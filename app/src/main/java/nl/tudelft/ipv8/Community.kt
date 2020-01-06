@@ -11,13 +11,15 @@ import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.peerdiscovery.Network
 import java.util.*
 
-class Community(
-    masterPeer: Peer,
+abstract class Community(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network
-) : Overlay(masterPeer, myPeer, endpoint, network) {
-    private val prefix = "00" + VERSION + masterPeer.mid
+) : Overlay(myPeer, endpoint, network) {
+    abstract val masterPeer: Peer
+
+    private val prefix: String
+        get() = "00" + VERSION + masterPeer.mid
 
     var myEstimatedWan: Address? = null
     val myEstimatedLan: Address? = null
@@ -36,6 +38,9 @@ class Community(
         // TODO
     }
 
+    /**
+     * Perform introduction logic to get into the network.
+     */
     fun bootstrap() {
         if (Date().time - (lastBootstrap?.time ?: 0L) < BOOTSTRAP_TIMEOUT_MS) return
         lastBootstrap = Date()
@@ -60,7 +65,7 @@ class Community(
                     ConnectionType.UNKNOWN,
                     (globalTime % 65536u).toInt()
                 )
-            val auth = BinMemberAuthenticationPayload(myPeer.publicKey)
+            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
             val dist = GlobalTimeDistributionPayload(globalTime)
 
             serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
@@ -76,6 +81,11 @@ class Community(
         // TODO: handle
     }
 
+    /**
+     * Puncture the NAT of an address.
+     *
+     * @param address The address to walk to.
+     */
     fun walkTo(address: Address) {
         val packet = createIntroductionRequest(address)
         if (packet != null) {

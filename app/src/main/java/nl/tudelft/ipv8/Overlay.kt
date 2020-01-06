@@ -4,8 +4,10 @@ import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.EndpointListener
 import nl.tudelft.ipv8.peerdiscovery.Network
 
+/**
+ * Interface for an Internet overlay.
+ */
 abstract class Overlay(
-    protected val masterPeer: Peer,
     protected val myPeer: Peer,
     protected val endpoint: Endpoint,
     protected val network: Network
@@ -21,6 +23,9 @@ abstract class Overlay(
         return globalTime
     }
 
+    /**
+     * Increase the local global time if the given [globalTime] is larger.
+     */
     private fun updateGlobalTime(globalTime: ULong) {
         if (globalTime > this.globalTime) {
             myPeer.updateClock(globalTime)

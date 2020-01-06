@@ -7,6 +7,9 @@ import nl.tudelft.ipv8.messaging.serializeUShort
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 
+/**
+ * The pair of an IP address and a port.
+ */
 data class Address(
     val ip: String,
     val port: Int
