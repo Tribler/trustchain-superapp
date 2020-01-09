@@ -6,14 +6,14 @@ import nl.tudelft.ipv8.Peer
 
 class Network {
     /**
-     * All known addresses, mapped to (introduction peer, services)
+     * All known addresses, mapped to (introduction peer MID, service ID)
      */
-    private val allAddresses: Map<Address, Pair<Peer, Set<String>>> = mutableMapOf()
+    internal val allAddresses: MutableMap<Address, Pair<String, String?>> = mutableMapOf()
 
     /**
      * All verified peer objects (peer.address must be in [allAddresses])
      */
-    private val verifiedPeers: List<Peer> = listOf()
+    private val verifiedPeers: MutableList<Peer> = mutableListOf()
 
     /**
      * Peers we should not add to the network (e.g. bootstrap peers)
@@ -28,7 +28,7 @@ class Network {
     /**
      * A map of advertised services per peer
      */
-    private val servicesPerPeer = mutableMapOf<Peer, Set<String>>()
+    private val servicesPerPeer = mutableMapOf<String, MutableSet<String>>()
 
     /**
      * A map of service identifiers to local overlays
@@ -38,23 +38,98 @@ class Network {
     /**
      * Cache of [Address] -> [Peer]
      */
-    private val reverseIpLookup: Map<Address, Peer> = mutableMapOf()
+    private val reverseIpLookup: MutableMap<Address, Peer> = mutableMapOf()
 
     /**
      * Cache of [Peer] -> [[Address]]
      */
-    private val reverseIntroLookup: Map<Peer, List<Address>> = mutableMapOf()
+    internal val reverseIntroLookup: MutableMap<Peer, MutableSet<Address>> = mutableMapOf()
 
     /**
      * Cache of service ID -> [[Peer]]
      */
-    private val reverseServiceLookup: Map<String, Set<Peer>> = mutableMapOf()
+    private val reverseServiceLookup: MutableMap<String, MutableSet<Peer>> = mutableMapOf()
 
     private val graphLock = Object()
 
-    //fun discoverAddress(peer: Peer, address: Address, serviceId: String? = null)
-    //fun discoverServices(peer: Peer, serviceIds: List<String>)
-    //fun addVerifiedPeer(peer: Peer)
+    /**
+     * A peer has introduced us to another IP address.
+     *
+     * @param peer The peer that performed the introduction.
+     * @param address The introduced address.
+     * @param serviceId The service through which we discovered the peer.
+     */
+    fun discoverAddress(peer: Peer, address: Address, serviceId: String? = null) {
+        if (address in blacklist) {
+            addVerifiedPeer(peer)
+            return
+        }
+
+        synchronized(graphLock) {
+            if (address !in allAddresses || allAddresses[address]!!.first !in verifiedPeers.map { it.mid }) {
+                // This is a new address, or our previous parent has been removed
+                allAddresses[address] = Pair(peer.mid, serviceId)
+
+                // TODO: in py-ipv8, this is only added if cache already exists, why?
+                val reverseIntroCache = reverseIntroLookup[peer] ?: mutableSetOf()
+                reverseIntroCache.add(address)
+                reverseIntroLookup[peer] = reverseIntroCache
+            }
+            addVerifiedPeer(peer)
+        }
+    }
+
+    /**
+     * A peer has advertised some services he can use.
+     *
+     * @param peer The peer to update the services for.
+     * @param serviceIds The list of service IDs to register.
+     */
+    fun discoverServices(peer: Peer, serviceIds: List<String>) {
+        synchronized(graphLock) {
+            val peerServices = servicesPerPeer[peer.mid] ?: mutableSetOf()
+            peerServices.addAll(serviceIds)
+            servicesPerPeer[peer.mid] = peerServices
+
+            for (serviceId in serviceIds) {
+                val serviceCache = reverseServiceLookup[serviceId] ?: mutableSetOf()
+                serviceCache.add(peer)
+                reverseServiceLookup[serviceId] = serviceCache
+            }
+        }
+    }
+
+    /**
+     * The holepunching layer has a new peer for us.
+     *
+     * @param peer The new peer.
+     */
+    fun addVerifiedPeer(peer: Peer) {
+        if (peer.mid in blacklistMids) return
+
+        synchronized(graphLock) {
+            // This may just me an address update
+            for (known in verifiedPeers) {
+                if (known.mid == peer.mid) {
+                    known.address = peer.address
+                    return
+                }
+            }
+
+            if (peer.address in allAddresses) {
+                if (peer !in verifiedPeers) {
+                    verifiedPeers.add(peer)
+                }
+            } else if (peer.address !in blacklist) {
+                if (peer.address !in allAddresses) {
+                    allAddresses[peer.address] = Pair("", null)
+                }
+                if (peer !in verifiedPeers) {
+                    verifiedPeers.add(peer)
+                }
+            }
+        }
+    }
 
     /**
      * Register an overlay to provide a certain service ID.
@@ -68,11 +143,36 @@ class Network {
         }
     }
 
+    /**
+     * Get peers which support a certain service.
+     *
+     * @param serviceId The service ID to fetch peers for.
+     */
     fun getPeersForService(serviceId: String): List<Peer> {
-        return listOf()
+        val out = mutableListOf<Peer>()
+        synchronized(graphLock) {
+            for (peer in verifiedPeers) {
+                val peerServices = servicesPerPeer[peer.mid]
+                if (peerServices != null) {
+                    if (serviceId in peerServices) {
+                        out += peer
+                    }
+                }
+            }
+        }
+        return out
     }
 
-    //fun getServicesForPeer(peer: Peer)
+    /**
+     * Get the known services supported by a peer.
+     *
+     * @param peer The peer to check services for.
+     */
+    fun getServicesForPeer(peer: Peer): Set<String> {
+        synchronized(graphLock) {
+            return servicesPerPeer[peer.mid] ?: setOf()
+        }
+    }
 
     /**
      * Get all addresses ready to be walked to.
@@ -80,15 +180,79 @@ class Network {
      * @param serviceId The service ID to filter on.
      */
     fun getWalkableAddresses(serviceId: String? = null): List<Address> {
-        // TODO
-        return listOf()
+        synchronized(graphLock) {
+            val known = if (serviceId != null) getPeersForService(serviceId) else verifiedPeers
+            val knownAddresses = known.map { it.address }
+            val out = (allAddresses.keys.toSet() - knownAddresses).toList()
+            // TODO: check the additional behavior in py-ipv8
+            return out
+        }
     }
 
-    //fun getVerifiedByAddress(address: Address)
-    //fun getVerifiedByPublicKeyBin(publicKeyBin: ByteArray)
-    //fun getIntroductionFrom(peer: Peer)
-    //fun removeByAddress(address: Address)
-    //fun removePeer(peer: Peer)
+    /**
+     * Get a verified peer by its IP address. If multiple peers use the same IP address,
+     * this method returns only one of those peers.
+     *
+     * @param address The address to search for.
+     * @return The [Peer] object for this address or null.
+     */
+    fun getVerifiedByAddress(address: Address): Peer? {
+        synchronized(graphLock) {
+            return verifiedPeers.find { it.address == address }
+        }
+    }
+
+    /**
+     * Get a verified per by its public key bin.
+     *
+     * @param publicKeyBin The string representation of the public key.
+     * @return The [Peer] object for this public key or null.
+     */
+    fun getVerifiedByPublicKeyBin(publicKeyBin: ByteArray): Peer? {
+        synchronized(graphLock) {
+            return verifiedPeers.find { it.publicKey.keyToBin().contentEquals(publicKeyBin) }
+        }
+    }
+
+    /**
+     * Get the addresses introduced to us by a certain peer.
+     *
+     * @param peer The peer to get the introductions for.
+     * @return A list of the introduced addresses.
+     */
+    fun getIntroductionFrom(peer: Peer): List<Address> {
+        synchronized(graphLock) {
+            return allAddresses
+                .filter { it.value.first == peer.mid }
+                .map { it.key }
+        }
+    }
+
+    /**
+     * Remove all walkable addresses and verified peers using a certain IP address.
+     *
+     * @param address The address to remove.
+     */
+    fun removeByAddress(address: Address) {
+        synchronized(graphLock) {
+            allAddresses.remove(address)
+            verifiedPeers.removeAll { it.address == address }
+            // TODO: what about servicesPerPeer?
+        }
+    }
+
+    /**
+     * Remove a verified peer.
+     *
+     * @param peer The peer to remove.
+     */
+    fun removePeer(peer: Peer) {
+        synchronized(graphLock) {
+            allAddresses.remove(peer.address)
+            verifiedPeers.remove(peer)
+            servicesPerPeer.remove(peer.mid)
+        }
+    }
 
     companion object {
         private const val REVERSE_IP_CACHE_SIZE = 500
