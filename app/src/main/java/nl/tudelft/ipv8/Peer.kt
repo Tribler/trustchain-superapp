@@ -13,7 +13,7 @@ class Peer(
     /**
      * The address of this peer.
      */
-    val address: Address,
+    val address: Address = Address("0.0.0.0", 0),
 
     /**
      * Is this peer suggested to us (otherwise it contacted us).

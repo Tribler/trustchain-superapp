@@ -14,7 +14,8 @@ import java.util.*
 abstract class Community(
     myPeer: Peer,
     endpoint: Endpoint,
-    network: Network
+    network: Network,
+    maxPeers: Int = DEFAULT_MAX_PEERS
 ) : Overlay(myPeer, endpoint, network) {
     abstract val masterPeer: Peer
 
@@ -29,19 +30,21 @@ abstract class Community(
     private val messageHandlers = mutableMapOf<Int, (ByteArray) -> Unit>()
 
     init {
-        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::handleIntroductionRequest
+        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::onPunctureRequest
+        messageHandlers[MessageId.PUNCTURE] = ::onPuncture
+        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::onIntroductionRequest
+        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::onIntroductionResponse
     }
 
-    override fun onPacket(packet: Packet) {
-        val sourceAddress = packet.source
-        val data = packet.data
-        // TODO
+    override fun load() {
+        super.load()
+
+        network.registerServiceProvider(masterPeer.mid, this)
+        network.blacklistMids.add(myPeer.mid)
+        network.blacklist.addAll(DEFAULT_ADDRESSES)
     }
 
-    /**
-     * Perform introduction logic to get into the network.
-     */
-    fun bootstrap() {
+    override fun bootstrap() {
         if (Date().time - (lastBootstrap?.time ?: 0L) < BOOTSTRAP_TIMEOUT_MS) return
         lastBootstrap = Date()
 
@@ -50,7 +53,59 @@ abstract class Community(
         }
     }
 
-    fun createIntroductionRequest(socketAddress: Address): ByteArray? {
+    override fun walkTo(address: Address) {
+        val packet = createIntroductionRequest(address)
+        if (packet != null) {
+            endpoint.send(address.toSocketAddress(), packet)
+        }
+    }
+
+    /**
+     * Get a new introduction, or bootstrap if there are no available peers.
+     */
+    override fun getNewIntroduction(fromPeer: Peer?) {
+        var peer = fromPeer
+
+        if (peer == null) {
+            val available = getPeers()
+            if (available.isNotEmpty()) {
+                peer = available.random()
+            } else {
+                bootstrap()
+                return
+            }
+        }
+
+        val packet = createIntroductionRequest(peer.address)
+        if (packet != null) {
+            endpoint.send(peer.address.toSocketAddress(), packet)
+        }
+    }
+
+    override fun getPeerForIntroduction(exclude: Peer?): Peer? {
+        val available = getPeers() - exclude
+        return if (available.isNotEmpty()) {
+            available.random()
+        } else {
+            null
+        }
+    }
+
+    override fun getWalkableAddresses(): List<Address> {
+        return network.getWalkableAddresses(masterPeer.mid)
+    }
+
+    override fun getPeers(): List<Peer> {
+        return network.getPeersForService(masterPeer.mid)
+    }
+
+    override fun onPacket(packet: Packet) {
+        val sourceAddress = packet.source
+        val data = packet.data
+        // TODO
+    }
+
+    private fun createIntroductionRequest(socketAddress: Address): ByteArray? {
         val myEstimatedLan = myEstimatedLan
         val myEstimatedWan = myEstimatedWan
 
@@ -65,7 +120,7 @@ abstract class Community(
                     ConnectionType.UNKNOWN,
                     (globalTime % 65536u).toInt()
                 )
-            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
+            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin().toString())
             val dist = GlobalTimeDistributionPayload(globalTime)
 
             serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
@@ -76,21 +131,36 @@ abstract class Community(
         }
     }
 
-    fun handleIntroductionRequest(bytes: ByteArray) {
+    private fun createIntroductionResponse(): ByteArray? {
+        // TODO
+        return null
+    }
+
+    private fun createPuncture(): ByteArray? {
+        // TODO
+        return null
+    }
+
+    private fun createPunctureRequest(): ByteArray? {
+        // TODO
+        return null
+    }
+
+    private fun onIntroductionRequest(bytes: ByteArray) {
         val payload = IntroductionRequestPayload.deserialize(bytes)
         // TODO: handle
     }
 
-    /**
-     * Puncture the NAT of an address.
-     *
-     * @param address The address to walk to.
-     */
-    fun walkTo(address: Address) {
-        val packet = createIntroductionRequest(address)
-        if (packet != null) {
-            endpoint.send(address.toSocketAddress(), packet)
-        }
+    private fun onIntroductionResponse(bytes: ByteArray) {
+        // TODO
+    }
+
+    private fun onPuncture(bytes: ByteArray) {
+        // TODO
+    }
+
+    private fun onPunctureRequest(bytes: ByteArray) {
+        // TODO
     }
 
     private fun serializePacket(prefix: String, messageId: Int, payload: List<Serializable>): ByteArray {
@@ -121,16 +191,16 @@ abstract class Community(
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)
-        private val BOOTSTRAP_TIMEOUT_MS = 30_000
-        private val DEFAULT_MAX_PEERS = 30
+        private const val BOOTSTRAP_TIMEOUT_MS = 30_000
+        private const val DEFAULT_MAX_PEERS = 30
 
-        private val VERSION = "02"
+        private const val VERSION = "02"
     }
 
     object MessageId {
-        val PUNCTURE_REQUEST = 250
-        val PUNCTURE = 249
-        val INTRODUCTION_REQUEST = 246
-        val INTRODUCTION_RESPONSE = 245
+        const val PUNCTURE_REQUEST = 250
+        const val PUNCTURE = 249
+        const val INTRODUCTION_REQUEST = 246
+        const val INTRODUCTION_RESPONSE = 245
     }
 }

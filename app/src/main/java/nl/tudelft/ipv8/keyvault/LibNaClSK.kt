@@ -1,12 +1,17 @@
 package nl.tudelft.ipv8.keyvault
 
+import org.libsodium.jni.NaCl
 import org.libsodium.jni.Sodium
 import org.libsodium.jni.crypto.Random
 
-class LibNaCLSK(
-    private val privateKey: ByteArray,
-    private val signSeed: ByteArray
+class LibNaClSK(
+    val privateKey: ByteArray,
+    val signSeed: ByteArray
 ) : PrivateKey {
+    init {
+        NaCl.sodium()
+    }
+
     private val publicKey: ByteArray
 
     private val signKey: ByteArray
@@ -36,22 +41,27 @@ class LibNaCLSK(
     }
 
     override fun pub(): PublicKey {
-        return LibNaCLPK(publicKey, verifyKey)
+        return LibNaClPK(publicKey, verifyKey)
     }
 
-    override fun keyToBin(): String {
-        return "LibNaCLSK:$privateKey$signSeed"
+    override fun keyToBin(): ByteArray {
+        val prefix = "LibNaCLSK:"
+        return prefix.toByteArray(Charsets.US_ASCII) + privateKey + signSeed
     }
 
     companion object {
-        fun generate(): LibNaCLSK {
+        init {
+            NaCl.sodium()
+        }
+
+        fun generate(): LibNaClSK {
             val publicKey = ByteArray(Sodium.crypto_box_curve25519xsalsa20poly1305_publickeybytes())
             val privateKey = ByteArray(Sodium.crypto_box_curve25519xsalsa20poly1305_secretkeybytes())
             Sodium.crypto_box_curve25519xsalsa20poly1305_keypair(publicKey, privateKey)
 
             val signSeed = Random().randomBytes(Sodium.crypto_sign_ed25519_seedbytes())
 
-            return LibNaCLSK(privateKey, signSeed)
+            return LibNaClSK(privateKey, signSeed)
         }
     }
 }

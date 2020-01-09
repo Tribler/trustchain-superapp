@@ -1,7 +1,7 @@
 package nl.tudelft.ipv8.messaging.payload
 
 import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.util.toHexString
+import nl.tudelft.ipv8.util.toHex
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -17,7 +17,7 @@ class IntroductionRequestPayloadTest {
             1
         )
         val serialized = payload.serialize()
-        assertEquals("0102030404d20202030408ba030203040ca2010001", serialized.toHexString())
+        assertEquals("0102030404d20202030408ba030203040ca2010001", serialized.toHex())
     }
 
     @Test
@@ -55,7 +55,7 @@ class IntroductionRequestPayloadTest {
             1
         )
         val serialized = payload.serialize()
-        assertEquals("0102030404d20202030408ba030203040ca2810001", serialized.toHexString())
+        assertEquals("0102030404d20202030408ba030203040ca2810001", serialized.toHex())
         val deserialized = IntroductionRequestPayload.deserialize(serialized)
         assertEquals(connectionType, deserialized.connectionType)
     }

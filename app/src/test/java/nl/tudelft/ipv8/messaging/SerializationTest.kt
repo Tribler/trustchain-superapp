@@ -1,6 +1,6 @@
 package nl.tudelft.ipv8.messaging
 
-import nl.tudelft.ipv8.util.toHexString
+import nl.tudelft.ipv8.util.toHex
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -33,13 +33,13 @@ class SerializationTest {
     @Test
     fun serializeBool_true() {
         val serialized = serializeBool(true)
-        assertEquals("01", serialized.toHexString())
+        assertEquals("01", serialized.toHex())
     }
 
     @Test
     fun serializeBool_false() {
         val serialized = serializeBool(false)
-        assertEquals("00", serialized.toHexString())
+        assertEquals("00", serialized.toHex())
     }
 
     @Test
@@ -57,7 +57,7 @@ class SerializationTest {
     @Test
     fun serializeUShort() {
         val serialized = serializeUShort(1025)
-        assertEquals("0401", serialized.toHexString())
+        assertEquals("0401", serialized.toHex())
     }
 
     @Test
@@ -77,7 +77,7 @@ class SerializationTest {
     @Test
     fun serializeULong_max() {
         val serialized = serializeULong(18446744073709551615uL)
-        assertEquals("ffffffffffffffff", serialized.toHexString())
+        assertEquals("ffffffffffffffff", serialized.toHex())
     }
 
     @Test

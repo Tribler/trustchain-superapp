@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.keyvault
 
-import nl.tudelft.ipv8.util.HashUtils
+import nl.tudelft.ipv8.util.sha1
+import nl.tudelft.ipv8.util.toHex
 
 /**
  * Interface for a public or private key.
@@ -12,15 +13,15 @@ interface Key {
     fun pub(): PublicKey
 
     /**
-     * Get the string representation of this key.
+     * Get the byte string representation of this key.
      */
-    fun keyToBin(): String
+    fun keyToBin(): ByteArray
 
     /**
      * Returns the hash of the public key.
      */
     fun keyToHash(): String {
-        return HashUtils.sha1(pub().keyToBin().toByteArray())
+        return sha1(pub().keyToBin()).toHex()
     }
 }
 
