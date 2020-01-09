@@ -18,8 +18,6 @@ class LibNaClSK(
     private val verifyKey: ByteArray
 
     init {
-        assert(privateKey.size == Sodium.crypto_scalarmult_curve25519_scalarbytes())
-
         publicKey = ByteArray(Sodium.crypto_scalarmult_curve25519_bytes())
         Sodium.crypto_scalarmult_curve25519_base(publicKey, privateKey)
 

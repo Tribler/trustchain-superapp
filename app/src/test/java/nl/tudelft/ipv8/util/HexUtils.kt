@@ -2,6 +2,7 @@ package nl.tudelft.ipv8.util
 
 import org.junit.Assert
 import org.junit.Test
+import java.lang.IllegalArgumentException
 
 class UtilsTest {
     @Test
@@ -32,5 +33,15 @@ class UtilsTest {
         val txid = "d19306e0"
         Assert.assertEquals(txid, txid.hexToBytes().toHex())
         Assert.assertEquals(txid, txid.toUpperCase().hexToBytes().toHex())
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun hexToBytes_odd() {
+        "abc".hexToBytes()
+    }
+
+    @Test
+    fun hexToBytes_empty() {
+        Assert.assertEquals(0, "".hexToBytes().size)
     }
 }

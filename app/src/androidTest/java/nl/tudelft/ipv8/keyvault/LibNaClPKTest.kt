@@ -56,7 +56,7 @@ class LibNaClPKTest {
 
     @Test(expected = IllegalArgumentException::class)
     fun fromBin_invalidLength() {
-        val hex = "4c69624e61434c504b3af7e62"
+        val hex = "4c69624e61434c504b3af7e623"
         LibNaClPK.fromBin(hex)
     }
 

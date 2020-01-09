@@ -25,9 +25,11 @@ fun ByteArray.toHex(): String {
  * https://gist.github.com/fabiomsr/845664a9c7e92bafb6fb0ca70d4e44fd
  */
 fun String.hexToBytes(): ByteArray {
+    if (length % 2 != 0) throw IllegalArgumentException("String length must be even")
+
     val result = ByteArray(length / 2)
 
-    for (i in 0 until 2 * (length / 2) step 2) {
+    for (i in 0 until length step 2) {
         val firstIndex = HEX_CHARS.indexOf(this[i].toLowerCase())
         val secondIndex = HEX_CHARS.indexOf(this[i + 1].toLowerCase())
 
