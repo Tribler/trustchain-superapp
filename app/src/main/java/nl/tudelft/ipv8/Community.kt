@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.Network
+import nl.tudelft.ipv8.util.hexToBytes
 import java.util.*
 
 abstract class Community(
@@ -19,15 +20,15 @@ abstract class Community(
 ) : Overlay(myPeer, endpoint, network) {
     abstract val masterPeer: Peer
 
-    private val prefix: String
-        get() = "00" + VERSION + masterPeer.mid
+    private val prefix: ByteArray
+        get() = ByteArray(0) + 0.toByte() + VERSION + masterPeer.mid.hexToBytes()
 
     var myEstimatedWan: Address = Address("0.0.0.0", 0)
     var myEstimatedLan: Address = Address("0.0.0.0", 0)
 
     private var lastBootstrap: Date? = null
 
-    private val messageHandlers = mutableMapOf<Int, (Address, ByteArray) -> Unit>()
+    internal val messageHandlers = mutableMapOf<Int, (Address, ByteArray) -> Unit>()
 
     init {
         //messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
@@ -99,14 +100,14 @@ abstract class Community(
         val sourceAddress = packet.source
         val data = packet.data
 
-        val packetPrefix = data.copyOfRange(0, prefix.length).toString(Charsets.US_ASCII)
-        if (packetPrefix != prefix) return
+        val packetPrefix = data.copyOfRange(0, prefix.size)
+        if (!packetPrefix.contentEquals(prefix)) return
 
-        val msgId = data.copyOfRange(22, 23).first().toChar().toInt()
-        val handler = messageHandlers[msgId]
+        val msgId = data.copyOfRange(prefix.size, prefix.size + 1).first()
+        val handler = messageHandlers[msgId.toUByte().toInt()]
 
         if (handler != null) {
-            val payload = data.copyOfRange(23, data.size)
+            val payload = data.copyOfRange(prefix.size + 1, data.size)
             try {
                 handler(sourceAddress, payload)
             } catch (e: Exception) {
@@ -204,12 +205,13 @@ abstract class Community(
      * @param sign True if the packet should be signed
      */
     protected fun serializePacket(
-        prefix: String,
+        prefix: ByteArray,
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true
     ): ByteArray {
-        var packet = prefix.toByteArray(Charsets.US_ASCII) + messageId.toChar().toByte()
+        var packet = prefix
+        packet += messageId.toChar().toByte()
 
         for (item in payload) {
             packet += item.serialize()
@@ -259,7 +261,7 @@ abstract class Community(
      * Request handling
      */
 
-    private fun onIntroductionRequest(
+    internal fun onIntroductionRequest(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
@@ -316,7 +318,7 @@ abstract class Community(
         private const val BOOTSTRAP_TIMEOUT_MS = 30_000
         private const val DEFAULT_MAX_PEERS = 30
 
-        private const val VERSION = "02"
+        private const val VERSION: Byte = 2
 
         private const val TAG = "Community"
     }

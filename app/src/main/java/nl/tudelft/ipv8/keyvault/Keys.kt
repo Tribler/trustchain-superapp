@@ -20,8 +20,8 @@ interface Key {
     /**
      * Returns the hash of the public key.
      */
-    fun keyToHash(): String {
-        return sha1(pub().keyToBin()).toHex()
+    fun keyToHash(): ByteArray {
+        return sha1(pub().keyToBin())
     }
 }
 

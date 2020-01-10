@@ -30,7 +30,7 @@ class LibNaClPKTest {
     fun keyToHash() {
         val key = LibNaClSK.generate().pub()
         val hash = key.keyToHash()
-        Assert.assertEquals(40, hash.length)
+        Assert.assertEquals(40, hash.toHex().length)
     }
 
     @Test

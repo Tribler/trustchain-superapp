@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.keyvault
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import nl.tudelft.ipv8.util.toHex
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +26,7 @@ class LibNaClSKTest {
     fun keyToHash() {
         val key = LibNaClSK.generate()
         val hash = key.keyToHash()
-        Assert.assertEquals(40, hash.length)
+        Assert.assertEquals(40, hash.toHex().length)
     }
 
     @Test

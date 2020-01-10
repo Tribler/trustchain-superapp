@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8
 
 import nl.tudelft.ipv8.keyvault.Key
+import nl.tudelft.ipv8.util.toHex
 import java.util.*
 import kotlin.math.max
 
@@ -24,9 +25,11 @@ class Peer(
     val lamportTimestamp: ULong
         get() = _lamportTimestamp
 
-    val publicKey = key.pub()
+    val publicKey
+        get() = key.pub()
 
-    val mid: String = key.keyToHash()
+    val mid: String
+        get() = key.keyToHash().toHex()
 
     var lastResponse: Date? = if (intro) null else Date()
 
