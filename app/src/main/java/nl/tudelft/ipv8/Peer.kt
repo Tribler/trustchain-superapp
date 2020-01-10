@@ -21,7 +21,8 @@ class Peer(
     val intro: Boolean = true
 ) {
     private var _lamportTimestamp = 0uL
-    val lamportTimestamp = _lamportTimestamp
+    val lamportTimestamp: ULong
+        get() = _lamportTimestamp
 
     val publicKey = key.pub()
 

@@ -1,9 +1,6 @@
 package nl.tudelft.ipv8
 
-import nl.tudelft.ipv8.messaging.Deserializable
-import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.ipv8.messaging.deserializeUShort
-import nl.tudelft.ipv8.messaging.serializeUShort
+import nl.tudelft.ipv8.messaging.*
 import java.net.InetSocketAddress
 import java.net.SocketAddress
 
@@ -28,14 +25,17 @@ data class Address(
     }
 
     companion object : Deserializable<Address> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Address {
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<Address, Int> {
+            var localOffset = 0
             val ip = "" +
                     buffer[offset + 0].toChar().toInt() + "." +
                     buffer[offset + 1].toChar().toInt() + "." +
                     buffer[offset + 2].toChar().toInt() + "." +
                     buffer[offset + 3].toChar().toInt()
-            val port = deserializeUShort(buffer, offset + 4)
-            return Address(ip, port)
+            localOffset += 4
+            val port = deserializeUShort(buffer, offset + localOffset)
+            localOffset += SERIALIZED_USHORT_SIZE
+            return Pair(Address(ip, port), localOffset)
         }
 
         const val SERIALIZED_SIZE = 6

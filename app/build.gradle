@@ -11,7 +11,9 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "nl.tudelft.ipv8"
-        minSdkVersion 21
+        // Temp fix for issue https://github.com/mockk/mockk/issues/281
+        // minSdkVersion 21
+        minSdkVersion 26
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -40,6 +42,7 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    androidTestImplementation "io.mockk:mockk-android:1.9.3"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

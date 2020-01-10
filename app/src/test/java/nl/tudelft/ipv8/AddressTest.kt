@@ -12,10 +12,19 @@ class AddressTest {
     }
 
     @Test
-    fun deserialize() {
-        val address = Address("1.2.3.4", 389)
+    fun deserialize_1() {
+        val address = Address("1.2.3.4", 0)
         val serialized = address.serialize()
-        System.out.println(serialized.toHex())
-        assertEquals(address, Address.deserialize(serialized))
+        val (deserialized, size) = Address.deserialize(serialized)
+        assertEquals(6, size)
+        assertEquals(address, deserialized)
+    }
+
+    @Test
+    fun deserialize_2() {
+        val address = Address("1.2.3.4", 1234)
+        val serialized = address.serialize()
+        val (deserialized, _) = Address.deserialize(serialized)
+        assertEquals(address, deserialized)
     }
 }

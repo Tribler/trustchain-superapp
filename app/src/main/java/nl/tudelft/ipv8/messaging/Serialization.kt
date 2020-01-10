@@ -1,11 +1,14 @@
 package nl.tudelft.ipv8.messaging
 
+const val SERIALIZED_USHORT_SIZE = 2
+const val SERIALIZED_ULONG_SIZE = 8
+
 interface Serializable {
     fun serialize(): ByteArray
 }
 
 interface Deserializable<T> {
-    fun deserialize(buffer: ByteArray, offset: Int = 0): T
+    fun deserialize(buffer: ByteArray, offset: Int = 0): Pair<T, Int>
 }
 
 fun serializeBool(data: Boolean): ByteArray {
@@ -20,7 +23,7 @@ fun deserializeBool(buffer: ByteArray, offset: Int = 0): Boolean {
 }
 
 fun serializeUShort(value: Int): ByteArray {
-    val bytes = ByteArray(2)
+    val bytes = ByteArray(SERIALIZED_USHORT_SIZE)
     bytes[1] = (value and 0xFF).toByte()
     bytes[0] = ((value shr 8) and 0xFF).toByte()
     return bytes
@@ -31,16 +34,16 @@ fun deserializeUShort(buffer: ByteArray, offset: Int = 0): Int {
 }
 
 fun serializeULong(value: ULong): ByteArray {
-    val bytes = ByteArray(8)
-    for (i in 0 until 8) {
-        bytes[i] = ((value shr ((8 - i) * 8)) and 0xFFu).toByte()
+    val bytes = ByteArray(SERIALIZED_ULONG_SIZE)
+    for (i in 0 until SERIALIZED_ULONG_SIZE) {
+        bytes[i] = ((value shr ((7 - i) * 8)) and 0xFFu).toByte()
     }
     return bytes
 }
 
 fun deserializeULong(buffer: ByteArray, offset: Int = 0): ULong {
     var result = 0uL
-    for (i in 0 until 8) {
+    for (i in 0 until SERIALIZED_ULONG_SIZE) {
         result = (result shl 8) or buffer[offset + i].toULong()
     }
     return result

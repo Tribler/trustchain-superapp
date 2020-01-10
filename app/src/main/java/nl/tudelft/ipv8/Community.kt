@@ -1,13 +1,13 @@
 package nl.tudelft.ipv8
 
 import android.util.Log
-import nl.tudelft.ipv8.messaging.payload.ConnectionType
-import nl.tudelft.ipv8.messaging.payload.IntroductionRequestPayload
+import nl.tudelft.ipv8.exception.PacketDecodingException
+import nl.tudelft.ipv8.keyvault.LibNaClPK
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
-import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
+import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.Network
 import java.util.*
 
@@ -22,18 +22,18 @@ abstract class Community(
     private val prefix: String
         get() = "00" + VERSION + masterPeer.mid
 
-    var myEstimatedWan: Address? = null
-    val myEstimatedLan: Address? = null
+    var myEstimatedWan: Address = Address("0.0.0.0", 0)
+    var myEstimatedLan: Address = Address("0.0.0.0", 0)
 
     private var lastBootstrap: Date? = null
 
-    private val messageHandlers = mutableMapOf<Int, (ByteArray) -> Unit>()
+    private val messageHandlers = mutableMapOf<Int, (Address, ByteArray) -> Unit>()
 
     init {
-        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::onPunctureRequest
-        messageHandlers[MessageId.PUNCTURE] = ::onPuncture
-        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::onIntroductionRequest
-        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::onIntroductionResponse
+        //messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
+        //messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
+        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::handleIntroductionRequest
+        //messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::handleIntroductionResponse
     }
 
     override fun load() {
@@ -55,9 +55,7 @@ abstract class Community(
 
     override fun walkTo(address: Address) {
         val packet = createIntroductionRequest(address)
-        if (packet != null) {
-            endpoint.send(address.toSocketAddress(), packet)
-        }
+        endpoint.send(address.toSocketAddress(), packet)
     }
 
     /**
@@ -77,9 +75,7 @@ abstract class Community(
         }
 
         val packet = createIntroductionRequest(peer.address)
-        if (packet != null) {
-            endpoint.send(peer.address.toSocketAddress(), packet)
-        }
+        endpoint.send(peer.address.toSocketAddress(), packet)
     }
 
     override fun getPeerForIntroduction(exclude: Peer?): Peer? {
@@ -102,73 +98,199 @@ abstract class Community(
     override fun onPacket(packet: Packet) {
         val sourceAddress = packet.source
         val data = packet.data
-        // TODO
-    }
 
-    private fun createIntroductionRequest(socketAddress: Address): ByteArray? {
-        val myEstimatedLan = myEstimatedLan
-        val myEstimatedWan = myEstimatedWan
+        val packetPrefix = data.copyOfRange(0, prefix.length).toString(Charsets.US_ASCII)
+        if (packetPrefix != prefix) return
 
-        return if (myEstimatedLan != null && myEstimatedWan != null) {
-            val globalTime = claimGlobalTime()
-            val payload =
-                IntroductionRequestPayload(
-                    socketAddress,
-                    myEstimatedLan,
-                    myEstimatedWan,
-                    true,
-                    ConnectionType.UNKNOWN,
-                    (globalTime % 65536u).toInt()
-                )
-            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin().toString())
-            val dist = GlobalTimeDistributionPayload(globalTime)
+        val msgId = data.copyOfRange(22, 23).first().toChar().toInt()
+        val handler = messageHandlers[msgId]
 
-            serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+        if (handler != null) {
+            val payload = data.copyOfRange(23, data.size)
+            try {
+                handler(sourceAddress, payload)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         } else {
-            // TODO: should we send the request even in this case?
-            Log.e("Overlay", "estimated LAN or WAN is null")
-            null
+            Log.d(TAG, "Received unknown message $msgId from $sourceAddress")
         }
     }
 
-    private fun createIntroductionResponse(): ByteArray? {
+    /*
+     * Introduction and puncturing requests creation
+     */
+
+    internal fun createIntroductionRequest(socketAddress: Address): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload =
+            IntroductionRequestPayload(
+                socketAddress,
+                myEstimatedLan,
+                myEstimatedWan,
+                true,
+                ConnectionType.UNKNOWN,
+                (globalTime % 65536u).toInt()
+            )
+        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+
+        return serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+    }
+
+    internal fun createIntroductionResponse(
+        lanSocketAddress: Address,
+        socketAddress: Address,
+        identifier: Int,
+        introduction: Peer? = null
+    ): ByteArray {
+        val globalTime = claimGlobalTime()
+        var introductionLan = Address("0.0.0.0", 0)
+        var introductionWan = Address("0.0.0.0", 0)
+        var introduced = false
+        val other = network.getVerifiedByAddress(socketAddress)
+        var intro = introduction
+        if (intro == null) {
+            intro = getPeerForIntroduction(exclude = other)
+        }
+        if (intro != null) {
+            // TODO: understand how this works
+            if (addressIsLan(intro.address)) {
+                introductionLan = intro.address
+                introductionWan = Address(myEstimatedWan.ip, introductionLan.port)
+            } else {
+                introductionWan = intro.address
+            }
+            introduced = true
+        }
+        val payload = IntroductionResponsePayload(
+            socketAddress,
+            myEstimatedLan,
+            myEstimatedWan,
+            introductionLan,
+            introductionWan,
+            ConnectionType.UNKNOWN,
+            false,
+            identifier
+        )
+        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+
+        if (introduced) {
+            // TODO: Seems like a bad practice to send a packet in the create method...
+            //val packet = createPunctureRequest()
+            //endpoint.send()
+        }
+
+        return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
+    }
+
+    private fun createPuncture(): ByteArray {
         // TODO
-        return null
+        return ByteArray(0)
     }
 
-    private fun createPuncture(): ByteArray? {
+    private fun createPunctureRequest(): ByteArray {
         // TODO
-        return null
+        return ByteArray(0)
     }
 
-    private fun createPunctureRequest(): ByteArray? {
-        // TODO
-        return null
-    }
+    /**
+     * Serializes multiple payloads into a binary packet that can be sent over the transport.
+     *
+     * @param prefix The packet prefix consisting of a zero byte, version, and master peer mid
+     * @param messageId The message type ID
+     * @param payload The list of payloads
+     * @param sign True if the packet should be signed
+     */
+    protected fun serializePacket(
+        prefix: String,
+        messageId: Int,
+        payload: List<Serializable>,
+        sign: Boolean = true
+    ): ByteArray {
+        var packet = prefix.toByteArray(Charsets.US_ASCII) + messageId.toChar().toByte()
 
-    private fun onIntroductionRequest(bytes: ByteArray) {
-        val payload = IntroductionRequestPayload.deserialize(bytes)
-        // TODO: handle
-    }
-
-    private fun onIntroductionResponse(bytes: ByteArray) {
-        // TODO
-    }
-
-    private fun onPuncture(bytes: ByteArray) {
-        // TODO
-    }
-
-    private fun onPunctureRequest(bytes: ByteArray) {
-        // TODO
-    }
-
-    private fun serializePacket(prefix: String, messageId: Int, payload: List<Serializable>): ByteArray {
-        var bytes = prefix.toByteArray(Charsets.US_ASCII) + messageId.toChar().toByte()
         for (item in payload) {
-            bytes += item.serialize()
+            packet += item.serialize()
         }
-        return bytes
+
+        if (sign && myPeer.key is PrivateKey) {
+            packet += myPeer.key.sign(packet)
+        }
+
+        return packet
+    }
+
+    /*
+     * Request deserialization
+     */
+
+    internal fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
+        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
+        onIntroductionRequest(peer, dist, payload)
+    }
+
+    /**
+     * Checks the signature of the authenticated packet and returns the packet payloads excluding
+     * BinMemberAuthenticationPayload if it is valid.
+     *
+     * @throws PacketDecodingException if the signature is invalid
+     */
+    internal fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
+        val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, 0)
+        val publicKey = LibNaClPK.fromBin(auth.publicKey)
+        val signature = bytes.copyOfRange(bytes.size - publicKey.getSignatureLength(), bytes.size)
+
+        // Verify signature
+        val isValidSignature = publicKey.verify(signature, bytes)
+        if (!isValidSignature)
+            throw PacketDecodingException("Incoming packet has an invalid signature")
+
+        // Return the peer and remaining payloads
+        val peer = Peer(LibNaClPK.fromBin(auth.publicKey), address)
+        val remainder = bytes.copyOfRange(authSize, bytes.size - publicKey.getSignatureLength())
+        return Pair(peer, remainder)
+    }
+
+    /*
+     * Request handling
+     */
+
+    private fun onIntroductionRequest(
+        peer: Peer,
+        dist: GlobalTimeDistributionPayload,
+        payload: IntroductionRequestPayload
+    ) {
+        network.addVerifiedPeer(peer)
+        network.discoverServices(peer, listOf(masterPeer.mid))
+
+        val packet = createIntroductionResponse(
+            payload.destinationAddress,
+            peer.address,
+            payload.identifier
+        )
+
+        endpoint.send(peer.address.toSocketAddress(), packet)
+    }
+
+    private fun onIntroductionResponse(address: Address, bytes: ByteArray) {
+        // TODO
+    }
+
+    private fun onPuncture(address: Address, bytes: ByteArray) {
+        // TODO
+    }
+
+    private fun onPunctureRequest(address: Address, bytes: ByteArray) {
+        // TODO
+    }
+
+    private fun addressIsLan(address: Address): Boolean {
+        // TODO
+        return false
     }
 
     companion object {
@@ -195,6 +317,8 @@ abstract class Community(
         private const val DEFAULT_MAX_PEERS = 30
 
         private const val VERSION = "02"
+
+        private const val TAG = "Community"
     }
 
     object MessageId {

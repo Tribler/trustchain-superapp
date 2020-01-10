@@ -1,6 +1,5 @@
 package nl.tudelft.ipv8.keyvault
 
-import nl.tudelft.ipv8.util.hexToBytes
 import org.libsodium.jni.NaCl
 import org.libsodium.jni.Sodium
 
@@ -41,9 +40,7 @@ open class LibNaClPK(
          *
          * @throws IllegalArgumentException If the argument does not represent a valid public key.
          */
-        fun fromBin(hex: String): LibNaClPK {
-            val bin = hex.hexToBytes()
-
+        fun fromBin(bin: ByteArray): LibNaClPK {
             val publicKeySize = Sodium.crypto_scalarmult_curve25519_bytes()
             val verifyKeySize = Sodium.crypto_sign_ed25519_publickeybytes()
             val binSize = BIN_PREFIX.length + publicKeySize + verifyKeySize

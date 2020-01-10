@@ -11,10 +11,10 @@ data class TestSerializable(private val value: Boolean): Serializable {
     }
 
     companion object : Deserializable<TestSerializable> {
-        override fun deserialize(buffer: ByteArray, offset: Int): TestSerializable {
-            return TestSerializable(
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<TestSerializable, Int> {
+            return Pair(TestSerializable(
                 deserializeBool(buffer, 0)
-            )
+            ), 0)
         }
     }
 }
@@ -24,7 +24,7 @@ class SerializationTest {
     fun simplePayload() {
         val serializable = TestSerializable(true)
         val bytes = serializable.serialize()
-        val deserialized = TestSerializable.deserialize(bytes)
+        val (deserialized, size) = TestSerializable.deserialize(bytes)
         assertEquals(1, bytes.size)
         assertEquals(1, bytes[0].toInt())
         assertEquals(serializable, deserialized)
@@ -72,6 +72,12 @@ class SerializationTest {
         val value = 389
         val serialized = serializeUShort(value)
         assertEquals(value, deserializeUShort(serialized))
+    }
+
+    @Test
+    fun serializeULong_small() {
+        val serialized = serializeULong(1uL)
+        assertEquals("0000000000000001", serialized.toHex())
     }
 
     @Test

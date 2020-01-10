@@ -29,6 +29,8 @@ Generate code coverage report:
 ./gradlew jacocoTestReport
 ```
 
+The generated report will be stored in `app/build/reports/jacoco/html/index.html`.
+
 ### Read more
 
 - [Message Serialization](doc/Serialization.md)

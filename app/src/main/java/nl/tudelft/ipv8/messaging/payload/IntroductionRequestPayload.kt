@@ -1,55 +1,69 @@
 package nl.tudelft.ipv8.messaging.payload
 
 import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.messaging.Deserializable
-import nl.tudelft.ipv8.messaging.Serializable
-import nl.tudelft.ipv8.messaging.deserializeUShort
-import nl.tudelft.ipv8.messaging.serializeUShort
+import nl.tudelft.ipv8.messaging.*
 import kotlin.experimental.and
 
+/**
+ * The payload for an introduction-request message.
+ */
 class IntroductionRequestPayload(
+    /**
+     * The address of the receiver. Effectively this should be the wan address that others can
+     * use to contact the receiver.
+     */
     val destinationAddress: Address,
+
+    /**
+     * The lan address of the sender.  Nodes in the same LAN should use this address to communicate.
+     */
     val sourceLanAddress: Address,
+
+    /**
+     * The wan address of the sender.  Nodes not in the same LAN should use this address
+     * to communicate.
+     */
     val sourceWanAddress: Address,
+
+    /**
+     * When True the receiver will introduce the sender to a new node.  This introduction will be
+     * facilitated by the receiver sending a puncture-request to the new node.
+     */
     val advice: Boolean,
+
+    /**
+     * Indicating the connection type that the message creator has.
+     */
     val connectionType: ConnectionType,
+
+    /**
+     * A number that must be given in the associated introduction-response. This number allows to
+     * distinguish between multiple introduction-response messages.
+     */
     val identifier: Int
 ) : Serializable {
     override fun serialize(): ByteArray {
         return destinationAddress.serialize() +
                 sourceLanAddress.serialize() +
                 sourceWanAddress.serialize() +
-                createConnectionByte() +
+                createConnectionByte(connectionType, advice) +
                 serializeUShort(identifier)
     }
 
-    private fun createConnectionByte(): Byte {
-        var connectionByte: UByte = 0x00u
-        if (connectionType.encoding.first) {
-            connectionByte = connectionByte or 0x80.toUByte()
-        }
-        if (connectionType.encoding.second) {
-            connectionByte = connectionByte or 0x40.toUByte()
-        }
-        if (advice) {
-            connectionByte = connectionByte or 0x01.toUByte()
-        }
-        return connectionByte.toByte()
-    }
-
     companion object : Deserializable<IntroductionRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): IntroductionRequestPayload {
-            var off = offset
-            val destinationAddress = Address.deserialize(buffer, off)
-            off += Address.SERIALIZED_SIZE
-            val sourceLanAddress = Address.deserialize(buffer, off)
-            off += Address.SERIALIZED_SIZE
-            val sourceWanAddress = Address.deserialize(buffer, off)
-            off += Address.SERIALIZED_SIZE
-            val (advice, connectionType) = deserializeConnectionByte(buffer[off])
-            off++
-            val identifier = deserializeUShort(buffer, off)
-            return IntroductionRequestPayload(
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<IntroductionRequestPayload, Int> {
+            var localOffset = 0
+            val (destinationAddress, _) = Address.deserialize(buffer, offset + localOffset)
+            localOffset += Address.SERIALIZED_SIZE
+            val (sourceLanAddress, _) = Address.deserialize(buffer, offset + localOffset)
+            localOffset += Address.SERIALIZED_SIZE
+            val (sourceWanAddress, _) = Address.deserialize(buffer, localOffset)
+            localOffset += Address.SERIALIZED_SIZE
+            val (advice, connectionType) = deserializeConnectionByte(buffer[offset + localOffset])
+            localOffset++
+            val identifier = deserializeUShort(buffer, offset + localOffset)
+            localOffset += SERIALIZED_USHORT_SIZE
+            val payload = IntroductionRequestPayload(
                 destinationAddress,
                 sourceLanAddress,
                 sourceWanAddress,
@@ -57,13 +71,7 @@ class IntroductionRequestPayload(
                 connectionType,
                 identifier
             )
-        }
-
-        private fun deserializeConnectionByte(byte: Byte): Pair<Boolean, ConnectionType> {
-            val advice = (byte and 0x01) == 0x01.toByte()
-            val bit0 = (byte.toUByte() and 0x80.toUByte()) != 0x00.toUByte()
-            val bit1 = (byte.toUByte() and 0x40.toUByte()) != 0x00.toUByte()
-            return Pair(advice, ConnectionType.decode(bit0, bit1))
+            return Pair(payload, localOffset)
         }
     }
 }

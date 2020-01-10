@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         val myPeer = Peer(myKey, address, false)
         val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
         val network = Network()
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = ExampleCommunity(myPeer, endpoint, network)
         val randomWalk = RandomWalk(community, timeout = 3.0)
         val overlayConfig = OverlayConfiguration(community, listOf(randomWalk))
 
