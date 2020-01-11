@@ -24,6 +24,10 @@ data class Address(
         return InetSocketAddress(ip, port)
     }
 
+    fun isEmpty(): Boolean {
+        return ip == "0.0.0.0" && port == 0
+    }
+
     companion object : Deserializable<Address> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<Address, Int> {
             var localOffset = 0

@@ -1,7 +1,7 @@
 package nl.tudelft.ipv8
 
 import nl.tudelft.ipv8.util.toHex
-import org.junit.Assert.assertEquals
+import org.junit.Assert.*
 import org.junit.Test
 
 class AddressTest {
@@ -26,5 +26,15 @@ class AddressTest {
         val serialized = address.serialize()
         val (deserialized, _) = Address.deserialize(serialized)
         assertEquals(address, deserialized)
+    }
+
+    @Test
+    fun isEmpty() {
+        val emptyAddress = Address("0.0.0.0", 0)
+        val nonEmptyIp = Address("1.2.3.4", 0)
+        val nonEmptyPort = Address("0.0.0.0", 1)
+        assertTrue(emptyAddress.isEmpty())
+        assertFalse(nonEmptyIp.isEmpty())
+        assertFalse(nonEmptyPort.isEmpty())
     }
 }

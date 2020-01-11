@@ -31,10 +31,10 @@ abstract class Community(
     internal val messageHandlers = mutableMapOf<Int, (Address, ByteArray) -> Unit>()
 
     init {
-        //messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
-        //messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
+        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
+        messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
         messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::handleIntroductionRequest
-        //messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::handleIntroductionResponse
+        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::handleIntroductionResponse
     }
 
     override fun load() {
@@ -179,21 +179,28 @@ abstract class Community(
 
         if (introduced) {
             // TODO: Seems like a bad practice to send a packet in the create method...
-            //val packet = createPunctureRequest()
-            //endpoint.send()
+            val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
+            val punctureRequestAddress = if (introductionLan.isEmpty())
+                introductionWan else introductionLan
+            endpoint.send(punctureRequestAddress.toSocketAddress(), packet)
         }
 
         return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
 
-    private fun createPuncture(): ByteArray {
-        // TODO
-        return ByteArray(0)
+    private fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload = PuncturePayload(lanWalker, wanWalker, identifier)
+        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
-    private fun createPunctureRequest(): ByteArray {
-        // TODO
-        return ByteArray(0)
+    private fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        return serializePacket(prefix, MessageId.PUNCTURE_REQUEST, listOf(dist, payload))
     }
 
     /**
@@ -228,11 +235,31 @@ abstract class Community(
      * Request deserialization
      */
 
-    internal fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
+    private fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
         val (peer, remainder) = unwrapAuthPacket(address, bytes)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
         onIntroductionRequest(peer, dist, payload)
+    }
+
+    private fun handleIntroductionResponse(address: Address, bytes: ByteArray) {
+        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
+        onIntroductionResponse(peer, dist, payload)
+    }
+
+    private fun handlePuncture(address: Address, bytes: ByteArray) {
+        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
+        onPuncture(peer, dist, payload)
+    }
+
+    private fun handlePunctureRequest(address: Address, bytes: ByteArray) {
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(bytes)
+        val (payload, _) = PunctureRequestPayload.deserialize(bytes, distSize)
+        onPunctureRequest(address, dist, payload)
     }
 
     /**
@@ -241,7 +268,7 @@ abstract class Community(
      *
      * @throws PacketDecodingException if the signature is invalid
      */
-    internal fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
+    private fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
         val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, 0)
         val publicKey = LibNaClPK.fromBin(auth.publicKey)
         val signature = bytes.copyOfRange(bytes.size - publicKey.getSignatureLength(), bytes.size)
@@ -261,7 +288,7 @@ abstract class Community(
      * Request handling
      */
 
-    internal fun onIntroductionRequest(
+    private fun onIntroductionRequest(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
@@ -278,16 +305,54 @@ abstract class Community(
         endpoint.send(peer.address.toSocketAddress(), packet)
     }
 
-    private fun onIntroductionResponse(address: Address, bytes: ByteArray) {
-        // TODO
+    private fun onIntroductionResponse(
+        peer: Peer,
+        dist: GlobalTimeDistributionPayload,
+        payload: IntroductionResponsePayload
+    ) {
+        myEstimatedWan = payload.destinationAddress
+
+        network.addVerifiedPeer(peer)
+        network.discoverServices(peer, listOf(masterPeer.mid))
+
+        // TODO: understand, document and test all cases
+
+        if (!payload.wanIntroductionAddress.isEmpty() &&
+            payload.wanIntroductionAddress.ip != myEstimatedWan.ip) {
+            if (!payload.lanIntroductionAddress.isEmpty()) {
+                network.discoverAddress(peer, payload.lanIntroductionAddress, masterPeer.mid)
+            }
+            network.discoverAddress(peer, payload.wanIntroductionAddress, masterPeer.mid)
+        } else if (!payload.lanIntroductionAddress.isEmpty() &&
+            payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
+            network.discoverAddress(peer, payload.lanIntroductionAddress, masterPeer.mid)
+        } else if (!payload.wanIntroductionAddress.isEmpty()) {
+            network.discoverAddress(peer, payload.wanIntroductionAddress, masterPeer.mid)
+            network.discoverAddress(peer,
+                Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), masterPeer.mid)
+        }
     }
 
-    private fun onPuncture(address: Address, bytes: ByteArray) {
-        // TODO
+    private fun onPuncture(
+        peer: Peer,
+        dist: GlobalTimeDistributionPayload,
+        payload: PuncturePayload
+    ) {
+        // NOOP
     }
 
-    private fun onPunctureRequest(address: Address, bytes: ByteArray) {
-        // TODO
+    private fun onPunctureRequest(
+        address: Address,
+        dist: GlobalTimeDistributionPayload,
+        payload: PunctureRequestPayload
+    ) {
+        var target = payload.wanWalkerAddress
+        if (payload.wanWalkerAddress.ip == myEstimatedWan.ip) {
+            target = payload.lanWalkerAddress
+        }
+
+        val packet = createPuncture(myEstimatedLan, payload.wanWalkerAddress, payload.identifier)
+        endpoint.send(target.toSocketAddress(), packet)
     }
 
     private fun addressIsLan(address: Address): Boolean {
