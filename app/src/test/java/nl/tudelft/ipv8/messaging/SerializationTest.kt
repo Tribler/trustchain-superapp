@@ -5,31 +5,7 @@ import org.junit.Test
 
 import org.junit.Assert.*
 
-data class TestSerializable(private val value: Boolean): Serializable {
-    override fun serialize(): ByteArray {
-        return serializeBool(value)
-    }
-
-    companion object : Deserializable<TestSerializable> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<TestSerializable, Int> {
-            return Pair(TestSerializable(
-                deserializeBool(buffer, 0)
-            ), 0)
-        }
-    }
-}
-
 class SerializationTest {
-    @Test
-    fun simplePayload() {
-        val serializable = TestSerializable(true)
-        val bytes = serializable.serialize()
-        val (deserialized, size) = TestSerializable.deserialize(bytes)
-        assertEquals(1, bytes.size)
-        assertEquals(1, bytes[0].toInt())
-        assertEquals(serializable, deserialized)
-    }
-
     @Test
     fun serializeBool_true() {
         val serialized = serializeBool(true)

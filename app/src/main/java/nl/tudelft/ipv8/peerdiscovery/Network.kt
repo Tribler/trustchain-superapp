@@ -35,21 +35,6 @@ class Network {
      */
     private val serviceOverlays = mutableMapOf<String, Overlay>()
 
-    /**
-     * Cache of [Address] -> [Peer]
-     */
-    private val reverseIpLookup: MutableMap<Address, Peer> = mutableMapOf()
-
-    /**
-     * Cache of [Peer] -> [[Address]]
-     */
-    internal val reverseIntroLookup: MutableMap<Peer, MutableSet<Address>> = mutableMapOf()
-
-    /**
-     * Cache of service ID -> [[Peer]]
-     */
-    private val reverseServiceLookup: MutableMap<String, MutableSet<Peer>> = mutableMapOf()
-
     private val graphLock = Object()
 
     /**
@@ -69,11 +54,6 @@ class Network {
             if (address !in allAddresses || allAddresses[address]!!.first !in verifiedPeers.map { it.mid }) {
                 // This is a new address, or our previous parent has been removed
                 allAddresses[address] = Pair(peer.mid, serviceId)
-
-                // TODO: in py-ipv8, this is only added if cache already exists, why?
-                val reverseIntroCache = reverseIntroLookup[peer] ?: mutableSetOf()
-                reverseIntroCache.add(address)
-                reverseIntroLookup[peer] = reverseIntroCache
             }
             addVerifiedPeer(peer)
         }
@@ -90,12 +70,6 @@ class Network {
             val peerServices = servicesPerPeer[peer.mid] ?: mutableSetOf()
             peerServices.addAll(serviceIds)
             servicesPerPeer[peer.mid] = peerServices
-
-            for (serviceId in serviceIds) {
-                val serviceCache = reverseServiceLookup[serviceId] ?: mutableSetOf()
-                serviceCache.add(peer)
-                reverseServiceLookup[serviceId] = serviceCache
-            }
         }
     }
 
@@ -203,7 +177,7 @@ class Network {
     }
 
     /**
-     * Get a verified per by its public key bin.
+     * Get a verified peer by its public key bin.
      *
      * @param publicKeyBin The string representation of the public key.
      * @return The [Peer] object for this public key or null.
@@ -252,11 +226,5 @@ class Network {
             verifiedPeers.remove(peer)
             servicesPerPeer.remove(peer.mid)
         }
-    }
-
-    companion object {
-        private const val REVERSE_IP_CACHE_SIZE = 500
-        private const val REVERSE_INTRO_CACHE_SIZE = 500
-        private const val REVERSE_SERVICE_CACHE_SIZE = 500
     }
 }
