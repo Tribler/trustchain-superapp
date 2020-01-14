@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.keyvault
 
+import nl.tudelft.ipv8.util.toHex
 import org.libsodium.jni.NaCl
 import org.libsodium.jni.Sodium
 
@@ -44,17 +45,23 @@ open class LibNaClPK(
             val publicKeySize = Sodium.crypto_scalarmult_curve25519_bytes()
             val verifyKeySize = Sodium.crypto_sign_ed25519_publickeybytes()
             val binSize = BIN_PREFIX.length + publicKeySize + verifyKeySize
-            if (bin.size != binSize)
-                throw IllegalArgumentException("Bin is expected to have $binSize bytes")
 
             val str = bin.toString(Charsets.US_ASCII)
-            if (!str.startsWith(BIN_PREFIX))
-                throw IllegalArgumentException("Bin prefix does not match $BIN_PREFIX")
+            val binPrefix = str.substring(0, BIN_PREFIX.length)
+            if (binPrefix != BIN_PREFIX)
+                throw IllegalArgumentException("Bin prefix $binPrefix does not match $BIN_PREFIX")
+
+            if (bin.size != binSize)
+                throw IllegalArgumentException("Bin is expected to have $binSize bytes, has ${bin.size}")
 
             val publicKey = bin.copyOfRange(BIN_PREFIX.length, BIN_PREFIX.length + publicKeySize)
             val verifyKey = bin.copyOfRange(BIN_PREFIX.length + publicKeySize,
                 BIN_PREFIX.length + publicKeySize + verifyKeySize)
             return LibNaClPK(publicKey, verifyKey)
         }
+    }
+
+    override fun toString(): String {
+        return keyToHash().toHex()
     }
 }

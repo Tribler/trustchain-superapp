@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.messaging.*
 /**
  * The payload for a puncture message.
  */
-class PuncturePayload(
+data class PuncturePayload(
     /**
      * The lan address of the sender. Nodes in the same LAN should use this address to communicate.
      */

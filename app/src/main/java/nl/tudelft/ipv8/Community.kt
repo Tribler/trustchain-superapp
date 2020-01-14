@@ -42,7 +42,7 @@ abstract class Community(
 
         network.registerServiceProvider(masterPeer.mid, this)
         network.blacklistMids.add(myPeer.mid)
-        network.blacklist.addAll(DEFAULT_ADDRESSES)
+        //network.blacklist.addAll(DEFAULT_ADDRESSES)
     }
 
     override fun bootstrap() {
@@ -56,7 +56,7 @@ abstract class Community(
 
     override fun walkTo(address: Address) {
         val packet = createIntroductionRequest(address)
-        endpoint.send(address.toSocketAddress(), packet)
+        endpoint.send(address, packet)
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class Community(
         }
 
         val packet = createIntroductionRequest(peer.address)
-        endpoint.send(peer.address.toSocketAddress(), packet)
+        endpoint.send(peer.address, packet)
     }
 
     override fun getPeerForIntroduction(exclude: Peer?): Peer? {
@@ -101,15 +101,18 @@ abstract class Community(
         val data = packet.data
 
         val packetPrefix = data.copyOfRange(0, prefix.size)
-        if (!packetPrefix.contentEquals(prefix)) return
+        if (!packetPrefix.contentEquals(prefix)) {
+            Log.d("Community", "prefix not matching")
+            return
+        }
 
         val msgId = data.copyOfRange(prefix.size, prefix.size + 1).first()
         val handler = messageHandlers[msgId.toUByte().toInt()]
 
         if (handler != null) {
-            val payload = data.copyOfRange(prefix.size + 1, data.size)
+            //val payload = data.copyOfRange(prefix.size + 1, data.size)
             try {
-                handler(sourceAddress, payload)
+                handler(sourceAddress, data)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -135,6 +138,8 @@ abstract class Community(
             )
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
+
+        Log.d("Community", "-> $payload")
 
         return serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
     }
@@ -182,8 +187,10 @@ abstract class Community(
             val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
             val punctureRequestAddress = if (introductionLan.isEmpty())
                 introductionWan else introductionLan
-            endpoint.send(punctureRequestAddress.toSocketAddress(), packet)
+            endpoint.send(punctureRequestAddress, packet)
         }
+
+        Log.d("Community", "-> $payload")
 
         return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
@@ -193,10 +200,14 @@ abstract class Community(
         val payload = PuncturePayload(lanWalker, wanWalker, identifier)
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
+
+        Log.d("Community", "-> $payload")
+
         return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
     private fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
+        Log.d("Community", "-> punctureRequest")
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
@@ -235,14 +246,19 @@ abstract class Community(
      * Request deserialization
      */
 
-    private fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
+    internal fun deserializeIntroductionRequest(address: Address, bytes: ByteArray): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
         val (peer, remainder) = unwrapAuthPacket(address, bytes)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
+        return Triple(peer, dist, payload)
+    }
+
+    private fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
+        val (peer, dist, payload) = deserializeIntroductionRequest(address, bytes)
         onIntroductionRequest(peer, dist, payload)
     }
 
-    private fun handleIntroductionResponse(address: Address, bytes: ByteArray) {
+    internal fun handleIntroductionResponse(address: Address, bytes: ByteArray) {
         val (peer, remainder) = unwrapAuthPacket(address, bytes)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
@@ -269,18 +285,22 @@ abstract class Community(
      * @throws PacketDecodingException if the signature is invalid
      */
     private fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
-        val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, 0)
+        // prefix + message type
+        val authOffset = prefix.size + 1
+        val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, authOffset)
         val publicKey = LibNaClPK.fromBin(auth.publicKey)
-        val signature = bytes.copyOfRange(bytes.size - publicKey.getSignatureLength(), bytes.size)
+        val signatureOffset = bytes.size - publicKey.getSignatureLength()
+        val signature = bytes.copyOfRange(signatureOffset, bytes.size)
 
         // Verify signature
-        val isValidSignature = publicKey.verify(signature, bytes)
+        val message = bytes.copyOfRange(0, signatureOffset)
+        val isValidSignature = publicKey.verify(signature, message)
         if (!isValidSignature)
             throw PacketDecodingException("Incoming packet has an invalid signature")
 
         // Return the peer and remaining payloads
         val peer = Peer(LibNaClPK.fromBin(auth.publicKey), address)
-        val remainder = bytes.copyOfRange(authSize, bytes.size - publicKey.getSignatureLength())
+        val remainder = bytes.copyOfRange(authOffset + authSize, bytes.size - publicKey.getSignatureLength())
         return Pair(peer, remainder)
     }
 
@@ -293,6 +313,8 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
     ) {
+        Log.d("Community", "<- $payload")
+
         network.addVerifiedPeer(peer)
         network.discoverServices(peer, listOf(masterPeer.mid))
 
@@ -302,14 +324,16 @@ abstract class Community(
             payload.identifier
         )
 
-        endpoint.send(peer.address.toSocketAddress(), packet)
+        endpoint.send(peer.address, packet)
     }
 
-    private fun onIntroductionResponse(
+    internal fun onIntroductionResponse(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
     ) {
+        Log.d("Community", "<- $payload")
+
         myEstimatedWan = payload.destinationAddress
 
         network.addVerifiedPeer(peer)
@@ -338,6 +362,7 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
     ) {
+        Log.d("Community", "<- $payload")
         // NOOP
     }
 
@@ -346,13 +371,14 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
     ) {
+        Log.d("Community", "<- $payload")
         var target = payload.wanWalkerAddress
         if (payload.wanWalkerAddress.ip == myEstimatedWan.ip) {
             target = payload.lanWalkerAddress
         }
 
         val packet = createPuncture(myEstimatedLan, payload.wanWalkerAddress, payload.identifier)
-        endpoint.send(target.toSocketAddress(), packet)
+        endpoint.send(target, packet)
     }
 
     private fun addressIsLan(address: Address): Boolean {
@@ -363,12 +389,13 @@ abstract class Community(
     companion object {
         private val DEFAULT_ADDRESSES = listOf(
             // Dispersy
-            Address("130.161.119.206", 6421),
-            Address("130.161.119.206", 6422),
-            Address("131.180.27.155", 6423),
-            Address("131.180.27.156", 6424),
-            Address("131.180.27.161", 6427),
+            //Address("130.161.119.206", 6421),
+            //Address("130.161.119.206", 6422),
+            //Address("131.180.27.155", 6423),
+            //Address("131.180.27.156", 6424),
+            //Address("131.180.27.161", 6427),
             // IPv8
+            /*
             Address("131.180.27.161", 6521),
             Address("131.180.27.161", 6522),
             Address("131.180.27.162", 6523),
@@ -377,6 +404,8 @@ abstract class Community(
             Address("130.161.119.215", 6526),
             Address("81.171.27.194", 6527),
             Address("81.171.27.194", 6528)
+             */
+            Address("145.94.233.189", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

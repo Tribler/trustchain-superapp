@@ -12,7 +12,7 @@ import kotlin.experimental.and
  * (depending on their positions).  The introduced node must sent a puncture message to the
  * receiver to punch a hole in its NAT.
  */
-class IntroductionResponsePayload(
+data class IntroductionResponsePayload(
     /**
      * The address of the receiver. Effectively this should be the wan address that others can
      * use to contact the receiver.

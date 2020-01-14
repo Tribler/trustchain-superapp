@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.messaging
 
+import nl.tudelft.ipv8.Address
 import java.net.SocketAddress
 
 abstract class Endpoint {
@@ -15,12 +16,16 @@ abstract class Endpoint {
 
     protected fun notifyListeners(packet: Packet) {
         for (listener in listeners) {
-            listener.onPacket(packet)
+            try {
+                listener.onPacket(packet)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     abstract fun isOpen(): Boolean
-    abstract fun send(socketAddress: SocketAddress, data: ByteArray)
+    abstract fun send(address: Address, data: ByteArray)
     abstract fun open()
     abstract fun close()
 }

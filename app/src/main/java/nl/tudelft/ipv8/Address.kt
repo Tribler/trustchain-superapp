@@ -15,7 +15,7 @@ data class Address(
         val parts = ip.split(".")
         val ipBytes = ByteArray(4)
         for (i in ipBytes.indices) {
-            ipBytes[i] = parts[i].toInt().toChar().toByte()
+            ipBytes[i] = parts[i].toUByte().toByte()
         }
         return ipBytes + serializeUShort(port)
     }
@@ -31,11 +31,12 @@ data class Address(
     companion object : Deserializable<Address> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<Address, Int> {
             var localOffset = 0
+
             val ip = "" +
-                    buffer[offset + 0].toChar().toInt() + "." +
-                    buffer[offset + 1].toChar().toInt() + "." +
-                    buffer[offset + 2].toChar().toInt() + "." +
-                    buffer[offset + 3].toChar().toInt()
+                    buffer[offset + 0].toUByte() + "." +
+                    buffer[offset + 1].toUByte() + "." +
+                    buffer[offset + 2].toUByte() + "." +
+                    buffer[offset + 3].toUByte()
             localOffset += 4
             val port = deserializeUShort(buffer, offset + localOffset)
             localOffset += SERIALIZED_USHORT_SIZE

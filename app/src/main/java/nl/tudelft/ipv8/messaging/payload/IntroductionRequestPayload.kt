@@ -7,7 +7,7 @@ import kotlin.experimental.and
 /**
  * The payload for an introduction-request message.
  */
-class IntroductionRequestPayload(
+data class IntroductionRequestPayload(
     /**
      * The address of the receiver. Effectively this should be the wan address that others can
      * use to contact the receiver.
@@ -57,7 +57,7 @@ class IntroductionRequestPayload(
             localOffset += Address.SERIALIZED_SIZE
             val (sourceLanAddress, _) = Address.deserialize(buffer, offset + localOffset)
             localOffset += Address.SERIALIZED_SIZE
-            val (sourceWanAddress, _) = Address.deserialize(buffer, localOffset)
+            val (sourceWanAddress, _) = Address.deserialize(buffer, offset + localOffset)
             localOffset += Address.SERIALIZED_SIZE
             val (advice, connectionType) = deserializeConnectionByte(buffer[offset + localOffset])
             localOffset++

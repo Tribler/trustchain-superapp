@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.messaging.*
 /**
  * The payload for a puncture-request payload.
  */
-class PunctureRequestPayload(
+data class PunctureRequestPayload(
     /**
      * The lan address of the node that the sender wants us to contact. This contact attempt should
      * punch a hole in our NAT to allow the node to connect to us.

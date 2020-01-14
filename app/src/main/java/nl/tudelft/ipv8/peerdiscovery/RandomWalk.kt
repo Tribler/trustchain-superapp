@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.peerdiscovery
 
+import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
 import java.util.*
@@ -34,7 +35,7 @@ class RandomWalk(
      */
     private val targetInterval: Int = 0
 ) : DiscoveryStrategy {
-    private val walkLock = Object()
+        private val walkLock = Object()
 
     private var lastStep: Date? = null
     private val introTimeouts = mutableMapOf<Address, Date>()
@@ -43,8 +44,22 @@ class RandomWalk(
      * Walk to random walkable peer.
      */
     override fun takeStep() {
+        Log.d("RandomWalk", "takeStep")
+
         synchronized(walkLock) {
-            // TODO: Sanitize unreachable nodes
+            // Sanitize unreachable nodes
+            val toRemove = mutableListOf<Address>()
+            for ((address, introTime) in introTimeouts) {
+                if (introTime.time + timeout * 1000 < Date().time) {
+                    toRemove += address
+                }
+            }
+            for (node in toRemove) {
+                introTimeouts.remove(node)
+                if (overlay.network.getVerifiedByAddress(node) == null) {
+                    overlay.network.removeByAddress(node)
+                }
+            }
 
             // Slow down the walk if a target interval has been specified
             val lastStep = lastStep

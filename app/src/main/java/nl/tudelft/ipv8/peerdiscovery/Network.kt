@@ -13,7 +13,7 @@ class Network {
     /**
      * All verified peer objects (peer.address must be in [allAddresses])
      */
-    private val verifiedPeers: MutableList<Peer> = mutableListOf()
+    val verifiedPeers: MutableList<Peer> = mutableListOf()
 
     /**
      * Peers we should not add to the network (e.g. bootstrap peers)

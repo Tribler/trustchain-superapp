@@ -22,7 +22,9 @@ class Ipv8(
 
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
-            overlays.add(overlayConfiguration.overlay)
+            val overlay = overlayConfiguration.overlay
+            overlays.add(overlay)
+            overlay.load()
             for (strategy in overlayConfiguration.walkers) {
                 strategies.add(strategy)
             }
@@ -59,6 +61,9 @@ class Ipv8(
 
     fun stop() {
         synchronized(overlayLock) {
+            for (overlay in overlays) {
+                overlay.unload()
+            }
             nextTickRunnable?.let {
                 handler.removeCallbacks(it)
             }

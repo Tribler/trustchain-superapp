@@ -12,6 +12,15 @@ class AddressTest {
     }
 
     @Test
+    fun serialize_2() {
+        val address = Address("192.168.0.1", 8090)
+        val serialized = address.serialize()
+        val (deserialized, _) = Address.deserialize(serialized)
+        assertEquals(address.ip, deserialized.ip)
+        assertEquals(address.port, deserialized.port)
+    }
+
+    @Test
     fun deserialize_1() {
         val address = Address("1.2.3.4", 0)
         val serialized = address.serialize()
