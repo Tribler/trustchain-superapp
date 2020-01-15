@@ -110,7 +110,6 @@ abstract class Community(
         val handler = messageHandlers[msgId.toUByte().toInt()]
 
         if (handler != null) {
-            //val payload = data.copyOfRange(prefix.size + 1, data.size)
             try {
                 handler(sourceAddress, data)
             } catch (e: Exception) {
@@ -195,7 +194,7 @@ abstract class Community(
         return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
 
-    private fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
+    internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
         val globalTime = claimGlobalTime()
         val payload = PuncturePayload(lanWalker, wanWalker, identifier)
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
@@ -206,7 +205,7 @@ abstract class Community(
         return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
-    private fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
+    internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
         Log.d("Community", "-> punctureRequest")
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
@@ -265,14 +264,14 @@ abstract class Community(
         onIntroductionResponse(peer, dist, payload)
     }
 
-    private fun handlePuncture(address: Address, bytes: ByteArray) {
+    internal fun handlePuncture(address: Address, bytes: ByteArray) {
         val (peer, remainder) = unwrapAuthPacket(address, bytes)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
         onPuncture(peer, dist, payload)
     }
 
-    private fun handlePunctureRequest(address: Address, bytes: ByteArray) {
+    internal fun handlePunctureRequest(address: Address, bytes: ByteArray) {
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(bytes)
         val (payload, _) = PunctureRequestPayload.deserialize(bytes, distSize)
         onPunctureRequest(address, dist, payload)
@@ -357,7 +356,7 @@ abstract class Community(
         }
     }
 
-    private fun onPuncture(
+    internal fun onPuncture(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
@@ -366,7 +365,7 @@ abstract class Community(
         // NOOP
     }
 
-    private fun onPunctureRequest(
+    internal fun onPunctureRequest(
         address: Address,
         dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
@@ -405,7 +404,8 @@ abstract class Community(
             Address("81.171.27.194", 6527),
             Address("81.171.27.194", 6528)
              */
-            Address("145.94.233.189", 8090)
+            //Address("145.94.233.189", 8090)
+            Address("145.94.235.215", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

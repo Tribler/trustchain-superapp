@@ -20,6 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        resources.configuration.orientation
+
         // General community
         val myKey = LibNaClSK.generate()
         val address = Address("0.0.0.0", 8090)

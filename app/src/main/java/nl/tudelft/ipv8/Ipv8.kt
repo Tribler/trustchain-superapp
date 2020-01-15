@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8
 
 import android.os.Handler
+import android.os.HandlerThread
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryStrategy
 import kotlin.math.roundToLong
@@ -14,10 +15,16 @@ class Ipv8(
     private val overlays = mutableListOf<Overlay>()
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
-    private val handler = Handler()
+    private var handlerThread: HandlerThread? = null
+    private var handler: Handler? = null
     private var nextTickRunnable: Runnable? = null
 
     fun start() {
+        val handlerThread = HandlerThread("SendThread")
+        handlerThread.start()
+        this.handlerThread = handlerThread
+        handler = Handler(handlerThread.looper)
+
         endpoint.open()
 
         // Init overlays and discovery strategies
@@ -56,16 +63,17 @@ class Ipv8(
             onTick()
         }
         nextTickRunnable = runnable
-        handler.postDelayed(runnable, interval)
+        handler?.postDelayed(runnable, interval)
     }
 
     fun stop() {
+        handlerThread?.quit()
         synchronized(overlayLock) {
             for (overlay in overlays) {
                 overlay.unload()
             }
             nextTickRunnable?.let {
-                handler.removeCallbacks(it)
+                handler?.removeCallbacks(it)
             }
             endpoint.close()
         }

@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.ECCrypto
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -85,5 +86,24 @@ class NetworkTest {
         network.removePeer(peer)
         val verifiedPeer = network.getVerifiedByAddress(address)
         Assert.assertNull(verifiedPeer)
+    }
+
+    @Test
+    fun getWalkableAddresses() {
+        val network = Network()
+
+        val noAddresses = network.getWalkableAddresses(null)
+        assertEquals(0, noAddresses.size)
+
+        val address = Address("1.2.3.4", 1234)
+        val peer = Peer(ECCrypto.generateKey(), address)
+        network.addVerifiedPeer(peer)
+
+        // all peers are known
+        val noWalkableAddresses = network.getWalkableAddresses(null)
+        assertEquals(0, noWalkableAddresses.size)
+
+        val walkableAddresses = network.getWalkableAddresses("abc")
+        assertEquals(1, walkableAddresses.size)
     }
 }
