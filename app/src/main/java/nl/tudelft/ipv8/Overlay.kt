@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.peerdiscovery.Network
  * Interface for an Internet overlay.
  */
 abstract class Overlay(
-    protected val myPeer: Peer,
+    val myPeer: Peer,
     protected val endpoint: Endpoint,
     val network: Network
 ) : EndpointListener {

@@ -213,7 +213,7 @@ class CommunityTest {
         val wanWalker = Address("2.3.4.5", 2345)
         val identifier = 1
         val packet = community.createPunctureRequest(lanWalker, wanWalker, identifier)
-        assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d202030405092900017b01e303fc9987b1b899445e3f9c3a0208580b3572f357e9667419cf095a8bf5ea7d97f22519695062d7db2a768ad0309afe9cb51607f0a104b623da0235c50e", packet.toHex())
+        assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d20203040509290001", packet.toHex())
     }
 
     @Test

@@ -16,11 +16,11 @@ abstract class Community(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network,
-    maxPeers: Int = DEFAULT_MAX_PEERS
+    val maxPeers: Int = DEFAULT_MAX_PEERS
 ) : Overlay(myPeer, endpoint, network) {
     abstract val serviceId: String
 
-    private val prefix: ByteArray
+    protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
     var myEstimatedWan: Address = Address("0.0.0.0", 0)
@@ -210,7 +210,7 @@ abstract class Community(
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
-        return serializePacket(prefix, MessageId.PUNCTURE_REQUEST, listOf(dist, payload))
+        return serializePacket(prefix, MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
     }
 
     /**
@@ -283,7 +283,7 @@ abstract class Community(
      *
      * @throws PacketDecodingException if the signature is invalid
      */
-    private fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
+    protected fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
         // prefix + message type
         val authOffset = prefix.size + 1
         val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, authOffset)

@@ -33,7 +33,7 @@ class Network {
     /**
      * A map of service identifiers to local overlays
      */
-    private val serviceOverlays = mutableMapOf<String, Overlay>()
+    val serviceOverlays = mutableMapOf<String, Overlay>()
 
     private val graphLock = Object()
 
