@@ -18,10 +18,10 @@ abstract class Community(
     network: Network,
     maxPeers: Int = DEFAULT_MAX_PEERS
 ) : Overlay(myPeer, endpoint, network) {
-    abstract val masterPeer: Peer
+    abstract val serviceId: String
 
     private val prefix: ByteArray
-        get() = ByteArray(0) + 0.toByte() + VERSION + masterPeer.mid.hexToBytes()
+        get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
     var myEstimatedWan: Address = Address("0.0.0.0", 0)
     var myEstimatedLan: Address = Address("0.0.0.0", 0)
@@ -40,7 +40,7 @@ abstract class Community(
     override fun load() {
         super.load()
 
-        network.registerServiceProvider(masterPeer.mid, this)
+        network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         //network.blacklist.addAll(DEFAULT_ADDRESSES)
     }
@@ -89,11 +89,11 @@ abstract class Community(
     }
 
     override fun getWalkableAddresses(): List<Address> {
-        return network.getWalkableAddresses(masterPeer.mid)
+        return network.getWalkableAddresses(serviceId)
     }
 
     override fun getPeers(): List<Peer> {
-        return network.getPeersForService(masterPeer.mid)
+        return network.getPeersForService(serviceId)
     }
 
     override fun onPacket(packet: Packet) {
@@ -315,7 +315,7 @@ abstract class Community(
         Log.d("Community", "<- $payload")
 
         network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(masterPeer.mid))
+        network.discoverServices(peer, listOf(serviceId))
 
         val packet = createIntroductionResponse(
             payload.destinationAddress,
@@ -336,23 +336,23 @@ abstract class Community(
         myEstimatedWan = payload.destinationAddress
 
         network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(masterPeer.mid))
+        network.discoverServices(peer, listOf(serviceId))
 
         // TODO: understand, document and test all cases
 
         if (!payload.wanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip != myEstimatedWan.ip) {
             if (!payload.lanIntroductionAddress.isEmpty()) {
-                network.discoverAddress(peer, payload.lanIntroductionAddress, masterPeer.mid)
+                network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
-            network.discoverAddress(peer, payload.wanIntroductionAddress, masterPeer.mid)
+            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
-            network.discoverAddress(peer, payload.lanIntroductionAddress, masterPeer.mid)
+            network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
-            network.discoverAddress(peer, payload.wanIntroductionAddress, masterPeer.mid)
+            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
             network.discoverAddress(peer,
-                Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), masterPeer.mid)
+                Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
         }
     }
 

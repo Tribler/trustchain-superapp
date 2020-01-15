@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         ipv8 = Ipv8(endpoint, config)
         ipv8?.start()
 
-        loadNetworkInfo(network, community.masterPeer.mid)
+        loadNetworkInfo(network, community.serviceId)
     }
 
     override fun onDestroy() {
