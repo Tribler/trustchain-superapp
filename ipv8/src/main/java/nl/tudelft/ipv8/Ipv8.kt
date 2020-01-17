@@ -3,7 +3,7 @@ package nl.tudelft.ipv8
 import android.os.Handler
 import android.os.HandlerThread
 import nl.tudelft.ipv8.messaging.Endpoint
-import nl.tudelft.ipv8.peerdiscovery.DiscoveryStrategy
+import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
 import kotlin.math.roundToLong
 
 class Ipv8(

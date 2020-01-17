@@ -43,6 +43,8 @@ abstract class Community(
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         network.blacklist.addAll(DEFAULT_ADDRESSES)
+
+        // TODO: Get LAN address
     }
 
     override fun bootstrap() {

@@ -1,6 +1,6 @@
 package nl.tudelft.ipv8
 
-import nl.tudelft.ipv8.peerdiscovery.DiscoveryStrategy
+import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
 
 class Ipv8Configuration(
     val address: String = "0.0.0.0",

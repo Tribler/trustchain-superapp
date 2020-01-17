@@ -1,11 +1,18 @@
-package nl.tudelft.ipv8.peerdiscovery
+package nl.tudelft.ipv8.peerdiscovery.strategy
 
 import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.peerdiscovery.PingOverlay
 import java.util.*
 import kotlin.math.min
 
+/**
+ * The strategy that handles peer churn. On every step, it randomly selects a few inactive peers.
+ * (A peer is considered inactive if we haven't received a message from them withing the last
+ * [inactiveTime] interval.) If no pong is received within [dropTime] interval, the peer is removed
+ * from the network graph.
+ */
 class RandomChurn(
     /**
      * The Overlay to sample peers from.

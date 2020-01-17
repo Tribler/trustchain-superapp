@@ -1,4 +1,4 @@
-package nl.tudelft.ipv8.peerdiscovery
+package nl.tudelft.ipv8.peerdiscovery.strategy
 
 import android.util.Log
 import nl.tudelft.ipv8.Address
@@ -7,7 +7,8 @@ import java.util.*
 import kotlin.random.Random
 
 /**
- * Walk randomly through the network.
+ * Walk randomly through the network. On every step, request a random peer from the community for
+ * an introduction to another community member.
  */
 class RandomWalk(
     /**

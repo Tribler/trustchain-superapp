@@ -1,8 +1,9 @@
-package nl.tudelft.ipv8.peerdiscovery
+package nl.tudelft.ipv8.peerdiscovery.strategy
 
 import io.mockk.*
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import org.junit.Test
 
 class RandomWalkTest {
@@ -12,7 +13,10 @@ class RandomWalkTest {
         val mockAddress = Address("1.2.3.4", 1234)
         every { overlay.getWalkableAddresses() } returns listOf(mockAddress)
 
-        val randomWalk = RandomWalk(overlay, resetChance = 0)
+        val randomWalk = RandomWalk(
+            overlay,
+            resetChance = 0
+        )
         randomWalk.takeStep()
 
         verify { overlay.getWalkableAddresses() }
@@ -25,7 +29,10 @@ class RandomWalkTest {
         val overlay = mockk<Overlay>(relaxed = true)
         every { overlay.getWalkableAddresses() } returns listOf()
 
-        val randomWalk = RandomWalk(overlay, resetChance = 0)
+        val randomWalk = RandomWalk(
+            overlay,
+            resetChance = 0
+        )
         randomWalk.takeStep()
 
         verify { overlay.getWalkableAddresses() }

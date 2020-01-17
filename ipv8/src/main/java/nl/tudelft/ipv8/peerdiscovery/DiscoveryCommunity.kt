@@ -43,10 +43,11 @@ class DiscoveryCommunity(
         )
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
+        Log.d("DiscoveryCommunity", "-> $payload")
         return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload))
     }
 
-    private fun sendSimilarityRequest(address: Address) {
+    fun sendSimilarityRequest(address: Address) {
         val myPeerSet = network.serviceOverlays.values.map { it.myPeer }.toSet()
         for (myPeer in myPeerSet) {
             val packet = createSimilarityRequest(myPeer)

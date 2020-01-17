@@ -227,4 +227,13 @@ class Network {
             servicesPerPeer.remove(peer.mid)
         }
     }
+
+    /**
+     * Returns a random verified peer.
+     */
+    fun getRandomPeer(): Peer? {
+        synchronized(graphLock) {
+            return if (verifiedPeers.isNotEmpty()) verifiedPeers.random() else null
+        }
+    }
 }

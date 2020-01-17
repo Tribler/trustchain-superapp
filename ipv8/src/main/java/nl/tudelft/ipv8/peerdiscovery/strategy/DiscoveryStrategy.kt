@@ -1,4 +1,4 @@
-package nl.tudelft.ipv8.peerdiscovery
+package nl.tudelft.ipv8.peerdiscovery.strategy
 
 /**
  * Strategy for discovering peers in a network.

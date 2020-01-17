@@ -12,8 +12,9 @@ import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.Network
-import nl.tudelft.ipv8.peerdiscovery.RandomChurn
-import nl.tudelft.ipv8.peerdiscovery.RandomWalk
+import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
+import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
+import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.peerchat.R
 import java.net.InetAddress
 
@@ -51,7 +52,8 @@ class MainActivity : AppCompatActivity() {
         val community = DiscoveryCommunity(myPeer, endpoint, network)
         val randomWalk = RandomWalk(community, timeout = 3.0)
         val randomChurn = RandomChurn(community)
-        val overlayConfig = OverlayConfiguration(community, listOf(randomWalk, randomChurn))
+        val periodicSimilarity = PeriodicSimilarity(community)
+        val overlayConfig = OverlayConfiguration(community, listOf(randomWalk, randomChurn, periodicSimilarity))
 
         val config = Ipv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 1.0)
         ipv8 = Ipv8(endpoint, config)
