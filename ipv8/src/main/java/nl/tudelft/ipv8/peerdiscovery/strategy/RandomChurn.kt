@@ -61,27 +61,23 @@ class RandomChurn(
 
     override fun takeStep() {
         synchronized(walkLock) {
-            val sampleSize = min(overlay.network.verifiedPeers.size, sampleSize)
-            if (sampleSize > 0) {
-                val verified = overlay.network.verifiedPeers.shuffled()
-                val window = verified.subList(0, sampleSize)
-
-                for (peer in window) {
-                    if (shouldDrop(peer) && pinged.contains(peer.address)) {
-                        Log.d("RandomChurn", "Dropping inactive peer $peer")
-                        overlay.network.removePeer(peer)
-                        pinged.remove(peer.address)
-                    } else if (isInactive(peer) || peer.pings.size < Peer.MAX_PINGS) {
-                        Log.d("RandomChurn", "Peer $peer is inactive")
-                        val pingedAddress = pinged[peer.address]
-                        if (pingedAddress != null) {
-                            if (Date().time > pingedAddress.time + pingInterval * 1000) {
-                                pinged.remove(peer.address)
-                            }
-                        } else {
-                            pinged[peer.address] = Date()
-                            overlay.sendPing(peer)
+            val window = overlay.network.getRandomPeers(sampleSize)
+            for (peer in window) {
+                if (shouldDrop(peer) && pinged.contains(peer.address)) {
+                    Log.d("RandomChurn", "Dropping inactive peer $peer")
+                    overlay.network.removePeer(peer)
+                    pinged.remove(peer.address)
+                } else if (isInactive(peer) || peer.pings.size < Peer.MAX_PINGS) {
+                    Log.d("RandomChurn", "Peer $peer is inactive")
+                    val pingedAddress = pinged[peer.address]
+                    if (pingedAddress != null) {
+                        if (Date().time > pingedAddress.time + pingInterval * 1000) {
+                            // Time to ping again in the next step
+                            pinged.remove(peer.address)
                         }
+                    } else {
+                        pinged[peer.address] = Date()
+                        overlay.sendPing(peer)
                     }
                 }
             }

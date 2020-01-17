@@ -3,6 +3,7 @@ package nl.tudelft.ipv8.peerdiscovery
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import kotlin.math.min
 
 class Network {
     /**
@@ -234,6 +235,17 @@ class Network {
     fun getRandomPeer(): Peer? {
         synchronized(graphLock) {
             return if (verifiedPeers.isNotEmpty()) verifiedPeers.random() else null
+        }
+    }
+
+    /**
+     * Returns a random sample of verified peers of the maximum size of [maxSampleSize].
+     */
+    fun getRandomPeers(maxSampleSize: Int): List<Peer> {
+        synchronized(graphLock) {
+            val sampleSize = min(verifiedPeers.size, maxSampleSize)
+            val shuffled = verifiedPeers.shuffled()
+            return shuffled.subList(0, sampleSize)
         }
     }
 }
