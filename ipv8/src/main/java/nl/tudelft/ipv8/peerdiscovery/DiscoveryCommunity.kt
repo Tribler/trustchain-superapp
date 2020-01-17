@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Endpoint
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.payload.PingPayload
 import nl.tudelft.ipv8.peerdiscovery.payload.PongPayload
@@ -90,32 +91,32 @@ class DiscoveryCommunity(
      * Request deserialization
      */
 
-    internal fun handleSimilarityRequest(address: Address, bytes: ByteArray) {
-        val (peer, remainder) = unwrapAuthPacket(address, bytes)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+    internal fun handleSimilarityRequest(packet: Packet) {
+        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityRequestPayload.deserialize(remainder, distSize)
-        onSimilarityRequest(peer, dist, payload)
+        onSimilarityRequest(peer, payload)
     }
 
-    internal fun handleSimilarityResponse(address: Address, bytes: ByteArray) {
-        val (peer, remainder) = unwrapAuthPacket(address, bytes)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+    internal fun handleSimilarityResponse(packet: Packet) {
+        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityResponsePayload.deserialize(remainder, distSize)
-        onSimilarityResponse(peer, dist, payload)
+        onSimilarityResponse(peer, payload)
     }
 
-    internal fun handlePing(address: Address, bytes: ByteArray) {
-        val remainder = unwrapUnauthPacket(bytes)
+    internal fun handlePing(packet: Packet) {
+        val remainder = unwrapUnauthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PingPayload.deserialize(remainder, distSize)
-        onPing(address, dist, payload)
+        onPing(packet.source, dist, payload)
     }
 
-    internal fun handlePong(address: Address, bytes: ByteArray) {
-        val remainder = unwrapUnauthPacket(bytes)
+    internal fun handlePong(packet: Packet) {
+        val remainder = unwrapUnauthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PongPayload.deserialize(remainder, distSize)
-        onPong(address, dist, payload)
+        onPong(dist, payload)
     }
 
     /*
@@ -133,7 +134,6 @@ class DiscoveryCommunity(
 
     internal fun onSimilarityRequest(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: SimilarityRequestPayload
     ) {
         Log.d("DiscoveryCommunity", "<- $payload")
@@ -149,7 +149,6 @@ class DiscoveryCommunity(
 
     internal fun onSimilarityResponse(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: SimilarityResponsePayload
     ) {
         Log.d("DiscoveryCommunity", "<- $payload")
@@ -176,7 +175,6 @@ class DiscoveryCommunity(
     }
 
     internal fun onPong(
-        address: Address,
         dist: GlobalTimeDistributionPayload,
         payload: PongPayload
     ) {

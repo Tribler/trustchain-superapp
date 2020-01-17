@@ -28,7 +28,7 @@ abstract class Community(
 
     private var lastBootstrap: Date? = null
 
-    internal val messageHandlers = mutableMapOf<Int, (Address, ByteArray) -> Unit>()
+    internal val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
 
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
@@ -118,7 +118,7 @@ abstract class Community(
 
         if (handler != null) {
             try {
-                handler(sourceAddress, data)
+                handler(packet)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -253,37 +253,37 @@ abstract class Community(
      * Request deserialization
      */
 
-    internal fun deserializeIntroductionRequest(address: Address, bytes: ByteArray): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
-        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+    internal fun deserializeIntroductionRequest(packet: Packet): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
+        val (peer, remainder) = unwrapAuthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
         return Triple(peer, dist, payload)
     }
 
-    private fun handleIntroductionRequest(address: Address, bytes: ByteArray) {
-        val (peer, dist, payload) = deserializeIntroductionRequest(address, bytes)
+    private fun handleIntroductionRequest(packet: Packet) {
+        val (peer, dist, payload) = deserializeIntroductionRequest(packet)
         onIntroductionRequest(peer, dist, payload)
     }
 
-    internal fun handleIntroductionResponse(address: Address, bytes: ByteArray) {
-        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+    internal fun handleIntroductionResponse(packet: Packet) {
+        val (peer, remainder) = unwrapAuthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
         onIntroductionResponse(peer, dist, payload)
     }
 
-    internal fun handlePuncture(address: Address, bytes: ByteArray) {
-        val (peer, remainder) = unwrapAuthPacket(address, bytes)
+    internal fun handlePuncture(packet: Packet) {
+        val (peer, remainder) = unwrapAuthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
         onPuncture(peer, dist, payload)
     }
 
-    internal fun handlePunctureRequest(address: Address, bytes: ByteArray) {
-        val remainder = unwrapUnauthPacket(bytes)
+    internal fun handlePunctureRequest(packet: Packet) {
+        val remainder = unwrapUnauthPacket(packet)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PunctureRequestPayload.deserialize(remainder, distSize)
-        onPunctureRequest(address, dist, payload)
+        onPunctureRequest(packet.source, dist, payload)
     }
 
     /**
@@ -292,7 +292,9 @@ abstract class Community(
      *
      * @throws PacketDecodingException if the signature is invalid
      */
-    protected fun unwrapAuthPacket(address: Address, bytes: ByteArray): Pair<Peer, ByteArray> {
+    protected fun unwrapAuthPacket(packet: Packet): Pair<Peer, ByteArray> {
+        val bytes = packet.data
+
         // prefix + message type
         val authOffset = prefix.size + 1
         val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, authOffset)
@@ -307,7 +309,7 @@ abstract class Community(
             throw PacketDecodingException("Incoming packet has an invalid signature")
 
         // Return the peer and remaining payloads
-        val peer = Peer(LibNaClPK.fromBin(auth.publicKey), address)
+        val peer = Peer(LibNaClPK.fromBin(auth.publicKey), packet.source)
         val remainder = bytes.copyOfRange(authOffset + authSize, bytes.size - publicKey.getSignatureLength())
         return Pair(peer, remainder)
     }
@@ -315,8 +317,8 @@ abstract class Community(
     /**
      * Returns the packet payload excluding the prefix and message type.
      */
-    protected fun unwrapUnauthPacket(bytes: ByteArray): ByteArray {
-        return bytes.copyOfRange(prefix.size + 1, bytes.size)
+    protected fun unwrapUnauthPacket(packet: Packet): ByteArray {
+        return packet.data.copyOfRange(prefix.size + 1, packet.data.size)
     }
 
     /*
@@ -372,7 +374,7 @@ abstract class Community(
         }
     }
 
-    internal fun onPuncture(
+    internal open fun onPuncture(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
@@ -381,7 +383,7 @@ abstract class Community(
         // NOOP
     }
 
-    internal fun onPunctureRequest(
+    internal open fun onPunctureRequest(
         address: Address,
         dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
@@ -398,7 +400,7 @@ abstract class Community(
 
     private fun addressIsLan(address: Address): Boolean {
         // TODO
-        return false
+        return address.ip == "10.0.0.0"
     }
 
     protected fun send(address: Address, data: ByteArray) {
