@@ -1,2 +1,2 @@
-include ':app'
+include ':ipv8', ':peerchat'
 rootProject.name='IPv8'

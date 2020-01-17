@@ -1,9 +1,10 @@
-package nl.tudelft.ipv8
+package nl.tudelft.peerchat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
@@ -21,8 +22,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        resources.configuration.orientation
 
         // General community
         val myKey = LibNaClSK.generate()
