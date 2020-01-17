@@ -31,6 +31,7 @@ data class Peer(
     val mid: String
         get() = key.keyToHash().toHex()
 
+    var lastSentMessage: Date? = null
     var lastResponse: Date? = if (intro) null else Date()
 
     val pings = mutableListOf<Double>()

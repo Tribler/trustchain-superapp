@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8
 
 import android.util.Log
-import androidx.annotation.CallSuper
 import nl.tudelft.ipv8.exception.PacketDecodingException
 import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -100,6 +99,11 @@ abstract class Community(
     override fun onPacket(packet: Packet) {
         val sourceAddress = packet.source
         val data = packet.data
+
+        val probablePeer = network.getVerifiedByAddress(sourceAddress)
+        if (probablePeer != null) {
+            probablePeer.lastResponse = Date()
+        }
 
         val packetPrefix = data.copyOfRange(0, prefix.size)
         if (!packetPrefix.contentEquals(prefix)) {
@@ -316,7 +320,6 @@ abstract class Community(
      * Request handling
      */
 
-    @CallSuper
     internal open fun onIntroductionRequest(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
@@ -336,7 +339,6 @@ abstract class Community(
         endpoint.send(peer.address, packet)
     }
 
-    @CallSuper
     internal open fun onIntroductionResponse(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
@@ -415,8 +417,8 @@ abstract class Community(
             Address("81.171.27.194", 6527),
             Address("81.171.27.194", 6528)
              */
-            //Address("145.94.233.189", 8090)
-            Address("145.94.234.53", 8090)
+            // IPv8 + LibNaCL
+            Address("131.180.27.161", 6427)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

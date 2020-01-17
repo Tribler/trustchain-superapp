@@ -8,7 +8,7 @@ class Network {
     /**
      * All known addresses, mapped to (introduction peer MID, service ID)
      */
-    internal val allAddresses: MutableMap<Address, Pair<String, String?>> = mutableMapOf()
+    val allAddresses: MutableMap<Address, Pair<String, String?>> = mutableMapOf()
 
     /**
      * All verified peer objects (peer.address must be in [allAddresses])

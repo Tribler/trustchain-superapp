@@ -1,9 +1,12 @@
-package nl.tudelft.peerchat
+package nl.tudelft.peerchat.ui.peers
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.mattskala.itemadapter.ItemAdapter
+import kotlinx.android.synthetic.main.activity_main.*
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
@@ -11,6 +14,7 @@ import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.peerdiscovery.RandomChurn
 import nl.tudelft.ipv8.peerdiscovery.RandomWalk
+import nl.tudelft.peerchat.R
 import java.net.InetAddress
 
 class MainActivity : AppCompatActivity() {
@@ -19,10 +23,25 @@ class MainActivity : AppCompatActivity() {
 
     private val handler = Handler()
 
+    private val adapter = ItemAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter.registerRenderer(PeerItemRenderer())
+
+        startIpv8()
+    }
+
+    override fun onDestroy() {
+        ipv8?.stop()
+        super.onDestroy()
+    }
+
+    private fun startIpv8() {
         // General community
         val myKey = LibNaClSK.generate()
         val address = Address("0.0.0.0", 8090)
@@ -34,25 +53,22 @@ class MainActivity : AppCompatActivity() {
         val randomChurn = RandomChurn(community)
         val overlayConfig = OverlayConfiguration(community, listOf(randomWalk, randomChurn))
 
-        val config = Ipv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 5.0)
+        val config = Ipv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 1.0)
         ipv8 = Ipv8(endpoint, config)
         ipv8?.start()
 
         loadNetworkInfo(network, community.serviceId)
     }
 
-    override fun onDestroy() {
-        ipv8?.stop()
-        super.onDestroy()
-    }
-
     private fun loadNetworkInfo(network: Network, serviceId: String) {
         handler.postDelayed({
             val peers = network.getPeersForService(serviceId)
-            Log.d("MainActivity", "Found ${peers.size} peers")
+            Log.d("MainActivity", "Found ${peers.size} community peers")
             for (peer in peers) {
                 Log.d("MainActivity", "$peer")
             }
+            val items = peers.map { PeerItem(it) }
+            adapter.updateItems(items)
             loadNetworkInfo(network, serviceId)
         }, 5000)
     }
