@@ -14,12 +14,12 @@ data class IntroductionRequestPayload(
     val destinationAddress: Address,
 
     /**
-     * The lan address of the sender.  Nodes in the same LAN should use this address to communicate.
+     * The lan address of the sender. Nodes in the same LAN should use this address to communicate.
      */
     val sourceLanAddress: Address,
 
     /**
-     * The wan address of the sender.  Nodes not in the same LAN should use this address
+     * The wan address of the sender. Nodes not in the same LAN should use this address
      * to communicate.
      */
     val sourceWanAddress: Address,
