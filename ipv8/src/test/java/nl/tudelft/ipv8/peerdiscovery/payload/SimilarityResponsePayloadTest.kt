@@ -1,8 +1,5 @@
 package nl.tudelft.ipv8.peerdiscovery.payload
 
-import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.messaging.payload.ConnectionType
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.junit.Assert.assertEquals
 import org.junit.Test

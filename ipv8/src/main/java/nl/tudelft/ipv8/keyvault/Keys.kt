@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8.keyvault
 
 import nl.tudelft.ipv8.util.sha1
-import nl.tudelft.ipv8.util.toHex
 
 /**
  * Interface for a public or private key.

@@ -3,7 +3,6 @@ package nl.tudelft.ipv8.peerdiscovery.strategy
 import io.mockk.*
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
-import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import org.junit.Test
 
 class RandomWalkTest {

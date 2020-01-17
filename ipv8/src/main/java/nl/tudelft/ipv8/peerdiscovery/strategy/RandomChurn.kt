@@ -5,7 +5,6 @@ import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.peerdiscovery.PingOverlay
 import java.util.*
-import kotlin.math.min
 
 /**
  * The strategy that handles peer churn. On every step, it randomly selects a few inactive peers.

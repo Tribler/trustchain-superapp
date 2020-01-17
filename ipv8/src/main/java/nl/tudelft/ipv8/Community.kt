@@ -412,11 +412,11 @@ abstract class Community(
     companion object {
         private val DEFAULT_ADDRESSES = listOf(
             // Dispersy
-            //Address("130.161.119.206", 6421),
-            //Address("130.161.119.206", 6422),
-            //Address("131.180.27.155", 6423),
-            //Address("131.180.27.156", 6424),
-            //Address("131.180.27.161", 6427),
+            // Address("130.161.119.206", 6421),
+            // Address("130.161.119.206", 6422),
+            // Address("131.180.27.155", 6423),
+            // Address("131.180.27.156", 6424),
+            // Address("131.180.27.161", 6427),
             // IPv8
             /*
             Address("131.180.27.161", 6521),

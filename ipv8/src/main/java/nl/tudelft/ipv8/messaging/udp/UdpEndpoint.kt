@@ -1,6 +1,5 @@
 package nl.tudelft.ipv8.messaging.udp
 
-import android.content.res.Configuration
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -58,13 +57,13 @@ class UdpEndpoint(
         sendThread?.quit()
         sendHandler?.removeCallbacksAndMessages(null)
         socket?.close()
-        //socket?.disconnect()
+        // socket?.disconnect()
         socket = null
     }
 
     inner class BindThread(
         private val socket: DatagramSocket
-    ): Thread() {
+    ) : Thread() {
         override fun run() {
             try {
                 val receiveData = ByteArray(1500)

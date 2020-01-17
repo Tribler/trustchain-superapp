@@ -4,7 +4,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.lang.IllegalArgumentException
 
-class UtilsTest {
+class HexUtilsTest {
     @Test
     fun hexToBytes() {
         val txid = "d19306e0"

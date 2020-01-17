@@ -1,8 +1,6 @@
 package nl.tudelft.ipv8.messaging.payload
 
 import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.util.toHex
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

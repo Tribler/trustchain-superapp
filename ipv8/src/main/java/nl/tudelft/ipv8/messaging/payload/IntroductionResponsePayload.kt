@@ -2,7 +2,6 @@ package nl.tudelft.ipv8.messaging.payload
 
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.messaging.*
-import kotlin.experimental.and
 
 /**
  * The payload for an introduction-response message.

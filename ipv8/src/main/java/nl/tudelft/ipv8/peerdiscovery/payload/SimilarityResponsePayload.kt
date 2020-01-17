@@ -11,7 +11,7 @@ data class SimilarityResponsePayload(
      * The list of service IDs supported by the sender.
      */
     val preferenceList: List<String>
-) : Serializable  {
+) : Serializable {
     override fun serialize(): ByteArray {
         return serializeUShort(identifier % 65536) +
                 serializeUShort(preferenceList.size) +

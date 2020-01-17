@@ -1,9 +1,7 @@
 package nl.tudelft.ipv8.peerdiscovery
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.mockk.mockk
 import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.ECCrypto
 import org.junit.Assert
