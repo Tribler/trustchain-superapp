@@ -2,7 +2,7 @@ package nl.tudelft.ipv8.messaging.payload
 
 import nl.tudelft.ipv8.messaging.*
 
-class GlobalTimeDistributionPayload constructor(
+data class GlobalTimeDistributionPayload constructor(
     val globalTime: ULong
 ) : Serializable {
     override fun serialize(): ByteArray {

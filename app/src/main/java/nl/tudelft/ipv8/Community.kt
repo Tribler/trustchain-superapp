@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8
 
 import android.util.Log
+import androidx.annotation.CallSuper
 import nl.tudelft.ipv8.exception.PacketDecodingException
 import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -272,8 +273,9 @@ abstract class Community(
     }
 
     internal fun handlePunctureRequest(address: Address, bytes: ByteArray) {
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(bytes)
-        val (payload, _) = PunctureRequestPayload.deserialize(bytes, distSize)
+        val remainder = unwrapUnauthPacket(bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = PunctureRequestPayload.deserialize(remainder, distSize)
         onPunctureRequest(address, dist, payload)
     }
 
@@ -303,11 +305,19 @@ abstract class Community(
         return Pair(peer, remainder)
     }
 
+    /**
+     * Returns the packet payload excluding the prefix and message type.
+     */
+    protected fun unwrapUnauthPacket(bytes: ByteArray): ByteArray {
+        return bytes.copyOfRange(prefix.size + 1, bytes.size)
+    }
+
     /*
      * Request handling
      */
 
-    private fun onIntroductionRequest(
+    @CallSuper
+    internal open fun onIntroductionRequest(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
@@ -326,7 +336,8 @@ abstract class Community(
         endpoint.send(peer.address, packet)
     }
 
-    internal fun onIntroductionResponse(
+    @CallSuper
+    internal open fun onIntroductionResponse(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
@@ -405,7 +416,7 @@ abstract class Community(
             Address("81.171.27.194", 6528)
              */
             //Address("145.94.233.189", 8090)
-            Address("145.94.235.215", 8090)
+            Address("145.94.234.53", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

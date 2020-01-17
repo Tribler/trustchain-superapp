@@ -5,12 +5,12 @@ import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Endpoint
-import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
-import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
+import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.payload.PingPayload
 import nl.tudelft.ipv8.peerdiscovery.payload.PongPayload
 import nl.tudelft.ipv8.peerdiscovery.payload.SimilarityRequestPayload
 import nl.tudelft.ipv8.peerdiscovery.payload.SimilarityResponsePayload
+import java.util.*
 
 class DiscoveryCommunity(
     myPeer: Peer,
@@ -19,6 +19,8 @@ class DiscoveryCommunity(
 ) : Community(myPeer, endpoint, network) {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
+    private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
+
     init {
         messageHandlers[MessageId.SIMILARITY_REQUEST] = ::handleSimilarityRequest
         messageHandlers[MessageId.SIMILARITY_RESPONSE] = ::handleSimilarityResponse
@@ -26,7 +28,66 @@ class DiscoveryCommunity(
         messageHandlers[MessageId.PONG] = ::handlePong
     }
 
+    /*
+     * Request creation
+     */
 
+    internal fun createSimilarityRequest(peer: Peer): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload = SimilarityRequestPayload(
+            (globalTime % 65536u).toInt(),
+            myEstimatedLan,
+            myEstimatedWan,
+            ConnectionType.UNKNOWN,
+            getMyOverlays(peer)
+        )
+        val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload))
+    }
+
+    private fun sendSimilarityRequest(address: Address) {
+        val myPeerSet = network.serviceOverlays.values.map { it.myPeer }.toSet()
+        for (myPeer in myPeerSet) {
+            val packet = createSimilarityRequest(myPeer)
+            endpoint.send(address, packet)
+        }
+    }
+
+    internal fun createSimilarityResponse(identifier: Int, peer: Peer): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload = SimilarityResponsePayload(identifier, getMyOverlays(peer))
+        val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        Log.d("DiscoveryCommunity", "-> $payload")
+        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload))
+    }
+
+    internal fun sendPing(peer: Peer) {
+        val globalTime = claimGlobalTime()
+        val payload = PingPayload((globalTime % 65536u).toInt())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        Log.d("DiscoveryCommunity", "-> $payload")
+        val packet = serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false)
+
+        val pingRequest = PingRequest(payload.identifier, peer, Date())
+        pingRequestCache[payload.identifier] = pingRequest
+        // TODO: implement cache timeout
+
+        endpoint.send(peer.address, packet)
+    }
+
+    internal fun createPong(identifier: Int): ByteArray {
+        val globalTime = claimGlobalTime()
+        val payload = PongPayload(identifier)
+        val dist = GlobalTimeDistributionPayload(globalTime)
+        Log.d("DiscoveryCommunity", "-> $payload")
+        return serializePacket(prefix, MessageId.PONG, listOf(dist, payload), sign = false)
+    }
+
+    /*
+     * Request deserialization
+     */
 
     internal fun handleSimilarityRequest(address: Address, bytes: ByteArray) {
         val (peer, remainder) = unwrapAuthPacket(address, bytes)
@@ -43,15 +104,30 @@ class DiscoveryCommunity(
     }
 
     internal fun handlePing(address: Address, bytes: ByteArray) {
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(bytes)
-        val (payload, _) = PingPayload.deserialize(bytes, distSize)
-        onPing(address, payload)
+        val remainder = unwrapUnauthPacket(bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = PingPayload.deserialize(remainder, distSize)
+        onPing(address, dist, payload)
     }
 
     internal fun handlePong(address: Address, bytes: ByteArray) {
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(bytes)
-        val (payload, _) = PongPayload.deserialize(bytes, distSize)
-        onPong(address, payload)
+        val remainder = unwrapUnauthPacket(bytes)
+        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
+        val (payload, _) = PongPayload.deserialize(remainder, distSize)
+        onPong(address, dist, payload)
+    }
+
+    /*
+     * Request handling
+     */
+
+    override fun onIntroductionResponse(
+        peer: Peer,
+        dist: GlobalTimeDistributionPayload,
+        payload: IntroductionResponsePayload
+    ) {
+        super.onIntroductionResponse(peer, dist, payload)
+        sendSimilarityRequest(peer.address)
     }
 
     internal fun onSimilarityRequest(
@@ -88,9 +164,11 @@ class DiscoveryCommunity(
 
     internal fun onPing(
         address: Address,
+        dist: GlobalTimeDistributionPayload,
         payload: PingPayload
     ) {
         Log.d("DiscoveryCommunity", "<- $payload")
+        Log.d("DiscoveryCommunity", "dist = $dist")
 
         val packet = createPong(payload.identifier)
         endpoint.send(address, packet)
@@ -98,41 +176,17 @@ class DiscoveryCommunity(
 
     internal fun onPong(
         address: Address,
+        dist: GlobalTimeDistributionPayload,
         payload: PongPayload
     ) {
         Log.d("DiscoveryCommunity", "<- $payload")
+        Log.d("DiscoveryCommunity", "dist = $dist")
 
-        // TODO
-    }
-
-    internal fun createSimilarityRequest() {
-        // TODO
-    }
-
-    internal fun createSimilarityResponse(identifier: Int, peer: Peer): ByteArray {
-        val globalTime = claimGlobalTime()
-        val payload = SimilarityResponsePayload(identifier, getMyOverlays(peer))
-        val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload))
-    }
-
-    internal fun createPong(identifier: Int): ByteArray {
-        val globalTime = claimGlobalTime()
-        val payload = PongPayload(identifier)
-        val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
-        return serializePacket(prefix, MessageId.PONG, listOf(dist, payload), sign = false)
-    }
-
-    internal fun sendPing(peer: Peer) {
-        val globalTime = claimGlobalTime()
-        val payload = PingPayload((globalTime % 65536u).toInt())
-        val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
-        val packet = serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false)
-        endpoint.send(peer.address, packet)
+        val pingRequest = pingRequestCache[payload.identifier]
+        if (pingRequest != null) {
+            pingRequest.peer.addPing((Date().time - pingRequest.startTime.time) / 1000.0)
+            pingRequestCache.remove(payload.identifier)
+        }
     }
 
     private fun getMyOverlays(peer: Peer): List<String> {
@@ -147,4 +201,6 @@ class DiscoveryCommunity(
         const val PING = 3
         const val PONG = 4
     }
+
+    class PingRequest(val identifier: Int, val peer: Peer, val startTime: Date)
 }

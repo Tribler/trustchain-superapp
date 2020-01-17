@@ -1,7 +1,7 @@
 package nl.tudelft.ipv8.peerdiscovery
 
+import android.util.Log
 import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import java.util.*
 import kotlin.math.min
@@ -10,7 +10,7 @@ class RandomChurn(
     /**
      * The Overlay to sample peers from.
      */
-    private val overlay: Overlay,
+    private val overlay: DiscoveryCommunity,
 
     /**
      * The amount of peers to check at once.
@@ -61,17 +61,19 @@ class RandomChurn(
 
                 for (peer in window) {
                     if (shouldDrop(peer) && pinged.contains(peer.address)) {
+                        Log.d("RandomChurn", "Dropping inactive peer $peer")
                         overlay.network.removePeer(peer)
                         pinged.remove(peer.address)
                     } else if (isInactive(peer) || peer.pings.size < Peer.MAX_PINGS) {
-                        if (pinged.contains(peer.address)) {
-                            if (Date().time > pinged[peer.address]!!.time + pingInterval * 1000) {
+                        Log.d("RandomChurn", "Peer $peer is inactive")
+                        val pingedAddress = pinged[peer.address]
+                        if (pingedAddress != null) {
+                            if (Date().time > pingedAddress.time + pingInterval * 1000) {
                                 pinged.remove(peer.address)
                             }
                         } else {
                             pinged[peer.address] = Date()
-                            // TODO
-                            // overlay.sendPing(peer)
+                            overlay.sendPing(peer)
                         }
                     }
                 }
