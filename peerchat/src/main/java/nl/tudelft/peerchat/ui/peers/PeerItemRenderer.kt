@@ -15,16 +15,16 @@ class PeerItemRenderer : ItemLayoutRenderer<PeerItem, View>(PeerItem::class.java
         txtPeerId.text = item.peer.mid
         txtAddress.text = item.peer.address.ip + ":" + item.peer.address.port
         val avgPing = item.peer.getAveragePing()
-        val lastPing = item.peer.pings.lastOrNull()
+        val lastRequest = item.peer.lastRequest
         val lastResponse = item.peer.lastResponse
 
-        txtLastSent.text = "?"
-        txtLastReceived.text = if (lastResponse != null)
-            "" + ((Date().time - lastResponse.time)/1000.0).roundToInt() + " s" else "?"
+        txtLastSent.text = if (lastRequest != null)
+            "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
 
-        val decimalFormat = DecimalFormat()
-        decimalFormat.maximumFractionDigits = 2
-        txtAvgPing.text = decimalFormat.format(avgPing) + " s"
+        txtLastReceived.text = if (lastResponse != null)
+            "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
+
+        txtAvgPing.text = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
     }
 
     override fun getLayoutResourceId(): Int {

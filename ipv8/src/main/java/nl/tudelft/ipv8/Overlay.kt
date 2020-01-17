@@ -7,25 +7,25 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 /**
  * Interface for an Internet overlay.
  */
-abstract class Overlay(
-    val myPeer: Peer,
-    protected val endpoint: Endpoint,
+interface Overlay : EndpointListener {
+    val myPeer: Peer
+    val endpoint: Endpoint
     val network: Network
-) : EndpointListener {
+
     private val globalTime: ULong
         get() = myPeer.lamportTimestamp
 
     /**
      * Called to inintialize this overlay.
      */
-    open fun load() {
+    fun load() {
         endpoint.addListener(this)
     }
 
     /**
      * Called when this overlay needs to be shut down.
      */
-    open fun unload() {
+    fun unload() {
         endpoint.removeListener(this)
     }
 
@@ -49,31 +49,31 @@ abstract class Overlay(
     /**
      * Perform introduction logic to get into the network.
      */
-    abstract fun bootstrap()
+    fun bootstrap()
 
     /**
      * Puncture the NAT of an address.
      *
      * @param address The address to walk to.
      */
-    abstract fun walkTo(address: Address)
+    fun walkTo(address: Address)
 
     /**
      * Get a new IP address to walk to from a random, or selected peer.
      *
      * @param fromPeer The peer to ask for an introduction.
      */
-    abstract fun getNewIntroduction(fromPeer: Peer? = null)
+    fun getNewIntroduction(fromPeer: Peer? = null)
 
     /**
      * Get peers in the network that use this overlay.
      */
-    abstract fun getPeers(): List<Peer>
+    fun getPeers(): List<Peer>
 
     /**
      * Get the list of addresses we can walk to on this overlay.
      */
-    abstract fun getWalkableAddresses(): List<Address>
+    fun getWalkableAddresses(): List<Address>
 
     /**
      * Get a peer for introduction.
@@ -81,5 +81,5 @@ abstract class Overlay(
      * @param Optionally specify a peer that is not considered eligible for introduction.
      * @return A peer to send an introduction request to, or null if are none available.
      */
-    abstract fun getPeerForIntroduction(exclude: Peer? = null): Peer?
+    fun getPeerForIntroduction(exclude: Peer? = null): Peer?
 }

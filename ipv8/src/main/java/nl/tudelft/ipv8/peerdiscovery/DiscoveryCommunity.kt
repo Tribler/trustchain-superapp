@@ -16,7 +16,7 @@ class DiscoveryCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network
-) : Community(myPeer, endpoint, network) {
+) : Community(myPeer, endpoint, network), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
     private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
@@ -50,7 +50,7 @@ class DiscoveryCommunity(
         val myPeerSet = network.serviceOverlays.values.map { it.myPeer }.toSet()
         for (myPeer in myPeerSet) {
             val packet = createSimilarityRequest(myPeer)
-            endpoint.send(address, packet)
+            send(address, packet)
         }
     }
 
@@ -63,7 +63,7 @@ class DiscoveryCommunity(
         return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload))
     }
 
-    internal fun sendPing(peer: Peer) {
+    override fun sendPing(peer: Peer) {
         val globalTime = claimGlobalTime()
         val payload = PingPayload((globalTime % 65536u).toInt())
         val dist = GlobalTimeDistributionPayload(globalTime)
@@ -74,7 +74,7 @@ class DiscoveryCommunity(
         pingRequestCache[payload.identifier] = pingRequest
         // TODO: implement cache timeout
 
-        endpoint.send(peer.address, packet)
+        send(peer.address, packet)
     }
 
     internal fun createPong(identifier: Int): ByteArray {
@@ -142,7 +142,7 @@ class DiscoveryCommunity(
         val myPeerSet = network.serviceOverlays.values.map { it.myPeer }.toSet()
         for (myPeer in myPeerSet) {
             val packet = createSimilarityResponse(payload.identifier, myPeer)
-            endpoint.send(peer.address, packet)
+            send(peer.address, packet)
         }
     }
 
@@ -171,7 +171,7 @@ class DiscoveryCommunity(
         Log.d("DiscoveryCommunity", "dist = $dist")
 
         val packet = createPong(payload.identifier)
-        endpoint.send(address, packet)
+        send(address, packet)
     }
 
     internal fun onPong(

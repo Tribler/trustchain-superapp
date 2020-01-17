@@ -13,11 +13,11 @@ import nl.tudelft.ipv8.util.hexToBytes
 import java.util.*
 
 abstract class Community(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
+    override val myPeer: Peer,
+    override val endpoint: Endpoint,
+    override val network: Network,
     val maxPeers: Int = DEFAULT_MAX_PEERS
-) : Overlay(myPeer, endpoint, network) {
+) : Overlay {
     abstract val serviceId: String
 
     protected val prefix: ByteArray
@@ -42,7 +42,7 @@ abstract class Community(
 
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
-        //network.blacklist.addAll(DEFAULT_ADDRESSES)
+        network.blacklist.addAll(DEFAULT_ADDRESSES)
     }
 
     override fun bootstrap() {
@@ -56,7 +56,7 @@ abstract class Community(
 
     override fun walkTo(address: Address) {
         val packet = createIntroductionRequest(address)
-        endpoint.send(address, packet)
+        send(address, packet)
     }
 
     /**
@@ -76,7 +76,7 @@ abstract class Community(
         }
 
         val packet = createIntroductionRequest(peer.address)
-        endpoint.send(peer.address, packet)
+        send(peer.address, packet)
     }
 
     override fun getPeerForIntroduction(exclude: Peer?): Peer? {
@@ -191,7 +191,7 @@ abstract class Community(
             val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
             val punctureRequestAddress = if (introductionLan.isEmpty())
                 introductionWan else introductionLan
-            endpoint.send(punctureRequestAddress, packet)
+            send(punctureRequestAddress, packet)
         }
 
         Log.d("Community", "-> $payload")
@@ -239,8 +239,9 @@ abstract class Community(
             packet += item.serialize()
         }
 
-        if (sign && myPeer.key is PrivateKey) {
-            packet += myPeer.key.sign(packet)
+        val myPeerKey = myPeer.key
+        if (sign && myPeerKey is PrivateKey) {
+            packet += myPeerKey.sign(packet)
         }
 
         return packet
@@ -336,7 +337,7 @@ abstract class Community(
             payload.identifier
         )
 
-        endpoint.send(peer.address, packet)
+        send(peer.address, packet)
     }
 
     internal open fun onIntroductionResponse(
@@ -390,12 +391,20 @@ abstract class Community(
         }
 
         val packet = createPuncture(myEstimatedLan, payload.wanWalkerAddress, payload.identifier)
-        endpoint.send(target, packet)
+        send(target, packet)
     }
 
     private fun addressIsLan(address: Address): Boolean {
         // TODO
         return false
+    }
+
+    protected fun send(address: Address, data: ByteArray) {
+        val probablePeer = network.getVerifiedByAddress(address)
+        if (probablePeer != null) {
+            probablePeer.lastRequest = Date()
+        }
+        endpoint.send(address, data)
     }
 
     companion object {

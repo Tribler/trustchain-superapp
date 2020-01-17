@@ -10,7 +10,7 @@ class RandomChurn(
     /**
      * The Overlay to sample peers from.
      */
-    private val overlay: DiscoveryCommunity,
+    private val overlay: PingOverlay,
 
     /**
      * The amount of peers to check at once.

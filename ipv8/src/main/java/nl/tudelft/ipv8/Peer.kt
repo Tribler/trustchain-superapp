@@ -28,12 +28,25 @@ data class Peer(
     val publicKey
         get() = key.pub()
 
+    /**
+     * Member ID.
+     */
     val mid: String
         get() = key.keyToHash().toHex()
 
-    var lastSentMessage: Date? = null
+    /**
+     * The timestamp of the last message sent to the peer.
+     */
+    var lastRequest: Date? = null
+
+    /**
+     * The timestamp of the last message received from the peer.
+     */
     var lastResponse: Date? = if (intro) null else Date()
 
+    /**
+     * Durations of the last [MAX_PINGS] pings in seconds.
+     */
     val pings = mutableListOf<Double>()
 
     /**
@@ -50,10 +63,16 @@ data class Peer(
         lastResponse = Date()
     }
 
+    /**
+     * Returns the average ping duration in seconds, calculated from the last [MAX_PINGS] pings.
+     */
     fun getAveragePing(): Double {
         return pings.average()
     }
 
+    /**
+     * Adds a new ping duration.
+     */
     fun addPing(ping: Double) {
         pings.add(ping)
         if (pings.size > MAX_PINGS) {

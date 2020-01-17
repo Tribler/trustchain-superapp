@@ -239,12 +239,10 @@ class CommunityTest {
         val myPeer = Peer(myPrivateKey)
         val endpoint = spyk(UdpEndpoint(0, InetAddress.getLocalHost()))
         val network = Network()
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = TestCommunity(myPeer, endpoint, network)
 
         community.getNewIntroduction()
 
-        verify { community.bootstrap() }
-        verify { community.createIntroductionRequest(any()) }
         verify { endpoint.send(any(), any()) }
     }
 }

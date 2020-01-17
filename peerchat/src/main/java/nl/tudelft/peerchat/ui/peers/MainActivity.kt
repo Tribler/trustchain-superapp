@@ -70,6 +70,6 @@ class MainActivity : AppCompatActivity() {
             val items = peers.map { PeerItem(it) }
             adapter.updateItems(items)
             loadNetworkInfo(network, serviceId)
-        }, 5000)
+        }, 1000)
     }
 }
