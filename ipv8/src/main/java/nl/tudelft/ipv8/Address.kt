@@ -25,7 +25,7 @@ data class Address(
     }
 
     fun isEmpty(): Boolean {
-        return ip == "0.0.0.0" && port == 0
+        return this == EMPTY
     }
 
     companion object : Deserializable<Address> {
@@ -44,5 +44,7 @@ data class Address(
         }
 
         const val SERIALIZED_SIZE = 6
+
+        val EMPTY = Address("0.0.0.0", 0)
     }
 }

@@ -14,7 +14,7 @@ data class Peer(
     /**
      * The address of this peer.
      */
-    var address: Address = Address("0.0.0.0", 0),
+    var address: Address = Address.EMPTY,
 
     /**
      * Is this peer suggested to us (otherwise it contacted us).

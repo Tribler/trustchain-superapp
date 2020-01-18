@@ -21,8 +21,8 @@ abstract class Community(
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
-    var myEstimatedWan: Address = Address("0.0.0.0", 0)
-    var myEstimatedLan: Address = Address("0.0.0.0", 0)
+    var myEstimatedWan: Address = Address.EMPTY
+    var myEstimatedLan: Address = Address.EMPTY
 
     private var lastBootstrap: Date? = null
 
@@ -157,8 +157,8 @@ abstract class Community(
         introduction: Peer? = null
     ): ByteArray {
         val globalTime = claimGlobalTime()
-        var introductionLan = Address("0.0.0.0", 0)
-        var introductionWan = Address("0.0.0.0", 0)
+        var introductionLan = Address.EMPTY
+        var introductionWan = Address.EMPTY
         var introduced = false
         val other = network.getVerifiedByAddress(socketAddress)
         var intro = introduction
