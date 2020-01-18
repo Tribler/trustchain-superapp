@@ -1,25 +1,14 @@
-# Message Serialization
-
-This document serves as the specification of a packet format in the IPv8 protocol.
-
-## Packet Format
-
-All fields are stored in the big endian representation.
-
-field | size | type | description
---- | --- | --- | ---
-zero byte | 1 byte | byte | A zero byte (`0x00`), reserved for future use?
-version | 1 byte | byte | The protocol version, currently `0x02`
-service id | 20 bytes | string | The SHA1 hash of the master peer public key
-message number | 1 byte | byte | The message type ID
-payload | variable |  | The message payload, defined for each message type separately
-signature | 32 bytes | byte array | The signature for message authentication. It is optional, as only certain message types are authenticated.
-
 # Community
 
-All communities should extend the abstract `Community` class, which implements the `Overlay` interface and defines some common messages used for NAT puncturing and peer discovery. This section introduces payload specification for all message types.
+A community represents a service avaialable to peers in the IPv8 protocol. All communities should extend the abstract `Community` class, which implements the `Overlay` interface and defines some common messages used for NAT puncturing and peer discovery.
 
-## BinMemberAuthenticationPayload
+The protocol takes advantage of UDP hole punching technique to establish direct connections between peers behind NATs and firewalls. The NAT puncturing mechanism is implemented in the base `Community` using 4 different messages.
+
+## General
+
+Before proceeding to concrete message definitions, we define several general payload types that are used by other message.
+
+### BinMemberAuthenticationPayload
 
 field | size | type | description
 --- | --- | --- | ---
@@ -38,13 +27,11 @@ key type | 10 bytes | byte array | `LibNaCLPK:` encoded as an ASCII string
 public key | 32 bytes | byte array | The public key for encryption
 verification key | 32 bytes | byte array | The verification key for signature verification
 
-## PunctureRequestPayload
+### GlobalTimeDistributionPayload
 
 field | size | type | description
 --- | --- | --- | ---
-LAN walker address | 6 bytes | Address | The LAN address of the node that the sender wants us to contact.
-WAN walker address | 6 bytes | Address | The WAN address of the node that the sender wants us to contact.
-identifier | 2 bytes | unsigned short | A number that was given in the associated introduction-request.
+global time | 8 bytes | unsigned long | The Lamport timestamp of the sender
 
 ### Address
 
@@ -53,15 +40,16 @@ field | size | type | description
 IP address | 4 bytes | byte array | IPv4 address segments represented by 4 bytes
 port | 2 bytes | unsigned short | The port number
 
-## PuncturePayload
+## Introduction Request
 
-field | size | type | description
---- | --- | --- | ---
-source LAN address | 6 bytes | Address | The LAN address of the sender.
-source WAN address | 6 bytes | Address | The WAN address of the sender.
-identifier | 2 bytes | unsigned short | A number that was given in the associated introduction-request.
+field | size | type
+--- | --- | ---
+auth | variable | BinMemberAuthenticationPayload
+dist | 8 bytes | GlobalTimeDistributionPayload
+payload | variable | IntroductionRequestPayload
+signature | 32 bytes | byte array
 
-## IntroductionRequestPayload
+### IntroductionRequestPayload
 
 field | size | type | description
 --- | --- | --- | ---
@@ -72,13 +60,25 @@ connection type and advice | 1 byte | byte | The highest two bits encode the con
 identifier | 2 bytes | unsigned short | A number that must be given in the associated introduction-response.
 
 ### Connection Type
+
+The protocol allows sender to specify its own NAT type to help others determine which peers it makes sense to introduce to (e.g. it does not make sense to introduce two peers both behind symmetric NAT to each other). However, for the sake of simplicity, the connection type detection is currently not implemented and it is always set as unknown.
+
 first bit | second bit | connection type
 --- | --- | ---
 0 | 0 | unknown
 1 | 0 | public
 1 | 1 | symmetric NAT
 
-## IntroductionResponsePayload
+## Introduction Response
+
+field | size | type
+--- | --- | ---
+auth | variable | BinMemberAuthenticationPayload
+dist | 8 bytes | GlobalTimeDistributionPayload
+payload | variable | IntroductionResponsePayload
+signature | 32 bytes | byte array
+
+### IntroductionResponsePayload
 
 field | size | type | description
 --- | --- | --- | ---
@@ -90,12 +90,34 @@ WAN introduction address | 6 bytes | Address | The WAN address of the node that 
 connection type | 1 byte | byte | The highest two bits encode the connection type the message creator has.
 identifier | 2 bytes | unsigned short | A number that must be given in the associated introduction-response.
 
-# Discovery Community
+## Puncture
 
-## SimilarityRequestPayload
+field | size | type
+--- | --- | ---
+auth | variable | BinMemberAuthenticationPayload
+dist | 8 bytes | GlobalTimeDistributionPayload
+payload | variable | PuncturePayload
+signature | 32 bytes | byte array
 
-## SimilarityResponsePayload
+### PuncturePayload
 
-## PingPayload
+field | size | type | description
+--- | --- | --- | ---
+source LAN address | 6 bytes | Address | The LAN address of the sender.
+source WAN address | 6 bytes | Address | The WAN address of the sender.
+identifier | 2 bytes | unsigned short | A number that was given in the associated introduction-request.
 
-## PongPayload
+## Puncture Request
+
+field | size | type
+--- | --- | ---
+dist | 8 bytes | GlobalTimeDistributionPayload
+payload | variable | PunctureRequestPayload
+
+### PunctureRequestPayload
+
+field | size | type | description
+--- | --- | --- | ---
+LAN walker address | 6 bytes | Address | The LAN address of the node that the sender wants us to contact.
+WAN walker address | 6 bytes | Address | The WAN address of the node that the sender wants us to contact.
+identifier | 2 bytes | unsigned short | A number that was given in the associated introduction-request.
