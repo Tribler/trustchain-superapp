@@ -8,7 +8,7 @@ field | size | type
 --- | --- | ---
 auth | variable | BinMemberAuthenticationPayload
 dist | 8 bytes | GlobalTimeDistributionPayload
-payload | variable | SiimilarityRequestPayload
+payload | variable | SimilarityRequestPayload
 signature | 32 bytes | byte array
 
 ### SimilarityRequestPayload
@@ -27,7 +27,7 @@ field | size | type
 --- | --- | ---
 auth | variable | BinMemberAuthenticationPayload
 dist | 8 bytes | GlobalTimeDistributionPayload
-payload | variable | SiimilarityResponsePayload
+payload | variable | SimilarityResponsePayload
 signature | 32 bytes | byte array
 
 ### SimilarityResponsePayload
