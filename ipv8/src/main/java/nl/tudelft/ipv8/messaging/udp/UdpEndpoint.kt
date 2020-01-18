@@ -77,7 +77,6 @@ class UdpEndpoint(
         sendThread?.quit()
         sendHandler?.removeCallbacksAndMessages(null)
         socket?.close()
-        // socket?.disconnect()
         socket = null
     }
 
@@ -85,21 +84,24 @@ class UdpEndpoint(
         private val socket: DatagramSocket
     ) : Thread() {
         override fun run() {
-            try {
-                val receiveData = ByteArray(1500)
-                while (isAlive) {
+            val receiveData = ByteArray(1500)
+            while (isAlive) {
+                try {
                     val receivePacket = DatagramPacket(receiveData, receiveData.size)
                     socket.receive(receivePacket)
-                    // TODO: clip data array to real length
-                    val sourceAddress = Address(receivePacket.address.hostAddress, receivePacket.port)
-                    val packet = Packet(sourceAddress, receivePacket.data.copyOf(receivePacket.length))
-                    Log.d("UdpEndpoint", "received packet (${receivePacket.length} B) from $sourceAddress")
+                    val sourceAddress =
+                        Address(receivePacket.address.hostAddress, receivePacket.port)
+                    val packet =
+                        Packet(sourceAddress, receivePacket.data.copyOf(receivePacket.length))
+                    Log.d(
+                        "UdpEndpoint",
+                        "received packet (${receivePacket.length} B) from $sourceAddress"
+                    )
                     Log.d("UdpEndpoint", packet.data.toHex())
                     notifyListeners(packet)
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
-            } catch (e: IOException) {
-                // TODO: handle errors
-                e.printStackTrace()
             }
         }
     }
