@@ -1,5 +1,8 @@
 package nl.tudelft.ipv8.messaging.udp
 
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.Network
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
@@ -8,18 +11,31 @@ import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.toHex
 import java.io.IOException
-import java.net.DatagramPacket
-import java.net.DatagramSocket
-import java.net.InetAddress
+import java.net.*
 
 class UdpEndpoint(
     private val port: Int,
-    private val ip: InetAddress
+    private val ip: InetAddress,
+    private val connectivityManager: ConnectivityManager
 ) : Endpoint() {
     private var socket: DatagramSocket? = null
     private var bindThread: BindThread? = null
     private var sendThread: HandlerThread? = null
     private var sendHandler: Handler? = null
+
+    private val defaultNetworkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onLinkPropertiesChanged(network: Network, linkProperties: LinkProperties) {
+            super.onLinkPropertiesChanged(network, linkProperties)
+            Log.d("UdpEndpoint", "onLinkPropertiesChanged " + linkProperties.linkAddresses)
+            for (linkAddress in linkProperties.linkAddresses) {
+                if (linkAddress.address is Inet4Address) {
+                    val estimatedAddress = Address(linkAddress.address.hostAddress, port)
+                    Log.d("UdpEndpoint", "estimated address: $estimatedAddress")
+                    setEstimatedLan(estimatedAddress)
+                }
+            }
+        }
+    }
 
     override fun isOpen(): Boolean {
         return socket?.isBound == true
@@ -40,6 +56,8 @@ class UdpEndpoint(
     }
 
     override fun open() {
+        connectivityManager.registerDefaultNetworkCallback(defaultNetworkCallback)
+
         val sendThread = HandlerThread("SendThread")
         sendThread.start()
         this.sendThread = sendThread
@@ -54,6 +72,8 @@ class UdpEndpoint(
     }
 
     override fun close() {
+        connectivityManager.unregisterNetworkCallback(defaultNetworkCallback)
+
         sendThread?.quit()
         sendHandler?.removeCallbacksAndMessages(null)
         socket?.close()

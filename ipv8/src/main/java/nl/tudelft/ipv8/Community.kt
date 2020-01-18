@@ -1,8 +1,6 @@
 package nl.tudelft.ipv8
 
 import android.util.Log
-import nl.tudelft.ipv8.exception.PacketDecodingException
-import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
@@ -43,8 +41,6 @@ abstract class Community(
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         network.blacklist.addAll(DEFAULT_ADDRESSES)
-
-        // TODO: Get LAN address
     }
 
     override fun bootstrap() {
@@ -125,6 +121,10 @@ abstract class Community(
         } else {
             Log.d(TAG, "Received unknown message $msgId from $sourceAddress")
         }
+    }
+
+    override fun onEstimatedLanChanged(address: Address) {
+        myEstimatedLan = address
     }
 
     /*

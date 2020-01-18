@@ -1,9 +1,12 @@
 package nl.tudelft.peerchat.ui.peers
 
+import android.content.Context
+import android.net.ConnectivityManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import androidx.core.content.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.activity_main.*
@@ -47,7 +50,8 @@ class MainActivity : AppCompatActivity() {
         val myKey = LibNaClSK.generate()
         val address = Address("0.0.0.0", 8090)
         val myPeer = Peer(myKey, address, false)
-        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
+        val connectivityManager = getSystemService<ConnectivityManager>()!!
+        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"), connectivityManager)
         val network = Network()
         val community = DiscoveryCommunity(myPeer, endpoint, network)
         val randomWalk = RandomWalk(community, timeout = 3.0)

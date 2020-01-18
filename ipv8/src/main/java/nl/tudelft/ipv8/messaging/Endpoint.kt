@@ -23,6 +23,12 @@ abstract class Endpoint {
         }
     }
 
+    protected fun setEstimatedLan(address: Address) {
+        for (listener in listeners) {
+            listener.onEstimatedLanChanged(address)
+        }
+    }
+
     abstract fun isOpen(): Boolean
     abstract fun send(address: Address, data: ByteArray)
     abstract fun open()
