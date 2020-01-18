@@ -92,28 +92,28 @@ class DiscoveryCommunity(
      */
 
     internal fun handleSimilarityRequest(packet: Packet) {
-        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (peer, remainder) = packet.getAuthPayload()
         val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityRequestPayload.deserialize(remainder, distSize)
         onSimilarityRequest(peer, payload)
     }
 
     internal fun handleSimilarityResponse(packet: Packet) {
-        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (peer, remainder) = packet.getAuthPayload()
         val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityResponsePayload.deserialize(remainder, distSize)
         onSimilarityResponse(peer, payload)
     }
 
     internal fun handlePing(packet: Packet) {
-        val remainder = unwrapUnauthPacket(packet)
+        val remainder = packet.getPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PingPayload.deserialize(remainder, distSize)
         onPing(packet.source, dist, payload)
     }
 
     internal fun handlePong(packet: Packet) {
-        val remainder = unwrapUnauthPacket(packet)
+        val remainder = packet.getPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PongPayload.deserialize(remainder, distSize)
         onPong(dist, payload)

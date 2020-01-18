@@ -254,7 +254,7 @@ abstract class Community(
      */
 
     internal fun deserializeIntroductionRequest(packet: Packet): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
-        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (peer, remainder) = packet.getAuthPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
         return Triple(peer, dist, payload)
@@ -266,59 +266,24 @@ abstract class Community(
     }
 
     internal fun handleIntroductionResponse(packet: Packet) {
-        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (peer, remainder) = packet.getAuthPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
         onIntroductionResponse(peer, dist, payload)
     }
 
     internal fun handlePuncture(packet: Packet) {
-        val (peer, remainder) = unwrapAuthPacket(packet)
+        val (peer, remainder) = packet.getAuthPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
         onPuncture(peer, dist, payload)
     }
 
     internal fun handlePunctureRequest(packet: Packet) {
-        val remainder = unwrapUnauthPacket(packet)
+        val remainder = packet.getPayload()
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PunctureRequestPayload.deserialize(remainder, distSize)
         onPunctureRequest(packet.source, dist, payload)
-    }
-
-    /**
-     * Checks the signature of the authenticated packet and returns the packet payloads excluding
-     * BinMemberAuthenticationPayload if it is valid.
-     *
-     * @throws PacketDecodingException if the signature is invalid
-     */
-    protected fun unwrapAuthPacket(packet: Packet): Pair<Peer, ByteArray> {
-        val bytes = packet.data
-
-        // prefix + message type
-        val authOffset = prefix.size + 1
-        val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(bytes, authOffset)
-        val publicKey = LibNaClPK.fromBin(auth.publicKey)
-        val signatureOffset = bytes.size - publicKey.getSignatureLength()
-        val signature = bytes.copyOfRange(signatureOffset, bytes.size)
-
-        // Verify signature
-        val message = bytes.copyOfRange(0, signatureOffset)
-        val isValidSignature = publicKey.verify(signature, message)
-        if (!isValidSignature)
-            throw PacketDecodingException("Incoming packet has an invalid signature")
-
-        // Return the peer and remaining payloads
-        val peer = Peer(LibNaClPK.fromBin(auth.publicKey), packet.source)
-        val remainder = bytes.copyOfRange(authOffset + authSize, bytes.size - publicKey.getSignatureLength())
-        return Pair(peer, remainder)
-    }
-
-    /**
-     * Returns the packet payload excluding the prefix and message type.
-     */
-    protected fun unwrapUnauthPacket(packet: Packet): ByteArray {
-        return packet.data.copyOfRange(prefix.size + 1, packet.data.size)
     }
 
     /*
