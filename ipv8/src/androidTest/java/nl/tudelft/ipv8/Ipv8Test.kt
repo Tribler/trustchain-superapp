@@ -1,5 +1,8 @@
 package nl.tudelft.ipv8
 
+import android.content.Context
+import android.net.ConnectivityManager
+import androidx.test.platform.app.InstrumentationRegistry
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
 import nl.tudelft.ipv8.peerdiscovery.Network
@@ -14,7 +17,9 @@ class Ipv8Test {
         val myKey = LibNaClSK.generate()
         val address = Address("0.0.0.0", 8090)
         val myPeer = Peer(myKey, address, false)
-        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"), connectivityManager)
         val network = Network()
         val community = ExampleCommunity(myPeer, endpoint, network)
         val randomWalk = RandomWalk(

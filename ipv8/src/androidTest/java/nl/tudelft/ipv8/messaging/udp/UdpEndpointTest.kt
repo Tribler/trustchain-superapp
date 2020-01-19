@@ -1,5 +1,8 @@
 package nl.tudelft.ipv8.messaging.udp
 
+import android.content.Context
+import android.net.ConnectivityManager
+import androidx.test.platform.app.InstrumentationRegistry
 import io.mockk.mockk
 import io.mockk.verify
 import nl.tudelft.ipv8.Address
@@ -11,7 +14,9 @@ import java.net.InetAddress
 class UdpEndpointTest {
     @Test
     fun openAndClose() {
-        val endpoint = UdpEndpoint(1234, InetAddress.getByName("0.0.0.0"))
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val endpoint = UdpEndpoint(1234, InetAddress.getByName("0.0.0.0"), connectivityManager)
         assertFalse(endpoint.isOpen())
         endpoint.open()
         assertTrue(endpoint.isOpen())
@@ -21,14 +26,17 @@ class UdpEndpointTest {
 
     @Test
     fun sendAndReceive() {
-        val endpoint = UdpEndpoint(1234, InetAddress.getByName("0.0.0.0"))
-        val listener = mockk<EndpointListener>()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val endpoint = UdpEndpoint(1234, InetAddress.getByName("0.0.0.0"), connectivityManager)
+        val listener = mockk<EndpointListener>(relaxed = true)
         endpoint.addListener(listener)
 
         endpoint.open()
         val data = "Hello world!".toByteArray(Charsets.US_ASCII)
         endpoint.send(Address("0.0.0.0", 1234), data)
 
+        verify { listener.onEstimatedLanChanged(any()) }
         verify { listener.onPacket(any()) }
 
         endpoint.close()

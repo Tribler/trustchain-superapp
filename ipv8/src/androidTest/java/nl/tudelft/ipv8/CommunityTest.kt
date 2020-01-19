@@ -1,5 +1,8 @@
 package nl.tudelft.ipv8
 
+import android.content.Context
+import android.net.ConnectivityManager
+import androidx.test.platform.app.InstrumentationRegistry
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -21,11 +24,17 @@ class CommunityTest {
         return LibNaClSK(privateKey.hexToBytes(), signSeed.hexToBytes())
     }
 
+    private fun getEndpoint(): UdpEndpoint {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return UdpEndpoint(0, InetAddress.getLocalHost(), connectivityManager)
+    }
+
     @Test
     fun onPacket() {
         val myPrivateKey = getPrivateKey()
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = TestCommunity(myPeer, endpoint, network)
@@ -42,7 +51,7 @@ class CommunityTest {
     fun createIntroductionRequest_handleIntroductionRequest() {
         val myPrivateKey = getPrivateKey()
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = TestCommunity(myPeer, endpoint, network)
@@ -59,7 +68,7 @@ class CommunityTest {
     fun createIntroductionRequest() {
         val myPrivateKey = getPrivateKey()
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -77,7 +86,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = TestCommunity(myPeer, endpoint, network)
@@ -99,7 +108,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -123,7 +132,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = TestCommunity(myPeer, endpoint, network)
@@ -142,7 +151,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = TestCommunity(myPeer, endpoint, network)
@@ -155,7 +164,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -170,7 +179,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -187,7 +196,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -203,7 +212,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -220,7 +229,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = UdpEndpoint(0, InetAddress.getLocalHost())
+        val endpoint = getEndpoint()
         val network = Network()
 
         val community = spyk(TestCommunity(myPeer, endpoint, network))
@@ -236,7 +245,7 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = spyk(UdpEndpoint(0, InetAddress.getLocalHost()))
+        val endpoint = spyk(getEndpoint())
         val network = Network()
         val community = TestCommunity(myPeer, endpoint, network)
 

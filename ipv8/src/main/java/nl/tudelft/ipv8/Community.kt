@@ -7,7 +7,9 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.Network
+import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
+import java.net.NetworkInterface
 import java.util.*
 
 abstract class Community(
@@ -166,7 +168,10 @@ abstract class Community(
             intro = getPeerForIntroduction(exclude = other)
         }
         if (intro != null) {
-            // TODO: understand how this works
+            /*
+             * If we are introducting a peer on our LAN, we assume our WAN is same as their WAN, and use their LAN port
+             * as a WAN port. Note that this will only work if the port is not translated by NAT.
+             */
             if (addressIsLan(intro.address)) {
                 introductionLan = intro.address
                 introductionWan = Address(myEstimatedWan.ip, introductionLan.port)
@@ -321,18 +326,20 @@ abstract class Community(
         network.addVerifiedPeer(peer)
         network.discoverServices(peer, listOf(serviceId))
 
-        // TODO: understand, document and test all cases
-
         if (!payload.wanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip != myEstimatedWan.ip) {
+            // WAN is not empty and it is not the same as ours
             if (!payload.lanIntroductionAddress.isEmpty()) {
+                // If LAN address is not empty, add them in case they are on our LAN
                 network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
             network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
+            // LAN is not empty and WAN is the same as ours => they are on the same LAN
             network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
+            // WAN is the same as ours, but we do not know the LAN => we assume LAN is the same as ours
             network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
             network.discoverAddress(peer,
                 Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
@@ -361,11 +368,6 @@ abstract class Community(
 
         val packet = createPuncture(myEstimatedLan, payload.wanWalkerAddress, payload.identifier)
         send(target, packet)
-    }
-
-    private fun addressIsLan(address: Address): Boolean {
-        // TODO
-        return address.ip == "10.0.0.0"
     }
 
     protected fun send(address: Address, data: ByteArray) {
