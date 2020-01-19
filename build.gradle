@@ -24,6 +24,13 @@ allprojects {
         jcenter()
         maven { url "https://dl.bintray.com/mattskala/maven" }
     }
+
+    // Temp fix for issue https://github.com/mockk/mockk/issues/281
+    configurations.all {
+        resolutionStrategy {
+            force("org.objenesis:objenesis:2.6")
+        }
+    }
 }
 
 task clean(type: Delete) {

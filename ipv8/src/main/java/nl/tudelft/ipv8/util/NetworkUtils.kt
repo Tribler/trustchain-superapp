@@ -4,7 +4,6 @@ import android.util.Log
 import nl.tudelft.ipv8.Address
 import java.net.Inet4Address
 import java.net.InetAddress
-import java.net.InterfaceAddress
 import java.net.NetworkInterface
 import java.nio.ByteBuffer
 

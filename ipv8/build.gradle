@@ -19,9 +19,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
     defaultConfig {
-        // Temp fix for issue https://github.com/mockk/mockk/issues/281
-        // minSdkVersion 21
-        minSdkVersion 26
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
