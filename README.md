@@ -1,4 +1,4 @@
-# kotlin-ipv8 [![Build Status](https://travis-ci.org/MattSkala/kotlin-ipv8.svg?branch=master)](https://travis-ci.org/MattSkala/kotlin-ipv8)
+# kotlin-ipv8 [![Build Status](https://github.com/MattSkala/kotlin-ipv8/workflows/build/badge.svg)](https://github.com/MattSkala/kotlin-ipv8/actions) [![codecov](https://codecov.io/gh/MattSkala/kotlin-ipv8/branch/master/graph/badge.svg)](https://codecov.io/gh/MattSkala/kotlin-ipv8)
 
 ## What is IPv8?
 
