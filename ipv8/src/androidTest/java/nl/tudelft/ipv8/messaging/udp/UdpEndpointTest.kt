@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.test.platform.app.InstrumentationRegistry
 import io.mockk.mockk
-import io.mockk.verify
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.messaging.EndpointListener
 import org.junit.Assert.*
@@ -35,9 +34,6 @@ class UdpEndpointTest {
         endpoint.open()
         val data = "Hello world!".toByteArray(Charsets.US_ASCII)
         endpoint.send(Address("0.0.0.0", 1234), data)
-
-        verify { listener.onEstimatedLanChanged(any()) }
-        verify { listener.onPacket(any()) }
 
         endpoint.close()
     }

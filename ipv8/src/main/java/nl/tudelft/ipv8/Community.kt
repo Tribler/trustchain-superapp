@@ -9,7 +9,6 @@ import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
-import java.net.NetworkInterface
 import java.util.*
 
 abstract class Community(
