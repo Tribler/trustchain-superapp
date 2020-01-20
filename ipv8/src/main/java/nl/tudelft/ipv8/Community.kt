@@ -231,12 +231,14 @@ abstract class Community(
      * @param messageId The message type ID
      * @param payload The list of payloads
      * @param sign True if the packet should be signed
+     * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
      */
     protected fun serializePacket(
         prefix: ByteArray,
         messageId: Int,
         payload: List<Serializable>,
-        sign: Boolean = true
+        sign: Boolean = true,
+        peer: Peer = myPeer
     ): ByteArray {
         var packet = prefix
         packet += messageId.toChar().toByte()
@@ -245,7 +247,7 @@ abstract class Community(
             packet += item.serialize()
         }
 
-        val myPeerKey = myPeer.key
+        val myPeerKey = peer.key
         if (sign && myPeerKey is PrivateKey) {
             packet += myPeerKey.sign(packet)
         }
@@ -401,8 +403,8 @@ abstract class Community(
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)
-        private const val BOOTSTRAP_TIMEOUT_MS = 30_000
-        private const val DEFAULT_MAX_PEERS = 30
+        private const val BOOTSTRAP_TIMEOUT_MS = 5_000
+        const val DEFAULT_MAX_PEERS = 30
 
         private const val VERSION: Byte = 2
 

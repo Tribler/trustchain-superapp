@@ -84,9 +84,9 @@ class UdpEndpoint(
         private val socket: DatagramSocket
     ) : Thread() {
         override fun run() {
-            val receiveData = ByteArray(1500)
-            while (isAlive) {
-                try {
+            try {
+                val receiveData = ByteArray(1500)
+                while (isAlive) {
                     val receivePacket = DatagramPacket(receiveData, receiveData.size)
                     socket.receive(receivePacket)
                     val sourceAddress =
@@ -99,9 +99,9 @@ class UdpEndpoint(
                     )
                     Log.d("UdpEndpoint", packet.data.toHex())
                     notifyListeners(packet)
-                } catch (e: IOException) {
-                    e.printStackTrace()
                 }
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
