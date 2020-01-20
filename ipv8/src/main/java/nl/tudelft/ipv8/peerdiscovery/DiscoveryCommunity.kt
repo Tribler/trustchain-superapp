@@ -16,8 +16,9 @@ import java.util.*
 class DiscoveryCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
-    network: Network
-) : Community(myPeer, endpoint, network), PingOverlay {
+    network: Network,
+    maxPeers: Int = DEFAULT_MAX_PEERS
+) : Community(myPeer, endpoint, network, maxPeers), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
     private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
@@ -45,7 +46,7 @@ class DiscoveryCommunity(
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         Log.d("DiscoveryCommunity", "-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload))
+        return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
     }
 
     fun sendSimilarityRequest(address: Address) {
@@ -62,18 +63,22 @@ class DiscoveryCommunity(
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         Log.d("DiscoveryCommunity", "-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload))
+        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
     }
 
-    override fun sendPing(peer: Peer) {
+    internal fun createPing(): Pair<Int, ByteArray> {
         val globalTime = claimGlobalTime()
         val payload = PingPayload((globalTime % 65536u).toInt())
         val dist = GlobalTimeDistributionPayload(globalTime)
         Log.d("DiscoveryCommunity", "-> $payload")
-        val packet = serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false)
+        return Pair(payload.identifier, serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false))
+    }
 
-        val pingRequest = PingRequest(payload.identifier, peer, Date())
-        pingRequestCache[payload.identifier] = pingRequest
+    override fun sendPing(peer: Peer) {
+        val (identifier, packet) = createPing()
+
+        val pingRequest = PingRequest(identifier, peer, Date())
+        pingRequestCache[identifier] = pingRequest
         // TODO: implement cache timeout
 
         send(peer.address, packet)
