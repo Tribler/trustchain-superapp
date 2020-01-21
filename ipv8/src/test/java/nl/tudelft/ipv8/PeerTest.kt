@@ -2,7 +2,6 @@ package nl.tudelft.ipv8
 
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import nl.tudelft.ipv8.keyvault.Key
 import org.junit.Assert
 import org.junit.Test
