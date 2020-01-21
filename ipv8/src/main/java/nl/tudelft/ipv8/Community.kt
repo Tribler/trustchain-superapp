@@ -15,7 +15,7 @@ abstract class Community(
     override val myPeer: Peer,
     override val endpoint: Endpoint,
     override val network: Network,
-    val maxPeers: Int = DEFAULT_MAX_PEERS
+    override val maxPeers: Int = DEFAULT_MAX_PEERS
 ) : Overlay {
     abstract val serviceId: String
 
@@ -302,6 +302,11 @@ abstract class Community(
         payload: IntroductionRequestPayload
     ) {
         Log.d("Community", "<- $payload")
+
+        if (maxPeers >= 0 && getPeers().size >= maxPeers) {
+            Log.i("Community", "Dropping introduction request from $peer, too many peers!")
+            return
+        }
 
         network.addVerifiedPeer(peer)
         network.discoverServices(peer, listOf(serviceId))

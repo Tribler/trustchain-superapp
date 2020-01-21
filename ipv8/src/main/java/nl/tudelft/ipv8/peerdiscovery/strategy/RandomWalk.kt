@@ -34,7 +34,12 @@ class RandomWalk(
     /**
      * The target interval (in seconds) between steps or 0 to use the default interval.
      */
-    private val targetInterval: Int = 0
+    private val targetInterval: Int = 0,
+
+    /**
+     * The target number of peers the walker should try to connect to.
+     */
+    private val peers: Int = 20
 ) : DiscoveryStrategy {
         private val walkLock = Object()
 
@@ -48,6 +53,8 @@ class RandomWalk(
         Log.d("RandomWalk", "takeStep")
 
         synchronized(walkLock) {
+            if (peers >= 0 && overlay.getPeers().size >= peers) return
+
             // Sanitize unreachable nodes
             val toRemove = mutableListOf<Address>()
             for ((address, introTime) in introTimeouts) {

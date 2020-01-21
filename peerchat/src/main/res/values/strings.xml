@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PeerChat</string>
+
+    <plurals name="x_peers">
+        <item quantity="one">%d peer</item>
+        <item quantity="other">%d peers</item>
+    </plurals>
 </resources>

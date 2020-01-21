@@ -11,6 +11,7 @@ interface Overlay : EndpointListener {
     val myPeer: Peer
     val endpoint: Endpoint
     val network: Network
+    val maxPeers: Int
 
     private val globalTime: ULong
         get() = myPeer.lamportTimestamp
