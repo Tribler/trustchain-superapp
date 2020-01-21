@@ -20,7 +20,6 @@ class RandomWalkTest {
 
         verify { overlay.getWalkableAddresses() }
         verify { overlay.walkTo(mockAddress) }
-        confirmVerified(overlay)
     }
 
     @Test
@@ -36,6 +35,5 @@ class RandomWalkTest {
 
         verify { overlay.getWalkableAddresses() }
         verify { overlay.getNewIntroduction() }
-        confirmVerified(overlay)
     }
 }
