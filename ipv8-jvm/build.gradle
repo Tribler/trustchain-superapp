@@ -1,0 +1,10 @@
+apply plugin: 'kotlin'
+
+apply plugin: 'java-library'
+
+dependencies {
+    api project(':ipv8')
+
+    implementation "net.java.dev.jna:jna:5.5.0"
+    implementation 'org.slf4j:slf4j-simple:1.7.29'
+}

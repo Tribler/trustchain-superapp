@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8
 
-import android.os.Handler
-import android.os.HandlerThread
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
 import kotlin.math.roundToLong
@@ -15,16 +14,9 @@ class Ipv8(
     private val overlays = mutableListOf<Overlay>()
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
-    private var handlerThread: HandlerThread? = null
-    private var handler: Handler? = null
-    private var nextTickRunnable: Runnable? = null
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     fun start() {
-        val handlerThread = HandlerThread("SendThread")
-        handlerThread.start()
-        this.handlerThread = handlerThread
-        handler = Handler(handlerThread.looper)
-
         endpoint.open()
 
         // Init overlays and discovery strategies
@@ -38,7 +30,7 @@ class Ipv8(
         }
 
         // Start looping call
-        scheduleNextTick()
+        startLoopingCall()
     }
 
     private fun onTick() {
@@ -52,29 +44,28 @@ class Ipv8(
                         e.printStackTrace()
                     }
                 }
-                scheduleNextTick()
             }
         }
     }
 
-    private fun scheduleNextTick() {
+    private fun startLoopingCall() {
         val interval = (configuration.walkerInterval * 1000).roundToLong()
-        val runnable = Runnable {
-            onTick()
+        scope.launch {
+            while (true) {
+                onTick()
+                delay(interval)
+            }
         }
-        nextTickRunnable = runnable
-        handler?.postDelayed(runnable, interval)
     }
 
     fun stop() {
-        handlerThread?.quit()
         synchronized(overlayLock) {
+            scope.cancel()
+
             for (overlay in overlays) {
                 overlay.unload()
             }
-            nextTickRunnable?.let {
-                handler?.removeCallbacks(it)
-            }
+
             endpoint.close()
         }
     }

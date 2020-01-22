@@ -1,28 +1,19 @@
 package nl.tudelft.ipv8.keyvault
 
+import com.goterl.lazycode.lazysodium.LazySodium
 import nl.tudelft.ipv8.util.toHex
-import org.libsodium.jni.NaCl
-import org.libsodium.jni.Sodium
 
-open class LibNaClPK(
-    private val publicKey: ByteArray,
-    private val verifyKey: ByteArray
+class LibNaClPK(
+    val publicKey: ByteArray,
+    val verifyKey: ByteArray,
+    private val lazySodium: LazySodium
 ) : PublicKey {
-    init {
-        NaCl.sodium()
-    }
-
     override fun verify(signature: ByteArray, msg: ByteArray): Boolean {
-        return Sodium.crypto_sign_ed25519_verify_detached(
-            signature,
-            msg,
-            msg.size,
-            verifyKey
-        ) == 0
+        return lazySodium.cryptoSignVerifyDetached(signature, msg, msg.size, verifyKey)
     }
 
     override fun getSignatureLength(): Int {
-        return Sodium.crypto_sign_bytes()
+        return LibNaClSK.SIGNATURE_SIZE
     }
 
     override fun keyToBin(): ByteArray {
@@ -32,18 +23,14 @@ open class LibNaClPK(
     companion object {
         private const val BIN_PREFIX = "LibNaCLPK:"
 
-        init {
-            NaCl.sodium()
-        }
-
         /**
          * Creates a public key from a hex-encoded binary string.
          *
          * @throws IllegalArgumentException If the argument does not represent a valid public key.
          */
-        fun fromBin(bin: ByteArray): LibNaClPK {
-            val publicKeySize = Sodium.crypto_scalarmult_curve25519_bytes()
-            val verifyKeySize = Sodium.crypto_sign_ed25519_publickeybytes()
+        fun fromBin(bin: ByteArray, lazySodium: LazySodium): LibNaClPK {
+            val publicKeySize = LibNaClSK.PUBLICKEY_BYTES
+            val verifyKeySize = LibNaClSK.SIGN_PUBLICKEY_BYTES
             val binSize = BIN_PREFIX.length + publicKeySize + verifyKeySize
 
             val str = bin.toString(Charsets.US_ASCII)
@@ -57,7 +44,7 @@ open class LibNaClPK(
             val publicKey = bin.copyOfRange(BIN_PREFIX.length, BIN_PREFIX.length + publicKeySize)
             val verifyKey = bin.copyOfRange(BIN_PREFIX.length + publicKeySize,
                 BIN_PREFIX.length + publicKeySize + verifyKeySize)
-            return LibNaClPK(publicKey, verifyKey)
+            return LibNaClPK(publicKey, verifyKey, lazySodium)
         }
     }
 
