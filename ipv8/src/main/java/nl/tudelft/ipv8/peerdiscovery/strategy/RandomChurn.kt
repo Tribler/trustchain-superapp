@@ -1,10 +1,12 @@
 package nl.tudelft.ipv8.peerdiscovery.strategy
 
-import android.util.Log
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.peerdiscovery.PingOverlay
 import java.util.*
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * The strategy that handles peer churn. On every step, it randomly selects a few inactive peers.
@@ -63,11 +65,11 @@ class RandomChurn(
             val window = overlay.network.getRandomPeers(sampleSize)
             for (peer in window) {
                 if (shouldDrop(peer) && pinged.contains(peer.address)) {
-                    Log.d("RandomChurn", "Dropping inactive peer $peer")
+                    logger.debug("Dropping inactive peer $peer")
                     overlay.network.removePeer(peer)
                     pinged.remove(peer.address)
                 } else if (isInactive(peer) || peer.pings.size < Peer.MAX_PINGS) {
-                    Log.d("RandomChurn", "Peer $peer is inactive")
+                    logger.debug("Peer $peer is inactive")
                     val pingedAddress = pinged[peer.address]
                     if (pingedAddress != null) {
                         if (Date().time > pingedAddress.time + pingInterval * 1000) {

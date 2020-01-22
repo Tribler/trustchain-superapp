@@ -1,6 +1,8 @@
 package nl.tudelft.ipv8
 
-import android.util.Log
+import mu.KotlinLogging
+import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
@@ -11,11 +13,14 @@ import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
 import java.util.*
 
+private val logger = KotlinLogging.logger {}
+
 abstract class Community(
     override val myPeer: Peer,
     override val endpoint: Endpoint,
     override val network: Network,
-    override val maxPeers: Int = DEFAULT_MAX_PEERS
+    override val maxPeers: Int = DEFAULT_MAX_PEERS,
+    protected val cryptoProvider: CryptoProvider = JavaCryptoProvider
 ) : Overlay {
     abstract val serviceId: String
 
@@ -106,7 +111,7 @@ abstract class Community(
 
         val packetPrefix = data.copyOfRange(0, prefix.size)
         if (!packetPrefix.contentEquals(prefix)) {
-            Log.d("Community", "prefix not matching")
+            logger.debug("prefix not matching")
             return
         }
 
@@ -120,7 +125,7 @@ abstract class Community(
                 e.printStackTrace()
             }
         } else {
-            Log.d(TAG, "Received unknown message $msgId from $sourceAddress")
+            logger.debug("Received unknown message $msgId from $sourceAddress")
         }
     }
 
@@ -146,7 +151,7 @@ abstract class Community(
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
 
-        Log.d("Community", "-> $payload")
+        logger.debug("-> $payload")
 
         return serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
     }
@@ -200,7 +205,7 @@ abstract class Community(
             send(punctureRequestAddress, packet)
         }
 
-        Log.d("Community", "-> $payload")
+        logger.debug("-> $payload")
 
         return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
@@ -211,13 +216,13 @@ abstract class Community(
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
 
-        Log.d("Community", "-> $payload")
+        logger.debug("-> $payload")
 
         return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
     internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
-        Log.d("Community", "-> punctureRequest")
+        logger.debug("-> punctureRequest")
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
@@ -260,7 +265,7 @@ abstract class Community(
      */
 
     internal fun deserializeIntroductionRequest(packet: Packet): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
-        val (peer, remainder) = packet.getAuthPayload()
+        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
         return Triple(peer, dist, payload)
@@ -272,14 +277,14 @@ abstract class Community(
     }
 
     internal fun handleIntroductionResponse(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload()
+        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
         onIntroductionResponse(peer, dist, payload)
     }
 
     internal fun handlePuncture(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload()
+        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
         val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
         onPuncture(peer, dist, payload)
@@ -301,10 +306,10 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
     ) {
-        Log.d("Community", "<- $payload")
+        logger.debug("<- $payload")
 
         if (maxPeers >= 0 && getPeers().size >= maxPeers) {
-            Log.i("Community", "Dropping introduction request from $peer, too many peers!")
+            logger.info("Dropping introduction request from $peer, too many peers!")
             return
         }
 
@@ -325,7 +330,7 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
     ) {
-        Log.d("Community", "<- $payload")
+        logger.debug("<- $payload")
 
         myEstimatedWan = payload.destinationAddress
 
@@ -357,7 +362,7 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
     ) {
-        Log.d("Community", "<- $payload")
+        logger.debug("<- $payload")
         // NOOP
     }
 
@@ -366,7 +371,7 @@ abstract class Community(
         dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
     ) {
-        Log.d("Community", "<- $payload")
+        logger.debug("<- $payload")
         var target = payload.wanWalkerAddress
         if (payload.wanWalkerAddress.ip == myEstimatedWan.ip) {
             target = payload.lanWalkerAddress
@@ -412,8 +417,6 @@ abstract class Community(
         const val DEFAULT_MAX_PEERS = 30
 
         private const val VERSION: Byte = 2
-
-        private const val TAG = "Community"
     }
 
     object MessageId {

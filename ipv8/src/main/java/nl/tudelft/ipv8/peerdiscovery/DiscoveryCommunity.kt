@@ -1,9 +1,10 @@
 package nl.tudelft.ipv8.peerdiscovery
 
-import android.util.Log
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.*
@@ -13,12 +14,15 @@ import nl.tudelft.ipv8.peerdiscovery.payload.SimilarityRequestPayload
 import nl.tudelft.ipv8.peerdiscovery.payload.SimilarityResponsePayload
 import java.util.*
 
+private val logger = KotlinLogging.logger {}
+
 class DiscoveryCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network,
+    cryptoProvider: CryptoProvider,
     maxPeers: Int = DEFAULT_MAX_PEERS
-) : Community(myPeer, endpoint, network, maxPeers), PingOverlay {
+) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
     private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
@@ -45,7 +49,7 @@ class DiscoveryCommunity(
         )
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
+        logger.debug("-> $payload")
         return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
     }
 
@@ -62,7 +66,7 @@ class DiscoveryCommunity(
         val payload = SimilarityResponsePayload(identifier, getMyOverlays(peer))
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
+        logger.debug("-> $payload")
         return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
     }
 
@@ -70,7 +74,7 @@ class DiscoveryCommunity(
         val globalTime = claimGlobalTime()
         val payload = PingPayload((globalTime % 65536u).toInt())
         val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
+        logger.debug("-> $payload")
         return Pair(payload.identifier, serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false))
     }
 
@@ -88,7 +92,7 @@ class DiscoveryCommunity(
         val globalTime = claimGlobalTime()
         val payload = PongPayload(identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
-        Log.d("DiscoveryCommunity", "-> $payload")
+        logger.debug("-> $payload")
         return serializePacket(prefix, MessageId.PONG, listOf(dist, payload), sign = false)
     }
 
@@ -97,14 +101,14 @@ class DiscoveryCommunity(
      */
 
     internal fun handleSimilarityRequest(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload()
+        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
         val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityRequestPayload.deserialize(remainder, distSize)
         onSimilarityRequest(peer, payload)
     }
 
     internal fun handleSimilarityResponse(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload()
+        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
         val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = SimilarityResponsePayload.deserialize(remainder, distSize)
         onSimilarityResponse(peer, payload)
@@ -141,7 +145,7 @@ class DiscoveryCommunity(
         peer: Peer,
         payload: SimilarityRequestPayload
     ) {
-        Log.d("DiscoveryCommunity", "<- $payload")
+        logger.debug("<- $payload")
 
         network.discoverServices(peer, payload.preferenceList)
 
@@ -156,10 +160,10 @@ class DiscoveryCommunity(
         peer: Peer,
         payload: SimilarityResponsePayload
     ) {
-        Log.d("DiscoveryCommunity", "<- $payload")
+        logger.debug("<- $payload")
 
         if (maxPeers >= 0 && getPeers().size >= maxPeers && !network.verifiedPeers.contains(peer)) {
-            Log.i("DiscoveryCommunity", "Dropping similarity response from $peer, too many peers!")
+            logger.info("Dropping similarity response from $peer, too many peers!")
             return
         }
 
@@ -172,8 +176,8 @@ class DiscoveryCommunity(
         dist: GlobalTimeDistributionPayload,
         payload: PingPayload
     ) {
-        Log.d("DiscoveryCommunity", "<- $payload")
-        Log.d("DiscoveryCommunity", "dist = $dist")
+        logger.debug("<- $payload")
+        logger.debug("dist = $dist")
 
         val packet = createPong(payload.identifier)
         send(address, packet)
@@ -183,8 +187,8 @@ class DiscoveryCommunity(
         dist: GlobalTimeDistributionPayload,
         payload: PongPayload
     ) {
-        Log.d("DiscoveryCommunity", "<- $payload")
-        Log.d("DiscoveryCommunity", "dist = $dist")
+        logger.debug("<- $payload")
+        logger.debug("dist = $dist")
 
         val pingRequest = pingRequestCache[payload.identifier]
         if (pingRequest != null) {

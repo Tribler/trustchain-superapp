@@ -15,24 +15,25 @@ Kotlin is a relatively new, but increasingly popular, modern, statically typed p
 
 ## Sample app
 
-The repository includes a sample app that depends on the ipv8 library and demonstrates its usage. Currently, it only shows a list of discovered peers, the time since the last sent and received message, and average ping duration for each peer. The app can be installed with the following command:
+The repository includes a sample app that depends on the IPv8 library and demonstrates its usage. Currently, it only shows a list of discovered peers, the time since the last sent and received message, and average ping latency for each peer. It is available both as a native app for Android, and as a command line application running locally on JVM on macOS, Linux, and Windows.
 
+Install the app on Android:
 ```
-./gradlew installPeerchatDebug
+./gradlew :demo-android:installDebug
+```
+
+Run the app locally in JVM:
+```
+./gradlew :demo-jvm:run
 ```
 
 ## Tests
 
-We strive for a high code coverage to keep the project maintainable and stable. There are two types of tests: unit tests running locally on JVM, and instrumented tests relying on Android SDK that must be run on a physical device or emulator. Jacoco is used to report the unified code coverage for both types of tests.
+We strive for a high code coverage to keep the project maintainable and stable. All unit tests are currently able to run on JVM, there are no Android instrumented tests. Jacoco is used to report the  code coverage.
 
 Run unit tests:
 ```
 ./gradlew test
-```
-
-Run instrumented tests:
-```
-./gradlew connectedAndroidTest
 ```
 
 Generate code coverage report:
@@ -40,7 +41,7 @@ Generate code coverage report:
 ./gradlew jacocoTestReport
 ```
 
-The generated report will be stored in `ipv8/build/reports/jacoco/html/index.html`.
+The generated report will be stored in `ipv8/build/reports/jacoco/test/html/index.html`.
 
 ## Code style
 

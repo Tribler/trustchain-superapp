@@ -1,6 +1,5 @@
 package nl.tudelft.ipv8.util
 
-import android.util.Log
 import nl.tudelft.ipv8.Address
 import java.net.Inet4Address
 import java.net.InetAddress
@@ -28,6 +27,5 @@ fun addressInSubnet(address: InetAddress, subnetAddress: InetAddress, networkPre
     val intfAddrInt = ByteBuffer.wrap(subnetAddress.address).int
     val targetAddrInt = ByteBuffer.wrap(address.address).int
     val inSubnet = intfAddrInt and mask == targetAddrInt and mask
-    Log.d("NetworkUtils", "addr:$subnetAddress, mask:$mask, $intfAddrInt $targetAddrInt -> ${intfAddrInt and mask} == ${targetAddrInt and mask} -> $inSubnet")
     return inSubnet
 }

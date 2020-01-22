@@ -1,2 +1,2 @@
-include ':ipv8', ':peerchat'
-rootProject.name='IPv8'
+include ':ipv8', ':ipv8-android', ':demo-jvm', ':demo-android', ':ipv8-jvm'
+rootProject.name = 'IPv8'

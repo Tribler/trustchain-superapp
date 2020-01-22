@@ -1,45 +1,40 @@
 package nl.tudelft.ipv8.keyvault
 
-import org.libsodium.jni.NaCl
-import org.libsodium.jni.Sodium
-import org.libsodium.jni.crypto.Random
+import com.goterl.lazycode.lazysodium.LazySodium
+import kotlin.random.Random
 
 class LibNaClSK(
     val privateKey: ByteArray,
-    val signSeed: ByteArray
+    val signSeed: ByteArray,
+    private val lazySodium: LazySodium
 ) : PrivateKey {
-    init {
-        NaCl.sodium()
-    }
-
     private val publicKey: ByteArray
 
     private val signKey: ByteArray
     private val verifyKey: ByteArray
 
     init {
-        publicKey = ByteArray(Sodium.crypto_scalarmult_curve25519_bytes())
-        Sodium.crypto_scalarmult_curve25519_base(publicKey, privateKey)
+        publicKey = ByteArray(PUBLICKEY_BYTES)
+        lazySodium.cryptoScalarMultBase(publicKey, privateKey)
 
-        verifyKey = ByteArray(Sodium.crypto_sign_ed25519_publickeybytes())
-        signKey = ByteArray(Sodium.crypto_sign_ed25519_secretkeybytes())
-        Sodium.crypto_sign_seed_keypair(verifyKey, signKey, signSeed)
+        verifyKey = ByteArray(SIGN_PUBLICKEY_BYTES)
+        signKey = ByteArray(SIGN_SECRETKEY_BYTES)
+        lazySodium.cryptoSignSeedKeypair(verifyKey, signKey, signSeed)
     }
 
     override fun sign(msg: ByteArray): ByteArray {
-        val signature = ByteArray(Sodium.crypto_sign_bytes())
-        Sodium.crypto_sign_ed25519_detached(
+        val signature = ByteArray(SIGNATURE_SIZE)
+        lazySodium.cryptoSignDetached(
             signature,
-            intArrayOf(signature.size),
             msg,
-            msg.size,
+            msg.size.toLong(),
             signKey
         )
         return signature
     }
 
     override fun pub(): PublicKey {
-        return LibNaClPK(publicKey, verifyKey)
+        return LibNaClPK(publicKey, verifyKey, lazySodium)
     }
 
     override fun keyToBin(): ByteArray {
@@ -48,18 +43,21 @@ class LibNaClSK(
     }
 
     companion object {
-        init {
-            NaCl.sodium()
-        }
+        const val PUBLICKEY_BYTES = 32
+        const val PRIVATEKEY_BYTES = 32
+        const val SIGN_PUBLICKEY_BYTES = 32
+        const val SIGN_SECRETKEY_BYTES = 64
+        const val SIGNATURE_SIZE = 64
+        const val SIGN_SEED_BYTES = 32
 
-        fun generate(): LibNaClSK {
-            val publicKey = ByteArray(Sodium.crypto_box_curve25519xsalsa20poly1305_publickeybytes())
-            val privateKey = ByteArray(Sodium.crypto_box_curve25519xsalsa20poly1305_secretkeybytes())
-            Sodium.crypto_box_curve25519xsalsa20poly1305_keypair(publicKey, privateKey)
+        fun generate(lazySodium: LazySodium): LibNaClSK {
+            val publicKey = ByteArray(PUBLICKEY_BYTES)
+            val privateKey = ByteArray(PRIVATEKEY_BYTES)
+            lazySodium.cryptoBoxKeypair(publicKey, privateKey)
 
-            val signSeed = Random().randomBytes(Sodium.crypto_sign_ed25519_seedbytes())
+            val signSeed = Random.nextBytes(SIGN_SEED_BYTES)
 
-            return LibNaClSK(privateKey, signSeed)
+            return LibNaClSK(privateKey, signSeed, lazySodium)
         }
     }
 }

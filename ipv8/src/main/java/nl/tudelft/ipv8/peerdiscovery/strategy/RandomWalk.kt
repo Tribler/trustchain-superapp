@@ -1,10 +1,12 @@
 package nl.tudelft.ipv8.peerdiscovery.strategy
 
-import android.util.Log
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
 import java.util.*
 import kotlin.random.Random
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * Walk randomly through the network. On every step, request a random peer from the community for
@@ -50,7 +52,7 @@ class RandomWalk(
      * Walk to random walkable peer.
      */
     override fun takeStep() {
-        Log.d("RandomWalk", "takeStep")
+        logger.debug("takeStep")
 
         synchronized(walkLock) {
             if (peers >= 0 && overlay.getPeers().size >= peers) return

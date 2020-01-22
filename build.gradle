@@ -23,6 +23,7 @@ allprojects {
         google()
         jcenter()
         maven { url "https://dl.bintray.com/mattskala/maven" }
+        maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
     }
 
     // Temp fix for issue https://github.com/mockk/mockk/issues/281
