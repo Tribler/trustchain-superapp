@@ -15,9 +15,9 @@ ktlint {
 
 jacocoTestReport {
     reports {
-        xml.enabled false
-        csv.enabled false
-        html.destination file("${buildDir}/jacocoHtml")
+        xml.enabled true
+        csv.enabled true
+        html.enabled true
     }
 }
 

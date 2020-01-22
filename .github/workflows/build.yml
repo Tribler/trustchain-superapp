@@ -15,9 +15,9 @@ jobs:
         java-version: 11
 
     - name: Run tests
-    - uses: eskatos/gradle-command-action@v1
+      uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check
+        arguments: check jacocoTestReport
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1

@@ -41,7 +41,7 @@ Generate code coverage report:
 ./gradlew jacocoTestReport
 ```
 
-The generated report will be stored in `ipv8/build/jacocoHtml/index.html`.
+The generated report will be stored in `ipv8/build/reports/jacoco/test/html/index.html`.
 
 ## Code style
 
