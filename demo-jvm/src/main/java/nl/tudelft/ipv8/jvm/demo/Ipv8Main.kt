@@ -14,6 +14,8 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import java.net.InetAddress
+import java.util.*
+import kotlin.math.roundToInt
 
 class Application {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -44,9 +46,27 @@ class Application {
         scope.launch {
             while (true) {
                 val peers = network.getPeersForService(community.serviceId)
-                logger.info("Found ${peers.size} community peers")
+                printPeersInfo(peers)
                 delay(1000)
             }
+        }
+    }
+
+    private fun printPeersInfo(peers: List<Peer>) {
+        logger.info("Found ${peers.size} community peers")
+        for (peer in peers) {
+            val avgPing = peer.getAveragePing()
+            val lastRequest = peer.lastRequest
+            val lastResponse = peer.lastResponse
+
+            val lastRequestStr = if (lastRequest != null)
+                "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val lastResponseStr = if (lastResponse != null)
+                "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+            logger.info("${peer.mid} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
         }
     }
 }
