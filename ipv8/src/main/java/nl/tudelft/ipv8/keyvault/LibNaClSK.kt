@@ -38,11 +38,11 @@ class LibNaClSK(
     }
 
     override fun keyToBin(): ByteArray {
-        val prefix = "LibNaCLSK:"
-        return prefix.toByteArray(Charsets.US_ASCII) + privateKey + signSeed
+        return BIN_PREFIX.toByteArray(Charsets.US_ASCII) + privateKey + signSeed
     }
 
     companion object {
+        const val BIN_PREFIX = "LibNaCLSK:"
         const val PUBLICKEY_BYTES = 32
         const val PRIVATEKEY_BYTES = 32
         const val SIGN_PUBLICKEY_BYTES = 32
@@ -57,6 +57,26 @@ class LibNaClSK(
 
             val signSeed = Random.nextBytes(SIGN_SEED_BYTES)
 
+            return LibNaClSK(privateKey, signSeed, lazySodium)
+        }
+
+        fun fromBin(bin: ByteArray, lazySodium: LazySodium): LibNaClSK {
+            val privateKeySize = PRIVATEKEY_BYTES
+            val signSeedSize = SIGN_SEED_BYTES
+            val binSize = BIN_PREFIX.length + privateKeySize + signSeedSize
+
+            val str = bin.toString(Charsets.US_ASCII)
+            val binPrefix = str.substring(0, BIN_PREFIX.length)
+            if (binPrefix != BIN_PREFIX)
+                throw IllegalArgumentException("Bin prefix $binPrefix does not match ${BIN_PREFIX}")
+
+            if (bin.size != binSize)
+                throw IllegalArgumentException("Bin is expected to have $binSize bytes, has ${bin.size}")
+
+            val privateKey = bin.copyOfRange(BIN_PREFIX.length, BIN_PREFIX.length + privateKeySize)
+            val signSeed = bin.copyOfRange(
+                BIN_PREFIX.length + privateKeySize,
+                BIN_PREFIX.length + privateKeySize + signSeedSize)
             return LibNaClSK(privateKey, signSeed, lazySodium)
         }
     }

@@ -19,8 +19,8 @@ abstract class Community(
     override val myPeer: Peer,
     override val endpoint: Endpoint,
     override val network: Network,
-    override val maxPeers: Int = DEFAULT_MAX_PEERS,
-    protected val cryptoProvider: CryptoProvider = JavaCryptoProvider
+    override val maxPeers: Int,
+    protected val cryptoProvider: CryptoProvider
 ) : Overlay {
     abstract val serviceId: String
 

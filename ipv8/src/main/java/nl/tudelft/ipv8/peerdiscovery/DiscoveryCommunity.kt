@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.*
@@ -20,8 +21,8 @@ class DiscoveryCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network,
-    cryptoProvider: CryptoProvider,
-    maxPeers: Int = DEFAULT_MAX_PEERS
+    maxPeers: Int,
+    cryptoProvider: CryptoProvider
 ) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
