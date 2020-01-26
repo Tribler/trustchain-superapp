@@ -22,10 +22,14 @@ Install the app on Android:
 ./gradlew :demo-android:installDebug
 ```
 
+<img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-android.png" width="180">
+
 Run the app locally in JVM:
 ```
 ./gradlew :demo-jvm:run
 ```
+
+<img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-jvm.png" width="450">
 
 ## Tests
 
