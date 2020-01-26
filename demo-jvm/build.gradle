@@ -14,3 +14,7 @@ dependencies {
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
 }
+
+run {
+    systemProperties System.getProperties()
+}

@@ -17,16 +17,27 @@ Kotlin is a relatively new, but increasingly popular, modern, statically typed p
 
 The repository includes a sample app that depends on the IPv8 library and demonstrates its usage. Currently, it only shows a list of discovered peers, the time since the last sent and received message, and average ping latency for each peer. It is available both as a native app for Android, and as a command line application running locally on JVM on macOS, Linux, and Windows.
 
+### Android
+
 Install the app on Android:
 ```
 ./gradlew :demo-android:installDebug
 ```
 
+*Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
+
 <img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-android.png" width="180">
+
+### JVM
 
 Run the app locally in JVM:
 ```
 ./gradlew :demo-jvm:run
+```
+
+SLF4J with [SimpleLogger](http://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.html) is used for logging. You can configure the behavior of the logger by providing supported system properties as arguments. E.g., if you want to see debug logs:
+```
+./gradlew :demo-jvm:run -Dorg.slf4j.simpleLogger.defaultLogLevel=debug
 ```
 
 <img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-jvm.png" width="450">
