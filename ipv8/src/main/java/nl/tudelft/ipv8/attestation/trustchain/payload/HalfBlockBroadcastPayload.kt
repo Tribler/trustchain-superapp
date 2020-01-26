@@ -16,7 +16,7 @@ class HalfBlockBroadcastPayload(
     blockType: String,
     transaction: ByteArray,
     timestamp: ULong,
-    val ttl: UInt
+    var ttl: UInt
 ) : HalfBlockPayload(
     publicKey,
     sequenceNumber,
