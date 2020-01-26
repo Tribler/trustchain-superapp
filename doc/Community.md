@@ -1,6 +1,6 @@
 # Community
 
-A community represents a service avaialable to peers in the IPv8 protocol. All communities should extend the abstract `Community` class, which implements the `Overlay` interface and defines some common messages used for NAT puncturing and peer discovery.
+A community represents a service avaialable to peers in the IPv8 protocol. All communities should extend the abstract base `Community` class, which implements the `Overlay` interface and defines some common messages used for NAT puncturing and peer discovery.
 
 The protocol takes advantage of UDP hole punching technique to establish direct connections between peers behind NATs and firewalls. The NAT puncturing mechanism is implemented in the base `Community` using 4 different messages.
 
