@@ -11,7 +11,7 @@ interface TrustChainStore {
     fun getBlockWithHash(blockHash: String): TrustChainBlock?
     fun getBlocksWithType(type: String): List<TrustChainBlock>
     fun contains(block: TrustChainBlock): Boolean
-    fun getLatest(publicKey: ByteArray, blockType: String? = null)
+    fun getLatest(publicKey: ByteArray, blockType: String? = null): TrustChainBlock?
     fun getBlockAfter(block: TrustChainBlock, blockType: String? = null)
     fun getBlockBefore(block: TrustChainBlock, blockType: String? = null)
 }

@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.attestation.trustchain
 
 import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
@@ -11,11 +12,14 @@ val GENESIS_SEQ = 1u
 val UNKNOWN_SEQ = 0u
 val EMPTY_SIG = ByteArray(64)
 val EMPTY_PK = ByteArray(74)
+val ANY_COUNTERPARTY_PK = EMPTY_PK
+
+typealias TrustChainTransaction = Map<*, *>
 
 /**
  * Container for TrustChain block information.
  */
-open class TrustChainBlock(
+class TrustChainBlock(
     /**
      * The block type name.
      */
@@ -24,7 +28,7 @@ open class TrustChainBlock(
     /**
      * Transaction content.
      */
-    val transaction: ByteArray,
+    val rawTransaction: ByteArray,
 
     /**
      * The serialized public key of the initiator of this block.
@@ -73,19 +77,16 @@ open class TrustChainBlock(
 
     val isGenesis = sequenceNumber == GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)
 
-    /**
-     * Validates the transaction of this block.
-     */
-    open fun validateTransaction(): ValidationResult {
-        return ValidationResult.VALID
+    val transaction: TrustChainTransaction by lazy {
+        TransactionSerialization.deserialize(rawTransaction)
     }
 
     /**
      * Validates this block against what is known in the database.
      */
-    open fun validate(): ValidationResult {
+    fun validate(database: TrustChainStore): ValidationResult {
         // TODO
-        return ValidationResult.VALID
+        return ValidationResult.Valid()
     }
 
     /**
@@ -94,7 +95,7 @@ open class TrustChainBlock(
      * @param key The key to sign this block with.
      */
     fun sign(key: PrivateKey) {
-        val payload = HalfBlockPayload.fromHalfBlock(this).serialize()
+        val payload = HalfBlockPayload.fromHalfBlock(this, sign = false).serialize()
         signature = key.sign(payload)
     }
 
@@ -119,38 +120,34 @@ open class TrustChainBlock(
         }
     }
 
-    /**
-     * Contains the various results that the validator can return.
-     */
-    enum class ValidationResult {
-        /**
-         * The block does not violate any rules.
-         */
-        VALID,
-
-        /**
-         * The block does not violate any rules, but there are gaps or no blocks on the previous or next block.
-         */
-        PARTIAL,
-
-        /**
-         * The block does not violate any rules, but there is a gap or no block on the next block.
-         */
-        PARTIAL_NEXT,
-
-        /**
-         * The block does not violate any rules, but there is a gap or no block on the previous block.
-         */
-        PARTIAL_PREVIOUS,
-
-        /**
-         * There are no blocks (previous or next) to validate against.
-         */
-        NO_INFO,
-
-        /**
-         * The block violates at least one validation rule.
-         */
-        INVALID
+    class Builder(
+        var type: String? = null,
+        var rawTransaction: ByteArray? = null,
+        var publicKey: ByteArray? = null,
+        var sequenceNumber: UInt? = null,
+        var linkPublicKey: ByteArray? = null,
+        var linkSequenceNumber: UInt? = null,
+        var previousHash: ByteArray? = null,
+        var signature: ByteArray? = null
+    ) {
+        fun build(): TrustChainBlock {
+            val type = type ?: throw IllegalStateException("type is null")
+            val rawTransaction = rawTransaction ?: throw IllegalStateException("transaction is null")
+            val publicKey = publicKey ?: throw IllegalStateException("public key is null")
+            val sequenceNumber = sequenceNumber ?: throw IllegalStateException("sequence number is null")
+            val linkPublicKey = linkPublicKey ?: throw IllegalStateException("link public key is null")
+            val linkSequenceNumber = linkSequenceNumber ?: throw IllegalStateException("link sequence number is null")
+            val previousHash = previousHash ?: throw IllegalStateException("previous hash is null")
+            val signature = signature ?: throw IllegalStateException("signature is null")
+            return TrustChainBlock(type,
+                rawTransaction,
+                publicKey,
+                sequenceNumber,
+                linkPublicKey,
+                linkSequenceNumber,
+                previousHash,
+                signature,
+                Date())
+        }
     }
 }

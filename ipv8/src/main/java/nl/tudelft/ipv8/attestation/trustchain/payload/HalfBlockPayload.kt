@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.attestation.trustchain.payload
 
+import nl.tudelft.ipv8.attestation.trustchain.EMPTY_SIG
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.*
 
@@ -64,16 +65,16 @@ open class HalfBlockPayload(
             return Pair(payload, localOffset)
         }
 
-        fun fromHalfBlock(block: TrustChainBlock): HalfBlockPayload {
+        fun fromHalfBlock(block: TrustChainBlock, sign: Boolean = true): HalfBlockPayload {
             return HalfBlockPayload(
                 block.publicKey,
                 block.sequenceNumber,
                 block.linkPublicKey,
                 block.linkSequenceNumber,
                 block.previousHash,
-                block.signature,
+                if (sign) block.signature else EMPTY_SIG,
                 block.type,
-                block.transaction,
+                block.rawTransaction,
                 block.timestamp.time.toULong()
             )
         }

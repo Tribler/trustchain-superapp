@@ -2,6 +2,11 @@ package nl.tudelft.ipv8.attestation.trustchain
 
 data class TrustChainSettings(
     /**
+     * The set with block types that should not be broadcast.
+     */
+    val blockTypesBcDisabled: Set<String> = setOf(),
+
+    /**
      * The fan-out of the broadcast when a new block is created.
      */
     val broadcastFanout: Int = 25,
