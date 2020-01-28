@@ -12,18 +12,28 @@ import java.io.ObjectOutputStream
  */
 object TransactionSerialization {
     fun deserialize(tx: ByteArray): TrustChainTransaction {
-        val bis = ByteArrayInputStream(tx)
-        return ObjectInputStream(bis).use { ins ->
-            ins.readObject() as Map<*, *>
+        try {
+            val bis = ByteArrayInputStream(tx)
+            return ObjectInputStream(bis).use { ins ->
+                ins.readObject() as Map<*, *>
+            }
+        } catch (e: Exception) {
+            throw TransactionSerializationException(e)
         }
     }
 
     fun serialize(tx: TrustChainTransaction): ByteArray {
-        ByteArrayOutputStream().use { bos ->
-            val out = ObjectOutputStream(bos)
-            out.writeObject(tx)
-            out.flush()
-            return bos.toByteArray()
+        try {
+            return ByteArrayOutputStream().use { bos ->
+                val out = ObjectOutputStream(bos)
+                out.writeObject(tx)
+                out.flush()
+                bos.toByteArray()
+            }
+        } catch (e: Exception) {
+            throw TransactionSerializationException(e)
         }
     }
 }
+
+class TransactionSerializationException(cause: Exception?) : Exception(cause)

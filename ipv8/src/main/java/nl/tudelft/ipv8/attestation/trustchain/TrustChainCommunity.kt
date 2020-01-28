@@ -155,151 +155,67 @@ class TrustChainCommunity(
         publicKey: ByteArray
     ): TrustChainBlock {
         val block = ProposalBlockBuilder(myPeer, database, blockType, transaction, publicKey).sign()
+
         onBlockCreated(block)
+
+        // Broadcast the block in the network if we initiated a transaction
+        if (block.type !in settings.blockTypesBcDisabled) {
+            sendBlock(block)
+        }
+
+        // We keep track of this outstanding sign request
+        if (!publicKey.contentEquals(myPeer.publicKey.keyToBin())) {
+            // TODO: implement HalfBlockSignCache
+        }
+
         return block
     }
 
     /**
-     * Creates an agreement block that will be linked to the source block.
+     * Creates an agreement block that will be linked to the proposal block.
      *
-     * @param source The source block which had no initial counterpary to sign.
+     * @param link The proposal block which the agreement block will be linked to.
      * @param transaction A map with supplementary information concerning the transaction.
      */
     fun createAgreementBlock(
-        source: TrustChainBlock,
+        link: TrustChainBlock,
         transaction: TrustChainTransaction
     ): TrustChainBlock {
-        val block = AgreementBlockBuilder(myPeer, database, source, transaction).sign()
+        assert (link.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) ||
+            link.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)) {
+            "Cannot counter sign block not addressed to self"
+        }
+
+        assert(link.linkSequenceNumber == UNKNOWN_SEQ) {
+            "Cannot counter sign block that is not a request"
+        }
+
+        val block = AgreementBlockBuilder(myPeer, database, link, transaction).sign()
+
         onBlockCreated(block)
+
+        // Broadcast both half blocks
+        if (block.type !in settings.blockTypesBcDisabled) {
+            sendBlockPair(link, block)
+        }
+
         return block
     }
 
     private fun onBlockCreated(block: TrustChainBlock) {
         // Validate and persist
         val validation = validatePersistBlock(block)
+
         logger.info { "Signed block, validation result: $validation" }
+
         if (validation !is ValidationResult.PartialNext && validation !is ValidationResult.Valid) {
             throw RuntimeException("Signed block did not validate")
         }
 
-
-    }
-
-    /**
-     * Create, sign, persist and send a block signed message.
-     *
-     * @param peer The peer with whom you have interacted, as a IPv8 peer.
-     * @param publicKey The public key of the other party you transact with.
-     * @param blockType The type of the block to be constructed, as a string.
-     * @param transaction A string describing the interaction in this block.
-     * @param linked The block that the requester is asking us to sign.
-     * @param additionalInfo Stores additional information, on the transaction.
-     */
-    fun signBlock(
-        peer: Peer? = null,
-        publicKey: ByteArray? = null,
-        blockType: String? = null,
-        transaction: TrustChainTransaction? = null,
-        linked: TrustChainBlock? = null,
-        additionalInfo: Map<String, Any>? = null
-    ): Pair<TrustChainBlock, TrustChainBlock?> {
-        assert(peer != null || (linked == null &&
-            publicKey?.contentEquals(ANY_COUNTERPARTY_PK) == true)) {
-            "Peer, linked block should not be provided when creating a no counterparty source " +
-                "block. Public key should be that reserved for any counterpary."
-        }
-
-        assert((transaction == null && linked != null) ||
-            (transaction != null && linked == null)) {
-            "Either provide a linked block or a transaction, not both"
-        }
-
-        assert(additionalInfo == null || (linked != null && transaction == null &&
-            peer == myPeer && publicKey.contentEquals(linked.publicKey))) {
-            "Either no additional info is provided or one provides it for a linked block"
-        }
-
-        assert (linked == null ||
-            linked.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) ||
-            linked.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)) {
-            "Cannot counter sign block not addressed to self"
-        }
-
-        assert(linked == null || linked.linkSequenceNumber == UNKNOWN_SEQ) {
-            "Cannot counter sign block that is not a request"
-        }
-
-        val builder = TrustChainBlock.Builder()
-
-        if (linked != null) {
-            builder.type = linked.type
-            builder.rawTransaction = linked.rawTransaction
-            builder.linkPublicKey = linked.publicKey
-            builder.linkSequenceNumber = linked.sequenceNumber
-        } else {
-            builder.type = blockType
-            builder.rawTransaction = TransactionSerialization.serialize(transaction!!)
-            builder.linkPublicKey = publicKey
-            builder.linkSequenceNumber = UNKNOWN_SEQ
-        }
-
-        val prevBlock = database.getLatest(myPeer.publicKey.keyToBin())
-        if (prevBlock != null) {
-            builder.sequenceNumber = prevBlock.sequenceNumber + 1u
-            builder.previousHash = prevBlock.calculateHash()
-        }
-
-        builder.publicKey = publicKey
-        builder.signature = EMPTY_SIG
-
-        val block = builder.build()
-        block.sign(myPeer.key as PrivateKey)
-
-        // Validate and persist
-        val validation = validatePersistBlock(block)
-        logger.info { "Signed block, validation result: $validation" }
-        if (validation !is ValidationResult.PartialNext && validation !is ValidationResult.Valid) {
-            throw RuntimeException("Signed block did not validate")
-        }
-
-        // This is a source block with no counterparty
-        if (peer == null && publicKey.contentEquals(ANY_COUNTERPARTY_PK)) {
-            if (block.type !in settings.blockTypesBcDisabled) {
-                sendBlock(block)
-            }
-            return Pair(block, null)
-        }
-
-        // If there is a counterparty to sign, we send it
+        val peer = network.getVerifiedByPublicKeyBin(block.linkPublicKey)
         if (peer != null) {
+            // If there is a counterparty to sign, we send it
             sendBlock(block, address = peer.address)
-        }
-
-        // We broadcast the block in the network if we initiated a transaction
-        if (blockType !in settings.blockTypesBcDisabled && linked == null) {
-            sendBlock(block)
-        }
-
-        if (peer == myPeer) {
-            // We created a self-signed block
-            if (block.type !in settings.blockTypesBcDisabled) {
-                sendBlock(block)
-            }
-            // TODO: what happens here?
-            return if (publicKey.contentEquals(ANY_COUNTERPARTY_PK)) {
-                Pair(block, null)
-            } else {
-                Pair(block, linked)
-            }
-        } else if (linked == null) {
-            // We keep track of this outstanding sign request.
-            // TODO: wait for the signed block
-        } else {
-            // Return both half blocks.
-            if (block.type !in settings.blockTypesBcDisabled) {
-                sendBlockPair(linked, block)
-            }
-            return Pair(linked, block)
         }
     }
 
