@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.attestation.trustchain
 
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.keyvault.PrivateKey
 
 abstract class BlockBuilder(

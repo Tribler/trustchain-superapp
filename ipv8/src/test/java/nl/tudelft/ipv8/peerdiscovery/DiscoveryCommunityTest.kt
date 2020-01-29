@@ -137,14 +137,14 @@ class DiscoveryCommunityTest {
         val endpoint = getEndpoint()
         val network = Network()
         network.addVerifiedPeer(Peer(JavaCryptoProvider.generateKey(), Address("12.2.3.4", 5234)))
-        val community = DiscoveryCommunity(myPeer, endpoint, network, 2, JavaCryptoProvider)
+        val community = DiscoveryCommunity(myPeer, endpoint, network, 1, JavaCryptoProvider)
 
         assertEquals(0, community.getPeers().size)
         assertEquals(1, network.verifiedPeers.size)
 
         val peer1 = Peer(JavaCryptoProvider.generateKey(), Address("13.2.3.4", 5234))
         val network1 = Network()
-        val community1 = DiscoveryCommunity(peer1, endpoint, network1, 2, JavaCryptoProvider)
+        val community1 = DiscoveryCommunity(peer1, endpoint, network1, 1, JavaCryptoProvider)
         network1.registerServiceProvider(community1.serviceId, community1)
         val payload1 = community1.createSimilarityResponse(123, peer1)
         community.handleSimilarityResponse(Packet(Address("13.2.3.4", 1234), payload1))
@@ -153,7 +153,7 @@ class DiscoveryCommunityTest {
 
         val peer2 = Peer(JavaCryptoProvider.generateKey(), Address("14.2.3.4", 5234))
         val network2 = Network()
-        val community2 = DiscoveryCommunity(peer2, endpoint, network2, 2, JavaCryptoProvider)
+        val community2 = DiscoveryCommunity(peer2, endpoint, network2, 1, JavaCryptoProvider)
         network2.registerServiceProvider(community2.serviceId, community2)
         val payload2 = community2.createSimilarityResponse(123, peer2)
         community.handleSimilarityResponse(Packet(Address("14.2.3.4", 5234), payload2))

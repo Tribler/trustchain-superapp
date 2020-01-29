@@ -6,11 +6,24 @@ apply plugin: 'jacoco'
 
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
+apply plugin: 'com.squareup.sqldelight'
+
+sqldelight {
+    Database {
+        packageName = "nl.tudelft.ipv8.attestation.trustchain.store"
+        sourceFolders = ["sqldelight"]
+        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    }
+}
+
 ktlint {
     version = "$ktlint_version"
     android = true
     outputToConsole = true
-    ignoreFailures = false
+    ignoreFailures = true
+    filter {
+        exclude("**/generated/**")
+    }
 }
 
 jacocoTestReport {

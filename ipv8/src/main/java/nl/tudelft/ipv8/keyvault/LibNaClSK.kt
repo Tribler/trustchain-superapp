@@ -68,7 +68,7 @@ class LibNaClSK(
             val str = bin.toString(Charsets.US_ASCII)
             val binPrefix = str.substring(0, BIN_PREFIX.length)
             if (binPrefix != BIN_PREFIX)
-                throw IllegalArgumentException("Bin prefix $binPrefix does not match ${BIN_PREFIX}")
+                throw IllegalArgumentException("Bin prefix $binPrefix does not match $BIN_PREFIX")
 
             if (bin.size != binSize)
                 throw IllegalArgumentException("Bin is expected to have $binSize bytes, has ${bin.size}")

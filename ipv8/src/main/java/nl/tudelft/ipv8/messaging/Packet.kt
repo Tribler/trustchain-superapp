@@ -2,7 +2,6 @@ package nl.tudelft.ipv8.messaging
 
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockBroadcastPayload
 import nl.tudelft.ipv8.exception.PacketDecodingException
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload

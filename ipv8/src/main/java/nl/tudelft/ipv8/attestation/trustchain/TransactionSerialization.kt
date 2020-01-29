@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 
-
 /**
  * Serializes and deserializes transactions using native Java primitives. Not that this is not
  * currently compatible with Python encoding implementation.

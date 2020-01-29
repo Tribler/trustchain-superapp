@@ -12,11 +12,8 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.random
-import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.util.contentEquals
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
@@ -202,7 +199,7 @@ class TrustChainCommunity(
         link: TrustChainBlock,
         transaction: TrustChainTransaction
     ): TrustChainBlock {
-        assert (link.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) ||
+        assert(link.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) ||
             link.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)) {
             "Cannot counter sign block not addressed to self"
         }
@@ -244,7 +241,6 @@ class TrustChainCommunity(
      * Crawl the whole chain of a specific peer.
      */
     fun crawlChain(peer: Peer, latestBlockNum: Int = 0) {
-
     }
 
     /*
@@ -364,7 +360,8 @@ class TrustChainCommunity(
         crawlId: UInt,
         index: Int,
         totalCount: Int,
-        peer: Peer) {
+        peer: Peer
+    ) {
 
         val globalTime = claimGlobalTime()
         val payload = CrawlResponsePayload.fromCrawl(block, crawlId, index.toUInt(),
