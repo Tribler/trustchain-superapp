@@ -40,6 +40,6 @@ dependencies {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
         "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-Werror" // Set Kotlin compiler warnings as errors
+        // "-Werror" // Set Kotlin compiler warnings as errors
     ]
 }

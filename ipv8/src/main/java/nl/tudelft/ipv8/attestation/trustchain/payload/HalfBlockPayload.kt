@@ -3,6 +3,7 @@ package nl.tudelft.ipv8.attestation.trustchain.payload
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_SIG
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.*
+import java.util.*
 
 /**
  * Payload for message that ships a half block.
@@ -28,6 +29,20 @@ open class HalfBlockPayload(
             serializeVarLen(blockType.toByteArray(Charsets.US_ASCII)) +
             serializeVarLen(transaction) +
             serializeULong(timestamp)
+    }
+
+    fun toBlock(): TrustChainBlock {
+        return TrustChainBlock(
+            blockType,
+            transaction,
+            publicKey,
+            sequenceNumber,
+            linkPublicKey,
+            linkSequenceNumber,
+            previousHash,
+            signature,
+            Date(timestamp.toLong())
+        )
     }
 
     companion object : Deserializable<HalfBlockPayload> {

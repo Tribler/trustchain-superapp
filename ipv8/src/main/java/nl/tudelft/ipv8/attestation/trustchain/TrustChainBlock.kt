@@ -104,22 +104,6 @@ class TrustChainBlock(
         return sha256(payload)
     }
 
-    companion object {
-        fun fromPayload(payload: HalfBlockPayload): TrustChainBlock {
-            return TrustChainBlock(
-                payload.blockType,
-                payload.transaction,
-                payload.publicKey,
-                payload.sequenceNumber,
-                payload.linkPublicKey,
-                payload.linkSequenceNumber,
-                payload.previousHash,
-                payload.signature,
-                Date(payload.timestamp.toLong())
-            )
-        }
-    }
-
     class Builder(
         var type: String? = null,
         var rawTransaction: ByteArray? = null,

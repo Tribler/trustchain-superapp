@@ -4,8 +4,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockBroadcastPayload
-import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.CryptoProvider
@@ -15,9 +13,11 @@ import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.contentEquals
+import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
@@ -38,7 +38,12 @@ class TrustChainCommunity(
 
     init {
         messageHandlers[MessageId.HALF_BLOCK] = ::onHalfBlockPacket
+        messageHandlers[MessageId.CRAWL_REQUEST] = ::onCrawlRequestPacket
+        messageHandlers[MessageId.CRAWL_RESPONSE] = ::onCrawlResponsePacket
         messageHandlers[MessageId.HALF_BLOCK_BROADCAST] = ::onHalfBlockBroadcastPacket
+        messageHandlers[MessageId.HALF_BLOCK_PAIR] = ::onHalfBlockPairPacket
+        messageHandlers[MessageId.HALF_BLOCK_PAIR_BROADCAST] = ::onHalfBlockPairBroadcastPacket
+        messageHandlers[MessageId.EMPTY_CRAWL_RESPONSE] = ::onEmptyCrawlResponsePacket
     }
 
     /*
@@ -137,7 +142,23 @@ class TrustChainCommunity(
         address: Address? = null,
         ttl: UInt = 1u
     ) {
-        // TODO
+        val globalTime = claimGlobalTime()
+        val dist = GlobalTimeDistributionPayload(globalTime)
+
+        if (address != null) {
+            val payload = HalfBlockPairPayload.fromHalfBlocks(block1, block2)
+            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
+                false)
+            send(address, packet)
+        } else {
+            val payload = HalfBlockPairBroadcastPayload.fromHalfBlocks(block1, block2, ttl)
+            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR_BROADCAST,
+                listOf(dist, payload))
+            for (peer in network.getRandomPeers(settings.broadcastFanout)) {
+                send(peer.address, packet)
+            }
+            relayedBroadcasts.add(block1.blockId)
+        }
     }
 
     /**
@@ -231,17 +252,38 @@ class TrustChainCommunity(
      */
 
     internal fun onHalfBlockPacket(packet: Packet) {
-        val remainder = packet.getPayload()
-        val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = HalfBlockPayload.deserialize(remainder, distSize)
+        val payload = packet.getPayload(HalfBlockPayload.Companion)
         onHalfBlock(packet.source, payload)
     }
 
     internal fun onHalfBlockBroadcastPacket(packet: Packet) {
-        val remainder = packet.getPayload()
-        val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = HalfBlockBroadcastPayload.deserialize(remainder, distSize)
+        val payload = packet.getPayload(HalfBlockBroadcastPayload.Companion)
         onHalfBlockBroadcast(payload)
+    }
+
+    internal fun onHalfBlockPairPacket(packet: Packet) {
+        val payload = packet.getPayload(HalfBlockPairPayload.Companion)
+        onHalfBlockPair(payload)
+    }
+
+    internal fun onHalfBlockPairBroadcastPacket(packet: Packet) {
+        val payload = packet.getPayload(HalfBlockPairBroadcastPayload.Companion)
+        onHalfBlockPairBroadcast(payload)
+    }
+
+    internal fun onCrawlRequestPacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(CrawlRequestPayload.Companion, cryptoProvider)
+        onCrawlRequest(peer, payload)
+    }
+
+    internal fun onCrawlResponsePacket(packet: Packet) {
+        val payload = packet.getPayload(CrawlResponsePayload.Companion)
+        onCrawlResponse(packet.source, payload)
+    }
+
+    internal fun onEmptyCrawlResponsePacket(packet: Packet) {
+        val payload = packet.getPayload(EmptyCrawlResponsePayload.Companion)
+        onEmptyCrawlResponse(payload)
     }
 
     /*
@@ -256,9 +298,8 @@ class TrustChainCommunity(
         val publicKey = cryptoProvider.keyFromPublicBin(payload.publicKey)
         val peer = Peer(publicKey, sourceAddress)
 
-        val block = TrustChainBlock.fromPayload(payload)
         try {
-            processHalfBlock(block, peer)
+            processHalfBlock(payload.toBlock(), peer)
         } catch (e: Exception) {
             logger.error(e) { "Failed to process half block" }
         }
@@ -268,12 +309,107 @@ class TrustChainCommunity(
      * We received a half block, part of a broadcast. Disseminate it further.
      */
     fun onHalfBlockBroadcast(payload: HalfBlockBroadcastPayload) {
-        val block = TrustChainBlock.fromPayload(payload)
+        val block = payload.toBlock()
         validatePersistBlock(block)
 
-        if (!relayedBroadcasts.contains(block.blockId) && payload.ttl > 0u) {
+        if (!relayedBroadcasts.contains(block.blockId) && payload.ttl > 1u) {
             sendBlock(block, ttl = payload.ttl.toInt() - 1)
         }
+    }
+
+    fun onHalfBlockPair(payload: HalfBlockPairPayload) {
+        validatePersistBlock(payload.block1.toBlock())
+        validatePersistBlock(payload.block2.toBlock())
+    }
+
+    fun onHalfBlockPairBroadcast(payload: HalfBlockPairBroadcastPayload) {
+        val block1 = payload.block1.toBlock()
+        val block2 = payload.block2.toBlock()
+        validatePersistBlock(block1)
+        validatePersistBlock(block2)
+
+        if (block1.blockId !in relayedBroadcasts && payload.ttl > 1u) {
+            sendBlockPair(block1, block2, ttl = payload.ttl - 1u)
+        }
+    }
+
+    fun onCrawlRequest(peer: Peer, payload: CrawlRequestPayload) {
+        val startSeqNum = getPositiveSeqNum(payload.startSeqNum, payload.publicKey)
+        val endSeqNum = getPositiveSeqNum(payload.endSeqNum, payload.publicKey)
+
+        val blocks = database.crawl(payload.publicKey, startSeqNum, endSeqNum,
+            limit = settings.maxCrawlBatch)
+
+        if (blocks.isEmpty()) {
+            val globalTime = claimGlobalTime()
+            val responsePayload = EmptyCrawlResponsePayload(payload.crawlId)
+            val dist = GlobalTimeDistributionPayload(globalTime)
+            val packet = serializePacket(prefix, MessageId.EMPTY_CRAWL_RESPONSE,
+                listOf(dist, responsePayload), false)
+            send(peer.address, packet)
+        } else {
+            sendCrawlResponses(blocks, peer, payload.crawlId)
+        }
+    }
+
+    private fun sendCrawlResponses(blocks: List<TrustChainBlock>, peer: Peer, crawlId: UInt) {
+        for ((i, block) in blocks.withIndex()) {
+            sendCrawlResponse(block, crawlId, i + 1, blocks.size, peer)
+        }
+        logger.info { "Sent ${blocks.size} blocks" }
+    }
+
+    private fun sendCrawlResponse(
+        block: TrustChainBlock,
+        crawlId: UInt,
+        index: Int,
+        totalCount: Int,
+        peer: Peer) {
+
+        val globalTime = claimGlobalTime()
+        val payload = CrawlResponsePayload.fromCrawl(block, crawlId, index.toUInt(),
+            totalCount.toUInt())
+        val dist = GlobalTimeDistributionPayload(globalTime)
+
+        val packet = serializePacket(prefix, MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
+        send(peer.address, packet)
+    }
+
+    /**
+     * Converts a negative sequence number to a positive number, based on the last block of one's
+     * chain.
+     */
+    private fun getPositiveSeqNum(seqNum: Long, publicKey: ByteArray): Long {
+        return if (seqNum < 0) {
+            val lastBlock = database.getLatest(publicKey)
+            return if (lastBlock != null) {
+                max(GENESIS_SEQ.toLong(), lastBlock.sequenceNumber.toLong() + seqNum + 1)
+            } else {
+                GENESIS_SEQ.toLong()
+            }
+        } else {
+            seqNum
+        }
+    }
+
+    fun onCrawlResponse(sourceAddress: Address, payload: CrawlResponsePayload) {
+        onHalfBlock(sourceAddress, payload.block)
+
+        val block = payload.block.toBlock()
+
+        // TODO: remove crawl id from request cache
+    }
+
+    fun onEmptyCrawlResponse(payload: EmptyCrawlResponsePayload) {
+        // TODO: remove crawl id from request cache
+    }
+
+    /**
+     * Return the length of your own chain.
+     */
+    fun getChainLength(): Int {
+        val latestBlock = database.getLatest(myPeer.publicKey.keyToBin())
+        return latestBlock?.sequenceNumber?.toInt() ?: 0
     }
 
     /**

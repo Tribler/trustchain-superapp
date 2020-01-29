@@ -10,7 +10,7 @@ import org.junit.Test
 
 class EmptyCrawlResponsePayloadTest {
     @Test
-    fun serialize() {
+    fun serializeAndDeserialize() {
         val payload = EmptyCrawlResponsePayload(
             123u
         )
