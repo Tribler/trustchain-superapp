@@ -239,8 +239,17 @@ class TrustChainCommunity(
 
     /**
      * Crawl the whole chain of a specific peer.
+     *
+     * @param latestBlockNum The latest block number of the peer in question, if available.
      */
     fun crawlChain(peer: Peer, latestBlockNum: Int = 0) {
+        // TODO: check if crawl is already pending
+
+
+    }
+
+    private fun sendNextPartialChainCrawlRequest() {
+
     }
 
     /*
