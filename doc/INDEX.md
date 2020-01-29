@@ -20,3 +20,4 @@ The protocol is built around the concept of communities. A community represents 
 
 - [Community](Community.md)
 - [Discovery Community](DiscoveryCommunity.md)
+- [TrustChain Community](TrustChainCommunity.md)
