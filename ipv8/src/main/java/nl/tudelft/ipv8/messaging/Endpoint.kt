@@ -1,6 +1,9 @@
 package nl.tudelft.ipv8.messaging
 
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
+
+private val logger = KotlinLogging.logger {}
 
 abstract class Endpoint {
     private val listeners = mutableListOf<EndpointListener>()
@@ -24,6 +27,7 @@ abstract class Endpoint {
     }
 
     protected fun setEstimatedLan(address: Address) {
+        logger.debug("estimated address: $address")
         for (listener in listeners) {
             listener.onEstimatedLanChanged(address)
         }

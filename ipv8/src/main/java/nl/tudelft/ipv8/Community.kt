@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
@@ -21,8 +22,6 @@ abstract class Community(
     override val maxPeers: Int,
     protected val cryptoProvider: CryptoProvider
 ) : Overlay {
-    abstract val serviceId: String
-
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
@@ -110,7 +109,7 @@ abstract class Community(
 
         val packetPrefix = data.copyOfRange(0, prefix.size)
         if (!packetPrefix.contentEquals(prefix)) {
-            logger.debug("prefix not matching")
+            // logger.debug("prefix not matching")
             return
         }
 
@@ -405,7 +404,7 @@ abstract class Community(
             Address("130.161.119.215", 6525),
             Address("130.161.119.215", 6526),
             Address("81.171.27.194", 6527),
-            Address("81.171.27.194", 6528)
+            //Address("81.171.27.194", 6528)
              */
             // IPv8 + LibNaCL
             Address("131.180.27.161", 6427)

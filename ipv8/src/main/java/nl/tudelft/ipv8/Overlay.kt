@@ -8,6 +8,7 @@ import nl.tudelft.ipv8.peerdiscovery.Network
  * Interface for an Internet overlay.
  */
 interface Overlay : EndpointListener {
+    val serviceId: String
     val myPeer: Peer
     val endpoint: Endpoint
     val network: Network

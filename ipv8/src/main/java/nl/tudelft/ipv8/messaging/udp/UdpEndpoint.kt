@@ -8,7 +8,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.util.toHex
 import java.io.IOException
 import java.net.*
 
@@ -31,7 +30,6 @@ open class UdpEndpoint(
         assert(isOpen()) { "UDP socket is closed" }
         scope.launch {
             logger.debug("send packet (${data.size} B) to $address")
-            logger.debug(data.toHex())
             try {
                 val datagramPacket = DatagramPacket(data, data.size, address.toSocketAddress())
                 socket?.send(datagramPacket)
@@ -42,14 +40,30 @@ open class UdpEndpoint(
     }
 
     override fun open() {
-        startLanEstimation()
-
-        val socket = DatagramSocket(port, ip)
+        val socket = getDatagramSocket()
         this.socket = socket
+
+        logger.info { "Opened UDP socket on port ${socket.localPort}" }
+
+        startLanEstimation()
 
         val bindThread = BindThread(socket)
         bindThread.start()
         this.bindThread = bindThread
+    }
+
+    /**
+     * Finds the nearest unused socket.
+     */
+    private fun getDatagramSocket(): DatagramSocket {
+        for (i in 0 until 100) {
+            try {
+                return DatagramSocket(port + i, ip)
+            } catch (e: Exception) {
+                // Try another port
+            }
+        }
+        throw IllegalStateException("No unused socket found")
     }
 
     override fun close() {
@@ -62,11 +76,23 @@ open class UdpEndpoint(
     }
 
     open fun startLanEstimation() {
-        // TODO
+        logger.debug { "estimate LAN" }
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        for (intf in interfaces) {
+            for (intfAddr in intf.interfaceAddresses) {
+                if (intfAddr.address is Inet4Address && !intfAddr.address.isLoopbackAddress) {
+                    val estimatedAddress = Address(intfAddr.address.hostAddress, getSocketPort())
+                    setEstimatedLan(estimatedAddress)
+                }
+            }
+        }
     }
 
     open fun stopLanEstimation() {
-        // TODO
+    }
+
+    protected fun getSocketPort(): Int {
+        return socket?.localPort ?: port
     }
 
     inner class BindThread(

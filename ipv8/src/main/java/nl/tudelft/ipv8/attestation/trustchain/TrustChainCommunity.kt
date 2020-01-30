@@ -314,7 +314,7 @@ class TrustChainCommunity(
      * We received a half block, part of a broadcast. Disseminate it further.
      */
     fun onHalfBlockBroadcast(payload: HalfBlockBroadcastPayload) {
-        val block = payload.toBlock()
+        val block = payload.block.toBlock()
         validatePersistBlock(block)
 
         if (!relayedBroadcasts.contains(block.blockId) && payload.ttl > 1u) {

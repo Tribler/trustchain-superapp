@@ -17,8 +17,6 @@ class Ipv8(
     private val scope = CoroutineScope(Dispatchers.IO)
 
     fun start() {
-        endpoint.open()
-
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
             val overlay = overlayConfiguration.overlay
@@ -28,6 +26,8 @@ class Ipv8(
                 strategies.add(strategy)
             }
         }
+
+        endpoint.open()
 
         // Start looping call
         startLoopingCall()

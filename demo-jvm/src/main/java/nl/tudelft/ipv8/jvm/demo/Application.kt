@@ -7,6 +7,7 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
+import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.Network
@@ -25,35 +26,50 @@ class Application {
         startIpv8()
     }
 
-    private fun startIpv8() {
-        // General community
-        val myKey = JavaCryptoProvider.generateKey()
-        val address = Address("0.0.0.0", 8090)
-        val myPeer = Peer(myKey, address, false)
-        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
-        val network = Network()
+    private fun createDiscoveryCommunity(myPeer: Peer, endpoint: Endpoint, network: Network): OverlayConfiguration {
         val community = DiscoveryCommunity(myPeer, endpoint, network, maxPeers = 30, cryptoProvider = JavaCryptoProvider)
         val randomWalk = RandomWalk(community, timeout = 3.0, peers = 20)
         val randomChurn = RandomChurn(community)
         val periodicSimilarity = PeriodicSimilarity(community)
         val overlayConfig = OverlayConfiguration(community, listOf(randomWalk, randomChurn, periodicSimilarity))
+        return overlayConfig
+    }
 
-        val config = Ipv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 1.0)
+    private fun createDemoCommunity(myPeer: Peer, endpoint: Endpoint, network: Network): OverlayConfiguration {
+        val demoCommunity = DemoCommunity(myPeer, endpoint, network, JavaCryptoProvider)
+        val demoRandomWalk = RandomWalk(demoCommunity, timeout = 3.0, peers = 20)
+        val demoOverlayConfig = OverlayConfiguration(demoCommunity, listOf(demoRandomWalk))
+        return demoOverlayConfig
+    }
+
+    private fun startIpv8() {
+        // General community
+        val myKey = JavaCryptoProvider.generateKey()
+        val myPeer = Peer(myKey)
+        val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
+        val network = Network()
+
+        val discoveryCommunity = createDiscoveryCommunity(myPeer, endpoint, network)
+        val demoCommunity = createDemoCommunity(myPeer, endpoint, network)
+
+        val config = Ipv8Configuration(overlays = listOf(discoveryCommunity, demoCommunity), walkerInterval = 1.0)
 
         val ipv8 = Ipv8(endpoint, config)
         ipv8.start()
 
         scope.launch {
             while (true) {
-                val peers = network.getPeersForService(community.serviceId)
-                printPeersInfo(peers)
+                printPeersInfo(discoveryCommunity.overlay)
+                printPeersInfo(demoCommunity.overlay)
+                logger.info("---")
                 delay(1000)
             }
         }
     }
 
-    private fun printPeersInfo(peers: List<Peer>) {
-        logger.info("Found ${peers.size} community peers")
+    private fun printPeersInfo(overlay: Overlay) {
+        val peers = overlay.getPeers()
+        logger.info(overlay::class.simpleName + ": ${peers.size} peers")
         for (peer in peers) {
             val avgPing = peer.getAveragePing()
             val lastRequest = peer.lastRequest
