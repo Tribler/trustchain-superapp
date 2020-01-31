@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
@@ -21,6 +22,7 @@ import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.service.Ipv8Service
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.util.toHex
 
 class PeersFragment : BaseFragment() {
     private val adapter = ItemAdapter()
@@ -28,7 +30,13 @@ class PeersFragment : BaseFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(PeerItemRenderer())
+        adapter.registerRenderer(PeerItemRenderer {
+            findNavController().navigate(
+                PeersFragmentDirections.actionPeersFragmentToBlocksFragment(
+                    it.peer.publicKey.keyToBin().toHex()
+                )
+            )
+        })
     }
 
     override fun onCreateView(

@@ -6,7 +6,11 @@
     <fragment
         android:id="@+id/peersFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.peers.PeersFragment"
-        android:label="PeersFragment" />
+        android:label="PeersFragment" >
+        <action
+            android:id="@+id/action_peersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment" />
+    </fragment>
     <fragment
         android:id="@+id/usersFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"

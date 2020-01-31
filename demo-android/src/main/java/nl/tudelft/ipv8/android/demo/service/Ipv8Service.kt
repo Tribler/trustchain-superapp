@@ -186,7 +186,7 @@ class Ipv8Service : Service() {
 
         val builder = NotificationCompat.Builder(this,
             Ipv8Application.NOTIFICATION_CHANNEL_CONNECTION)
-            .setContentTitle("TrustChain")
+            .setContentTitle("IPv8")
             .setContentText("Running")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)

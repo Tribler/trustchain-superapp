@@ -10,16 +10,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_blocks.*
-import kotlinx.android.synthetic.main.fragment_peers.*
-import kotlinx.android.synthetic.main.fragment_peers.imgEmpty
 import kotlinx.android.synthetic.main.fragment_peers.recyclerView
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.service.Ipv8Service
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.android.demo.ui.peers.PeerItemRenderer
 import nl.tudelft.ipv8.util.hexToBytes
 
 class BlocksFragment : BaseFragment() {
@@ -61,6 +56,6 @@ class BlocksFragment : BaseFragment() {
             BlockItem(it)
         }
         adapter.updateItems(items)
-        imgEmpty.isVisible = items.isEmpty()
+        imgNoBlocks.isVisible = items.isEmpty()
     }
 }
