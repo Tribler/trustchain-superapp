@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/mutualBlockItem"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:id="@+id/blockStatus"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingStart="2dp"
+                android:text="Status of Block:"
+                android:textColor="@android:color/white"
+                android:textAlignment="viewStart"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/dark_gray"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/gray"
+                    android:id="@+id/own_chain_indicator"
+                    android:paddingEnd="6dp">
+
+                    <TextView
+                        android:id="@+id/txtPublicKey"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:text="User"
+                        android:textColor="@android:color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtSequenceNumber"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginBottom="2dp"
+                        android:singleLine="true"
+                        android:ellipsize="middle"
+                        android:text="seqNum"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@color/gray"
+                    android:orientation="vertical"
+                    android:id="@+id/link_chain_indicator_mutualBlock"
+                    android:paddingEnd="6dp">
+
+                    <TextView
+                        android:id="@+id/txtLinkPublicKey"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:ellipsize="middle"
+                        android:singleLine="true"
+                        android:text="Link peer"
+                        android:textColor="@android:color/white"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/txtLinkSequenceNumber"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/white"
+                        android:textSize="12sp"
+                        android:layout_marginLeft="5dp"
+                        android:singleLine="true"
+                        android:ellipsize="middle"
+                        android:layout_marginBottom="2dp"
+                        android:text="linkSeq"/>
+                </LinearLayout>
+
+
+                <TextView
+                    android:id="@+id/transactionMutualBlock"
+                    android:layout_width="120dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:ellipsize="middle"
+                    android:maxLines="2"
+                    android:paddingStart="6dp"
+                    android:text="Transaction"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp" />
+
+                <!--<ImageView-->
+                <!--android:id="@+id/expand_arrow"-->
+                <!--android:layout_width="40dp"-->
+                <!--android:layout_height="match_parent"-->
+                <!--android:src="@drawable/ic_expand_more_black_24dp" />-->
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--The sign button-->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:padding="5dp"
+        android:layout_marginTop="-10dp"
+        android:id="@+id/sign_layout">
+
+        <Button
+            android:id="@+id/sign_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="@android:color/white"
+            android:text="@string/sign_block"
+            android:background="@color/dark_gray"/>
+    </LinearLayout>
+
+
+
+</LinearLayout>

@@ -10,4 +10,7 @@
     <color name="red">#EE3B00</color>
     <color name="purple">#AA00FF</color>
     <color name="light_gray">#EEEEEE</color>
+    <color name="mild_gray">#CCCCCC</color>
+    <color name="gray">#a9a9a9</color>
+    <color name="dark_gray">#444444</color>
 </resources>

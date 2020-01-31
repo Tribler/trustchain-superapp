@@ -1,4 +1,4 @@
-package nl.tudelft.ipv8.jvm.demo
+package nl.tudelft.ipv8.android.demo
 
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer

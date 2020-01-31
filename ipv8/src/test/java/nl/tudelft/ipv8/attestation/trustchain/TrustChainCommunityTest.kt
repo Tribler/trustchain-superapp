@@ -17,8 +17,8 @@ class TrustChainCommunityTest : BaseCommunityTest() {
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
         val store = mockk<TrustChainStore>(relaxed = true)
-        return TrustChainCommunity(getMyPeer(), getEndpoint(), Network(), settings, store,
-            maxPeers = 20, cryptoProvider = JavaCryptoProvider)
+        return TrustChainCommunity(getMyPeer(), getEndpoint(), Network(),
+            maxPeers = 20, cryptoProvider = JavaCryptoProvider, settings = settings, database = store)
     }
 
     @Test

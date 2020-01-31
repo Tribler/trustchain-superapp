@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    app:startDestination="@id/peersFragment">
+
+    <fragment
+        android:id="@+id/peersFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.peers.PeersFragment"
+        android:label="PeersFragment" />
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"
+        android:label="UsersFragment" >
+        <action
+            android:id="@+id/action_usersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/blocksFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.BlocksFragment"
+        android:label="BlocksFragment" >
+        <argument
+            android:name="publicKey"
+            app:argType="string" />
+    </fragment>
+</navigation>

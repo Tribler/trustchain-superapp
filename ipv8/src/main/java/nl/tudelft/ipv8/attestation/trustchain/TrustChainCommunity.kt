@@ -22,14 +22,14 @@ private val logger = KotlinLogging.logger {}
  * The community implementing TrustChain, a scalable, tamper-proof, distributed ledger. The
  * community handles sending blocks, broadcasting, and crawling chains of other peers.
  */
-class TrustChainCommunity(
+open class TrustChainCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network,
-    val settings: TrustChainSettings,
-    val database: TrustChainStore,
     maxPeers: Int,
-    cryptoProvider: CryptoProvider
+    cryptoProvider: CryptoProvider,
+    val settings: TrustChainSettings,
+    val database: TrustChainStore
 ) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider) {
     override val serviceId = "5ad767b05ae592a02488272ca2a86b847d4562e1"
 
@@ -271,37 +271,37 @@ class TrustChainCommunity(
      * Request deserialization
      */
 
-    internal fun onHalfBlockPacket(packet: Packet) {
+    private fun onHalfBlockPacket(packet: Packet) {
         val payload = packet.getPayload(HalfBlockPayload.Companion)
         onHalfBlock(packet.source, payload)
     }
 
-    internal fun onHalfBlockBroadcastPacket(packet: Packet) {
+    private fun onHalfBlockBroadcastPacket(packet: Packet) {
         val payload = packet.getPayload(HalfBlockBroadcastPayload.Companion)
         onHalfBlockBroadcast(payload)
     }
 
-    internal fun onHalfBlockPairPacket(packet: Packet) {
+    private fun onHalfBlockPairPacket(packet: Packet) {
         val payload = packet.getPayload(HalfBlockPairPayload.Companion)
         onHalfBlockPair(payload)
     }
 
-    internal fun onHalfBlockPairBroadcastPacket(packet: Packet) {
+    private fun onHalfBlockPairBroadcastPacket(packet: Packet) {
         val payload = packet.getPayload(HalfBlockPairBroadcastPayload.Companion)
         onHalfBlockPairBroadcast(payload)
     }
 
-    internal fun onCrawlRequestPacket(packet: Packet) {
+    private fun onCrawlRequestPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(CrawlRequestPayload.Companion, cryptoProvider)
         onCrawlRequest(peer, payload)
     }
 
-    internal fun onCrawlResponsePacket(packet: Packet) {
+    private fun onCrawlResponsePacket(packet: Packet) {
         val payload = packet.getPayload(CrawlResponsePayload.Companion)
         onCrawlResponse(packet.source, payload)
     }
 
-    internal fun onEmptyCrawlResponsePacket(packet: Packet) {
+    private fun onEmptyCrawlResponsePacket(packet: Packet) {
         val payload = packet.getPayload(EmptyCrawlResponsePayload.Companion)
         onEmptyCrawlResponse(payload)
     }
@@ -311,10 +311,12 @@ class TrustChainCommunity(
      */
 
     /**
-     * We've received a half block, either because we sent a SIGNED message to some one or we are
+     * We've received a half block, either because we sent a signed half block to someone or we are
      * crawling.
      */
-    fun onHalfBlock(sourceAddress: Address, payload: HalfBlockPayload) {
+    private fun onHalfBlock(sourceAddress: Address, payload: HalfBlockPayload) {
+        logger.debug("<- $payload")
+
         val publicKey = cryptoProvider.keyFromPublicBin(payload.publicKey)
         val peer = Peer(publicKey, sourceAddress)
 
@@ -328,7 +330,9 @@ class TrustChainCommunity(
     /**
      * We received a half block, part of a broadcast. Disseminate it further.
      */
-    fun onHalfBlockBroadcast(payload: HalfBlockBroadcastPayload) {
+    private fun onHalfBlockBroadcast(payload: HalfBlockBroadcastPayload) {
+        logger.debug("<- $payload")
+
         val block = payload.block.toBlock()
         validateAndPersistBlock(block)
 
@@ -337,12 +341,16 @@ class TrustChainCommunity(
         }
     }
 
-    fun onHalfBlockPair(payload: HalfBlockPairPayload) {
+    private fun onHalfBlockPair(payload: HalfBlockPairPayload) {
+        logger.debug("<- $payload")
+
         validateAndPersistBlock(payload.block1.toBlock())
         validateAndPersistBlock(payload.block2.toBlock())
     }
 
-    fun onHalfBlockPairBroadcast(payload: HalfBlockPairBroadcastPayload) {
+    private fun onHalfBlockPairBroadcast(payload: HalfBlockPairBroadcastPayload) {
+        logger.debug("<- $payload")
+
         val block1 = payload.block1.toBlock()
         val block2 = payload.block2.toBlock()
         validateAndPersistBlock(block1)
@@ -353,7 +361,9 @@ class TrustChainCommunity(
         }
     }
 
-    fun onCrawlRequest(peer: Peer, payload: CrawlRequestPayload) {
+    private fun onCrawlRequest(peer: Peer, payload: CrawlRequestPayload) {
+        logger.debug("<- $payload")
+
         val startSeqNum = getPositiveSeqNum(payload.startSeqNum, payload.publicKey)
         val endSeqNum = getPositiveSeqNum(payload.endSeqNum, payload.publicKey)
 
@@ -413,7 +423,7 @@ class TrustChainCommunity(
         }
     }
 
-    fun onCrawlResponse(sourceAddress: Address, payload: CrawlResponsePayload) {
+    private fun onCrawlResponse(sourceAddress: Address, payload: CrawlResponsePayload) {
         onHalfBlock(sourceAddress, payload.block)
 
         val block = payload.block.toBlock()
@@ -421,7 +431,7 @@ class TrustChainCommunity(
         // TODO: remove crawl id from request cache
     }
 
-    fun onEmptyCrawlResponse(payload: EmptyCrawlResponsePayload) {
+    private fun onEmptyCrawlResponse(payload: EmptyCrawlResponsePayload) {
         // TODO: remove crawl id from request cache
     }
 
@@ -442,11 +452,11 @@ class TrustChainCommunity(
 
     /**
      * Validates a block and its transaction if a transaction validator has been registered for the
-     * given block type.
+     * given block type. Transactions that cannot be validated are assumed to be valid.
      *
      * @return The validation result.
      */
-    internal fun validateBlock(block: TrustChainBlock): ValidationResult {
+    private fun validateBlock(block: TrustChainBlock): ValidationResult {
         var validationResult = block.validate(database)
 
         if (validationResult !is ValidationResult.Invalid) {

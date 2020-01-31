@@ -16,6 +16,10 @@ class Ipv8(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    fun getOverlays(): List<Overlay> {
+        return overlays
+    }
+
     fun start() {
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {

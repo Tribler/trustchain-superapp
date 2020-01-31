@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: "androidx.navigation.safeargs"
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -26,6 +27,8 @@ android {
 }
 
 dependencies {
+    def fragment_version = "1.2.0"
+
     implementation project(':ipv8-android')
 
     // AndroidX
@@ -33,16 +36,20 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.recyclerview:recyclerview:1.1.0"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation 'com.google.android.material:material:1.0.0'
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     implementation 'com.mattskala:itemadapter:0.2'
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
-    //implementation 'org.slf4j:slf4j-android:1.7.29'
     implementation 'com.github.tony19:logback-android:2.0.0'
-    //implementation 'sk.baka.slf4j:slf4j-handroid:1.7.27'
 
     // Testing
     testImplementation 'junit:junit:4.12'

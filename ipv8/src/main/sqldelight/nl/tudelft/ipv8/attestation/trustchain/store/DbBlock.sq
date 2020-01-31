@@ -19,24 +19,24 @@ INSERT INTO blocks (type, tx, public_key, sequence_number, link_public_key, link
 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 get:
-SELECT * FROM blocks WHERE public_key = ? AND sequence_number = ?;
+SELECT * FROM blocks WHERE public_key = ? AND sequence_number = ? LIMIT 1;
 
 getAllBlocks:
 SELECT * FROM blocks;
 
 getBlockWithHash:
-SELECT * FROM blocks WHERE block_hash = ?;
+SELECT * FROM blocks WHERE block_hash = ? LIMIT 1;
 
 getBlocksWithType:
 SELECT * FROM blocks WHERE type = ?;
 
 getLatestWithType:
 SELECT * FROM blocks WHERE public_key = ? AND type = ? AND sequence_number =
-(SELECT MAX(sequence_number) FROM blocks WHERE public_key = ? AND type = ?);
+(SELECT MAX(sequence_number) FROM blocks WHERE public_key = ? AND type = ?) LIMIT 1;
 
 getLatest:
 SELECT * FROM blocks WHERE public_key = ? AND sequence_number =
-(SELECT MAX(sequence_number) FROM blocks WHERE public_key = ?);
+(SELECT MAX(sequence_number) FROM blocks WHERE public_key = ?) LIMIT 1;
 
 getLatestBlocksWithTypes:
 SELECT * FROM blocks WHERE public_key = ? AND type IN (?) ORDER BY sequence_number DESC LIMIT ?;
@@ -46,17 +46,19 @@ SELECT * FROM blocks WHERE public_key = ? ORDER BY sequence_number DESC LIMIT ?;
 
 getBlockAfterWithType:
 SELECT * FROM blocks WHERE sequence_number > ? AND public_key = ? AND type = ?
-ORDER BY sequence_number ASC;
+ORDER BY sequence_number ASC LIMIT 1;
 
 getBlockAfter:
-SELECT * FROM blocks WHERE sequence_number > ? AND public_key = ? ORDER BY sequence_number ASC;
+SELECT * FROM blocks WHERE sequence_number > ? AND public_key = ? ORDER BY sequence_number ASC
+LIMIT 1;
 
 getBlockBeforeWithType:
 SELECT * FROM blocks WHERE sequence_number < ? AND public_key = ? AND type = ?
-ORDER BY sequence_number DESC;
+ORDER BY sequence_number DESC LIMIT 1;
 
 getBlockBefore:
-SELECT * FROM blocks WHERE sequence_number < ? AND public_key = ? ORDER BY sequence_number DESC;
+SELECT * FROM blocks WHERE sequence_number < ? AND public_key = ? ORDER BY sequence_number DESC
+LIMIT 1;
 
 getLowestSequenceNumberUnknown:
 SELECT b1.sequence_number FROM blocks b1 WHERE b1.public_key = ? AND NOT EXISTS
@@ -69,7 +71,7 @@ ORDER BY sequence_number LIMIT 1;
 
 getLinked:
 SELECT * FROM blocks WHERE public_key = ? AND sequence_number = ? OR link_public_key = ? AND
-link_sequence_number = ? ORDER BY block_timestamp ASC;
+link_sequence_number = ? ORDER BY block_timestamp ASC LIMIT 1;
 
 getAllLinked:
 SELECT * FROM blocks WHERE public_key = ? AND sequence_number = ? OR link_public_key = ? AND
