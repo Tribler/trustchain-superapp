@@ -1,4 +1,4 @@
-# kotlin-ipv8 [![Build Status](https://github.com/MattSkala/kotlin-ipv8/workflows/build/badge.svg)](https://github.com/MattSkala/kotlin-ipv8/actions) [![codecov](https://codecov.io/gh/MattSkala/kotlin-ipv8/branch/master/graph/badge.svg)](https://codecov.io/gh/MattSkala/kotlin-ipv8)
+# kotlin-ipv8 [![Build Status](https://github.com/Tribler/kotlin-ipv8/workflows/build/badge.svg)](https://github.com/MattSkala/kotlin-ipv8/actions) [![codecov](https://codecov.io/gh/Tribler/kotlin-ipv8/branch/master/graph/badge.svg)](https://codecov.io/gh/MattSkala/kotlin-ipv8)
 
 ## What is IPv8?
 
@@ -26,7 +26,7 @@ Install the app on Android:
 
 *Note: It is required to have an Android device connected with USB debugging enabled before running this command.*
 
-<img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-android.png" width="180">
+<img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android.png" width="180">
 
 ### JVM
 
@@ -40,7 +40,7 @@ SLF4J with [SimpleLogger](http://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.h
 ./gradlew :demo-jvm:run -Dorg.slf4j.simpleLogger.defaultLogLevel=debug
 ```
 
-<img src="https://raw.githubusercontent.com/MattSkala/kotlin-ipv8/add-screenshots/doc/demo-jvm.png" width="450">
+<img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-jvm.png" width="450">
 
 ## Tests
 
