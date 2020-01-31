@@ -18,6 +18,10 @@ import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * The community implementing TrustChain, a scalable, tamper-proof, distributed ledger. The
+ * community handles sending blocks, broadcasting, and crawling chains of other peers.
+ */
 class TrustChainCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
@@ -60,10 +64,24 @@ class TrustChainCommunity(
         listeners.add(listener)
     }
 
+    /**
+     * Removes a previously registered block listener.
+     *
+     * @param listener The listener to be removed.
+     * @param blockType The block type to which the listener has been registered.
+     */
     fun removeListener(listener: BlockListener, blockType: String? = null) {
         listenersMap[blockType]?.remove(listener)
     }
 
+    /**
+     * Registers a validator for a specific block type. The validator is called for every incoming
+     * block. It should check the integrity of the transaction and return the validation result.
+     * Invalid blocks will be dropped immediately, valid blocks will be stored in the database.
+     *
+     * @param blockType The block type the validator is able to validate.
+     * @param validator The transaction validator.
+     */
     fun registerTransactionValidator(blockType: String, validator: TransactionValidator) {
         txValidators[blockType] = validator
     }
@@ -75,7 +93,7 @@ class TrustChainCommunity(
     /**
      * Notify listeners of a specific new block.
      */
-    private fun notifyListeners(block: TrustChainBlock) {
+    internal fun notifyListeners(block: TrustChainBlock) {
         val universalListeners = listenersMap[null] ?: listOf<BlockListener>()
         for (listener in universalListeners) {
             listener.onBlockReceived(block)
@@ -222,7 +240,7 @@ class TrustChainCommunity(
 
     private fun onBlockCreated(block: TrustChainBlock) {
         // Validate and persist
-        val validation = validatePersistBlock(block)
+        val validation = validateAndPersistBlock(block)
 
         logger.info { "Signed block, validation result: $validation" }
 
@@ -244,12 +262,9 @@ class TrustChainCommunity(
      */
     fun crawlChain(peer: Peer, latestBlockNum: Int = 0) {
         // TODO: check if crawl is already pending
-
-
     }
 
     private fun sendNextPartialChainCrawlRequest() {
-
     }
 
     /*
@@ -315,7 +330,7 @@ class TrustChainCommunity(
      */
     fun onHalfBlockBroadcast(payload: HalfBlockBroadcastPayload) {
         val block = payload.block.toBlock()
-        validatePersistBlock(block)
+        validateAndPersistBlock(block)
 
         if (!relayedBroadcasts.contains(block.blockId) && payload.ttl > 1u) {
             sendBlock(block, ttl = payload.ttl.toInt() - 1)
@@ -323,15 +338,15 @@ class TrustChainCommunity(
     }
 
     fun onHalfBlockPair(payload: HalfBlockPairPayload) {
-        validatePersistBlock(payload.block1.toBlock())
-        validatePersistBlock(payload.block2.toBlock())
+        validateAndPersistBlock(payload.block1.toBlock())
+        validateAndPersistBlock(payload.block2.toBlock())
     }
 
     fun onHalfBlockPairBroadcast(payload: HalfBlockPairBroadcastPayload) {
         val block1 = payload.block1.toBlock()
         val block2 = payload.block2.toBlock()
-        validatePersistBlock(block1)
-        validatePersistBlock(block2)
+        validateAndPersistBlock(block1)
+        validateAndPersistBlock(block2)
 
         if (block1.blockId !in relayedBroadcasts && payload.ttl > 1u) {
             sendBlockPair(block1, block2, ttl = payload.ttl - 1u)
@@ -422,13 +437,16 @@ class TrustChainCommunity(
      * Process a received half block.
      */
     private fun processHalfBlock(block: TrustChainBlock, peer: Peer) {
-        validatePersistBlock(block)
+        validateAndPersistBlock(block)
     }
 
     /**
-     * Validate a block and if it's valid, persist it. Return the validation result.
+     * Validates a block and its transaction if a transaction validator has been registered for the
+     * given block type.
+     *
+     * @return The validation result.
      */
-    private fun validatePersistBlock(block: TrustChainBlock): ValidationResult {
+    internal fun validateBlock(block: TrustChainBlock): ValidationResult {
         var validationResult = block.validate(database)
 
         if (validationResult !is ValidationResult.Invalid) {
@@ -439,12 +457,23 @@ class TrustChainCommunity(
                     validationResult = txValidationResult
                 }
             }
+        }
 
-            if (validationResult !is ValidationResult.Invalid) {
-                if (!database.contains(block)) {
-                    database.addBlock(block)
-                    notifyListeners(block)
-                }
+        return validationResult
+    }
+
+    /**
+     * Validates a block and if it's valid, persists it.
+     *
+     * @return The validation result.
+     */
+    internal fun validateAndPersistBlock(block: TrustChainBlock): ValidationResult {
+        val validationResult = validateBlock(block)
+
+        if (validationResult !is ValidationResult.Invalid) {
+            if (!database.contains(block)) {
+                database.addBlock(block)
+                notifyListeners(block)
             }
         }
 

@@ -87,7 +87,9 @@ class TrustChainBlock(
      */
     fun validate(database: TrustChainStore): ValidationResult {
         // TODO
-        return ValidationResult.Valid()
+        database.getBlockBefore(this)
+        database.getBlockAfter(this)
+        return ValidationResult.Valid
     }
 
     /**
@@ -116,14 +118,22 @@ class TrustChainBlock(
         var signature: ByteArray? = null
     ) {
         fun build(): TrustChainBlock {
-            val type = type ?: throw IllegalStateException("type is null")
-            val rawTransaction = rawTransaction ?: throw IllegalStateException("transaction is null")
-            val publicKey = publicKey ?: throw IllegalStateException("public key is null")
-            val sequenceNumber = sequenceNumber ?: throw IllegalStateException("sequence number is null")
-            val linkPublicKey = linkPublicKey ?: throw IllegalStateException("link public key is null")
-            val linkSequenceNumber = linkSequenceNumber ?: throw IllegalStateException("link sequence number is null")
-            val previousHash = previousHash ?: throw IllegalStateException("previous hash is null")
-            val signature = signature ?: throw IllegalStateException("signature is null")
+            val type = type
+                ?: throw IllegalStateException("type is null")
+            val rawTransaction = rawTransaction
+                ?: throw IllegalStateException("transaction is null")
+            val publicKey = publicKey
+                ?: throw IllegalStateException("public key is null")
+            val sequenceNumber = sequenceNumber
+                ?: throw IllegalStateException("sequence number is null")
+            val linkPublicKey = linkPublicKey
+                ?: throw IllegalStateException("link public key is null")
+            val linkSequenceNumber = linkSequenceNumber
+                ?: throw IllegalStateException("link sequence number is null")
+            val previousHash = previousHash
+                ?: throw IllegalStateException("previous hash is null")
+            val signature = signature
+                ?: throw IllegalStateException("signature is null")
             return TrustChainBlock(type,
                 rawTransaction,
                 publicKey,

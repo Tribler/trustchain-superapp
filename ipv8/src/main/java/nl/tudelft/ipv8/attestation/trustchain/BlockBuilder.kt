@@ -19,6 +19,10 @@ abstract class BlockBuilder(
         if (prevBlock != null) {
             builder.sequenceNumber = prevBlock.sequenceNumber + 1u
             builder.previousHash = prevBlock.calculateHash()
+        } else {
+            // Genesis block
+            builder.sequenceNumber = GENESIS_SEQ
+            builder.previousHash = GENESIS_HASH
         }
 
         builder.publicKey = myPeer.publicKey.keyToBin()

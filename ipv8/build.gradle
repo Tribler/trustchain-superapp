@@ -22,7 +22,8 @@ ktlint {
     outputToConsole = true
     ignoreFailures = true
     filter {
-        exclude("**/generated/**")
+        // https://github.com/JLLeitschuh/ktlint-gradle/issues/266
+        exclude { element -> element.file.path.contains("generated/") }
     }
 }
 
@@ -48,6 +49,7 @@ dependencies {
     // Testing
     testImplementation 'junit:junit:4.12'
     testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

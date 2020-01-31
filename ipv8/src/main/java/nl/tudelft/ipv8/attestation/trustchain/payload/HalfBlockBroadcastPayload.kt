@@ -1,6 +1,5 @@
 package nl.tudelft.ipv8.attestation.trustchain.payload
 
-import nl.tudelft.ipv8.attestation.trustchain.TransactionSerialization
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.messaging.*
 

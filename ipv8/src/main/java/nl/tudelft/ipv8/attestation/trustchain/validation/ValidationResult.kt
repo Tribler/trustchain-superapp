@@ -7,27 +7,27 @@ sealed class ValidationResult {
     /**
      * The block does not violate any rules.
      */
-    class Valid : ValidationResult()
+    object Valid : ValidationResult()
 
     /**
      * The block does not violate any rules, but there are gaps or no blocks on the previous or next block.
      */
-    class Partial : ValidationResult()
+    object Partial : ValidationResult()
 
     /**
      * The block does not violate any rules, but there is a gap or no block on the next block.
      */
-    class PartialNext : ValidationResult()
+    object PartialNext : ValidationResult()
 
     /**
      * The block does not violate any rules, but there is a gap or no block on the previous block.
      */
-    class PartialPervious : ValidationResult()
+    object PartialPervious : ValidationResult()
 
     /**
      * There are no blocks (previous or next) to validate against.
      */
-    class NoInfo : ValidationResult()
+    object NoInfo : ValidationResult()
 
     /**
      * The block violates at least one validation rule.
