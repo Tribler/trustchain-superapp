@@ -1,17 +1,12 @@
 package nl.tudelft.ipv8.android.demo.ui.peers
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,7 +15,6 @@ import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.service.Ipv8Service
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
 
@@ -53,30 +47,26 @@ class PeersFragment : BaseFragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
-    }
 
-    override fun onServiceConnected(service: Ipv8Service) {
         loadNetworkInfo()
     }
 
     private fun loadNetworkInfo() {
-        uiScope.launch {
-            val service = service
-            if (service != null) {
-                val overlays = service.getOverlays()
-                val demoCommunity = overlays.find { it is DemoCommunity }
-                    ?: throw IllegalStateException("DemoCommunity is not configured")
-                val peers = demoCommunity.getPeers()
+        lifecycleScope.launchWhenStarted {
+            val overlays = ipv8.getOverlays()
+            val demoCommunity = overlays.find { it is DemoCommunity }
+                ?: throw IllegalStateException("DemoCommunity is not configured")
+            val peers = demoCommunity.getPeers()
 
-                logger.debug("Found ${peers.size} community peers")
-                val items = peers.map { PeerItem(it) }
-                adapter.updateItems(items)
-                txtCommunityName.text = demoCommunity.javaClass.simpleName
-                txtPeerCount.text = resources.getQuantityString(
-                    R.plurals.x_peers, peers.size,
-                    peers.size)
-                imgEmpty.isVisible = peers.isEmpty()
-            }
+            logger.debug("Found ${peers.size} community peers")
+            val items = peers.map { PeerItem(it) }
+            adapter.updateItems(items)
+            txtCommunityName.text = demoCommunity.javaClass.simpleName
+            txtPeerCount.text = resources.getQuantityString(
+                R.plurals.x_peers, peers.size,
+                peers.size)
+            imgEmpty.isVisible = peers.isEmpty()
+
             delay(1000)
             loadNetworkInfo()
         }

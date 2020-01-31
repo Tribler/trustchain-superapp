@@ -45,10 +45,12 @@ class BlocksFragment : BaseFragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+
+        updateView()
     }
 
-    override fun onServiceConnected(service: Ipv8Service) {
-        val overlays = service.getOverlays()
+    private fun updateView() {
+        val overlays = ipv8.getOverlays()
         val demoCommunity = overlays.find { it is DemoCommunity } as? DemoCommunity
             ?: throw IllegalStateException("DemoCommunity is not configured")
         val blocks = demoCommunity.getChainByUser(publicKey)

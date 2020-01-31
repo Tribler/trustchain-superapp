@@ -1,8 +1,10 @@
 package nl.tudelft.ipv8
 
 import kotlinx.coroutines.*
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
+import java.lang.IllegalStateException
 import kotlin.math.roundToLong
 
 class Ipv8(
@@ -16,11 +18,17 @@ class Ipv8(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    private var started = false
+
     fun getOverlays(): List<Overlay> {
         return overlays
     }
 
     fun start() {
+        if (started) throw IllegalStateException("IPv8 has already started")
+
+        started = true
+
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
             val overlay = overlayConfiguration.overlay
@@ -63,6 +71,8 @@ class Ipv8(
     }
 
     fun stop() {
+        if (!started) throw IllegalStateException("IPv8 is not running")
+
         synchronized(overlayLock) {
             scope.cancel()
 
@@ -72,5 +82,7 @@ class Ipv8(
 
             endpoint.close()
         }
+
+        started = false
     }
 }

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,30 +47,27 @@ class UsersFragment : BaseFragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
-    }
 
-    override fun onServiceConnected(service: Ipv8Service) {
         loadNetworkInfo()
     }
 
+
     private fun loadNetworkInfo() {
-        uiScope.launch {
-            val service = service
-            if (service != null) {
-                val overlays = service.getOverlays()
-                val demoCommunity = overlays.find { it is DemoCommunity } as? DemoCommunity
-                    ?: throw IllegalStateException("DemoCommunity is not configured")
-                val users = demoCommunity.getUsers()
+        lifecycleScope.launchWhenStarted {
+            val overlays = ipv8.getOverlays()
+            val demoCommunity = overlays.find { it is DemoCommunity } as? DemoCommunity
+                ?: throw IllegalStateException("DemoCommunity is not configured")
+            val users = demoCommunity.getUsers()
 
-                val items = users.map {
-                    val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
-                        .keyToHash().toHex()
-                    UserItem(peerId, it.publicKey.toHex(), it.latestSequenceNumber)
-                }
-                adapter.updateItems(items)
-
-                imgEmpty.isVisible = users.isEmpty()
+            val items = users.map {
+                val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
+                    .keyToHash().toHex()
+                UserItem(peerId, it.publicKey.toHex(), it.latestSequenceNumber)
             }
+            adapter.updateItems(items)
+
+            imgEmpty.isVisible = users.isEmpty()
+
             delay(1000)
             loadNetworkInfo()
         }

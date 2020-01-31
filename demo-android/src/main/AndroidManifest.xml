@@ -16,7 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".Ipv8Application">
+        android:name=".DemoApplication">
 
         <activity android:name=".ui.peers.MainActivity" android:launchMode="singleTop">
             <intent-filter>

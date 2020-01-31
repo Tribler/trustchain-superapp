@@ -14,4 +14,8 @@ object AndroidCryptoProvider : CryptoProvider {
     override fun keyFromPublicBin(bin: ByteArray): PublicKey {
         return LibNaClPK.fromBin(bin, lazySodium)
     }
+
+    override fun keyFromPrivateBin(bin: ByteArray): PrivateKey {
+        return LibNaClSK.fromBin(bin, lazySodium)
+    }
 }

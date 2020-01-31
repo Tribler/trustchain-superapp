@@ -24,6 +24,15 @@ android {
         }
     }
 
+    compileOptions {
+        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
 }
 
 dependencies {
@@ -39,6 +48,7 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation "androidx.preference:preference:1.1.0"
     implementation 'com.google.android.material:material:1.0.0'
 
     // Kotlin

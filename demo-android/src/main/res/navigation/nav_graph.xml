@@ -6,23 +6,31 @@
     <fragment
         android:id="@+id/peersFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.peers.PeersFragment"
-        android:label="PeersFragment" >
+        android:label="Peers">
         <action
             android:id="@+id/action_peersFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment" />
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/usersFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"
-        android:label="UsersFragment" >
+        android:label="Chains">
         <action
             android:id="@+id/action_usersFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment" />
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/blocksFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.blocks.BlocksFragment"
-        android:label="BlocksFragment" >
+        android:label="Blocks">
         <argument
             android:name="publicKey"
             app:argType="string" />
