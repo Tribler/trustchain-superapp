@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8
 
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
 import java.lang.IllegalStateException
