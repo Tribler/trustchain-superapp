@@ -8,15 +8,15 @@ CREATE TABLE blocks (
     previous_hash BLOB NOT NULL,
     signature BLOB NOT NULL,
     block_timestamp INTEGER NOT NULL,
-    insert_time INTEGER DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    insert_time INTEGER NOT NULL,
     block_hash BLOB NOT NULL,
     PRIMARY KEY (public_key, sequence_number)
 );
 
 addBlock:
 INSERT INTO blocks (type, tx, public_key, sequence_number, link_public_key, link_sequence_number,
-    previous_hash, signature, block_timestamp, block_hash)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    previous_hash, signature, block_timestamp, insert_time, block_hash)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 get:
 SELECT * FROM blocks WHERE public_key = ? AND sequence_number = ? LIMIT 1;
@@ -97,3 +97,7 @@ SELECT * FROM blocks ORDER BY block_timestamp DESC LIMIT ? OFFSET ?;
 getUsers:
 SELECT DISTINCT public_key, MAX(sequence_number) FROM blocks GROUP BY public_key
 ORDER BY MAX(sequence_number) DESC LIMIT ?;
+
+getParticipatingBlocks:
+SELECT * FROM blocks WHERE public_key = ? OR link_public_key = ?
+ORDER BY block_timestamp DESC LIMIT ?;

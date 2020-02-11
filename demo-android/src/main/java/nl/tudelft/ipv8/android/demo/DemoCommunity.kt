@@ -27,8 +27,8 @@ class DemoCommunity(
         return network.getVerifiedByPublicKeyBin(publicKeyBin)
     }
 
-    suspend fun crawlChain(peer: Peer, latestBlockNum: UInt) {
-        trustChainCommunity.crawlChain(peer, latestBlockNum)
+    suspend fun crawlChain(peer: Peer) {
+        trustChainCommunity.crawlChain(peer)
     }
 
     /**
@@ -41,6 +41,6 @@ class DemoCommunity(
     }
 
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
-        return trustChainCommunity.database.getLatestBlocks(publicKeyBin, 1000)
+        return trustChainCommunity.database.getParticipatingBlocks(publicKeyBin, 1000)
     }
 }

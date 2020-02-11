@@ -14,8 +14,10 @@ class BlockItemRenderer(
         val block = item.block
         txtPublicKey.text = block.publicKey.toHex()
         txtLinkPublicKey.text = block.linkPublicKey.toHex()
-        txtSequenceNumber.text = block.sequenceNumber.toString()
-        txtLinkSequenceNumber.text = block.linkSequenceNumber.toString()
+        txtSequenceNumber.text = if (block.sequenceNumber > 0u)
+            "seq: " + block.sequenceNumber else null
+        txtLinkSequenceNumber.text = if (block.linkSequenceNumber > 0u)
+            "seq: " + block.linkSequenceNumber else null
 
         txtExpandedPublicKey.text = block.publicKey.toHex()
         txtExpandedLinkPublicKey.text = block.linkPublicKey.toHex()
@@ -34,6 +36,11 @@ class BlockItemRenderer(
 
         expandedItem.isVisible = item.isExpanded
         btnExpand.scaleY = if (item.isExpanded) -1f else 1f
+
+        ownChainIndicator.setBackgroundColor(
+            ChainColor.getColor(view.context, item.block.publicKey.toHex()))
+        linkChainIndicator.setBackgroundColor(
+            ChainColor.getColor(view.context, item.block.linkPublicKey.toHex()))
     }
 
     override fun getLayoutResourceId(): Int {

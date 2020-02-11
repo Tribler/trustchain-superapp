@@ -39,6 +39,7 @@ class DebugFragment : BaseFragment() {
         txtBootstrap.text = Community.DEFAULT_ADDRESSES.joinToString("\n")
         txtLanAddress.text = demo.myEstimatedLan.toString()
         txtWanAddress.text = demo.myEstimatedWan.toString()
+        txtPeerId.text = demo.myPeer.mid
         txtPublicKey.text = demo.myPeer.publicKey.keyToBin().toHex()
         txtOverlays.text = ipv8.getOverlays().joinToString("\n") {
             it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"

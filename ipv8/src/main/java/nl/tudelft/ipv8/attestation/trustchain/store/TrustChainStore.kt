@@ -23,6 +23,15 @@ interface TrustChainStore {
     fun crawl(publicKey: ByteArray, startSeqNum: Long, endSeqNum: Long, limit: Int = 100): List<TrustChainBlock>
     fun getRecentBlocks(limit: Int = 10, offset: Int = 0): List<TrustChainBlock>
     fun getUsers(limit: Int = 100): List<UserInfo>
+
+    /**
+     * Returns the list of blocks in which the public key is either a sender or a receiver,
+     * sorted by timestamp from the latest.
+     *
+     * @param publicKey The public key of the peer we are interested in.
+     * @param limit The limit of recent blocks to return.
+     */
+    fun getParticipatingBlocks(publicKey: ByteArray, limit: Int = 100): List<TrustChainBlock>
 }
 
 class UserInfo(

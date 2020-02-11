@@ -42,33 +42,35 @@ fun deserializeUShort(buffer: ByteArray, offset: Int = 0): Int {
 }
 
 fun serializeUInt(value: UInt): ByteArray {
-    val bytes = ByteArray(SERIALIZED_UINT_SIZE)
+    val bytes = UByteArray(SERIALIZED_UINT_SIZE)
     for (i in 0 until SERIALIZED_UINT_SIZE) {
-        bytes[i] = ((value shr ((7 - i) * 8)) and 0xFFu).toByte()
+        bytes[i] = ((value shr ((7 - i) * 8)) and 0xFFu).toUByte()
     }
-    return bytes
+    return bytes.toByteArray()
 }
 
 fun deserializeUInt(buffer: ByteArray, offset: Int = 0): UInt {
+    val ubuffer = buffer.toUByteArray()
     var result = 0u
     for (i in 0 until SERIALIZED_UINT_SIZE) {
-        result = (result shl 8) or buffer[offset + i].toUInt()
+        result = (result shl 8) or ubuffer[offset + i].toUInt()
     }
     return result
 }
 
 fun serializeULong(value: ULong): ByteArray {
-    val bytes = ByteArray(SERIALIZED_ULONG_SIZE)
+    val bytes = UByteArray(SERIALIZED_ULONG_SIZE)
     for (i in 0 until SERIALIZED_ULONG_SIZE) {
-        bytes[i] = ((value shr ((7 - i) * 8)) and 0xFFu).toByte()
+        bytes[i] = ((value shr ((7 - i) * 8)) and 0xFFu).toUByte()
     }
-    return bytes
+    return bytes.toByteArray()
 }
 
 fun deserializeULong(buffer: ByteArray, offset: Int = 0): ULong {
+    val ubuffer = buffer.toUByteArray()
     var result = 0uL
     for (i in 0 until SERIALIZED_ULONG_SIZE) {
-        result = (result shl 8) or buffer[offset + i].toULong()
+        result = (result shl 8) or ubuffer[offset + i].toULong()
     }
     return result
 }

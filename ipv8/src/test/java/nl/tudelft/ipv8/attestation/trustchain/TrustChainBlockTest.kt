@@ -34,7 +34,8 @@ class TrustChainBlockTest {
             Date()
         )
         block.sign(privateKey)
-        val message = HalfBlockPayload.fromHalfBlock(block, sign = false).serialize()
+        val payload = HalfBlockPayload.fromHalfBlock(block, sign = false)
+        val message = payload.serialize()
         Assert.assertTrue(privateKey.pub().verify(block.signature, message))
     }
 }

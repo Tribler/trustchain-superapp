@@ -48,6 +48,7 @@ class TrustChainSQLiteStore(
             block.previousHash,
             block.signature,
             block.timestamp.time,
+            Date().time,
             block.calculateHash()
         )
     }
@@ -81,7 +82,11 @@ class TrustChainSQLiteStore(
         }
     }
 
-    override fun getLatestBlocks(publicKey: ByteArray, limit: Int, blockTypes: List<String>?): List<TrustChainBlock> {
+    override fun getLatestBlocks(
+        publicKey: ByteArray,
+        limit: Int,
+        blockTypes: List<String>?
+    ): List<TrustChainBlock> {
         return if (blockTypes != null) {
             dao.getLatestBlocksWithTypes(publicKey, blockTypes.joinToString(","),
                 limit.toLong(), blockMapper).executeAsList()
@@ -116,7 +121,8 @@ class TrustChainSQLiteStore(
 
     override fun getLowestRangeUnknown(publicKey: ByteArray): LongRange {
         val lowestUnknown = getLowestSequenceNumberUnknown(publicKey)
-        val highestUnknown = dao.getLowestRangeUnknown(publicKey, lowestUnknown).executeAsOneOrNull()
+        val highestUnknown = dao.getLowestRangeUnknown(publicKey, lowestUnknown)
+            .executeAsOneOrNull()
         return LongRange(lowestUnknown, highestUnknown ?: lowestUnknown)
     }
 
@@ -148,5 +154,10 @@ class TrustChainSQLiteStore(
         return dao.getUsers(limit.toLong()) { publicKey, count ->
             UserInfo(publicKey, count ?: 1)
         }.executeAsList()
+    }
+
+    override fun getParticipatingBlocks(publicKey: ByteArray, limit: Int): List<TrustChainBlock> {
+        return dao.getParticipatingBlocks(publicKey, publicKey, limit.toLong(), blockMapper)
+            .executeAsList()
     }
 }

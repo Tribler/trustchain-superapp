@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_blocks.*
 import kotlinx.android.synthetic.main.fragment_peers.recyclerView
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
@@ -25,21 +27,37 @@ open class BlocksFragment : BaseFragment() {
 
     private lateinit var publicKey: ByteArray
 
+    private val expandedBlocks: MutableSet<String> = mutableSetOf()
+
+    init {
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                updateView()
+                delay(1000)
+            }
+        }
+
+        lifecycleScope.launchWhenStarted {
+            crawlChain()
+        }
+
+        adapter.registerRenderer(BlockItemRenderer {
+            val blockId = it.block.blockId
+            if (expandedBlocks.contains(blockId)) {
+                expandedBlocks.remove(blockId)
+            } else {
+                expandedBlocks.add(blockId)
+            }
+            updateView()
+        })
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
 
         publicKey = getPublicKey()
-
-        adapter.registerRenderer(BlockItemRenderer {
-            it.isExpanded = !it.isExpanded
-            adapter.notifyDataSetChanged()
-        })
-
-        lifecycleScope.launchWhenStarted {
-            crawlChain()
-        }
     }
 
     override fun onCreateView(
@@ -56,8 +74,6 @@ open class BlocksFragment : BaseFragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
-
-        updateView()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -82,8 +98,12 @@ open class BlocksFragment : BaseFragment() {
     private fun updateView() {
         val demoCommunity = getDemoCommunity()
         val blocks = demoCommunity.getChainByUser(publicKey)
+
+        val myBlocks = demoCommunity.getChainByUser(demoCommunity.myPeer.publicKey.keyToBin())
+            .filter { it.linkPublicKey.contentEquals(publicKey) }
+
         val items = blocks.map {
-            BlockItem(it)
+            BlockItem(it, expandedBlocks.contains(it.blockId))
         }
         adapter.updateItems(items)
         imgNoBlocks.isVisible = items.isEmpty()
@@ -114,10 +134,7 @@ open class BlocksFragment : BaseFragment() {
     private suspend fun crawlChain() {
         val peer = getDemoCommunity().getPeerByPublicKeyBin(publicKey)
         if (peer != null) {
-            val trustChainStore = getDemoCommunity().trustChainCommunity.database
-            val lowestSeqNumUnknown = trustChainStore.getLowestSequenceNumberUnknown(publicKey)
-            val latestBlockNum = (lowestSeqNumUnknown - 1).toUInt()
-            getDemoCommunity().crawlChain(peer, latestBlockNum)
+            getDemoCommunity().crawlChain(peer)
             updateView()
         }
     }

@@ -20,8 +20,7 @@
             android:layout_height="wrap_content"
             android:padding="1dp"
             android:background="@android:color/black"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -34,11 +33,11 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@color/dark_gray"
-                    android:id="@+id/own_chain_indicator"
-                    android:paddingEnd="6dp">
+                    android:id="@+id/ownChainIndicator"
+                    android:padding="6dp">
+
                     <TextView
                         android:id="@+id/txtPublicKey"
-                        android:layout_marginLeft="5dp"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:textSize="13sp"
@@ -52,10 +51,8 @@
                         android:id="@+id/txtSequenceNumber"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
                         android:textSize="12sp"
                         android:textColor="@android:color/white"
-                        android:layout_marginBottom="2dp"
                         android:singleLine="true"
                         android:ellipsize="middle"
                         android:text="seqNum"/>
@@ -65,17 +62,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/dark_gray"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="4dp"
                     android:orientation="vertical"
-                    android:id="@+id/link_chain_indicator"
-                    android:paddingEnd="6dp">
+                    android:id="@+id/linkChainIndicator"
+                    android:padding="6dp">
+
                     <TextView
                         android:id="@+id/txtLinkPublicKey"
                         android:textColor="@android:color/white"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
                         android:textSize="13sp"
-                        android:layout_marginLeft="5dp"
                         android:textStyle="bold"
                         android:singleLine="true"
                         android:ellipsize="middle"
@@ -87,26 +84,22 @@
                         android:layout_height="wrap_content"
                         android:textColor="@android:color/white"
                         android:textSize="12sp"
-                        android:layout_marginLeft="5dp"
                         android:singleLine="true"
                         android:ellipsize="middle"
-                        android:layout_marginBottom="2dp"
                         android:text="linkSeq"/>
                 </LinearLayout>
-
 
                 <TextView
                     android:id="@+id/txtTransaction"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:paddingStart="6dp"
+                    android:padding="6dp"
                     android:textSize="12sp"
                     android:layout_weight="1"
                     android:textColor="@android:color/black"
                     android:maxLines="2"
                     android:ellipsize="middle"
                     tools:text="transaction"/>
-
 
                 <ImageView
                     android:id="@+id/btnExpand"
@@ -129,7 +122,8 @@
         android:visibility="gone"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
-        android:paddingTop="4dp">
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
 
         <TableRow>
             <TextView
@@ -146,6 +140,7 @@
             <TextView
                 android:textSize="13sp"
                 android:textStyle="bold"
+                android:layout_marginEnd="16dp"
                 android:text="Link Public Key"/>
 
             <TextView

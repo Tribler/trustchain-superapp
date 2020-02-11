@@ -120,6 +120,14 @@ class TrustChainBlock(
         return sha256(payload)
     }
 
+    override fun equals(other: Any?): Boolean {
+        return other is TrustChainBlock && other.calculateHash().contentEquals(calculateHash())
+    }
+
+    override fun hashCode(): Int {
+        return calculateHash().contentHashCode()
+    }
+
     class Builder(
         var type: String? = null,
         var rawTransaction: ByteArray? = null,

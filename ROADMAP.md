@@ -9,6 +9,7 @@ This document describes long-term plans for the kotlin-ipv8 project.
 
 ## TrustChain
 - block integrity validation
+- py-ipv8 compatible transaction serialization
 
 ## Peer Discovery
 - LAN discovery
