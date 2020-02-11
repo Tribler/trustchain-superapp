@@ -88,6 +88,14 @@ class TrustChainBlock(
     }
 
     /**
+     * Return the hash of this block as a number (used as crawl ID).
+     */
+    val hashNumber: Int
+        get() {
+            return Integer.parseInt(calculateHash().toHex(), 16) % 100000000
+        }
+
+    /**
      * Validates this block against what is known in the database.
      */
     fun validate(database: TrustChainStore): ValidationResult {

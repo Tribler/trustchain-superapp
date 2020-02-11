@@ -4,12 +4,12 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.UserInfo
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.Network
 
+@UseExperimental(ExperimentalUnsignedTypes::class)
 class DemoCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
@@ -27,7 +27,7 @@ class DemoCommunity(
         return network.getVerifiedByPublicKeyBin(publicKeyBin)
     }
 
-    fun crawlChain(peer: Peer, latestBlockNum: Int) {
+    suspend fun crawlChain(peer: Peer, latestBlockNum: UInt) {
         trustChainCommunity.crawlChain(peer, latestBlockNum)
     }
 

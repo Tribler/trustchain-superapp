@@ -8,6 +8,7 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
@@ -36,7 +37,9 @@ open class BlocksFragment : BaseFragment() {
             adapter.notifyDataSetChanged()
         })
 
-        crawlChain()
+        lifecycleScope.launchWhenStarted {
+            crawlChain()
+        }
     }
 
     override fun onCreateView(
@@ -108,13 +111,14 @@ open class BlocksFragment : BaseFragment() {
         builder.show()
     }
 
-    private fun crawlChain() {
+    private suspend fun crawlChain() {
         val peer = getDemoCommunity().getPeerByPublicKeyBin(publicKey)
         if (peer != null) {
             val trustChainStore = getDemoCommunity().trustChainCommunity.database
             val lowestSeqNumUnknown = trustChainStore.getLowestSequenceNumberUnknown(publicKey)
-            val latestBlockNum = (lowestSeqNumUnknown - 1).toInt()
+            val latestBlockNum = (lowestSeqNumUnknown - 1).toUInt()
             getDemoCommunity().crawlChain(peer, latestBlockNum)
+            updateView()
         }
     }
 }

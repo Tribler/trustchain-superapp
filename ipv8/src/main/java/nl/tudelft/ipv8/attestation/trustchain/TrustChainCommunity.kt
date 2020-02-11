@@ -1,5 +1,7 @@
 package nl.tudelft.ipv8.attestation.trustchain
 
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
@@ -14,6 +16,9 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
+import java.util.*
+import kotlin.coroutines.Continuation
 import kotlin.math.max
 
 private val logger = KotlinLogging.logger {}
@@ -29,13 +34,16 @@ open class TrustChainCommunity(
     maxPeers: Int,
     cryptoProvider: CryptoProvider,
     val settings: TrustChainSettings,
-    val database: TrustChainStore
+    val database: TrustChainStore,
+    private val crawler: TrustChainCrawler = TrustChainCrawler()
 ) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider) {
     override val serviceId = "1ad767b05ae592a02488272ca2a86b847d4562e1"
 
     private val relayedBroadcasts = mutableSetOf<String>()
     private val listenersMap: MutableMap<String?, MutableList<BlockListener>> = mutableMapOf()
     private val txValidators: MutableMap<String, TransactionValidator> = mutableMapOf()
+
+    private val crawlRequestCache: MutableMap<UInt, CrawlRequest> = mutableMapOf()
 
     init {
         messageHandlers[MessageId.HALF_BLOCK] = ::onHalfBlockPacket
@@ -45,6 +53,11 @@ open class TrustChainCommunity(
         messageHandlers[MessageId.HALF_BLOCK_PAIR] = ::onHalfBlockPairPacket
         messageHandlers[MessageId.HALF_BLOCK_PAIR_BROADCAST] = ::onHalfBlockPairBroadcastPacket
         messageHandlers[MessageId.EMPTY_CRAWL_RESPONSE] = ::onEmptyCrawlResponsePacket
+    }
+
+    override fun load() {
+        super.load()
+        crawler.trustChainCommunity = this
     }
 
     /*
@@ -260,11 +273,44 @@ open class TrustChainCommunity(
      *
      * @param latestBlockNum The latest block number of the peer in question, if available.
      */
-    fun crawlChain(peer: Peer, latestBlockNum: Int = 0) {
-        // TODO: check if crawl is already pending
+    suspend fun crawlChain(peer: Peer, latestBlockNum: UInt? = null) {
+        crawler.crawlChain(peer, latestBlockNum)
     }
 
-    private fun sendNextPartialChainCrawlRequest() {
+    /**
+     * Send a crawl request to a specific peer.
+     */
+    suspend fun sendCrawlRequest(
+        peer: Peer,
+        publicKey: ByteArray,
+        range: LongRange,
+        forHalfBlock: TrustChainBlock? = null
+    ): List<TrustChainBlock> = withTimeout(CRAWL_REQUEST_TIMEOUT) {
+        val globalTime = claimGlobalTime()
+
+        val crawlId = forHalfBlock?.hashNumber?.toUInt() ?: (globalTime % UInt.MAX_VALUE).toUInt()
+        logger.info(
+            "Requesting crawl of node $peer (blocks $range) " +
+                "with id $crawlId"
+        )
+
+        val blocks = suspendCancellableCoroutine<List<TrustChainBlock>> { continuation ->
+            crawlRequestCache[crawlId] = CrawlRequest(peer, continuation)
+
+            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
+            val dist = GlobalTimeDistributionPayload(globalTime)
+            val payload = CrawlRequestPayload(publicKey, range.first, range.last, crawlId)
+
+            val packet = serializePacket(prefix, MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
+
+            endpoint.send(peer.address, packet)
+        }
+
+        crawlRequestCache.remove(crawlId)
+
+        // TODO: make sure to handle timeout properly and return at least partial crawl response
+
+        blocks
     }
 
     /*
@@ -428,11 +474,29 @@ open class TrustChainCommunity(
 
         val block = payload.block.toBlock()
 
-        // TODO: remove crawl id from request cache
+        val crawlRequest = crawlRequestCache[payload.crawlId]
+        if (crawlRequest != null) {
+            crawlRequest.totalHalfBlocksExpected = payload.totalCount
+            crawlRequest.receivedHalfBlocks.add(block)
+
+            if (crawlRequest.receivedHalfBlocks.size.toUInt() >=
+                crawlRequest.totalHalfBlocksExpected) {
+                crawlRequestCache.remove(payload.crawlId)
+                crawlRequest.crawlFuture.resumeWith(
+                    Result.success(crawlRequest.receivedHalfBlocks))
+            }
+        } else {
+            logger.error { "Invalid crawl ID received: ${payload.crawlId}" }
+        }
     }
 
     private fun onEmptyCrawlResponse(payload: EmptyCrawlResponsePayload) {
-        // TODO: remove crawl id from request cache
+        val crawlRequest = crawlRequestCache.remove(payload.crawlId)
+        if (crawlRequest != null) {
+            crawlRequest.crawlFuture.resumeWith(Result.success(listOf()))
+        } else {
+            logger.error { "Invalid crawl ID received: ${payload.crawlId}" }
+        }
     }
 
     /**
@@ -499,4 +563,15 @@ open class TrustChainCommunity(
         const val HALF_BLOCK_PAIR_BROADCAST = 6
         const val EMPTY_CRAWL_RESPONSE = 7
     }
+
+    companion object {
+        const val CRAWL_REQUEST_TIMEOUT = 10_000L
+    }
+
+    class CrawlRequest(
+        val peer: Peer,
+        val crawlFuture: Continuation<List<TrustChainBlock>>,
+        val receivedHalfBlocks: MutableList<TrustChainBlock> = mutableListOf(),
+        var totalHalfBlocksExpected: UInt = 0u
+    )
 }
