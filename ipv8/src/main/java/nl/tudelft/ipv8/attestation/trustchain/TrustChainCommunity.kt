@@ -31,7 +31,7 @@ open class TrustChainCommunity(
     val settings: TrustChainSettings,
     val database: TrustChainStore
 ) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider) {
-    override val serviceId = "5ad767b05ae592a02488272ca2a86b847d4562e1"
+    override val serviceId = "1ad767b05ae592a02488272ca2a86b847d4562e1"
 
     private val relayedBroadcasts = mutableSetOf<String>()
     private val listenersMap: MutableMap<String?, MutableList<BlockListener>> = mutableMapOf()

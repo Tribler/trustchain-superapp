@@ -76,7 +76,7 @@ open class UdpEndpoint(
     }
 
     open fun startLanEstimation() {
-        logger.debug { "estimate LAN" }
+        logger.debug { "Estimate LAN" }
         val interfaces = NetworkInterface.getNetworkInterfaces()
         for (intf in interfaces) {
             for (intfAddr in intf.interfaceAddresses) {

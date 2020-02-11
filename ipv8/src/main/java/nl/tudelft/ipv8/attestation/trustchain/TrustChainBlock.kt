@@ -79,7 +79,12 @@ class TrustChainBlock(
     val isGenesis = sequenceNumber == GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)
 
     val transaction: TrustChainTransaction by lazy {
-        TransactionSerialization.deserialize(rawTransaction)
+        try {
+            TransactionSerialization.deserialize(rawTransaction)
+        } catch (e: TransactionSerializationException) {
+            e.printStackTrace()
+            mapOf<String, Any>()
+        }
     }
 
     /**

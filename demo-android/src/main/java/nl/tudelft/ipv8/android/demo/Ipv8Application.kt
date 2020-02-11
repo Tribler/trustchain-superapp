@@ -26,9 +26,18 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import java.net.InetAddress
 
 abstract class Ipv8Application : Application() {
-    val ipv8 by lazy {
-        startIpv8()
+    private val _ipv8 by lazy {
+        Ipv8(endpoint, getIpv8Configuration())
     }
+
+    val ipv8: Ipv8
+        get() {
+            if (!_ipv8.isStarted()) {
+                _ipv8.start()
+                startService()
+            }
+            return _ipv8
+        }
 
     val myPeer by lazy {
         Peer(getPrivateKey())
@@ -43,9 +52,7 @@ abstract class Ipv8Application : Application() {
         Network()
     }
 
-    override fun onCreate() {
-        super.onCreate()
-
+    private fun startService() {
         val serviceIntent = Intent(this, Ipv8Service::class.java)
         startForegroundService(serviceIntent)
     }
@@ -73,11 +80,5 @@ abstract class Ipv8Application : Application() {
             cryptoProvider = AndroidCryptoProvider, settings = settings, database = store)
         val randomWalk = RandomWalk(trustChainCommunity, timeout = 3.0, peers = 20)
         return OverlayConfiguration(trustChainCommunity, listOf(randomWalk))
-    }
-
-    private fun startIpv8(): Ipv8 {
-        val ipv8 = Ipv8(endpoint, getIpv8Configuration())
-        ipv8.start()
-        return ipv8
     }
 }

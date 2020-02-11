@@ -86,8 +86,8 @@ class Application {
         val demoCommunity = createDemoCommunity(myPeer, endpoint, network, trustChainCommunity.overlay)
 
         val config = Ipv8Configuration(overlays = listOf(
-            discoveryCommunity,
-            trustChainCommunity,
+            //discoveryCommunity,
+            //trustChainCommunity,
             demoCommunity
         ), walkerInterval = 1.0)
 

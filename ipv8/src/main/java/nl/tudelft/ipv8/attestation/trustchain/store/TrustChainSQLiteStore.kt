@@ -18,7 +18,8 @@ private val blockMapper: (
 ) -> TrustChainBlock = { type, tx, public_key, sequence_number, link_public_key,
                          link_sequence_number, previous_hash, signature, block_timestamp,
                          insert_time, block_hash ->
-    TrustChainBlock(type,
+    TrustChainBlock(
+        type,
         tx,
         public_key,
         sequence_number.toUInt(),

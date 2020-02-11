@@ -1,60 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/mutualBlockItem"
+<LinearLayout android:id="@+id/top_item"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:background="?selectableItemBackground">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
+            android:padding="1dp"
+            android:background="@android:color/black"
             android:orientation="vertical"
             >
-
-            <TextView
-                android:id="@+id/blockStatus"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:paddingStart="2dp"
-                android:text="Status of Block:"
-                android:textColor="@android:color/white"
-                android:textAlignment="viewStart"
-                android:visibility="visible" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/dark_gray"
+                android:background="@android:color/white"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@color/gray"
+                    android:background="@color/dark_gray"
                     android:id="@+id/own_chain_indicator"
                     android:paddingEnd="6dp">
-
                     <TextView
                         android:id="@+id/txtPublicKey"
+                        android:layout_marginLeft="5dp"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:text="User"
-                        android:textColor="@android:color/white"
                         android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:textColor="@android:color/white"
+                        android:ellipsize="middle"
+                        android:text="peer"/>
 
                     <TextView
                         android:id="@+id/txtSequenceNumber"
@@ -72,22 +64,22 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@color/gray"
+                    android:background="@color/dark_gray"
+                    android:layout_marginLeft="5dp"
                     android:orientation="vertical"
-                    android:id="@+id/link_chain_indicator_mutualBlock"
+                    android:id="@+id/link_chain_indicator"
                     android:paddingEnd="6dp">
-
                     <TextView
                         android:id="@+id/txtLinkPublicKey"
+                        android:textColor="@android:color/white"
                         android:layout_width="80dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:ellipsize="middle"
-                        android:singleLine="true"
-                        android:text="Link peer"
-                        android:textColor="@android:color/white"
                         android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:layout_marginLeft="5dp"
+                        android:textStyle="bold"
+                        android:singleLine="true"
+                        android:ellipsize="middle"
+                        android:text="Link peer"/>
 
                     <TextView
                         android:id="@+id/txtLinkSequenceNumber"
@@ -104,47 +96,139 @@
 
 
                 <TextView
-                    android:id="@+id/transactionMutualBlock"
-                    android:layout_width="120dp"
+                    android:id="@+id/txtTransaction"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:ellipsize="middle"
-                    android:maxLines="2"
                     android:paddingStart="6dp"
-                    android:text="Transaction"
-                    android:textColor="@android:color/white"
-                    android:textSize="12sp" />
+                    android:textSize="12sp"
+                    android:layout_weight="1"
+                    android:textColor="@android:color/black"
+                    android:maxLines="2"
+                    android:ellipsize="middle"
+                    tools:text="transaction"/>
 
-                <!--<ImageView-->
-                <!--android:id="@+id/expand_arrow"-->
-                <!--android:layout_width="40dp"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:src="@drawable/ic_expand_more_black_24dp" />-->
+
+                <ImageView
+                    android:id="@+id/btnExpand"
+                    android:layout_width="40dp"
+                    android:layout_height="match_parent"
+                    app:srcCompat="@drawable/ic_expand_more_black_24dp" />
 
             </LinearLayout>
+
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!--The sign button-->
-    <LinearLayout
+    <TableLayout
+        android:id="@+id/expandedItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:padding="5dp"
-        android:layout_marginTop="-10dp"
-        android:id="@+id/sign_layout">
+        android:shrinkColumns="1"
+        android:visibility="gone"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="4dp">
 
-        <Button
-            android:id="@+id/sign_button"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@android:color/white"
-            android:text="@string/sign_block"
-            android:background="@color/dark_gray"/>
-    </LinearLayout>
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Public Key"/>
 
+            <TextView
+                android:id="@+id/txtExpandedPublicKey"
+                android:textSize="13sp"/>
+        </TableRow>
 
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Link Public Key"/>
+
+            <TextView
+                android:id="@+id/txtExpandedLinkPublicKey"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Previous Hash"/>
+
+            <TextView
+                android:id="@+id/txtPrevHash"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Signature"/>
+
+            <TextView
+                android:id="@+id/txtSignature"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Type"/>
+
+            <TextView
+                android:id="@+id/txtType"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Transaction"/>
+
+            <TextView
+                android:id="@+id/txtExpandedTransaction"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Timestamp"/>
+
+            <TextView
+                android:id="@+id/txtTimestamp"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Insert Time"/>
+
+            <TextView
+                android:id="@+id/txtInsertTime"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:text="Block Hash"/>
+
+            <TextView
+                android:id="@+id/txtBlockHash"
+                android:textSize="13sp"/>
+        </TableRow>
+    </TableLayout>
 
 </LinearLayout>

@@ -17,17 +17,22 @@ class Ipv8(
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var loopingCallJob: Job? = null
 
-    private var started = false
+    private var isStarted = false
+
+    fun isStarted(): Boolean {
+        return isStarted
+    }
 
     fun getOverlays(): List<Overlay> {
         return overlays
     }
 
     fun start() {
-        if (started) throw IllegalStateException("IPv8 has already started")
+        if (isStarted()) throw IllegalStateException("IPv8 has already started")
 
-        started = true
+        isStarted = true
 
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
@@ -62,7 +67,7 @@ class Ipv8(
 
     private fun startLoopingCall() {
         val interval = (configuration.walkerInterval * 1000).roundToLong()
-        scope.launch {
+        loopingCallJob = scope.launch {
             while (true) {
                 onTick()
                 delay(interval)
@@ -71,18 +76,21 @@ class Ipv8(
     }
 
     fun stop() {
-        if (!started) throw IllegalStateException("IPv8 is not running")
+        if (!isStarted()) throw IllegalStateException("IPv8 is not running")
 
         synchronized(overlayLock) {
-            scope.cancel()
+            loopingCallJob?.cancel()
 
             for (overlay in overlays) {
                 overlay.unload()
             }
+            overlays.clear()
+
+            strategies.clear()
 
             endpoint.close()
         }
 
-        started = false
+        isStarted = false
     }
 }

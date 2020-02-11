@@ -54,11 +54,15 @@ class PeersFragment : BaseFragment() {
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             val overlays = ipv8.getOverlays()
+
+            for (overlay in overlays) {
+                logger.debug(overlay.javaClass.simpleName + ": " + overlay.getPeers().size + " peers")
+            }
+
             val demoCommunity = overlays.find { it is DemoCommunity }
                 ?: throw IllegalStateException("DemoCommunity is not configured")
             val peers = demoCommunity.getPeers()
 
-            logger.debug("Found ${peers.size} community peers")
             val items = peers.map { PeerItem(it) }
             adapter.updateItems(items)
             txtCommunityName.text = demoCommunity.javaClass.simpleName

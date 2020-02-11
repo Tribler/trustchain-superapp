@@ -28,6 +28,10 @@ data class Address(
         return this == EMPTY
     }
 
+    override fun toString(): String {
+        return "$ip:$port"
+    }
+
     companion object : Deserializable<Address> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<Address, Int> {
             var localOffset = 0

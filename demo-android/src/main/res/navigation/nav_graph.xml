@@ -35,4 +35,12 @@
             android:name="publicKey"
             app:argType="string" />
     </fragment>
+    <fragment
+        android:id="@+id/myChainFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.MyChainFragment"
+        android:label="My Chain" />
+    <fragment
+        android:id="@+id/debugFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.debug.DebugFragment"
+        android:label="Debug" />
 </navigation>

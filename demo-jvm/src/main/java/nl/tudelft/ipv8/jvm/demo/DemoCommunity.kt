@@ -16,7 +16,7 @@ class DemoCommunity(
     cryptoProvider: CryptoProvider,
     val trustChainCommunity: TrustChainCommunity
 ) : Community(myPeer, endpoint, network, 20, cryptoProvider) {
-    override val serviceId = "12313685c1912a141279f8248fc8db5899c5df5a"
+    override val serviceId = "02313685c1912a141279f8248fc8db5899c5df5a"
 
     fun getUsers(): List<UserInfo> {
         return trustChainCommunity.database.getUsers()

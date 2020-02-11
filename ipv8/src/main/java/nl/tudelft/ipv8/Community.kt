@@ -41,6 +41,8 @@ abstract class Community(
     override fun load() {
         super.load()
 
+        logger.info { "Loading " + javaClass.simpleName + " for peer " + myPeer.mid }
+
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         network.blacklist.addAll(DEFAULT_ADDRESSES)
@@ -387,7 +389,7 @@ abstract class Community(
     }
 
     companion object {
-        private val DEFAULT_ADDRESSES = listOf(
+        val DEFAULT_ADDRESSES = listOf(
             // Dispersy
             // Address("130.161.119.206", 6421),
             // Address("130.161.119.206", 6422),

@@ -27,7 +27,7 @@ abstract class Endpoint {
     }
 
     protected fun setEstimatedLan(address: Address) {
-        logger.debug("estimated address: $address")
+        logger.info("Estimated LAN address: $address")
         for (listener in listeners) {
             listener.onEstimatedLanChanged(address)
         }
