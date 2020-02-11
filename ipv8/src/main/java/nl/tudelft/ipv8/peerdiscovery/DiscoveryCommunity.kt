@@ -20,8 +20,8 @@ class DiscoveryCommunity(
     myPeer: Peer,
     endpoint: Endpoint,
     network: Network,
-    cryptoProvider: CryptoProvider,
-    maxPeers: Int = DEFAULT_MAX_PEERS
+    maxPeers: Int,
+    cryptoProvider: CryptoProvider
 ) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 

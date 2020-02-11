@@ -8,7 +8,9 @@ import nl.tudelft.ipv8.android.demo.R
 import java.util.*
 import kotlin.math.roundToInt
 
-class PeerItemRenderer : ItemLayoutRenderer<PeerItem, View>(PeerItem::class.java) {
+class PeerItemRenderer(
+    private val onItemClick: (PeerItem) -> Unit
+) : ItemLayoutRenderer<PeerItem, View>(PeerItem::class.java) {
     @SuppressLint("SetTextI18n")
     override fun bindView(item: PeerItem, view: View) = with(view) {
         txtPeerId.text = item.peer.mid
@@ -24,6 +26,10 @@ class PeerItemRenderer : ItemLayoutRenderer<PeerItem, View>(PeerItem::class.java
             "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
 
         txtAvgPing.text = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+
+        setOnClickListener {
+            onItemClick(item)
+        }
     }
 
     override fun getLayoutResourceId(): Int {

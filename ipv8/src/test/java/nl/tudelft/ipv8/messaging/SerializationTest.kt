@@ -68,4 +68,11 @@ class SerializationTest {
         val serialized = serializeULong(value)
         assertEquals(value, deserializeULong(serialized, 0))
     }
+
+    @Test
+    fun deserializeULong_test2() {
+        val value = 1581459001000uL
+        val serialized = serializeULong(value)
+        assertEquals(value, deserializeULong(serialized, 0))
+    }
 }

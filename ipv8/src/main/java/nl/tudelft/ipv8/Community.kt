@@ -2,7 +2,6 @@ package nl.tudelft.ipv8
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
@@ -19,11 +18,9 @@ abstract class Community(
     override val myPeer: Peer,
     override val endpoint: Endpoint,
     override val network: Network,
-    override val maxPeers: Int = DEFAULT_MAX_PEERS,
-    protected val cryptoProvider: CryptoProvider = JavaCryptoProvider
+    override val maxPeers: Int,
+    protected val cryptoProvider: CryptoProvider
 ) : Overlay {
-    abstract val serviceId: String
-
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
@@ -43,6 +40,8 @@ abstract class Community(
 
     override fun load() {
         super.load()
+
+        logger.info { "Loading " + javaClass.simpleName + " for peer " + myPeer.mid }
 
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
@@ -111,7 +110,7 @@ abstract class Community(
 
         val packetPrefix = data.copyOfRange(0, prefix.size)
         if (!packetPrefix.contentEquals(prefix)) {
-            logger.debug("prefix not matching")
+            // logger.debug("prefix not matching")
             return
         }
 
@@ -390,7 +389,7 @@ abstract class Community(
     }
 
     companion object {
-        private val DEFAULT_ADDRESSES = listOf(
+        val DEFAULT_ADDRESSES = listOf(
             // Dispersy
             // Address("130.161.119.206", 6421),
             // Address("130.161.119.206", 6422),
@@ -406,7 +405,7 @@ abstract class Community(
             Address("130.161.119.215", 6525),
             Address("130.161.119.215", 6526),
             Address("81.171.27.194", 6527),
-            Address("81.171.27.194", 6528)
+            //Address("81.171.27.194", 6528)
              */
             // IPv8 + LibNaCL
             Address("131.180.27.161", 6427)

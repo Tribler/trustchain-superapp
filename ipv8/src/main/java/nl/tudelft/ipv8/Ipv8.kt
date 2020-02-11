@@ -3,6 +3,7 @@ package nl.tudelft.ipv8
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
+import java.lang.IllegalStateException
 import kotlin.math.roundToLong
 
 class Ipv8(
@@ -15,9 +16,22 @@ class Ipv8(
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var loopingCallJob: Job? = null
+
+    private var isStarted = false
+
+    fun isStarted(): Boolean {
+        return isStarted
+    }
+
+    fun getOverlays(): List<Overlay> {
+        return overlays
+    }
 
     fun start() {
-        endpoint.open()
+        if (isStarted()) throw IllegalStateException("IPv8 has already started")
+
+        isStarted = true
 
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
@@ -28,6 +42,8 @@ class Ipv8(
                 strategies.add(strategy)
             }
         }
+
+        endpoint.open()
 
         // Start looping call
         startLoopingCall()
@@ -50,7 +66,7 @@ class Ipv8(
 
     private fun startLoopingCall() {
         val interval = (configuration.walkerInterval * 1000).roundToLong()
-        scope.launch {
+        loopingCallJob = scope.launch {
             while (true) {
                 onTick()
                 delay(interval)
@@ -59,14 +75,21 @@ class Ipv8(
     }
 
     fun stop() {
+        if (!isStarted()) throw IllegalStateException("IPv8 is not running")
+
         synchronized(overlayLock) {
-            scope.cancel()
+            loopingCallJob?.cancel()
 
             for (overlay in overlays) {
                 overlay.unload()
             }
+            overlays.clear()
+
+            strategies.clear()
 
             endpoint.close()
         }
+
+        isStarted = false
     }
 }

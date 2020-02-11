@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph"
+    app:startDestination="@id/peersFragment">
+
+    <fragment
+        android:id="@+id/peersFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.peers.PeersFragment"
+        android:label="Peers">
+        <action
+            android:id="@+id/action_peersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"
+        android:label="Chains">
+        <action
+            android:id="@+id/action_usersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/blocksFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.BlocksFragment"
+        android:label="Blocks">
+        <argument
+            android:name="publicKey"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/myChainFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.MyChainFragment"
+        android:label="My Chain" />
+    <fragment
+        android:id="@+id/debugFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.debug.DebugFragment"
+        android:label="Debug" />
+</navigation>
