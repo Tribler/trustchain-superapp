@@ -2,6 +2,12 @@
 
 `TrustChainCommunity` implements TrustChain, a scalable, tamper-proof and distributed ledger, built for secure accounting. This document mostly focuses on the specification of the communication protocol. To learn more about the theory behind TrustChain, its security, and architecture, refer to the [IETF internet standard](https://tools.ietf.org/html/draft-pouwelse-trustchain-01) draft and [our published scientific article](https://www.sciencedirect.com/science/article/pii/S0167739X17318988).
 
+## Overview
+
+We now introduce the idea of TrustChain, a distributed ledger which tries to overcome limitations of other blockchains by avoiding the global consensus. In TrustChain, every user has its own chain with its own *genesis* block. Every block contains exactly one transaction. Whenever a transaction is created between two parties, a block is added to the chains of both participants, which causes *entanglement*.
+
+A block is usually composed of two half-blocks, where a half-block is added to the chain of each transaction participant. For this reason, transaction creation needs to be *interactive*. Let's assume A wants to perform a transaction with B. First, A creates a *proposal block* containing its public key, the sequence number of the previous block, the hash of the previous block, and the public key of the conterparty (*a link public key*). Finally, A sends the proposal block with its own private key and sends it to B. Upon receiving the proposal block, B validates its integrity. If the block is valid and B agrees with the proposed transaction, it creates an *agreement block*. The agreement block should contain the public key of B, the sequence number of its previous block, a public key of A, and the sequence number of the other half-block in the chain of A. Finaly, B signs the agreement block with its private key and sends it back to A. After this, the transaction is considered completed.
+
 ## *HalfBlock* (1)
 
 Whenever a new block is signed, this message is being sent to the counterparty. If this is a proposal block, the counterparty should create and sign an agreement block and send it back in another `HalfBlock` message. On the other end, the initiator should wait for the response and re-send the `HalfBlock` to the counterparty if they do not respond within a timeout interval.
