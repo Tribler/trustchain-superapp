@@ -21,16 +21,4 @@ class DemoCommunity(
     fun getUsers(): List<UserInfo> {
         return trustChainCommunity.database.getUsers()
     }
-
-    fun getPeerByPublicKeyBin(publicKeyBin: ByteArray): Peer? {
-        return network.getVerifiedByPublicKeyBin(publicKeyBin)
-    }
-
-    fun crawlChain(peer: Peer, latestBlockNum: Int) {
-        trustChainCommunity.crawlChain(peer, latestBlockNum)
-    }
-
-    fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
-        return trustChainCommunity.database.getLatestBlocks(publicKeyBin, 1000)
-    }
 }
