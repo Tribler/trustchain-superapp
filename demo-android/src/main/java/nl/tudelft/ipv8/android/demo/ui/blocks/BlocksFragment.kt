@@ -19,9 +19,13 @@ import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.ipv8.util.hexToBytes
 
 
+@UseExperimental(ExperimentalUnsignedTypes::class)
 open class BlocksFragment : BaseFragment() {
     private val adapter = ItemAdapter()
 
@@ -41,15 +45,20 @@ open class BlocksFragment : BaseFragment() {
             crawlChain()
         }
 
-        adapter.registerRenderer(BlockItemRenderer {
-            val blockId = it.block.blockId
-            if (expandedBlocks.contains(blockId)) {
-                expandedBlocks.remove(blockId)
-            } else {
-                expandedBlocks.add(blockId)
+        adapter.registerRenderer(BlockItemRenderer(
+            onExpandClick = {
+                val blockId = it.block.blockId
+                if (expandedBlocks.contains(blockId)) {
+                    expandedBlocks.remove(blockId)
+                } else {
+                    expandedBlocks.add(blockId)
+                }
+                updateView()
+            },
+            onSignClick = {
+                createAgreementBlock(it.block)
             }
-            updateView()
-        })
+        ))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,12 +107,16 @@ open class BlocksFragment : BaseFragment() {
     private fun updateView() {
         val demoCommunity = getDemoCommunity()
         val blocks = demoCommunity.getChainByUser(publicKey)
-
-        val myBlocks = demoCommunity.getChainByUser(demoCommunity.myPeer.publicKey.keyToBin())
-            .filter { it.linkPublicKey.contentEquals(publicKey) }
-
-        val items = blocks.map {
-            BlockItem(it, expandedBlocks.contains(it.blockId))
+        val items = blocks.map { block ->
+            val isMyPk = block.linkPublicKey.contentEquals(demoCommunity.myPeer.publicKey.keyToBin())
+            val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
+            val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
+            val canSign = (isMyPk || isAnyCounterpartyPk) && isProposalBlock
+            val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
+            BlockItem(block,
+                isExpanded = expandedBlocks.contains(block.blockId),
+                canSign = canSign && !hasLinkedBlock
+            )
         }
         adapter.updateItems(items)
         imgNoBlocks.isVisible = items.isEmpty()
@@ -137,5 +150,10 @@ open class BlocksFragment : BaseFragment() {
             getDemoCommunity().crawlChain(peer)
             updateView()
         }
+    }
+
+    private fun createAgreementBlock(proposalBlock: TrustChainBlock) {
+        getDemoCommunity().createAgreementBlock(proposalBlock, proposalBlock.transaction)
+        updateView()
     }
 }

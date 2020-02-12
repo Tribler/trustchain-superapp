@@ -5,7 +5,8 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 data class BlockItem(
     val block: TrustChainBlock,
-    var isExpanded: Boolean = false
+    var isExpanded: Boolean = false,
+    val canSign: Boolean = false
 ): Item() {
     override fun areItemsTheSame(other: Item): Boolean {
         return other is BlockItem && other.block.blockId == block.blockId

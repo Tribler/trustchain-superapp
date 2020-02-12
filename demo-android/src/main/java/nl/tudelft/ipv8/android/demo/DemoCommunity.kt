@@ -4,6 +4,7 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.UserInfo
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
@@ -38,6 +39,10 @@ class DemoCommunity(
         val blockType = "demo_block"
         val transaction = mapOf("message" to message)
         trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+    }
+
+    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
+        trustChainCommunity.createAgreementBlock(link, transaction)
     }
 
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {

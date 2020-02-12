@@ -8,7 +8,8 @@ import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.util.toHex
 
 class BlockItemRenderer(
-    private val onExpandClick: (BlockItem) -> Unit
+    private val onExpandClick: (BlockItem) -> Unit,
+    private val onSignClick: (BlockItem) -> Unit
 ) : ItemLayoutRenderer<BlockItem, View>(BlockItem::class.java) {
     override fun bindView(item: BlockItem, view: View) = with(view) {
         val block = item.block
@@ -41,6 +42,11 @@ class BlockItemRenderer(
             ChainColor.getColor(view.context, item.block.publicKey.toHex()))
         linkChainIndicator.setBackgroundColor(
             ChainColor.getColor(view.context, item.block.linkPublicKey.toHex()))
+
+        signButton.isVisible = item.canSign
+        signButton.setOnClickListener {
+            onSignClick(item)
+        }
     }
 
     override fun getLayoutResourceId(): Int {
