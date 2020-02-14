@@ -156,8 +156,8 @@ class TrustChainSQLiteStore(
         }.executeAsList()
     }
 
-    override fun getParticipatingBlocks(publicKey: ByteArray, limit: Int): List<TrustChainBlock> {
-        return dao.getParticipatingBlocks(publicKey, publicKey, limit.toLong(), blockMapper)
+    override fun getMutualBlocks(publicKey: ByteArray, limit: Int): List<TrustChainBlock> {
+        return dao.getMutualBlocks(publicKey, publicKey, limit.toLong(), blockMapper)
             .executeAsList()
     }
 }

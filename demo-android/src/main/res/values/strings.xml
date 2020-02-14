@@ -15,4 +15,5 @@
     </plurals>
 
     <string name="sign_block">Sign block</string>
+    <string name="block_status">Block Status: %s</string>
 </resources>

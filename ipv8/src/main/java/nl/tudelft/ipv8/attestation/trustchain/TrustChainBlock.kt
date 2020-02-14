@@ -78,6 +78,8 @@ class TrustChainBlock(
 
     val isGenesis = sequenceNumber == GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)
 
+    val isSelfSigned = publicKey.contentEquals(linkPublicKey)
+
     val transaction: TrustChainTransaction by lazy {
         try {
             TransactionSerialization.deserialize(rawTransaction)

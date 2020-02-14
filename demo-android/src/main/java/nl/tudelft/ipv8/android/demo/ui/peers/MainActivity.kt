@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
     private val appBarConfiguration by lazy {
         val topLevelDestinationIds = setOf(R.id.peersFragment, R.id.usersFragment,
-            R.id.myChainFragment, R.id.debugFragment)
+            R.id.latestBlocksFragment, R.id.myChainFragment, R.id.debugFragment)
         AppBarConfiguration(topLevelDestinationIds)
     }
 

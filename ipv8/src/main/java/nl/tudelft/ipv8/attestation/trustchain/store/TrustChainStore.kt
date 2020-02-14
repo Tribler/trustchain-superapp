@@ -31,7 +31,7 @@ interface TrustChainStore {
      * @param publicKey The public key of the peer we are interested in.
      * @param limit The limit of recent blocks to return.
      */
-    fun getParticipatingBlocks(publicKey: ByteArray, limit: Int = 100): List<TrustChainBlock>
+    fun getMutualBlocks(publicKey: ByteArray, limit: Int = 100): List<TrustChainBlock>
 }
 
 class UserInfo(
