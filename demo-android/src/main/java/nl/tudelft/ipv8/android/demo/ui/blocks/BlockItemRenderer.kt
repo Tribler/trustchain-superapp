@@ -35,7 +35,6 @@ class BlockItemRenderer(
             onExpandClick(item)
         }
 
-        //txtBlockStatus.isVisible = item.isExpanded
         expandedItem.isVisible = item.isExpanded
         btnExpand.scaleY = if (item.isExpanded) -1f else 1f
 

@@ -123,12 +123,10 @@ open class BlocksFragment : BaseFragment() {
     }
 
     protected open suspend fun updateView() {
-        val demoCommunity = getDemoCommunity()
         val items = blocks.map { block ->
-            val isMyPk = block.linkPublicKey.contentEquals(demoCommunity.myPeer.publicKey.keyToBin())
             val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
             val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-            val canSign = (isMyPk || isAnyCounterpartyPk) && isProposalBlock
+            val canSign = isAnyCounterpartyPk && isProposalBlock
             val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
             val status = when {
                 block.isSelfSigned -> BlockItem.BlockStatus.SELF_SIGNED
@@ -144,6 +142,7 @@ open class BlocksFragment : BaseFragment() {
         }
         adapter.updateItems(items)
         imgNoBlocks.isVisible = items.isEmpty()
+        progress.isVisible = false
     }
 
     private fun showNewBlockDialog() {
@@ -161,6 +160,7 @@ open class BlocksFragment : BaseFragment() {
             lifecycleScope.launch {
                 refreshBlocks()
                 updateView()
+                recyclerView.smoothScrollToPosition(0)
             }
         }
 
