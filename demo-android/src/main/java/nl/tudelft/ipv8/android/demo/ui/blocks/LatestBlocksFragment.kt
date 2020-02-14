@@ -21,7 +21,7 @@ class LatestBlocksFragment : BlocksFragment() {
 
     override suspend fun updateView() {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-        val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
+        val firstVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
 
         super.updateView()
 

@@ -50,5 +50,12 @@ class DebugFragment : BaseFragment() {
             }
             txtBlockCount.text = blockCount.toString()
         }
+
+        lifecycleScope.launch {
+            val chainLength = withContext(Dispatchers.IO) {
+                demo.trustChainCommunity.getChainLength()
+            }
+            txtChainLength.text = chainLength.toString()
+        }
     }
 }

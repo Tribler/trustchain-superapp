@@ -11,7 +11,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
-import nl.tudelft.ipv8.attestation.trustchain.store.Database
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
@@ -21,7 +20,7 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
-import java.lang.Exception
+import nl.tudelft.ipv8.sqldelight.Database
 import java.net.InetAddress
 import java.util.*
 import kotlin.math.roundToInt
@@ -54,7 +53,6 @@ class Application {
     ): OverlayConfiguration<TrustChainCommunity> {
         val settings = TrustChainSettings()
         val driver: SqlDriver = JdbcSqliteDriver(IN_MEMORY)
-        //Database.Schema.create(driver)
         val database = Database(driver)
         val store = TrustChainSQLiteStore(database)
         val trustChainCommunity = TrustChainCommunity(myPeer, endpoint, network, maxPeers = 30,

@@ -60,12 +60,12 @@ getBlockBefore:
 SELECT * FROM blocks WHERE sequence_number < ? AND public_key = ? ORDER BY sequence_number DESC
 LIMIT 1;
 
-getLowestSequenceNumberUnknown:
+getLatestSequenceNumber:
 SELECT b1.sequence_number FROM blocks b1 WHERE b1.public_key = ? AND NOT EXISTS
 (SELECT b2.sequence_number FROM blocks b2 WHERE b2.sequence_number = b1.sequence_number + 1
 AND b2.public_key = ?) ORDER BY b1.sequence_number LIMIT 1;
 
-getLowestRangeUnknown:
+getLowestSequenceNumberAfter:
 SELECT sequence_number FROM blocks WHERE public_key = ? AND sequence_number > ?
 ORDER BY sequence_number LIMIT 1;
 

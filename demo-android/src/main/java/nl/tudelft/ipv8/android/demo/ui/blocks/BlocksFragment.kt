@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_blocks.*
 import kotlinx.android.synthetic.main.fragment_peers.recyclerView
@@ -123,27 +124,33 @@ open class BlocksFragment : BaseFragment() {
     }
 
     protected open suspend fun updateView() {
-        val items = blocks.map { block ->
-            val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-            val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-            val canSign = isAnyCounterpartyPk && isProposalBlock
-            val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
-            val status = when {
-                block.isSelfSigned -> BlockItem.BlockStatus.SELF_SIGNED
-                hasLinkedBlock -> BlockItem.BlockStatus.SIGNED
-                isProposalBlock -> BlockItem.BlockStatus.WAITING_FOR_SIGNATURE
-                else -> null
-            }
-            BlockItem(block,
-                isExpanded = expandedBlocks.contains(block.blockId),
-                canSign = canSign && !hasLinkedBlock,
-                status = status
-            )
-        }
+        val items = createItems(blocks)
         adapter.updateItems(items)
         imgNoBlocks.isVisible = items.isEmpty()
         progress.isVisible = false
     }
+
+    private suspend fun createItems(blocks: List<TrustChainBlock>): List<Item> =
+        withContext(Dispatchers.Default) {
+            blocks.map { block ->
+                val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
+                val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
+                val canSign = isAnyCounterpartyPk && isProposalBlock
+                val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
+                val status = when {
+                    block.isSelfSigned -> BlockItem.BlockStatus.SELF_SIGNED
+                    hasLinkedBlock -> BlockItem.BlockStatus.SIGNED
+                    isProposalBlock -> BlockItem.BlockStatus.WAITING_FOR_SIGNATURE
+                    else -> null
+                }
+                BlockItem(
+                    block,
+                    isExpanded = expandedBlocks.contains(block.blockId),
+                    canSign = canSign && !hasLinkedBlock,
+                    status = status
+                )
+            }
+        }
 
     private fun showNewBlockDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(requireContext())
@@ -153,7 +160,7 @@ open class BlocksFragment : BaseFragment() {
         input.inputType = InputType.TYPE_CLASS_TEXT
         builder.setView(input)
 
-        builder.setPositiveButton("Create") { dialog, which ->
+        builder.setPositiveButton("Create") { _, _ ->
             val message = input.text.toString()
             val demoCommunity = getDemoCommunity()
             demoCommunity.createProposalBlock(message, publicKey)
@@ -164,7 +171,7 @@ open class BlocksFragment : BaseFragment() {
             }
         }
 
-        builder.setNegativeButton("Cancel") { dialog, which ->
+        builder.setNegativeButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
 

@@ -46,9 +46,29 @@ class TrustChainCrawler {
         val lowestUnknown = database.getLowestSequenceNumberUnknown(crawl.peer.publicKey.keyToBin())
 
         if (crawl.knownChainLength != null) {
-            if (crawl.knownChainLength == (lowestUnknown - 1).toUInt()) {
-                // At this point, we have all blocks we need
-                return
+            if (crawl.knownChainLength + 1u != lowestUnknown.toUInt()) {
+                // We know we are still missing some blocks
+                val latestBlock = database.getLatest(crawl.peer.publicKey.keyToBin())
+                if (latestBlock == null) {
+                    // We have no knowledge of this peer but we have the length of the chain.
+                    // Simply send a request from the genesis block to the known chain length.
+                    performPartialChainCrawl(crawl, LongRange(1L, crawl.knownChainLength.toLong()))
+                } else if (lowestUnknown.toUInt() == latestBlock.sequenceNumber + 1u) {
+                    // It seems that we filled all gaps in the database
+                    if (latestBlock.sequenceNumber < crawl.knownChainLength) {
+                        // Check whether we can do one final request if we still don't have the
+                        // whole chain.
+                        val crawlRange = LongRange(
+                            latestBlock.sequenceNumber.toLong() + 1,
+                            crawl.knownChainLength.toLong()
+                        )
+                        performPartialChainCrawl(crawl, crawlRange)
+                    }
+                    return
+                }
+
+                val lowestRangeUnknown = database.getLowestRangeUnknown(crawl.peer.publicKey.keyToBin())
+                performPartialChainCrawl(crawl, lowestRangeUnknown)
             }
         } else {
             // Do we know the chain length of the crawled peer? If not, make sure we get to know
@@ -59,28 +79,14 @@ class TrustChainCrawler {
                 crawl.peer.publicKey.keyToBin(),
                 LongRange(-1, -1)
             )
-            if (blocks.isEmpty()) {
-                return
+
+            if (blocks.isNotEmpty()) {
+                val nextCrawl = crawl.copy(
+                    knownChainLength = blocks.first().sequenceNumber
+                )
+                sendNextPartialChainCrawlRequest(nextCrawl)
             }
-            val nextCrawl = crawl.copy(
-                knownChainLength = blocks.first().sequenceNumber
-            )
-            sendNextPartialChainCrawlRequest(nextCrawl)
-            return
         }
-
-        val latestBlock = database.getLatest(crawl.peer.publicKey.keyToBin())
-        if (latestBlock == null) {
-            // We have no knowledge of this peer but we have the length of the chain.
-            // Simply send a request from the genesis block to the known chain length.
-            performPartialChainCrawl(crawl, LongRange(1L, crawl.knownChainLength.toLong()))
-        } else if (lowestUnknown.toUInt() == latestBlock.sequenceNumber + 1u) {
-            // It seems that we filled all gaps in the database
-            return
-        }
-
-        val lowestRangeUnknown = database.getLowestRangeUnknown(crawl.peer.publicKey.keyToBin())
-        performPartialChainCrawl(crawl, lowestRangeUnknown)
     }
 
     /**

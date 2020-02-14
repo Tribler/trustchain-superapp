@@ -65,7 +65,6 @@ open class HalfBlockPayload(
             localOffset += blockTypeSize
             val (transaction, transactionSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += transactionSize
-            val serializedTiemstamp = buffer.copyOfRange(offset + localOffset, offset + localOffset + SERIALIZED_ULONG_SIZE)
             val timestamp = deserializeULong(buffer, offset + localOffset)
             localOffset += SERIALIZED_ULONG_SIZE
             val payload = HalfBlockPayload(

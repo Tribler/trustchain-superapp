@@ -519,6 +519,12 @@ open class TrustChainCommunity(
      */
     private fun processHalfBlock(block: TrustChainBlock, peer: Peer) {
         validateAndPersistBlock(block)
+
+        logger.info("Processing half-block from $peer")
+
+        // TODO: Check if we are waiting for this signature response
+
+        // TODO: Sign the half-block if it is valid?
     }
 
     /**

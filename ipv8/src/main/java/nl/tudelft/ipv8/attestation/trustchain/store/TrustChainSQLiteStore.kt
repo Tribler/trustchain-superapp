@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.attestation.trustchain.store
 
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.sqldelight.Database
 import java.util.*
 
 private val blockMapper: (
@@ -17,7 +18,7 @@ private val blockMapper: (
     ByteArray
 ) -> TrustChainBlock = { type, tx, public_key, sequence_number, link_public_key,
                          link_sequence_number, previous_hash, signature, block_timestamp,
-                         insert_time, block_hash ->
+                         insert_time, _ ->
     TrustChainBlock(
         type,
         tx,
@@ -35,7 +36,7 @@ private val blockMapper: (
 class TrustChainSQLiteStore(
     database: Database
 ) : TrustChainStore {
-    val dao = database.dbBlockQueries
+    private val dao = database.dbBlockQueries
 
     override fun addBlock(block: TrustChainBlock) {
         dao.addBlock(
@@ -116,14 +117,24 @@ class TrustChainSQLiteStore(
     }
 
     override fun getLowestSequenceNumberUnknown(publicKey: ByteArray): Long {
-        return dao.getLowestSequenceNumberUnknown(publicKey, publicKey).executeAsOneOrNull() ?: 1
+        // The following query fetches the earliest block that does not have a subsequent block.
+        // This does not work for the case where we are merely missing the first block, hence this
+        // check.
+        if (get(publicKey, 1u) == null) {
+            return 1L
+        }
+
+        val latestSequenceNumber = dao.getLatestSequenceNumber(publicKey, publicKey)
+            .executeAsOneOrNull()
+        return if (latestSequenceNumber != null) latestSequenceNumber + 1 else 1
     }
 
     override fun getLowestRangeUnknown(publicKey: ByteArray): LongRange {
         val lowestUnknown = getLowestSequenceNumberUnknown(publicKey)
-        val highestUnknown = dao.getLowestRangeUnknown(publicKey, lowestUnknown)
+        val lowestKnownAfter = dao.getLowestSequenceNumberAfter(publicKey, lowestUnknown)
             .executeAsOneOrNull()
-        return LongRange(lowestUnknown, highestUnknown ?: lowestUnknown)
+        val highestUnknown = if (lowestKnownAfter != null) lowestKnownAfter - 1 else lowestUnknown
+        return LongRange(lowestUnknown, highestUnknown)
     }
 
     override fun getLinked(block: TrustChainBlock): TrustChainBlock? {
