@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.peerdiscovery.Network
 import org.junit.Assert
 import org.junit.Test
+import java.math.BigInteger
 import java.util.*
 
 class TrustChainCommunityTest : BaseCommunityTest() {
@@ -109,7 +110,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         )
 
         Assert.assertEquals("custom", block.type)
-        Assert.assertEquals(42, block.transaction["test"])
+        Assert.assertEquals(BigInteger.valueOf(42), block.transaction["test"])
         Assert.assertArrayEquals(getPrivateKey().pub().keyToBin(), block.publicKey)
         Assert.assertEquals(UNKNOWN_SEQ, block.linkSequenceNumber)
         Assert.assertEquals(GENESIS_SEQ, block.sequenceNumber)
@@ -144,7 +145,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         )
 
         Assert.assertEquals("custom", block2.type)
-        Assert.assertEquals(42, block2.transaction["test"])
+        Assert.assertEquals(BigInteger.valueOf(42), block2.transaction["test"])
         Assert.assertArrayEquals(getPrivateKey().pub().keyToBin(), block2.publicKey)
         Assert.assertEquals(GENESIS_SEQ, block2.linkSequenceNumber)
         Assert.assertEquals(GENESIS_SEQ, block2.sequenceNumber)
