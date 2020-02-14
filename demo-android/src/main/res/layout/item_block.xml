@@ -1,140 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:id="@+id/top_item"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:padding="5dp"
+    android:background="?selectableItemBackground">
 
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp"
-        android:background="?selectableItemBackground">
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="1dp"
-            android:background="@android:color/black"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@color/dark_gray"
+            android:id="@+id/ownChainIndicator"
+            android:padding="6dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txtPublicKey"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"
-                android:background="@android:color/white"
-                android:orientation="horizontal">
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:textColor="@android:color/white"
+                android:ellipsize="middle"
+                android:text="peer"/>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@color/dark_gray"
-                    android:id="@+id/ownChainIndicator"
-                    android:padding="6dp">
-
-                    <TextView
-                        android:id="@+id/txtPublicKey"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:textColor="@android:color/white"
-                        android:ellipsize="middle"
-                        android:text="peer"/>
-
-                    <TextView
-                        android:id="@+id/txtSequenceNumber"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@android:color/white"
-                        android:singleLine="true"
-                        android:ellipsize="middle"
-                        android:text="seqNum"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/dark_gray"
-                    android:layout_marginStart="4dp"
-                    android:orientation="vertical"
-                    android:id="@+id/linkChainIndicator"
-                    android:padding="6dp">
-
-                    <TextView
-                        android:id="@+id/txtLinkPublicKey"
-                        android:textColor="@android:color/white"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:singleLine="true"
-                        android:ellipsize="middle"
-                        android:text="Link peer"/>
-
-                    <TextView
-                        android:id="@+id/txtLinkSequenceNumber"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:textColor="@android:color/white"
-                        android:textSize="12sp"
-                        android:singleLine="true"
-                        android:ellipsize="middle"
-                        android:text="linkSeq"/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/txtTransaction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:padding="6dp"
-                    android:textSize="12sp"
-                    android:layout_weight="1"
-                    android:textColor="@android:color/black"
-                    android:maxLines="2"
-                    android:ellipsize="middle"
-                    tools:text="transaction"/>
-
-                <ImageView
-                    android:id="@+id/btnExpand"
-                    android:layout_width="40dp"
-                    android:layout_height="match_parent"
-                    app:srcCompat="@drawable/ic_expand_more_black_24dp" />
-
-            </LinearLayout>
-
-
+            <TextView
+                android:id="@+id/txtSequenceNumber"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:text="seqNum"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/dark_gray"
+            android:layout_marginStart="4dp"
+            android:orientation="vertical"
+            android:id="@+id/linkChainIndicator"
+            android:padding="6dp">
+
+            <TextView
+                android:id="@+id/txtLinkPublicKey"
+                android:textColor="@android:color/white"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:text="Link peer"/>
+
+            <TextView
+                android:id="@+id/txtLinkSequenceNumber"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:text="linkSeq"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtTransaction"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="6dp"
+            android:textSize="12sp"
+            android:layout_weight="1"
+            android:textColor="@android:color/black"
+            android:maxLines="2"
+            android:ellipsize="middle"
+            tools:text="transaction"/>
+
+        <ImageView
+            android:id="@+id/btnExpand"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_expand_more_black_24dp" />
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtBlockStatus"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:padding="4dp"
+        android:text="Status of Block:"
+        android:textColor="@android:color/white"
+        android:fontFamily="sans-serif-medium"
+        android:background="@color/dark_gray"
+        android:textAlignment="viewStart"
+        android:visibility="visible" />
 
     <!--The sign button-->
     <Button
         android:id="@+id/signButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
         android:textColor="@android:color/white"
         android:text="@string/sign_block"
-        android:background="@color/gray"/>
+        android:background="@color/dark_gray"/>
 
     <TableLayout
         android:id="@+id/expandedItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:shrinkColumns="1"
-        android:visibility="gone"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:paddingTop="4dp"
+        android:visibility="visible"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
         android:paddingBottom="4dp">
 
         <TableRow>

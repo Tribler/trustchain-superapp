@@ -31,7 +31,7 @@ class BlockItemRenderer(
         txtBlockHash.text = block.calculateHash().toHex()
         txtSignature.text = block.signature.toHex()
 
-        header.setOnClickListener {
+        setOnClickListener {
             onExpandClick(item)
         }
 
@@ -46,6 +46,23 @@ class BlockItemRenderer(
         signButton.isVisible = item.canSign
         signButton.setOnClickListener {
             onSignClick(item)
+        }
+
+        txtBlockStatus.isVisible = item.status != null
+
+        when (item.status) {
+            BlockItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
+                txtBlockStatus.text = context.getString(R.string.block_status, "Waiting for Signature")
+                txtBlockStatus.setBackgroundColor(context.getColor(R.color.red))
+            }
+            BlockItem.BlockStatus.SELF_SIGNED -> {
+                txtBlockStatus.text = context.getString(R.string.block_status, "Self-signed")
+                txtBlockStatus.setBackgroundColor(context.getColor(R.color.green))
+            }
+            BlockItem.BlockStatus.SIGNED -> {
+                txtBlockStatus.text = context.getString(R.string.block_status, "Signed")
+                txtBlockStatus.setBackgroundColor(context.getColor(R.color.green))
+            }
         }
     }
 

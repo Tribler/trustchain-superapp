@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
+import java.lang.Exception
 import java.util.*
 
 val GENESIS_HASH = ByteArray(32)
@@ -78,10 +79,16 @@ class TrustChainBlock(
 
     val isGenesis = sequenceNumber == GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)
 
+    val isSelfSigned = publicKey.contentEquals(linkPublicKey)
+
     val transaction: TrustChainTransaction by lazy {
         try {
-            TransactionSerialization.deserialize(rawTransaction)
+            val (_, data) = TransactionEncoding.decode(rawTransaction)
+            data as TrustChainTransaction
         } catch (e: TransactionSerializationException) {
+            e.printStackTrace()
+            mapOf<String, Any>()
+        } catch (e: Exception) {
             e.printStackTrace()
             mapOf<String, Any>()
         }

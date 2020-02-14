@@ -100,4 +100,41 @@
         android:text="0"
         app:fontFamily="monospace"
         style="@style/TextAppearance.MaterialComponents.Body2"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="TrustChain"
+        style="@style/TextAppearance.MaterialComponents.Headline6" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Total Block Count"
+        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+
+    <TextView
+        android:id="@+id/txtBlockCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="?"
+        app:fontFamily="monospace"
+        style="@style/TextAppearance.MaterialComponents.Body2"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="My Chain Length"
+        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+
+    <TextView
+        android:id="@+id/txtChainLength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="?"
+        app:fontFamily="monospace"
+        style="@style/TextAppearance.MaterialComponents.Body2"/>
 </LinearLayout>

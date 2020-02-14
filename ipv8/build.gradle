@@ -10,7 +10,7 @@ apply plugin: 'com.squareup.sqldelight'
 
 sqldelight {
     Database {
-        packageName = "nl.tudelft.ipv8.attestation.trustchain.store"
+        packageName = "nl.tudelft.ipv8.sqldelight"
         sourceFolders = ["sqldelight"]
         schemaOutputDirectory = file("src/main/sqldelight/databases")
     }
@@ -33,6 +33,16 @@ jacocoTestReport {
         csv.enabled true
         html.enabled true
     }
+
+    // TODO: exclude generated files
+    afterEvaluate {
+        getClassDirectories().setFrom(files(classDirectories.files.collect {
+            fileTree(
+                dir: it,
+                exclude: ["**/sqldelight/**"]
+            )
+        }))
+    }
 }
 
 dependencies {
@@ -50,11 +60,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.3.3'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
         "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        // "-Werror" // Set Kotlin compiler warnings as errors
+        "-Werror" // Set Kotlin compiler warnings as errors
     ]
 }

@@ -44,7 +44,7 @@ class ProposalBlockBuilder(
 ) : BlockBuilder(myPeer, database) {
     override fun update(builder: TrustChainBlock.Builder) {
         builder.type = blockType
-        builder.rawTransaction = TransactionSerialization.serialize(transaction)
+        builder.rawTransaction = TransactionEncoding.encode(transaction)
         builder.linkPublicKey = publicKey
         builder.linkSequenceNumber = UNKNOWN_SEQ
     }
@@ -58,7 +58,7 @@ class AgreementBlockBuilder(
 ) : BlockBuilder(myPeer, database) {
     override fun update(builder: TrustChainBlock.Builder) {
         builder.type = link.type
-        builder.rawTransaction = TransactionSerialization.serialize(transaction)
+        builder.rawTransaction = TransactionEncoding.encode(transaction)
         builder.linkPublicKey = link.publicKey
         builder.linkSequenceNumber = link.sequenceNumber
     }

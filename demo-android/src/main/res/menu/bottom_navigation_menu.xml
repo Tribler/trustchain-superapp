@@ -11,6 +11,10 @@
         android:title="Chains"
         android:icon="@drawable/ic_insert_link_black_24dp" />
     <item
+        android:id="@+id/latestBlocksFragment"
+        android:title="Blocks"
+        android:icon="@drawable/ic_grid_on_black_24dp" />
+    <item
         android:id="@+id/myChainFragment"
         android:title="My Chain"
         android:icon="@drawable/ic_person_black_24dp" />

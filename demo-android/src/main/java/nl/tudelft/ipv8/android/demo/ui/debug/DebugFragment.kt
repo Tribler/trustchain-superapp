@@ -7,8 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_debug.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
@@ -43,6 +42,20 @@ class DebugFragment : BaseFragment() {
         txtPublicKey.text = demo.myPeer.publicKey.keyToBin().toHex()
         txtOverlays.text = ipv8.getOverlays().joinToString("\n") {
             it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"
+        }
+
+        lifecycleScope.launch {
+            val blockCount = withContext(Dispatchers.IO) {
+                demo.trustChainCommunity.database.getAllBlocks().size
+            }
+            txtBlockCount.text = blockCount.toString()
+        }
+
+        lifecycleScope.launch {
+            val chainLength = withContext(Dispatchers.IO) {
+                demo.trustChainCommunity.getChainLength()
+            }
+            txtChainLength.text = chainLength.toString()
         }
     }
 }

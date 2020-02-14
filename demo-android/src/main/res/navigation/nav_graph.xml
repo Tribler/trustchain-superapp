@@ -18,7 +18,7 @@
     <fragment
         android:id="@+id/usersFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"
-        android:label="Chains">
+        android:label="All Chains">
         <action
             android:id="@+id/action_usersFragment_to_blocksFragment"
             app:destination="@id/blocksFragment"
@@ -43,4 +43,8 @@
         android:id="@+id/debugFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.debug.DebugFragment"
         android:label="Debug" />
+    <fragment
+        android:id="@+id/latestBlocksFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.LatestBlocksFragment"
+        android:label="All Blocks" />
 </navigation>

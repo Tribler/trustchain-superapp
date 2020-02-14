@@ -46,6 +46,6 @@ class DemoCommunity(
     }
 
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
-        return trustChainCommunity.database.getParticipatingBlocks(publicKeyBin, 1000)
+        return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
     }
 }
