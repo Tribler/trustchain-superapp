@@ -15,30 +15,11 @@ private val logger = KotlinLogging.logger {}
  * from the network graph.
  */
 class RandomChurn(
-    /**
-     * The Overlay to sample peers from.
-     */
     private val overlay: PingOverlay,
-
-    /**
-     * The amount of peers to check at once.
-     */
-    private val sampleSize: Int = 8,
-
-    /**
-     * Time between pings in the range of [inactiveTime] to [dropTime].
-     */
-    private val pingInterval: Double = 10.0,
-
-    /**
-     * Time before pings are sent to check liveness.
-     */
-    private val inactiveTime: Double = 27.5,
-
-    /**
-     * Time after which a peer is dropped.
-     */
-    private val dropTime: Double = 57.5
+    private val sampleSize: Int,
+    private val pingInterval: Double,
+    private val inactiveTime: Double,
+    private val dropTime: Double
 ) : DiscoveryStrategy {
     private val walkLock = Object()
 
@@ -82,6 +63,35 @@ class RandomChurn(
                     }
                 }
             }
+        }
+    }
+
+    class Factory(
+        /**
+         * The amount of peers to check at once.
+         */
+        private val sampleSize: Int = 8,
+
+        /**
+         * Time between pings in the range of [inactiveTime] to [dropTime].
+         */
+        private val pingInterval: Double = 10.0,
+
+        /**
+         * Time before pings are sent to check liveness.
+         */
+        private val inactiveTime: Double = 27.5,
+
+        /**
+         * Time after which a peer is dropped.
+         */
+        private val dropTime: Double = 57.5
+    ) : DiscoveryStrategy.Factory<RandomChurn>() {
+        override fun create(): RandomChurn {
+            val overlay = getOverlay() as? PingOverlay
+                ?: throw IllegalStateException("RandomChurn is only compatible with an overlay " +
+                    "implementing PingOveray")
+            return RandomChurn(overlay, sampleSize, pingInterval, inactiveTime, dropTime)
         }
     }
 }

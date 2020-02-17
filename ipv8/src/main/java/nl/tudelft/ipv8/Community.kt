@@ -14,13 +14,7 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-abstract class Community(
-    override val myPeer: Peer,
-    override val endpoint: Endpoint,
-    override val network: Network,
-    override val maxPeers: Int,
-    protected val cryptoProvider: CryptoProvider
-) : Overlay {
+abstract class Community : Overlay {
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
@@ -30,6 +24,12 @@ abstract class Community(
     private var lastBootstrap: Date? = null
 
     internal val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
+
+    override lateinit var myPeer: Peer
+    override lateinit var endpoint: Endpoint
+    override lateinit var network: Network
+    override var maxPeers: Int = 0
+    override lateinit var cryptoProvider: CryptoProvider
 
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest

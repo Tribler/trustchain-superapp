@@ -4,10 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class CancelIpv8Receiver extends BroadcastReceiver {
+public class CancelIPv8Receiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent serviceIntent = new Intent(context, Ipv8Service.class);
+        Intent serviceIntent = new Intent(context, IPv8Service.class);
         context.stopService(serviceIntent);
     }
 }

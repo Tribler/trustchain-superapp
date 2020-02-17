@@ -1,18 +1,26 @@
 package nl.tudelft.ipv8
 
 import kotlinx.coroutines.*
+import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
+import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
 import java.lang.IllegalStateException
 import kotlin.math.roundToLong
 
-class Ipv8(
+class IPv8(
     private val endpoint: Endpoint,
-    private val configuration: Ipv8Configuration
+    private val configuration: IPv8Configuration,
+    privateKey: PrivateKey,
+    private val cryptoProvider: CryptoProvider
 ) {
     private val overlayLock = Object()
 
-    private val overlays = mutableListOf<Overlay>()
+    val myPeer = Peer(privateKey)
+    val network = Network()
+
+    private val overlays = mutableMapOf<Class<out Overlay>, Overlay>()
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -24,7 +32,7 @@ class Ipv8(
         return isStarted
     }
 
-    fun getOverlays(): List<Overlay> {
+    fun getOverlays(): Map<Class<out Overlay>, Overlay> {
         return overlays
     }
 
@@ -35,10 +43,26 @@ class Ipv8(
 
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
-            val overlay = overlayConfiguration.overlay
-            overlays.add(overlay)
+            val overlayClass = overlayConfiguration.factory.overlayClass
+            if (overlays[overlayClass] != null) {
+                throw IllegalArgumentException("Overlay $overlayClass already exists")
+            }
+
+            // Create an overlay instance and set all dependencies
+            val overlay = overlayConfiguration.factory.create()
+            overlay.myPeer = myPeer
+            overlay.endpoint = endpoint
+            overlay.network = network
+            overlay.maxPeers = overlayConfiguration.maxPeers
+            overlay.cryptoProvider = cryptoProvider
             overlay.load()
-            for (strategy in overlayConfiguration.walkers) {
+
+            overlays[overlayClass] = overlay
+
+            for (strategyFactory in overlayConfiguration.walkers) {
+                val strategy = strategyFactory
+                    .setOverlay(overlay)
+                    .create()
                 strategies.add(strategy)
             }
         }
@@ -80,7 +104,7 @@ class Ipv8(
         synchronized(overlayLock) {
             loopingCallJob?.cancel()
 
-            for (overlay in overlays) {
+            for ((_, overlay) in overlays) {
                 overlay.unload()
             }
             overlays.clear()

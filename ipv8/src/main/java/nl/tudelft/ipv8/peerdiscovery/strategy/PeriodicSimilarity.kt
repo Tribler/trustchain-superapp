@@ -14,4 +14,13 @@ class PeriodicSimilarity(
             overlay.sendSimilarityRequest(peer.address)
         }
     }
+
+    class Factory : DiscoveryStrategy.Factory<PeriodicSimilarity>() {
+        override fun create(): PeriodicSimilarity {
+            val overlay = getOverlay() as? DiscoveryCommunity
+                ?: throw IllegalStateException("PeriodicSimilarity is only compatible with " +
+                    "DiscoveryCommunity")
+            return PeriodicSimilarity(overlay)
+        }
+    }
 }

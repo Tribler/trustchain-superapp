@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.net.InetAddress
 
-class Ipv8Test {
+class IPv8Test {
     @Test
     fun startAndStop() {
         val myKey = JavaCryptoProvider.generateKey()
@@ -23,8 +23,8 @@ class Ipv8Test {
         )
         val overlayConfig = OverlayConfiguration(community, listOf(randomWalk))
 
-        val config = Ipv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 5.0)
-        val ipv8 = Ipv8(endpoint, config)
+        val config = IPv8Configuration(overlays = listOf(overlayConfig), walkerInterval = 5.0)
+        val ipv8 = IPv8(endpoint, config)
         ipv8.start()
         assertTrue(endpoint.isOpen())
         ipv8.stop()

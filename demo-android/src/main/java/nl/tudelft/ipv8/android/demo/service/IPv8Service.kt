@@ -12,15 +12,15 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.*
-import nl.tudelft.ipv8.android.demo.Ipv8Application
+import nl.tudelft.ipv8.android.demo.DemoApplication
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.peers.MainActivity
 
-class Ipv8Service : Service() {
+class IPv8Service : Service() {
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    private val ipv8: Ipv8 by lazy {
-        (application as Ipv8Application).ipv8
+    private val ipv8: IPv8 by lazy {
+        (application as DemoApplication).ipv8
     }
 
     private var isBound = false
@@ -77,7 +77,7 @@ class Ipv8Service : Service() {
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
 
-        val cancelBroadcastIntent = Intent(this, CancelIpv8Receiver::class.java)
+        val cancelBroadcastIntent = Intent(this, CancelIPv8Receiver::class.java)
         val cancelPendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             0, cancelBroadcastIntent, 0
@@ -87,7 +87,7 @@ class Ipv8Service : Service() {
             NOTIFICATION_CHANNEL_CONNECTION)
             .setContentTitle("IPv8")
             .setContentText("Running")
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_insert_link_black_24dp)
             .setContentIntent(pendingIntent)
 
         // Allow cancellation when the app is running in background

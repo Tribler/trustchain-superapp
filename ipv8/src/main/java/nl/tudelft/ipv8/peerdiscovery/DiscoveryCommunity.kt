@@ -3,9 +3,8 @@ package nl.tudelft.ipv8.peerdiscovery
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.payload.PingPayload
@@ -16,13 +15,7 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-class DiscoveryCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
-    maxPeers: Int,
-    cryptoProvider: CryptoProvider
-) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider), PingOverlay {
+class DiscoveryCommunity : Community(), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
     private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
@@ -211,4 +204,6 @@ class DiscoveryCommunity(
     }
 
     class PingRequest(val identifier: Int, val peer: Peer, val startTime: Date)
+
+    class Factory : Overlay.Factory<DiscoveryCommunity>(DiscoveryCommunity::class.java)
 }

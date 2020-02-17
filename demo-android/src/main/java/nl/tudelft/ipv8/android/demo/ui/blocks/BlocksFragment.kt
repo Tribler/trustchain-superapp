@@ -115,8 +115,7 @@ open class BlocksFragment : BaseFragment() {
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
-        val demoCommunity = getDemoCommunity()
-        return demoCommunity.getChainByUser(publicKey)
+        return trustchain.getChainByUser(publicKey)
     }
 
     private suspend fun refreshBlocks() = withContext(Dispatchers.IO) {
@@ -162,8 +161,7 @@ open class BlocksFragment : BaseFragment() {
 
         builder.setPositiveButton("Create") { _, _ ->
             val message = input.text.toString()
-            val demoCommunity = getDemoCommunity()
-            demoCommunity.createProposalBlock(message, publicKey)
+            trustchain.createProposalBlock(message, publicKey)
             lifecycleScope.launch {
                 refreshBlocks()
                 updateView()
@@ -179,16 +177,16 @@ open class BlocksFragment : BaseFragment() {
     }
 
     private suspend fun crawlChain() {
-        val peer = getDemoCommunity().getPeerByPublicKeyBin(publicKey)
+        val peer = trustchain.getPeerByPublicKeyBin(publicKey)
         if (peer != null) {
-            getDemoCommunity().crawlChain(peer)
+            trustchain.crawlChain(peer)
             refreshBlocks()
             updateView()
         }
     }
 
     private fun createAgreementBlock(proposalBlock: TrustChainBlock) {
-        getDemoCommunity().createAgreementBlock(proposalBlock, proposalBlock.transaction)
+        trustchain.createAgreementBlock(proposalBlock, proposalBlock.transaction)
         lifecycleScope.launch {
             refreshBlocks()
             updateView()

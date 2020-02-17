@@ -9,14 +9,13 @@ class LatestBlocksFragment : BlocksFragment() {
     override val isNewBlockAllowed = false
 
     override fun getBlocks(): List<TrustChainBlock> {
-        val demoCommunity = getDemoCommunity()
-        val allBlocks = demoCommunity.trustChainCommunity.database.getAllBlocks()
+        val allBlocks = getTrustChainCommunity().database.getAllBlocks()
             .sortedByDescending { it.insertTime }
         return allBlocks.subList(0, min(1000, allBlocks.size))
     }
 
     override fun getPublicKey(): ByteArray {
-        return getDemoCommunity().myPeer.publicKey.keyToBin()
+        return getTrustChainCommunity().myPeer.publicKey.keyToBin()
     }
 
     override suspend fun updateView() {

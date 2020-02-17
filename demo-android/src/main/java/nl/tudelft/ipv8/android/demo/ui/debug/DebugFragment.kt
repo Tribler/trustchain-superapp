@@ -40,20 +40,20 @@ class DebugFragment : BaseFragment() {
         txtWanAddress.text = demo.myEstimatedWan.toString()
         txtPeerId.text = demo.myPeer.mid
         txtPublicKey.text = demo.myPeer.publicKey.keyToBin().toHex()
-        txtOverlays.text = ipv8.getOverlays().joinToString("\n") {
+        txtOverlays.text = getIpv8().getOverlays().values.toList().joinToString("\n") {
             it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"
         }
 
         lifecycleScope.launch {
             val blockCount = withContext(Dispatchers.IO) {
-                demo.trustChainCommunity.database.getAllBlocks().size
+                getTrustChainCommunity().database.getAllBlocks().size
             }
             txtBlockCount.text = blockCount.toString()
         }
 
         lifecycleScope.launch {
             val chainLength = withContext(Dispatchers.IO) {
-                demo.trustChainCommunity.getChainLength()
+                getTrustChainCommunity().getChainLength()
             }
             txtChainLength.text = chainLength.toString()
         }

@@ -26,8 +26,8 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.Ipv8Service" />
-        <receiver android:name=".service.CancelIpv8Receiver" />
+        <service android:name=".service.IPv8Service" />
+        <receiver android:name=".service.CancelIPv8Receiver" />
     </application>
 
 </manifest>

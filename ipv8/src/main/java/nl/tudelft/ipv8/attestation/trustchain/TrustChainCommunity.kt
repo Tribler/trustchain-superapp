@@ -3,16 +3,11 @@ package nl.tudelft.ipv8.attestation.trustchain
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
-import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
-import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
@@ -28,15 +23,10 @@ private val logger = KotlinLogging.logger {}
  * community handles sending blocks, broadcasting, and crawling chains of other peers.
  */
 open class TrustChainCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
-    maxPeers: Int,
-    cryptoProvider: CryptoProvider,
-    val settings: TrustChainSettings,
+    private val settings: TrustChainSettings,
     val database: TrustChainStore,
     private val crawler: TrustChainCrawler = TrustChainCrawler()
-) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider) {
+) : Community() {
     override val serviceId = "5ad767b05ae592a02488272ca2a86b847d4562e1"
 
     private val relayedBroadcasts = mutableSetOf<String>()
@@ -587,4 +577,14 @@ open class TrustChainCommunity(
         val receivedHalfBlocks: MutableList<TrustChainBlock> = mutableListOf(),
         var totalHalfBlocksExpected: UInt = 0u
     )
+
+    class Factory(
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
+    ) : Overlay.Factory<TrustChainCommunity>(TrustChainCommunity::class.java) {
+        override fun create(): TrustChainCommunity {
+            return TrustChainCommunity(settings, database, crawler)
+        }
+    }
 }

@@ -83,13 +83,13 @@ class Application {
         val trustChainCommunity = createTrustChainCommunity(myPeer, endpoint, network)
         val demoCommunity = createDemoCommunity(myPeer, endpoint, network, trustChainCommunity.overlay)
 
-        val config = Ipv8Configuration(overlays = listOf(
+        val config = IPv8Configuration(overlays = listOf(
             //discoveryCommunity,
             //trustChainCommunity,
             demoCommunity
         ), walkerInterval = 1.0)
 
-        val ipv8 = Ipv8(endpoint, config)
+        val ipv8 = IPv8(endpoint, config)
         ipv8.start()
 
         scope.launch {
