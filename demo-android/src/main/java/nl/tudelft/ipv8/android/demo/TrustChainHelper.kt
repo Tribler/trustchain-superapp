@@ -9,7 +9,7 @@ import nl.tudelft.ipv8.attestation.trustchain.store.UserInfo
 /**
  * A helper class for interacting with TrustChain.
  */
-class TrustChainExplorer(
+class TrustChainHelper(
     private val trustChainCommunity: TrustChainCommunity
 ) {
     /**
@@ -23,8 +23,7 @@ class TrustChainExplorer(
      * Returns a peer by its public key if found.
      */
     fun getPeerByPublicKeyBin(publicKeyBin: ByteArray): Peer? {
-        val network = trustChainCommunity.network
-        return network.getVerifiedByPublicKeyBin(publicKeyBin)
+        return trustChainCommunity.network.getVerifiedByPublicKeyBin(publicKeyBin)
     }
 
     /**

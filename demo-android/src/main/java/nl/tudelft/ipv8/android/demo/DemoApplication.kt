@@ -5,6 +5,9 @@ import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import nl.tudelft.ipv8.*
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.IPv8AndroidFactory
+import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
@@ -19,39 +22,24 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 
 class DemoApplication : Application() {
-    val ipv8 by lazy {
-        createIPv8()
+    override fun onCreate() {
+        super.onCreate()
+
+        initIPv8()
     }
 
-    private fun getPrivateKey(): PrivateKey {
-        // Return key from the shared preferences
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
-        if (privateKey == null) {
-            // Generate a new key on the first launch
-            val newKey = AndroidCryptoProvider.generateKey()
-            prefs.edit()
-                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
-                .apply()
-            return newKey
-        }
-        return AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
-    }
-
-    private fun createIPv8(): IPv8 {
-        return IPv8Factory(this)
-            .setPrivateKey(getPrivateKey())
-            .setConfiguration(createIPv8Config())
-            .setCryptoProvider(AndroidCryptoProvider)
-            .create()
-    }
-
-    private fun createIPv8Config(): IPv8Configuration {
-        return IPv8Configuration(overlays = listOf(
+    private fun initIPv8() {
+        val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
             createDemoCommunity()
         ), walkerInterval = 1.0)
+
+        val factory = IPv8AndroidFactory(this)
+            .setConfiguration(config)
+            .setPrivateKey(getPrivateKey())
+
+        IPv8Android.init(this, factory, DemoService::class.java)
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -82,6 +70,21 @@ class DemoApplication : Application() {
             Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
         )
+    }
+
+    private fun getPrivateKey(): PrivateKey {
+        // Return key from the shared preferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
+        if (privateKey == null) {
+            // Generate a new key on the first launch
+            val newKey = AndroidCryptoProvider.generateKey()
+            prefs.edit()
+                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
+                .apply()
+            return newKey
+        }
+        return AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
     }
 
     companion object {

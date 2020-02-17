@@ -33,71 +33,57 @@ class Application {
         startIpv8()
     }
 
-    private fun createDiscoveryCommunity(
-        myPeer: Peer,
-        endpoint: Endpoint,
-        network: Network
-    ): OverlayConfiguration<DiscoveryCommunity> {
-        val community = DiscoveryCommunity(myPeer, endpoint, network, maxPeers = 30,
-            cryptoProvider = JavaCryptoProvider)
-        val randomWalk = RandomWalk(community, timeout = 3.0, peers = 20)
-        val randomChurn = RandomChurn(community)
-        val periodicSimilarity = PeriodicSimilarity(community)
-        return OverlayConfiguration(community, listOf(randomWalk, randomChurn, periodicSimilarity))
+    private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
+        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val randomChurn = RandomChurn.Factory()
+        val periodicSimilarity = PeriodicSimilarity.Factory()
+        return OverlayConfiguration(
+            DiscoveryCommunity.Factory(),
+            listOf(randomWalk, randomChurn, periodicSimilarity)
+        )
     }
 
-    private fun createTrustChainCommunity(
-        myPeer: Peer,
-        endpoint: Endpoint,
-        network: Network
-    ): OverlayConfiguration<TrustChainCommunity> {
+    private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
         val settings = TrustChainSettings()
         val driver: SqlDriver = JdbcSqliteDriver(IN_MEMORY)
+        Database.Schema.create(driver)
         val database = Database(driver)
         val store = TrustChainSQLiteStore(database)
-        val trustChainCommunity = TrustChainCommunity(myPeer, endpoint, network, maxPeers = 30,
-            cryptoProvider = JavaCryptoProvider, settings = settings, database = store)
-        val randomWalk = RandomWalk(trustChainCommunity, timeout = 3.0, peers = 20)
-        return OverlayConfiguration(trustChainCommunity, listOf(randomWalk))
+        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        return OverlayConfiguration(
+            TrustChainCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
     }
 
-    private fun createDemoCommunity(
-        myPeer: Peer,
-        endpoint: Endpoint,
-        network: Network,
-        trustChainCommunity: TrustChainCommunity
-    ): OverlayConfiguration<DemoCommunity> {
-        val demoCommunity = DemoCommunity(myPeer, endpoint, network, JavaCryptoProvider,
-            trustChainCommunity)
-        val demoRandomWalk = RandomWalk(demoCommunity, timeout = 3.0, peers = 20)
-        return OverlayConfiguration(demoCommunity, listOf(demoRandomWalk))
+    private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
+        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        return OverlayConfiguration(
+            Overlay.Factory(DemoCommunity::class.java),
+            listOf(randomWalk)
+        )
     }
 
     private fun startIpv8() {
         val myKey = JavaCryptoProvider.generateKey()
-        val myPeer = Peer(myKey)
         val endpoint = UdpEndpoint(8090, InetAddress.getByName("0.0.0.0"))
-        val network = Network()
-
-        val discoveryCommunity = createDiscoveryCommunity(myPeer, endpoint, network)
-        val trustChainCommunity = createTrustChainCommunity(myPeer, endpoint, network)
-        val demoCommunity = createDemoCommunity(myPeer, endpoint, network, trustChainCommunity.overlay)
 
         val config = IPv8Configuration(overlays = listOf(
-            //discoveryCommunity,
-            //trustChainCommunity,
-            demoCommunity
+            createDiscoveryCommunity(),
+            createTrustChainCommunity(),
+            createDemoCommunity()
         ), walkerInterval = 1.0)
 
-        val ipv8 = IPv8(endpoint, config)
+        val ipv8 = IPv8(endpoint, config, myKey, JavaCryptoProvider)
         ipv8.start()
 
         scope.launch {
             while (true) {
-                printPeersInfo(discoveryCommunity.overlay)
-                printPeersInfo(demoCommunity.overlay)
-                logger.info("---")
-                delay(1000)
+                for ((_, overlay) in ipv8.overlays) {
+                    printPeersInfo(overlay)
+                }
+                logger.info("===")
+                delay(5000)
             }
         }
     }

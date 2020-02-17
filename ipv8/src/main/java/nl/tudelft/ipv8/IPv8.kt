@@ -20,7 +20,7 @@ class IPv8(
     val myPeer = Peer(privateKey)
     val network = Network()
 
-    private val overlays = mutableMapOf<Class<out Overlay>, Overlay>()
+    val overlays = mutableMapOf<Class<out Overlay>, Overlay>()
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -30,10 +30,6 @@ class IPv8(
 
     fun isStarted(): Boolean {
         return isStarted
-    }
-
-    fun getOverlays(): Map<Class<out Overlay>, Overlay> {
-        return overlays
     }
 
     fun start() {

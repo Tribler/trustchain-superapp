@@ -6,9 +6,6 @@
         <item quantity="other">%d peers</item>
     </plurals>
 
-    <string name="notification_channel_connection_title">Connection</string>
-    <string name="notification_channel_connection_description">Shows when the network connection service is running</string>
-
     <plurals name="x_blocks">
         <item quantity="one">%d block</item>
         <item quantity="other">%d blocks</item>

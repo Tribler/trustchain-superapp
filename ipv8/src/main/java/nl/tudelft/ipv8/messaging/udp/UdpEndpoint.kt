@@ -72,6 +72,8 @@ open class UdpEndpoint(
         socket?.close()
         socket = null
 
+        bindThread = null
+
         scope.cancel()
     }
 

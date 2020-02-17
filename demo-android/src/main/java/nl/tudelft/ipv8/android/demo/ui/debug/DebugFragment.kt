@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_debug.*
 import kotlinx.coroutines.*
@@ -34,13 +33,14 @@ class DebugFragment : BaseFragment() {
     }
 
     private fun updateView() {
+        val ipv8 = getIpv8()
         val demo = getDemoCommunity()
         txtBootstrap.text = Community.DEFAULT_ADDRESSES.joinToString("\n")
         txtLanAddress.text = demo.myEstimatedLan.toString()
         txtWanAddress.text = demo.myEstimatedWan.toString()
-        txtPeerId.text = demo.myPeer.mid
-        txtPublicKey.text = demo.myPeer.publicKey.keyToBin().toHex()
-        txtOverlays.text = getIpv8().getOverlays().values.toList().joinToString("\n") {
+        txtPeerId.text = ipv8.myPeer.mid
+        txtPublicKey.text = ipv8.myPeer.publicKey.keyToBin().toHex()
+        txtOverlays.text = ipv8.overlays.values.toList().joinToString("\n") {
             it.javaClass.simpleName + " (" + it.getPeers().size + " peers)"
         }
 

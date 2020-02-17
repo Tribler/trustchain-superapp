@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.peers
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,7 +55,7 @@ class PeersFragment : BaseFragment() {
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val overlays = getIpv8().getOverlays()
+                val overlays = getIpv8().overlays
 
                 for ((_, overlay) in overlays) {
                     logger.debug(overlay.javaClass.simpleName + ": " + overlay.getPeers().size + " peers")

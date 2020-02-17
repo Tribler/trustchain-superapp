@@ -1,4 +1,4 @@
-package nl.tudelft.ipv8.android.demo.service
+package nl.tudelft.ipv8.android.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,51 +8,59 @@ import android.content.Intent
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.ProcessLifecycleOwner
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.*
-import nl.tudelft.ipv8.android.demo.DemoApplication
-import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.ui.peers.MainActivity
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.R
 
-class IPv8Service : Service() {
+abstract class IPv8Service : Service(), LifecycleObserver {
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    private val ipv8: IPv8 by lazy {
-        (application as DemoApplication).ipv8
-    }
-
-    private var isBound = false
+    private var isForeground = false
 
     override fun onCreate() {
         super.onCreate()
 
         createNotificationChannel()
         showForegroundNotification()
-    }
 
-    override fun onDestroy() {
-        ipv8.stop()
-        scope.cancel()
-        super.onDestroy()
+        ProcessLifecycleOwner.get()
+            .lifecycle
+            .addObserver(this)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        isBound = true
-        showForegroundNotification()
-        return LocalBinder()
+        return null
     }
 
-    override fun onRebind(intent: Intent?) {
-        isBound = true
+    override fun onDestroy() {
+        getIPv8().stop()
+        scope.cancel()
+
+        ProcessLifecycleOwner.get()
+            .lifecycle
+            .removeObserver(this)
+
+        super.onDestroy()
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    fun onBackground() {
+        isForeground = false
         showForegroundNotification()
     }
 
-    override fun onUnbind(intent: Intent?): Boolean {
-        isBound = false
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    fun onForeground() {
+        isForeground = true
         showForegroundNotification()
-        return true
     }
 
     private fun createNotificationChannel() {
@@ -74,24 +82,16 @@ class IPv8Service : Service() {
     }
 
     private fun showForegroundNotification() {
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
-
-        val cancelBroadcastIntent = Intent(this, CancelIPv8Receiver::class.java)
+        val cancelBroadcastIntent = Intent(this, StopIPv8Receiver::class.java)
         val cancelPendingIntent = PendingIntent.getBroadcast(
             applicationContext,
             0, cancelBroadcastIntent, 0
         )
 
-        val builder = NotificationCompat.Builder(this,
-            NOTIFICATION_CHANNEL_CONNECTION)
-            .setContentTitle("IPv8")
-            .setContentText("Running")
-            .setSmallIcon(R.drawable.ic_insert_link_black_24dp)
-            .setContentIntent(pendingIntent)
+        val builder = createNotification()
 
         // Allow cancellation when the app is running in background
-        if (!isBound) {
+        if (!isForeground) {
             builder.addAction(NotificationCompat.Action(0, "Stop", cancelPendingIntent))
         }
 
@@ -101,7 +101,17 @@ class IPv8Service : Service() {
         )
     }
 
-    inner class LocalBinder : Binder()
+    /**
+     * Creates a notification that will be shown when the IPv8 service is running.
+     */
+    protected abstract fun createNotification(): NotificationCompat.Builder
+
+    /**
+     * Returns a running IPv8 instance.
+     */
+    private fun getIPv8(): IPv8 {
+        return IPv8Android.getInstance()
+    }
 
     companion object {
         const val NOTIFICATION_CHANNEL_CONNECTION = "service_notifications"

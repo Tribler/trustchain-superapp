@@ -13,10 +13,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
 import mu.KotlinLogging
-import nl.tudelft.ipv8.android.demo.DemoApplication
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.service.IPv8Service
-import nl.tudelft.ipv8.android.demo.startIfNotRunning
 
 val logger = KotlinLogging.logger {}
 
@@ -31,14 +28,6 @@ class MainActivity : AppCompatActivity() {
         AppBarConfiguration(topLevelDestinationIds)
     }
 
-    private val serviceConnection: ServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
-        }
-
-        override fun onServiceDisconnected(name: ComponentName) {
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,21 +38,6 @@ class MainActivity : AppCompatActivity() {
 
         // Setup bottom navigation
         bottomNavigation.setupWithNavController(navController)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        // Make sure IPv8 is running
-        (application as DemoApplication).ipv8.startIfNotRunning(this)
-
-        val serviceIntent = Intent(this, IPv8Service::class.java)
-        bindService(serviceIntent, serviceConnection, 0)
-    }
-
-    override fun onStop() {
-        unbindService(serviceConnection)
-        super.onStop()
     }
 
     override fun onSupportNavigateUp(): Boolean {
