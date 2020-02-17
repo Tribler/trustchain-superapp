@@ -10,11 +10,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 
 private val lazySodium = LazySodiumJava(SodiumJava())
 
-class TestCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network
-) : Community(myPeer, endpoint, network, 20, JavaCryptoProvider) {
+class TestCommunity : Community() {
     override val serviceId = Peer(LibNaClPK.fromBin(MASTER_PEER_KEY.hexToBytes(), lazySodium)).mid
 
     companion object {

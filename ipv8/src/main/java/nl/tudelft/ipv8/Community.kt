@@ -2,6 +2,7 @@ package nl.tudelft.ipv8
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
@@ -28,8 +29,8 @@ abstract class Community : Overlay {
     override lateinit var myPeer: Peer
     override lateinit var endpoint: Endpoint
     override lateinit var network: Network
-    override var maxPeers: Int = 0
-    override lateinit var cryptoProvider: CryptoProvider
+    override var maxPeers: Int = 20
+    override var cryptoProvider: CryptoProvider = JavaCryptoProvider
 
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest

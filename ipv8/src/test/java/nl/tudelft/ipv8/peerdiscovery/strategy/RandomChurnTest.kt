@@ -22,7 +22,8 @@ class RandomChurnTest {
         every { overlay.network } returns network
         every { network.getRandomPeers(any()) } returns listOf(peer)
 
-        val randomChurn = RandomChurn(overlay, sampleSize = 8)
+        val randomChurn = RandomChurn.Factory(sampleSize = 8)
+            .setOverlay(overlay).create()
         randomChurn.takeStep()
 
         verify { network.getRandomPeers(8) }
@@ -39,7 +40,8 @@ class RandomChurnTest {
         every { overlay.network } returns network
         every { network.getRandomPeers(any()) } returns listOf(peer)
 
-        val randomChurn = RandomChurn(overlay, sampleSize = 8)
+        val randomChurn = RandomChurn.Factory(sampleSize = 8)
+            .setOverlay(overlay).create()
         randomChurn.takeStep()
 
         verify { network.getRandomPeers(8) }
@@ -56,7 +58,9 @@ class RandomChurnTest {
         every { overlay.network } returns network
         every { network.getRandomPeers(any()) } returns listOf(peer)
 
-        val randomChurn = RandomChurn(overlay, sampleSize = 8)
+        val randomChurn = RandomChurn.Factory(sampleSize = 8)
+            .setOverlay(overlay)
+            .create()
         randomChurn.takeStep()
 
         verify { network.getRandomPeers(8) }

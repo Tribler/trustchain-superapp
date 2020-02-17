@@ -2,6 +2,7 @@ package nl.tudelft.ipv8
 
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.peerdiscovery.Network
@@ -13,7 +14,7 @@ class IPv8(
     private val endpoint: Endpoint,
     private val configuration: IPv8Configuration,
     privateKey: PrivateKey,
-    private val cryptoProvider: CryptoProvider
+    private val cryptoProvider: CryptoProvider = JavaCryptoProvider
 ) {
     private val overlayLock = Object()
 
