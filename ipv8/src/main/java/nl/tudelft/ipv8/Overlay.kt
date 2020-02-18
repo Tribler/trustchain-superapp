@@ -92,7 +92,7 @@ interface Overlay : EndpointListener {
         val overlayClass: Class<T>
     ) {
         open fun create(): T {
-            return overlayClass.newInstance()
+            return overlayClass.getConstructor().newInstance()
         }
     }
 }
