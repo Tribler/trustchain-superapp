@@ -3,14 +3,12 @@ package nl.tudelft.ipv8.attestation.trustchain
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import io.mockk.coEvery
-import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runBlockingTest
 import nl.tudelft.ipv8.BaseCommunityTest
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.sqldelight.Database

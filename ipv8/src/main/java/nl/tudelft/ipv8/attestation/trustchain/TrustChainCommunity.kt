@@ -136,13 +136,13 @@ open class TrustChainCommunity(
             logger.debug("Sending block to $address")
             val payload = HalfBlockPayload.fromHalfBlock(block)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK, listOf(dist, payload),
+            val packet = serializePacket(MessageId.HALF_BLOCK, listOf(dist, payload),
                 false)
             send(address, packet)
         } else {
             val payload = HalfBlockBroadcastPayload.fromHalfBlock(block, ttl.toUInt())
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_BROADCAST, listOf(dist,
+            val packet = serializePacket(MessageId.HALF_BLOCK_BROADCAST, listOf(dist,
                 payload), false)
             val randomPeers = getPeers().random(settings.broadcastFanout)
             for (peer in randomPeers) {
@@ -168,13 +168,13 @@ open class TrustChainCommunity(
         if (address != null) {
             val payload = HalfBlockPairPayload.fromHalfBlocks(block1, block2)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
                 false)
             send(address, packet)
         } else {
             val payload = HalfBlockPairBroadcastPayload.fromHalfBlocks(block1, block2, ttl)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR_BROADCAST,
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR_BROADCAST,
                 listOf(dist, payload))
             for (peer in network.getRandomPeers(settings.broadcastFanout)) {
                 send(peer.address, packet)
@@ -296,7 +296,7 @@ open class TrustChainCommunity(
             val payload = CrawlRequestPayload(publicKey, range.first, range.last, crawlId)
 
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
+            val packet = serializePacket(MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
 
             endpoint.send(peer.address, packet)
         }
@@ -416,7 +416,7 @@ open class TrustChainCommunity(
             val responsePayload = EmptyCrawlResponsePayload(payload.crawlId)
             val dist = GlobalTimeDistributionPayload(globalTime)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.EMPTY_CRAWL_RESPONSE,
+            val packet = serializePacket(MessageId.EMPTY_CRAWL_RESPONSE,
                 listOf(dist, responsePayload), false)
             send(peer.address, packet)
         } else {
@@ -445,7 +445,7 @@ open class TrustChainCommunity(
         val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
-        val packet = serializePacket(prefix, MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
+        val packet = serializePacket(MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
         send(peer.address, packet)
     }
 

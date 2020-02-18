@@ -20,7 +20,7 @@ import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.R
 
-abstract class IPv8Service : Service(), LifecycleObserver {
+open class IPv8Service : Service(), LifecycleObserver {
     private val scope = CoroutineScope(Dispatchers.Default)
 
     private var isForeground = false
@@ -104,7 +104,11 @@ abstract class IPv8Service : Service(), LifecycleObserver {
     /**
      * Creates a notification that will be shown when the IPv8 service is running.
      */
-    protected abstract fun createNotification(): NotificationCompat.Builder
+    protected open fun createNotification(): NotificationCompat.Builder {
+        return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_CONNECTION)
+            .setContentTitle("IPv8")
+            .setContentText("Running")
+    }
 
     /**
      * Returns a running IPv8 instance.

@@ -12,12 +12,31 @@ If you want to deep dive into technical details of the protocol and understand h
 
 Kotlin is a relatively new, but increasingly popular, modern, statically typed programming language. Compared to Java, it features null safety, type inference, coroutines, and is more expressive. Moreover, it is 100% interoperable with Java, so applications using this library can still be built in Java.
 
+## Communities
+
+The protocol is built around the concept of *communities*. A community (or an *overlay*) represents a service in the IPv8 network. Every peer can choose which communities to join when starting the protocol stack. The following communities are implemented by the IPv8 core:
+
+- [DiscoveryCommunity](doc/DiscoveryCommunity.md) implements peer discovery mechanism. It tries to keep an active connection with a specified number of peers and keeps track of communities they participate in. It performs regular keep-alive checks and drops inactive peers. While it is possible to run IPv8 without using this community, it is not recommended.
+- [TrustChainCommunity](doc/TrustChainCommunity.md) implements TrustChain, a scalable, tamper-proof and distributed ledger, built for secure accounting.
+
+## Tutorials
+
+- [Creating your first overlay](doc/OverlayTutorial.md)
+- [Creating your first TrustChain application](doc/TrustChainTutorial.md)
 
 ## Sample app
 
-The repository includes a sample app that depends on the IPv8 library and demonstrates its usage. Currently, it only shows a list of discovered peers, the time since the last sent and received message, and average ping latency for each peer. It is available both as a native app for Android, and as a command line application running locally on JVM on macOS, Linux, and Windows.
+The repository includes a sample app that depends on the IPv8 library and demonstrates its usage. It is  available both as a native app for Android, and as a command line application running locally on JVM on macOS, Linux, and Windows.
 
 ### Android
+
+The **TrustChain Explorer** app mostly demonstrates  interaction with TrustChainCommunity. It defines its own DemoCommunity to ensure that all users using the app are able to discover each other easily. The content of the app is split into several tabs:
+
+- **Peers:** A list of discovered peers in DemoCommunity. For each peer, there is a time since the last sent and received message, and an average ping latency. After clicking on the peer item, a list of mutual blocks in TrustChain is shown. It is possible to create and send a new proposal block by clicking on the plus icon.
+- **Chains:** A list of discovered chains in TrustChainComunity, ordered by their length. After clicking on the item, the list of stored blocks is shown.
+- **All Blocks:** A stream of all received blocks, updated in real-time as new blocks are received from the network.
+- **My Chain:** A list of blocks in which the current user is participating either as a sender or a receiver. It is possible to create a new self-signed block by clicking on the plus icon. It is posible to sign received blocks.
+- **Debug:** Various debug information including the number of connected peers in different overlays, estimated LAN and WAN address, and TrustChain statistics.
 
 Install the app on Android:
 ```
@@ -29,6 +48,8 @@ Install the app on Android:
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android.png" width="180"> <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-trustchain.png" width="180"> <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
 
 ### JVM
+
+The JVM app merely shows a list of connected peers in the CLI, to demonstrate the feasibility of running the stack without any Android dependencies.
 
 Run the app locally in JVM:
 ```

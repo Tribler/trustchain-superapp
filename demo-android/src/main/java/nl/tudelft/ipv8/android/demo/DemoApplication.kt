@@ -6,7 +6,6 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.IPv8AndroidFactory
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -35,11 +34,11 @@ class DemoApplication : Application() {
             createDemoCommunity()
         ), walkerInterval = 1.0)
 
-        val factory = IPv8AndroidFactory(this)
+        IPv8Android.Factory(this)
             .setConfiguration(config)
             .setPrivateKey(getPrivateKey())
-
-        IPv8Android.init(this, factory, DemoService::class.java)
+            .setServiceClass(DemoService::class.java)
+            .init()
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -73,18 +72,19 @@ class DemoApplication : Application() {
     }
 
     private fun getPrivateKey(): PrivateKey {
-        // Return key from the shared preferences
+        // Load a key from the shared preferences
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
-        if (privateKey == null) {
+        return if (privateKey == null) {
             // Generate a new key on the first launch
             val newKey = AndroidCryptoProvider.generateKey()
             prefs.edit()
                 .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
                 .apply()
-            return newKey
+            newKey
+        } else {
+            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
-        return AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
     }
 
     companion object {

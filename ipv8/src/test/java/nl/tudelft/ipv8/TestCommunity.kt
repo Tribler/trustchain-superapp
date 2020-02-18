@@ -2,10 +2,7 @@ package nl.tudelft.ipv8
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava
 import com.goterl.lazycode.lazysodium.SodiumJava
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.LibNaClPK
-import nl.tudelft.ipv8.messaging.Endpoint
-import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.hexToBytes
 
 private val lazySodium = LazySodiumJava(SodiumJava())

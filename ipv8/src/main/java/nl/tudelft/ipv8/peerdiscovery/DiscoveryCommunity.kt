@@ -43,7 +43,7 @@ class DiscoveryCommunity : Community(), PingOverlay {
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
+        return serializePacket(MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
     }
 
     fun sendSimilarityRequest(address: Address) {
@@ -60,7 +60,7 @@ class DiscoveryCommunity : Community(), PingOverlay {
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
+        return serializePacket(MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
     }
 
     internal fun createPing(): Pair<Int, ByteArray> {
@@ -68,7 +68,7 @@ class DiscoveryCommunity : Community(), PingOverlay {
         val payload = PingPayload((globalTime % 65536u).toInt())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return Pair(payload.identifier, serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false))
+        return Pair(payload.identifier, serializePacket(MessageId.PING, listOf(dist, payload), sign = false))
     }
 
     override fun sendPing(peer: Peer) {
@@ -86,7 +86,7 @@ class DiscoveryCommunity : Community(), PingOverlay {
         val payload = PongPayload(identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.PONG, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PONG, listOf(dist, payload), sign = false)
     }
 
     /*

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IPv8 Demo</string>
+    <string name="app_name">TrustChain Explorer</string>
 
     <plurals name="x_peers">
         <item quantity="one">%d peer</item>

@@ -24,7 +24,7 @@ abstract class Community : Overlay {
 
     private var lastBootstrap: Date? = null
 
-    internal val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
+    val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
 
     override lateinit var myPeer: Peer
     override lateinit var endpoint: Endpoint
@@ -153,7 +153,7 @@ abstract class Community : Overlay {
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
     }
 
     internal fun createIntroductionResponse(
@@ -207,7 +207,7 @@ abstract class Community : Overlay {
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
 
     internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
@@ -218,7 +218,7 @@ abstract class Community : Overlay {
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
     internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
@@ -226,7 +226,7 @@ abstract class Community : Overlay {
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
-        return serializePacket(prefix, MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
     }
 
     /**
@@ -239,7 +239,6 @@ abstract class Community : Overlay {
      * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
      */
     protected fun serializePacket(
-        prefix: ByteArray,
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true,
