@@ -68,17 +68,16 @@ abstract class Community : Overlay {
      * Get a new introduction, or bootstrap if there are no available peers.
      */
     override fun getNewIntroduction(fromPeer: Peer?) {
-        var peer = fromPeer
+        var address = fromPeer?.address
 
-        if (peer == null) {
+        if (address == null) {
             val available = getPeers()
-            if (available.isNotEmpty()) {
+            address = if (available.isNotEmpty()) {
                 // With a small chance, try to remedy any disconnected network phenomena.
-                if (Random.nextFloat() < 0.05f) {
-                    bootstrap()
-                    return
+                if (Random.nextFloat() < 0.5f) {
+                    DEFAULT_ADDRESSES.random()
                 } else {
-                    peer = available.random()
+                    available.random().address
                 }
             } else {
                 bootstrap()
@@ -86,8 +85,8 @@ abstract class Community : Overlay {
             }
         }
 
-        val packet = createIntroductionRequest(peer.address)
-        send(peer.address, packet)
+        val packet = createIntroductionRequest(address)
+        send(address, packet)
     }
 
     override fun getPeerForIntroduction(exclude: Peer?): Peer? {

@@ -158,8 +158,28 @@ class Network {
         synchronized(graphLock) {
             val known = if (serviceId != null) getPeersForService(serviceId) else verifiedPeers
             val knownAddresses = known.map { it.address }
-            val out = (allAddresses.keys.toSet() - knownAddresses).toList()
-            // TODO: check the additional behavior in py-ipv8
+            var out = (allAddresses.keys.toSet() - knownAddresses).toList()
+
+            if (serviceId != null) {
+                val newOut = mutableListOf<Address>()
+
+                for (address in out) {
+                    val (introPeer, service) = allAddresses[address] ?: return listOf()
+                    val services = servicesPerPeer[introPeer] ?: mutableSetOf()
+                    if (service != null) {
+                        services += service
+                    }
+
+                    // If the one that introduced this peer runs the requested service, there is
+                    // a chance the introduced peer will run it too.
+                    if (serviceId in services) {
+                        newOut += address
+                    }
+                }
+
+                out = newOut
+            }
+
             return out
         }
     }
