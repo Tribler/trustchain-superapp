@@ -21,6 +21,8 @@ Every peer in has to generate a Curve25519 key pair, which provides an identity,
 We can generate a private key with `AndroidCryptoProvider.generateKey()`. The key can then be serialized to a byte array with `Key.keyToBin()` method, and again deserialized using `AndroidCryptoProvider.keyFromPrivateBin(ByteArray)`. When the app is launched for the first time, the key should be generated and persisted (e.g. in `SharedPreferences`). The previously generated key should be loaded on subsequent launches. The following code snippet does exactly that:
 
 ```kotlin
+private const val PREF_PRIVATE_KEY = "private_key"
+
 private fun getPrivateKey(): PrivateKey {
     // Load a key from the shared preferences
     val prefs = PreferenceManager.getDefaultSharedPreferences(this)

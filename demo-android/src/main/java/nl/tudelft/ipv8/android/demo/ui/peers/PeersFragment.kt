@@ -17,6 +17,11 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.util.toHex
 
 class PeersFragment : BaseFragment() {
@@ -58,6 +63,27 @@ class PeersFragment : BaseFragment() {
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
+            val trustchain = getTrustChainCommunity()
+
+            trustchain.registerTransactionValidator("demo_block", object : TransactionValidator {
+                override fun validate(
+                    block: TrustChainBlock,
+                    database: TrustChainStore
+                ): Boolean {
+                    return block.transaction["message"] != null
+                }
+            })
+
+            trustchain.addListener(object : BlockListener {
+                override fun shouldSign(block: TrustChainBlock): Boolean {
+                    return true
+                }
+
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                }
+            }, "demo_block")
+
             while (isActive) {
                 val overlays = getIpv8().overlays
 

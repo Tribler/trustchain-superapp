@@ -515,6 +515,12 @@ open class TrustChainCommunity(
         // TODO: Check if we are waiting for this signature response
 
         // TODO: Sign the half-block if it is valid?
+
+        val shouldSign = shouldSign(block)
+
+        if (shouldSign) {
+            createAgreementBlock(block, mapOf<Any?, Any?>())
+        }
     }
 
     /**
@@ -529,9 +535,8 @@ open class TrustChainCommunity(
         if (validationResult !is ValidationResult.Invalid) {
             val validator = getTransactionValidator(block.type)
             if (validator != null) {
-                val txValidationResult = validator.validate(block, database)
-                if (txValidationResult is ValidationResult.Invalid) {
-                    validationResult = txValidationResult
+                if (!validator.validate(block, database)) {
+                    validationResult = ValidationResult.Invalid(listOf("Invalid transaction"))
                 }
             }
         }

@@ -18,14 +18,10 @@ abstract class BaseFragment : Fragment() {
     }
 
     protected fun getTrustChainCommunity(): TrustChainCommunity {
-        val overlays = getIpv8().overlays
-        return overlays[TrustChainCommunity::class.java] as? TrustChainCommunity
-            ?: throw IllegalStateException("TrustChainCommunity is not configured")
+        return getIpv8().getOverlay() ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
 
     protected fun getDemoCommunity(): DemoCommunity {
-        val overlays = getIpv8().overlays
-        return overlays[DemoCommunity::class.java] as? DemoCommunity
-            ?: throw IllegalStateException("DemoCommunity is not configured")
+        return getIpv8().getOverlay() ?: throw IllegalStateException("DemoCommunity is not configured")
     }
 }

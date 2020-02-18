@@ -33,6 +33,10 @@ class IPv8(
         return isStarted
     }
 
+    inline fun <reified T : Overlay> getOverlay(): T? {
+        return overlays[T::class.java] as? T
+    }
+
     fun start() {
         if (isStarted()) throw IllegalStateException("IPv8 has already started")
 

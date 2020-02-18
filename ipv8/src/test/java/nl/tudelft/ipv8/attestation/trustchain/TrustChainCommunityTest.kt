@@ -75,7 +75,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         community.addListener(customListener, "custom")
 
         val validator = mockk<TransactionValidator>()
-        every { validator.validate(any(), any()) } returns ValidationResult.Valid
+        every { validator.validate(any(), any()) } returns true
         community.registerTransactionValidator("custom", validator)
 
         val block = TrustChainBlock(
