@@ -103,14 +103,16 @@ class NetworkTest {
 
         val address = Address("1.2.3.4", 1234)
         val peer = Peer(JavaCryptoProvider.generateKey(), address)
+        network.discoverAddress(peer, address, "abc")
+
+        val walkableAddresses = network.getWalkableAddresses("abc")
+        assertEquals(1, walkableAddresses.size)
+
         network.addVerifiedPeer(peer)
 
         // all peers are known
         val noWalkableAddresses = network.getWalkableAddresses(null)
         assertEquals(0, noWalkableAddresses.size)
-
-        val walkableAddresses = network.getWalkableAddresses("abc")
-        assertEquals(1, walkableAddresses.size)
     }
 
     @Test

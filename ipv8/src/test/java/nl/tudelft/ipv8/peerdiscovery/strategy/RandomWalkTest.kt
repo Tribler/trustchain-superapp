@@ -32,6 +32,6 @@ class RandomWalkTest {
         randomWalk.takeStep()
 
         verify { overlay.getWalkableAddresses() }
-        verify { overlay.bootstrap() }
+        verify { overlay.getNewIntroduction() }
     }
 }
