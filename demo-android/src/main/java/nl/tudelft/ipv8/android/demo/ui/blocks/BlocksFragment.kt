@@ -131,9 +131,10 @@ open class BlocksFragment : BaseFragment() {
 
     private suspend fun createItems(blocks: List<TrustChainBlock>): List<Item> =
         withContext(Dispatchers.Default) {
+            val myPk = getTrustChainCommunity().myPeer.publicKey.keyToBin()
             blocks.map { block ->
                 val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-                val isMyPk = block.linkPublicKey.contentEquals(getPublicKey())
+                val isMyPk = block.linkPublicKey.contentEquals(myPk)
                 val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
                 val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
                 val canSign = (isAnyCounterpartyPk || isMyPk) &&
