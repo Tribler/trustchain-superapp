@@ -19,5 +19,11 @@
         android:id="@+id/txtChainHeight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:text="? blocks" />
+        tools:text="Discovered: ? blocks" />
+
+    <TextView
+        android:id="@+id/txtChainStored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="Stored: ? blocks" />
 </LinearLayout>

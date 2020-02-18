@@ -12,10 +12,9 @@ class RandomWalkTest {
         val mockAddress = Address("1.2.3.4", 1234)
         every { overlay.getWalkableAddresses() } returns listOf(mockAddress)
 
-        val randomWalk = RandomWalk(
-            overlay,
+        val randomWalk = RandomWalk.Factory(
             resetChance = 0
-        )
+        ).setOverlay(overlay).create()
         randomWalk.takeStep()
 
         verify { overlay.getWalkableAddresses() }
@@ -27,10 +26,9 @@ class RandomWalkTest {
         val overlay = mockk<Overlay>(relaxed = true)
         every { overlay.getWalkableAddresses() } returns listOf()
 
-        val randomWalk = RandomWalk(
-            overlay,
+        val randomWalk = RandomWalk.Factory(
             resetChance = 0
-        )
+        ).setOverlay(overlay).create()
         randomWalk.takeStep()
 
         verify { overlay.getWalkableAddresses() }

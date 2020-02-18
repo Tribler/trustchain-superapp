@@ -85,7 +85,7 @@
             android:layout_weight="1"
             android:textColor="@android:color/black"
             android:maxLines="2"
-            android:ellipsize="middle"
+            android:ellipsize="end"
             tools:text="transaction"/>
 
         <ImageView

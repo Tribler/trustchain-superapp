@@ -3,9 +3,8 @@ package nl.tudelft.ipv8.peerdiscovery
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.*
 import nl.tudelft.ipv8.peerdiscovery.payload.PingPayload
@@ -16,13 +15,7 @@ import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-class DiscoveryCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
-    maxPeers: Int,
-    cryptoProvider: CryptoProvider
-) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider), PingOverlay {
+class DiscoveryCommunity : Community(), PingOverlay {
     override val serviceId = "7e313685c1912a141279f8248fc8db5899c5df5a"
 
     private val pingRequestCache: MutableMap<Int, PingRequest> = mutableMapOf()
@@ -50,7 +43,7 @@ class DiscoveryCommunity(
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
+        return serializePacket(MessageId.SIMILARITY_REQUEST, listOf(auth, dist, payload), peer = peer)
     }
 
     fun sendSimilarityRequest(address: Address) {
@@ -67,7 +60,7 @@ class DiscoveryCommunity(
         val auth = BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
+        return serializePacket(MessageId.SIMILARITY_RESPONSE, listOf(auth, dist, payload), peer = peer)
     }
 
     internal fun createPing(): Pair<Int, ByteArray> {
@@ -75,7 +68,7 @@ class DiscoveryCommunity(
         val payload = PingPayload((globalTime % 65536u).toInt())
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return Pair(payload.identifier, serializePacket(prefix, MessageId.PING, listOf(dist, payload), sign = false))
+        return Pair(payload.identifier, serializePacket(MessageId.PING, listOf(dist, payload), sign = false))
     }
 
     override fun sendPing(peer: Peer) {
@@ -93,7 +86,7 @@ class DiscoveryCommunity(
         val payload = PongPayload(identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
         logger.debug("-> $payload")
-        return serializePacket(prefix, MessageId.PONG, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PONG, listOf(dist, payload), sign = false)
     }
 
     /*
@@ -211,4 +204,6 @@ class DiscoveryCommunity(
     }
 
     class PingRequest(val identifier: Int, val peer: Peer, val startTime: Date)
+
+    class Factory : Overlay.Factory<DiscoveryCommunity>(DiscoveryCommunity::class.java)
 }

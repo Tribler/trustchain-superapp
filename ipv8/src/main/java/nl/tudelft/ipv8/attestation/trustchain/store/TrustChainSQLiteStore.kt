@@ -171,4 +171,8 @@ class TrustChainSQLiteStore(
         return dao.getMutualBlocks(publicKey, publicKey, limit.toLong(), blockMapper)
             .executeAsList()
     }
+
+    override fun getStoredBlockCountForUser(publicKey: ByteArray): Long {
+        return dao.getStoredBlockCountForUser(publicKey).executeAsOne()
+    }
 }

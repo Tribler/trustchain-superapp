@@ -2,6 +2,7 @@ package nl.tudelft.ipv8
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
@@ -11,16 +12,11 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
 import java.util.*
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
-abstract class Community(
-    override val myPeer: Peer,
-    override val endpoint: Endpoint,
-    override val network: Network,
-    override val maxPeers: Int,
-    protected val cryptoProvider: CryptoProvider
-) : Overlay {
+abstract class Community : Overlay {
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
@@ -29,7 +25,13 @@ abstract class Community(
 
     private var lastBootstrap: Date? = null
 
-    internal val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
+    val messageHandlers = mutableMapOf<Int, (Packet) -> Unit>()
+
+    override lateinit var myPeer: Peer
+    override lateinit var endpoint: Endpoint
+    override lateinit var network: Network
+    override var maxPeers: Int = 20
+    override var cryptoProvider: CryptoProvider = JavaCryptoProvider
 
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
@@ -66,20 +68,25 @@ abstract class Community(
      * Get a new introduction, or bootstrap if there are no available peers.
      */
     override fun getNewIntroduction(fromPeer: Peer?) {
-        var peer = fromPeer
+        var address = fromPeer?.address
 
-        if (peer == null) {
+        if (address == null) {
             val available = getPeers()
-            if (available.isNotEmpty()) {
-                peer = available.random()
+            address = if (available.isNotEmpty()) {
+                // With a small chance, try to remedy any disconnected network phenomena.
+                if (Random.nextFloat() < 0.5f) {
+                    DEFAULT_ADDRESSES.random()
+                } else {
+                    available.random().address
+                }
             } else {
                 bootstrap()
                 return
             }
         }
 
-        val packet = createIntroductionRequest(peer.address)
-        send(peer.address, packet)
+        val packet = createIntroductionRequest(address)
+        send(address, packet)
     }
 
     override fun getPeerForIntroduction(exclude: Peer?): Peer? {
@@ -152,7 +159,7 @@ abstract class Community(
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
     }
 
     internal fun createIntroductionResponse(
@@ -206,7 +213,7 @@ abstract class Community(
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
     }
 
     internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
@@ -217,7 +224,7 @@ abstract class Community(
 
         logger.debug("-> $payload")
 
-        return serializePacket(prefix, MessageId.PUNCTURE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.PUNCTURE, listOf(auth, dist, payload))
     }
 
     internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
@@ -225,7 +232,7 @@ abstract class Community(
         val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
         val dist = GlobalTimeDistributionPayload(globalTime)
-        return serializePacket(prefix, MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
     }
 
     /**
@@ -238,7 +245,6 @@ abstract class Community(
      * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
      */
     protected fun serializePacket(
-        prefix: ByteArray,
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true,
@@ -324,7 +330,7 @@ abstract class Community(
         send(peer.address, packet)
     }
 
-    internal open fun onIntroductionResponse(
+    open fun onIntroductionResponse(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
@@ -341,19 +347,22 @@ abstract class Community(
             // WAN is not empty and it is not the same as ours
             if (!payload.lanIntroductionAddress.isEmpty()) {
                 // If LAN address is not empty, add them in case they are on our LAN
-                network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
+                discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
-            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
+            discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
             // LAN is not empty and WAN is the same as ours => they are on the same LAN
-            network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
+            discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
             // WAN is the same as ours, but we do not know the LAN => we assume LAN is the same as ours
-            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
-            network.discoverAddress(peer,
-                Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
+            discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
+            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
         }
+    }
+
+    protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
+        network.discoverAddress(peer, address, serviceId)
     }
 
     internal open fun onPuncture(

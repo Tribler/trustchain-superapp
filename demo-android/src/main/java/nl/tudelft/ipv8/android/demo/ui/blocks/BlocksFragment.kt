@@ -115,8 +115,7 @@ open class BlocksFragment : BaseFragment() {
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
-        val demoCommunity = getDemoCommunity()
-        return demoCommunity.getChainByUser(publicKey)
+        return trustchain.getChainByUser(publicKey)
     }
 
     private suspend fun refreshBlocks() = withContext(Dispatchers.IO) {
@@ -132,11 +131,16 @@ open class BlocksFragment : BaseFragment() {
 
     private suspend fun createItems(blocks: List<TrustChainBlock>): List<Item> =
         withContext(Dispatchers.Default) {
+            val myPk = getTrustChainCommunity().myPeer.publicKey.keyToBin()
             blocks.map { block ->
                 val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
+                val isMyPk = block.linkPublicKey.contentEquals(myPk)
                 val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-                val canSign = isAnyCounterpartyPk && isProposalBlock
                 val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
+                val canSign = (isAnyCounterpartyPk || isMyPk) &&
+                    isProposalBlock &&
+                    !block.isSelfSigned &&
+                    !hasLinkedBlock
                 val status = when {
                     block.isSelfSigned -> BlockItem.BlockStatus.SELF_SIGNED
                     hasLinkedBlock -> BlockItem.BlockStatus.SIGNED
@@ -146,7 +150,7 @@ open class BlocksFragment : BaseFragment() {
                 BlockItem(
                     block,
                     isExpanded = expandedBlocks.contains(block.blockId),
-                    canSign = canSign && !hasLinkedBlock,
+                    canSign = canSign,
                     status = status
                 )
             }
@@ -162,8 +166,7 @@ open class BlocksFragment : BaseFragment() {
 
         builder.setPositiveButton("Create") { _, _ ->
             val message = input.text.toString()
-            val demoCommunity = getDemoCommunity()
-            demoCommunity.createProposalBlock(message, publicKey)
+            trustchain.createProposalBlock(message, publicKey)
             lifecycleScope.launch {
                 refreshBlocks()
                 updateView()
@@ -179,16 +182,16 @@ open class BlocksFragment : BaseFragment() {
     }
 
     private suspend fun crawlChain() {
-        val peer = getDemoCommunity().getPeerByPublicKeyBin(publicKey)
+        val peer = trustchain.getPeerByPublicKeyBin(publicKey)
         if (peer != null) {
-            getDemoCommunity().crawlChain(peer)
+            trustchain.crawlChain(peer)
             refreshBlocks()
             updateView()
         }
     }
 
     private fun createAgreementBlock(proposalBlock: TrustChainBlock) {
-        getDemoCommunity().createAgreementBlock(proposalBlock, proposalBlock.transaction)
+        trustchain.createAgreementBlock(proposalBlock, proposalBlock.transaction)
         lifecycleScope.launch {
             refreshBlocks()
             updateView()

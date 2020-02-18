@@ -3,16 +3,11 @@ package nl.tudelft.ipv8.attestation.trustchain
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
-import nl.tudelft.ipv8.Address
-import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
-import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
@@ -28,15 +23,10 @@ private val logger = KotlinLogging.logger {}
  * community handles sending blocks, broadcasting, and crawling chains of other peers.
  */
 open class TrustChainCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
-    maxPeers: Int,
-    cryptoProvider: CryptoProvider,
-    val settings: TrustChainSettings,
+    private val settings: TrustChainSettings,
     val database: TrustChainStore,
     private val crawler: TrustChainCrawler = TrustChainCrawler()
-) : Community(myPeer, endpoint, network, maxPeers, cryptoProvider) {
+) : Community() {
     override val serviceId = "5ad767b05ae592a02488272ca2a86b847d4562e1"
 
     private val relayedBroadcasts = mutableSetOf<String>()
@@ -146,13 +136,13 @@ open class TrustChainCommunity(
             logger.debug("Sending block to $address")
             val payload = HalfBlockPayload.fromHalfBlock(block)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK, listOf(dist, payload),
+            val packet = serializePacket(MessageId.HALF_BLOCK, listOf(dist, payload),
                 false)
             send(address, packet)
         } else {
             val payload = HalfBlockBroadcastPayload.fromHalfBlock(block, ttl.toUInt())
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_BROADCAST, listOf(dist,
+            val packet = serializePacket(MessageId.HALF_BLOCK_BROADCAST, listOf(dist,
                 payload), false)
             val randomPeers = getPeers().random(settings.broadcastFanout)
             for (peer in randomPeers) {
@@ -178,13 +168,13 @@ open class TrustChainCommunity(
         if (address != null) {
             val payload = HalfBlockPairPayload.fromHalfBlocks(block1, block2)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
                 false)
             send(address, packet)
         } else {
             val payload = HalfBlockPairBroadcastPayload.fromHalfBlocks(block1, block2, ttl)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.HALF_BLOCK_PAIR_BROADCAST,
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR_BROADCAST,
                 listOf(dist, payload))
             for (peer in network.getRandomPeers(settings.broadcastFanout)) {
                 send(peer.address, packet)
@@ -306,7 +296,7 @@ open class TrustChainCommunity(
             val payload = CrawlRequestPayload(publicKey, range.first, range.last, crawlId)
 
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
+            val packet = serializePacket(MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
 
             endpoint.send(peer.address, packet)
         }
@@ -426,7 +416,7 @@ open class TrustChainCommunity(
             val responsePayload = EmptyCrawlResponsePayload(payload.crawlId)
             val dist = GlobalTimeDistributionPayload(globalTime)
             logger.debug("-> $payload")
-            val packet = serializePacket(prefix, MessageId.EMPTY_CRAWL_RESPONSE,
+            val packet = serializePacket(MessageId.EMPTY_CRAWL_RESPONSE,
                 listOf(dist, responsePayload), false)
             send(peer.address, packet)
         } else {
@@ -455,7 +445,7 @@ open class TrustChainCommunity(
         val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
-        val packet = serializePacket(prefix, MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
+        val packet = serializePacket(MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
         send(peer.address, packet)
     }
 
@@ -525,6 +515,12 @@ open class TrustChainCommunity(
         // TODO: Check if we are waiting for this signature response
 
         // TODO: Sign the half-block if it is valid?
+
+        val shouldSign = shouldSign(block)
+
+        if (shouldSign) {
+            createAgreementBlock(block, mapOf<Any?, Any?>())
+        }
     }
 
     /**
@@ -539,9 +535,8 @@ open class TrustChainCommunity(
         if (validationResult !is ValidationResult.Invalid) {
             val validator = getTransactionValidator(block.type)
             if (validator != null) {
-                val txValidationResult = validator.validate(block, database)
-                if (txValidationResult is ValidationResult.Invalid) {
-                    validationResult = txValidationResult
+                if (!validator.validate(block, database)) {
+                    validationResult = ValidationResult.Invalid(listOf("Invalid transaction"))
                 }
             }
         }
@@ -587,4 +582,14 @@ open class TrustChainCommunity(
         val receivedHalfBlocks: MutableList<TrustChainBlock> = mutableListOf(),
         var totalHalfBlocksExpected: UInt = 0u
     )
+
+    class Factory(
+        private val settings: TrustChainSettings,
+        private val database: TrustChainStore,
+        private val crawler: TrustChainCrawler = TrustChainCrawler()
+    ) : Overlay.Factory<TrustChainCommunity>(TrustChainCommunity::class.java) {
+        override fun create(): TrustChainCommunity {
+            return TrustChainCommunity(settings, database, crawler)
+        }
+    }
 }

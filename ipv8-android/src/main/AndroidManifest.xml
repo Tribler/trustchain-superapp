@@ -8,4 +8,9 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application>
+        <service android:name=".service.IPv8Service" />
+        <receiver android:name=".service.StopIPv8Receiver" />
+    </application>
 </manifest>

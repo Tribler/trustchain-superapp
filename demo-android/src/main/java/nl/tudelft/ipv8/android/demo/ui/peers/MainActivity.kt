@@ -1,13 +1,21 @@
 package nl.tudelft.ipv8.android.demo.ui.peers
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import nl.tudelft.ipv8.android.demo.R
 
@@ -34,6 +42,13 @@ class MainActivity : AppCompatActivity() {
 
         // Setup bottom navigation
         bottomNavigation.setupWithNavController(navController)
+
+        lifecycleScope.launch {
+            while (isActive) {
+
+                delay(1000)
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

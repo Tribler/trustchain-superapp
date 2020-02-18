@@ -12,7 +12,6 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.junit.Assert
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 private val lazySodium = LazySodiumJava(SodiumJava())
@@ -28,14 +27,25 @@ class CommunityTest {
         return mockk(relaxed = true)
     }
 
-    @Test
-    fun onPacket() {
+    private fun getCommunity(): TestCommunity {
         val myPrivateKey = getPrivateKey()
         val myPeer = Peer(myPrivateKey)
         val endpoint = getEndpoint()
         val network = Network()
 
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = TestCommunity()
+        community.myPeer = myPeer
+        community.endpoint = endpoint
+        community.network = network
+        return community
+    }
+
+    @Test
+    fun onPacket() {
+        val myPrivateKey = getPrivateKey()
+        val myPeer = Peer(myPrivateKey)
+
+        val community = getCommunity()
         val handler = mockk<(Packet) -> Unit>(relaxed = true)
         community.messageHandlers[246] = handler
 
@@ -49,10 +59,8 @@ class CommunityTest {
     fun createIntroductionRequest_handleIntroductionRequest() {
         val myPrivateKey = getPrivateKey()
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
 
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = getCommunity()
 
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
@@ -64,12 +72,7 @@ class CommunityTest {
 
     @Test
     fun createIntroductionRequest() {
-        val myPrivateKey = getPrivateKey()
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
@@ -81,13 +84,7 @@ class CommunityTest {
 
     @Test
     fun createIntroductionResponse() {
-        val myPrivateKey = getPrivateKey()
-
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = getCommunity()
 
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
@@ -104,12 +101,8 @@ class CommunityTest {
     @Test
     fun createIntroductionResponse_handleIntroductionResponse() {
         val myPrivateKey = getPrivateKey()
-
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
@@ -130,14 +123,12 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
 
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = getCommunity()
 
         community.load()
-        assertEquals(1, network.blacklistMids.size)
-        assertEquals(myPeer.mid, network.blacklistMids.first())
+        Assert.assertEquals(1, community.network.blacklistMids.size)
+        Assert.assertEquals(myPeer.mid, community.network.blacklistMids.first())
         community.unload()
     }
 
@@ -149,23 +140,15 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
 
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = getCommunity()
 
         community.deserializeIntroductionRequest(Packet(myPeer.address, receivedPayload.hexToBytes()))
     }
 
     @Test
     fun bootstrap() {
-        val myPrivateKey = getPrivateKey()
-
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         community.bootstrap()
 
@@ -174,19 +157,13 @@ class CommunityTest {
 
     @Test
     fun createPuncture() {
-        val myPrivateKey = getPrivateKey()
-
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         val lanWalker = Address("1.2.3.4", 1234)
         val wanWalker = Address("2.3.4.5", 2345)
         val identifier = 1
         val payload = community.createPuncture(lanWalker, wanWalker, identifier)
-        assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2f9004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d202030405092900016e45d66684e87a35bddf5d971619dd21de92993639b1021f85be61d940c5ba1cbd943797cfb4058c962d24d0cf19fbd4a7f6ed41e75ea2fe8693a5d876da210f", payload.toHex())
+        Assert.assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2f9004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d202030405092900016e45d66684e87a35bddf5d971619dd21de92993639b1021f85be61d940c5ba1cbd943797cfb4058c962d24d0cf19fbd4a7f6ed41e75ea2fe8693a5d876da210f", payload.toHex())
     }
 
     @Test
@@ -194,10 +171,8 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
 
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         val packet = "000260793bdb9cc0b60c96f88069d78aee327a6241d2f9004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d202030405092900016e45d66684e87a35bddf5d971619dd21de92993639b1021f85be61d940c5ba1cbd943797cfb4058c962d24d0cf19fbd4a7f6ed41e75ea2fe8693a5d876da210f"
         community.handlePuncture(Packet(myPeer.address, packet.hexToBytes()))
@@ -207,19 +182,13 @@ class CommunityTest {
 
     @Test
     fun createPunctureRequest() {
-        val myPrivateKey = getPrivateKey()
-
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         val lanWalker = Address("1.2.3.4", 1234)
         val wanWalker = Address("2.3.4.5", 2345)
         val identifier = 1
         val packet = community.createPunctureRequest(lanWalker, wanWalker, identifier)
-        assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d20203040509290001", packet.toHex())
+        Assert.assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d20203040509290001", packet.toHex())
     }
 
     @Test
@@ -227,10 +196,8 @@ class CommunityTest {
         val myPrivateKey = getPrivateKey()
 
         val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
 
-        val community = spyk(TestCommunity(myPeer, endpoint, network))
+        val community = spyk(getCommunity())
 
         val packet = "000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d202030405092900017b01e303fc9987b1b899445e3f9c3a0208580b3572f357e9667419cf095a8bf5ea7d97f22519695062d7db2a768ad0309afe9cb51607f0a104b623da0235c50e"
         community.handlePunctureRequest(Packet(myPeer.address, packet.hexToBytes()))
@@ -240,15 +207,10 @@ class CommunityTest {
 
     @Test
     fun getNewIntroduction() {
-        val myPrivateKey = getPrivateKey()
-
-        val myPeer = Peer(myPrivateKey)
-        val endpoint = getEndpoint()
-        val network = Network()
-        val community = TestCommunity(myPeer, endpoint, network)
+        val community = getCommunity()
 
         community.getNewIntroduction()
 
-        verify { endpoint.send(any(), any()) }
+        verify { community.endpoint.send(any(), any()) }
     }
 }

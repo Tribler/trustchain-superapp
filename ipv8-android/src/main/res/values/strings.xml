@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">IPv8 Android</string>
+
+    <string name="notification_channel_connection_title">Connection</string>
+    <string name="notification_channel_connection_description">Shows when the network connection service is running</string>
 </resources>

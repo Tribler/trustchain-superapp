@@ -13,37 +13,14 @@ private val logger = KotlinLogging.logger {}
  * an introduction to another community member.
  */
 class RandomWalk(
-    /**
-     * The Overlay to walk over.
-     */
     private val overlay: Overlay,
-
-    /**
-     * The timeout (in seconds) after which peers are considered unreachable.
-     */
-    private val timeout: Double = 3.0,
-
-    /**
-     * The amount of unanswered packets we can have in-flight.
-     */
-    private val windowSize: Int = 5,
-
-    /**
-     * The chance (0-255) to go back to the tracker.
-     */
-    private val resetChance: Int = 50,
-
-    /**
-     * The target interval (in seconds) between steps or 0 to use the default interval.
-     */
-    private val targetInterval: Int = 0,
-
-    /**
-     * The target number of peers the walker should try to connect to.
-     */
-    private val peers: Int = 20
+    private val timeout: Double,
+    private val windowSize: Int,
+    private val resetChance: Int,
+    private val targetInterval: Int,
+    private val peers: Int
 ) : DiscoveryStrategy {
-        private val walkLock = Object()
+    private val walkLock = Object()
 
     private var lastStep: Date? = null
     private val introTimeouts = mutableMapOf<Address, Date>()
@@ -94,6 +71,37 @@ class RandomWalk(
             }
 
             this.lastStep = Date()
+        }
+    }
+
+    class Factory(
+        /**
+         * The timeout (in seconds) after which peers are considered unreachable.
+         */
+        private val timeout: Double = 3.0,
+
+        /**
+         * The amount of unanswered packets we can have in-flight.
+         */
+        private val windowSize: Int = 5,
+
+        /**
+         * The chance (0-255) to go back to the tracker.
+         */
+        private val resetChance: Int = 50,
+
+        /**
+         * The target interval (in seconds) between steps or 0 to use the default interval.
+         */
+        private val targetInterval: Int = 0,
+
+        /**
+         * The target number of peers the walker should try to connect to.
+         */
+        private val peers: Int = 20
+    ) : DiscoveryStrategy.Factory<RandomWalk>() {
+        override fun create(): RandomWalk {
+            return RandomWalk(getOverlay(), timeout, windowSize, resetChance, targetInterval, peers)
         }
     }
 }

@@ -1,51 +1,73 @@
 package nl.tudelft.ipv8.android.demo
 
+import android.util.Log
+import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
-import nl.tudelft.ipv8.attestation.trustchain.store.UserInfo
-import nl.tudelft.ipv8.keyvault.CryptoProvider
-import nl.tudelft.ipv8.messaging.Endpoint
-import nl.tudelft.ipv8.peerdiscovery.Network
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
+import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import java.util.*
 
-@UseExperimental(ExperimentalUnsignedTypes::class)
-class DemoCommunity(
-    myPeer: Peer,
-    endpoint: Endpoint,
-    network: Network,
-    cryptoProvider: CryptoProvider,
-    val trustChainCommunity: TrustChainCommunity
-) : Community(myPeer, endpoint, network, 20, cryptoProvider) {
+class DemoCommunity : Community() {
     override val serviceId = "02313685c1912a141279f8248fc8db5899c5df5a"
 
-    fun getUsers(): List<UserInfo> {
-        return trustChainCommunity.database.getUsers()
+    init {
+        messageHandlers[1] = ::onMessage
     }
 
-    fun getPeerByPublicKeyBin(publicKeyBin: ByteArray): Peer? {
-        return network.getVerifiedByPublicKeyBin(publicKeyBin)
+    val discoveredAddresses: MutableSet<Address> = mutableSetOf()
+    val discoveredAddressesIntroduced: MutableMap<Address, Date> = mutableMapOf()
+    val discoveredAddressesContacted: MutableMap<Address, Date> = mutableMapOf()
+
+    private fun onMessage(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(MyMessage.Companion, cryptoProvider)
+        Log.d("DemoCommunity", peer.mid + ": " + payload.message)
     }
 
-    suspend fun crawlChain(peer: Peer) {
-        trustChainCommunity.crawlChain(peer)
+    fun broadcastGreeting() {
+        for (peer in getPeers()) {
+            val packet = serializePacket(1, listOf(MyMessage("Hello!")))
+            send(peer.address, packet)
+        }
     }
 
-    /**
-     * Creates a new proposal block, using a text message as the transaction content.
-     */
-    fun createProposalBlock(message: String, publicKey: ByteArray) {
-        val blockType = "demo_block"
-        val transaction = mapOf("message" to message)
-        trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+    override fun onIntroductionResponse(
+        peer: Peer,
+        dist: GlobalTimeDistributionPayload,
+        payload: IntroductionResponsePayload
+    ) {
+        super.onIntroductionResponse(peer, dist, payload)
+
+        Log.d("DemoCommunity", "onIntroductionResponse $payload")
     }
 
-    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
-        trustChainCommunity.createAgreementBlock(link, transaction)
+    override fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
+        super.discoverAddress(peer, address, serviceId)
+
+        discoveredAddresses.add(address)
+        discoveredAddressesIntroduced[address] = Date()
+
+        // TODO: remove old addresses
     }
 
-    fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
-        return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
+    override fun walkTo(address: Address) {
+        super.walkTo(address)
+
+        discoveredAddressesContacted[address] = Date()
+    }
+
+    class MyMessage(val message: String) : Serializable {
+        override fun serialize(): ByteArray {
+            return message.toByteArray()
+        }
+
+        companion object : Deserializable<MyMessage> {
+            override fun deserialize(buffer: ByteArray, offset: Int): Pair<MyMessage, Int> {
+                return Pair(MyMessage(buffer.toString(Charsets.UTF_8)), buffer.size)
+            }
+        }
     }
 }

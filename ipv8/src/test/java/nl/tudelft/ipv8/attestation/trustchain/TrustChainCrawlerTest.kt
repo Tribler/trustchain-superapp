@@ -28,8 +28,13 @@ class TrustChainCrawlerTest : BaseCommunityTest() {
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
         val store = createTrustChainStore()
-        return TrustChainCommunity(getMyPeer(), getEndpoint(), Network(),
-            maxPeers = 20, cryptoProvider = JavaCryptoProvider, settings = settings, database = store)
+        val community = TrustChainCommunity(settings = settings, database = store)
+        community.myPeer = getMyPeer()
+        community.endpoint = getEndpoint()
+        community.network = Network()
+        community.maxPeers = 20
+        community.cryptoProvider = JavaCryptoProvider
+        return community
     }
 
     @Test

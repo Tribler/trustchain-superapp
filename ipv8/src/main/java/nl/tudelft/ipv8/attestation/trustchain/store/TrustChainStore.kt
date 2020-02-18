@@ -23,6 +23,7 @@ interface TrustChainStore {
     fun crawl(publicKey: ByteArray, startSeqNum: Long, endSeqNum: Long, limit: Int = 100): List<TrustChainBlock>
     fun getRecentBlocks(limit: Int = 10, offset: Int = 0): List<TrustChainBlock>
     fun getUsers(limit: Int = 100): List<UserInfo>
+    fun getStoredBlockCountForUser(publicKey: ByteArray): Long
 
     /**
      * Returns the list of blocks in which the public key is either a sender or a receiver,

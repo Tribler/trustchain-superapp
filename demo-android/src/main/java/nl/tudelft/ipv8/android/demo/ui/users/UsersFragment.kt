@@ -13,9 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.service.Ipv8Service
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.util.toHex
@@ -54,22 +52,28 @@ class UsersFragment : BaseFragment() {
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
-            val overlays = ipv8.getOverlays()
-            val demoCommunity = overlays.find { it is DemoCommunity } as? DemoCommunity
-                ?: throw IllegalStateException("DemoCommunity is not configured")
-            val users = demoCommunity.getUsers()
+            while (isActive) {
+                val items = withContext(Dispatchers.IO) {
+                    val users = trustchain.getUsers()
 
-            val items = users.map {
-                val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
-                    .keyToHash().toHex()
-                UserItem(peerId, it.publicKey.toHex(), it.latestSequenceNumber)
+                    users.map {
+                        val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
+                            .keyToHash().toHex()
+                        val storedBlocks = trustchain.getStoredBlockCountForUser(it.publicKey)
+                        UserItem(
+                            peerId,
+                            it.publicKey.toHex(),
+                            it.latestSequenceNumber,
+                            storedBlocks
+                        )
+                    }
+                }
+                adapter.updateItems(items)
+
+                imgEmpty.isVisible = items.isEmpty()
+
+                delay(1000)
             }
-            adapter.updateItems(items)
-
-            imgEmpty.isVisible = users.isEmpty()
-
-            delay(1000)
-            loadNetworkInfo()
         }
     }
 }

@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8
 
+import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.messaging.Endpoint
 import nl.tudelft.ipv8.messaging.EndpointListener
 import nl.tudelft.ipv8.peerdiscovery.Network
@@ -9,10 +10,12 @@ import nl.tudelft.ipv8.peerdiscovery.Network
  */
 interface Overlay : EndpointListener {
     val serviceId: String
-    val myPeer: Peer
-    val endpoint: Endpoint
-    val network: Network
-    val maxPeers: Int
+
+    var myPeer: Peer
+    var endpoint: Endpoint
+    var network: Network
+    var maxPeers: Int
+    var cryptoProvider: CryptoProvider
 
     private val globalTime: ULong
         get() = myPeer.lamportTimestamp
@@ -84,4 +87,12 @@ interface Overlay : EndpointListener {
      * @return A peer to send an introduction request to, or null if are none available.
      */
     fun getPeerForIntroduction(exclude: Peer? = null): Peer?
+
+    open class Factory<T : Overlay>(
+        val overlayClass: Class<T>
+    ) {
+        open fun create(): T {
+            return overlayClass.getConstructor().newInstance()
+        }
+    }
 }

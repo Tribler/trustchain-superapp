@@ -101,3 +101,6 @@ ORDER BY MAX(sequence_number) DESC LIMIT ?;
 getMutualBlocks:
 SELECT * FROM blocks WHERE public_key = ? OR link_public_key = ?
 ORDER BY block_timestamp DESC LIMIT ?;
+
+getStoredBlockCountForUser:
+SELECT COUNT(*) FROM blocks WHERE public_key = ?;
