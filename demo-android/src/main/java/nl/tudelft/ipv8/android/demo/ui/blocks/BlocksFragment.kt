@@ -135,8 +135,11 @@ open class BlocksFragment : BaseFragment() {
                 val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
                 val isMyPk = block.linkPublicKey.contentEquals(getPublicKey())
                 val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-                val canSign = (isAnyCounterpartyPk || isMyPk) && isProposalBlock
                 val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
+                val canSign = (isAnyCounterpartyPk || isMyPk) &&
+                    isProposalBlock &&
+                    !block.isSelfSigned &&
+                    !hasLinkedBlock
                 val status = when {
                     block.isSelfSigned -> BlockItem.BlockStatus.SELF_SIGNED
                     hasLinkedBlock -> BlockItem.BlockStatus.SIGNED
@@ -146,7 +149,7 @@ open class BlocksFragment : BaseFragment() {
                 BlockItem(
                     block,
                     isExpanded = expandedBlocks.contains(block.blockId),
-                    canSign = canSign && !hasLinkedBlock,
+                    canSign = canSign,
                     status = status
                 )
             }

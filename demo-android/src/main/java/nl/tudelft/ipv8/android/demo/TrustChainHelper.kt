@@ -20,6 +20,13 @@ class TrustChainHelper(
     }
 
     /**
+     * Returns the number of blocks stored for the given public key.
+     */
+    fun getStoredBlockCountForUser(publicKeyBin: ByteArray): Long {
+        return trustChainCommunity.database.getStoredBlockCountForUser(publicKeyBin)
+    }
+
+    /**
      * Returns a peer by its public key if found.
      */
     fun getPeerByPublicKeyBin(publicKeyBin: ByteArray): Peer? {

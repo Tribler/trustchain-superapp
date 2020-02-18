@@ -1,140 +1,153 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bootstrap Server"
-        style="@style/TextAppearance.MaterialComponents.Headline6" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/txtBootstrap"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0.0.0.0:0"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Overlays"
-        style="@style/TextAppearance.MaterialComponents.Headline6" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bootstrap Server"
+                style="@style/TextAppearance.MaterialComponents.Headline6" />
 
-    <TextView
-        android:id="@+id/txtOverlays"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="DiscoveryCommunity"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:id="@+id/txtBootstrap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0.0.0:0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="My Peer"
-        style="@style/TextAppearance.MaterialComponents.Headline6" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Overlays"
+                style="@style/TextAppearance.MaterialComponents.Headline6" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="LAN Address"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:id="@+id/txtOverlays"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DiscoveryCommunity"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:id="@+id/txtLanAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0.0.0.0:0"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="My Peer"
+                style="@style/TextAppearance.MaterialComponents.Headline6" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="WAN Address"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="LAN Address"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 
-    <TextView
-        android:id="@+id/txtWanAddress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0.0.0.0:0"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:id="@+id/txtLanAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0.0.0:0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Member ID"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="WAN Address"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 
-    <TextView
-        android:id="@+id/txtPeerId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:id="@+id/txtWanAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.0.0.0:0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Public Key"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Member ID"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 
-    <TextView
-        android:id="@+id/txtPublicKey"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:id="@+id/txtPeerId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="TrustChain"
-        style="@style/TextAppearance.MaterialComponents.Headline6" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Public Key"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Total Block Count"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:id="@+id/txtPublicKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
 
-    <TextView
-        android:id="@+id/txtBlockCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="?"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="TrustChain"
+                style="@style/TextAppearance.MaterialComponents.Headline6" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="My Chain Length"
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Stored Block Count"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 
-    <TextView
-        android:id="@+id/txtChainLength"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="?"
-        app:fontFamily="monospace"
-        style="@style/TextAppearance.MaterialComponents.Body2"/>
-</LinearLayout>
+            <TextView
+                android:id="@+id/txtBlockCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="?"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="My Chain Length"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+
+            <TextView
+                android:id="@+id/txtChainLength"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="?"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
+        </LinearLayout>
+
+    </ScrollView>
+</FrameLayout>

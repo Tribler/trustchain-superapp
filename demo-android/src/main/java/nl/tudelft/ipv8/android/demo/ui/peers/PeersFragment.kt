@@ -32,6 +32,10 @@ class PeersFragment : BaseFragment() {
                 )
             )
         })
+
+        adapter.registerRenderer(AddressItemRenderer {
+            // NOOP
+        })
     }
 
     override fun onCreateView(
@@ -64,14 +68,28 @@ class PeersFragment : BaseFragment() {
                 val demoCommunity = getDemoCommunity()
                 val peers = demoCommunity.getPeers()
 
-                val items = peers.map { PeerItem(it) }
+                // Filter only addresses that are not verified yet
+                val discoveredAddresses = demoCommunity.discoveredAddresses.filter { address ->
+                    peers.find { peer -> peer.address == address } == null
+                }
+
+                val peerItems = peers.map { PeerItem(it) }
+
+                val addressItems = discoveredAddresses.map { address ->
+                    val introduced = demoCommunity.discoveredAddressesIntroduced[address]!!
+                    val contacted = demoCommunity.discoveredAddressesContacted[address]
+                    AddressItem(address, introduced, contacted)
+                }
+
+                val items = peerItems + addressItems
+
                 adapter.updateItems(items)
                 txtCommunityName.text = demoCommunity.javaClass.simpleName
                 txtPeerCount.text = resources.getQuantityString(
                     R.plurals.x_peers, peers.size,
                     peers.size
                 )
-                imgEmpty.isVisible = peers.isEmpty()
+                imgEmpty.isVisible = items.isEmpty()
 
                 delay(1000)
             }

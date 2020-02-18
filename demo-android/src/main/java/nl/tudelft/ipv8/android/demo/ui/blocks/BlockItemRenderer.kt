@@ -24,7 +24,7 @@ class BlockItemRenderer(
         txtExpandedLinkPublicKey.text = block.linkPublicKey.toHex()
         txtPrevHash.text = block.previousHash.toHex()
         txtType.text = block.type
-        txtTransaction.text = block.transaction["message"]?.toString()
+        txtTransaction.text = block.transaction.toString()
         txtExpandedTransaction.text = block.transaction.toString()
         txtTimestamp.text = block.timestamp.toString()
         txtInsertTime.text = block.insertTime?.toString()

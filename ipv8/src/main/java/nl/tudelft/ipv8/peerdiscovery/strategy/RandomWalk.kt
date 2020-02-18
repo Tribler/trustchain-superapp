@@ -67,7 +67,7 @@ class RandomWalk(
                 overlay.walkTo(peer)
                 introTimeouts[peer] = Date()
             } else {
-                overlay.getNewIntroduction()
+                overlay.bootstrap()
             }
 
             this.lastStep = Date()

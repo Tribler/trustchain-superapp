@@ -52,19 +52,28 @@ class UsersFragment : BaseFragment() {
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
-            val users = trustchain.getUsers()
+            while (isActive) {
+                val items = withContext(Dispatchers.IO) {
+                    val users = trustchain.getUsers()
 
-            val items = users.map {
-                val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
-                    .keyToHash().toHex()
-                UserItem(peerId, it.publicKey.toHex(), it.latestSequenceNumber)
+                    users.map {
+                        val peerId = AndroidCryptoProvider.keyFromPublicBin(it.publicKey)
+                            .keyToHash().toHex()
+                        val storedBlocks = trustchain.getStoredBlockCountForUser(it.publicKey)
+                        UserItem(
+                            peerId,
+                            it.publicKey.toHex(),
+                            it.latestSequenceNumber,
+                            storedBlocks
+                        )
+                    }
+                }
+                adapter.updateItems(items)
+
+                imgEmpty.isVisible = items.isEmpty()
+
+                delay(1000)
             }
-            adapter.updateItems(items)
-
-            imgEmpty.isVisible = users.isEmpty()
-
-            delay(1000)
-            loadNetworkInfo()
         }
     }
 }

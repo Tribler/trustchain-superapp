@@ -12,6 +12,7 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.hexToBytes
 import java.util.*
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
@@ -72,7 +73,13 @@ abstract class Community : Overlay {
         if (peer == null) {
             val available = getPeers()
             if (available.isNotEmpty()) {
-                peer = available.random()
+                // With a small chance, try to remedy any disconnected network phenomena.
+                if (Random.nextFloat() < 0.05f) {
+                    bootstrap()
+                    return
+                } else {
+                    peer = available.random()
+                }
             } else {
                 bootstrap()
                 return
@@ -324,7 +331,7 @@ abstract class Community : Overlay {
         send(peer.address, packet)
     }
 
-    internal open fun onIntroductionResponse(
+    open fun onIntroductionResponse(
         peer: Peer,
         dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
@@ -341,19 +348,22 @@ abstract class Community : Overlay {
             // WAN is not empty and it is not the same as ours
             if (!payload.lanIntroductionAddress.isEmpty()) {
                 // If LAN address is not empty, add them in case they are on our LAN
-                network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
+                discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
-            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
+            discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
             // LAN is not empty and WAN is the same as ours => they are on the same LAN
-            network.discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
+            discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
             // WAN is the same as ours, but we do not know the LAN => we assume LAN is the same as ours
-            network.discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
-            network.discoverAddress(peer,
-                Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
+            discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
+            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
         }
+    }
+
+    protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
+        network.discoverAddress(peer, address, serviceId)
     }
 
     internal open fun onPuncture(

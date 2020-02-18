@@ -13,4 +13,7 @@
 
     <string name="sign_block">Sign block</string>
     <string name="block_status">Block Status: %s</string>
+
+    <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
+    <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
 </resources>
