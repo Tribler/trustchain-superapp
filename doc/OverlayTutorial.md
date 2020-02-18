@@ -77,7 +77,7 @@ We can subsequently get the IPv8 singleton instance by calling `IPv8Android.getI
 If we run the app on multiple devices, they should be able to connect to each other and form an overlay. We can now get the instance of our community and query a list of connected peers by calling `Community.getPeers()`:
 
 ```kotlin
-val community = overlays[DemoCommunity::class.java] as DemoCommunity
+val community = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
 val peers = community.getPeers()
 for (peer in peers) {
     Log.d("DemoApplication", peer.mid)
@@ -115,6 +115,8 @@ fun broadcastGreeting() {
 }
 ```
 
+## Process incoming messages
+
 Finally, we add a message handler to parse incoming messages and print their sender and content to the log.
 
 ```kotlin
@@ -131,7 +133,7 @@ private fun onMessage(packet: Packet) {
 We can call `broadcastGreeting` function in our application e.g. in response to a button click, or we can add the following to our `Activity` to make sure we greet everyone every second even without user interaction:
 
 ```kotlin
-val community = overlays[DemoCommunity::class.java] as DemoCommunity
+val community = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
 lifecycleScope.launch {
     while (isActive) {
         community.broadcastGreeting()
