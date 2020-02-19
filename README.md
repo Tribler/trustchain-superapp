@@ -24,6 +24,18 @@ The protocol is built around the concept of *communities*. A community (or an *o
 - [Creating your first overlay](doc/OverlayTutorial.md)
 - [Creating your first TrustChain application](doc/TrustChainTutorial.md)
 
+## Project structure
+
+The project is a composed of several modules:
+
+- `ipv8` (JVM library) – The core of IPv8 implementation, pure Kotlin library module.
+- `ipv8-android` (Android library) – Android-specific dependencies and helper classes (`IPv8Android`, `IPv8Android.Factory`) for running IPv8 on Android Runtime.
+- `ipv8-jvm` (JVM library) – JVM-specific dependencies for running IPv8 on JVM.
+- `demo-android` (Android app) – The Android demo demonstrating usage of ipv8-android library.
+- `demo-jvm` (JVM app) - The CLI app demonstrating usage of ipv8-jvm library.
+
+Android apps using IPv8 should depend on the `ipv8-android` module, which also includes and exposes APIs of `ipv8` module.
+
 ## Sample app
 
 The repository includes a sample app that depends on the IPv8 library and demonstrates its usage. It is  available both as a native app for Android, and as a command line application running locally on JVM on macOS, Linux, and Windows.
