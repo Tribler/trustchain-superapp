@@ -92,6 +92,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
             EMPTY_SIG,
             Date()
         )
+        block.sign(getPrivateKey())
 
         every { community.database.contains(block) } returns false
         community.validateAndPersistBlock(block)

@@ -12,6 +12,7 @@ import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
 import nl.tudelft.ipv8.util.toHex
 import java.util.*
@@ -568,7 +569,7 @@ open class TrustChainCommunity(
             val validator = getTransactionValidator(block.type)
             if (validator != null) {
                 if (!validator.validate(block, database)) {
-                    validationResult = ValidationResult.Invalid(listOf("Invalid transaction"))
+                    validationResult = ValidationResult.Invalid(listOf(ValidationErrors.INVALID_TRANSACTION))
                 }
             }
         }

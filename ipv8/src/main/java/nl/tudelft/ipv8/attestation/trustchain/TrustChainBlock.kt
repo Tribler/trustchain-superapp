@@ -2,12 +2,14 @@ package nl.tudelft.ipv8.attestation.trustchain
 
 import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.*
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
-import java.lang.Exception
+import org.omg.CORBA.INVALID_TRANSACTION
 import java.util.*
+import kotlin.Exception
 
 val GENESIS_HASH = ByteArray(32)
 val GENESIS_SEQ = 1u
@@ -176,17 +178,35 @@ class TrustChainBlock(
         val errors = mutableListOf<String>()
 
         if (sequenceNumber < GENESIS_SEQ) {
-            errors += "Sequence number is prior to genesis"
+            errors += ValidationErrors.INVALID_SEQUENCE_NUMBER
         }
 
-        // TODO: Check signature
+        if (!defaultCryptoProvider.isValidPublicBin(publicKey)) {
+            errors += ValidationErrors.INVALID_PUBLIC_KEY
+        }
+
+        if (!linkPublicKey.contentEquals(EMPTY_PK) &&
+            !linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK) &&
+            !defaultCryptoProvider.isValidPublicBin(linkPublicKey)) {
+            errors += ValidationErrors.INVALID_LINK_PUBLIC_KEY
+        }
+
+        try {
+            val pk = defaultCryptoProvider.keyFromPublicBin(publicKey)
+            val serialized = HalfBlockPayload.fromHalfBlock(this, false).serialize()
+            if (!pk.verify(signature, serialized)) {
+                errors += ValidationErrors.INVALID_SIGNATURE
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         if (sequenceNumber == GENESIS_SEQ && !previousHash.contentEquals(GENESIS_HASH)) {
-            errors += "Sequence number implies previous hash should be Genesis ID"
+            errors += ValidationErrors.INVALID_GENESIS_HASH
         }
 
         if (sequenceNumber != GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)) {
-            errors += "Sequence number implies previous hash should not be Genesis ID"
+            errors += ValidationErrors.INVALID_GENESIS_SEQUENCE_NUMBER
         }
 
         return updateValidationResult(prevResult, errors)
