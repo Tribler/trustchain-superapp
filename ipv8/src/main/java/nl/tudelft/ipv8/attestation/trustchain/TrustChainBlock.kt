@@ -7,7 +7,6 @@ import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.*
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
-import org.omg.CORBA.INVALID_TRANSACTION
 import java.util.*
 import kotlin.Exception
 
@@ -124,6 +123,8 @@ class TrustChainBlock(
      * Validates this block against what is known in the database.
      */
     fun validate(database: TrustChainStore): ValidationResult {
+        // val blk = database.get(publicKey, sequenceNumber)
+        // val link = database.getLinked(this)
         val prevBlk = database.getBlockBefore(this)
         val nextBlk = database.getBlockAfter(this)
 
@@ -139,7 +140,8 @@ class TrustChainBlock(
         // TODO: Check if the linked block as retrieved from our database is the same as the one
         //  linked by this block. Detect double countersign fraud.
 
-        // TODO: Check if the chain of blocks is properly hooked up.
+        // Check if the chain of blocks is properly hooked up.
+        result = validateChainConsistency(prevBlk, nextBlk, result)
 
         return result
     }
@@ -207,6 +209,50 @@ class TrustChainBlock(
 
         if (sequenceNumber != GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)) {
             errors += ValidationErrors.INVALID_GENESIS_SEQUENCE_NUMBER
+        }
+
+        return updateValidationResult(prevResult, errors)
+    }
+
+    /**
+     * Check for chain order consistency.
+     *
+     * The previous block should point to us and this block should point to the next block.
+     */
+    private fun validateChainConsistency(
+        prevBlk: TrustChainBlock?,
+        nextBlk: TrustChainBlock?,
+        prevResult: ValidationResult
+    ): ValidationResult {
+        val errors = mutableListOf<String>()
+
+        if (prevBlk != null) {
+            if (!prevBlk.publicKey.contentEquals(publicKey)) {
+                errors += ValidationErrors.PREVIOUS_PUBLIC_KEY_MISMATCH
+            }
+            if (prevBlk.sequenceNumber >= sequenceNumber) {
+                errors += ValidationErrors.PREVIOUS_SEQUENCE_NUMBER_MISMATCH
+            }
+            val isPrevGap = prevBlk.sequenceNumber != sequenceNumber - 1u
+            if (!isPrevGap && !prevBlk.calculateHash().contentEquals(previousHash)) {
+                errors += ValidationErrors.PREVIOUS_HASH_MISMATCH
+                // Is this fraud? It is certainly an error, but fixing it would require a different
+                // signature on the same sequence number which is fraud.
+            }
+        }
+
+        if (nextBlk != null) {
+            if (!nextBlk.publicKey.contentEquals(publicKey)) {
+                errors += ValidationErrors.NEXT_PUBLIC_KEY_MISMATCH
+            }
+            if (nextBlk.sequenceNumber <= sequenceNumber) {
+                errors += ValidationErrors.NEXT_SEQUENCE_NUMBER_MISMATCH
+            }
+            val isNextGap = nextBlk.sequenceNumber != sequenceNumber + 1u
+            if (!isNextGap && !nextBlk.previousHash.contentEquals(calculateHash())) {
+                errors += ValidationErrors.NEXT_HASH_MISMATCH
+                // Again, this might not be fraud, but fixing it can only result in fraud.
+            }
         }
 
         return updateValidationResult(prevResult, errors)

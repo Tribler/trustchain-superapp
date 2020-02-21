@@ -2,12 +2,12 @@ package nl.tudelft.ipv8.attestation.trustchain
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava
 import com.goterl.lazycode.lazysodium.SodiumJava
+import io.mockk.every
 import io.mockk.mockk
 import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.hexToBytes
@@ -59,6 +59,8 @@ class TrustChainBlockTest {
         )
         block.sign(getPrivateKey())
         val store = mockk<TrustChainStore>(relaxed = true)
+        every { store.getBlockBefore(any()) } returns null
+        every { store.getBlockAfter(any()) } returns null
         val result = block.validate(store)
         Assert.assertEquals(ValidationResult.PartialNext, result)
     }
