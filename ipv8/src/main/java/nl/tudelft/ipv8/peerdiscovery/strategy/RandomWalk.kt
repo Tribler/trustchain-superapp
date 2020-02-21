@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
 import java.util.*
-import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
@@ -60,14 +59,14 @@ class RandomWalk(
             val known = overlay.getWalkableAddresses()
             val available = (known.toSet() - introTimeouts.keys.toSet()).toList()
 
-            // We can get stuck in an infinite loop of unreachable peers if we never contact
-            // the tracker again
-            if (available.isNotEmpty() && Random.nextInt(255) >= resetChance) {
+            // Get a new introduction from a verified peer or a tracker
+            overlay.getNewIntroduction()
+
+            // Walk to a random introduced peer
+            if (available.isNotEmpty()) {
                 val peer = available.random()
                 overlay.walkTo(peer)
                 introTimeouts[peer] = Date()
-            } else {
-                overlay.getNewIntroduction()
             }
 
             this.lastStep = Date()

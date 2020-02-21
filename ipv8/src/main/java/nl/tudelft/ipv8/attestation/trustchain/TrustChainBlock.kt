@@ -77,9 +77,25 @@ class TrustChainBlock(
 
     val linkedBlockId = linkPublicKey.toHex() + "." + linkSequenceNumber
 
+    /**
+     * Returns whether the block is a genesis block.
+     */
     val isGenesis = sequenceNumber == GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)
 
+    /**
+     * Returns whether the block is a self-signed block.
+     */
     val isSelfSigned = publicKey.contentEquals(linkPublicKey)
+
+    /**
+     * Returns whether the block is a proposal block.
+     */
+    val isProposal = linkSequenceNumber == UNKNOWN_SEQ
+
+    /**
+     * Returns whether the block is an agreement block.
+     */
+    val isAgreement = linkSequenceNumber != UNKNOWN_SEQ
 
     val transaction: TrustChainTransaction by lazy {
         try {
@@ -106,10 +122,86 @@ class TrustChainBlock(
      * Validates this block against what is known in the database.
      */
     fun validate(database: TrustChainStore): ValidationResult {
-        // TODO
-        database.getBlockBefore(this)
-        database.getBlockAfter(this)
-        return ValidationResult.Valid
+        val prevBlk = database.getBlockBefore(this)
+        val nextBlk = database.getBlockAfter(this)
+
+        // Initialize the validation result to reflect the achievable validation level.
+        var result = getMaxValidationLevel(prevBlk, nextBlk)
+
+        // Check the block invariant.
+        result = validateBlockInvariant(result)
+
+        // TODO: Check if the linked block as retrieved from our database is the same as the one
+        //  linked by this block. Detect double spend.
+
+        // TODO: Check if the linked block as retrieved from our database is the same as the one
+        //  linked by this block. Detect double countersign fraud.
+
+        // TODO: Check if the chain of blocks is properly hooked up.
+
+        return result
+    }
+
+    /**
+     * Determine the maximum validation level.
+     *
+     * Depending on the blocks we get from the database, we can decide to reduce the validation
+     * level. We must do this prior to flagging any errors. This way we are only ever reducing
+     * the validation level without having to resort to min()/max() every time we set it.
+     */
+    private fun getMaxValidationLevel(
+        prevBlk: TrustChainBlock?,
+        nextBlk: TrustChainBlock?
+    ): ValidationResult {
+        val isPrevGap = prevBlk == null || prevBlk.sequenceNumber != sequenceNumber - 1u
+        val isNextGap = nextBlk == null || nextBlk.sequenceNumber != sequenceNumber + 1u
+
+        return if (prevBlk == null && nextBlk == null && !isGenesis) {
+            ValidationResult.NoInfo
+        } else if (isPrevGap && isNextGap && !isGenesis) {
+            ValidationResult.Partial
+        } else if (isPrevGap && !isGenesis) {
+            ValidationResult.PartialPrevious
+        } else if (isNextGap) {
+            ValidationResult.PartialNext
+        } else {
+            ValidationResult.Valid
+        }
+    }
+
+    /**
+     * Validate that the block is sane.
+     */
+    private fun validateBlockInvariant(prevResult: ValidationResult): ValidationResult {
+        val errors = mutableListOf<String>()
+
+        if (sequenceNumber < GENESIS_SEQ) {
+            errors += "Sequence number is prior to genesis"
+        }
+
+        // TODO: Check signature
+
+        if (sequenceNumber == GENESIS_SEQ && !previousHash.contentEquals(GENESIS_HASH)) {
+            errors += "Sequence number implies previous hash should be Genesis ID"
+        }
+
+        if (sequenceNumber != GENESIS_SEQ && previousHash.contentEquals(GENESIS_HASH)) {
+            errors += "Sequence number implies previous hash should not be Genesis ID"
+        }
+
+        return updateValidationResult(prevResult, errors)
+    }
+
+    private fun updateValidationResult(prevResult: ValidationResult, newErrors: List<String>): ValidationResult {
+        return if (newErrors.isNotEmpty()) {
+            val prevErrors = if (prevResult is ValidationResult.Invalid) {
+                prevResult.errors
+            } else listOf()
+            val errors = prevErrors + newErrors
+            ValidationResult.Invalid(errors)
+        } else {
+            prevResult
+        }
     }
 
     /**

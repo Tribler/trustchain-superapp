@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8
 
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
@@ -33,6 +34,9 @@ abstract class Community : Overlay {
     override var maxPeers: Int = 20
     override var cryptoProvider: CryptoProvider = JavaCryptoProvider
 
+    private lateinit var job: Job
+    protected lateinit var scope: CoroutineScope
+
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
         messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
@@ -48,6 +52,15 @@ abstract class Community : Overlay {
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         network.blacklist.addAll(DEFAULT_ADDRESSES)
+
+        job = SupervisorJob()
+        scope = CoroutineScope(Dispatchers.Main + job)
+    }
+
+    override fun unload() {
+        super.unload()
+
+        job.cancel()
     }
 
     override fun bootstrap() {
@@ -165,22 +178,18 @@ abstract class Community : Overlay {
     internal fun createIntroductionResponse(
         lanSocketAddress: Address,
         socketAddress: Address,
-        identifier: Int,
-        introduction: Peer? = null
+        identifier: Int
     ): ByteArray {
         val globalTime = claimGlobalTime()
         var introductionLan = Address.EMPTY
         var introductionWan = Address.EMPTY
-        var introduced = false
         val other = network.getVerifiedByAddress(socketAddress)
-        var intro = introduction
-        if (intro == null) {
-            intro = getPeerForIntroduction(exclude = other)
-        }
+        val intro = getPeerForIntroduction(exclude = other)
         if (intro != null) {
             /*
-             * If we are introducting a peer on our LAN, we assume our WAN is same as their WAN, and use their LAN port
-             * as a WAN port. Note that this will only work if the port is not translated by NAT.
+             * If we are introducting a peer on our LAN, we assume our WAN is same as their WAN,
+             * and use their LAN port as a WAN port. Note that this will only work if the port is
+             * not translated by NAT.
              */
             if (addressIsLan(intro.address)) {
                 introductionLan = intro.address
@@ -188,7 +197,6 @@ abstract class Community : Overlay {
             } else {
                 introductionWan = intro.address
             }
-            introduced = true
         }
         val payload = IntroductionResponsePayload(
             socketAddress,
@@ -203,7 +211,7 @@ abstract class Community : Overlay {
         val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
         val dist = GlobalTimeDistributionPayload(globalTime)
 
-        if (introduced) {
+        if (intro != null) {
             // TODO: Seems like a bad practice to send a packet in the create method...
             val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
             val punctureRequestAddress = if (introductionLan.isEmpty())
@@ -322,8 +330,8 @@ abstract class Community : Overlay {
         network.discoverServices(peer, listOf(serviceId))
 
         val packet = createIntroductionResponse(
-            payload.destinationAddress,
-            peer.address,
+            payload.sourceLanAddress,
+            payload.sourceWanAddress,
             payload.identifier
         )
 
@@ -337,7 +345,11 @@ abstract class Community : Overlay {
     ) {
         logger.debug("<- $payload")
 
-        myEstimatedWan = payload.destinationAddress
+        // Accept a new WAN address if the sender is not on the same LAN, otherwise they would
+        // just send us our LAN address
+        if (payload.sourceWanAddress.ip != myEstimatedWan.ip) {
+            myEstimatedWan = payload.destinationAddress
+        }
 
         network.addVerifiedPeer(peer)
         network.discoverServices(peer, listOf(serviceId))
@@ -362,7 +374,10 @@ abstract class Community : Overlay {
     }
 
     protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
-        network.discoverAddress(peer, address, serviceId)
+        // Prevent discovering its own address
+        if (address != myEstimatedLan && address != myEstimatedWan) {
+            network.discoverAddress(peer, address, serviceId)
+        }
     }
 
     internal open fun onPuncture(

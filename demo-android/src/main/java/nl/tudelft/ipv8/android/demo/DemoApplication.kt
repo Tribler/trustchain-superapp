@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo
 
 import android.app.Application
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -8,9 +9,10 @@ import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
+import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
@@ -39,10 +41,38 @@ class DemoApplication : Application() {
             .setPrivateKey(getPrivateKey())
             .setServiceClass(DemoService::class.java)
             .init()
+
+        initTrustChain()
+    }
+
+    private fun initTrustChain() {
+        val ipv8 = IPv8Android.getInstance()
+        val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
+
+        trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
+            override fun validate(
+                block: TrustChainBlock,
+                database: TrustChainStore
+            ): Boolean {
+                return block.transaction["message"] != null || block.isAgreement
+            }
+        })
+
+        trustchain.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
+
+        trustchain.addListener(BLOCK_TYPE, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val randomWalk = RandomWalk.Factory()
         val randomChurn = RandomChurn.Factory()
         val periodicSimilarity = PeriodicSimilarity.Factory()
         return OverlayConfiguration(
@@ -53,10 +83,9 @@ class DemoApplication : Application() {
 
     private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
         val settings = TrustChainSettings()
-        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val database = Database(driver)
-        val store = TrustChainSQLiteStore(database)
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
             listOf(randomWalk)
@@ -64,7 +93,7 @@ class DemoApplication : Application() {
     }
 
     private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
@@ -89,5 +118,6 @@ class DemoApplication : Application() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
+        private const val BLOCK_TYPE = "demo_block"
     }
 }

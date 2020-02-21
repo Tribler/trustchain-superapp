@@ -63,27 +63,6 @@ class PeersFragment : BaseFragment() {
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
-            val trustchain = getTrustChainCommunity()
-
-            trustchain.registerTransactionValidator("demo_block", object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): Boolean {
-                    return block.transaction["message"] != null
-                }
-            })
-
-            trustchain.addListener(object : BlockListener {
-                override fun shouldSign(block: TrustChainBlock): Boolean {
-                    return true
-                }
-
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-                }
-            }, "demo_block")
-
             while (isActive) {
                 val overlays = getIpv8().overlays
 
@@ -94,17 +73,14 @@ class PeersFragment : BaseFragment() {
                 val demoCommunity = getDemoCommunity()
                 val peers = demoCommunity.getPeers()
 
-                // Filter only addresses that are not verified yet
-                val discoveredAddresses = demoCommunity.discoveredAddresses.filter { address ->
-                    peers.find { peer -> peer.address == address } == null
-                }
+                val discoveredAddresses = demoCommunity.network
+                    .getWalkableAddresses(demoCommunity.serviceId)
 
                 val peerItems = peers.map { PeerItem(it) }
 
                 val addressItems = discoveredAddresses.map { address ->
-                    val introduced = demoCommunity.discoveredAddressesIntroduced[address]!!
                     val contacted = demoCommunity.discoveredAddressesContacted[address]
-                    AddressItem(address, introduced, contacted)
+                    AddressItem(address, null, contacted)
                 }
 
                 val items = peerItems + addressItems

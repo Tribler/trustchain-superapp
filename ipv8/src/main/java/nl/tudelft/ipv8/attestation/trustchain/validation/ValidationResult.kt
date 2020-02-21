@@ -22,7 +22,7 @@ sealed class ValidationResult {
     /**
      * The block does not violate any rules, but there is a gap or no block on the previous block.
      */
-    object PartialPervious : ValidationResult()
+    object PartialPrevious : ValidationResult()
 
     /**
      * There are no blocks (previous or next) to validate against.
@@ -32,5 +32,9 @@ sealed class ValidationResult {
     /**
      * The block violates at least one validation rule.
      */
-    class Invalid(val errors: List<String>) : ValidationResult()
+    class Invalid(val errors: List<String>) : ValidationResult() {
+        override fun toString(): String {
+            return "Invalid(" + errors.joinToString(", ") + ")"
+        }
+    }
 }
