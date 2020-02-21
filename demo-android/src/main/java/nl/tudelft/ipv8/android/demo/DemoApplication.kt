@@ -9,10 +9,7 @@ import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
+import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
@@ -52,7 +49,7 @@ class DemoApplication : Application() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
 
-        trustchain.registerTransactionValidator("demo_block", object : TransactionValidator {
+        trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
@@ -61,15 +58,17 @@ class DemoApplication : Application() {
             }
         })
 
-        trustchain.addListener(object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-
+        trustchain.registerBlockSigner(BLOCK_TYPE, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
-        }, "demo_block")
+        })
+
+        trustchain.addListener(BLOCK_TYPE, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -120,5 +119,6 @@ class DemoApplication : Application() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
+        private const val BLOCK_TYPE = "demo_block"
     }
 }

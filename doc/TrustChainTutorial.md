@@ -33,6 +33,8 @@ trustchain.createProposalBlock("demo_block", transaction, publicKey)
 
 Optionally, we can register `TransactionValidator` for our block type to enforce integrity requirements. In the `validate` method, we also get access to `TrustChainStore` if there we need to define any context-sensitive rules depending on the previous blocks in the chain. Invalid blocks are discarded and not stored in the database.
 
+In our case, we require proposal blocks to include a message field. We accept any transaction for agreement blocks as we are only concerned with the signature.
+
 ```kotlin
 trustchain.registerTransactionValidator("demo_block", object : TransactionValidator {
     override fun validate(
@@ -46,18 +48,28 @@ trustchain.registerTransactionValidator("demo_block", object : TransactionValida
 
 ## Create agreement blocks
 
-We now register a block listener to process incoming blocks. When the listener methods get called, the block has already been validated using the registered `TransactionValidator`, so we can just assume all blocks are valid. `TrustChainCommunity.addListener` takes two parameters: an object implementing `BlockListener` interface, and the type of blocks we want to be notified about. We have to implement two methods of `BlockListener:`
-- `onBlockReceived` gets called for every incoming block of the specified type. We can perform any application-specific logic there if needed. For now, we just log the block ID and the transaction.
-- `onSignatureRequest` gets called whenever we receive a proposal block that we should create an agreement block for. To sign all valid blocks automatically, `TrustChainCommunity.createAgreementBlock` method should be called. The method accepts the proposal block and a transaction for the agreement block. This can be either the copy of the original transaction, an empty map, or any other content depending on the use case. In our demo, we are just going to sign all valid blocks and include an empty transaction. In case the application requires user confirmation to sign agreement blocks, this method can also be empty and agreement blocks can be created later manually.
+We now register `BlockSigner` that will be notified about incoming proposal blocks that we should create agreement blocks for. At the point when the `onSignatureRequest` method is called, the last few blocks (the exact count can be configured in `TrustChainSettings.validationRange`) have already been validated. 
+
+To create the agreement block, `TrustChainCommunity.createAgreementBlock` method should be called. The method accepts the proposal block and a transaction for the agreement block. This can be either the copy of the original transaction, an empty map, or any other content depending on the use case. 
+
+In our demo, we are just going to sign all valid blocks and include an empty transaction in the agreement block. In case the application requires user confirmation to sign agreement blocks, the block signer is not required at all and the agreement blocks can be created based on the user interaction. 
+
+```kotlin
+trustchain.registerBlockSigner("demo_block", object : BlockSigner {
+    override fun onSignatureRequest(block: TrustChainBlock) {
+        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+    }
+})
+``` 
+
+We now register a block listener to be notified about all incoming blocks. When the listener methods get called, the block has already been validated using the registered `TransactionValidator`, so we can just assume all blocks are valid. `TrustChainCommunity.addListener` takes two parameters: an object implementing `BlockListener` interface, and the type of blocks we want to be notified about. `onBlockReceived` gets called for every incoming block of the specified type. We can perform any application-specific logic there if needed. For now, we just log the block ID and the transaction.
+
+There can be multiple listeners registered for a single block type and a listener can be removed with `TrustChainCommunity.removeListener` method.
 
 ```kotlin
 trustchain.addListener(object : BlockListener {
     override fun onBlockReceived(block: TrustChainBlock) {
         Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-    }
-
-    override fun onSignatureRequest(block: TrustChainBlock) {
-        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
     }
 }, "demo_block")
 ```
@@ -65,5 +77,3 @@ trustchain.addListener(object : BlockListener {
 ## Request a chain crawl
 
 By default, blocks are only received passively when other peers broadcast them. However, it is also possible to request an active crawl of the chain from the specific peer using the `TrustChainCommunity.crawlChain(Peer)` method. It keeps sending crawl requests until we have all known blocks stored in our database. The `crawlChain` function is a suspending function that will resume once the whole chain is crawled, or a timeout is reached.
-
-

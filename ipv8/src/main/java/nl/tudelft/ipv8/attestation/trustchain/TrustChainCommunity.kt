@@ -34,6 +34,7 @@ open class TrustChainCommunity(
     private val relayedBroadcasts = mutableSetOf<String>()
     private val listenersMap: MutableMap<String?, MutableList<BlockListener>> = mutableMapOf()
     private val txValidators: MutableMap<String, TransactionValidator> = mutableMapOf()
+    private val blockSigners: MutableMap<String, BlockSigner> = mutableMapOf()
 
     private val crawlRequestCache: MutableMap<UInt, CrawlRequest> = mutableMapOf()
 
@@ -63,7 +64,7 @@ open class TrustChainCommunity(
      * @param blockType The type of blocks the listener will be notified about.
      * If null, the listener will be notified about all block types.
      */
-    fun addListener(listener: BlockListener, blockType: String? = null) {
+    fun addListener(blockType: String?, listener: BlockListener) {
         val listeners = listenersMap[blockType] ?: mutableListOf()
         listenersMap[blockType] = listeners
         listeners.add(listener)
@@ -96,6 +97,14 @@ open class TrustChainCommunity(
     }
 
     /**
+     * Register a block signer for a specific block type. The signer will be notified for every
+     * incoming proposal block targeted at us. They can react by creating an agreement block.
+     */
+    fun registerBlockSigner(blockType: String, signer: BlockSigner) {
+        blockSigners[blockType] = signer
+    }
+
+    /**
      * Notify listeners of a specific new block.
      */
     internal fun notifyListeners(block: TrustChainBlock) {
@@ -111,16 +120,10 @@ open class TrustChainCommunity(
     }
 
     /**
-     * Return whether we should sign the block in the passed message.
+     * Sends a signature request to the block signer.
      */
-    private fun shouldSign(block: TrustChainBlock): Boolean {
-        val listeners: List<BlockListener> = listenersMap[block.type] ?: listOf()
-        for (listener in listeners) {
-            if (listener.shouldSign(block)) {
-                return true
-            }
-        }
-        return false
+    private fun onSignatureRequest(block: TrustChainBlock) {
+        blockSigners[block.type]?.onSignatureRequest(block)
     }
 
     /*
@@ -547,10 +550,7 @@ open class TrustChainCommunity(
                 // Validate again
                 processHalfBlock(block, peer)
             } else {
-                val shouldSign = shouldSign(block)
-                if (shouldSign) {
-                    createAgreementBlock(block, mapOf<Any?, Any?>())
-                }
+                onSignatureRequest(block)
             }
         }
     }
