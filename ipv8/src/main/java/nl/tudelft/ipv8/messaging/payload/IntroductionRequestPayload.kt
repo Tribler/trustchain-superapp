@@ -49,7 +49,7 @@ data class IntroductionRequestPayload(
                 serializeUShort(identifier)
     }
 
-    companion object : Deserializable<IntroductionRequestPayload> {
+    companion object Deserializer : Deserializable<IntroductionRequestPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<IntroductionRequestPayload, Int> {
             var localOffset = 0
             val (destinationAddress, _) = Address.deserialize(buffer, offset + localOffset)

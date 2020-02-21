@@ -104,7 +104,7 @@ class MyMessage(val message: String) : Serializable {
         return message.toByteArray()
     }
 
-    companion object : Deserializable<MyMessage> {
+    companion object Deserializer : Deserializable<MyMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<MyMessage, Int> {
             return Pair(MyMessage(buffer.toString(Charsets.UTF_8)), buffer.size)
         }
@@ -119,7 +119,7 @@ private const val MESSAGE_ID = 1
 
 fun broadcastGreeting() {
     for (peer in getPeers()) {
-        val packet = serializePacket(MESSAGE_ID, listOf(MyMessage("Hello!")))
+        val packet = serializePacket(MESSAGE_ID, MyMessage("Hello!"))
         send(peer.address, packet)
     }
 }
@@ -135,12 +135,12 @@ init {
 }
 
 private fun onMessage(packet: Packet) {
-    val (peer, payload) = packet.getAuthPayload(MyMessage.Companion, cryptoProvider)
+    val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
     Log.d("DemoCommunity", peer.mid + ": " + payload.message)
 }
 ```
 
-We can call `broadcastGreeting` function in our application e.g. in response to a button click, or we can add the following to our `Activity` to make sure we greet everyone every second even without user interaction:
+We can call `broadcastGreeting` function in our application e.g. in response to a button click, or we can add a loop to our `Activity` to make sure we greet everyone every second even without user interaction:
 
 ```kotlin
 val community = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!

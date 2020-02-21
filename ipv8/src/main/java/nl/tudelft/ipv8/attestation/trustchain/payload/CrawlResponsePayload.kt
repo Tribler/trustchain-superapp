@@ -19,7 +19,7 @@ open class CrawlResponsePayload(
             serializeUInt(totalCount)
     }
 
-    companion object : Deserializable<CrawlResponsePayload> {
+    companion object Deserializer : Deserializable<CrawlResponsePayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<CrawlResponsePayload, Int> {
             var (block, localOffset) = HalfBlockPayload.deserialize(buffer, offset)
             val crawlId = deserializeUInt(buffer, offset + localOffset)

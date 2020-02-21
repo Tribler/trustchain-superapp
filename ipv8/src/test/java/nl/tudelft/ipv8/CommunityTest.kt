@@ -77,10 +77,9 @@ class CommunityTest {
 
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
-        val packet = community.createIntroductionRequest(
+        community.createIntroductionRequest(
             Address("1.2.3.4", 1234)
         )
-        Assert.assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2f6004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d20202030408ba030203040ca2010001e3e4862ec5a53c8e44e8bdeffbc8eb21cc441dbe90cc7018d4eb9183bf48d564cd86fe1d5c5d8d2298f7e2b746633ad995e2015597bfa53fb86fb70d1679a104", packet.toHex())
     }
 
     @Test
@@ -90,13 +89,11 @@ class CommunityTest {
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
         every { community.getPeers() } returns listOf(Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234)))
-        val packet = community.createIntroductionResponse(
+        community.createIntroductionResponse(
             Address("1.2.3.4", 1234),
             Address("1.2.3.4", 1234),
             2
         )
-
-        Assert.assertEquals("000260793bdb9cc0b60c96f88069d78aee327a6241d2f5004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d20202030408ba030203040ca200000000000005020304147200000294b144e819f1b3179e8d6117ea7cf7846b4490273999f1bfd2e3c498f9486183be2464cb543003475c5cbff8458ce9e40170d332fad063e238d1dab448098801", packet.toHex())
     }
 
     @Test
@@ -114,9 +111,9 @@ class CommunityTest {
             2
         )
 
-        community.handleIntroductionResponse(Packet(myPeer.address, packet))
+        community.onIntroductionResponsePacket(Packet(myPeer.address, packet))
 
-        verify { community.onIntroductionResponse(any(), any(), any()) }
+        verify { community.onIntroductionResponse(any(), any()) }
     }
 
     @Test
@@ -144,7 +141,7 @@ class CommunityTest {
 
         val community = getCommunity()
 
-        community.deserializeIntroductionRequest(Packet(myPeer.address, receivedPayload.hexToBytes()))
+        community.onIntroductionRequestPacket(Packet(myPeer.address, receivedPayload.hexToBytes()))
     }
 
     @Test
@@ -176,9 +173,9 @@ class CommunityTest {
         val community = spyk(getCommunity())
 
         val packet = "000260793bdb9cc0b60c96f88069d78aee327a6241d2f9004a4c69624e61434c504b3a7dc013cef4be5e4e051616a9b3cd9c8d8eb5192f037f3104f6323e43d83a934161ef4f7fe7ea4443da306cd998f830cf8bd543525afd929c83d641c7e9ba0ed300000000000000010102030404d202030405092900016e45d66684e87a35bddf5d971619dd21de92993639b1021f85be61d940c5ba1cbd943797cfb4058c962d24d0cf19fbd4a7f6ed41e75ea2fe8693a5d876da210f"
-        community.handlePuncture(Packet(myPeer.address, packet.hexToBytes()))
+        community.onPuncturePacket(Packet(myPeer.address, packet.hexToBytes()))
 
-        verify { community.onPuncture(any(), any(), any()) }
+        verify { community.onPuncture(any(), any()) }
     }
 
     @Test
@@ -201,9 +198,9 @@ class CommunityTest {
         val community = spyk(getCommunity())
 
         val packet = "000260793bdb9cc0b60c96f88069d78aee327a6241d2fa00000000000000010102030404d202030405092900017b01e303fc9987b1b899445e3f9c3a0208580b3572f357e9667419cf095a8bf5ea7d97f22519695062d7db2a768ad0309afe9cb51607f0a104b623da0235c50e"
-        community.handlePunctureRequest(Packet(myPeer.address, packet.hexToBytes()))
+        community.onPunctureRequestPacket(Packet(myPeer.address, packet.hexToBytes()))
 
-        verify { community.onPunctureRequest(any(), any(), any()) }
+        verify { community.onPunctureRequest(any(), any()) }
     }
 
     @Test

@@ -9,7 +9,7 @@ data class PongPayload(
         return serializeUShort(identifier % 65536)
     }
 
-    companion object : Deserializable<PongPayload> {
+    companion object Deserializer : Deserializable<PongPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<PongPayload, Int> {
             val identifier = deserializeUShort(buffer, offset)
             return Pair(PongPayload(identifier), offset + SERIALIZED_USHORT_SIZE)

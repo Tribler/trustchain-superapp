@@ -38,10 +38,10 @@ abstract class Community : Overlay {
     protected lateinit var scope: CoroutineScope
 
     init {
-        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
-        messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
-        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::handleIntroductionRequest
-        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::handleIntroductionResponse
+        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::onPunctureRequestPacket
+        messageHandlers[MessageId.PUNCTURE] = ::onPuncturePacket
+        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::onIntroductionRequestPacket
+        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::onIntroductionResponsePacket
     }
 
     override fun load() {
@@ -167,12 +167,10 @@ abstract class Community : Overlay {
                 ConnectionType.UNKNOWN,
                 (globalTime % 65536u).toInt()
             )
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_REQUEST, payload)
     }
 
     internal fun createIntroductionResponse(
@@ -180,7 +178,6 @@ abstract class Community : Overlay {
         socketAddress: Address,
         identifier: Int
     ): ByteArray {
-        val globalTime = claimGlobalTime()
         var introductionLan = Address.EMPTY
         var introductionWan = Address.EMPTY
         val other = network.getVerifiedByAddress(socketAddress)
@@ -208,8 +205,6 @@ abstract class Community : Overlay {
             false,
             identifier
         )
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         if (intro != null) {
             // TODO: Seems like a bad practice to send a packet in the create method...
@@ -221,38 +216,60 @@ abstract class Community : Overlay {
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_RESPONSE, payload)
     }
 
     internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
-        val globalTime = claimGlobalTime()
         val payload = PuncturePayload(lanWalker, wanWalker, identifier)
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.PUNCTURE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.PUNCTURE, payload)
     }
 
     internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
         logger.debug("-> punctureRequest")
-        val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
-        val dist = GlobalTimeDistributionPayload(globalTime)
-        return serializePacket(MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PUNCTURE_REQUEST, payload, sign = false)
+    }
+
+    /**
+     * Serializes a payload into a binary packet that can be sent over the transport.
+     *
+     * @param messageId The message type ID
+     * @param payload The serializable payload
+     * @param sign True if the packet should be signed
+     * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
+     */
+    protected fun serializePacket(
+        messageId: Int,
+        payload: Serializable,
+        sign: Boolean = true,
+        peer: Peer = myPeer
+    ): ByteArray {
+        val payloads = mutableListOf<Serializable>()
+        if (sign) {
+            payloads += BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
+        }
+        payloads += GlobalTimeDistributionPayload(claimGlobalTime())
+        payloads += payload
+        return serializePacket(
+            messageId,
+            payloads,
+            sign,
+            peer
+        )
     }
 
     /**
      * Serializes multiple payloads into a binary packet that can be sent over the transport.
      *
-     * @param prefix The packet prefix consisting of a zero byte, version, and master peer mid
      * @param messageId The message type ID
      * @param payload The list of payloads
      * @param sign True if the packet should be signed
      * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
      */
-    protected fun serializePacket(
+    private fun serializePacket(
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true,
@@ -277,37 +294,26 @@ abstract class Community : Overlay {
      * Request deserialization
      */
 
-    internal fun deserializeIntroductionRequest(packet: Packet): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
-        return Triple(peer, dist, payload)
+    internal fun onIntroductionRequestPacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(IntroductionRequestPayload.Deserializer)
+        onIntroductionRequest(peer, payload)
     }
 
-    private fun handleIntroductionRequest(packet: Packet) {
-        val (peer, dist, payload) = deserializeIntroductionRequest(packet)
-        onIntroductionRequest(peer, dist, payload)
+    internal fun onIntroductionResponsePacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(IntroductionResponsePayload.Deserializer)
+        onIntroductionResponse(peer, payload)
     }
 
-    internal fun handleIntroductionResponse(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
-        onIntroductionResponse(peer, dist, payload)
+    internal fun onPuncturePacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(PuncturePayload.Deserializer)
+        onPuncture(peer, payload)
     }
 
-    internal fun handlePuncture(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
-        onPuncture(peer, dist, payload)
-    }
-
-    internal fun handlePunctureRequest(packet: Packet) {
-        val remainder = packet.getPayload()
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = PunctureRequestPayload.deserialize(remainder, distSize)
-        onPunctureRequest(packet.source, dist, payload)
+    internal fun onPunctureRequestPacket(packet: Packet) {
+        val payload = packet.getPayload(PunctureRequestPayload.Deserializer)
+        onPunctureRequest(packet.source, payload)
     }
 
     /*
@@ -316,7 +322,6 @@ abstract class Community : Overlay {
 
     internal open fun onIntroductionRequest(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
     ) {
         logger.debug("<- $payload")
@@ -340,7 +345,6 @@ abstract class Community : Overlay {
 
     open fun onIntroductionResponse(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
     ) {
         logger.debug("<- $payload")
@@ -382,7 +386,6 @@ abstract class Community : Overlay {
 
     internal open fun onPuncture(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
     ) {
         logger.debug("<- $payload")
@@ -391,7 +394,6 @@ abstract class Community : Overlay {
 
     internal open fun onPunctureRequest(
         address: Address,
-        dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
     ) {
         logger.debug("<- $payload")
