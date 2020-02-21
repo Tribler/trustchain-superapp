@@ -2,6 +2,16 @@
 
 In this tutorial, we will learn how to create a simple overlay network, and send and handle custom messages. Finally, we will configure and start the IPv8 stack, and load our overlay with a discovery strategy, which will allow us to discover other peers in the community using the bootstrap server.
 
+## Project setup
+
+You can check the `demo-android` module to see how to configure an Android app module, initialize IPv8, and interact with the overlays. In essence, Android applications should depend on the `ipv8-android` module, which includes and exposes APIs of `ipv8` module, and defines some Android-specific dependencies and helper classes (e.g. `IPv8Android`).
+
+The dependency is defined with the following line in `build.gradle`:
+
+```
+implementation project(':ipv8-android')
+```
+
 ## Create a community
 
 All communities have to extend an abstract `Community` class, which implements the `Overlay` interface. The only field left for us to define is `serviceId`. This should be an arbitrary 20-byte array represented as a hexadecimal string that uniquely identifies the community.

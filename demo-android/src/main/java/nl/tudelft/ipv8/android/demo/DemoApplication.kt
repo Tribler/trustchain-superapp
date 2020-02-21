@@ -72,7 +72,7 @@ class DemoApplication : Application() {
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val randomWalk = RandomWalk.Factory()
         val randomChurn = RandomChurn.Factory()
         val periodicSimilarity = PeriodicSimilarity.Factory()
         return OverlayConfiguration(
@@ -83,10 +83,9 @@ class DemoApplication : Application() {
 
     private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
         val settings = TrustChainSettings()
-        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val database = Database(driver)
-        val store = TrustChainSQLiteStore(database)
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
             listOf(randomWalk)
@@ -94,7 +93,7 @@ class DemoApplication : Application() {
     }
 
     private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
-        val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
+        val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
