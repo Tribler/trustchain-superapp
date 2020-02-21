@@ -83,7 +83,7 @@ class Network {
         if (peer.mid in blacklistMids) return
 
         synchronized(graphLock) {
-            // This may just me an address update
+            // This may just be an address update
             for (known in verifiedPeers) {
                 if (known.mid == peer.mid) {
                     known.address = peer.address
