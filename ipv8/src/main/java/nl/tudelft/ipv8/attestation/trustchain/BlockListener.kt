@@ -5,12 +5,14 @@ package nl.tudelft.ipv8.attestation.trustchain
  */
 interface BlockListener {
     /**
-     * Method to indicate whether this listener wants a specific block signed or not.
-     */
-    fun shouldSign(block: TrustChainBlock): Boolean
-
-    /**
-     * This method is called when a listener receives a block that matches the BLOCK_CLASS.
+     * It is called when a listener receives a block that matches the registered block type.
      */
     fun onBlockReceived(block: TrustChainBlock)
+
+    /**
+     * It is called whenever a proposal block targeted to use is received and the last
+     * `TrustChainSettings.validationRange` blocks have been received and validated.
+     * `TrustChainCommunity.createAgreementBlock` should be called to create an agreement block.
+     */
+    fun onSignatureRequest(block: TrustChainBlock)
 }

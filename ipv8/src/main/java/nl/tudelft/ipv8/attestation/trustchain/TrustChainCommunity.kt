@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.attestation.trustchain
 
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeout
 import mu.KotlinLogging
@@ -12,6 +13,7 @@ import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
+import nl.tudelft.ipv8.util.toHex
 import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.math.max
@@ -361,10 +363,12 @@ open class TrustChainCommunity(
         val publicKey = cryptoProvider.keyFromPublicBin(payload.publicKey)
         val peer = Peer(publicKey, sourceAddress)
 
-        try {
-            processHalfBlock(payload.toBlock(), peer)
-        } catch (e: Exception) {
-            logger.error(e) { "Failed to process half block" }
+        scope.launch {
+            try {
+                processHalfBlock(payload.toBlock(), peer)
+            } catch (e: Exception) {
+                logger.error(e) { "Failed to process half block" }
+            }
         }
     }
 
@@ -507,19 +511,47 @@ open class TrustChainCommunity(
     /**
      * Process a received half block.
      */
-    private fun processHalfBlock(block: TrustChainBlock, peer: Peer) {
-        validateAndPersistBlock(block)
+    private suspend fun processHalfBlock(block: TrustChainBlock, peer: Peer) {
+        val result = validateAndPersistBlock(block)
 
         logger.info("Processing half-block from $peer")
 
         // TODO: Check if we are waiting for this signature response
 
-        // TODO: Sign the half-block if it is valid?
+        // We can create an agreement block if this is a proposal block targeted to us and we
+        // have not created a linked agreement block yet
+        val canSign = block.isProposal &&
+            block.linkPublicKey.contentEquals(myPeer.publicKey.keyToBin()) &&
+            database.getLinked(block) == null
 
-        val shouldSign = shouldSign(block)
+        if (canSign) {
+            // Crawl missing blocks in case of partial validation result
+            val isPartialChain = (result is ValidationResult.PartialPrevious ||
+                result is ValidationResult.Partial ||
+                result is ValidationResult.NoInfo)
 
-        if (shouldSign) {
-            createAgreementBlock(block, mapOf<Any?, Any?>())
+            if (isPartialChain && settings.validationRange > 0) {
+                logger.info("Proposal block could not be validated sufficiently, crawling requester")
+
+                // TODO: check if there is crawl pending
+
+                val range = LongRange(
+                    max(
+                        GENESIS_SEQ.toLong(),
+                        (block.sequenceNumber.toLong() - settings.validationRange.toLong())
+                    ),
+                    max(GENESIS_SEQ.toLong(), block.sequenceNumber.toLong() - 1)
+                )
+                sendCrawlRequest(peer, block.publicKey, range, forHalfBlock = block)
+
+                // Validate again
+                processHalfBlock(block, peer)
+            } else {
+                val shouldSign = shouldSign(block)
+                if (shouldSign) {
+                    createAgreementBlock(block, mapOf<Any?, Any?>())
+                }
+            }
         }
     }
 
@@ -554,7 +586,12 @@ open class TrustChainCommunity(
 
         if (validationResult !is ValidationResult.Invalid) {
             if (!database.contains(block)) {
-                database.addBlock(block)
+                try {
+                    logger.debug("addBlock " + block.publicKey.toHex() + " " + block.sequenceNumber)
+                    database.addBlock(block)
+                } catch (e: Exception) {
+                    logger.error(e) { "Failed to insert block into database" }
+                }
                 notifyListeners(block)
             }
         }

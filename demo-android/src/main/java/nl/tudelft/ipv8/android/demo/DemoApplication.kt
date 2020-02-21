@@ -57,17 +57,17 @@ class DemoApplication : Application() {
                 block: TrustChainBlock,
                 database: TrustChainStore
             ): Boolean {
-                return block.transaction["message"] != null
+                return block.transaction["message"] != null || block.isAgreement
             }
         })
 
         trustchain.addListener(object : BlockListener {
-            override fun shouldSign(block: TrustChainBlock): Boolean {
-                return true
-            }
-
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         }, "demo_block")
     }

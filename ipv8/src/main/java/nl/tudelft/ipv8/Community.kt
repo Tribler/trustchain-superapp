@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8
 
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
@@ -33,6 +34,9 @@ abstract class Community : Overlay {
     override var maxPeers: Int = 20
     override var cryptoProvider: CryptoProvider = JavaCryptoProvider
 
+    private lateinit var job: Job
+    protected lateinit var scope: CoroutineScope
+
     init {
         messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
         messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
@@ -48,6 +52,15 @@ abstract class Community : Overlay {
         network.registerServiceProvider(serviceId, this)
         network.blacklistMids.add(myPeer.mid)
         network.blacklist.addAll(DEFAULT_ADDRESSES)
+
+        job = SupervisorJob()
+        scope = CoroutineScope(Dispatchers.Default + job)
+    }
+
+    override fun unload() {
+        super.unload()
+
+        job.cancel()
     }
 
     override fun bootstrap() {

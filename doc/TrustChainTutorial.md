@@ -39,7 +39,7 @@ trustchain.registerTransactionValidator("demo_block", object : TransactionValida
         block: TrustChainBlock,
         database: TrustChainStore
     ): Boolean {
-        return block.transaction["message"] != null
+        return block.transaction["message"] != null || block.isAgreement
     }
 })
 ```
@@ -47,22 +47,20 @@ trustchain.registerTransactionValidator("demo_block", object : TransactionValida
 ## Create agreement blocks
 
 We now register a block listener to process incoming blocks. When the listener methods get called, the block has already been validated using the registered `TransactionValidator`, so we can just assume all blocks are valid. `TrustChainCommunity.addListener` takes two parameters: an object implementing `BlockListener` interface, and the type of blocks we want to be notified about. We have to implement two methods of `BlockListener:`
-- `shouldSign` should decide whether we want to automatically counter-sign the incoming proposal block. We are just going to sign all valid blocks.
 - `onBlockReceived` gets called for every incoming block of the specified type. We can perform any application-specific logic there if needed. For now, we just log the block ID and the transaction.
+- `onSignatureRequest` gets called whenever we receive a proposal block that we should create an agreement block for. To sign all valid blocks automatically, `TrustChainCommunity.createAgreementBlock` method should be called. The method accepts the proposal block and a transaction for the agreement block. This can be either the copy of the original transaction, an empty map, or any other content depending on the use case. In our demo, we are just going to sign all valid blocks and include an empty transaction. In case the application requires user confirmation to sign agreement blocks, this method can also be empty and agreement blocks can be created later manually.
 
 ```kotlin
 trustchain.addListener(object : BlockListener {
-    override fun shouldSign(block: TrustChainBlock): Boolean {
-        return true
-    }
-
     override fun onBlockReceived(block: TrustChainBlock) {
         Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
     }
+
+    override fun onSignatureRequest(block: TrustChainBlock) {
+        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+    }
 }, "demo_block")
 ```
-
-In case the application requires user confirmation to sign agreement blocks, `shouldSign` method should return `false` to prevent automatic signing. The agreement block can then be created manually with the `TrustChainCommunity.createAgreementBlock` method.
 
 ## Request a chain crawl
 
