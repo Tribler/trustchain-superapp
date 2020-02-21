@@ -2,7 +2,10 @@ package nl.tudelft.ipv8.attestation.trustchain
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava
 import com.goterl.lazycode.lazysodium.SodiumJava
+import io.mockk.mockk
 import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.hexToBytes
@@ -37,5 +40,77 @@ class TrustChainBlockTest {
         val payload = HalfBlockPayload.fromHalfBlock(block, sign = false)
         val message = payload.serialize()
         Assert.assertTrue(privateKey.pub().verify(block.signature, message))
+    }
+
+    @Test
+    fun validate_valid() {
+        val block = TrustChainBlock(
+            "custom",
+            "hello".toByteArray(Charsets.US_ASCII),
+            getPrivateKey().pub().keyToBin(),
+            GENESIS_SEQ,
+            ANY_COUNTERPARTY_PK,
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date()
+        )
+        val store = mockk<TrustChainStore>(relaxed = true)
+        val result = block.validate(store)
+        Assert.assertEquals(ValidationResult.PartialNext, result)
+    }
+
+    @Test
+    fun validate_invalidSeqNum() {
+        val block = TrustChainBlock(
+            "custom",
+            "hello".toByteArray(Charsets.US_ASCII),
+            getPrivateKey().pub().keyToBin(),
+            0u,
+            ANY_COUNTERPARTY_PK,
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date()
+        )
+        val store = mockk<TrustChainStore>(relaxed = true)
+        val result = block.validate(store)
+        Assert.assertTrue(result is ValidationResult.Invalid)
+    }
+
+    @Test
+    fun validate_invalidGenesisHash() {
+        val block = TrustChainBlock(
+            "custom",
+            "hello".toByteArray(Charsets.US_ASCII),
+            getPrivateKey().pub().keyToBin(),
+            GENESIS_SEQ,
+            ANY_COUNTERPARTY_PK,
+            UNKNOWN_SEQ,
+            byteArrayOf(42),
+            EMPTY_SIG,
+            Date()
+        )
+        val store = mockk<TrustChainStore>(relaxed = true)
+        val result = block.validate(store)
+        Assert.assertTrue(result is ValidationResult.Invalid)
+    }
+
+    @Test
+    fun validate_invalidGenesisSeq() {
+        val block = TrustChainBlock(
+            "custom",
+            "hello".toByteArray(Charsets.US_ASCII),
+            getPrivateKey().pub().keyToBin(),
+            2u,
+            ANY_COUNTERPARTY_PK,
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date()
+        )
+        val store = mockk<TrustChainStore>(relaxed = true)
+        val result = block.validate(store)
+        Assert.assertTrue(result is ValidationResult.Invalid)
     }
 }

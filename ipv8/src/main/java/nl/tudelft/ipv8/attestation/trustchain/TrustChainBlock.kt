@@ -179,10 +179,6 @@ class TrustChainBlock(
             errors += "Sequence number is prior to genesis"
         }
 
-        if (linkSequenceNumber < GENESIS_SEQ && linkSequenceNumber != UNKNOWN_SEQ) {
-            errors += "Link sequence number not empty and is prior to genesis"
-        }
-
         // TODO: Check signature
 
         if (sequenceNumber == GENESIS_SEQ && !previousHash.contentEquals(GENESIS_HASH)) {
