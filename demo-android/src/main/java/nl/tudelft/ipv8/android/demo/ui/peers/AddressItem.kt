@@ -6,7 +6,7 @@ import java.util.*
 
 class AddressItem(
     val address: Address,
-    val discovered: Date,
+    val discovered: Date?,
     val contacted: Date?
 ): Item() {
     override fun areItemsTheSame(other: Item): Boolean {

@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo
 
 import android.app.Application
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
@@ -8,9 +9,13 @@ import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
@@ -39,6 +44,32 @@ class DemoApplication : Application() {
             .setPrivateKey(getPrivateKey())
             .setServiceClass(DemoService::class.java)
             .init()
+
+        initTrustChain()
+    }
+
+    private fun initTrustChain() {
+        val ipv8 = IPv8Android.getInstance()
+        val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
+
+        trustchain.registerTransactionValidator("demo_block", object : TransactionValidator {
+            override fun validate(
+                block: TrustChainBlock,
+                database: TrustChainStore
+            ): Boolean {
+                return block.transaction["message"] != null
+            }
+        })
+
+        trustchain.addListener(object : BlockListener {
+            override fun shouldSign(block: TrustChainBlock): Boolean {
+                return true
+            }
+
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        }, "demo_block")
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {

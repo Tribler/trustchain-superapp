@@ -21,7 +21,8 @@ class AddressItemRenderer(
         txtLastSent.text = if (lastRequest != null)
             "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
 
-        txtLastReceived.text = "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s"
+        txtLastReceived.text = if (lastResponse != null)
+            "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
 
         txtAvgPing.text = "? ms"
 
