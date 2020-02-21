@@ -54,7 +54,7 @@ abstract class Community : Overlay {
         network.blacklist.addAll(DEFAULT_ADDRESSES)
 
         job = SupervisorJob()
-        scope = CoroutineScope(Dispatchers.Default + job)
+        scope = CoroutineScope(Dispatchers.Main + job)
     }
 
     override fun unload() {

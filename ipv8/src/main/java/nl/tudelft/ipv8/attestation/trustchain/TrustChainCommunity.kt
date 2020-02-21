@@ -360,7 +360,7 @@ open class TrustChainCommunity(
      * We've received a half block, either because we sent a signed half block to someone or we are
      * crawling.
      */
-    private fun onHalfBlock(sourceAddress: Address, payload: HalfBlockPayload) {
+    internal fun onHalfBlock(sourceAddress: Address, payload: HalfBlockPayload) {
         logger.debug("<- $payload")
 
         val publicKey = cryptoProvider.keyFromPublicBin(payload.publicKey)

@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Overlay
 import java.util.*
-import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 

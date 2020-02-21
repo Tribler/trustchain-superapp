@@ -1,9 +1,12 @@
 package nl.tudelft.ipv8.attestation.trustchain
 
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.BaseCommunityTest
+import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
@@ -23,6 +26,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         community.network = Network()
         community.maxPeers = 20
         community.cryptoProvider = JavaCryptoProvider
+        community.load()
         return community
     }
 
@@ -123,7 +127,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
     }
 
     @Test
-    fun createAgreemenetBlock_genesis() {
+    fun createAgreementBlock_genesis() {
         val community = getCommunity()
         val store = community.database
 
@@ -155,5 +159,58 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         Assert.assertEquals(GENESIS_SEQ, block2.sequenceNumber)
         Assert.assertArrayEquals(GENESIS_HASH, block2.previousHash)
         Assert.assertNotEquals(EMPTY_SIG, block2.signature)
+    }
+
+    @Test
+    fun processHalfBlock_signatureRequest() {
+        val community = getCommunity()
+
+        val blockSigner = mockk<BlockSigner>()
+        community.registerBlockSigner("test", blockSigner)
+
+        val address = Address("1.2.3.4", 1234)
+        val senderKey = JavaCryptoProvider.generateKey()
+        val myKey = getPrivateKey()
+        val payload = HalfBlockPayload(
+            senderKey.pub().keyToBin(),
+            GENESIS_SEQ,
+            myKey.pub().keyToBin(),
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            "test",
+            ByteArray(10),
+            1581459001000u
+        )
+        every { community.database.getLinked(any()) } returns null
+        community.onHalfBlock(address, payload)
+
+        verify(exactly = 1) { blockSigner.onSignatureRequest(any()) }
+    }
+
+    @Test
+    fun processHalfBlock_otherPublicKey() {
+        val community = getCommunity()
+
+        val blockSigner = mockk<BlockSigner>()
+        community.registerBlockSigner("test", blockSigner)
+
+        val address = Address("1.2.3.4", 1234)
+        val senderKey = JavaCryptoProvider.generateKey()
+        val payload = HalfBlockPayload(
+            senderKey.pub().keyToBin(),
+            GENESIS_SEQ,
+            senderKey.pub().keyToBin(),
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            "test",
+            ByteArray(10),
+            1581459001000u
+        )
+        every { community.database.getLinked(any()) } returns null
+        community.onHalfBlock(address, payload)
+
+        verify { blockSigner wasNot Called }
     }
 }
