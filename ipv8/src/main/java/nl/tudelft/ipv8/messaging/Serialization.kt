@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 const val SERIALIZED_USHORT_SIZE = 2
 const val SERIALIZED_UINT_SIZE = 4
 const val SERIALIZED_ULONG_SIZE = 8
-const val SERIALIZED_LONG_SIZE = 8
+const val SERIALIZED_LONG_SIZE = 4
 
 const val SERIALIZED_PUBLIC_KEY_SIZE = 74
 const val HASH_SIZE = 32
@@ -76,16 +76,16 @@ fun deserializeULong(buffer: ByteArray, offset: Int = 0): ULong {
 }
 
 fun serializeLong(value: Long): ByteArray {
-    val buffer = ByteBuffer.allocate(Long.SIZE_BYTES)
-    buffer.putLong(value)
+    val buffer = ByteBuffer.allocate(SERIALIZED_LONG_SIZE)
+    buffer.putInt(value.toInt())
     return buffer.array()
 }
 
 fun deserializeLong(bytes: ByteArray, offset: Int = 0): Long {
-    val buffer = ByteBuffer.allocate(Long.SIZE_BYTES)
+    val buffer = ByteBuffer.allocate(SERIALIZED_LONG_SIZE)
     buffer.put(bytes.copyOfRange(offset, offset + SERIALIZED_LONG_SIZE))
     buffer.flip()
-    return buffer.long
+    return buffer.int.toLong()
 }
 
 fun serializeVarLen(bytes: ByteArray): ByteArray {

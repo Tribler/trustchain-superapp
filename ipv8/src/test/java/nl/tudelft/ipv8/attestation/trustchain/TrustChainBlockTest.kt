@@ -8,9 +8,11 @@ import nl.tudelft.ipv8.attestation.trustchain.payload.HalfBlockPayload
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import org.junit.Assert
 import org.junit.Test
 import java.util.*
@@ -26,22 +28,25 @@ class TrustChainBlockTest {
 
     @Test
     fun sign() {
-        val privateKey = getPrivateKey()
+        val privateKey = JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
         val block = TrustChainBlock(
-            "custom",
-            "hello".toByteArray(Charsets.US_ASCII),
+            "test",
+            TransactionEncoding.encode(mapOf("id" to 42)),
             privateKey.pub().keyToBin(),
-            0u,
+            GENESIS_SEQ,
             ANY_COUNTERPARTY_PK,
-            0u,
+            UNKNOWN_SEQ,
             GENESIS_HASH,
             EMPTY_SIG,
-            Date()
+            Date(0)
         )
         block.sign(privateKey)
         val payload = HalfBlockPayload.fromHalfBlock(block, sign = false)
         val message = payload.serialize()
+
         Assert.assertTrue(privateKey.pub().verify(block.signature, message))
+        Assert.assertEquals("4c69624e61434c504b3a80d4a88a7d010d2fb488913b5f1b5644a5eb2edbae589f81ac28e866ffe3c90b3a41a0304dc512874131fc96fa324ca3e6afeaa473dbc1e8da895c7a7c746af80000000130303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030300000000030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303030303000000004746573740000000b61316432736964326934320000000000000000", message.toHex())
+        Assert.assertEquals("3a02014eb9e8ba9753208481db2be600da5ff23904a565a9fe0e9e663ec6774d08ecf77b1214e0cbb58f537ed595dd5ff2bfd0208e621e83674deb8b337e5101", block.signature.toHex())
     }
 
     @Test
@@ -146,5 +151,24 @@ class TrustChainBlockTest {
         Assert.assertTrue(result is ValidationResult.Invalid)
         Assert.assertTrue(result is ValidationResult.Invalid &&
             result.errors.contains(ValidationErrors.INVALID_SIGNATURE))
+    }
+
+    @Test
+    fun getHashNumber() {
+        val privateKey = JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
+        val block = TrustChainBlock(
+            "test",
+            TransactionEncoding.encode(mapOf("id" to 42)),
+            privateKey.pub().keyToBin(),
+            GENESIS_SEQ,
+            ANY_COUNTERPARTY_PK,
+            UNKNOWN_SEQ,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date(0)
+        )
+        block.sign(privateKey)
+
+        Assert.assertEquals(16207010, block.hashNumber)
     }
 }

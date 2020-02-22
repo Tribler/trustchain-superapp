@@ -7,14 +7,15 @@ import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.*
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
+import java.math.BigInteger
 import java.util.*
 import kotlin.Exception
 
-val GENESIS_HASH = ByteArray(32)
+val GENESIS_HASH = ByteArray(32) { '0'.toByte() }
 val GENESIS_SEQ = 1u
 val UNKNOWN_SEQ = 0u
-val EMPTY_SIG = ByteArray(64)
-val EMPTY_PK = ByteArray(74)
+val EMPTY_SIG = ByteArray(64) { '0'.toByte() }
+val EMPTY_PK = ByteArray(74) { '0'.toByte() }
 val ANY_COUNTERPARTY_PK = EMPTY_PK
 
 typealias TrustChainTransaction = Map<*, *>
@@ -116,7 +117,8 @@ class TrustChainBlock(
      */
     val hashNumber: Int
         get() {
-            return Integer.parseInt(calculateHash().toHex(), 16) % 100000000
+            val int = calculateHash().toHex().toBigInteger(16)
+            return int.mod(BigInteger.valueOf(100000000)).toInt()
         }
 
     /**

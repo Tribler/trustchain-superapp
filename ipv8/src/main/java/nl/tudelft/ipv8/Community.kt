@@ -199,7 +199,9 @@ abstract class Community : Overlay {
             val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
             val punctureRequestAddress = if (introductionLan.isEmpty())
                 introductionWan else introductionLan
-            send(punctureRequestAddress, packet)
+            if (!punctureRequestAddress.isEmpty()) {
+                send(punctureRequestAddress, packet)
+            }
         }
 
         logger.debug("-> $payload")
@@ -389,7 +391,7 @@ abstract class Community : Overlay {
 
     protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
         // Prevent discovering its own address
-        if (address != myEstimatedLan && address != myEstimatedWan) {
+        if (address != myEstimatedLan && address != myEstimatedWan && !address.isEmpty()) {
             network.discoverAddress(peer, address, serviceId)
         }
     }

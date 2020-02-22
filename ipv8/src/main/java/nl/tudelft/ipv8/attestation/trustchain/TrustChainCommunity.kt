@@ -577,6 +577,8 @@ open class TrustChainCommunity(
                 }
                 notifyListeners(block)
             }
+        } else {
+            logger.warn { "Block is invalid: ${validationResult.errors}" }
         }
 
         return validationResult

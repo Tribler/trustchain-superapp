@@ -76,8 +76,7 @@ object TransactionEncoding {
         return when (val type = buffer[index].toChar().toString()) {
             TYPE_INT -> decodeInt(buffer, index + 1, count)
             TYPE_LONG -> decodeLong(buffer, index + 1, count)
-            TYPE_STRING -> decodeString(buffer, index + 1, count)
-            TYPE_BYTES -> decodeString(buffer, index + 1, count)
+            TYPE_STRING, TYPE_BYTES -> decodeString(buffer, index + 1, count)
             TYPE_FLOAT -> decodeFloat(buffer, index + 1, count)
             TYPE_LIST, TYPE_TUPLE -> decodeList(buffer, index + 1, count)
             TYPE_SET -> decodeSet(buffer, index + 1, count)
