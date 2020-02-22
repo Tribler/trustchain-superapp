@@ -178,23 +178,11 @@ abstract class Community : Overlay {
         socketAddress: Address,
         identifier: Int
     ): ByteArray {
-        var introductionLan = Address.EMPTY
-        var introductionWan = Address.EMPTY
         val other = network.getVerifiedByAddress(socketAddress)
         val intro = getPeerForIntroduction(exclude = other)
-        if (intro != null) {
-            /*
-             * If we are introducting a peer on our LAN, we assume our WAN is same as their WAN,
-             * and use their LAN port as a WAN port. Note that this will only work if the port is
-             * not translated by NAT.
-             */
-            if (addressIsLan(intro.address)) {
-                introductionLan = intro.address
-                introductionWan = Address(myEstimatedWan.ip, introductionLan.port)
-            } else {
-                introductionWan = intro.address
-            }
-        }
+        val introductionLan = intro?.lanAddress ?: Address.EMPTY
+        val introductionWan = intro?.wanAddress ?: Address.EMPTY
+
         val payload = IntroductionResponsePayload(
             socketAddress,
             myEstimatedLan,
@@ -331,8 +319,8 @@ abstract class Community : Overlay {
             return
         }
 
-        network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(serviceId))
+        // Add the sender as a verified peer
+        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
 
         val packet = createIntroductionResponse(
             payload.sourceLanAddress,
@@ -349,32 +337,54 @@ abstract class Community : Overlay {
     ) {
         logger.debug("<- $payload")
 
-        // Accept a new WAN address if the sender is not on the same LAN, otherwise they would
-        // just send us our LAN address
-        if (payload.sourceWanAddress.ip != myEstimatedWan.ip) {
+        // Change our estimated WAN address if the sender is not on the same LAN, otherwise it
+        // would just send us our LAN address
+        if (!addressIsLan(peer.address)) {
             myEstimatedWan = payload.destinationAddress
         }
 
-        network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(serviceId))
+        // Add the sender as a verified peer
+        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
 
+        // Process introduced addresses
         if (!payload.wanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip != myEstimatedWan.ip) {
-            // WAN is not empty and it is not the same as ours
+            // WAN is not empty and it is not same as ours
+
             if (!payload.lanIntroductionAddress.isEmpty()) {
                 // If LAN address is not empty, add them in case they are on our LAN
                 discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
+
+            // Discover WAN address. We should contact it ASAP as it just received a puncture
+            // request and probably already sent a puncture to us.
             discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
             // LAN is not empty and WAN is the same as ours => they are on the same LAN
             discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
-            // WAN is the same as ours, but we do not know the LAN => we assume LAN is the same as ours
+            // WAN is same as ours, but we do not know the LAN
+
+            // Try to connect via WAN, NAT needs to support hairpinning
             discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
-            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
+
+            // Assume LAN is same as ours (e.g. multiple instances running on a local machine),
+            // and port same as for WAN (works only if NAT does not change port)
+            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port),
+                serviceId)
         }
+    }
+
+    private fun addVerifiedPeer(peer: Peer, sourceLanAddress: Address, sourceWanAddress: Address) {
+        val newPeer = Peer(
+            peer.key,
+            peer.address,
+            lanAddress = sourceLanAddress,
+            wanAddress = sourceWanAddress
+        )
+        network.addVerifiedPeer(newPeer)
+        network.discoverServices(newPeer, listOf(serviceId))
     }
 
     protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
