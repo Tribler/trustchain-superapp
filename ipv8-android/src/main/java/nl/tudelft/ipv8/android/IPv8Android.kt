@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
+import android.os.Build
 import androidx.core.content.getSystemService
 import androidx.lifecycle.ProcessLifecycleOwner
 import nl.tudelft.ipv8.IPv8
@@ -79,7 +80,11 @@ object IPv8Android {
 
         private fun startAndroidService(context: Context) {
             val serviceIntent = Intent(context, serviceClass)
-            context.startService(serviceIntent)
+            if (Build.VERSION.SDK_INT >= 26) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
         }
     }
 }

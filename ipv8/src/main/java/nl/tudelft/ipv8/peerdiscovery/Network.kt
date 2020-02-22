@@ -87,8 +87,12 @@ class Network {
             for (known in verifiedPeers) {
                 if (known.mid == peer.mid) {
                     known.address = peer.address
-                    known.lanAddress = peer.lanAddress
-                    known.wanAddress = peer.wanAddress
+                    if (!peer.lanAddress.isEmpty()) {
+                        known.lanAddress = peer.lanAddress
+                    }
+                    if (!peer.wanAddress.isEmpty()) {
+                        known.wanAddress = peer.wanAddress
+                    }
                     return
                 }
             }

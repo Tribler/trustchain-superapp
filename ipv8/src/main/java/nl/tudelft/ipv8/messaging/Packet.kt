@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.exception.PacketDecodingException
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
 import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
+import java.lang.IllegalArgumentException
 
 class Packet(
     val source: Address,
@@ -56,7 +57,11 @@ class Packet(
         // prefix + message type
         val authOffset = PREFIX_SIZE + 1
         val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(data, authOffset)
-        val publicKey = defaultCryptoProvider.keyFromPublicBin(auth.publicKey)
+        val publicKey = try {
+            defaultCryptoProvider.keyFromPublicBin(auth.publicKey)
+        } catch (e: IllegalArgumentException) {
+            throw PacketDecodingException("Incoming packet has an invalid public key", e)
+        }
         val signatureOffset = data.size - publicKey.getSignatureLength()
         val signature = data.copyOfRange(signatureOffset, data.size)
 
