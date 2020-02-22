@@ -12,9 +12,19 @@ data class Peer(
     val key: Key,
 
     /**
-     * The address of this peer.
+     * The address of this peer it contacted us from (can be LAN or WAN).
      */
     var address: Address = Address.EMPTY,
+
+    /**
+     * The LAN address of this peer.
+     */
+    var lanAddress: Address = Address.EMPTY,
+
+    /**
+     * The WAN address of this peer.
+     */
+    var wanAddress: Address = Address.EMPTY,
 
     /**
      * Is this peer suggested to us (otherwise it contacted us).

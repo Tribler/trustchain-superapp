@@ -31,7 +31,7 @@ data class PunctureRequestPayload(
                 serializeUShort(identifier)
     }
 
-    companion object : Deserializable<PunctureRequestPayload> {
+    companion object Deserializer : Deserializable<PunctureRequestPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<PunctureRequestPayload, Int> {
             var localOffset = 0
             val (lanWalkerAddress, _) = Address.deserialize(buffer, offset + localOffset)

@@ -12,7 +12,7 @@ data class EmptyCrawlResponsePayload(
         return serializeUInt(crawlId)
     }
 
-    companion object : Deserializable<EmptyCrawlResponsePayload> {
+    companion object Deserializer : Deserializable<EmptyCrawlResponsePayload> {
         override fun deserialize(
             buffer: ByteArray,
             offset: Int

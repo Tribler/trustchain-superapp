@@ -9,7 +9,7 @@ data class PingPayload(
         return serializeUShort(identifier % 65536)
     }
 
-    companion object : Deserializable<PingPayload> {
+    companion object Deserializer : Deserializable<PingPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<PingPayload, Int> {
             val identifier = deserializeUShort(buffer, offset)
             return Pair(PingPayload(identifier), offset + SERIALIZED_USHORT_SIZE)

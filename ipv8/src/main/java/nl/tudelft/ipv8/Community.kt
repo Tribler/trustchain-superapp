@@ -38,10 +38,10 @@ abstract class Community : Overlay {
     protected lateinit var scope: CoroutineScope
 
     init {
-        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::handlePunctureRequest
-        messageHandlers[MessageId.PUNCTURE] = ::handlePuncture
-        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::handleIntroductionRequest
-        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::handleIntroductionResponse
+        messageHandlers[MessageId.PUNCTURE_REQUEST] = ::onPunctureRequestPacket
+        messageHandlers[MessageId.PUNCTURE] = ::onPuncturePacket
+        messageHandlers[MessageId.INTRODUCTION_REQUEST] = ::onIntroductionRequestPacket
+        messageHandlers[MessageId.INTRODUCTION_RESPONSE] = ::onIntroductionResponsePacket
     }
 
     override fun load() {
@@ -167,12 +167,10 @@ abstract class Community : Overlay {
                 ConnectionType.UNKNOWN,
                 (globalTime % 65536u).toInt()
             )
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.INTRODUCTION_REQUEST, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_REQUEST, payload)
     }
 
     internal fun createIntroductionResponse(
@@ -180,24 +178,11 @@ abstract class Community : Overlay {
         socketAddress: Address,
         identifier: Int
     ): ByteArray {
-        val globalTime = claimGlobalTime()
-        var introductionLan = Address.EMPTY
-        var introductionWan = Address.EMPTY
         val other = network.getVerifiedByAddress(socketAddress)
         val intro = getPeerForIntroduction(exclude = other)
-        if (intro != null) {
-            /*
-             * If we are introducting a peer on our LAN, we assume our WAN is same as their WAN,
-             * and use their LAN port as a WAN port. Note that this will only work if the port is
-             * not translated by NAT.
-             */
-            if (addressIsLan(intro.address)) {
-                introductionLan = intro.address
-                introductionWan = Address(myEstimatedWan.ip, introductionLan.port)
-            } else {
-                introductionWan = intro.address
-            }
-        }
+        val introductionLan = intro?.lanAddress ?: Address.EMPTY
+        val introductionWan = intro?.wanAddress ?: Address.EMPTY
+
         val payload = IntroductionResponsePayload(
             socketAddress,
             myEstimatedLan,
@@ -208,8 +193,6 @@ abstract class Community : Overlay {
             false,
             identifier
         )
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         if (intro != null) {
             // TODO: Seems like a bad practice to send a packet in the create method...
@@ -221,38 +204,60 @@ abstract class Community : Overlay {
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.INTRODUCTION_RESPONSE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.INTRODUCTION_RESPONSE, payload)
     }
 
     internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
-        val globalTime = claimGlobalTime()
         val payload = PuncturePayload(lanWalker, wanWalker, identifier)
-        val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-        val dist = GlobalTimeDistributionPayload(globalTime)
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.PUNCTURE, listOf(auth, dist, payload))
+        return serializePacket(MessageId.PUNCTURE, payload)
     }
 
     internal fun createPunctureRequest(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
         logger.debug("-> punctureRequest")
-        val globalTime = claimGlobalTime()
         val payload = PunctureRequestPayload(lanWalker, wanWalker, identifier)
-        val dist = GlobalTimeDistributionPayload(globalTime)
-        return serializePacket(MessageId.PUNCTURE_REQUEST, listOf(dist, payload), sign = false)
+        return serializePacket(MessageId.PUNCTURE_REQUEST, payload, sign = false)
+    }
+
+    /**
+     * Serializes a payload into a binary packet that can be sent over the transport.
+     *
+     * @param messageId The message type ID
+     * @param payload The serializable payload
+     * @param sign True if the packet should be signed
+     * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
+     */
+    protected fun serializePacket(
+        messageId: Int,
+        payload: Serializable,
+        sign: Boolean = true,
+        peer: Peer = myPeer
+    ): ByteArray {
+        val payloads = mutableListOf<Serializable>()
+        if (sign) {
+            payloads += BinMemberAuthenticationPayload(peer.publicKey.keyToBin())
+        }
+        payloads += GlobalTimeDistributionPayload(claimGlobalTime())
+        payloads += payload
+        return serializePacket(
+            messageId,
+            payloads,
+            sign,
+            peer
+        )
     }
 
     /**
      * Serializes multiple payloads into a binary packet that can be sent over the transport.
      *
-     * @param prefix The packet prefix consisting of a zero byte, version, and master peer mid
      * @param messageId The message type ID
      * @param payload The list of payloads
      * @param sign True if the packet should be signed
      * @param peer The peer that should sign the packet. The community's [myPeer] is used by default.
      */
-    protected fun serializePacket(
+    private fun serializePacket(
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true,
@@ -277,37 +282,26 @@ abstract class Community : Overlay {
      * Request deserialization
      */
 
-    internal fun deserializeIntroductionRequest(packet: Packet): Triple<Peer, GlobalTimeDistributionPayload, IntroductionRequestPayload> {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = IntroductionRequestPayload.deserialize(remainder, distSize)
-        return Triple(peer, dist, payload)
+    internal fun onIntroductionRequestPacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(IntroductionRequestPayload.Deserializer)
+        onIntroductionRequest(peer, payload)
     }
 
-    private fun handleIntroductionRequest(packet: Packet) {
-        val (peer, dist, payload) = deserializeIntroductionRequest(packet)
-        onIntroductionRequest(peer, dist, payload)
+    internal fun onIntroductionResponsePacket(packet: Packet) {
+        val (peer, payload) =
+            packet.getAuthPayload(IntroductionResponsePayload.Deserializer)
+        onIntroductionResponse(peer, payload)
     }
 
-    internal fun handleIntroductionResponse(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = IntroductionResponsePayload.deserialize(remainder, distSize)
-        onIntroductionResponse(peer, dist, payload)
+    internal fun onPuncturePacket(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(PuncturePayload.Deserializer)
+        onPuncture(peer, payload)
     }
 
-    internal fun handlePuncture(packet: Packet) {
-        val (peer, remainder) = packet.getAuthPayload(cryptoProvider)
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = PuncturePayload.deserialize(remainder, distSize)
-        onPuncture(peer, dist, payload)
-    }
-
-    internal fun handlePunctureRequest(packet: Packet) {
-        val remainder = packet.getPayload()
-        val (dist, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
-        val (payload, _) = PunctureRequestPayload.deserialize(remainder, distSize)
-        onPunctureRequest(packet.source, dist, payload)
+    internal fun onPunctureRequestPacket(packet: Packet) {
+        val payload = packet.getPayload(PunctureRequestPayload.Deserializer)
+        onPunctureRequest(packet.source, payload)
     }
 
     /*
@@ -316,7 +310,6 @@ abstract class Community : Overlay {
 
     internal open fun onIntroductionRequest(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: IntroductionRequestPayload
     ) {
         logger.debug("<- $payload")
@@ -326,8 +319,8 @@ abstract class Community : Overlay {
             return
         }
 
-        network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(serviceId))
+        // Add the sender as a verified peer
+        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
 
         val packet = createIntroductionResponse(
             payload.sourceLanAddress,
@@ -340,37 +333,58 @@ abstract class Community : Overlay {
 
     open fun onIntroductionResponse(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: IntroductionResponsePayload
     ) {
         logger.debug("<- $payload")
 
-        // Accept a new WAN address if the sender is not on the same LAN, otherwise they would
-        // just send us our LAN address
-        if (payload.sourceWanAddress.ip != myEstimatedWan.ip) {
+        // Change our estimated WAN address if the sender is not on the same LAN, otherwise it
+        // would just send us our LAN address
+        if (!addressIsLan(peer.address)) {
             myEstimatedWan = payload.destinationAddress
         }
 
-        network.addVerifiedPeer(peer)
-        network.discoverServices(peer, listOf(serviceId))
+        // Add the sender as a verified peer
+        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
 
+        // Process introduced addresses
         if (!payload.wanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip != myEstimatedWan.ip) {
-            // WAN is not empty and it is not the same as ours
+            // WAN is not empty and it is not same as ours
+
             if (!payload.lanIntroductionAddress.isEmpty()) {
                 // If LAN address is not empty, add them in case they are on our LAN
                 discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
+
+            // Discover WAN address. We should contact it ASAP as it just received a puncture
+            // request and probably already sent a puncture to us.
             discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
         } else if (!payload.lanIntroductionAddress.isEmpty() &&
             payload.wanIntroductionAddress.ip == myEstimatedWan.ip) {
             // LAN is not empty and WAN is the same as ours => they are on the same LAN
             discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
-            // WAN is the same as ours, but we do not know the LAN => we assume LAN is the same as ours
+            // WAN is same as ours, but we do not know the LAN
+
+            // Try to connect via WAN, NAT needs to support hairpinning
             discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
-            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port), serviceId)
+
+            // Assume LAN is same as ours (e.g. multiple instances running on a local machine),
+            // and port same as for WAN (works only if NAT does not change port)
+            discoverAddress(peer, Address(myEstimatedLan.ip, payload.wanIntroductionAddress.port),
+                serviceId)
         }
+    }
+
+    private fun addVerifiedPeer(peer: Peer, sourceLanAddress: Address, sourceWanAddress: Address) {
+        val newPeer = Peer(
+            peer.key,
+            peer.address,
+            lanAddress = sourceLanAddress,
+            wanAddress = sourceWanAddress
+        )
+        network.addVerifiedPeer(newPeer)
+        network.discoverServices(newPeer, listOf(serviceId))
     }
 
     protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
@@ -382,7 +396,6 @@ abstract class Community : Overlay {
 
     internal open fun onPuncture(
         peer: Peer,
-        dist: GlobalTimeDistributionPayload,
         payload: PuncturePayload
     ) {
         logger.debug("<- $payload")
@@ -391,7 +404,6 @@ abstract class Community : Overlay {
 
     internal open fun onPunctureRequest(
         address: Address,
-        dist: GlobalTimeDistributionPayload,
         payload: PunctureRequestPayload
     ) {
         logger.debug("<- $payload")

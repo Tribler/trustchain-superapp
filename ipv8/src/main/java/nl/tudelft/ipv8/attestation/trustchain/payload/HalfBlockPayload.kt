@@ -46,7 +46,7 @@ open class HalfBlockPayload(
         )
     }
 
-    companion object : Deserializable<HalfBlockPayload> {
+    companion object Deserializer : Deserializable<HalfBlockPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<HalfBlockPayload, Int> {
             var localOffset = 0
             val publicKey = buffer.copyOfRange(offset + localOffset, offset + localOffset + SERIALIZED_PUBLIC_KEY_SIZE)

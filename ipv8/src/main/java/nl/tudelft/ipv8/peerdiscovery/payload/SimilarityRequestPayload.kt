@@ -25,7 +25,7 @@ data class SimilarityRequestPayload(
                 preferenceList.joinToString("").hexToBytes()
     }
 
-    companion object : Deserializable<SimilarityRequestPayload> {
+    companion object Deserializer : Deserializable<SimilarityRequestPayload> {
         override fun deserialize(
             buffer: ByteArray,
             offset: Int

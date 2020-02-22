@@ -73,6 +73,8 @@ class TrustChainCommunityTest : BaseCommunityTest() {
     fun validateAndPersistBlock_valid() {
         val community = getCommunity()
         every { community.database.addBlock(any()) } returns Unit
+        every { community.database.getBlockBefore(any()) } returns null
+        every { community.database.getBlockAfter(any()) } returns null
 
         val customListener = mockk<BlockListener>(relaxed = true)
         community.addListener("custom", customListener)
@@ -92,6 +94,7 @@ class TrustChainCommunityTest : BaseCommunityTest() {
             EMPTY_SIG,
             Date()
         )
+        block.sign(getPrivateKey())
 
         every { community.database.contains(block) } returns false
         community.validateAndPersistBlock(block)
@@ -110,6 +113,8 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         every { store.getLatest(any(), any()) } returns null
         every { store.contains(any()) } returns false
         every { store.addBlock(any()) } returns Unit
+        every { store.getBlockBefore(any()) } returns null
+        every { store.getBlockAfter(any()) } returns null
 
         val block = community.createProposalBlock(
             "custom",
@@ -134,6 +139,8 @@ class TrustChainCommunityTest : BaseCommunityTest() {
         every { store.getLatest(any(), any()) } returns null
         every { store.contains(any()) } returns false
         every { store.addBlock(any()) } returns Unit
+        every { store.getBlockBefore(any()) } returns null
+        every { store.getBlockAfter(any()) } returns null
 
         val block1 = TrustChainBlock(
             "custom",

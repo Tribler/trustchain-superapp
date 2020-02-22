@@ -8,11 +8,10 @@ import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.util.random
 import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.util.toHex
 import java.util.*
 import kotlin.coroutines.Continuation
@@ -134,21 +133,16 @@ open class TrustChainCommunity(
      * Send a block to a specific address, or do a broadcast to known peers if no peer is specified.
      */
     fun sendBlock(block: TrustChainBlock, address: Address? = null, ttl: Int = 1) {
-        val globalTime = claimGlobalTime()
-        val dist = GlobalTimeDistributionPayload(globalTime)
-
         if (address != null) {
             logger.debug("Sending block to $address")
             val payload = HalfBlockPayload.fromHalfBlock(block)
             logger.debug("-> $payload")
-            val packet = serializePacket(MessageId.HALF_BLOCK, listOf(dist, payload),
-                false)
+            val packet = serializePacket(MessageId.HALF_BLOCK, payload, false)
             send(address, packet)
         } else {
             val payload = HalfBlockBroadcastPayload.fromHalfBlock(block, ttl.toUInt())
             logger.debug("-> $payload")
-            val packet = serializePacket(MessageId.HALF_BLOCK_BROADCAST, listOf(dist,
-                payload), false)
+            val packet = serializePacket(MessageId.HALF_BLOCK_BROADCAST, payload, false)
             val randomPeers = getPeers().random(settings.broadcastFanout)
             for (peer in randomPeers) {
                 send(peer.address, packet)
@@ -167,20 +161,16 @@ open class TrustChainCommunity(
         address: Address? = null,
         ttl: UInt = 1u
     ) {
-        val globalTime = claimGlobalTime()
-        val dist = GlobalTimeDistributionPayload(globalTime)
-
         if (address != null) {
             val payload = HalfBlockPairPayload.fromHalfBlocks(block1, block2)
             logger.debug("-> $payload")
-            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR, listOf(dist, payload),
-                false)
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR, payload, false)
             send(address, packet)
         } else {
             val payload = HalfBlockPairBroadcastPayload.fromHalfBlocks(block1, block2, ttl)
             logger.debug("-> $payload")
-            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR_BROADCAST,
-                listOf(dist, payload))
+            val packet = serializePacket(MessageId.HALF_BLOCK_PAIR_BROADCAST, payload,
+                false)
             for (peer in network.getRandomPeers(settings.broadcastFanout)) {
                 send(peer.address, packet)
             }
@@ -296,12 +286,10 @@ open class TrustChainCommunity(
         val blocks = suspendCancellableCoroutine<List<TrustChainBlock>> { continuation ->
             crawlRequestCache[crawlId] = CrawlRequest(peer, continuation)
 
-            val auth = BinMemberAuthenticationPayload(myPeer.publicKey.keyToBin())
-            val dist = GlobalTimeDistributionPayload(globalTime)
             val payload = CrawlRequestPayload(publicKey, range.first, range.last, crawlId)
 
             logger.debug("-> $payload")
-            val packet = serializePacket(MessageId.CRAWL_REQUEST, listOf(auth, dist, payload))
+            val packet = serializePacket(MessageId.CRAWL_REQUEST, payload)
 
             endpoint.send(peer.address, packet)
         }
@@ -318,37 +306,37 @@ open class TrustChainCommunity(
      */
 
     private fun onHalfBlockPacket(packet: Packet) {
-        val payload = packet.getPayload(HalfBlockPayload.Companion)
+        val payload = packet.getPayload(HalfBlockPayload.Deserializer)
         onHalfBlock(packet.source, payload)
     }
 
     private fun onHalfBlockBroadcastPacket(packet: Packet) {
-        val payload = packet.getPayload(HalfBlockBroadcastPayload.Companion)
+        val payload = packet.getPayload(HalfBlockBroadcastPayload.Deserializer)
         onHalfBlockBroadcast(payload)
     }
 
     private fun onHalfBlockPairPacket(packet: Packet) {
-        val payload = packet.getPayload(HalfBlockPairPayload.Companion)
+        val payload = packet.getPayload(HalfBlockPairPayload.Deserializer)
         onHalfBlockPair(payload)
     }
 
     private fun onHalfBlockPairBroadcastPacket(packet: Packet) {
-        val payload = packet.getPayload(HalfBlockPairBroadcastPayload.Companion)
+        val payload = packet.getPayload(HalfBlockPairBroadcastPayload.Deserializer)
         onHalfBlockPairBroadcast(payload)
     }
 
     private fun onCrawlRequestPacket(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(CrawlRequestPayload.Companion, cryptoProvider)
+        val (peer, payload) = packet.getAuthPayload(CrawlRequestPayload.Deserializer)
         onCrawlRequest(peer, payload)
     }
 
     private fun onCrawlResponsePacket(packet: Packet) {
-        val payload = packet.getPayload(CrawlResponsePayload.Companion)
+        val payload = packet.getPayload(CrawlResponsePayload.Deserializer)
         onCrawlResponse(packet.source, payload)
     }
 
     private fun onEmptyCrawlResponsePacket(packet: Packet) {
-        val payload = packet.getPayload(EmptyCrawlResponsePayload.Companion)
+        val payload = packet.getPayload(EmptyCrawlResponsePayload.Deserializer)
         onEmptyCrawlResponse(payload)
     }
 
@@ -419,12 +407,10 @@ open class TrustChainCommunity(
             limit = settings.maxCrawlBatch)
 
         if (blocks.isEmpty()) {
-            val globalTime = claimGlobalTime()
             val responsePayload = EmptyCrawlResponsePayload(payload.crawlId)
-            val dist = GlobalTimeDistributionPayload(globalTime)
             logger.debug("-> $payload")
             val packet = serializePacket(MessageId.EMPTY_CRAWL_RESPONSE,
-                listOf(dist, responsePayload), false)
+                responsePayload, false)
             send(peer.address, packet)
         } else {
             sendCrawlResponses(blocks, peer, payload.crawlId)
@@ -445,14 +431,11 @@ open class TrustChainCommunity(
         totalCount: Int,
         peer: Peer
     ) {
-
-        val globalTime = claimGlobalTime()
-        val payload = CrawlResponsePayload.fromCrawl(block, crawlId, index.toUInt(),
-            totalCount.toUInt())
-        val dist = GlobalTimeDistributionPayload(globalTime)
+        val payload = CrawlResponsePayload.fromCrawl(block, crawlId,
+            index.toUInt(), totalCount.toUInt())
 
         logger.debug("-> $payload")
-        val packet = serializePacket(MessageId.CRAWL_RESPONSE, listOf(dist, payload), false)
+        val packet = serializePacket(MessageId.CRAWL_RESPONSE, payload, false)
         send(peer.address, packet)
     }
 
@@ -568,7 +551,7 @@ open class TrustChainCommunity(
             val validator = getTransactionValidator(block.type)
             if (validator != null) {
                 if (!validator.validate(block, database)) {
-                    validationResult = ValidationResult.Invalid(listOf("Invalid transaction"))
+                    validationResult = ValidationResult.Invalid(listOf(ValidationErrors.INVALID_TRANSACTION))
                 }
             }
         }

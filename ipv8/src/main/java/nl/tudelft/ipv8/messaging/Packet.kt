@@ -3,7 +3,7 @@ package nl.tudelft.ipv8.messaging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.exception.PacketDecodingException
-import nl.tudelft.ipv8.keyvault.CryptoProvider
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.payload.BinMemberAuthenticationPayload
 import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 
@@ -28,9 +28,9 @@ class Packet(
      *
      * @throws PacketDecodingException If the packet is authenticated and the signature is invalid.
      */
-    fun <T> getAuthPayload(deserializer: Deserializable<T>, cryptoProvider: CryptoProvider):
-        Pair<Peer, T> {
-        val (peer, remainder) = getAuthPayload(cryptoProvider)
+    @Throws(PacketDecodingException::class)
+    fun <T> getAuthPayload(deserializer: Deserializable<T>): Pair<Peer, T> {
+        val (peer, remainder) = getAuthPayload()
         val (_, distSize) = GlobalTimeDistributionPayload.deserialize(remainder)
         val (payload, _) = deserializer.deserialize(remainder, distSize)
         return Pair(peer, payload)
@@ -39,7 +39,7 @@ class Packet(
     /**
      * Strips the prefix, message type, and returns the raw payload.
      */
-    fun getPayload(): ByteArray {
+    private fun getPayload(): ByteArray {
         return data.copyOfRange(PREFIX_SIZE + 1, data.size)
     }
 
@@ -52,11 +52,11 @@ class Packet(
      * @throws PacketDecodingException If the packet is authenticated and the signature is invalid.
      */
     @Throws(PacketDecodingException::class)
-    fun getAuthPayload(cryptoProvider: CryptoProvider): Pair<Peer, ByteArray> {
+    private fun getAuthPayload(): Pair<Peer, ByteArray> {
         // prefix + message type
         val authOffset = PREFIX_SIZE + 1
         val (auth, authSize) = BinMemberAuthenticationPayload.deserialize(data, authOffset)
-        val publicKey = cryptoProvider.keyFromPublicBin(auth.publicKey)
+        val publicKey = defaultCryptoProvider.keyFromPublicBin(auth.publicKey)
         val signatureOffset = data.size - publicKey.getSignatureLength()
         val signature = data.copyOfRange(signatureOffset, data.size)
 

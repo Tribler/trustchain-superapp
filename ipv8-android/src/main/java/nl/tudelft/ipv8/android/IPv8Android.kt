@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.android.messaging.udp.AndroidUdpEndpoint
 import nl.tudelft.ipv8.android.service.IPv8Service
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import java.net.InetAddress
 
 object IPv8Android {
@@ -55,6 +56,8 @@ object IPv8Android {
 
             IPv8Android.ipv8 = ipv8
             IPv8Android.serviceClass = serviceClass
+
+            defaultCryptoProvider = AndroidCryptoProvider
 
             return ipv8
         }

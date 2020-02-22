@@ -18,7 +18,7 @@ class CrawlRequestPayload(
             serializeUInt(crawlId)
     }
 
-    companion object : Deserializable<CrawlRequestPayload> {
+    companion object Deserializer : Deserializable<CrawlRequestPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<CrawlRequestPayload, Int> {
             var localOffset = 0
             val publicKey = buffer.copyOfRange(offset + localOffset,

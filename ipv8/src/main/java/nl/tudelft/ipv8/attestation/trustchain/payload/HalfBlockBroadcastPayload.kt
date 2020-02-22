@@ -14,7 +14,7 @@ class HalfBlockBroadcastPayload(
         return block.serialize() + serializeUInt(ttl)
     }
 
-    companion object : Deserializable<HalfBlockBroadcastPayload> {
+    companion object Deserializer : Deserializable<HalfBlockBroadcastPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<HalfBlockBroadcastPayload, Int> {
             var (block, localOffset) = HalfBlockPayload.deserialize(buffer, offset)
             val ttl = deserializeUInt(buffer, offset + localOffset)

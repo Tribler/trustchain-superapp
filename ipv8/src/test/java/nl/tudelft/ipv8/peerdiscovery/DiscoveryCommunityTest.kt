@@ -8,7 +8,6 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.ConnectionType
-import nl.tudelft.ipv8.messaging.payload.GlobalTimeDistributionPayload
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -32,7 +31,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
         community.network.registerServiceProvider(community.serviceId, community)
         val peer = Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234))
         val payload = community.createSimilarityRequest(peer)
-        community.handleSimilarityRequest(Packet(Address("1.2.3.4", 1234), payload))
+        community.onSimilarityRequestPacket(Packet(Address("1.2.3.4", 1234), payload))
         verify { community.onSimilarityRequest(any(), any()) }
     }
 
@@ -50,7 +49,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
         val community = spyk(getCommunity())
         val peer = Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234))
         val payload = community.createSimilarityResponse(123, peer)
-        community.handleSimilarityResponse(Packet(Address("1.2.3.4", 1234), payload))
+        community.onSimilarityResponsePacket(Packet(Address("1.2.3.4", 1234), payload))
         verify { community.onSimilarityResponse(any(), any()) }
     }
 
@@ -58,8 +57,8 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
     fun createPing() {
         val community = spyk(getCommunity())
         val (_, payload) = community.createPing()
-        community.handlePing(Packet(Address("1.2.3.4", 1234), payload))
-        verify { community.onPing(any(), any(), any()) }
+        community.onPingPacket(Packet(Address("1.2.3.4", 1234), payload))
+        verify { community.onPing(any(), any()) }
     }
 
     @Test
@@ -73,8 +72,8 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
     fun createPong() {
         val community = spyk(getCommunity())
         val payload = community.createPong(123)
-        community.handlePong(Packet(Address("1.2.3.4", 1234), payload))
-        verify { community.onPong(any(), any()) }
+        community.onPongPacket(Packet(Address("1.2.3.4", 1234), payload))
+        verify { community.onPong(any()) }
     }
 
     @Test
@@ -84,7 +83,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
         community.sendPing(peer)
 
         val payload = community.createPong(1)
-        community.handlePong(Packet(Address("1.2.3.4", 1234), payload))
+        community.onPongPacket(Packet(Address("1.2.3.4", 1234), payload))
 
         assertEquals(1, peer.pings.size)
     }
@@ -93,7 +92,6 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
     fun onIntroductionResponse_sendSimilarityRequest() {
         val community = spyk(getCommunity())
         val peer = Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234))
-        val dist = GlobalTimeDistributionPayload(1u)
         val payload = IntroductionResponsePayload(
             Address("1.2.3.4", 1234),
             Address("2.2.3.4", 2234),
@@ -104,7 +102,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
             false,
             2
         )
-        community.onIntroductionResponse(peer, dist, payload)
+        community.onIntroductionResponse(peer, payload)
         verify { community.sendSimilarityRequest(peer.address) }
     }
 
@@ -133,7 +131,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
         community1.maxPeers = 1
         network1.registerServiceProvider(community1.serviceId, community1)
         val payload1 = community1.createSimilarityResponse(123, peer1)
-        community.handleSimilarityResponse(Packet(Address("13.2.3.4", 1234), payload1))
+        community.onSimilarityResponsePacket(Packet(Address("13.2.3.4", 1234), payload1))
         assertEquals(1, community.getPeers().size)
         assertEquals(2, network.verifiedPeers.size)
 
@@ -146,7 +144,7 @@ class DiscoveryCommunityTest : BaseCommunityTest() {
         community2.maxPeers = 1
         network2.registerServiceProvider(community2.serviceId, community2)
         val payload2 = community2.createSimilarityResponse(123, peer2)
-        community.handleSimilarityResponse(Packet(Address("14.2.3.4", 5234), payload2))
+        community.onSimilarityResponsePacket(Packet(Address("14.2.3.4", 5234), payload2))
 
         assertEquals(1, community.getPeers().size)
         assertEquals(2, network.verifiedPeers.size)
