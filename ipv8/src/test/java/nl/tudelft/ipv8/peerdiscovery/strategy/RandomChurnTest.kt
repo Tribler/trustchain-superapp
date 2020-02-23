@@ -6,7 +6,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.Network

@@ -451,7 +451,6 @@ abstract class Community : Overlay {
              */
             // IPv8 + LibNaCL
             Address("131.180.27.161", 6427)
-            //Address("192.168.1.13", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

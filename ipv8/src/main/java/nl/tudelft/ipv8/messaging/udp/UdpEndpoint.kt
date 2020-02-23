@@ -1,9 +1,6 @@
 package nl.tudelft.ipv8.messaging.udp
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.messaging.Endpoint
@@ -20,19 +17,23 @@ open class UdpEndpoint(
     private var socket: DatagramSocket? = null
     private var bindThread: BindThread? = null
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private lateinit var job: Job
+    private lateinit var scope: CoroutineScope
 
     override fun isOpen(): Boolean {
         return socket?.isBound == true
     }
 
     override fun send(address: Address, data: ByteArray) {
-        assert(isOpen()) { "UDP socket is closed" }
+        if (!isOpen()) throw IllegalStateException("UDP socket is closed")
+
         scope.launch {
-            logger.debug("send packet (${data.size} B) to $address")
+            logger.debug("Send packet (${data.size} B) to $address")
             try {
                 val datagramPacket = DatagramPacket(data, data.size, address.toSocketAddress())
-                socket?.send(datagramPacket)
+                withContext(Dispatchers.IO) {
+                    socket?.send(datagramPacket)
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -40,6 +41,9 @@ open class UdpEndpoint(
     }
 
     override fun open() {
+        job = SupervisorJob()
+        scope = CoroutineScope(Dispatchers.IO + job)
+
         val socket = getDatagramSocket()
         this.socket = socket
 
@@ -67,6 +71,8 @@ open class UdpEndpoint(
     }
 
     override fun close() {
+        if (!isOpen()) throw IllegalStateException("UDP socket is already closed")
+
         stopLanEstimation()
 
         socket?.close()
@@ -74,11 +80,10 @@ open class UdpEndpoint(
 
         bindThread = null
 
-        scope.cancel()
+        job.cancel()
     }
 
     open fun startLanEstimation() {
-        logger.debug { "Estimate LAN" }
         val interfaces = NetworkInterface.getNetworkInterfaces()
         for (intf in interfaces) {
             for (intfAddr in intf.interfaceAddresses) {
@@ -111,7 +116,7 @@ open class UdpEndpoint(
                     val packet =
                         Packet(sourceAddress, receivePacket.data.copyOf(receivePacket.length))
                     logger.debug(
-                        "received packet (${receivePacket.length} B) from $sourceAddress"
+                        "Received packet (${receivePacket.length} B) from $sourceAddress"
                     )
                     notifyListeners(packet)
                 }

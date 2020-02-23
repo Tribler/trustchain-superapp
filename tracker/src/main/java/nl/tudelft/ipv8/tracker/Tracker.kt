@@ -14,7 +14,7 @@ import java.util.*
 private val logger = KotlinLogging.logger {}
 
 @UseExperimental(ExperimentalUnsignedTypes::class)
-class EndpointServer : Community() {
+class TrackerCommunity : Community() {
     override val serviceId: String = sha1(cryptoProvider.generateKey().keyToBin()).toHex()
 
     override fun onPacket(packet: Packet) {
@@ -34,7 +34,7 @@ class EndpointServer : Community() {
                 packet.getAuthPayload(IntroductionRequestPayload.Deserializer)
             onGenericIntroductionRequest(peer, payload, packetPrefix)
         } else {
-            logger.warn { "Tracker received unknown message $msgId" }
+            logger.debug { "Tracker received unknown message $msgId" }
         }
     }
 
@@ -73,13 +73,14 @@ class TrackerService {
         val config = IPv8Configuration(
             overlays = listOf(
                 OverlayConfiguration(
-                    Overlay.Factory(EndpointServer::class.java),
-                    // TODO: add simple churn strategy
-                    walkers = listOf()
+                    Overlay.Factory(TrackerCommunity::class.java),
+                    walkers = listOf(SimpleChurn.Factory())
                 )
             )
         )
+
         val key = defaultCryptoProvider.generateKey()
+
         val ipv8 = IPv8(endpoint, config, key)
         ipv8.start()
 
@@ -87,9 +88,11 @@ class TrackerService {
     }
 }
 
+private const val PROPERTY_PORT = "port"
+private const val DEFAULT_PORT = 8090
+
 fun main() {
-    // TODO: take port from argument
-    val port = 8090
+    val port = System.getProperty(PROPERTY_PORT).toIntOrNull() ?: DEFAULT_PORT
     val service = TrackerService()
     service.startTracker(port)
 }
