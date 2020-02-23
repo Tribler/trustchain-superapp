@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.keyvault
 
 import com.goterl.lazycode.lazysodium.LazySodium
+import nl.tudelft.ipv8.util.toHex
 import kotlin.random.Random
 
 class LibNaClSK(
@@ -39,6 +40,18 @@ class LibNaClSK(
 
     override fun keyToBin(): ByteArray {
         return BIN_PREFIX.toByteArray(Charsets.US_ASCII) + privateKey + signSeed
+    }
+
+    override fun toString(): String {
+        return keyToHash().toHex()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is LibNaClSK && keyToHash().contentEquals(other.keyToHash())
+    }
+
+    override fun hashCode(): Int {
+        return keyToHash().hashCode()
     }
 
     companion object {

@@ -13,7 +13,6 @@ import nl.tudelft.ipv8.attestation.trustchain.payload.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationErrors
 import nl.tudelft.ipv8.util.toHex
-import java.util.*
 import kotlin.coroutines.Continuation
 import kotlin.math.max
 

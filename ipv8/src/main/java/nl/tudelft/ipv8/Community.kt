@@ -134,8 +134,8 @@ abstract class Community : Overlay {
             return
         }
 
-        val msgId = data.copyOfRange(prefix.size, prefix.size + 1).first()
-        val handler = messageHandlers[msgId.toUByte().toInt()]
+        val msgId = data[prefix.size].toUByte().toInt()
+        val handler = messageHandlers[msgId]
 
         if (handler != null) {
             try {
@@ -158,33 +158,32 @@ abstract class Community : Overlay {
 
     internal fun createIntroductionRequest(socketAddress: Address): ByteArray {
         val globalTime = claimGlobalTime()
-        val payload =
-            IntroductionRequestPayload(
-                socketAddress,
-                myEstimatedLan,
-                myEstimatedWan,
-                true,
-                ConnectionType.UNKNOWN,
-                (globalTime % 65536u).toInt()
-            )
+        val payload = IntroductionRequestPayload(
+            socketAddress,
+            myEstimatedLan,
+            myEstimatedWan,
+            true,
+            ConnectionType.UNKNOWN,
+            (globalTime % UShort.MAX_VALUE).toInt()
+        )
 
         logger.debug("-> $payload")
 
         return serializePacket(MessageId.INTRODUCTION_REQUEST, payload)
     }
 
-    internal fun createIntroductionResponse(
-        lanSocketAddress: Address,
-        socketAddress: Address,
-        identifier: Int
+    fun createIntroductionResponse(
+        requester: Peer,
+        identifier: Int,
+        introduction: Peer? = null,
+        prefix: ByteArray = this.prefix
     ): ByteArray {
-        val other = network.getVerifiedByAddress(socketAddress)
-        val intro = getPeerForIntroduction(exclude = other)
+        val intro = introduction ?: getPeerForIntroduction(exclude = requester)
         val introductionLan = intro?.lanAddress ?: Address.EMPTY
         val introductionWan = intro?.wanAddress ?: Address.EMPTY
 
         val payload = IntroductionResponsePayload(
-            socketAddress,
+            requester.address,
             myEstimatedLan,
             myEstimatedWan,
             introductionLan,
@@ -196,17 +195,14 @@ abstract class Community : Overlay {
 
         if (intro != null) {
             // TODO: Seems like a bad practice to send a packet in the create method...
-            val packet = createPunctureRequest(lanSocketAddress, socketAddress, identifier)
-            val punctureRequestAddress = if (introductionLan.isEmpty())
-                introductionWan else introductionLan
-            if (!punctureRequestAddress.isEmpty()) {
-                send(punctureRequestAddress, packet)
-            }
+            val packet = createPunctureRequest(requester.lanAddress, requester.wanAddress,
+                identifier)
+            send(intro.address, packet)
         }
 
         logger.debug("-> $payload")
 
-        return serializePacket(MessageId.INTRODUCTION_RESPONSE, payload)
+        return serializePacket(MessageId.INTRODUCTION_RESPONSE, payload, prefix = prefix)
     }
 
     internal fun createPuncture(lanWalker: Address, wanWalker: Address, identifier: Int): ByteArray {
@@ -235,7 +231,8 @@ abstract class Community : Overlay {
         messageId: Int,
         payload: Serializable,
         sign: Boolean = true,
-        peer: Peer = myPeer
+        peer: Peer = myPeer,
+        prefix: ByteArray = this.prefix
     ): ByteArray {
         val payloads = mutableListOf<Serializable>()
         if (sign) {
@@ -247,7 +244,8 @@ abstract class Community : Overlay {
             messageId,
             payloads,
             sign,
-            peer
+            peer,
+            prefix
         )
     }
 
@@ -263,7 +261,8 @@ abstract class Community : Overlay {
         messageId: Int,
         payload: List<Serializable>,
         sign: Boolean = true,
-        peer: Peer = myPeer
+        peer: Peer = myPeer,
+        prefix: ByteArray = this.prefix
     ): ByteArray {
         var packet = prefix
         packet += messageId.toChar().toByte()
@@ -322,11 +321,14 @@ abstract class Community : Overlay {
         }
 
         // Add the sender as a verified peer
-        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
+        val newPeer = peer.copy(
+            lanAddress = payload.sourceLanAddress,
+            wanAddress = payload.sourceWanAddress
+        )
+        addVerifiedPeer(newPeer)
 
         val packet = createIntroductionResponse(
-            payload.sourceLanAddress,
-            payload.sourceWanAddress,
+            newPeer,
             payload.identifier
         )
 
@@ -346,7 +348,11 @@ abstract class Community : Overlay {
         }
 
         // Add the sender as a verified peer
-        addVerifiedPeer(peer, payload.sourceLanAddress, payload.sourceWanAddress)
+        val newPeer = peer.copy(
+            lanAddress = payload.sourceLanAddress,
+            wanAddress = payload.sourceWanAddress
+        )
+        addVerifiedPeer(newPeer)
 
         // Process introduced addresses
         if (!payload.wanIntroductionAddress.isEmpty() &&
@@ -354,7 +360,8 @@ abstract class Community : Overlay {
             // WAN is not empty and it is not same as ours
 
             if (!payload.lanIntroductionAddress.isEmpty()) {
-                // If LAN address is not empty, add them in case they are on our LAN
+                // If LAN address is not empty, add them in case they are on our LAN,
+                // even though that should not happen as WAN is different than ours
                 discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
             }
 
@@ -378,15 +385,9 @@ abstract class Community : Overlay {
         }
     }
 
-    private fun addVerifiedPeer(peer: Peer, sourceLanAddress: Address, sourceWanAddress: Address) {
-        val newPeer = Peer(
-            peer.key,
-            peer.address,
-            lanAddress = sourceLanAddress,
-            wanAddress = sourceWanAddress
-        )
-        network.addVerifiedPeer(newPeer)
-        network.discoverServices(newPeer, listOf(serviceId))
+    protected fun addVerifiedPeer(peer: Peer) {
+        network.addVerifiedPeer(peer)
+        network.discoverServices(peer, listOf(serviceId))
     }
 
     protected open fun discoverAddress(peer: Peer, address: Address, serviceId: String) {
@@ -409,12 +410,15 @@ abstract class Community : Overlay {
         payload: PunctureRequestPayload
     ) {
         logger.debug("<- $payload")
-        var target = payload.wanWalkerAddress
-        if (payload.wanWalkerAddress.ip == myEstimatedWan.ip) {
-            target = payload.lanWalkerAddress
+
+        val target = if (payload.wanWalkerAddress.ip == myEstimatedWan.ip) {
+            // They are on the same LAN, puncture should not be needed, but send it just in case
+            payload.lanWalkerAddress
+        } else {
+            payload.wanWalkerAddress
         }
 
-        val packet = createPuncture(myEstimatedLan, payload.wanWalkerAddress, payload.identifier)
+        val packet = createPuncture(myEstimatedLan, myEstimatedWan, payload.identifier)
         send(target, packet)
     }
 
@@ -447,6 +451,7 @@ abstract class Community : Overlay {
              */
             // IPv8 + LibNaCL
             Address("131.180.27.161", 6427)
+            //Address("192.168.1.13", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

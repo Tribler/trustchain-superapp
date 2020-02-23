@@ -89,9 +89,14 @@ class CommunityTest {
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
         every { community.getPeers() } returns listOf(Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234)))
+        val peer = Peer(
+            defaultCryptoProvider.generateKey().pub(),
+            Address("1.2.3.4", 1234),
+            Address("1.2.3.4", 1234),
+            Address("1.2.3.4", 1234)
+        )
         community.createIntroductionResponse(
-            Address("1.2.3.4", 1234),
-            Address("1.2.3.4", 1234),
+            peer,
             2
         )
     }
@@ -105,9 +110,14 @@ class CommunityTest {
         community.myEstimatedLan = Address("2.2.3.4", 2234)
         community.myEstimatedWan = Address("3.2.3.4", 3234)
         every { community.getPeers() } returns listOf(Peer(JavaCryptoProvider.generateKey(), Address("5.2.3.4", 5234)))
+        val peer = Peer(
+            defaultCryptoProvider.generateKey().pub(),
+            Address("1.2.3.4", 1234),
+            Address("1.2.3.4", 1234),
+            Address("1.2.3.4", 1234)
+        )
         val packet = community.createIntroductionResponse(
-            Address("1.2.3.4", 1234),
-            Address("1.2.3.4", 1234),
+            peer,
             2
         )
 
