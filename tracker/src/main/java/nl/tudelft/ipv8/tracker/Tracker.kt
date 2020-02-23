@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionRequestPayload
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
+import nl.tudelft.ipv8.util.addressIsLan
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
 import java.net.InetAddress
@@ -45,9 +46,14 @@ class TrackerCommunity : Community() {
     ) {
         logger.debug("<- $payload")
 
+        // In case this is the first time the peer contacts a tracker, try to estimate their WAN
+        // so we can already send a puncture request in this round
+        val sourceWanAddress = if (payload.sourceWanAddress.isEmpty() &&
+            !addressIsLan(peer.address)) peer.address else payload.sourceWanAddress
+
         val newPeer = peer.copy(
             lanAddress = payload.sourceLanAddress,
-            wanAddress = payload.sourceWanAddress
+            wanAddress = sourceWanAddress
         )
         addVerifiedPeer(newPeer)
 
