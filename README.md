@@ -32,7 +32,8 @@ The project is a composed of several modules:
 - `ipv8-android` (Android library) – Android-specific dependencies and helper classes (`IPv8Android`, `IPv8Android.Factory`) for running IPv8 on Android Runtime.
 - `ipv8-jvm` (JVM library) – JVM-specific dependencies for running IPv8 on JVM.
 - `demo-android` (Android app) – The Android app demonstrating the usage of `ipv8-android` library.
-- `demo-jvm` (JVM app) - The CLI app demonstrating the usage of `ipv8-jvm` library.
+- `demo-jvm` (JVM app) – The CLI app demonstrating the usage of `ipv8-jvm` library.
+- `tracker` (JVM app) – The bootstrap server implementation.
 
 Android apps using IPv8 should depend on the `ipv8-android` module, which also includes and exposes APIs of `ipv8` module.
 
@@ -74,6 +75,16 @@ SLF4J with [SimpleLogger](http://www.slf4j.org/api/org/slf4j/impl/SimpleLogger.h
 ```
 
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-jvm.png" width="450">
+
+## Bootstrap server
+
+IPv8 currently requires a trusted bootstrap server (a *tracker*) that introduces new peers to the rest of the network. The bootstrap server can be started with the following command, where a port can be specified in the `port` property:
+
+```
+./gradlew :tracker:run -Dport=8090
+```
+
+The tracker should be reachable on a public IP address and its address should be added in `Community.DEFAULT_ADDRESSES`.
 
 ## Tests
 

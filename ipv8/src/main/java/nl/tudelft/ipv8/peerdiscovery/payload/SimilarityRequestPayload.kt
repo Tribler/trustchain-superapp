@@ -18,7 +18,7 @@ data class SimilarityRequestPayload(
     val preferenceList: List<String>
 ) : Serializable {
     override fun serialize(): ByteArray {
-        return serializeUShort(identifier % 65536) +
+        return serializeUShort(identifier % UShort.MAX_VALUE.toInt()) +
                 lanAddress.serialize() +
                 wanAddress.serialize() +
                 connectionType.serialize() +

@@ -13,7 +13,7 @@ data class SimilarityResponsePayload(
     val preferenceList: List<String>
 ) : Serializable {
     override fun serialize(): ByteArray {
-        return serializeUShort(identifier % 65536) +
+        return serializeUShort(identifier % UShort.MAX_VALUE.toInt()) +
                 serializeUShort(preferenceList.size) +
                 preferenceList.joinToString("").hexToBytes()
     }

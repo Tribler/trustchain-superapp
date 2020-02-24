@@ -60,7 +60,7 @@ class DiscoveryCommunity : Community(), PingOverlay {
 
     internal fun createPing(): Pair<Int, ByteArray> {
         val globalTime = claimGlobalTime()
-        val payload = PingPayload((globalTime % 65536u).toInt())
+        val payload = PingPayload((globalTime % UShort.MAX_VALUE).toInt())
         logger.debug("-> $payload")
         return Pair(payload.identifier, serializePacket(MessageId.PING, payload, sign = false))
     }

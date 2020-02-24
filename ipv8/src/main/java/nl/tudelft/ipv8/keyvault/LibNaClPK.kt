@@ -20,6 +20,10 @@ class LibNaClPK(
         return BIN_PREFIX.toByteArray(Charsets.US_ASCII) + publicKey + verifyKey
     }
 
+    override fun toString(): String {
+        return keyToHash().toHex()
+    }
+
     companion object {
         private const val BIN_PREFIX = "LibNaCLPK:"
 
@@ -46,9 +50,5 @@ class LibNaClPK(
                 BIN_PREFIX.length + publicKeySize + verifyKeySize)
             return LibNaClPK(publicKey, verifyKey, lazySodium)
         }
-    }
-
-    override fun toString(): String {
-        return keyToHash().toHex()
     }
 }

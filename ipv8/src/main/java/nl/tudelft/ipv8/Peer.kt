@@ -17,12 +17,12 @@ data class Peer(
     var address: Address = Address.EMPTY,
 
     /**
-     * The LAN address of this peer.
+     * The LAN address of this peer they believe they have.
      */
     var lanAddress: Address = Address.EMPTY,
 
     /**
-     * The WAN address of this peer.
+     * The WAN address of this peer they believe they have.
      */
     var wanAddress: Address = Address.EMPTY,
 
@@ -88,6 +88,14 @@ data class Peer(
         if (pings.size > MAX_PINGS) {
             pings.removeAt(0)
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Peer && other.mid == mid
+    }
+
+    override fun hashCode(): Int {
+        return mid.hashCode()
     }
 
     companion object {

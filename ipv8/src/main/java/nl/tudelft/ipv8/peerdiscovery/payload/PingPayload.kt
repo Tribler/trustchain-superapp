@@ -6,7 +6,7 @@ data class PingPayload(
     val identifier: Int
 ) : Serializable {
     override fun serialize(): ByteArray {
-        return serializeUShort(identifier % 65536)
+        return serializeUShort(identifier % UShort.MAX_VALUE.toInt())
     }
 
     companion object Deserializer : Deserializable<PingPayload> {

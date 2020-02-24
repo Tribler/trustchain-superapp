@@ -36,7 +36,7 @@ class Network {
      */
     val serviceOverlays = mutableMapOf<String, Overlay>()
 
-    private val graphLock = Object()
+    val graphLock = Object()
 
     /**
      * A peer has introduced us to another IP address.
