@@ -214,8 +214,21 @@ class CommunityTest {
     }
 
     @Test
-    fun getNewIntroduction() {
+    fun getNewIntroduction_bootstrap() {
         val community = getCommunity()
+
+        community.getNewIntroduction()
+
+        verify { community.endpoint.send(any(), any()) }
+    }
+
+    @Test
+    fun getNewIntroduction_peer() {
+        val community = getCommunity()
+        val address = Address("1.2.3.4", 1234)
+        val peer = Peer(defaultCryptoProvider.generateKey(), address)
+        community.network.addVerifiedPeer(peer)
+        community.network.discoverServices(peer, listOf(community.serviceId))
 
         community.getNewIntroduction()
 

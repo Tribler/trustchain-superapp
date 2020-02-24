@@ -46,14 +46,6 @@ class LibNaClSK(
         return keyToHash().toHex()
     }
 
-    override fun equals(other: Any?): Boolean {
-        return other is LibNaClSK && keyToHash().contentEquals(other.keyToHash())
-    }
-
-    override fun hashCode(): Int {
-        return keyToHash().hashCode()
-    }
-
     companion object {
         const val BIN_PREFIX = "LibNaCLSK:"
         const val PUBLICKEY_BYTES = 32
