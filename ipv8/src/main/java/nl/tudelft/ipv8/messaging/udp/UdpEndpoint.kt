@@ -17,8 +17,8 @@ open class UdpEndpoint(
     private var socket: DatagramSocket? = null
     private var bindThread: BindThread? = null
 
-    private lateinit var job: Job
-    private lateinit var scope: CoroutineScope
+    private val job = SupervisorJob()
+    private val scope = CoroutineScope(Dispatchers.IO + job)
 
     override fun isOpen(): Boolean {
         return socket?.isBound == true
@@ -41,9 +41,6 @@ open class UdpEndpoint(
     }
 
     override fun open() {
-        job = SupervisorJob()
-        scope = CoroutineScope(Dispatchers.IO + job)
-
         val socket = getDatagramSocket()
         this.socket = socket
 
@@ -79,8 +76,6 @@ open class UdpEndpoint(
         socket = null
 
         bindThread = null
-
-        job.cancel()
     }
 
     open fun startLanEstimation() {

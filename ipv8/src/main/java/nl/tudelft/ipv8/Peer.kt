@@ -22,7 +22,7 @@ data class Peer(
     var lanAddress: Address = Address.EMPTY,
 
     /**
-     * The WAN address of this peer the believe they have.
+     * The WAN address of this peer they believe they have.
      */
     var wanAddress: Address = Address.EMPTY,
 
