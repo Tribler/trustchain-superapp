@@ -98,7 +98,8 @@ private const val PROPERTY_PORT = "port"
 private const val DEFAULT_PORT = 8090
 
 fun main() {
-    val port = System.getProperty(PROPERTY_PORT).toIntOrNull() ?: DEFAULT_PORT
+    val port = System.getProperty(PROPERTY_PORT, DEFAULT_PORT.toString()).toIntOrNull()
+        ?: DEFAULT_PORT
     val service = TrackerService()
     service.startTracker(port)
 }
