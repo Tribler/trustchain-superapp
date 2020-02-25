@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.udp.AndroidUdpEndpoint
+import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.android.service.IPv8Service
 import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey

@@ -47,6 +47,7 @@ class Network {
      */
     fun discoverAddress(peer: Peer, address: Address, serviceId: String? = null) {
         if (address in blacklist) {
+            // TODO: Do we need to add the verified peer as it is already added in Community?
             addVerifiedPeer(peer)
             return
         }

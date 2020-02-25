@@ -24,7 +24,7 @@ class IPv8(
     val overlays = mutableMapOf<Class<out Overlay>, Overlay>()
     private val strategies = mutableListOf<DiscoveryStrategy>()
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var loopingCallJob: Job? = null
 
     private var isStarted = false
@@ -41,6 +41,8 @@ class IPv8(
         if (isStarted()) throw IllegalStateException("IPv8 has already started")
 
         isStarted = true
+
+        endpoint.open()
 
         // Init overlays and discovery strategies
         for (overlayConfiguration in configuration.overlays) {
@@ -64,11 +66,10 @@ class IPv8(
                 val strategy = strategyFactory
                     .setOverlay(overlay)
                     .create()
+                strategy.load()
                 strategies.add(strategy)
             }
         }
-
-        endpoint.open()
 
         // Start looping call
         startLoopingCall()
@@ -110,6 +111,9 @@ class IPv8(
             }
             overlays.clear()
 
+            for (strategy in strategies) {
+                strategy.unload()
+            }
             strategies.clear()
 
             endpoint.close()

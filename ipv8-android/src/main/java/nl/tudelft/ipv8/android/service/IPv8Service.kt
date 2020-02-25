@@ -19,6 +19,7 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.R
+import kotlin.system.exitProcess
 
 open class IPv8Service : Service(), LifecycleObserver {
     private val scope = CoroutineScope(Dispatchers.Default)
@@ -49,6 +50,9 @@ open class IPv8Service : Service(), LifecycleObserver {
             .removeObserver(this)
 
         super.onDestroy()
+
+        // We need to kill the app as IPv8 is started in Application.onCreate
+        exitProcess(0)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)

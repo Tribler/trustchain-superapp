@@ -79,6 +79,14 @@ class Packet(
     }
 
     companion object {
+        /**
+         * The prefix size in bytes.
+         */
         private const val PREFIX_SIZE = 22
+
+        /**
+         * The service ID size in bytes.
+         */
+         const val SERVICE_ID_SIZE = 20
     }
 }

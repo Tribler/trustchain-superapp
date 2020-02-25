@@ -1,13 +1,16 @@
 package nl.tudelft.ipv8.android.demo
 
 import android.app.Application
+import android.net.nsd.NsdManager
 import android.util.Log
+import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
+import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
@@ -85,17 +88,19 @@ class DemoApplication : Application() {
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
-            listOf(randomWalk)
+            listOf(randomWalk, nsd)
         )
     }
 
     private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
         val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
-            listOf(randomWalk)
+            listOf(randomWalk, nsd)
         )
     }
 

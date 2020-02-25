@@ -7,9 +7,15 @@ private val logger = KotlinLogging.logger {}
 
 abstract class Endpoint {
     private val listeners = mutableListOf<EndpointListener>()
+    private var estimatedLan: Address? = null
 
     fun addListener(listener: EndpointListener) {
         listeners.add(listener)
+
+        val estimatedLan = estimatedLan
+        if (estimatedLan != null) {
+            listener.onEstimatedLanChanged(estimatedLan)
+        }
     }
 
     fun removeListener(listener: EndpointListener) {
@@ -28,6 +34,9 @@ abstract class Endpoint {
 
     protected fun setEstimatedLan(address: Address) {
         logger.info("Estimated LAN address: $address")
+
+        estimatedLan = address
+
         for (listener in listeners) {
             listener.onEstimatedLanChanged(address)
         }

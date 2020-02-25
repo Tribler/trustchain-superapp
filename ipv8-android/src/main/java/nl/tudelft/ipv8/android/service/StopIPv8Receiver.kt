@@ -10,6 +10,5 @@ class StopIPv8Receiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val serviceIntent = Intent(context, IPv8Android.serviceClass)
         context.stopService(serviceIntent)
-        exitProcess(0)
     }
 }
