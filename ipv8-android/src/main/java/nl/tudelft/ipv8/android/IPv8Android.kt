@@ -6,14 +6,11 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Build
 import androidx.core.content.getSystemService
-import androidx.lifecycle.ProcessLifecycleOwner
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.udp.AndroidUdpEndpoint
-import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.android.service.IPv8Service
-import nl.tudelft.ipv8.keyvault.CryptoProvider
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import java.net.InetAddress

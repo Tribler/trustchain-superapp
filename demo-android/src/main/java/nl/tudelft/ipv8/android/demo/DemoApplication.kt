@@ -87,10 +87,9 @@ class DemoApplication : Application() {
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
-        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
-            listOf(randomWalk, nsd)
+            listOf(randomWalk)
         )
     }
 

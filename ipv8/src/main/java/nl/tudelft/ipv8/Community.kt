@@ -21,8 +21,8 @@ abstract class Community : Overlay {
     protected val prefix: ByteArray
         get() = ByteArray(0) + 0.toByte() + VERSION + serviceId.hexToBytes()
 
-    var myEstimatedWan: Address = Address.EMPTY
-    var myEstimatedLan: Address = Address.EMPTY
+    override var myEstimatedWan: Address = Address.EMPTY
+    override var myEstimatedLan: Address = Address.EMPTY
 
     private var lastBootstrap: Date? = null
 
@@ -432,7 +432,7 @@ abstract class Community : Overlay {
     }
 
     companion object {
-        val DEFAULT_ADDRESSES = listOf(
+        val DEFAULT_ADDRESSES = listOf<Address>(
             // Dispersy
             // Address("130.161.119.206", 6421),
             // Address("130.161.119.206", 6422),
@@ -449,7 +449,7 @@ abstract class Community : Overlay {
             // Address("81.171.27.194", 6527),
             // Address("81.171.27.194", 6528)
             // py-ipv8 + LibNaCL
-            // Address("131.180.27.161", 6427),
+            Address("131.180.27.161", 6427),
             // kotlin-ipv8
             Address("178.62.16.66", 8090)
         )

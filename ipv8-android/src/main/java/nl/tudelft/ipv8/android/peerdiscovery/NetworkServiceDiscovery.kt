@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.udp.UdpEndpoint
 import nl.tudelft.ipv8.peerdiscovery.strategy.DiscoveryStrategy
-import java.net.InetAddress
+import kotlin.random.Random
 
 private val logger = KotlinLogging.logger {}
 
@@ -64,7 +64,6 @@ class NetworkServiceDiscovery(
 
                 if (serviceInfo.serviceName == serviceName) {
                     logger.debug { "Found its own service" }
-                    return
                 }
 
                 val serviceId = getServiceId(serviceInfo.serviceName)
@@ -112,22 +111,23 @@ class NetworkServiceDiscovery(
                 val peer = overlay.myPeer
                 val address = Address(serviceInfo.host.hostAddress, serviceInfo.port)
 
-                logger.debug { "Discovered address: $address" }
-
-                overlay.network.discoverAddress(peer, address, overlay.serviceId)
-                overlay.walkTo(address)
+                if (overlay.myEstimatedLan != address) {
+                    logger.debug { "Discovered address: $address" }
+                    overlay.network.discoverAddress(peer, address, overlay.serviceId)
+                } else {
+                    logger.debug { "Resolved its own IP address" }
+                }
             }
         }
     }
 
-    private fun registerService(port: Int, serviceId: String) {
-        val serviceInfo = NsdServiceInfo().apply {
-            // The name is subject to change based on conflicts
-            // with other services advertised on the same network.
-            serviceName = serviceId
-            serviceType = SERVICE_TYPE
-            setPort(port)
-        }
+    private fun registerService(port: Int, serviceName: String) {
+        val serviceInfo = NsdServiceInfo()
+        // The name is subject to change based on conflicts
+        // with other services advertised on the same network.
+        serviceInfo.serviceName = serviceName
+        serviceInfo.serviceType = SERVICE_TYPE
+        serviceInfo.port = port
 
         logger.debug { "Registering service info $serviceInfo" }
 
@@ -152,8 +152,9 @@ class NetworkServiceDiscovery(
         val endpoint = overlay.endpoint
         if (endpoint is UdpEndpoint) {
             val socketPort = endpoint.getSocketPort()
-            logger.debug { "Registering service ${overlay.serviceId} on port $socketPort" }
-            registerService(socketPort, overlay.serviceId)
+            val serviceName = overlay.serviceId + "_" + Random.nextInt(10000)
+            logger.debug { "Registering service $serviceName on port $socketPort" }
+            registerService(socketPort, serviceName)
         } else {
             logger.error { "Overlay endpoint is not UdpEndpoint" }
         }
@@ -161,7 +162,11 @@ class NetworkServiceDiscovery(
     }
 
     override fun takeStep() {
-        // NOOP
+        val addresses = overlay.getWalkableAddresses()
+        if (addresses.isNotEmpty()) {
+            val address = addresses.random()
+            overlay.walkTo(address)
+        }
     }
 
     override fun unload() {
