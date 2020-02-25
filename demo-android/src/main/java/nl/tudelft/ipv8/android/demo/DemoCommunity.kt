@@ -2,7 +2,6 @@ package nl.tudelft.ipv8.android.demo
 
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import java.util.*
 
 class DemoCommunity : Community() {
@@ -18,7 +17,6 @@ class DemoCommunity : Community() {
 
     override fun load() {
         super.load()
-
     }
 
     override fun unload() {

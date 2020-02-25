@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8.android.demo
 
 import android.app.Application
-import android.net.nsd.NsdManager
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
