@@ -1,6 +1,15 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
+
+ktlint {
+    version = "$ktlint_version"
+    android = true
+    outputToConsole = true
+    ignoreFailures = true
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"

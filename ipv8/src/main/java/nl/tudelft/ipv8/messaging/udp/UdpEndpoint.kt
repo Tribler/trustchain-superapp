@@ -93,7 +93,7 @@ open class UdpEndpoint(
     open fun stopLanEstimation() {
     }
 
-    protected fun getSocketPort(): Int {
+    fun getSocketPort(): Int {
         return socket?.localPort ?: port
     }
 

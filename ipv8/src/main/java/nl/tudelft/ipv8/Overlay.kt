@@ -17,6 +17,9 @@ interface Overlay : EndpointListener {
     var maxPeers: Int
     var cryptoProvider: CryptoProvider
 
+    var myEstimatedWan: Address
+    var myEstimatedLan: Address
+
     private val globalTime: ULong
         get() = myPeer.lamportTimestamp
 

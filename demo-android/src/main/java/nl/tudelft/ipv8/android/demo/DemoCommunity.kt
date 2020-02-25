@@ -14,4 +14,12 @@ class DemoCommunity : Community() {
 
         discoveredAddressesContacted[address] = Date()
     }
+
+    override fun load() {
+        super.load()
+    }
+
+    override fun unload() {
+        super.unload()
+    }
 }
