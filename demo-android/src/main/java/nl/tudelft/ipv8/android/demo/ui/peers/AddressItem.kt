@@ -8,7 +8,7 @@ class AddressItem(
     val address: Address,
     val discovered: Date?,
     val contacted: Date?
-): Item() {
+) : Item() {
     override fun areItemsTheSame(other: Item): Boolean {
         return other is AddressItem && other.address == address
     }

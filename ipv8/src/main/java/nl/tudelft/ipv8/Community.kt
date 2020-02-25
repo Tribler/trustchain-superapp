@@ -374,6 +374,7 @@ abstract class Community : Overlay {
             discoverAddress(peer, payload.lanIntroductionAddress, serviceId)
         } else if (!payload.wanIntroductionAddress.isEmpty()) {
             // WAN is same as ours, but we do not know the LAN
+            // Should not happen with kotlin-ipv8 peers, but we'll keep it for py-ipv8 compatibility
 
             // Try to connect via WAN, NAT needs to support hairpinning
             discoverAddress(peer, payload.wanIntroductionAddress, serviceId)
@@ -439,18 +440,18 @@ abstract class Community : Overlay {
             // Address("131.180.27.156", 6424),
             // Address("131.180.27.161", 6427),
             // IPv8
-            /*
-            Address("131.180.27.161", 6521),
-            Address("131.180.27.161", 6522),
-            Address("131.180.27.162", 6523),
-            Address("131.180.27.162", 6524),
-            Address("130.161.119.215", 6525),
-            Address("130.161.119.215", 6526),
-            Address("81.171.27.194", 6527),
-            //Address("81.171.27.194", 6528)
-             */
-            // IPv8 + LibNaCL
-            Address("131.180.27.161", 6427)
+            // Address("131.180.27.161", 6521),
+            // Address("131.180.27.161", 6522),
+            // Address("131.180.27.162", 6523),
+            // Address("131.180.27.162", 6524),
+            // Address("130.161.119.215", 6525),
+            // Address("130.161.119.215", 6526),
+            // Address("81.171.27.194", 6527),
+            // Address("81.171.27.194", 6528)
+            // py-ipv8 + LibNaCL
+            Address("131.180.27.161", 6427),
+            // kotlin-ipv8
+            Address("178.62.16.66", 8090)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)

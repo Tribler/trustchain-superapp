@@ -8,7 +8,7 @@ data class BlockItem(
     var isExpanded: Boolean = false,
     val canSign: Boolean = false,
     val status: BlockStatus? = null
-): Item() {
+) : Item() {
     override fun areItemsTheSame(other: Item): Boolean {
         return other is BlockItem && other.block.blockId == block.blockId
     }

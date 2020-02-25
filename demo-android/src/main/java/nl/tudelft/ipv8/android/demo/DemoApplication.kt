@@ -4,7 +4,6 @@ import android.app.Application
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.db.SqlDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.service.DemoService

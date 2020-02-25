@@ -13,19 +13,18 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_blocks.*
-import kotlinx.android.synthetic.main.fragment_peers.recyclerView
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.databinding.FragmentBlocksBinding
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.android.demo.util.viewBinding
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.ipv8.util.hexToBytes
 
-
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class BlocksFragment : BaseFragment() {
+open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     private val adapter = ItemAdapter()
 
     private lateinit var publicKey: ByteArray
@@ -34,6 +33,8 @@ open class BlocksFragment : BaseFragment() {
     private val expandedBlocks: MutableSet<String> = mutableSetOf()
 
     protected open val isNewBlockAllowed = true
+
+    protected val binding: FragmentBlocksBinding by viewBinding(FragmentBlocksBinding::bind)
 
     init {
         lifecycleScope.launchWhenStarted {
@@ -74,23 +75,15 @@ open class BlocksFragment : BaseFragment() {
         publicKey = getPublicKey()
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_blocks, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
         val dividerItemDecoration = DividerItemDecoration(context, LinearLayout.VERTICAL)
         dividerItemDecoration.setDrawable(ResourcesCompat.getDrawable(resources,
             R.drawable.list_divider, null)!!)
-        recyclerView.addItemDecoration(dividerItemDecoration)
+        binding.recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -103,14 +96,14 @@ open class BlocksFragment : BaseFragment() {
         return when (item.itemId) {
             R.id.item_new_block -> {
                 showNewBlockDialog()
-               true
+                true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     protected open fun getPublicKey(): ByteArray {
-        val args = BlocksFragmentArgs.fromBundle(arguments!!)
+        val args = BlocksFragmentArgs.fromBundle(requireArguments())
         return args.publicKey.hexToBytes()
     }
 
@@ -125,8 +118,8 @@ open class BlocksFragment : BaseFragment() {
     protected open suspend fun updateView() {
         val items = createItems(blocks)
         adapter.updateItems(items)
-        imgNoBlocks.isVisible = items.isEmpty()
-        progress.isVisible = false
+        binding.imgNoBlocks.isVisible = items.isEmpty()
+        binding.progress.isVisible = false
     }
 
     private suspend fun createItems(blocks: List<TrustChainBlock>): List<Item> =
@@ -170,7 +163,7 @@ open class BlocksFragment : BaseFragment() {
             lifecycleScope.launch {
                 refreshBlocks()
                 updateView()
-                recyclerView.smoothScrollToPosition(0)
+                binding.recyclerView.smoothScrollToPosition(0)
             }
         }
 
