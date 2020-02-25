@@ -11,15 +11,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.databinding.FragmentUsersBinding
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.android.demo.util.viewBinding
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 
-class UsersFragment : BaseFragment() {
+class UsersFragment : BaseFragment(R.layout.fragment_users) {
     private val adapter = ItemAdapter()
+
+    private val binding by viewBinding(FragmentUsersBinding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,24 +34,15 @@ class UsersFragment : BaseFragment() {
         })
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_users, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
 
         loadNetworkInfo()
     }
-
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
@@ -70,7 +64,7 @@ class UsersFragment : BaseFragment() {
                 }
                 adapter.updateItems(items)
 
-                imgEmpty.isVisible = items.isEmpty()
+                binding.imgEmpty.isVisible = items.isEmpty()
 
                 delay(1000)
             }

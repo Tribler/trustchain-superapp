@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.messaging.*
 /**
  * Payload for the response to a crawl request.
  */
-open class CrawlResponsePayload(
+data class CrawlResponsePayload(
     val block: HalfBlockPayload,
     val crawlId: UInt,
     val curCount: UInt,

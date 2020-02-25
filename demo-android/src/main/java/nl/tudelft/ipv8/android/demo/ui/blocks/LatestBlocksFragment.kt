@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8.android.demo.ui.blocks
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_blocks.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import kotlin.math.min
 
@@ -19,13 +18,13 @@ class LatestBlocksFragment : BlocksFragment() {
     }
 
     override suspend fun updateView() {
-        val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+        val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
         val firstVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
 
         super.updateView()
 
         if (firstVisibleItem == 0) {
-            recyclerView.smoothScrollToPosition(0)
+            binding.recyclerView.smoothScrollToPosition(0)
         }
     }
 }

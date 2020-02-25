@@ -456,6 +456,8 @@ open class TrustChainCommunity(
     }
 
     private fun onCrawlResponse(sourceAddress: Address, payload: CrawlResponsePayload) {
+        logger.debug("<- $payload")
+
         onHalfBlock(sourceAddress, payload.block)
 
         val block = payload.block.toBlock()

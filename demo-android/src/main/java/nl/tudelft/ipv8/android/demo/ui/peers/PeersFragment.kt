@@ -1,10 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.peers
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -12,20 +9,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.android.demo.DemoCommunity
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.databinding.FragmentPeersBinding
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.android.demo.util.viewBinding
 import nl.tudelft.ipv8.util.toHex
 
-class PeersFragment : BaseFragment() {
+class PeersFragment : BaseFragment(R.layout.fragment_peers) {
     private val adapter = ItemAdapter()
+
+    private val binding by viewBinding(FragmentPeersBinding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,20 +37,12 @@ class PeersFragment : BaseFragment() {
         })
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_peers, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
 
         loadNetworkInfo()
     }
@@ -86,12 +72,12 @@ class PeersFragment : BaseFragment() {
                 val items = peerItems + addressItems
 
                 adapter.updateItems(items)
-                txtCommunityName.text = demoCommunity.javaClass.simpleName
-                txtPeerCount.text = resources.getQuantityString(
+                binding.txtCommunityName.text = demoCommunity.javaClass.simpleName
+                binding.txtPeerCount.text = resources.getQuantityString(
                     R.plurals.x_peers, peers.size,
                     peers.size
                 )
-                imgEmpty.isVisible = items.isEmpty()
+                binding.imgEmpty.isVisible = items.isEmpty()
 
                 delay(1000)
             }

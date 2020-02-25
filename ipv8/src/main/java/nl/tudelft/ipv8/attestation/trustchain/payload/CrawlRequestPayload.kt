@@ -5,7 +5,7 @@ import nl.tudelft.ipv8.messaging.*
 /**
  * Request a crawl of blocks starting with a specific sequence number or the first if 0.
  */
-class CrawlRequestPayload(
+data class CrawlRequestPayload(
     val publicKey: ByteArray,
     val startSeqNum: Long,
     val endSeqNum: Long,
