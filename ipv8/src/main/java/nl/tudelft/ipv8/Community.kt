@@ -451,7 +451,7 @@ abstract class Community : Overlay {
             // py-ipv8 + LibNaCL
             Address("131.180.27.161", 6427),
             // kotlin-ipv8
-            Address("178.62.16.66", 8090)
+            Address("131.180.27.188", 1337)
         )
 
         // Timeout before we bootstrap again (bootstrap kills performance)
