@@ -51,7 +51,7 @@
         android:label="All Blocks" />
     <fragment
         android:id="@+id/bitcoinFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.bitcoinFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
         android:label="fragment_bitcoin"
         tools:layout="@layout/fragment_bitcoin" />
 </navigation>
