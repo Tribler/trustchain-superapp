@@ -56,15 +56,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Bitcoin PK:" />
+                android:text="Bitcoin SK:" />
 
             <EditText
                 android:id="@+id/editText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autofillHints="@string/enter_private_key"
                 android:ems="10"
                 android:inputType="textPassword" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Bitcoin amount:" />
+
+            <EditText
+                android:id="@+id/editText3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="numberDecimal" />
         </LinearLayout>
 
         <Button
