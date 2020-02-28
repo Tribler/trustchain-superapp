@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
 
 // TODO: Rename parameter arguments, choose names that match
@@ -22,11 +24,26 @@ class bitcoinFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    private var publicKeyReceiver: String = ""
+    private var bitcoinPrivateKey: String = ""
+    private var transactionAmount: Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
+        }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        button3.setOnClickListener {
+            publicKeyReceiver = pk_receiver.text.toString()
+            bitcoinPrivateKey = sk_bitcoin.text.toString()
+            transactionAmount = tx_amount.text.toString().toDouble()
+            outputTextView.text = "PK Receiver: $publicKeyReceiver, SK Bitcoin: $bitcoinPrivateKey, Amount: $transactionAmount"
         }
     }
 

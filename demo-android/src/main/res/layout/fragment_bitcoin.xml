@@ -39,7 +39,7 @@
                 android:text="PK of Receiver:" />
 
             <EditText
-                android:id="@+id/editText2"
+                android:id="@+id/pk_receiver"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -59,7 +59,7 @@
                 android:text="Bitcoin SK:" />
 
             <EditText
-                android:id="@+id/editText"
+                android:id="@+id/sk_bitcoin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -79,7 +79,7 @@
                 android:text="Bitcoin amount:" />
 
             <EditText
-                android:id="@+id/editText3"
+                android:id="@+id/tx_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -92,6 +92,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send_bitcoin" />
+
+        <TextView
+            android:id="@+id/outputTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
 
     </LinearLayout>
 
