@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.util.hexToBytes
 
 /**
  * A simple [Fragment] subclass.
@@ -24,9 +25,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
 
         button3.setOnClickListener {
             publicKeyReceiver = pk_receiver.text.toString()
-            bitcoinPrivateKey = sk_bitcoin.text.toString()
             transactionAmount = tx_amount.text.toString().toDouble()
-            outputTextView.text = "PK Receiver: $publicKeyReceiver, SK Bitcoin: $bitcoinPrivateKey, Amount: $transactionAmount"
+            outputTextView.text = "PK Receiver: $publicKeyReceiver, Amount: $transactionAmount"
+
+            getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
         }
     }
 

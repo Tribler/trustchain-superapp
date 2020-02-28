@@ -34,7 +34,8 @@ class DemoApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
-            createDemoCommunity()
+            createDemoCommunity(),
+            createCoinCommunity()
         ), walkerInterval = 1.0)
 
         IPv8Android.Factory(this)
@@ -90,6 +91,15 @@ class DemoApplication : Application() {
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
             listOf(randomWalk)
+        )
+    }
+
+    private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+        return OverlayConfiguration(
+            Overlay.Factory(CoinCommunity::class.java),
+            listOf(randomWalk, nsd)
         )
     }
 

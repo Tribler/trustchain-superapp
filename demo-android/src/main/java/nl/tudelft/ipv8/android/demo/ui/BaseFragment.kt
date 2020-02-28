@@ -4,6 +4,7 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.DemoCommunity
 
 import nl.tudelft.ipv8.android.demo.TrustChainHelper
@@ -24,5 +25,9 @@ abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
 
     protected fun getDemoCommunity(): DemoCommunity {
         return getIpv8().getOverlay() ?: throw IllegalStateException("DemoCommunity is not configured")
+    }
+
+    protected fun getCoinCommunity(): CoinCommunity {
+        return getIpv8().getOverlay() ?: throw IllegalStateException("CoinCommunity is not configured")
     }
 }
