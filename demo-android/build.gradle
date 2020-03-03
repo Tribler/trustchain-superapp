@@ -84,6 +84,12 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    // BitcoinJ
+    implementation 'org.bitcoinj:bitcoinj-core:0.15.6'
+
+    // Google Core
+    implementation "com.google.guava:guava:28.2-android"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
