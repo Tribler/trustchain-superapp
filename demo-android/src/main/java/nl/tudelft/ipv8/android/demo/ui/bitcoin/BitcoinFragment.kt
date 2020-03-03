@@ -1,12 +1,13 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.util.hexToBytes
 
@@ -30,6 +31,37 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
 
             getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
         }
+
+        refreshButton.setOnClickListener {
+            refresh()
+        }
+
+        importPrivateKeyButton.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            val privateKeyAsString = privateKeyTextInput.text.toString()
+
+            if (privateKeyAsString.isNotEmpty()) walletManager.importPrivateKey(privateKeyAsString)
+            privateKeyTextInput.text.clear()
+            refresh()
+        }
+
+        refresh()
+    }
+
+    fun refresh() {
+        val walletManager = WalletManagerAndroid.getInstance()
+
+        // Balance.
+        val balance = walletManager.getBalance()
+        balanceTextView.text = balance.toString()
+
+        // Keypair List.
+        var output = ""
+        walletManager.getImportedKeyPairs()?.forEach { keypair ->
+            output += walletManager.ecKeyToPrivateKeyString(keypair) + "\n"
+            // TODO: Figure out how to get the public key as a string out of the keypair.
+        }
+        keypairTextview.text = output
     }
 
     override fun onCreateView(

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -74,6 +73,46 @@
 
         <LinearLayout
             android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textView9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Import Private Key:" />
+
+            <EditText
+                android:id="@+id/privateKeyTextInput"
+                android:layout_width="125dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="textPersonName" />
+
+            <Button
+                android:id="@+id/importPrivateKeyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="IMPORT" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Imported Keypairs (Private Key Only):" />
+
+        <TextView
+            android:id="@+id/keypairTextview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="None" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:baselineAligned="false"
             android:gravity="bottom"
@@ -93,14 +132,14 @@
                         android:id="@+id/textView7"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Balance:" />
+                        android:text="Balance of whole wallet:" />
 
                     <TextView
-                        android:id="@+id/textView6"
+                        android:id="@+id/balanceTextView"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="10.3 BtC"
+                        android:text="0.0BTC"
                         android:textAlignment="center" />
                 </LinearLayout>
 
@@ -109,20 +148,13 @@
                     android:layout_height="match_parent"
                     android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/textView5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Public Key:" />
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
-                        android:textAlignment="center" />
                 </LinearLayout>
+
+                <Button
+                    android:id="@+id/refreshButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Refresh" />
 
             </LinearLayout>
 
