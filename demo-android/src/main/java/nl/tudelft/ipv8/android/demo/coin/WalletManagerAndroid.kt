@@ -35,6 +35,8 @@ object WalletManagerAndroid {
             val walletManager = WalletManager(configuration, walletDir)
             setupThread(application.applicationContext)
 
+            WalletManagerAndroid.walletManager = walletManager
+
             return walletManager
         }
 
