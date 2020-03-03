@@ -46,7 +46,6 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, appl
         }
 
         kit.startAsync()
-        kit.awaitRunning()
 
         setupThread(applicationContext)
 
