@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TrustChain Explorer</string>
+    <string name="app_name">TrustChain Currency</string>
 
     <plurals name="x_peers">
         <item quantity="one">%d peer</item>
@@ -16,4 +16,10 @@
 
     <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
     <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="sending_bitcoins">Sending Bitcoins</string>
+    <string name="send_bitcoin">Send Bitcoin</string>
+    <string name="enter_private_key">Enter private key</string>
+    <string name="bitcoin">Bitcoin</string>
 </resources>
