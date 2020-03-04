@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.common.util.concurrent.ListenableFuture
 import org.bitcoinj.core.*
 import org.bitcoinj.core.ECKey.ECDSASignature
+import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
@@ -106,6 +107,40 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         val signature: ECDSASignature = myPublicKey.sign(sighash)
 
         return signature
+    }
+
+    /**
+     * Contract: multi signature contract in question
+     * Signatures: all signatures needed (also includes yourself).
+     * Receiver address: the address we are sending to
+     * Value: the amount of money we are sending
+     */
+    fun sendMultiSignatureMessage(
+        contract: Transaction,
+        signatures: List<ECDSASignature>,
+        receiverAddress: ECKey,
+        value: Coin
+    ) {
+        // Make the transaction we want to perform.
+        val multisigOutput: TransactionOutput = contract.getOutput(0)
+        val spendTx = Transaction(params)
+        spendTx.addOutput(value, receiverAddress)
+        val input = spendTx.addInput(multisigOutput)
+
+        // Create the script that combines the signatures (to spend the multi-signature output).
+        val transactionSignatures = signatures.map { signature ->
+            TransactionSignature(signature, Transaction.SigHash.ALL, false)
+        }
+        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
+
+        // Add it to the input.
+        input.setScriptSig(inputScript);
+
+        // Verify.
+        input.verify(multisigOutput);
+
+        // Todo: add listener for when there is completion
+        kit.peerGroup().broadcastTransaction(spendTx)
     }
 
     fun getBalance(): Long {
