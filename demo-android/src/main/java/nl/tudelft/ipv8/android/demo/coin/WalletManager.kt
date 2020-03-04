@@ -3,9 +3,12 @@ package nl.tudelft.ipv8.android.demo.coin
 import android.util.Log
 import com.google.common.util.concurrent.ListenableFuture
 import org.bitcoinj.core.*
+import org.bitcoinj.core.ECKey.ECDSASignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.TestNet3Params
+import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
+import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.File
@@ -72,6 +75,37 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         broadcast.addListener(Runnable {
             Log.d("Coin", "Coin: created a multisignature wzllet.")
         }, WalletManagerAndroid.runInUIThread)
+    }
+
+    fun signMultiSignatureMessage(
+        contract: Transaction,
+        myPublicKey: ECKey,
+        receiverAddress: ECKey,
+        value: Coin
+    ): ECDSASignature {
+        // Retrieve the multisignature contract.
+        val multisigOutput: TransactionOutput = contract.getOutput(0)
+        val multisigScript: Script = multisigOutput.scriptPubKey
+
+        // Validate whether the transaction (= contract) is what we expect.
+        if (!ScriptPattern.isSentToMultisig(multisigScript)) {
+            throw Exception("Contract is not a multi signature contract!")
+        }
+
+        // Build the transaction we want to sign.
+        // todo: add validation to check for this value
+        // todo: add fees (so we get chosen earlier by miners)
+        val value: Coin = value
+        val spendTx = Transaction(params)
+        spendTx.addOutput(value, receiverAddress)
+        spendTx.addInput(multisigOutput)
+
+        // Sign the transaction and return it.
+        val sighash: Sha256Hash =
+            spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
+        val signature: ECDSASignature = myPublicKey.sign(sighash)
+
+        return signature
     }
 
     fun getBalance(): Long {
