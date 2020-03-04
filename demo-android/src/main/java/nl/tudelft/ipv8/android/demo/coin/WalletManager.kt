@@ -1,13 +1,15 @@
 package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
-import org.bitcoinj.core.DumpedPrivateKey
-import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.NetworkParameters
+import com.google.common.util.concurrent.ListenableFuture
+import org.bitcoinj.core.*
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.TestNet3Params
+import org.bitcoinj.script.ScriptBuilder
+import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.File
+import java.util.*
 
 
 /**
@@ -41,6 +43,35 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         }
 
         kit.startAsync()
+    }
+
+    fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>) {
+        // Prepare a template for the contract.
+        val contract = Transaction(params)
+
+        // Prepare a list of all keys present in contract.
+        val copiedList = otherPublicKeys.toMutableList()
+        copiedList.add(ourPublicKey)
+        val keys = Collections.unmodifiableList(copiedList)
+
+        // Create a n-n multi-signature output script.
+        val script = ScriptBuilder.createMultiSigOutputScript(keys.size, keys)
+        // Now add an output with minimum fee needed.
+        // TODO: check if this is enough, or find out how we add fees to a transaction.
+        val amount: Coin = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE
+        contract.addOutput(amount, script)
+
+        // Add the input to the transaction (so the above amount can be sent to the wallet).
+        val req = SendRequest.forTx(contract)
+        kit.wallet().completeTx(req)
+
+        // Broadcast and wait for it to propagate across the network.
+        // It should take a few seconds unless something went wrong.
+        val broadcast: ListenableFuture<Transaction> =
+            kit.peerGroup().broadcastTransaction(req.tx).broadcast()
+        broadcast.addListener(Runnable {
+            Log.d("Coin", "Coin: created a multisignature wzllet.")
+        }, WalletManagerAndroid.runInUIThread)
     }
 
     fun getBalance(): Long {
