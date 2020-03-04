@@ -49,7 +49,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         kit.startAsync()
     }
 
-    fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>) {
+    fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>): Transaction {
         // Prepare a template for the contract.
         val contract = Transaction(params)
 
@@ -76,6 +76,8 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         broadcast.addListener(Runnable {
             Log.d("Coin", "Coin: created a multisignature wzllet.")
         }, WalletManagerAndroid.runInUIThread)
+
+        return contract
     }
 
     fun signMultiSignatureMessage(
@@ -134,10 +136,10 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
 
         // Add it to the input.
-        input.setScriptSig(inputScript);
+        input.scriptSig = inputScript
 
         // Verify.
-        input.verify(multisigOutput);
+        input.verify(multisigOutput)
 
         // Todo: add listener for when there is completion
         kit.peerGroup().broadcastTransaction(spendTx)
