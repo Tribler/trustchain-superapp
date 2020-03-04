@@ -1,5 +1,5 @@
-rootProject.name='TrustChain Super App'
+rootProject.name='TrustChain'
 include ':app', ':ipv8', ':ipv8-android'
 
-project(':ipv8').projectDir = new File(settingsDir, 'kotlin-ipv8:ipv8')
-project(':ipv8-android').projectDir = new File(settingsDir, 'kotlin-ipv8:ipv8-android')
+project(':ipv8').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8')
+project(':ipv8-android').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-android')

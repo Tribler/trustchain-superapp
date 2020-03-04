@@ -1,15 +1,19 @@
 <resources>
-    <string name="app_name">TrustChain Super App</string>
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
+    <string name="app_name">TrustChain Explorer</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <plurals name="x_peers">
+        <item quantity="one">%d peer</item>
+        <item quantity="other">%d peers</item>
+    </plurals>
 
-    <string name="home_second">Home Second</string>
+    <plurals name="x_blocks">
+        <item quantity="one">%d block</item>
+        <item quantity="other">%d blocks</item>
+    </plurals>
+
+    <string name="sign_block">Sign block</string>
+    <string name="block_status">Block Status: %s</string>
+
+    <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
+    <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
 </resources>
