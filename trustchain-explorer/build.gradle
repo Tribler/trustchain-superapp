@@ -1,28 +1,21 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
-
-ktlint {
-    version = "$ktlint_version"
-    android = true
-    outputToConsole = true
-    ignoreFailures = true
-}
 
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
 
     defaultConfig {
-        applicationId "nl.tudelft.trustchain"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
@@ -32,8 +25,6 @@ android {
         }
     }
 
-    // To inline the bytecode built with JVM target 1.8 into
-    // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -48,9 +39,7 @@ android {
 }
 
 dependencies {
-    implementation project(':common')
-    implementation project(':trustchain-explorer')
-    implementation project(':debug')
+    api project(':common')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -85,10 +74,4 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += [
-            "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
-    ]
 }

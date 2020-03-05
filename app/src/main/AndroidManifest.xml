@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="nl.tudelft.trustchain.superapp">
+    package="nl.tudelft.trustchain.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -16,9 +16,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".TrustChainApplication">
+        android:name="nl.tudelft.trustchain.app.TrustChainApplication">
 
-        <activity android:name=".ui.MainActivity" android:launchMode="singleTop">
+        <activity android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity"
+            android:label="IPv8 Apps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +27,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.TrustChainService" />
+        <activity android:name="nl.tudelft.trustchain.explorer.ui.MainActivity" />
+
+        <activity android:name="nl.tudelft.trustchain.debug.DebugActivity" />
+
+        <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>
 
 </manifest>
