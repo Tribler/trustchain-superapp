@@ -10,7 +10,7 @@ You can follow these steps to add a new module to the super app. You can also du
 
 4. Create a navigation graph in `src/main/res/navigation` and define your `Fragment` as a start destination. Make sure to use a unique name for your navigation graph file to prevent collisions with other apps. 
 
-5. Create your own `Activity` extending `DrawerActivity`, and override `navigationGraph` to be the ID of your navigation graph, and optionally `bottomNavigationMenu` to return the menu ID to be used for the bottom navigation.
+5. Create your own `Activity` extending `BaseActivity`, and override `navigationGraph` to be the ID of your navigation graph, and optionally `bottomNavigationMenu` to return the menu ID to be used for the bottom navigation.
 
 7. Define dependency of the super app on your app module by adding `implementation project(':my-app')` to `app/build.gradle` dependencies, where `my-app` is the name of your module.
 
