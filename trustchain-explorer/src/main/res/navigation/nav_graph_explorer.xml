@@ -40,10 +40,6 @@
         android:name="nl.tudelft.trustchain.explorer.ui.blocks.MyChainFragment"
         android:label="My Chain" />
     <fragment
-        android:id="@+id/debugFragment"
-        android:name="nl.tudelft.trustchain.explorer.ui.debug.DebugFragment"
-        android:label="Debug" />
-    <fragment
         android:id="@+id/latestBlocksFragment"
         android:name="nl.tudelft.trustchain.explorer.ui.blocks.LatestBlocksFragment"
         android:label="All Blocks" />

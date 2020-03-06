@@ -8,8 +8,6 @@ import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.trustchain.app.AppDefinition
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.debug.DebugActivity
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 
 class DashboardActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityDashboardBinding::inflate)

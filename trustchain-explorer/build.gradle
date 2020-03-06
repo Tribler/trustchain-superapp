@@ -3,6 +3,14 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'jacoco'
+
+ktlint {
+    version = "$ktlint_version"
+    android = true
+    outputToConsole = true
+    ignoreFailures = false
+}
 
 android {
     compileSdkVersion 29
@@ -19,6 +27,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
