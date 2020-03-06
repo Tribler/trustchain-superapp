@@ -1,6 +1,6 @@
 # Adding your own app to the TrustChain Super App
 
-You can follow these setps to add a new module to the super app. You can also duplicate an existing module (e.g., `trustchain-explorer` or `debug`) and update it according to your needs. However, make sure you still perform the required changes according to this guide.
+You can follow these steps to add a new module to the super app. You can also duplicate an existing module (e.g., `trustchain-explorer` or `debug`) and update it according to your needs. However, make sure you still perform the required changes according to this guide.
 
 1. Create a new Android library module (`File` - `New` - `New Module...` - `Android Library`).
 
@@ -12,7 +12,7 @@ You can follow these setps to add a new module to the super app. You can also du
 
 5. Add an item for your app to the navigation drawer in `common/src/main/res/menu/drawer.xml`. 
 
-6. Create your own `Activity` extending `DrawerActivity`, and override
+6. Create your own `Activity` extending `DrawerActivity`, and override:
    - `navigationGraph` to be the ID of your navigation graph,
    - `topLevelDestinationIds` to be the IDs of top level destinations (it used to determine for which destinations the back button should be shown),
    - `drawerNavigationItem` to be the ID of your drawer navigation item defined in the previous step,
