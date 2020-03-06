@@ -53,19 +53,15 @@ You can also build and automatically install the app on all connected Android de
 
 ## Tests
 
-We strive for a high code coverage to keep the project maintainable and stable. All unit tests are currently able to run on JVM, there are no Android instrumented tests. Jacoco is used to report the  code coverage.
-
 Run unit tests:
 ```
 ./gradlew test
 ```
 
-Generate code coverage report:
+Run instrumented tests:
 ```
 ./gradlew jacocoTestReport
 ```
-
-The generated report will be stored in `ipv8/build/reports/jacoco/test/html/index.html`.
 
 ## Code style
 
