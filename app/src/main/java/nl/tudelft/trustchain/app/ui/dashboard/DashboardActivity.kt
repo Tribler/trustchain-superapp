@@ -1,12 +1,15 @@
 package nl.tudelft.trustchain.app.ui.dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import nl.tudelft.trustchain.common.AppDefinition
+import nl.tudelft.trustchain.app.AppDefinition
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.debug.DebugActivity
+import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 
 class DashboardActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityDashboardBinding::inflate)
@@ -14,7 +17,10 @@ class DashboardActivity : AppCompatActivity() {
     private val adapter = ItemAdapter()
 
     init {
-        adapter.registerRenderer(DashboardItemRenderer {})
+        adapter.registerRenderer(DashboardItemRenderer {
+            val intent = Intent(this, it.app.activity)
+            startActivity(intent)
+        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,9 +36,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun getAppList(): List<DashboardItem> {
-        return listOf(
-            DashboardItem(AppDefinition.TRUSTCHAIN_EXPLORER),
-            DashboardItem(AppDefinition.DEBUG)
-        )
+        return AppDefinition.values().map {
+            DashboardItem(it)
+        }
     }
 }

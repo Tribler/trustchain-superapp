@@ -18,14 +18,15 @@
         android:theme="@style/AppTheme"
         android:name="nl.tudelft.trustchain.app.TrustChainApplication">
 
-        <activity android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity"
-            android:label="IPv8 Apps">
+        <activity android:name=".ui.dashboard.DashboardActivity" android:label="IPv8 Apps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity" />
 
         <activity android:name="nl.tudelft.trustchain.debug.DebugActivity" />
 

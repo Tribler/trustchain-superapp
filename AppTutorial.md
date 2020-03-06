@@ -8,20 +8,14 @@ You can follow these steps to add a new module to the super app. You can also du
 
 3. Create a `Fragment` for your application.
 
-4. Create a navigation graph in `src/main/res/navigation` and define your `Fragment` as a start destination. Make sure to use a unique name for your navigation graph file to prevent collisions with other apps.
+4. Create a navigation graph in `src/main/res/navigation` and define your `Fragment` as a start destination. Make sure to use a unique name for your navigation graph file to prevent collisions with other apps. 
 
-5. Add an item for your app to the navigation drawer in `common/src/main/res/menu/drawer.xml`. 
-
-6. Create your own `Activity` extending `DrawerActivity`, and override:
-   - `navigationGraph` to be the ID of your navigation graph,
-   - `topLevelDestinationIds` to be the IDs of top level destinations (it used to determine for which destinations the back button should be shown),
-   - `drawerNavigationItem` to be the ID of your drawer navigation item defined in the previous step,
-   - and optionally, `bottomNavigationMenu` can return the menu ID to be used for the bottom navigation.
+5. Create your own `Activity` extending `DrawerActivity`, and override `navigationGraph` to be the ID of your navigation graph, and optionally `bottomNavigationMenu` to return the menu ID to be used for the bottom navigation.
 
 7. Define dependency of the super app on your app module by adding `implementation project(':my-app')` to `app/build.gradle` dependencies, where `my-app` is the name of your module.
 
 8. Define your `Activity` in `app/src/main/AndroidManifest.xml`.
 
-9. Add a handler for a navigation drawer item click in `TrustChainApplication.onNavigationItemSelected`. When your item is selected, your `Activity` should be started. 
+9. Define your app in `AppDefinition` enum in `app/src/main/ajva/nl/tudelft/trustchain/app/AppDefinition.kt`. You should specify the icon drawable resource, app name, color, and your `Activity` class. 
 
-10. Install the super app and check that your app is available in the menu and is opened on click: ``./gradlew :app:installDebug``
+10. Install the super app and check that your app is available in the dashboard and can be opened on click: ``./gradlew :app:installDebug``

@@ -1,11 +1,8 @@
 package nl.tudelft.trustchain.app
 
-import android.app.Activity
 import android.app.Application
 import android.bluetooth.BluetoothManager
-import android.content.Intent
 import android.util.Log
-import android.view.MenuItem
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -29,12 +26,9 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.common.OnNavigationItemSelectedListener
-import nl.tudelft.trustchain.debug.DebugActivity
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.app.service.TrustChainService
 
-class TrustChainApplication : Application(), OnNavigationItemSelectedListener {
+class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
@@ -138,28 +132,6 @@ class TrustChainApplication : Application(), OnNavigationItemSelectedListener {
         } else {
             AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
-    }
-
-    /**
-     * Handle click on drawer navigation item.
-     */
-    override fun onNavigationItemSelected(activity: Activity, item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_trustchain_explorer -> {
-                startActivity(activity, TrustChainExplorerActivity::class.java)
-            }
-            R.id.nav_debug -> {
-                startActivity(activity, DebugActivity::class.java)
-            }
-        }
-        return true
-    }
-
-    private fun <T> startActivity(activity: Activity, cls: Class<T>) {
-        val intent = Intent(this, cls)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        activity.startActivity(intent)
-        activity.overridePendingTransition(0, 0)
     }
 
     companion object {

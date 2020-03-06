@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.debug
 
-import nl.tudelft.trustchain.common.DrawerActivity
+import nl.tudelft.trustchain.common.BaseActivity
 
-class DebugActivity : DrawerActivity() {
+class DebugActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_debug
-    override val topLevelDestinationIds = setOf(R.id.debugFragment)
-    override val drawerNavigationItem = R.id.nav_debug
 }

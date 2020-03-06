@@ -14,7 +14,7 @@ class TrustChainService : IPv8Service() {
             notificationIntent, 0)
 
         return NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_CONNECTION)
-            .setContentTitle("TrustChain Explorer")
+            .setContentTitle("IPv8")
             .setContentText("Running")
             .setSmallIcon(R.drawable.ic_insert_link_black_24dp)
             .setContentIntent(pendingIntent)
