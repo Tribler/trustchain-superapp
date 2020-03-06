@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,32 +37,13 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
             refresh()
         }
 
-        importPrivateKeyButton.setOnClickListener {
-            val walletManager = WalletManagerAndroid.getInstance()
-            val privateKeyAsString = privateKeyTextInput.text.toString()
-
-            if (privateKeyAsString.isNotEmpty()) walletManager.importPrivateKey(privateKeyAsString)
-            privateKeyTextInput.text.clear()
-            refresh()
-        }
-
         refresh()
     }
 
     fun refresh() {
         val walletManager = WalletManagerAndroid.getInstance()
 
-        // Balance.
-        val balance = walletManager.getBalance()
-        balanceTextView.text = balance.toString()
-
-        // Keypair List.
-        var output = ""
-        walletManager.getImportedKeyPairs()?.forEach { keypair ->
-            output += walletManager.ecKeyToPrivateKeyString(keypair) + "\n"
-            // TODO: Figure out how to get the public key as a string out of the keypair.
-        }
-        keypairTextview.text = output
+        Log.i("Coin", "Coin: ${walletManager.toSeed()}")
     }
 
     override fun onCreateView(

@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
+import com.google.common.base.Joiner
 import com.google.common.util.concurrent.ListenableFuture
 import org.bitcoinj.core.*
 import org.bitcoinj.core.ECKey.ECDSASignature
@@ -10,6 +11,7 @@ import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptPattern
+import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.File
@@ -22,7 +24,7 @@ import java.util.*
  * NOTE: Ideally should be separated from any Android UI concepts. Not the case currently.
  */
 class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, walletDir: File) {
-    private val kit: WalletAppKit
+    val kit: WalletAppKit
     val params: NetworkParameters
 
     init {
@@ -47,6 +49,10 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         }
 
         kit.startAsync()
+
+        Thread.sleep(5000)
+        Log.i("Coin", "Coin: ${kit.wallet()}")
+        Log.i("Coin", "Coin: ${toSeed()}")
     }
 
     fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>): Transaction {
@@ -145,18 +151,20 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         kit.peerGroup().broadcastTransaction(spendTx)
     }
 
-    fun getBalance(): Long {
-        Log.e("Coin", kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString())
-        // TODO: Does not show correct value.
-        return kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).value
+    fun getConfirmedBalance(): Coin? {
+        return kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE)
     }
 
-    fun getImportedKeyPairs(): MutableList<ECKey>? {
-        return kit.wallet().importedKeys
+    fun getUnconfirmedBalance(): Coin? {
+        return kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED_SPENDABLE)
     }
 
-    fun importPrivateKey(privateKey: String) {
-        kit.wallet().importKey(privateKeyStringToECKey(privateKey))
+    fun getProtocolPublicAddress(): Address {
+        return kit.wallet().issuedReceiveAddresses[0]
+    }
+
+    fun getProtocolPublicKey(): ECKey {
+        return kit.wallet().issuedReceiveKeys[0]
     }
 
     fun privateKeyStringToECKey(privateKey: String): ECKey {
@@ -165,6 +173,17 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
 
     fun ecKeyToPrivateKeyString(ecKey: ECKey): String {
         return ecKey.getPrivateKeyAsWiF(params)
+    }
+
+    fun toSeed() {
+        val seed = kit.wallet().keyChainSeed
+        println("Seed words are: " + Joiner.on(" ").join(seed.mnemonicCode))
+        println("Seed birthday is: " + seed.creationTimeSeconds)
+    }
+
+    fun importSeedIntoWallet(seedCode: String, creationTime: Long) {
+        val seed = DeterministicSeed(seedCode, null, "", creationTime)
+        kit.restoreWalletFromSeed(seed)
     }
 
 }

@@ -39,6 +39,9 @@ class DemoApplication : Application() {
         WalletManagerAndroid.Factory(this)
             .setConfiguration(config)
             .init()
+
+        Log.i("Coin", "Coin: ${WalletManagerAndroid.getInstance().kit.wallet()}")
+
     }
 
     private fun initIPv8() {
