@@ -25,16 +25,16 @@ The debug app shows various information related to connectivity, including:
 - The public key and member ID (SHA-1 hash of the public key)
 - TrustChain statistics (the number of stored blocks and the length of our own chain)
 
-### How to add a new app
+### Do you want to add your own app?
 
-Follow the guide to add your own app.
+- [Adding your own app to the TrustChain Super App](AppTutorial.md).
 
 ## Build
 
 If you want to build an APK, run the following command:
 
 ```
-./gradlew :demo-android:buildDebug
+./gradlew :app:buildDebug
 ```
 
 The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
@@ -44,7 +44,7 @@ The resulting APK will be stored in `app/build/outputs/apk/debug/app-debug.apk`.
 You can also build and automatically install the app on all connected Android devices with a single command:
 
 ```
-./gradlew :demo-android:installDebug
+./gradlew :app:installDebug
 ```
 
 *Note: It is required to have an Android device connected with USB debugging enabled before running this command.*

@@ -27,8 +27,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nl.tudelft.trustchain.explorer.ui.MainActivity" />
-
         <activity android:name="nl.tudelft.trustchain.debug.DebugActivity" />
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />

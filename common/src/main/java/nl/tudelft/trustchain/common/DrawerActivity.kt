@@ -3,8 +3,10 @@ package nl.tudelft.trustchain.common
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.annotation.MenuRes
 import androidx.annotation.NavigationRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -15,7 +17,7 @@ import nl.tudelft.trustchain.common.databinding.ActivityDrawerBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
 abstract class DrawerActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    protected val binding by viewBinding(ActivityDrawerBinding::inflate)
+    private val binding by viewBinding(ActivityDrawerBinding::inflate)
 
     private val appBarConfiguration: AppBarConfiguration by lazy {
         AppBarConfiguration(topLevelDestinationIds, binding.drawerLayout)
@@ -31,7 +33,18 @@ abstract class DrawerActivity : AppCompatActivity(), NavigationView.OnNavigation
      */
     protected abstract val topLevelDestinationIds: Set<Int>
 
-    protected val navController by lazy {
+    /**
+     * The ID of the menu item in the drawer navigation.
+     */
+    protected abstract val drawerNavigationItem: Int
+
+    /**
+     * The resource ID of the bottom menu if it should be shown.
+     */
+    @MenuRes
+    protected open val bottomNavigationMenu: Int = 0
+
+    private val navController by lazy {
         findNavController(R.id.navHostFragment)
     }
 
@@ -47,9 +60,14 @@ abstract class DrawerActivity : AppCompatActivity(), NavigationView.OnNavigation
 
         // Setup drawer navigation
         binding.navView.setNavigationItemSelectedListener(this)
+        binding.navView.setCheckedItem(drawerNavigationItem)
 
         // Setup bottom navigation
         binding.bottomNavigation.setupWithNavController(navController)
+        binding.bottomNavigation.isVisible = bottomNavigationMenu > 0
+        if (bottomNavigationMenu > 0) {
+            binding.bottomNavigation.inflateMenu(bottomNavigationMenu)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -33,7 +33,6 @@ import nl.tudelft.trustchain.common.OnNavigationItemSelectedListener
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.app.service.TrustChainService
-import nl.tudelft.trustchain.common.AppDefinition
 
 class TrustChainApplication : Application(), OnNavigationItemSelectedListener {
     override fun onCreate() {
@@ -145,17 +144,15 @@ class TrustChainApplication : Application(), OnNavigationItemSelectedListener {
      * Handle click on drawer navigation item.
      */
     override fun onNavigationItemSelected(activity: Activity, item: MenuItem): Boolean {
-        return when (item.itemId) {
+        when (item.itemId) {
             R.id.nav_trustchain_explorer -> {
                 startActivity(activity, TrustChainExplorerActivity::class.java)
-                true
             }
             R.id.nav_debug -> {
                 startActivity(activity, DebugActivity::class.java)
-                true
             }
-            else -> false
         }
+        return true
     }
 
     private fun <T> startActivity(activity: Activity, cls: Class<T>) {
