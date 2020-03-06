@@ -60,7 +60,7 @@ Run unit tests:
 
 Run instrumented tests:
 ```
-./gradlew jacocoTestReport
+./gradlew connectedAndroidTest
 ```
 
 ## Code style
