@@ -17,7 +17,7 @@ jobs:
     - name: Run tests
       uses: eskatos/gradle-command-action@v1
       with:
-        arguments: check
+        arguments: :app:check :common:check :trustchain-explorer:check :debug:check
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
