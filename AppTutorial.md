@@ -16,6 +16,6 @@ You can follow these steps to add a new module to the super app. You can also du
 
 8. Define your `Activity` in `app/src/main/AndroidManifest.xml`.
 
-9. Define your app in `AppDefinition` enum in `app/src/main/ajva/nl/tudelft/trustchain/app/AppDefinition.kt`. You should specify the icon drawable resource, app name, color, and your `Activity` class. 
+9. Define your app in `AppDefinition` enum in `app/src/main/java/nl/tudelft/trustchain/app/AppDefinition.kt`. You should specify the icon drawable resource, app name, color, and your `Activity` class. 
 
 10. Install the super app and check that your app is available in the dashboard and can be opened on click: ``./gradlew :app:installDebug``
