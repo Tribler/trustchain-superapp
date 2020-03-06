@@ -7,10 +7,6 @@
         android:title="Peers"
         android:icon="@drawable/ic_device_hub_black_24dp" />
     <item
-        android:id="@+id/bitcoinFragment"
-        android:title="@string/bitcoin"
-        android:icon="@drawable/ic_device_hub_black_24dp" />
-    <item
         android:id="@+id/usersFragment"
         android:title="Chains"
         android:icon="@drawable/ic_insert_link_black_24dp" />
@@ -26,4 +22,8 @@
 <!--        android:id="@+id/debugFragment"-->
 <!--        android:title="Debug"-->
 <!--        android:icon="@drawable/ic_bug_report_black_24dp" />-->
+    <item
+        android:id="@+id/bitcoinFragment"
+        android:title="@string/bitcoin"
+        android:icon="@drawable/ic_device_hub_black_24dp" />
 </menu>

@@ -53,5 +53,16 @@
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
         android:label="fragment_bitcoin"
-        tools:layout="@layout/fragment_bitcoin" />
+        tools:layout="@layout/fragment_bitcoin" >
+        <action
+            android:id="@+id/action_bitcoinFragment_to_join_network"
+            app:destination="@id/join_network"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/join_network"
+        android:name="nl.tudelft.ipv8.android.demo_currency.join_network"
+        android:label="fragment_join_network"
+        tools:layout="@layout/fragment_join_network" />
 </navigation>
