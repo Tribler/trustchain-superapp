@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.common
 
-import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 

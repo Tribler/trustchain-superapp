@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.common
 
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.MenuRes
-import androidx.annotation.NavigationRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.findNavController
