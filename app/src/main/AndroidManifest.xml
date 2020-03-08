@@ -18,7 +18,10 @@
         android:theme="@style/AppTheme"
         android:name="nl.tudelft.trustchain.app.TrustChainApplication">
 
-        <activity android:name=".ui.dashboard.DashboardActivity" android:label="IPv8 Apps">
+        <activity
+            android:name=".ui.dashboard.DashboardActivity"
+            android:label="IPv8 Apps"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,9 +29,13 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity" />
+        <activity
+            android:name="nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
-        <activity android:name="nl.tudelft.trustchain.debug.DebugActivity" />
+        <activity
+            android:name="nl.tudelft.trustchain.debug.DebugActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>

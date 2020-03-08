@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.common
 
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -10,11 +9,11 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import nl.tudelft.trustchain.common.databinding.ActivityDrawerBinding
+import nl.tudelft.trustchain.common.databinding.ActivityBaseBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
 abstract class BaseActivity : AppCompatActivity() {
-    private val binding by viewBinding(ActivityDrawerBinding::inflate)
+    private val binding by viewBinding(ActivityBaseBinding::inflate)
 
     private val appBarConfiguration: AppBarConfiguration by lazy {
         AppBarConfiguration(setOf())
@@ -55,17 +54,5 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                if (!onSupportNavigateUp()) {
-                    finish()
-                }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
     }
 }
