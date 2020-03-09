@@ -10,4 +10,49 @@
         android:name="nl.tudelft.trustchain.trader.ui.TraderFragment"
         android:label="Trader Fragment"
         tools:layout="@layout/fragment_trader" />
+
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferFragment"
+        android:label="Transfer" >
+        <action
+            android:id="@+id/action_transferFragment_to_transferReceiveFragment"
+            app:destination="@id/transferReceiveFragment" />
+        <action
+            android:id="@+id/action_transferFragment_to_transferSendFragment"
+            app:destination="@id/transferSendFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transferConfirmationFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferConfirmationFragment"
+        android:label="TransferConfirmationFragment" >
+        <action
+            android:id="@+id/action_transferConfirmationFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transferReceiveFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferReceiveFragment"
+        android:label="TransferReceiveFragment" >
+        <action
+            android:id="@+id/action_transferReceiveFragment_to_transferConfirmationFragment"
+            app:destination="@id/transferConfirmationFragment" />
+        <action
+            android:id="@+id/action_transferReceiveFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transferSendFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferSendFragment"
+        android:label="TransferSendFragment" >
+        <action
+            android:id="@+id/action_transferSendFragment_to_transferConfirmationFragment"
+            app:destination="@id/transferConfirmationFragment" />
+        <action
+            android:id="@+id/action_transferSendFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
+    </fragment>
 </navigation>
