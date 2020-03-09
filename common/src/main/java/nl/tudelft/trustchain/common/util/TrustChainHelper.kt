@@ -42,18 +42,27 @@ class TrustChainHelper(
 
     /**
      * Creates a new proposal block, using a text message as the transaction content.
-     * Optionally, the blockType can be passed as an argument. Default value is "demo_block".
      */
-    fun createProposalBlock(message: String, publicKey: ByteArray, blockType: String = "demo_block") {
+    fun createProposalBlock(message: String, publicKey: ByteArray): TrustChainBlock {
+        val blockType = "demo_block"
         val transaction = mapOf("message" to message)
-        trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+        return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+    }
+
+    /**
+     * Creates a new proposal block of type "demo_tx_block", using a float as transaction amount.
+     */
+    fun createTxProposalBlock(amount: Float, publicKey: ByteArray): TrustChainBlock {
+        val blockType = "demo_tx_block"
+        val transaction = mapOf("amount" to amount)
+        return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
 
     /**
      * Creates an agreement block to a specified proposal block, using a custom transaction.
      */
-    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
-        trustChainCommunity.createAgreementBlock(link, transaction)
+    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction): TrustChainBlock {
+        return trustChainCommunity.createAgreementBlock(link, transaction)
     }
 
     /**
@@ -62,5 +71,12 @@ class TrustChainHelper(
      */
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
         return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
+    }
+
+    /**
+     * Returns public key of self
+     */
+    fun getMyPublicKey(): ByteArray {
+        return trustChainCommunity.myPeer.publicKey.keyToBin()
     }
 }

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/transferReceiveLinear">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="100sp"
+            android:autoSizeStepGranularity="2sp"
+            android:text="@string/transferInfoMessage"
+            android:id="@+id/textTransferInfoMessage" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="100sp"
+            android:autoSizeStepGranularity="2sp"
+            android:text=""
+            android:id="@+id/textSenderPublicKey"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="100sp"
+            android:autoSizeStepGranularity="2sp"
+            android:text=""
+            android:id="@+id/textTransferAmount"
+            />
+
+        <Button
+            android:id="@+id/buttonConfirmReceipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/transferReceiveBttnConfirm"
+            app:layout_constraintLeft_toLeftOf="@id/transferReceiveLinear"
+            app:layout_constraintBottom_toBottomOf="@id/transferReceiveLinear" />
+        <Button
+            android:id="@+id/buttonCancelReceipt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/transferReceiveCancel"
+            app:layout_constraintRight_toRightOf="@id/transferReceiveLinear"
+            app:layout_constraintBottom_toBottomOf="@id/transferReceiveLinear" />
+
+    </LinearLayout>
+    <LinearLayout android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:id="@+id/transferReceiveLinearConfirmed">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="16sp"
+            android:autoSizeMaxTextSize="100sp"
+            android:autoSizeStepGranularity="2sp"
+            android:text="@string/receiverLetSenderConfirm"
+            android:id="@+id/textReceiverLetSenderConfirm"
+            />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:id="@+id/image3rdQR" />
+
+        <Button
+            android:id="@+id/buttonConfirmReceiptTransferEnd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next"
+            app:layout_constraintRight_toRightOf="@id/transferReceiveLinear"
+            app:layout_constraintBottom_toBottomOf="@id/transferReceiveLinear" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

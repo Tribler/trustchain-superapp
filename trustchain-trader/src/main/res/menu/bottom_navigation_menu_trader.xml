@@ -5,4 +5,9 @@
         android:id="@+id/traderFragment"
         android:title="Trader"
         android:icon="@drawable/ic_person_black_24dp" />
+
+    <item
+        android:id="@+id/transferFragment"
+        android:title="Transfer"
+        android:icon="@drawable/ic_person_black_24dp" />
 </menu>
