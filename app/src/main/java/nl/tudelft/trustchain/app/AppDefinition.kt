@@ -8,6 +8,7 @@ import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.MainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
+import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -26,6 +27,12 @@ enum class AppDefinition(
         "Debug",
         R.color.dark_gray,
         DebugActivity::class.java
+    ),
+    TRUSTCHAIN_TRADER(
+        R.drawable.ic_device_hub_black_24dp,
+        "TrustChain Trader",
+        R.color.blue,
+        TrustChainTraderActivity::class.java
     ),
     CURRENCYII(
         R.drawable.ic_attach_money_black_24dp,

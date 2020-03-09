@@ -38,6 +38,10 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.currencyii.MainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
