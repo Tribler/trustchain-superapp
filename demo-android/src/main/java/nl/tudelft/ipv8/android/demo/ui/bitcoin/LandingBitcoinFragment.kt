@@ -19,7 +19,7 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin) {
         loadInitialView()
     }
 
-    private  fun loadInitialView() {
+    private fun loadInitialView() {
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.landing_bitcoin_container, BitcoinFragment.newInstance())
         transaction.addToBackStack(null)

@@ -38,7 +38,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
     }
 
     private fun loadJoinNetworkFragment() {
-
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(R.id.landing_bitcoin_container, JoinNetworkFragment.newInstance())
         transaction.addToBackStack(null)
