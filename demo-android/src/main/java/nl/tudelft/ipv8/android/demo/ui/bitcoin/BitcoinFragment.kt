@@ -15,8 +15,9 @@ import nl.tudelft.ipv8.util.hexToBytes
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
-    private val joinFragment: Fragment = JoinNetworkFragment.newInstance()
+class BitcoinFragment(
+    override val controller: BitcoinViewController
+) : BitcoinView, BaseFragment(R.layout.fragment_bitcoin) {
 
     private var publicKeyReceiver: String = ""
     private var bitcoinPrivateKey: String = ""
@@ -38,10 +39,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
     }
 
     private fun loadJoinNetworkFragment() {
-        val transaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.landing_bitcoin_container, JoinNetworkFragment.newInstance())
-        transaction.addToBackStack(null)
-        transaction.commit()
+        controller.showView("JoinNetworkFragment")
     }
 
     override fun onCreateView(
@@ -60,6 +58,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance() = BitcoinFragment()
+        fun newInstance(controller: BitcoinViewController) = BitcoinFragment(controller)
     }
 }

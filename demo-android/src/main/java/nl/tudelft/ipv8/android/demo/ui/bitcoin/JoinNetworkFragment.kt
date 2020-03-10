@@ -13,7 +13,9 @@ import nl.tudelft.ipv8.android.demo.ui.BaseFragment
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinNetworkFragment : BaseFragment(R.layout.fragment_join_network) {
+class JoinNetworkFragment (
+    override val controller: BitcoinViewController
+) : BitcoinView, BaseFragment(R.layout.fragment_join_network) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
     }
@@ -34,6 +36,6 @@ class JoinNetworkFragment : BaseFragment(R.layout.fragment_join_network) {
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance() = JoinNetworkFragment()
+        fun newInstance(controller: BitcoinViewController) = JoinNetworkFragment(controller)
     }
 }
