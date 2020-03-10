@@ -5,42 +5,23 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.util.hexToBytes
 
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
-    private val joinFragment: Fragment = JoinNetworkFragment.newInstance()
-
-    private var publicKeyReceiver: String = ""
-    private var bitcoinPrivateKey: String = ""
-    private var transactionAmount: Double = 0.0
-
+class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        button3.setOnClickListener {
-            publicKeyReceiver = pk_receiver.text.toString()
-            transactionAmount = tx_amount.text.toString().toDouble()
-            outputTextView.text = "PK Receiver: $publicKeyReceiver, Amount: $transactionAmount"
-
-            getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
-        }
-
-        button4.setOnClickListener {
-            loadJoinNetworkFragment()
-        }
+        loadInitialView()
     }
 
-    private fun loadJoinNetworkFragment() {
-
+    private  fun loadInitialView() {
         val transaction = parentFragmentManager.beginTransaction()
-        transaction.replace(R.id.landing_bitcoin_container, JoinNetworkFragment.newInstance())
+        transaction.replace(R.id.landing_bitcoin_container, BitcoinFragment.newInstance())
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -50,7 +31,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bitcoin, container, false)
+        return inflater.inflate(R.layout.fragment_landing_bitcoin, container, false)
     }
 
     companion object {
@@ -61,6 +42,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance() = BitcoinFragment()
+        fun newInstance() = LandingBitcoinFragment()
     }
 }

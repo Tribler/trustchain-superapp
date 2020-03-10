@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_bitcoin_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.bitcoin.BitcoinFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -66,6 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/send_bitcoin" />
+
         <TextView
             android:id="@+id/outputTextView"
             android:layout_width="match_parent"
@@ -130,7 +129,7 @@
                 android:id="@+id/button4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Button" />
+                android:text="Search a Shared Wallet" />
 
         </LinearLayout>
 
