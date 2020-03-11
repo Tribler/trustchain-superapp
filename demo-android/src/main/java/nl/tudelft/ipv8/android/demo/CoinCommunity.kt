@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.util.toHex
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
@@ -61,10 +62,20 @@ class CoinCommunity: Community() {
             SW_TRUSTCHAIN_PKS to arrayListOf(trustchainPk),
             SW_BITCOIN_PKS to arrayListOf(bitcoinPk)
         )
-        val transaction = mapOf("message" to JSONObject(transactionValues).toString())
-        // Create a self signed proposal block
-        val proposalBlock = trustchain.createProposalBlock(transaction, trustchainPk, SW_JOIN_BLOCK)
-        trustchain.createAgreementBlock(proposalBlock, mapOf("message" to "ack"))
+        val values = JSONObject(transactionValues).toString()
+        trustchain.createProposalBlock(values, trustchainPk, SW_JOIN_BLOCK)
+    }
+
+    public fun discoverSharedWalletsTrustchainPublicKeys(): List<String> {
+        val sharedWalletBlocks = getTrustChainCommunity().database.getBlocksWithType(SW_JOIN_BLOCK)
+        val wallets = mutableListOf<String>()
+        for (block in sharedWalletBlocks) {
+            val publicKey = block.publicKey.toHex()
+            if (!wallets.contains(publicKey)) {
+                wallets.add(publicKey)
+            }
+        }
+        return wallets
     }
 
     public fun joinSharedWallet(swBlockHash: ByteArray, bitcoinPk: ByteArray) {
