@@ -1,9 +1,11 @@
 package nl.tudelft.ipv8.android.demo
+import android.util.JsonWriter
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
+import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -52,18 +54,17 @@ class CoinCommunity: Community() {
         // TODO: Create bitcoin wallet
         // TODO: Fill wallet with entrance fee
 
-        val transaction = mapOf(
+        val transactionValues = mapOf(
             SW_ENTRANCE_FEE to entranceFee,
             SW_PK to sharedWalletPK,
             SW_VOTING_THRESHOLD to votingThreshold,
             SW_TRUSTCHAIN_PKS to arrayListOf(trustchainPk),
             SW_BITCOIN_PKS to arrayListOf(bitcoinPk)
         )
-
+        val transaction = mapOf("message" to JSONObject(transactionValues).toString())
         // Create a self signed proposal block
         val proposalBlock = trustchain.createProposalBlock(transaction, trustchainPk, SW_JOIN_BLOCK)
         trustchain.createAgreementBlock(proposalBlock, mapOf("message" to "ack"))
-
     }
 
     public fun joinSharedWallet(swBlockHash: ByteArray, bitcoinPk: ByteArray) {
