@@ -7,6 +7,8 @@ import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
@@ -23,11 +25,23 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 
+@ExperimentalStdlibApi
 class DemoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
         initIPv8()
+        initWalletManager()
+    }
+
+    private fun initWalletManager() {
+        val config = WalletManagerConfiguration()
+        WalletManagerAndroid.Factory(this)
+            .setConfiguration(config)
+            .init()
+
+        Log.i("Coin", "Coin: ${WalletManagerAndroid.getInstance().kit.wallet()}")
+
     }
 
     private fun initIPv8() {

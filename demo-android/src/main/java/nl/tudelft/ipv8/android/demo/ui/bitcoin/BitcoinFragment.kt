@@ -1,12 +1,14 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.util.hexToBytes
 
@@ -32,6 +34,18 @@ class BitcoinFragment(
 
             getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
         }
+
+        refreshButton.setOnClickListener {
+            refresh()
+        }
+
+        refresh()
+    }
+
+    private fun refresh() {
+        val walletManager = WalletManagerAndroid.getInstance()
+
+        Log.i("Coin", "Coin: ${walletManager.toSeed()}")
 
         create_wallet_button.setOnClickListener {
             controller.showView("CreateSWFragment")
