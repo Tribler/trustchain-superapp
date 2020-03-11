@@ -64,4 +64,9 @@
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.LandingBitcoinFragment"
         android:label="Bitcoin Overview"
         tools:layout="@layout/fragment_landing_bitcoin" />
+    <fragment
+        android:id="@+id/createSWFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.CreateSWFragment"
+        android:label="fragment_create_sw"
+        tools:layout="@layout/fragment_create_sw" />
 </navigation>

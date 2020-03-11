@@ -126,7 +126,12 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/button4"
+                android:id="@+id/create_wallet_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Create a Shared Wallet" />
+            <Button
+                android:id="@+id/search_wallet_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Search a Shared Wallet" />
