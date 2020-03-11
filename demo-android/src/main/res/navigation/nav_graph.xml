@@ -52,6 +52,21 @@
     <fragment
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
-        android:label="fragment_bitcoin"
-        tools:layout="@layout/fragment_bitcoin" />
+        android:label="Bitcoin Overview"
+        tools:layout="@layout/fragment_bitcoin"></fragment>
+    <fragment
+        android:id="@+id/joinNetworkFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.JoinNetworkFragment"
+        android:label="Join Shared Wallet"
+        tools:layout="@layout/fragment_join_network" />
+    <fragment
+        android:id="@+id/landingBitcoinFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.LandingBitcoinFragment"
+        android:label="Bitcoin Overview"
+        tools:layout="@layout/fragment_landing_bitcoin" />
+    <fragment
+        android:id="@+id/createSWFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.CreateSWFragment"
+        android:label="fragment_create_sw"
+        tools:layout="@layout/fragment_create_sw" />
 </navigation>

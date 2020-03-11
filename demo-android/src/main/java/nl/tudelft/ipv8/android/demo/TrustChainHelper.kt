@@ -49,6 +49,13 @@ class TrustChainHelper(
     }
 
     /**
+     * Creates a new proposal block, using a text message as the transaction content.
+     */
+    fun createProposalBlock(transaction: TrustChainTransaction, publicKey: ByteArray, blockType: String = "demo_block"): TrustChainBlock {
+        return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+    }
+
+    /**
      * Creates an agreement block to a specified proposal block, using a custom transaction.
      */
     fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction) {
