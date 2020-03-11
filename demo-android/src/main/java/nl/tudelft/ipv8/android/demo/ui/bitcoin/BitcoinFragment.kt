@@ -33,13 +33,13 @@ class BitcoinFragment(
             getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
         }
 
-        button4.setOnClickListener {
-            loadJoinNetworkFragment()
+        create_wallet_button.setOnClickListener {
+            controller.showView("CreateSWFragment")
         }
-    }
 
-    private fun loadJoinNetworkFragment() {
-        controller.showView("JoinNetworkFragment")
+        search_wallet_button.setOnClickListener {
+            controller.showView("JoinNetworkFragment")
+        }
     }
 
     override fun onCreateView(
