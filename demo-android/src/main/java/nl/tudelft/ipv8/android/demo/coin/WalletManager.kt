@@ -5,6 +5,7 @@ import com.google.common.base.Joiner
 import com.google.common.util.concurrent.ListenableFuture
 import org.bitcoinj.core.*
 import org.bitcoinj.core.ECKey.ECDSASignature
+import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.TestNet3Params
@@ -44,15 +45,37 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             override fun onSetupCompleted() {
                 // Make a fresh new key if no keys in stored wallet.
                 if (wallet().keyChainGroupSize < 1) wallet().importKey(ECKey())
+                wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
             }
         }
 
-        kit.startAsync()
+        kit.setDownloadListener(object : DownloadProgressTracker() {
+            override fun progress(
+                pct: Double,
+                blocksSoFar: Int,
+                date: Date?
+            ) {
+                super.progress(pct, blocksSoFar, date)
+                val percentage = pct.toInt()
+                Log.i("Coin", "Progress: $percentage")
+            }
 
-        Thread.sleep(5000)
+            override fun doneDownload() {
+                super.doneDownload()
+                Log.w("Coin", "Download Complete!")
+                Log.i("Coin", "Balance: ${kit.wallet().balance}")
+            }
+        })
+
+        kit.setBlockingStartup(false)
+        kit.startAsync();
+        kit.awaitRunning()
+
         Log.i("Coin", "Coin: ${kit.wallet()}")
         Log.i("Coin", "Coin: ${toSeed()}")
+        Log.i("Coin", "ChainHeight: ${kit.chain().bestChainHeight}" )
+
     }
 
     fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>): Transaction {
@@ -80,7 +103,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         val broadcast: ListenableFuture<Transaction> =
             kit.peerGroup().broadcastTransaction(req.tx).broadcast()
         broadcast.addListener(Runnable {
-            Log.d("Coin", "Coin: created a multisignature wzllet.")
+            Log.d("Coin", "Coin: created a multisignature wallet.")
         }, WalletManagerAndroid.runInUIThread)
 
         return contract

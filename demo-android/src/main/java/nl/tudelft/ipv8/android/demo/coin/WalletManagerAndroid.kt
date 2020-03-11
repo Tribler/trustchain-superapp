@@ -36,7 +36,7 @@ object WalletManagerAndroid {
             WalletManagerAndroid.application = application
 
             val walletManager = WalletManager(configuration, walletDir)
-            setupThread(application.applicationContext)
+//            setupThread(application.applicationContext)
 
             WalletManagerAndroid.walletManager = walletManager
 
@@ -56,11 +56,9 @@ object WalletManagerAndroid {
      * Sets up in which thread BitcoinJ will conduct its background activities.
      */
     fun setupThread(applicationContext: Context) {
-        val runInUIThread: Executor = object : Executor {
-            override fun execute(runnable: Runnable) {
-                val handler = Handler(applicationContext.mainLooper)
-                handler.post(runnable)
-            }
+        val runInUIThread: Executor = Executor { runnable ->
+            val handler = Handler(applicationContext.mainLooper)
+            handler.post(runnable)
         }
 
         Threading.USER_THREAD = runInUIThread

@@ -1,7 +1,5 @@
 package nl.tudelft.ipv8.android.demo.coin
 
-import com.google.common.base.Joiner
-import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.Wallet
 import org.junit.Test
 import java.io.File
@@ -24,6 +22,7 @@ class WalletManagerTest {
 
         walletManager.toSeed()
 
+        println("\nChain height:" + walletManager.kit.chain().bestChainHeight)
         println("Current receive address")
         println(wallet.currentReceiveAddress())
         println("Protocol address:")
