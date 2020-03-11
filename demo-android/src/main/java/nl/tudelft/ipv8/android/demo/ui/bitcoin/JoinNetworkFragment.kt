@@ -5,41 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.util.hexToBytes
 
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment(
+class JoinNetworkFragment (
     override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_bitcoin) {
-
-    private var publicKeyReceiver: String = ""
-    private var bitcoinPrivateKey: String = ""
-    private var transactionAmount: Double = 0.0
-
+) : BitcoinView, BaseFragment(R.layout.fragment_join_network) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        button3.setOnClickListener {
-            publicKeyReceiver = pk_receiver.text.toString()
-            transactionAmount = tx_amount.text.toString().toDouble()
-            outputTextView.text = "PK Receiver: $publicKeyReceiver, Amount: $transactionAmount"
-
-            getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
-        }
-
-        button4.setOnClickListener {
-            loadJoinNetworkFragment()
-        }
-    }
-
-    private fun loadJoinNetworkFragment() {
-        controller.showView("JoinNetworkFragment")
     }
 
     override fun onCreateView(
@@ -47,7 +25,7 @@ class BitcoinFragment(
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_bitcoin, container, false)
+        return inflater.inflate(R.layout.fragment_join_network, container, false)
     }
 
     companion object {
@@ -58,6 +36,6 @@ class BitcoinFragment(
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance(controller: BitcoinViewController) = BitcoinFragment(controller)
+        fun newInstance(controller: BitcoinViewController) = JoinNetworkFragment(controller)
     }
 }
