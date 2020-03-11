@@ -66,12 +66,12 @@ class CoinCommunity: Community() {
         trustchain.createProposalBlock(values, trustchainPk, SW_JOIN_BLOCK)
     }
 
-    public fun discoverSharedWalletsTrustchainPublicKeys(): List<String> {
+    public fun discoverSharedWalletsTrustchainPublicKeys(): List<ByteArray> {
         val sharedWalletBlocks = getTrustChainCommunity().database.getBlocksWithType(SW_JOIN_BLOCK)
-        val wallets = mutableListOf<String>()
+        val wallets = mutableListOf<ByteArray>()
         for (block in sharedWalletBlocks) {
-            val publicKey = block.publicKey.toHex()
-            if (!wallets.contains(publicKey)) {
+            val publicKey = block.publicKey
+            if (wallets.none { byteArray -> byteArray.toHex() == publicKey.toHex() }) {
                 wallets.add(publicKey)
             }
         }
@@ -119,7 +119,7 @@ class CoinCommunity: Community() {
     }
 
     companion object {
-        private const val SW_JOIN_BLOCK = "SW_JOIN"
+        public const val SW_JOIN_BLOCK = "SW_JOIN"
         private const val SW_JOIN_AGREEMENT_BLOCK = "SW_JOIN"
         private const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         private const val SW_PK = "SW_PK"

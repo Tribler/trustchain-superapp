@@ -9,9 +9,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_join_network.*
+import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import org.json.JSONObject
 
 /**
  * A simple [Fragment] subclass.
@@ -26,6 +29,11 @@ class JoinNetworkFragment (
 
         val sharedWalletPublicKeys = getCoinCommunity()
             .discoverSharedWalletsTrustchainPublicKeys()
+            .map { pk ->
+                getTrustChainCommunity().database.getLatest(pk, CoinCommunity.SW_JOIN_BLOCK)
+                    ?: throw IllegalArgumentException("Shared Wallet block not found")
+            }
+
         val adaptor = JoinNetworkListAdapter(this, sharedWalletPublicKeys)
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
@@ -53,13 +61,15 @@ class JoinNetworkFragment (
     }
 }
 
-class JoinNetworkListAdapter(private val context: BaseFragment, private val items: List<String>): BaseAdapter() {
+class JoinNetworkListAdapter(private val context: BaseFragment, private val items: List<TrustChainBlock>): BaseAdapter() {
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         val inflater = context.layoutInflater
         val view1 = inflater.inflate(R.layout.join_sw_row_data, null)
 
-        var sw_id_item = view1.findViewById<TextView>(R.id.sw_id_item_t)
-        sw_id_item.text = items[p0]
+        var publicKeyTextView = view1.findViewById<TextView>(R.id.sw_id_item_t)
+//        var blockDataTextView = view1.findViewById<TextView>(R.id.sw_data_tf)
+        publicKeyTextView.text = items[p0].publicKey.toHex()
+//        blockDataTextView.text = JSONObject(items[p0].transaction).toString()
 
         return view1
     }
