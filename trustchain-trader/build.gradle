@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
+apply plugin: "androidx.navigation.safeargs"
 
 android {
     compileSdkVersion 29
@@ -42,9 +43,12 @@ dependencies {
     // QR code
     implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
     implementation 'com.android.support:multidex:1.0.3'
-    
+
     // Animation
     implementation 'com.airbnb.android:lottie:3.4.0'
+
+    implementation 'com.mattskala:itemadapter:0.3'
+
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
