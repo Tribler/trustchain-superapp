@@ -12,11 +12,10 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
-import kotlinx.android.synthetic.main.fragment_transfer_receive.view.*
-import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.trader.R
 
 
 class TransferFragment : BaseFragment() {
