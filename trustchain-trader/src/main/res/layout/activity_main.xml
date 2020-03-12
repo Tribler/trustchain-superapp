@@ -22,6 +22,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/light_gray"
-        app:menu="@menu/bottom_navigation_menu"
+        app:menu="@menu/bottom_navigation_menu_trader"
         app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
