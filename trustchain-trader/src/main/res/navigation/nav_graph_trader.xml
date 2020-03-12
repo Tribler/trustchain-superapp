@@ -36,7 +36,7 @@
         <action
             android:id="@+id/action_transferConfirmationFragment_to_transferFragment"
             app:destination="@id/transferFragment"
-            app:popUpTo="@+id/main_nav_graph"
+            app:popUpTo="@+id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 
