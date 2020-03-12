@@ -1,14 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.TraderFragment">
+    tools:context=".ui.TraderFragment"
+    android:orientation="vertical">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="Yo" />
+        android:layout_gravity="center_horizontal"
+        android:text="Wallet"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:padding="20sp"
+        android:textStyle="bold" />
 
-</FrameLayout>
+    <LinearLayout
+        android:id="@+id/Wallet"
+        android:gravity="top"
+        android:layout_marginTop="60dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="40dp"
+            android:text="Dymbe Dollars:"
+            android:textAlignment="textStart"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="40dp"
+            android:text="@string/amount_currency"
+            android:textAlignment="center"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="0dp"
+            android:paddingVertical="40dp"
+            android:textAlignment="textStart"
+            android:text="Tribler Bandwidth:"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="40dp"
+            android:text="@string/Amount_Bandwidth"
+            android:textAlignment="center"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginTop="60dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_marginTop="160dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/Transactions"
+        android:gravity="top"
+        android:layout_marginTop="165dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
