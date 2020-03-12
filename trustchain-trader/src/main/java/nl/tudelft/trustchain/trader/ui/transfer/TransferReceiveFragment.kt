@@ -22,19 +22,18 @@ class TransferReceiveFragment : BaseFragment(R.layout.fragment_transfer_receive)
      */
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        //val proposalBlock = TransferBlockParser().stringToProposal((arguments?.get("Proposal Block") as String), trustchain)
-        //val agreementBlock = trustchain.createAgreementBlock(proposalBlock, proposalBlock.transaction)
-        //val publicKey = proposalBlock.publicKey.toHex()
-        //val amount = TransactionEncoding.decode(proposalBlock.rawTransaction)
-        //textSenderPublicKey.text = "Public key: $publicKey"
-        //textTransferAmount.text = "Amount: $amount"
+        val proposalBlock = TransferBlockParser().stringToProposal((arguments?.get("Proposal Block") as String), trustchain)
+        val agreementBlock = trustchain.createAgreementBlock(proposalBlock, proposalBlock.transaction)
+        val publicKey = proposalBlock.publicKey.toHex()
+        val amount = TransactionEncoding.decode(proposalBlock.rawTransaction).second
+        textSenderPublicKey.text = "Public key: $publicKey"
+        textTransferAmount.text = "Amount: $amount"
         buttonConfirmReceipt.setOnClickListener {
             val view: View = requireView()
             view.transferReceiveLinear.visibility = View.GONE
             view.transferReceiveLinearConfirmed.visibility = View.VISIBLE
             val bitmap: Bitmap? = QRCodeUtils(activity, requireContext())
-                //.createQR(TransferBlockParser().proposalToString(agreementBlock))
-                .createQR("Joo")
+                .createQR(TransferBlockParser().proposalToString(agreementBlock))
             view.image3rdQR.setImageBitmap(bitmap)
         }
         // Go back to transfer without the ability to go back to this fragment

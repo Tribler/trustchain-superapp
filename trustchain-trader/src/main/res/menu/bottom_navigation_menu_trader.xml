@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_person_black_24dp" />
 
     <item
-        android:id="@+id/transferReceiveFragment"
+        android:id="@+id/transferFragment"
         android:title="Transfer"
         android:icon="@drawable/ic_person_black_24dp" />
 
