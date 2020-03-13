@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.trader.MarketCommunity
 import nl.tudelft.trustchain.trader.R
 import nl.tudelft.trustchain.trader.databinding.FragmentPeersBinding
 
@@ -48,13 +49,13 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val demoCommunity = getDemoCommunity()
-                val peers = demoCommunity.getPeers()
+                val marketCommunity = getMarketCommunity()
+                val peers = marketCommunity.getPeers()
 
-                val discoveredAddresses = demoCommunity.network
-                    .getWalkableAddresses(demoCommunity.serviceId)
+                val discoveredAddresses = marketCommunity.network
+                    .getWalkableAddresses(marketCommunity.serviceId)
 
-                val discoveredBluetoothAddresses = demoCommunity.network
+                val discoveredBluetoothAddresses = marketCommunity.network
                     .getConnectableBluetoothAddresses()
 
                 val peerItems = peers.map {
@@ -64,7 +65,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 }
 
                 val addressItems = discoveredAddresses.map { address ->
-                    val contacted = demoCommunity.discoveredAddressesContacted[address]
+                    val contacted = marketCommunity.discoveredAddressesContacted[address]
                     AddressItem(
                         address,
                         null,
@@ -83,7 +84,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 val items = peerItems + bluetoothAddressItems + addressItems
 
                 adapter.updateItems(items)
-                binding.txtCommunityName.text = demoCommunity.javaClass.simpleName
+                binding.txtCommunityName.text = marketCommunity.javaClass.simpleName
                 binding.txtPeerCount.text = resources.getQuantityString(
                     R.plurals.x_peers, peers.size,
                     peers.size
@@ -96,5 +97,9 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 delay(1000)
             }
         }
+    }
+
+    protected fun getMarketCommunity(): MarketCommunity {
+        return getIpv8().getOverlay() ?: throw IllegalStateException("MarketCommunity is not configured")
     }
 }
