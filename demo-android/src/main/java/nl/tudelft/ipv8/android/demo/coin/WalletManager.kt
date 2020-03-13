@@ -79,26 +79,83 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
 
         Log.i("Coin", "Coin: ${kit.wallet()}")
         Log.i("Coin", "Coin: ${toSeed()}")
-        Log.i("Coin", "Wallet: ${kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)}" )
+        Log.i("Coin", "Wallet: ${kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)}")
 
     }
 
-    fun createMultiSignatureWallet(ourPublicKey: ECKey, otherPublicKeys: List<ECKey>): Transaction {
-        // Prepare a template for the contract.
-        val contract = Transaction(params)
+    companion object {
+        fun createMultiSignatureWallet(
+            ourPublicKey: ECKey,
+            otherPublicKeys: List<ECKey>,
+            params: NetworkParameters = MainNetParams.get()
+        ): Transaction {
+            // Prepare a template for the contract.
+            val contract = Transaction(params)
 
-        // Prepare a list of all keys present in contract.
-        val copiedList = otherPublicKeys.toMutableList()
-        copiedList.add(ourPublicKey)
-        val keys = Collections.unmodifiableList(copiedList)
+            // Prepare a list of all keys present in contract.
+            val copiedList = otherPublicKeys.toMutableList()
+            copiedList.add(ourPublicKey)
+            val keys = Collections.unmodifiableList(copiedList)
 
-        // Create a n-n multi-signature output script.
-        val script = ScriptBuilder.createMultiSigOutputScript(keys.size, keys)
-        // Now add an output with minimum fee needed.
-        // TODO: check if this is enough, or find out how we add fees to a transaction.
-        val amount: Coin = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE
-        contract.addOutput(amount, script)
+            // Create a n-n multi-signature output script.
+            val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
 
+            // Now add an output with minimum fee needed.
+            val amount: Coin = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE
+            contract.addOutput(amount, script)
+
+            return contract
+        }
+
+        fun signMultiSignatureMessage(
+            contract: Transaction,
+            myPublicKey: ECKey,
+            receiverAddress: ECKey,
+            value: Coin,
+            params: NetworkParameters = MainNetParams.get()
+        ): ECDSASignature {
+            // Retrieve the multisignature contract.
+            val multisigOutput: TransactionOutput = contract.getOutput(0)
+            val multisigScript: Script = multisigOutput.scriptPubKey
+
+            // Validate whether the transaction (= contract) is what we expect.
+            if (!ScriptPattern.isSentToMultisig(multisigScript)) {
+                throw Exception("Contract is not a multi signature contract!")
+            }
+
+            // Build the transaction we want to sign.
+            // todo: add validation to check for this value
+            // todo: add fees (so we get chosen earlier by miners)
+            val value: Coin = value
+            val spendTx = Transaction(params)
+            spendTx.addOutput(value, receiverAddress)
+            spendTx.addInput(multisigOutput)
+
+            // Sign the transaction and return it.
+            val sighash: Sha256Hash =
+                spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
+            val signature: ECDSASignature = myPublicKey.sign(sighash)
+
+            return signature
+        }
+
+        fun privateKeyStringToECKey(
+            privateKey: String,
+            params: NetworkParameters = MainNetParams.get()
+        ): ECKey {
+            return DumpedPrivateKey.fromBase58(params, privateKey).key
+        }
+
+        fun ecKeyToPrivateKeyString(
+            ecKey: ECKey,
+            params: NetworkParameters = MainNetParams.get()
+        ): String {
+            return ecKey.getPrivateKeyAsWiF(params)
+        }
+
+    }
+
+    fun completeAndBroadcastTransaction(contract: Transaction) {
         // Add the input to the transaction (so the above amount can be sent to the wallet).
         val req = SendRequest.forTx(contract)
         kit.wallet().completeTx(req)
@@ -107,43 +164,12 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         // It should take a few seconds unless something went wrong.
         val broadcast: ListenableFuture<Transaction> =
             kit.peerGroup().broadcastTransaction(req.tx).broadcast()
+
         broadcast.addListener(Runnable {
             Log.d("Coin", "Coin: created a multisignature wallet.")
         }, WalletManagerAndroid.runInUIThread)
-
-        return contract
     }
 
-    fun signMultiSignatureMessage(
-        contract: Transaction,
-        myPublicKey: ECKey,
-        receiverAddress: ECKey,
-        value: Coin
-    ): ECDSASignature {
-        // Retrieve the multisignature contract.
-        val multisigOutput: TransactionOutput = contract.getOutput(0)
-        val multisigScript: Script = multisigOutput.scriptPubKey
-
-        // Validate whether the transaction (= contract) is what we expect.
-        if (!ScriptPattern.isSentToMultisig(multisigScript)) {
-            throw Exception("Contract is not a multi signature contract!")
-        }
-
-        // Build the transaction we want to sign.
-        // todo: add validation to check for this value
-        // todo: add fees (so we get chosen earlier by miners)
-        val value: Coin = value
-        val spendTx = Transaction(params)
-        spendTx.addOutput(value, receiverAddress)
-        spendTx.addInput(multisigOutput)
-
-        // Sign the transaction and return it.
-        val sighash: Sha256Hash =
-            spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-        val signature: ECDSASignature = myPublicKey.sign(sighash)
-
-        return signature
-    }
 
     /**
      * Contract: multi signature contract in question
@@ -195,14 +221,6 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         return kit.wallet().issuedReceiveKeys[0]
     }
 
-    fun privateKeyStringToECKey(privateKey: String): ECKey {
-        return DumpedPrivateKey.fromBase58(params, privateKey).key
-    }
-
-    fun ecKeyToPrivateKeyString(ecKey: ECKey): String {
-        return ecKey.getPrivateKeyAsWiF(params)
-    }
-
     fun toSeed() {
         val seed = kit.wallet().keyChainSeed
         println("Seed words are: " + Joiner.on(" ").join(seed.mnemonicCode))
@@ -212,6 +230,16 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
     fun importSeedIntoWallet(seedCode: String, creationTime: Long) {
         val seed = DeterministicSeed(seedCode, null, "", creationTime)
         kit.restoreWalletFromSeed(seed)
+    }
+
+    fun printWalletInfo() {
+        val wallet = this.kit.wallet()
+        println("Current receive address:")
+        println(wallet.currentReceiveAddress())
+        println("Protocol address:")
+        println(wallet.issuedReceiveAddresses[0])
+        println("Wallet:")
+        println(wallet.toString())
     }
 
 }
