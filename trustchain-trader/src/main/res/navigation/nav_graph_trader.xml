@@ -8,8 +8,24 @@
     <fragment
         android:id="@+id/traderFragment"
         android:name="nl.tudelft.trustchain.trader.ui.TraderFragment"
-        android:label="Trader Fragment"
-        tools:layout="@layout/fragment_trader" />
+        android:label="Trader"
+        tools:layout="@layout/fragment_trader" >
+        <action
+            android:id="@+id/action_traderFragment_to_AI_HistoryFragment"
+            app:destination="@id/AI_HistoryFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/peerFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.peers.PeersFragment"
+        android:label="Peer Fragment"
+        tools:layout="@layout/fragment_peers" >
+        <action
+            android:id="@+id/action_peerFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/transferFragment"
@@ -30,7 +46,7 @@
         <action
             android:id="@+id/action_transferConfirmationFragment_to_transferFragment"
             app:destination="@id/transferFragment"
-            app:popUpTo="@+id/main_nav_graph"
+            app:popUpTo="@+id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
 
@@ -56,5 +72,16 @@
         <action
             android:id="@+id/action_transferSendFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/AI_HistoryFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.AI_HistoryFragment"
+        android:label="AI History"
+        tools:layout="@layout/fragment_ai_history" >
+        <action
+            android:id="@+id/action_AI_HistoryFragment_to_traderFragment"
+            app:destination="@id/traderFragment"
+            app:enterAnim="@anim/fragment_close_enter"
+            app:exitAnim="@anim/fragment_close_exit" />
     </fragment>
 </navigation>
