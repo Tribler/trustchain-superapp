@@ -22,7 +22,8 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
     private val bitcoinViews = mapOf<String, Fragment>(
         "BitcoinFragment" to BitcoinFragment.newInstance(this),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
-        "CreateSWFragment" to CreateSWFragment.newInstance(this)
+        "CreateSWFragment" to CreateSWFragment.newInstance(this),
+        "MySharedWalletsFragment" to MySharedWalletFragment.newInstance(this)
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

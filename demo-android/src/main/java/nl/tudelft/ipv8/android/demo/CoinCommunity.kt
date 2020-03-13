@@ -36,11 +36,6 @@ class CoinCommunity: Community() {
         return IPv8Android.getInstance()
     }
 
-    public fun sendCurrency(amount: Double, toPublicKey: ByteArray = myPeer.publicKey.keyToBin()) {
-        val message = "Transaction amount: $amount bitcoins"
-        trustchain.createProposalBlock(message, toPublicKey, SW_JOIN_BLOCK)
-    }
-
     /**
      * Create a shared wallet block
      * entranceFee - the fee that has to be paid for new participants
