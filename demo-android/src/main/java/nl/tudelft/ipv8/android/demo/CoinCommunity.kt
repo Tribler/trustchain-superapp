@@ -1,6 +1,4 @@
 package nl.tudelft.ipv8.android.demo
-import android.util.JsonWriter
-import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
@@ -54,6 +52,7 @@ class CoinCommunity: Community() {
         // TODO: Fill wallet with entrance fee
 
         val transactionValues = mapOf(
+            SW_UNIQUE_ID to CoinUtil.randomUUID(),
             SW_ENTRANCE_FEE to entranceFee,
             SW_PK to sharedWalletPK.toHex(),
             SW_VOTING_THRESHOLD to votingThreshold,
@@ -61,20 +60,7 @@ class CoinCommunity: Community() {
             SW_BITCOIN_PKS to arrayListOf(bitcoinPk.toHex())
         )
         val values = JSONObject(transactionValues).toString()
-        trustchain.createProposalBlock(values, trustchainPk, SW_JOIN_BLOCK)
-    }
-
-    public fun discoverSharedWalletsTrustchainPublicKeys(): List<ByteArray> {
-        val sharedWalletBlocks = getTrustChainCommunity().database.getBlocksWithType(SW_JOIN_BLOCK)
-        val wallets = mutableListOf<ByteArray>()
-        for (block in sharedWalletBlocks) {
-            val publicKey = block.publicKey
-            // TODO: Filter on the Shared Bitcoin Wallet PK's (currently always the same)
-            if (wallets.none { byteArray -> byteArray.toHex() == publicKey.toHex() }) {
-                wallets.add(publicKey)
-            }
-        }
-        return wallets
+        trustchain.createProposalBlock(values, trustchainPk, SHARED_WALLET_BLOCK)
     }
 
     public fun joinSharedWallet(swBlockHash: ByteArray, bitcoinPk: ByteArray) {
@@ -86,7 +72,6 @@ class CoinCommunity: Community() {
         val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
         val oldBitcoinPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
         val trustchainPk = myPeer.publicKey.keyToBin()
-
         // TODO: Pay the entrance fee with bitcoinPk
         // TODO: Create new shared wallet using bitcoinPks
 
@@ -99,6 +84,7 @@ class CoinCommunity: Community() {
         newBitcoinPks.add(bitcoinPk.toHex())
 
         val transaction = mapOf(
+            SW_UNIQUE_ID to parsedTransaction.getString(SW_UNIQUE_ID),
             SW_ENTRANCE_FEE to parsedTransaction.getDouble(SW_ENTRANCE_FEE),
             SW_PK to parsedTransaction.getString(SW_PK),
             SW_VOTING_THRESHOLD to parsedTransaction.getInt(SW_VOTING_THRESHOLD),
@@ -108,12 +94,46 @@ class CoinCommunity: Community() {
         val message = JSONObject(transaction).toString()
 
         for (swParticipantPk in oldTrustchainPks) {
-            Log.i("Coin", "Fetched= ${swParticipantPk.hexToBytes().toHex()}")
-            Log.i("Coin", "Should be= ${myPeer.publicKey.keyToBin().toHex()}")
-            trustchain.createProposalBlock(message, swParticipantPk.hexToBytes(), SW_JOIN_AGREEMENT_BLOCK)
+            trustchain.createProposalBlock(message, swParticipantPk.hexToBytes(), SHARED_WALLET_BLOCK)
         }
 
         // TODO: TIMEOUT, wait for votes, collect key parts
+    }
+
+    private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
+        return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
+    }
+
+    private fun fetchLatestSharedWalletBlock(block: TrustChainBlock): TrustChainBlock? {
+        return getTrustChainCommunity().database.getAllLinked(block).maxBy { it.timestamp }
+    }
+
+    /**
+     * Discover joinable shared wallets, return the latest (known) blocks
+     */
+    public fun discoverSharedWallets(): List<TrustChainBlock> {
+        val sharedWalletBlocks = fetchSharedWalletBlocks()
+        val discoveredBlocks = mutableListOf<TrustChainBlock>()
+        val discoveredBlockIds = mutableListOf<String>()
+        for (block in sharedWalletBlocks) {
+            val blockData = CoinUtil.parseTransaction(block.transaction)
+            if (discoveredBlockIds.contains(blockData.getString(SW_UNIQUE_ID))) {
+                continue
+            }
+
+            val latestBlock = fetchLatestSharedWalletBlock(block) ?: continue
+            discoveredBlocks.add(latestBlock)
+            discoveredBlockIds.add(blockData.getString(SW_UNIQUE_ID))
+        }
+        return discoveredBlocks
+    }
+
+    public fun fetchLatestJoinedSharedWalletBlocks(): List<TrustChainBlock> {
+        return discoverSharedWallets().filter {
+            val blockData = CoinUtil.parseTransaction(it.transaction)
+            val users = CoinUtil.parseJSONArray(blockData.getJSONArray(SW_TRUSTCHAIN_PKS))
+            users.contains(myPeer.publicKey.keyToBin().toHex())
+        }
     }
 
     public fun transferFunds(oldSwPk: ByteArray, newSwPk: ByteArray) {
@@ -121,8 +141,8 @@ class CoinCommunity: Community() {
     }
 
     companion object {
-        public const val SW_JOIN_BLOCK = "SW_JOIN"
-        public const val SW_JOIN_AGREEMENT_BLOCK = "SW_JOIN"
+        public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
+        public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         public const val SW_PK = "SW_PK"
         public const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
