@@ -17,14 +17,16 @@ import nl.tudelft.ipv8.util.hexToBytes
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
+class BitcoinFragment(
+    override val controller: BitcoinViewController
+) : BitcoinView, BaseFragment(R.layout.fragment_bitcoin) {
+
     private var publicKeyReceiver: String = ""
     private var bitcoinPrivateKey: String = ""
     private var transactionAmount: Double = 0.0
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
         button3.setOnClickListener {
             publicKeyReceiver = pk_receiver.text.toString()
             transactionAmount = tx_amount.text.toString().toDouble()
@@ -40,10 +42,18 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
         refresh()
     }
 
-    fun refresh() {
+    private fun refresh() {
         val walletManager = WalletManagerAndroid.getInstance()
 
         Log.i("Coin", "Coin: ${walletManager.toSeed()}")
+
+        create_wallet_button.setOnClickListener {
+            controller.showView("CreateSWFragment")
+        }
+
+        search_wallet_button.setOnClickListener {
+            controller.showView("JoinNetworkFragment")
+        }
     }
 
     override fun onCreateView(
@@ -62,6 +72,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin) {
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance() = BitcoinFragment()
+        fun newInstance(controller: BitcoinViewController) = BitcoinFragment(controller)
     }
 }
