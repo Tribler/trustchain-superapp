@@ -35,7 +35,7 @@
             android:paddingVertical="40dp"
             android:text="Dymbe Dollars:"
             android:textAlignment="textStart"
-            android:textSize="14sp" />
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="match_parent"
