@@ -36,7 +36,7 @@ class DemoApplication : Application() {
 
     private fun initWalletManager() {
         val config = WalletManagerConfiguration()
-        WalletManagerAndroid.Factory(this)
+        WalletManagerAndroid.Factory(this.applicationContext)
             .setConfiguration(config)
             .init()
 

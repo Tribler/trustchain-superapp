@@ -11,7 +11,7 @@ import java.util.concurrent.Executor
  */
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
-    private var application: Application? = null
+    private var context: Context? = null
 
     fun getInstance(): WalletManager {
         return walletManager
@@ -19,7 +19,7 @@ object WalletManagerAndroid {
     }
 
     class Factory(
-        private val application: Application
+        private val context: Context
     ) {
         private var configuration: WalletManagerConfiguration? = null
 
@@ -29,11 +29,11 @@ object WalletManagerAndroid {
         }
 
         fun init(): WalletManager {
-            val walletDir = application.applicationContext.filesDir
+            val walletDir = context.filesDir
             val configuration = configuration
                 ?: throw IllegalStateException("Configuration is not set")
 
-            WalletManagerAndroid.application = application
+            WalletManagerAndroid.context = context
 
             val walletManager = WalletManager(configuration, walletDir)
 //            setupThread(application.applicationContext)
@@ -47,7 +47,7 @@ object WalletManagerAndroid {
 
     val runInUIThread: Executor = object : Executor {
         override fun execute(runnable: Runnable) {
-            val handler = Handler(application?.applicationContext?.mainLooper)
+            val handler = Handler(context?.mainLooper)
             handler.post(runnable)
         }
     }
