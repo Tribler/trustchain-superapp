@@ -1,5 +1,6 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -7,11 +8,14 @@ import android.widget.TextView
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.CoinUtil
+import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 
-class SharedWalletListAdapter(private val view: View, private val items: List<TrustChainBlock>): BaseAdapter() {
+class SharedWalletListAdapter(private val context: BaseFragment, private val items: List<TrustChainBlock>): BaseAdapter() {
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
+        val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null)
+
         val parsedTransaction = CoinUtil.parseTransaction(items[p0].transaction)
         val publicKeyTextView = view.findViewById<TextView>(R.id.sw_id_item_t)
         val votingThreshold = view.findViewById<TextView>(R.id.sw_threshold_vt)

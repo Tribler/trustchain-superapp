@@ -1,4 +1,5 @@
 package nl.tudelft.ipv8.android.demo
+import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
@@ -42,7 +43,7 @@ class CoinCommunity: Community() {
      */
     public fun createSharedWallet(entranceFee: Double, votingThreshold: Int, bitcoinPk: ByteArray) {
         if (votingThreshold <= 0 || votingThreshold > 100) {
-            throw IllegalStateException("The voting threshold (%) for a shared wallet should be [0,100>")
+            throw IllegalStateException("The voting threshold (%) for a shared wallet should be [0,100]")
         }
 
         val trustchainPk = myPeer.publicKey.keyToBin()
@@ -104,12 +105,21 @@ class CoinCommunity: Community() {
         return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
     }
 
-    private fun fetchLatestSharedWalletBlock(block: TrustChainBlock): TrustChainBlock? {
-        return getTrustChainCommunity().database.getAllLinked(block).maxBy { it.timestamp }
+    /**
+     * Fetch the latest shared wallet block, based on a given block 'block'.
+     * The unique shared wallet id is used to find the most recent block in
+     * the 'sharedWalletBlocks' list.
+     */
+    private fun fetchLatestSharedWalletBlock(block: TrustChainBlock, sharedWalletBlocks: List<TrustChainBlock>)
+        : TrustChainBlock? {
+        val walletId = CoinUtil.parseTransaction(block.transaction).getString(SW_UNIQUE_ID)
+        return sharedWalletBlocks
+            .filter{ CoinUtil.parseTransaction(it.transaction).getString(SW_UNIQUE_ID) == walletId }
+            .maxBy { it.timestamp.time }
     }
 
     /**
-     * Discover joinable shared wallets, return the latest (known) blocks
+     * Discover shared wallets that you can join, return the latest (known) blocks
      */
     public fun discoverSharedWallets(): List<TrustChainBlock> {
         val sharedWalletBlocks = fetchSharedWalletBlocks()
@@ -117,17 +127,19 @@ class CoinCommunity: Community() {
         val discoveredBlockIds = mutableListOf<String>()
         for (block in sharedWalletBlocks) {
             val blockData = CoinUtil.parseTransaction(block.transaction)
-            if (discoveredBlockIds.contains(blockData.getString(SW_UNIQUE_ID))) {
-                continue
-            }
+            if (discoveredBlockIds.contains(blockData.getString(SW_UNIQUE_ID))) { continue }
 
-            val latestBlock = fetchLatestSharedWalletBlock(block) ?: continue
+            val latestBlock = fetchLatestSharedWalletBlock(block, sharedWalletBlocks) ?: block
             discoveredBlocks.add(latestBlock)
             discoveredBlockIds.add(blockData.getString(SW_UNIQUE_ID))
         }
+
         return discoveredBlocks
     }
 
+    /**
+     * Fetch the shared wallet blocks that you are part of, based on your trustchain PK.
+     */
     public fun fetchLatestJoinedSharedWalletBlocks(): List<TrustChainBlock> {
         return discoverSharedWallets().filter {
             val blockData = CoinUtil.parseTransaction(it.transaction)

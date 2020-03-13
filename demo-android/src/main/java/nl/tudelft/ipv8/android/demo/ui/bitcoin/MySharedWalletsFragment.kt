@@ -23,8 +23,7 @@ class MySharedWalletFragment(
 
     private fun initListView() {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
-
-        val adaptor = SharedWalletListAdapter(this.requireView(), sharedWalletBlocks)
+        val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks)
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
             Log.i("Coin", "Clicked: $view, $position, $id")
