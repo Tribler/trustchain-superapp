@@ -20,7 +20,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Click on a SW public key to join!" />
+            android:text="Overview of your Bitcoin Shared Wallets" />
         <ListView
             android:id="@+id/list_view"
             android:layout_width="match_parent"

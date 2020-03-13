@@ -110,6 +110,12 @@
                     android:layout_height="wrap_content"
                     android:text="Refresh" />
 
+                <Button
+                    android:id="@+id/create_wallet_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Shared Bitcoin Wallet" />
+
             </LinearLayout>
 
             <Button
@@ -117,11 +123,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Your Shared Bitcoin Wallets" />
-            <Button
-                android:id="@+id/create_wallet_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create Shared Bitcoin Wallet" />
+
             <Button
                 android:id="@+id/search_wallet_button"
                 android:layout_width="match_parent"

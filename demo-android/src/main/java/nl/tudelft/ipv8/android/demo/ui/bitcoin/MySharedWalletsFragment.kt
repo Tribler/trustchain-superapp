@@ -10,6 +10,7 @@ import kotlinx.android.synthetic.main.fragment_join_network.*
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.util.toHex
 
 
 /**
@@ -23,7 +24,8 @@ class MySharedWalletFragment(
 
     private fun initListView() {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
-        val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks)
+        val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to enter wallet")
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
             Log.i("Coin", "Clicked: $view, $position, $id")
@@ -44,7 +46,6 @@ class MySharedWalletFragment(
     }
 
     companion object {
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(controller: BitcoinViewController) = MySharedWalletFragment(controller)
     }
