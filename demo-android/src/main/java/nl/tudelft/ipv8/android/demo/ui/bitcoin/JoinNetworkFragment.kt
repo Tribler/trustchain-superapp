@@ -11,6 +11,7 @@ import android.widget.TextView
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -66,11 +67,16 @@ class JoinNetworkListAdapter(private val context: BaseFragment, private val item
         val inflater = context.layoutInflater
         val view1 = inflater.inflate(R.layout.join_sw_row_data, null)
 
-        var publicKeyTextView = view1.findViewById<TextView>(R.id.sw_id_item_t)
-//        var blockDataTextView = view1.findViewById<TextView>(R.id.sw_data_tf)
-        publicKeyTextView.text = items[p0].publicKey.toHex()
-//        blockDataTextView.text = JSONObject(items[p0].transaction).toString()
+        val parsedTransaction = CoinUtil.parseTransaction(items[p0].transaction)
+        val publicKeyTextView = view1.findViewById<TextView>(R.id.sw_id_item_t)
+        val votingThreshold = view1.findViewById<TextView>(R.id.sw_threshold_vt)
+        val entranceFee = view1.findViewById<TextView>(R.id.sw_entrance_fee_vt)
 
+        val votingThresholdText = "${parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)} %"
+        val entranceFeeText = "${parsedTransaction.getDouble(CoinCommunity.SW_ENTRANCE_FEE)} BTC"
+        publicKeyTextView.text = items[p0].publicKey.toHex()
+        votingThreshold.text = votingThresholdText
+        entranceFee.text = entranceFeeText
         return view1
     }
 

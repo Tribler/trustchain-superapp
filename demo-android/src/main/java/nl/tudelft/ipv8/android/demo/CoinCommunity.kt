@@ -120,10 +120,10 @@ class CoinCommunity: Community() {
 
     companion object {
         public const val SW_JOIN_BLOCK = "SW_JOIN"
-        private const val SW_JOIN_AGREEMENT_BLOCK = "SW_JOIN"
-        private const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
-        private const val SW_PK = "SW_PK"
-        private const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
+        public const val SW_JOIN_AGREEMENT_BLOCK = "SW_JOIN"
+        public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
+        public const val SW_PK = "SW_PK"
+        public const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
         private const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
         private const val SW_BITCOIN_PKS = "SW_BLOCKCHAIN_PKS"
     }
