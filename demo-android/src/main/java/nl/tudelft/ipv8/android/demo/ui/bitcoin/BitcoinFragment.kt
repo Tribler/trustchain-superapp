@@ -21,31 +21,19 @@ class BitcoinFragment(
     override val controller: BitcoinViewController
 ) : BitcoinView, BaseFragment(R.layout.fragment_bitcoin) {
 
-    private var publicKeyReceiver: String = ""
-    private var bitcoinPrivateKey: String = ""
-    private var transactionAmount: Double = 0.0
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        button3.setOnClickListener {
-            publicKeyReceiver = pk_receiver.text.toString()
-            transactionAmount = tx_amount.text.toString().toDouble()
-            outputTextView.text = "PK Receiver: $publicKeyReceiver, Amount: $transactionAmount"
+        initClickListeners()
+    }
 
-            getCoinCommunity().sendCurrency(transactionAmount, publicKeyReceiver.hexToBytes())
-        }
-
+    private fun initClickListeners() {
         refreshButton.setOnClickListener {
             refresh()
         }
 
-        refresh()
-    }
-
-    private fun refresh() {
-        val walletManager = WalletManagerAndroid.getInstance()
-
-        Log.i("Coin", "Coin: ${walletManager.toSeed()}")
+        show_wallet_button.setOnClickListener {
+            controller.showView("MySharedWalletsFragment")
+        }
 
         create_wallet_button.setOnClickListener {
             controller.showView("CreateSWFragment")
@@ -54,6 +42,12 @@ class BitcoinFragment(
         search_wallet_button.setOnClickListener {
             controller.showView("JoinNetworkFragment")
         }
+    }
+
+    private fun refresh() {
+        val walletManager = WalletManagerAndroid.getInstance()
+
+        Log.i("Coin", "Coin: ${walletManager.toSeed()}")
     }
 
     override fun onCreateView(
