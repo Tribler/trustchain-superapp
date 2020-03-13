@@ -2,18 +2,27 @@ package nl.tudelft.trustchain.trader.ui
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_transfer_receive.*
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.trader.R
 
-class TraderFragment : BaseFragment(R.layout.fragment_trader) {
+class AI_HistoryFragment : BaseFragment(R.layout.fragment_ai_history) {
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenStarted {
             val trustchain = getTrustChainCommunity()
@@ -36,5 +45,8 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             })
         }
+//        buttonConfirmReceiptTransferEnd.setOnClickListener {
+//            view.findNavController().navigate(R.id.action_AI_HistoryFragment_to_traderFragment)
+//        }
     }
 }
