@@ -18,6 +18,16 @@
     </fragment>
 
     <fragment
+        android:id="@+id/peerFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.peers.PeersFragment"
+        android:label="Peer Fragment"
+        tools:layout="@layout/fragment_peers" >
+        <action
+            android:id="@+id/action_peerFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
+    </fragment>
+
+    <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferFragment"
         android:label="Transfer" >
@@ -35,7 +45,9 @@
         android:label="TransferConfirmationFragment" >
         <action
             android:id="@+id/action_transferConfirmationFragment_to_transferFragment"
-            app:destination="@id/transferFragment" />
+            app:destination="@id/transferFragment"
+            app:popUpTo="@+id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment

@@ -58,6 +58,7 @@
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:visibility="gone"
+        android:weightSum="10"
         android:id="@+id/transferReceiveLinearConfirmed">
 
         <TextView
@@ -69,13 +70,14 @@
             android:autoSizeStepGranularity="2sp"
             android:text="@string/receiverLetSenderConfirm"
             android:id="@+id/textReceiverLetSenderConfirm"
+            android:layout_weight="1"
             />
 
         <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:id="@+id/image3rdQR" />
+            android:id="@+id/image3rdQR"
+            android:layout_weight="8"/>
 
         <Button
             android:id="@+id/buttonConfirmReceiptTransferEnd"
