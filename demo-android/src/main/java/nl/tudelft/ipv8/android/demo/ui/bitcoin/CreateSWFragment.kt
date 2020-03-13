@@ -48,7 +48,7 @@ class CreateSWFragment(
         val entranceFee = entrance_fee_tf.text.toString().toDoubleOrNull()
         val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
         return entranceFee != null && entranceFee > 0
-            && votingThreshold != null && votingThreshold > 0 && votingThreshold < 100
+            && votingThreshold != null && votingThreshold > 0 && votingThreshold <= 100
     }
 
     override fun onCreateView(
