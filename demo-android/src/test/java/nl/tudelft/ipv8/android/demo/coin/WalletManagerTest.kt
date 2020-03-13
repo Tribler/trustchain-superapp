@@ -40,7 +40,7 @@ class WalletManagerTest {
         println(ECKey_3.privateKeyAsHex)
 
         val contract: Transaction =
-            WalletManager.createMultiSignatureWallet(ECKey_1, listOf(ECKey_2, ECKey_3))
+            WalletManager.createMultiSignatureWallet(ECKey_1, listOf(ECKey_2, ECKey_3), 2)
 
         val scriptPubKey: Script = contract.outputs[0].scriptPubKey
         val scriptPubKeyBytes: ByteArray = contract.outputs[0].scriptBytes

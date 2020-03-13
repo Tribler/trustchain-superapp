@@ -87,6 +87,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         fun createMultiSignatureWallet(
             ourPublicKey: ECKey,
             otherPublicKeys: List<ECKey>,
+            threshHold: Int,
             params: NetworkParameters = MainNetParams.get()
         ): Transaction {
             // Prepare a template for the contract.
@@ -98,7 +99,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             val keys = Collections.unmodifiableList(copiedList)
 
             // Create a n-n multi-signature output script.
-            val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
+            val script = ScriptBuilder.createMultiSigOutputScript(threshHold, keys)
 
             // Now add an output with minimum fee needed.
             val amount: Coin = Transaction.REFERENCE_DEFAULT_MIN_TX_FEE
