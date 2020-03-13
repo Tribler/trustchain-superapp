@@ -14,7 +14,7 @@ class TrustChainTraderActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val appBarConfiguration = AppBarConfiguration.Builder(
-            setOf(R.id.transferFragment, R.id.traderFragment, R.id.peerFragment)).build()
+            setOf(R.id.transferFragment, R.id.traderFragment, R.id.peerFragment, R.id.AI_HistoryFragment)).build()
         setupActionBarWithNavController(findNavController(R.id.navHostFragment), appBarConfiguration)
     }
 }
