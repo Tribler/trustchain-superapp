@@ -52,6 +52,13 @@
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Entrance fee:" />
+
+                <TextView
+                    android:id="@+id/textView5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Nr. of users:" />
             </LinearLayout>
 
             <LinearLayout
@@ -72,9 +79,23 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="text" />
-            </LinearLayout>
 
+                <TextView
+                    android:id="@+id/nr_of_users_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="text" />
+            </LinearLayout>
         </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="10px"
+            android:text="Click to join"
+            android:textAlignment="center"
+            android:textColor="#6F6969" />
 
     </LinearLayout>
 

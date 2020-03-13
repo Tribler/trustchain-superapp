@@ -15,7 +15,6 @@ import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
-import org.json.JSONObject
 
 /**
  * A simple [Fragment] subclass.
@@ -25,21 +24,28 @@ import org.json.JSONObject
 class JoinNetworkFragment (
     override val controller: BitcoinViewController
 ) : BitcoinView, BaseFragment(R.layout.fragment_join_network) {
+    private val tempBitcoinPk = ByteArray(2)
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val sharedWalletPublicKeys = getCoinCommunity()
+        val sharedWalletBlocks = getCoinCommunity()
             .discoverSharedWalletsTrustchainPublicKeys()
             .map { pk ->
                 getTrustChainCommunity().database.getLatest(pk, CoinCommunity.SW_JOIN_BLOCK)
                     ?: throw IllegalArgumentException("Shared Wallet block not found")
             }
 
-        val adaptor = JoinNetworkListAdapter(this, sharedWalletPublicKeys)
+        val adaptor = JoinNetworkListAdapter(this, sharedWalletBlocks)
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
+            joinSharedWalletClicked(sharedWalletBlocks[position])
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
+    }
+
+    private fun joinSharedWalletClicked(block: TrustChainBlock) {
+        getCoinCommunity().joinSharedWallet(block.calculateHash(), tempBitcoinPk)
     }
 
     override fun onCreateView(
@@ -71,12 +77,15 @@ class JoinNetworkListAdapter(private val context: BaseFragment, private val item
         val publicKeyTextView = view1.findViewById<TextView>(R.id.sw_id_item_t)
         val votingThreshold = view1.findViewById<TextView>(R.id.sw_threshold_vt)
         val entranceFee = view1.findViewById<TextView>(R.id.sw_entrance_fee_vt)
+        val nrOfUsers = view1.findViewById<TextView>(R.id.nr_of_users_tv)
 
         val votingThresholdText = "${parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)} %"
         val entranceFeeText = "${parsedTransaction.getDouble(CoinCommunity.SW_ENTRANCE_FEE)} BTC"
+        val users = "${parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS).length()} user(s) in this shared wallet"
         publicKeyTextView.text = items[p0].publicKey.toHex()
         votingThreshold.text = votingThresholdText
         entranceFee.text = entranceFeeText
+        nrOfUsers.text = users
         return view1
     }
 

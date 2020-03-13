@@ -38,6 +38,7 @@ class CreateSWFragment(
             val threshold = voting_threshold_tf.text.toString().toInt()
 
             getCoinCommunity().createSharedWallet(entranceFee, threshold, ByteArray(5))
+            controller.showView("BitcoinFragment")
         } else {
             alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
         }

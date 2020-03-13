@@ -1,10 +1,13 @@
 package nl.tudelft.ipv8.android.demo
 import android.util.JsonWriter
+import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.json.JSONObject
 import java.util.*
@@ -57,10 +60,10 @@ class CoinCommunity: Community() {
 
         val transactionValues = mapOf(
             SW_ENTRANCE_FEE to entranceFee,
-            SW_PK to sharedWalletPK,
+            SW_PK to sharedWalletPK.toHex(),
             SW_VOTING_THRESHOLD to votingThreshold,
-            SW_TRUSTCHAIN_PKS to arrayListOf(trustchainPk),
-            SW_BITCOIN_PKS to arrayListOf(bitcoinPk)
+            SW_TRUSTCHAIN_PKS to arrayListOf(trustchainPk.toHex()),
+            SW_BITCOIN_PKS to arrayListOf(bitcoinPk.toHex())
         )
         val values = JSONObject(transactionValues).toString()
         trustchain.createProposalBlock(values, trustchainPk, SW_JOIN_BLOCK)
@@ -71,6 +74,7 @@ class CoinCommunity: Community() {
         val wallets = mutableListOf<ByteArray>()
         for (block in sharedWalletBlocks) {
             val publicKey = block.publicKey
+            // TODO: Filter on the Shared Bitcoin Wallet PK's (currently always the same)
             if (wallets.none { byteArray -> byteArray.toHex() == publicKey.toHex() }) {
                 wallets.add(publicKey)
             }
@@ -81,34 +85,37 @@ class CoinCommunity: Community() {
     public fun joinSharedWallet(swBlockHash: ByteArray, bitcoinPk: ByteArray) {
         val swJoinBlock: TrustChainBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
             ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
-        if (!swJoinBlock.isAgreement) {
-            throw IllegalStateException("Shared Wallet block is not signed!")
-        }
 
-        val entranceFee = swJoinBlock.transaction[SW_ENTRANCE_FEE]
-        val oldTrustchainPks = swJoinBlock.transaction[SW_BITCOIN_PKS] as ArrayList<ByteArray>
-        val oldBitcoinPks = swJoinBlock.transaction[SW_JOIN_BLOCK] as ArrayList<ByteArray>
+        val parsedTransaction = CoinUtil.parseTransaction(swJoinBlock.transaction)
+
+        val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
+        val oldBitcoinPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
         val trustchainPk = myPeer.publicKey.keyToBin()
 
         // TODO: Pay the entrance fee with bitcoinPk
         // TODO: Create new shared wallet using bitcoinPks
 
-        val newTrustchainPks: ArrayList<ByteArray> = swJoinBlock.transaction[SW_TRUSTCHAIN_PKS] as ArrayList<ByteArray>
-        newTrustchainPks.add(trustchainPk)
+        val newTrustchainPks: ArrayList<String> = arrayListOf()
+        newTrustchainPks.addAll(oldTrustchainPks)
+        newTrustchainPks.add(trustchainPk.toHex())
 
-        val newBitcoinPks: ArrayList<ByteArray> = swJoinBlock.transaction[SW_BITCOIN_PKS] as ArrayList<ByteArray>
-        newBitcoinPks.add(bitcoinPk)
+        val newBitcoinPks: ArrayList<String> = arrayListOf()
+        newBitcoinPks.addAll(oldBitcoinPks)
+        newBitcoinPks.add(bitcoinPk.toHex())
 
         val transaction = mapOf(
-            SW_ENTRANCE_FEE to swJoinBlock.transaction[SW_ENTRANCE_FEE],
-            SW_PK to swJoinBlock.transaction[SW_PK],
-            SW_VOTING_THRESHOLD to swJoinBlock.transaction[SW_VOTING_THRESHOLD],
+            SW_ENTRANCE_FEE to parsedTransaction.getDouble(SW_ENTRANCE_FEE),
+            SW_PK to parsedTransaction.getString(SW_PK),
+            SW_VOTING_THRESHOLD to parsedTransaction.getInt(SW_VOTING_THRESHOLD),
             SW_TRUSTCHAIN_PKS to newTrustchainPks,
             SW_BITCOIN_PKS to newBitcoinPks
         )
+        val message = JSONObject(transaction).toString()
 
         for (swParticipantPk in oldTrustchainPks) {
-            trustchain.createProposalBlock(transaction, swParticipantPk, SW_JOIN_AGREEMENT_BLOCK)
+            Log.i("Coin", "Fetched= ${swParticipantPk.hexToBytes().toHex()}")
+            Log.i("Coin", "Should be= ${myPeer.publicKey.keyToBin().toHex()}")
+            trustchain.createProposalBlock(message, swParticipantPk.hexToBytes(), SW_JOIN_AGREEMENT_BLOCK)
         }
 
         // TODO: TIMEOUT, wait for votes, collect key parts
@@ -124,7 +131,7 @@ class CoinCommunity: Community() {
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         public const val SW_PK = "SW_PK"
         public const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
-        private const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
-        private const val SW_BITCOIN_PKS = "SW_BLOCKCHAIN_PKS"
+        public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
+        public const val SW_BITCOIN_PKS = "SW_BLOCKCHAIN_PKS"
     }
 }
