@@ -22,11 +22,10 @@ class TransferReceiveFragment : BaseFragment(R.layout.fragment_transfer_receive)
      */
     @SuppressLint("SetTextI18n")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        println("json is " + arguments?.get("Proposal Block"))
         val proposalBlock = TransferBlockParser().stringToProposal((arguments?.get("Proposal Block") as String), trustchain)
         val agreementBlock = trustchain.createAgreementBlock(proposalBlock, proposalBlock.transaction)
         val publicKey = proposalBlock.publicKey.toHex()
-        val amount = TransactionEncoding.decode(proposalBlock.rawTransaction)
+        val amount = TransactionEncoding.decode(proposalBlock.rawTransaction).second
         textSenderPublicKey.text = "Public key: $publicKey"
         textTransferAmount.text = "Amount: $amount"
         buttonConfirmReceipt.setOnClickListener {

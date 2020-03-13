@@ -12,10 +12,10 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
-import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.trader.R
 
 
 class TransferFragment : BaseFragment() {
@@ -32,6 +32,10 @@ class TransferFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         transferSendLayout.visibility = View.VISIBLE
         transferReceiveLayout.visibility = View.GONE
+
+        if (arguments?.getString("Public Key") != null) {
+            editTxtAddress.setText(arguments?.getString("Public Key"))
+        }
 
         view.QRPK.setImageBitmap(
             QRCodeUtils(

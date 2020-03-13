@@ -10,4 +10,9 @@
         android:id="@+id/transferFragment"
         android:title="Transfer"
         android:icon="@drawable/ic_person_black_24dp" />
+
+    <item
+        android:id="@+id/peerFragment"
+        android:title="Peers"
+        android:icon="@drawable/ic_device_hub_black_24dp" />
 </menu>
