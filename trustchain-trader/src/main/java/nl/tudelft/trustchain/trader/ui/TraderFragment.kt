@@ -9,7 +9,6 @@ import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
 import nl.tudelft.trustchain.trader.constants.BlockTypes
@@ -22,9 +21,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenStarted {
             val trustchain = getTrustChainCommunity()
-
-            val currentBalance = trustchain.database.getBalance(trustchain.getMyPublicKey())
-            txtBalance.text = "Your balance: ${currentBalance}"
 
             trustchain.registerTransactionValidator(
                 BlockTypes.DEMO_TX_BLOCK.value,
