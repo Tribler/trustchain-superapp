@@ -24,6 +24,11 @@ fun TrustChainCommunity.getMyPublicKey(): ByteArray {
     return this.myPeer.publicKey.keyToBin()
 }
 
+@ExperimentalUnsignedTypes
+fun TrustChainCommunity.getBalance(publicKey: ByteArray = this.getMyPublicKey()): Float {
+    return this.database.getBalance(publicKey)
+}
+
 /**
  * Calculates the balance when looking at all block up to the specified sequence number. If no
  * sequence number is specified, it will calculate the current balance with all blocks taken into
@@ -42,9 +47,9 @@ fun TrustChainStore.getBalance(publicKey: ByteArray, sequenceNumber: UInt? = nul
 
     for (block in txBlocks) {
         val amount = block.getAmount()
-        if (block.linkPublicKey.contentEquals(publicKey)) {
+        if (block.publicKey.contentEquals(publicKey)) {
             balance += amount
-        } else if (block.publicKey.contentEquals(publicKey)) {
+        } else if (block.linkPublicKey.contentEquals(publicKey)) {
             balance -= amount
         }
     }
