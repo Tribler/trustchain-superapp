@@ -29,6 +29,12 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         block: TrustChainBlock,
                         database: TrustChainStore
                     ): Boolean {
+                        // Do not validate offline transactions
+                        val offline = block.transaction["offline"]?.toString()?.toBoolean()
+                        if (offline != null && offline) {
+                            return true
+                        }
+
                         // Self signed blocks print money, they are always valid
                         if (block.isSelfSigned) {
                             return true
@@ -38,18 +44,14 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
                         if (block.isProposal) {
                             val balance =
+                                database.getBalance(block.linkPublicKey, block.linkSequenceNumber - 1u)
+                            return balance > amount
+                        } else if (block.isAgreement){
+                            val balance =
                                 database.getBalance(block.publicKey, block.sequenceNumber - 1u)
                             return balance > amount
-                        } else {
-                            // Is agreement block
-                            val proposalBlock = database.getLinked(block) ?: return false
-                            if (block.transaction == proposalBlock.transaction) {
-                                return true
-                            }
-                            val balance =
-                                database.getBalance(block.linkPublicKey, block.sequenceNumber - 1u)
-                            return balance > amount
                         }
+                        return false
                     }
                 })
 

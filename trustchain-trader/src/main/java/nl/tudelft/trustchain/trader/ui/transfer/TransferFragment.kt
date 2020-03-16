@@ -16,6 +16,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
+import nl.tudelft.trustchain.trader.util.getBalance
 
 
 class TransferFragment : BaseFragment() {
@@ -29,7 +30,11 @@ class TransferFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_transfer, container, false)
     }
 
+    @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d("PKPK", trustchain.getMyPublicKey().toHex())
+        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
+
         transferSendLayout.visibility = View.VISIBLE
         transferReceiveLayout.visibility = View.GONE
 
