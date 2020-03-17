@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.util.toHex
 
 /**
  * A simple [Fragment] subclass.
@@ -26,8 +27,8 @@ class JoinNetworkFragment (
         super.onActivityCreated(savedInstanceState)
 
         val sharedWalletBlocks = getCoinCommunity().discoverSharedWallets()
-
-        val adaptor = SharedWalletListAdapter(this.requireView(), sharedWalletBlocks)
+        val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to join")
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
             joinSharedWalletClicked(sharedWalletBlocks[position])
@@ -48,12 +49,6 @@ class JoinNetworkFragment (
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @return A new instance of fragment bitcoinFragment.
-         */
         @JvmStatic
         fun newInstance(controller: BitcoinViewController) = JoinNetworkFragment(controller)
     }
