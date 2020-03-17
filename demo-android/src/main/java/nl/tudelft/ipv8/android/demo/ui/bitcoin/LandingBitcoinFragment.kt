@@ -14,7 +14,8 @@ import kotlin.IllegalArgumentException
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), BitcoinViewController {
+class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin),
+    BitcoinViewController {
 
     /**
      * Loads the view fragments and map them to strings as identifiers.
@@ -23,7 +24,8 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
         "BitcoinFragment" to BitcoinFragment.newInstance(this),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
         "CreateSWFragment" to CreateSWFragment.newInstance(this),
-        "MySharedWalletsFragment" to MySharedWalletFragment.newInstance(this)
+        "MySharedWalletsFragment" to MySharedWalletFragment.newInstance(this),
+        "JoinNetworkSteps" to JoinNetworkSteps.newInstance("test1", "test2")
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {

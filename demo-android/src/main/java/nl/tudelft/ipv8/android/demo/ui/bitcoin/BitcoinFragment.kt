@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.util.hexToBytes
 
 /**
  * A simple [Fragment] subclass.
@@ -42,6 +41,8 @@ class BitcoinFragment(
         search_wallet_button.setOnClickListener {
             controller.showView("JoinNetworkFragment")
         }
+
+
     }
 
     private fun refresh() {

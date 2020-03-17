@@ -53,7 +53,7 @@
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
         android:label="Bitcoin Overview"
-        tools:layout="@layout/fragment_bitcoin"></fragment>
+        tools:layout="@layout/fragment_bitcoin" />
     <fragment
         android:id="@+id/joinNetworkFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.JoinNetworkFragment"

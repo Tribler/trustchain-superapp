@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/fragment_bitcoin_container"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -117,11 +116,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Your Shared Bitcoin Wallets" />
+
             <Button
                 android:id="@+id/create_wallet_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Create Shared Bitcoin Wallet" />
+
             <Button
                 android:id="@+id/search_wallet_button"
                 android:layout_width="match_parent"
@@ -131,5 +132,4 @@
         </LinearLayout>
 
     </LinearLayout>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

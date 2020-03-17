@@ -17,10 +17,11 @@
             android:layout_height="wrap_content"
             android:text="Your Bitcoin Shared Wallets"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Click on a SW public key to join!" />
+            android:text="Click on a shared wallet to start a transaction!" />
         <ListView
             android:id="@+id/list_view"
             android:layout_width="match_parent"

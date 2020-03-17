@@ -26,6 +26,7 @@ class MySharedWalletFragment(
         val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks)
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
+            controller.showView("JoinNetworkSteps")
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
     }
