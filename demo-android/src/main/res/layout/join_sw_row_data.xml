@@ -16,19 +16,6 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="10px"
-                android:text="Wallet Key:" />
-
-            <TextView
-                android:id="@+id/sw_id_item_t"
-                android:layout_width="wrap_content"
-                android:layout_height="82dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:text="text" />
         </LinearLayout>
 
         <LinearLayout
@@ -45,6 +32,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
+                    android:text="Wallet ID:" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
                     android:text="Voting threshold:" />
 
                 <TextView
@@ -54,17 +47,36 @@
                     android:text="Entrance fee:" />
 
                 <TextView
-                    android:id="@+id/textView5"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Nr. of users:" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="You, in wallet:" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Your votes:" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/sw_id_item_t"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:text="text" />
 
                 <TextView
                     android:id="@+id/sw_threshold_vt"
@@ -86,10 +98,25 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="text" />
+
+                <TextView
+                    android:id="@+id/you_joined_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="text" />
+
+                <TextView
+                    android:id="@+id/your_votes_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="text" />
             </LinearLayout>
         </LinearLayout>
 
         <TextView
+            android:id="@+id/click_to_join"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingRight="10px"

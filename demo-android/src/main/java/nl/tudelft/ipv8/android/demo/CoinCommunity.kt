@@ -36,6 +36,20 @@ class CoinCommunity: Community() {
         return IPv8Android.getInstance()
     }
 
+    private fun createTransactionData(entranceFee: Double, sharedWalletPublicKey: String,
+                                      votingThreshold: Int, trustchainPks: List<String>,
+                                      bitcoinPks: List<String>, uniqueId: String? = null): String {
+        val transactionValues = mapOf(
+            SW_UNIQUE_ID to (uniqueId ?: CoinUtil.randomUUID()),
+            SW_ENTRANCE_FEE to entranceFee,
+            SW_PK to sharedWalletPublicKey,
+            SW_VOTING_THRESHOLD to votingThreshold,
+            SW_TRUSTCHAIN_PKS to trustchainPks,
+            SW_BITCOIN_PKS to bitcoinPks
+        )
+        return JSONObject(transactionValues).toString()
+    }
+
     /**
      * Create a shared wallet block
      * entranceFee - the fee that has to be paid for new participants
@@ -44,7 +58,7 @@ class CoinCommunity: Community() {
      */
     public fun createSharedWallet(entranceFee: Double, votingThreshold: Int, bitcoinPk: ByteArray) {
         if (votingThreshold <= 0 || votingThreshold > 100) {
-            throw IllegalStateException("The voting threshold (%) for a shared wallet should be [0,100]")
+            throw IllegalStateException("The voting threshold (%) for a shared wallet should be <0,100]")
         }
 
         val trustchainPk = myPeer.publicKey.keyToBin()
@@ -53,15 +67,13 @@ class CoinCommunity: Community() {
         // TODO: Create bitcoin wallet
         // TODO: Fill wallet with entrance fee
 
-        val transactionValues = mapOf(
-            SW_UNIQUE_ID to CoinUtil.randomUUID(),
-            SW_ENTRANCE_FEE to entranceFee,
-            SW_PK to sharedWalletPK.toHex(),
-            SW_VOTING_THRESHOLD to votingThreshold,
-            SW_TRUSTCHAIN_PKS to arrayListOf(trustchainPk.toHex()),
-            SW_BITCOIN_PKS to arrayListOf(bitcoinPk.toHex())
+        val values = createTransactionData(
+            entranceFee,
+            sharedWalletPK.toHex(),
+            votingThreshold,
+            arrayListOf(trustchainPk.toHex()),
+            arrayListOf(bitcoinPk.toHex())
         )
-        val values = JSONObject(transactionValues).toString()
         trustchain.createProposalBlock(values, trustchainPk, SHARED_WALLET_BLOCK)
     }
 
@@ -70,38 +82,37 @@ class CoinCommunity: Community() {
             ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
 
         val parsedTransaction = CoinUtil.parseTransaction(swJoinBlock.transaction)
-
         val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
-        val oldBitcoinPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
-        val trustchainPk = myPeer.publicKey.keyToBin()
         // TODO: Pay the entrance fee with bitcoinPk
         // TODO: Create new shared wallet using bitcoinPks
 
         val newTrustchainPks: ArrayList<String> = arrayListOf()
         newTrustchainPks.addAll(oldTrustchainPks)
-        newTrustchainPks.add(trustchainPk.toHex())
+        newTrustchainPks.add(myPeer.publicKey.keyToBin().toHex())
 
-        val newBitcoinPks: ArrayList<String> = arrayListOf()
-        newBitcoinPks.addAll(oldBitcoinPks)
+        val newBitcoinPks: ArrayList<String> = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
         newBitcoinPks.add(bitcoinPk.toHex())
 
-        val transaction = mapOf(
-            SW_UNIQUE_ID to parsedTransaction.getString(SW_UNIQUE_ID),
-            SW_ENTRANCE_FEE to parsedTransaction.getDouble(SW_ENTRANCE_FEE),
-            SW_PK to parsedTransaction.getString(SW_PK),
-            SW_VOTING_THRESHOLD to parsedTransaction.getInt(SW_VOTING_THRESHOLD),
-            SW_TRUSTCHAIN_PKS to newTrustchainPks,
-            SW_BITCOIN_PKS to newBitcoinPks
+        val values = createTransactionData(
+            parsedTransaction.getDouble(SW_ENTRANCE_FEE),
+            parsedTransaction.getString(SW_PK),
+            parsedTransaction.getInt(SW_VOTING_THRESHOLD),
+            newTrustchainPks,
+            newBitcoinPks,
+            parsedTransaction.getString(SW_UNIQUE_ID)
         )
-        val message = JSONObject(transaction).toString()
 
         for (swParticipantPk in oldTrustchainPks) {
-            trustchain.createProposalBlock(message, swParticipantPk.hexToBytes(), SHARED_WALLET_BLOCK)
+            trustchain.createProposalBlock(values, swParticipantPk.hexToBytes(), SHARED_WALLET_BLOCK)
         }
 
         // TODO: TIMEOUT, wait for votes, collect key parts
     }
 
+    public fun transferFunds(oldSwPk: ByteArray, newSwPk: ByteArray) {
+        // TODO: send funds to new wallet
+    }
+    
     private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
         return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
     }
@@ -124,18 +135,10 @@ class CoinCommunity: Community() {
      */
     public fun discoverSharedWallets(): List<TrustChainBlock> {
         val sharedWalletBlocks = fetchSharedWalletBlocks()
-        val discoveredBlocks = mutableListOf<TrustChainBlock>()
-        val discoveredBlockIds = mutableListOf<String>()
-        for (block in sharedWalletBlocks) {
-            val blockData = CoinUtil.parseTransaction(block.transaction)
-            if (discoveredBlockIds.contains(blockData.getString(SW_UNIQUE_ID))) { continue }
-
-            val latestBlock = fetchLatestSharedWalletBlock(block, sharedWalletBlocks) ?: block
-            discoveredBlocks.add(latestBlock)
-            discoveredBlockIds.add(blockData.getString(SW_UNIQUE_ID))
-        }
-
-        return discoveredBlocks
+        // For every distinct unique shared wallet, find the latest block
+        return sharedWalletBlocks
+            .distinctBy { CoinUtil.parseTransaction(it.transaction).getString(SW_UNIQUE_ID) }
+            .map { fetchLatestSharedWalletBlock(it, sharedWalletBlocks) ?: it }
     }
 
     /**
@@ -144,13 +147,9 @@ class CoinCommunity: Community() {
     public fun fetchLatestJoinedSharedWalletBlocks(): List<TrustChainBlock> {
         return discoverSharedWallets().filter {
             val blockData = CoinUtil.parseTransaction(it.transaction)
-            val users = CoinUtil.parseJSONArray(blockData.getJSONArray(SW_TRUSTCHAIN_PKS))
-            users.contains(myPeer.publicKey.keyToBin().toHex())
+            val userTrustchainPks = CoinUtil.parseJSONArray(blockData.getJSONArray(SW_TRUSTCHAIN_PKS))
+            userTrustchainPks.contains(myPeer.publicKey.keyToBin().toHex())
         }
-    }
-
-    public fun transferFunds(oldSwPk: ByteArray, newSwPk: ByteArray) {
-        // TODO: send funds to new wallet
     }
 
     companion object {
