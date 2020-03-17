@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import kotlin.IllegalArgumentException
 
@@ -22,7 +23,8 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
     private val bitcoinViews = mapOf<String, Fragment>(
         "BitcoinFragment" to BitcoinFragment.newInstance(this),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
-        "CreateSWFragment" to CreateSWFragment.newInstance(this)
+        "CreateSWFragment" to CreateSWFragment.newInstance(this),
+        "BlockchainDownloading" to BlockchainDownloading.newInstance("","")
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -31,7 +33,11 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
     }
 
     private fun loadInitialView() {
-        showView("BitcoinFragment")
+        if (WalletManagerAndroid.getInstance().isDownloading) {
+            showView("BlockchainDownloading")
+        } else {
+            showView("BitcoinFragment")
+        }
     }
 
     override fun onCreateView(
