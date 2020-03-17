@@ -26,7 +26,11 @@ import java.util.*
  * with bitcoin wallets (including multi-signature wallets).
  * NOTE: Ideally should be separated from any Android UI concepts. Not the case currently.
  */
-class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, walletDir: File) {
+class WalletManager(
+    walletManagerConfiguration: WalletManagerConfiguration,
+    walletDir: File,
+    serializedDeterministicKey: SerializedDeterminsticKey? = null
+) {
     val kit: WalletAppKit
     val params: NetworkParameters
 
@@ -71,15 +75,24 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             }
         })
 
+        if (serializedDeterministicKey != null) {
+            Log.i("Coin", "Coin: received a key to import, will clear the wallet and download again.")
+            val deterministicSeed = DeterministicSeed(
+                serializedDeterministicKey.seed,
+                null,
+                "",
+                serializedDeterministicKey.creationTime
+            )
+            kit.restoreWalletFromSeed(deterministicSeed)
+        }
+
+        Log.i("Coin", "Coin: starting the setup of kit.")
         kit.setBlockingStartup(false)
         kit.startAsync()
         kit.awaitRunning()
-        val ad = LegacyAddress.fromString(params, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")
-        kit.wallet().addWatchedAddress(ad)
+        Log.i("Coin", "Coin: finished the setup of kit.")
 
         Log.i("Coin", "Coin: ${kit.wallet()}")
-        Log.i("Coin", "Coin: ${toSeed()}")
-        Log.i("Coin", "Wallet: ${kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)}")
     }
 
     companion object {
@@ -168,7 +181,8 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             for (input in tx.inputs) {
                 val inputValue = input.previousOutput.value.toDouble() / 100000000
                 if (userBitcoinPkString.equals(input.previousOutput.address) &&
-                    inputValue >= entranceFee) {
+                    inputValue >= entranceFee
+                ) {
                     hasCorrectInput = true
                     break
                 }
@@ -185,7 +199,8 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             for (output in tx.outputs) {
                 val outputValue = output.value.toDouble() / 100000000
                 if (sharedWalletBitcoinPkString.equals(output.address) &&
-                    outputValue >= entranceFee) {
+                    outputValue >= entranceFee
+                ) {
                     hasCorrectOutput = true
                     break
                 }
@@ -226,9 +241,9 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         val broadcast: ListenableFuture<Transaction> =
             kit.peerGroup().broadcastTransaction(req.tx).broadcast()
 
-        broadcast.addListener(Runnable {
-            Log.d("Coin", "Coin: created a multisignature wallet.")
-        }, WalletManagerAndroid.runInUIThread)
+//        broadcast.addListener(Runnable {
+//            Log.d("Coin", "Coin: created a multisignature wallet.")
+//        }, WalletManagerAndroid.runInUIThread)
     }
 
 

@@ -19,51 +19,41 @@
             android:text="@string/sending_bitcoins"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-        <TextView
-            android:id="@+id/outputTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="" />
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView9"
-                android:layout_width="wrap_content"
+                android:id="@+id/walletStatus"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Import Private Key:" />
+                android:text=" " />
 
-            <EditText
-                android:id="@+id/privateKeyTextInput"
-                android:layout_width="125dp"
+            <TextView
+                android:id="@+id/walletBalance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/chosenNetwork"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="textPersonName" />
+                android:text=" " />
 
             <Button
-                android:id="@+id/importPrivateKeyButton"
-                android:layout_width="wrap_content"
+                android:id="@+id/startWalletButtonExisting"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="IMPORT" />
+                android:text="Start Wallet (load existing)" />
+
+            <Button
+                android:id="@+id/startWalletButtonImportDefaultKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start Wallet (import default key)" />
+
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Imported Keypairs (Private Key Only):" />
-
-        <TextView
-            android:id="@+id/keypairTextview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="None" />
 
         <LinearLayout
             android:layout_width="match_parent"
