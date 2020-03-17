@@ -131,6 +131,8 @@ class WalletManager(
 
         Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
         val req = SendRequest.forTx(contract)
+        Log.i("Coin", "Coin: the change adress is hard-reset to your protocol key.")
+        req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
         kit.wallet().completeTx(req)
 
         val transactionId = req.tx.txId.toString()
