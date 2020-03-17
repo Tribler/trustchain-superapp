@@ -131,9 +131,13 @@ class WalletManager(
 
         Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
         val req = SendRequest.forTx(contract)
+        kit.wallet().completeTx(req)
+
         Log.i("Coin", "Coin: the change adress is hard-reset to your protocol key.")
         req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
-        kit.wallet().completeTx(req)
+
+        Log.i("Coin", "Coin: committing transaction to wallet.")
+        kit.wallet().commitTx(req.tx)
 
         val transactionId = req.tx.txId.toString()
         Log.i("Coin", "Coin: the transaction ID will be: ${transactionId}")
@@ -143,7 +147,7 @@ class WalletManager(
         broadcastTransaction.setProgressCallback { progress ->
             Log.i("Coin", "Coin: broadcast progress is ${progress}.")
         }
-        val broadcast: ListenableFuture<Transaction> = broadcastTransaction.broadcast()
+        broadcastTransaction.broadcast()
         Log.i("Coin", "Coin: successfully broad-casted the multi-sig wallet.")
 
         // TODO: figure out how to put attemptToGetTransactionAndSerialize into future
@@ -255,7 +259,7 @@ class WalletManager(
             params: NetworkParameters
         ): ECDSASignature {
             // Retrieve the multisignature contract.
-            var multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
+            val multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
             val multisigScript: Script = multisigOutput.scriptPubKey
 
             // Validate whether the transaction (= contract) is what we expect.
@@ -408,6 +412,9 @@ class WalletManager(
         }
         Log.i("Coin", "Coin: sendMultiSignatureMessage, transaction is ready to be sent..")
         Log.i("Coin", "Coin: sendMultiSignatureMessage, transactionId: ${spendTx.txId}")
+
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, committing transaction to wallet.")
+        kit.wallet().commitTx(spendTx)
 
         Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcasting transaction.")
         val broadcastTransaction = kit.peerGroup().broadcastTransaction(spendTx)
