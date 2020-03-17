@@ -2,7 +2,6 @@ package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
 import com.google.common.base.Joiner
-import com.google.common.util.concurrent.ListenableFuture
 import info.blockchain.api.blockexplorer.BlockExplorer
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -30,7 +29,8 @@ import java.util.*
 class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
-    serializedDeterministicKey: SerializedDeterminsticKey? = null
+    serializedDeterministicKey: SerializedDeterminsticKey? = null,
+    tracker: DownloadProgressTracker?
 ) {
     val kit: WalletAppKit
     val params: NetworkParameters
@@ -57,25 +57,6 @@ class WalletManager(
             }
         }
 
-        kit.setDownloadListener(object : DownloadProgressTracker() {
-            override fun progress(
-                pct: Double,
-                blocksSoFar: Int,
-                date: Date?
-            ) {
-                super.progress(pct, blocksSoFar, date)
-                val percentage = pct.toInt()
-                println("Progress: $percentage")
-                Log.i("Coin", "Progress: $percentage")
-            }
-
-            override fun doneDownload() {
-                super.doneDownload()
-                Log.w("Coin", "Download Complete!")
-                Log.i("Coin", "Balance: ${kit.wallet().balance}")
-            }
-        })
-
         if (serializedDeterministicKey != null) {
             Log.i(
                 "Coin",
@@ -88,6 +69,30 @@ class WalletManager(
                 serializedDeterministicKey.creationTime
             )
             kit.restoreWalletFromSeed(deterministicSeed)
+        }
+
+        if (tracker != null) {
+            kit.setDownloadListener(tracker)
+        } else {
+            kit.setDownloadListener(object : DownloadProgressTracker() {
+                override fun progress(
+                    pct: Double,
+                    blocksSoFar: Int,
+                    date: Date?
+                ) {
+                    super.progress(pct, blocksSoFar, date)
+                    val percentage = pct.toInt()
+                    println("Progress: $percentage")
+                    Log.i("Coin", "Progress 2: $percentage")
+                }
+
+                override fun doneDownload() {
+                    super.doneDownload()
+                    Log.w("Coin", "Download Complete!")
+                }
+
+            }
+            )
         }
 
         Log.i("Coin", "Coin: starting the setup of kit.")

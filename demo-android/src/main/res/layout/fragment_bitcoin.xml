@@ -58,6 +58,12 @@
                     android:layout_height="wrap_content"
                     android:text="Public Key:" />
 
+                <TextView
+                    android:id="@+id/progressField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Progress: waiting..." />
+
                 <Button
                     android:id="@+id/startWalletButtonExisting"
                     android:layout_width="match_parent"

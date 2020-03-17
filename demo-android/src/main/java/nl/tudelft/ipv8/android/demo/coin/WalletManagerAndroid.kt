@@ -1,10 +1,6 @@
 package nl.tudelft.ipv8.android.demo.coin
 
-import android.app.Application
 import android.content.Context
-import android.os.Handler
-import org.bitcoinj.utils.Threading
-import java.util.concurrent.Executor
 
 /**
  * Singleton class for WalletManager which also sets-up Android specific things.
@@ -28,14 +24,14 @@ object WalletManagerAndroid {
             return this
         }
 
-        fun init(): WalletManager {
+        fun init(tracker: org.bitcoinj.core.listeners.DownloadProgressTracker? = null): WalletManager {
             val walletDir = context.filesDir
             val configuration = configuration
                 ?: throw IllegalStateException("Configuration is not set")
 
             WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(configuration, walletDir, configuration.key)
+            val walletManager = WalletManager(configuration, walletDir, configuration.key, tracker)
 
             WalletManagerAndroid.walletManager = walletManager
 
