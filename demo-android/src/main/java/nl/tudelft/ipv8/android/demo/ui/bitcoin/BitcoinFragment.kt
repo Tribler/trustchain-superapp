@@ -51,6 +51,7 @@ class BitcoinFragment(
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config)
                 .init()
+            refresh()
         }
 
         startWalletButtonImportDefaultKey.setOnClickListener {
@@ -64,25 +65,11 @@ class BitcoinFragment(
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config)
                 .init()
+            refresh()
+
         }
 
         refreshButton.setOnClickListener {
-            val walletManager = WalletManagerAndroid.getInstance()
-            walletStatus.text = "Status: ${walletManager.kit.state()}"
-            walletBalance.text =
-                "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
-            chosenNetwork.text = "Network: ${walletManager.params.id}"
-            val seed = walletManager.toSeed()
-            walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
-            yourPublicHex.text = walletManager.networkPublicECKeyHex()
-
-            if (walletManager.kit.state().equals(RUNNING)) {
-                startWalletButtonExisting.isEnabled = false
-                startWalletButtonExisting.isClickable = false
-                startWalletButtonImportDefaultKey.isEnabled = false
-                startWalletButtonImportDefaultKey.isClickable = false
-            }
-
             refresh()
         }
 
@@ -127,11 +114,25 @@ class BitcoinFragment(
 
     }
 
-    private fun refresh() {
+    fun refresh() {
         val walletManager = WalletManagerAndroid.getInstance()
+        walletStatus.text = "Status: ${walletManager.kit.state()}"
+        walletBalance.text =
+            "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
+        chosenNetwork.text = "Network: ${walletManager.params.id}"
+        val seed = walletManager.toSeed()
+        walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
+        yourPublicHex.text = walletManager.networkPublicECKeyHex()
 
+        if (walletManager.kit.state().equals(RUNNING)) {
+            startWalletButtonExisting.isEnabled = false
+            startWalletButtonExisting.isClickable = false
+            startWalletButtonImportDefaultKey.isEnabled = false
+            startWalletButtonImportDefaultKey.isClickable = false
 
-        Log.i("Coin", "Coin: ${walletManager.toSeed()}")
+            generateRandomHexes.isEnabled = true
+            createMultisig.isEnabled = true
+        }
     }
 
     override fun onCreateView(

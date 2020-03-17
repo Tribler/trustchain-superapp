@@ -422,8 +422,6 @@ class WalletManager(
         val seed = kit.wallet().keyChainSeed
         val words = Joiner.on(" ").join(seed.mnemonicCode)
         val creationTime = seed.creationTimeSeconds
-        Log.i("Coin", "Seed words are: " + words)
-        Log.i("Coin", "Seed birthday is: " + creationTime)
         return SerializedDeterminsticKey(words, creationTime)
     }
 

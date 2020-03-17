@@ -64,22 +64,38 @@
                     android:layout_height="wrap_content"
                     android:text="Start Wallet (load existing)" />
 
-                <Button
-                    android:id="@+id/startWalletButtonImportDefaultKey"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Start Wallet (import default key)" />
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/startWalletButtonImportDefaultKey"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Import Default Wallet" />
+
+                    <Button
+                        android:id="@+id/importFreshWalletButton"
+                        android:layout_width="196dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:text="Import Fresh Wallet" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/generateRandomHexes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="false"
                     android:text="Generate Random Hexes" />
 
                 <Button
                     android:id="@+id/createMultisig"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="false"
                     android:text="Create Multisig" />
 
                 <EditText
