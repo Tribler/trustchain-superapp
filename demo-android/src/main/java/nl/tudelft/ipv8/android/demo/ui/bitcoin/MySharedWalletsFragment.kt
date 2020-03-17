@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
-import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 
@@ -26,7 +25,7 @@ class MySharedWalletFragment(
         val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks)
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
-            controller.showView("JoinNetworkSteps")
+            controller.showSharedWalletTransactionView(sharedWalletBlocks[position])
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
     }

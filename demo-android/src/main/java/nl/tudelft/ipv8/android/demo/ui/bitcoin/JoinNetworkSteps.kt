@@ -5,12 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import nl.tudelft.ipv8.android.demo.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val PUBLIC_KEY = "publicKey"
+private const val VOTING_THRESHOLD = "votingThreshold"
+private const val ENTRANCE_FEE = "entranceFee"
+private const val USERS = "users"
+
 
 /**
  * A simple [Fragment] subclass.
@@ -18,15 +20,18 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class JoinNetworkSteps : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var publicKey: String = ""
+    private var votingThreshold: String = ""
+    private var entranceFee: String = ""
+    private var users: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            publicKey = it.getString(PUBLIC_KEY, PUBLIC_KEY)
+            votingThreshold = it.getString(VOTING_THRESHOLD, VOTING_THRESHOLD)
+            entranceFee = it.getString(ENTRANCE_FEE, ENTRANCE_FEE)
+            users = it.getString(USERS, USERS)
         }
     }
 
@@ -35,7 +40,12 @@ class JoinNetworkSteps : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_join_network_steps, container, false)
+        val view = inflater.inflate(R.layout.fragment_join_network_steps, container, false)
+        view.findViewById<TextView>(R.id.public_key_proposal).text = publicKey
+        view.findViewById<TextView>(R.id.voting_threshold_proposal).text = votingThreshold
+        view.findViewById<TextView>(R.id.entrance_fee_proposal).text = entranceFee
+        view.findViewById<TextView>(R.id.users_proposal).text = users
+        return view
     }
 
     companion object {
@@ -49,11 +59,18 @@ class JoinNetworkSteps : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(
+            publicKey: String,
+            votingThreshold: String,
+            entranceFee: String,
+            users: String
+        ) =
             JoinNetworkSteps().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString(PUBLIC_KEY, publicKey)
+                    putString(VOTING_THRESHOLD, votingThreshold)
+                    putString(ENTRANCE_FEE, entranceFee)
+                    putString(USERS, users)
                 }
             }
     }
