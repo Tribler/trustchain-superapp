@@ -3,6 +3,7 @@ package nl.tudelft.ipv8.android.demo.coin
 import android.util.Log
 import com.google.common.base.Joiner
 import com.google.common.util.concurrent.ListenableFuture
+import info.blockchain.api.blockexplorer.BlockExplorer
 import org.bitcoinj.core.*
 import org.bitcoinj.core.ECKey.ECDSASignature
 import org.bitcoinj.core.listeners.DownloadProgressTracker
@@ -74,13 +75,11 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         kit.startAsync()
         kit.awaitRunning()
         val ad = LegacyAddress.fromString(params, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")
-
         kit.wallet().addWatchedAddress(ad)
 
         Log.i("Coin", "Coin: ${kit.wallet()}")
         Log.i("Coin", "Coin: ${toSeed()}")
         Log.i("Coin", "Wallet: ${kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)}")
-
     }
 
     companion object {
@@ -137,6 +136,69 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             return signature
         }
 
+        fun checkEntranceFeeTransaction(
+            userBitcoinPk: Address,
+            bitcoinTransactionHash: Sha256Hash,
+            sharedWalletBitcoinPk: Address,
+            entranceFee: Double
+        ): Boolean {
+            // Get transaction from tx hash
+            val blockExplorer = BlockExplorer()
+            val tx = try {
+                blockExplorer.getTransaction(bitcoinTransactionHash.toString())
+            } catch (e: Exception) {
+                e.printStackTrace()
+                return false
+            }
+
+            // Check block confirmations
+            val blockHeightRelative = blockExplorer.latestBlock.height - tx.blockHeight
+            if (blockHeightRelative < 6) {
+                println("Transaction was not confirmed by at least 6 blocks:  $blockHeightRelative")
+                return false
+            }
+            if (tx.blockHeight < 0) {
+                println("Transaction does not have a valid block height: ${tx.blockHeight}")
+                return false
+            }
+
+            // Check transaction inputs
+            val userBitcoinPkString = userBitcoinPk.toString()
+            var hasCorrectInput = false
+            for (input in tx.inputs) {
+                val inputValue = input.previousOutput.value.toDouble() / 100000000
+                if (userBitcoinPkString.equals(input.previousOutput.address) &&
+                    inputValue >= entranceFee) {
+                    hasCorrectInput = true
+                    break
+                }
+            }
+
+            if (!hasCorrectInput) {
+                println("Transaction did not have correct inputs")
+                return false
+            }
+
+            // Check transaction outputs
+            val sharedWalletBitcoinPkString = sharedWalletBitcoinPk.toString()
+            var hasCorrectOutput = false
+            for (output in tx.outputs) {
+                val outputValue = output.value.toDouble() / 100000000
+                if (sharedWalletBitcoinPkString.equals(output.address) &&
+                    outputValue >= entranceFee) {
+                    hasCorrectOutput = true
+                    break
+                }
+            }
+
+            if (!hasCorrectOutput) {
+                println("Transaction did not have correct outputs")
+                return false
+            }
+
+            return true
+        }
+
         fun privateKeyStringToECKey(
             privateKey: String,
             params: NetworkParameters = MainNetParams.get()
@@ -157,6 +219,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         // Add the input to the transaction (so the above amount can be sent to the wallet).
         val req = SendRequest.forTx(contract)
         kit.wallet().completeTx(req)
+
 
         // Broadcast and wait for it to propagate across the network.
         // It should take a few seconds unless something went wrong.
