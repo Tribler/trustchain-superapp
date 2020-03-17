@@ -122,7 +122,7 @@ class BitcoinFragment(
         chosenNetwork.text = "Network: ${walletManager.params.id}"
         val seed = walletManager.toSeed()
         walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
-        yourPublicHex.text = walletManager.networkPublicECKeyHex()
+        yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
 
         if (walletManager.kit.state().equals(RUNNING)) {
             startWalletButtonExisting.isEnabled = false
