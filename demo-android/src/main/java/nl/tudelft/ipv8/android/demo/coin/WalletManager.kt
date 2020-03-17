@@ -134,9 +134,9 @@ class WalletManager(
 
         Log.i("Coin", "Coin: we will broadcast your new multi-sig transaction.")
         val broadcastTransaction = kit.peerGroup().broadcastTransaction(req.tx)
-        broadcastTransaction.setProgressCallback({ progress ->
+        broadcastTransaction.setProgressCallback { progress ->
             Log.i("Coin", "Coin: broadcast progress is ${progress}.")
-        })
+        }
         broadcastTransaction.broadcast().get()
         Log.i("Coin", "Coin: successfully broad-casted the multi-sig wallet.")
 
@@ -165,6 +165,31 @@ class WalletManager(
         Log.i("Coin", "Coin: the signature is ${serializedSignature}")
 
         return serializedSignature
+    }
+
+    fun combineSignaturesToSendTransaction(
+        serializedTransaction: String,
+        serializedSignatures: List<String>,
+        receiverAddress: String,
+        value: Coin
+    ) {
+        Log.i("Coin", "Coin: we are going to send a transaction.")
+        val transaction = Transaction(params, serializedTransaction.hexToBytes())
+        Log.i("Coin", "Coin: transaction Id is ${transaction.txId}")
+
+        Log.i("Coin", "Coin: there are ${serializedSignatures.size} signatures.")
+        val signatures = serializedSignatures.map { serializedSignature ->
+            ECDSASignature.decodeFromDER(serializedSignature.hexToBytes())
+        }
+
+        sendMultiSignatureMessage(
+            transaction,
+            signatures,
+            Address.fromString(params, receiverAddress),
+            value
+        )
+
+
     }
 
     fun attemptToGetTransactionAndSerialize(transactionId: String): String? {
@@ -202,6 +227,16 @@ class WalletManager(
             return contract
         }
 
+        fun getMultisigOutputFromTransaction(transaction: Transaction): TransactionOutput {
+            var multisigOutput: TransactionOutput? = null
+            for (output in transaction.outputs) {
+                if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
+                    multisigOutput = output
+                }
+            }
+            return multisigOutput!!
+        }
+
         fun signMultiSignatureMessage(
             contract: Transaction,
             myPublicKey: ECKey,
@@ -210,12 +245,7 @@ class WalletManager(
             params: NetworkParameters
         ): ECDSASignature {
             // Retrieve the multisignature contract.
-            var multisigOutput: TransactionOutput = contract.getOutput(0)
-            for (output in contract.outputs) {
-                if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
-                    multisigOutput = output
-                }
-            }
+            var multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
             val multisigScript: Script = multisigOutput.scriptPubKey
 
             // Validate whether the transaction (= contract) is what we expect.
@@ -321,24 +351,31 @@ class WalletManager(
 
     }
 
-    /**
-     * Contract: multi signature contract in question
-     * Signatures: all signatures needed (also includes yourself).
-     * Receiver address: the address we are sending to
-     * Value: the amount of money we are sending
-     */
     fun sendMultiSignatureMessage(
         contract: Transaction,
         signatures: List<ECDSASignature>,
-        receiverAddress: ECKey,
+        receiverAddress: Address,
         value: Coin
-    ) {
+    ): String {
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, starting process.")
         // Make the transaction we want to perform.
-        val multisigOutput: TransactionOutput = contract.getOutput(0)
+        val multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
+
+        // Validate whether the transaction (= contract) is what we expect.
+        if (!ScriptPattern.isSentToMultisig(multisigOutput.scriptPubKey)) {
+            Log.i(
+                "Coin",
+                "Coin: sendMultiSignatureMessage failing because not multi sig output index correct"
+            )
+            throw Exception("Contract is not a multi signature contract!")
+        }
+
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, making transaction.")
         val spendTx = Transaction(params)
         spendTx.addOutput(value, receiverAddress)
         val input = spendTx.addInput(multisigOutput)
 
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, creating the script (combining).")
         // Create the script that combines the signatures (to spend the multi-signature output).
         val transactionSignatures = signatures.map { signature ->
             TransactionSignature(signature, Transaction.SigHash.ALL, false)
@@ -348,11 +385,29 @@ class WalletManager(
         // Add it to the input.
         input.scriptSig = inputScript
 
-        // Verify.
-        input.verify(multisigOutput)
+        // Verify the script before sending.
+        try {
+            Log.i("Coin", "Coin: sendMultiSignatureMessage, script is valid.")
+            input.verify(multisigOutput)
+        } catch (exception: VerificationException) {
+            Log.i(
+                "Coin",
+                "Coin: sendMultiSignatureMessage, ! script is not valid, order wrong (most likely) -> ${exception.message}."
+            )
 
-        // Todo: add listener for when there is completion
-        kit.peerGroup().broadcastTransaction(spendTx)
+        }
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, transaction is ready to be sent..")
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, transactionId: ${spendTx.txId}")
+
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcasting transaction.")
+        val broadcastTransaction = kit.peerGroup().broadcastTransaction(spendTx)
+        broadcastTransaction.setProgressCallback { progress ->
+            Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcast progress is ${progress}")
+        }
+        broadcastTransaction.broadcast().get()
+        Log.i("Coin", "Coin: sendMultiSignatureMessage, successfully broad-casted the transaction.")
+
+        return spendTx.bitcoinSerialize().toHex()
     }
 
     fun toSeed(): SerializedDeterminsticKey {
