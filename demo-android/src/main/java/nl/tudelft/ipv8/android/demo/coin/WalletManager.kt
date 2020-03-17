@@ -145,6 +145,28 @@ class WalletManager(
         return serializedTransaction
     }
 
+    fun makeSignatureForTransaction(
+        serializedTransaction: String,
+        receiverAddress: String
+    ): String {
+        Log.i("Coin", "Coin: we are going to sign a transaction.")
+        val transaction = Transaction(params, serializedTransaction.hexToBytes())
+        Log.i("Coin", "Coin: transaction Id is ${transaction.txId}")
+
+        val signature: ECDSASignature = signMultiSignatureMessage(
+            transaction,
+            protocolECKey(),
+            Address.fromString(params, receiverAddress),
+            Coin.valueOf(1000),
+            params
+        )
+
+        val serializedSignature = signature.encodeToDER().toHex()
+        Log.i("Coin", "Coin: the signature is ${serializedSignature}")
+
+        return serializedSignature
+    }
+
     fun attemptToGetTransactionAndSerialize(transactionId: String): String? {
         val transaction = kit.wallet().getTransaction(Sha256Hash.wrap(transactionId))
         if (transaction != null) {
