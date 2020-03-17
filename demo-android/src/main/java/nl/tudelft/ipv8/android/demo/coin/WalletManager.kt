@@ -2,6 +2,7 @@ package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
 import com.google.common.base.Joiner
+import com.google.common.util.concurrent.ListenableFuture
 import info.blockchain.api.blockexplorer.BlockExplorer
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -99,7 +100,7 @@ class WalletManager(
     }
 
     // The protocol key we are using (private + public).
-    private fun protocolECKey(): ECKey {
+    fun protocolECKey(): ECKey {
         return kit.wallet().issuedReceiveKeys[0]
     }
 
@@ -108,22 +109,25 @@ class WalletManager(
         return protocolECKey().publicKeyAsHex
     }
 
+    data class TransactionPackage(
+        val transactionId: String,
+        val serializedTransaction: String
+    )
+
     fun startNewWalletProcess(
         networkPublicHexKeys: List<String>,
         entranceFee: Coin,
         threshHold: Int = networkPublicHexKeys.size + 1
-    ): String? {
+    ): TransactionPackage {
 
         Log.i("Coin", "Coin: we are making a new multi-sig wallet, with some other people.")
-        val us = protocolECKey()
-        val them = networkPublicHexKeys.map { publicHexKey: String ->
+        val keys = networkPublicHexKeys.map { publicHexKey: String ->
+            Log.i("Coin", "Coin: deserializing key ${publicHexKey}.")
             ECKey.fromPublicOnly(publicHexKey.hexToBytes())
         }
-        val total = them.toMutableList()
-        total.add(us)
 
-        Log.i("Coin", "Coin: we will now make a wallet for ${total.size} people in total.")
-        val contract = createMultiSignatureWallet(total, entranceFee, threshHold, params)
+        Log.i("Coin", "Coin: we will now make a wallet for ${keys.size} people in total.")
+        val contract = createMultiSignatureWallet(keys, entranceFee, threshHold, params)
 
         Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
         val req = SendRequest.forTx(contract)
@@ -137,12 +141,16 @@ class WalletManager(
         broadcastTransaction.setProgressCallback { progress ->
             Log.i("Coin", "Coin: broadcast progress is ${progress}.")
         }
-        broadcastTransaction.broadcast().get()
+        val broadcast: ListenableFuture<Transaction> = broadcastTransaction.broadcast()
         Log.i("Coin", "Coin: successfully broad-casted the multi-sig wallet.")
 
-        val serializedTransaction = attemptToGetTransactionAndSerialize(transactionId)
+        // TODO: figure out how to put attemptToGetTransactionAndSerialize into future
+        val serializedTransaction = "temp"
 
-        return serializedTransaction
+        return TransactionPackage(
+            transactionId,
+            serializedTransaction
+        )
     }
 
     fun makeSignatureForTransaction(

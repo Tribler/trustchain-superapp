@@ -14,6 +14,8 @@ import nl.tudelft.ipv8.android.demo.coin.SerializedDeterminsticKey
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
 
 /**
  * A simple [Fragment] subclass.
@@ -72,6 +74,7 @@ class BitcoinFragment(
             chosenNetwork.text = "Network: ${walletManager.params.id}"
             val seed = walletManager.toSeed()
             walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
+            yourPublicHex.text = walletManager.networkPublicECKeyHex()
 
             if (walletManager.kit.state().equals(RUNNING)) {
                 startWalletButtonExisting.isEnabled = false
@@ -81,6 +84,45 @@ class BitcoinFragment(
             }
 
             refresh()
+        }
+
+        generateRandomHexes.setOnClickListener {
+            val key = ECKey()
+            publicKeyHexes.setText("${publicKeyHexes.text}${System.lineSeparator()}${key.publicKeyAsHex}")
+        }
+
+        createMultisig.setOnClickListener {
+            Log.i("Coin", "Coin: createMultisig clicked.")
+            val walletManager = WalletManagerAndroid.getInstance()
+
+            val myKey = walletManager.networkPublicECKeyHex()
+            val lines = publicKeyHexes.text.lines()
+            val value = coinValue.text.toString().toLong()
+            val threshHold = threshHoldText.text.toString().toInt()
+
+            val keys = lines.toMutableList()
+            keys.add(myKey)
+            keys.removeAt(0)
+
+            Log.i("Coin", "Coin: your key: ${myKey}")
+            Log.i("Coin", "Coin: all keys:")
+            keys.forEach { key ->
+                Log.i("Coin", "Coin: ${key}}")
+            }
+            Log.i("Coin", "Coin: value (satoshi) sending: ${value}")
+
+            Log.i("Coin", "Coin: createMultisig, starting process.")
+            val result = walletManager.startNewWalletProcess(
+                keys,
+                Coin.valueOf(value),
+                threshHold
+            )
+            Log.i("Coin", "Coin: createMultisig, finished process.")
+
+            Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
+            Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
+            multisigOutputText.setText(result.transactionId)
+
         }
 
     }
