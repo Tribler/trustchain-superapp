@@ -70,6 +70,8 @@ class BitcoinFragment(
             walletBalance.text =
                 "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
             chosenNetwork.text = "Network: ${walletManager.params.id}"
+            val seed = walletManager.toSeed()
+            walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
 
             if (walletManager.kit.state().equals(RUNNING)) {
                 startWalletButtonExisting.isEnabled = false

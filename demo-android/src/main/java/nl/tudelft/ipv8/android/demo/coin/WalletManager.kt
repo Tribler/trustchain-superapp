@@ -2,7 +2,6 @@ package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
 import com.google.common.base.Joiner
-import com.google.common.util.concurrent.ListenableFuture
 import info.blockchain.api.blockexplorer.BlockExplorer
 import org.bitcoinj.core.*
 import org.bitcoinj.core.ECKey.ECDSASignature
@@ -15,8 +14,6 @@ import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.wallet.DeterministicSeed
-import org.bitcoinj.wallet.SendRequest
-import org.bitcoinj.wallet.Wallet
 import java.io.File
 import java.util.*
 
@@ -76,7 +73,10 @@ class WalletManager(
         })
 
         if (serializedDeterministicKey != null) {
-            Log.i("Coin", "Coin: received a key to import, will clear the wallet and download again.")
+            Log.i(
+                "Coin",
+                "Coin: received a key to import, will clear the wallet and download again."
+            )
             val deterministicSeed = DeterministicSeed(
                 serializedDeterministicKey.seed,
                 null,
@@ -230,23 +230,6 @@ class WalletManager(
 
     }
 
-    fun completeAndBroadcastTransaction(contract: Transaction) {
-        // Add the input to the transaction (so the above amount can be sent to the wallet).
-        val req = SendRequest.forTx(contract)
-        kit.wallet().completeTx(req)
-
-
-        // Broadcast and wait for it to propagate across the network.
-        // It should take a few seconds unless something went wrong.
-        val broadcast: ListenableFuture<Transaction> =
-            kit.peerGroup().broadcastTransaction(req.tx).broadcast()
-
-//        broadcast.addListener(Runnable {
-//            Log.d("Coin", "Coin: created a multisignature wallet.")
-//        }, WalletManagerAndroid.runInUIThread)
-    }
-
-
     /**
      * Contract: multi signature contract in question
      * Signatures: all signatures needed (also includes yourself).
@@ -281,41 +264,13 @@ class WalletManager(
         kit.peerGroup().broadcastTransaction(spendTx)
     }
 
-    fun getConfirmedBalance(): Coin? {
-        return kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE_SPENDABLE)
-    }
-
-    fun getUnconfirmedBalance(): Coin? {
-        return kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED_SPENDABLE)
-    }
-
-    fun getProtocolPublicAddress(): Address {
-        return kit.wallet().issuedReceiveAddresses[0]
-    }
-
-    fun getProtocolPublicKey(): ECKey {
-        return kit.wallet().issuedReceiveKeys[0]
-    }
-
-    fun toSeed() {
+    fun toSeed(): SerializedDeterminsticKey {
         val seed = kit.wallet().keyChainSeed
-        println("Seed words are: " + Joiner.on(" ").join(seed.mnemonicCode))
-        println("Seed birthday is: " + seed.creationTimeSeconds)
-    }
-
-    fun importSeedIntoWallet(seedCode: String, creationTime: Long) {
-        val seed = DeterministicSeed(seedCode, null, "", creationTime)
-        kit.restoreWalletFromSeed(seed)
-    }
-
-    fun printWalletInfo() {
-        val wallet = this.kit.wallet()
-        println("Current receive address:")
-        println(wallet.currentReceiveAddress())
-        println("Protocol address:")
-        println(wallet.issuedReceiveAddresses[0])
-        println("Wallet:")
-        println(wallet.toString())
+        val words = Joiner.on(" ").join(seed.mnemonicCode)
+        val creationTime = seed.creationTimeSeconds
+        Log.i("Coin", "Seed words are: " + words)
+        Log.i("Coin", "Seed birthday is: " + creationTime)
+        return SerializedDeterminsticKey(words, creationTime)
     }
 
 }
