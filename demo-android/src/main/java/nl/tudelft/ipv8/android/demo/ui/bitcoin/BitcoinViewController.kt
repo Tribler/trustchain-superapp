@@ -4,5 +4,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 interface BitcoinViewController {
     fun showView(bitcoinViewName: String)
+    fun showDefaultView()
     fun showSharedWalletTransactionView(sharedWalletBlock: TrustChainBlock)
 }

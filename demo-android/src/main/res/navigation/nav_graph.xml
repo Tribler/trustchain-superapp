@@ -70,6 +70,11 @@
         android:label="fragment_create_sw"
         tools:layout="@layout/fragment_create_sw" />
     <fragment
+        android:id="@+id/blockchainDownloading"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BlockchainDownloading"
+        android:label="fragment_blockchain_downloading"
+        tools:layout="@layout/fragment_blockchain_downloading" />
+    <fragment
         android:id="@+id/mySharedWalletsFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.MySharedWalletsFragment"
         android:label="fragment_my_shared_wallets"

@@ -28,6 +28,8 @@ import java.util.*
 class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, walletDir: File) {
     val kit: WalletAppKit
     val params: NetworkParameters
+    var isDownloading: Boolean = true
+    var progress: Int = 0;
 
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
@@ -59,6 +61,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             ) {
                 super.progress(pct, blocksSoFar, date)
                 val percentage = pct.toInt()
+                progress = percentage
                 println("Progress: $percentage")
                 Log.i("Coin", "Progress: $percentage")
             }
@@ -67,13 +70,14 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
                 super.doneDownload()
                 Log.w("Coin", "Download Complete!")
                 Log.i("Coin", "Balance: ${kit.wallet().balance}")
+                isDownloading = false
             }
         })
 
         kit.setBlockingStartup(false)
         kit.startAsync()
         kit.awaitRunning()
-        val ad = LegacyAddress.fromString(params, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")
+        val ad = LegacyAddress.fromString(params, "1CN6vbTuKioGThCb2Q7mQF1fow27HZBVJP")
 
         kit.wallet().addWatchedAddress(ad)
 

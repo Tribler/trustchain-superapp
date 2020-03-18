@@ -18,7 +18,7 @@ import nl.tudelft.ipv8.util.toHex
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinNetworkFragment (
+class JoinNetworkFragment(
     override val controller: BitcoinViewController
 ) : BitcoinView, BaseFragment(R.layout.fragment_join_network) {
     private val tempBitcoinPk = ByteArray(2)
