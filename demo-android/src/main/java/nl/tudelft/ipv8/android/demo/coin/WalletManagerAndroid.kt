@@ -5,6 +5,7 @@ import android.content.Context
 /**
  * Singleton class for WalletManager which also sets-up Android specific things.
  */
+// TODO: Clean up Thread usage.
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
     private var context: Context? = null

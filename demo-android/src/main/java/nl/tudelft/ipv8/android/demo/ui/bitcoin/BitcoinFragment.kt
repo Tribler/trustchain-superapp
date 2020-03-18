@@ -14,10 +14,6 @@ import nl.tudelft.ipv8.android.demo.coin.SerializedDeterminsticKey
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.listeners.DownloadProgressTracker
-import java.util.*
 
 /**
  * A simple [Fragment] subclass.
@@ -65,33 +61,11 @@ class BitcoinFragment(
                 )
             )
 
-            val tracker: DownloadProgressTracker = object : DownloadProgressTracker() {
-                override fun progress(
-                    pct: Double,
-                    blocksSoFar: Int,
-                    date: Date?
-                ) {
-                    super.progress(pct, blocksSoFar, date)
-                    val percentage = pct.toInt()
-                    println("Progress: $percentage")
-                    Log.i("Coin", "Progress 2: $percentage")
-                    progressField.text = "Progress: $percentage"
-                }
-
-                override fun doneDownload() {
-                    super.doneDownload()
-                    Log.w("Coin", "Download Complete!")
-                    progressField.text = "Progress: up-to-date"
-                }
-
-            }
-
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config)
-                .init(tracker)
+                .init()
 
             refresh()
-
         }
 
         refreshButton.setOnClickListener {
@@ -136,8 +110,9 @@ class BitcoinFragment(
             multisigOutputText.setText(result.transactionId)
 
         }
-
     }
+
+
 
     fun refresh() {
         val walletManager = WalletManagerAndroid.getInstance()

@@ -19,7 +19,7 @@ class SharedWalletListAdapter(
     private val listButtonText: String) : BaseAdapter() {
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
-        val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null)
+        val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null, false)
 
         val parsedTransaction = CoinUtil.parseTransaction(items[p0].transaction)
         val walletId = view.findViewById<TextView>(R.id.sw_id_item_t)

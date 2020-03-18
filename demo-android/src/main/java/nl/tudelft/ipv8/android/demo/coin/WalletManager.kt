@@ -26,14 +26,11 @@ import java.util.*
  * with bitcoin wallets (including multi-signature wallets).
  * NOTE: Ideally should be separated from any Android UI concepts. Not the case currently.
  */
-class WalletManager(
-    walletManagerConfiguration: WalletManagerConfiguration,
-    walletDir: File,
-    serializedDeterministicKey: SerializedDeterminsticKey? = null,
-    tracker: DownloadProgressTracker?
-) {
+class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, walletDir: File) {
     val kit: WalletAppKit
     val params: NetworkParameters
+    var isDownloading: Boolean = true
+    var progress: Int = 0;
 
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
@@ -71,29 +68,40 @@ class WalletManager(
             kit.restoreWalletFromSeed(deterministicSeed)
         }
 
-        if (tracker != null) {
-            kit.setDownloadListener(tracker)
-        } else {
-            kit.setDownloadListener(object : DownloadProgressTracker() {
-                override fun progress(
-                    pct: Double,
-                    blocksSoFar: Int,
-                    date: Date?
-                ) {
-                    super.progress(pct, blocksSoFar, date)
-                    val percentage = pct.toInt()
-                    println("Progress: $percentage")
-                    Log.i("Coin", "Progress 2: $percentage")
-                }
-
-                override fun doneDownload() {
-                    super.doneDownload()
-                    Log.w("Coin", "Download Complete!")
-                }
-
-            }
+        if (serializedDeterministicKey != null) {
+            Log.i(
+                "Coin",
+                "Coin: received a key to import, will clear the wallet and download again."
             )
+            val deterministicSeed = DeterministicSeed(
+                serializedDeterministicKey.seed,
+                null,
+                "",
+                serializedDeterministicKey.creationTime
+            )
+            kit.restoreWalletFromSeed(deterministicSeed)
         }
+
+        kit.setDownloadListener(object : DownloadProgressTracker() {
+            override fun progress(
+                pct: Double,
+                blocksSoFar: Int,
+                date: Date?
+            ) {
+                super.progress(pct, blocksSoFar, date)
+                val percentage = pct.toInt()
+                progress = percentage
+                println("Progress: $percentage")
+                Log.i("Coin", "Progress: $percentage")
+            }
+
+            override fun doneDownload() {
+                super.doneDownload()
+                Log.w("Coin", "Download Complete!")
+                Log.i("Coin", "Balance: ${kit.wallet().balance}")
+                isDownloading = false
+            }
+        })
 
         Log.i("Coin", "Coin: starting the setup of kit.")
         kit.setBlockingStartup(false)
