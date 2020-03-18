@@ -8,6 +8,7 @@ import org.bitcoinj.core.ECKey.ECDSASignature
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
+import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
@@ -33,7 +34,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
 
         params = when (walletManagerConfiguration.network) {
             BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
-            BitcoinNetworkOptions.PRODUCTION -> TestNet3Params.get()
+            BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
         }
 
         val filePrefix = when (walletManagerConfiguration.network) {
@@ -58,6 +59,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
             ) {
                 super.progress(pct, blocksSoFar, date)
                 val percentage = pct.toInt()
+                println("Progress: $percentage")
                 Log.i("Coin", "Progress: $percentage")
             }
 
@@ -69,12 +71,15 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         })
 
         kit.setBlockingStartup(false)
-        kit.startAsync();
+        kit.startAsync()
         kit.awaitRunning()
+        val ad = LegacyAddress.fromString(params, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")
+
+        kit.wallet().addWatchedAddress(ad)
 
         Log.i("Coin", "Coin: ${kit.wallet()}")
         Log.i("Coin", "Coin: ${toSeed()}")
-        Log.i("Coin", "ChainHeight: ${kit.chain().bestChainHeight}" )
+        Log.i("Coin", "Wallet: ${kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)}" )
 
     }
 

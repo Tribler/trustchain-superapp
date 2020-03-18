@@ -5,5 +5,5 @@ enum class BitcoinNetworkOptions {
 }
 
 class WalletManagerConfiguration(
-    val network: BitcoinNetworkOptions = BitcoinNetworkOptions.TEST_NET
+    val network: BitcoinNetworkOptions = BitcoinNetworkOptions.PRODUCTION
 )
