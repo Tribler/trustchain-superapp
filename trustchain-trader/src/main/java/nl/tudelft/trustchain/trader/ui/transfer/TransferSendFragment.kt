@@ -20,7 +20,7 @@ class TransferSendFragment : BaseFragment(R.layout.fragment_transfer_send) {
         val amount = arguments?.getFloat("Amount")
 
         if (receiverPublicKey != null && amount != null) {
-            val block = trustchain.createTxProposalBlock(amount, receiverPublicKey)
+            val block = trustchain.createOfflineTxProposalBlock(amount, receiverPublicKey)
             println("Json in is " + TransferBlockParser().proposalToString(block))
             val bitmap: Bitmap? = QRCodeUtils(requireActivity(), requireContext())
                 .createQR(TransferBlockParser().proposalToString(block))
