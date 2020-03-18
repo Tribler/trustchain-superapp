@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.android.demo.DemoCommunity
 
 import nl.tudelft.ipv8.android.demo.TrustChainHelper
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 
 abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
     protected val trustchain: TrustChainHelper by lazy {

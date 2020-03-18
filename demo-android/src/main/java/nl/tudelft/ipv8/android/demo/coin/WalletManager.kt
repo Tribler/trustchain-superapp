@@ -44,7 +44,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
 
         kit = object : WalletAppKit(params, walletDir, filePrefix) {
             override fun onSetupCompleted() {
-                // Make a fresh new key if no keys in stored wallet.
+     // Make a fresh new key if no keys in stored wallet.
                 if (wallet().keyChainGroupSize < 1) wallet().importKey(ECKey())
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
