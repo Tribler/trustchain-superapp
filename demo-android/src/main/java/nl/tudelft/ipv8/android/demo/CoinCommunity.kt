@@ -1,14 +1,11 @@
 package nl.tudelft.ipv8.android.demo
-import android.util.Log
 import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.demo.coin.CoinUtil
-import nl.tudelft.ipv8.android.demo.coin.WalletManager
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.attestation.trustchain.*
-import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.Coin
@@ -92,21 +89,59 @@ class CoinCommunity: Community() {
         return true
     }
 
-    public fun joinSharedWallet(swBlockHash: ByteArray, bitcoinPk: ByteArray) {
+    public fun joinSharedWallet(swBlockHash: ByteArray): String {
         val swJoinBlock: TrustChainBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
             ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
 
         val parsedTransaction = CoinUtil.parseTransaction(swJoinBlock.transaction)
         val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
-        // TODO: Pay the entrance fee with bitcoinPk
-        // TODO: Create new shared wallet using bitcoinPks
+        val bitcoinPublicKeys = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
+        val entranceFee = parsedTransaction.getLong(SW_ENTRANCE_FEE)
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val myBitcoinPublicKey = walletManager.networkPublicECKeyHex()
+        bitcoinPublicKeys.add(myBitcoinPublicKey)
+
+        val totalAmount = bitcoinPublicKeys.size.toDouble()
+        val thresholdNumber = parsedTransaction.getInt(SW_VOTING_THRESHOLD).toDouble()
+        var threshold = Math.ceil((thresholdNumber / 100.0) * totalAmount)
+        val thresholdInt = Math.min(totalAmount, threshold).toInt()
+
+        // TODO: Fetch funds of old wallet and add to the input of the following transaction (in addition to your input):
+        val transaction = walletManager.startNewWalletProcess(
+            bitcoinPublicKeys,
+            Coin.valueOf(entranceFee),
+            thresholdInt
+        )
+
+        return transaction.transactionId
+    }
+
+    public fun fetchJoinSharedWalletStatus(transactionId: String): Boolean {
+        val walletManager = WalletManagerAndroid.getInstance()
+        val transactionSerialized = walletManager.attemptToGetTransactionAndSerialize(transactionId)
+        return transactionSerialized != null
+    }
+
+    /**
+     * Function that can be called to add a user to a shared wallet, on the trustchain.
+     */
+    public fun addSharedWalletJoinBlock(swBlockHash: ByteArray) {
+        val swJoinBlock: TrustChainBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
+            ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
+
+        val parsedTransaction = CoinUtil.parseTransaction(swJoinBlock.transaction)
+        val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
 
         val newTrustchainPks: ArrayList<String> = arrayListOf()
         newTrustchainPks.addAll(oldTrustchainPks)
         newTrustchainPks.add(myPeer.publicKey.keyToBin().toHex())
 
         val newBitcoinPks: ArrayList<String> = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
-        newBitcoinPks.add(bitcoinPk.toHex())
+        val walletManager = WalletManagerAndroid.getInstance()
+        val myBitcoinPublicKey = walletManager.networkPublicECKeyHex()
+
+        newBitcoinPks.add(myBitcoinPublicKey)
 
         val values = createTransactionData(
             parsedTransaction.getLong(SW_ENTRANCE_FEE),
@@ -120,8 +155,6 @@ class CoinCommunity: Community() {
         for (swParticipantPk in oldTrustchainPks) {
             trustchain.createProposalBlock(values, swParticipantPk.hexToBytes(), SHARED_WALLET_BLOCK)
         }
-
-        // TODO: TIMEOUT, wait for votes, collect key parts
     }
 
     public fun transferFunds(oldSwPk: ByteArray, newSwPk: ByteArray) {
