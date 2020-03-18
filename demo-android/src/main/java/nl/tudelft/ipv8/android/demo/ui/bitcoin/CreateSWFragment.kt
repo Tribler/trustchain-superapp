@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -37,6 +38,7 @@ class CreateSWFragment(
             val threshold = voting_threshold_tf.text.toString().toInt()
 
             getCoinCommunity().createSharedWallet(entranceFee, threshold, ByteArray(5))
+            controller.showView("BitcoinFragment")
         } else {
             alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
         }
@@ -46,7 +48,7 @@ class CreateSWFragment(
         val entranceFee = entrance_fee_tf.text.toString().toDoubleOrNull()
         val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
         return entranceFee != null && entranceFee > 0
-            && votingThreshold != null && votingThreshold > 0 && votingThreshold < 100
+            && votingThreshold != null && votingThreshold > 0 && votingThreshold <= 100
     }
 
     override fun onCreateView(

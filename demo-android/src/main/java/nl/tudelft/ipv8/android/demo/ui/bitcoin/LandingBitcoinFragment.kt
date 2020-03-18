@@ -5,9 +5,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
+import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.util.toHex
 import kotlin.IllegalArgumentException
 
 /**
@@ -15,7 +19,8 @@ import kotlin.IllegalArgumentException
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), BitcoinViewController {
+class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin),
+    BitcoinViewController {
 
     /**
      * Loads the view fragments and map them to strings as identifiers.
@@ -24,7 +29,8 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
         "BitcoinFragment" to BitcoinFragment.newInstance(this),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
         "CreateSWFragment" to CreateSWFragment.newInstance(this),
-        "BlockchainDownloading" to BlockchainDownloading.newInstance(this)
+        "BlockchainDownloading" to BlockchainDownloading.newInstance(this),
+        "MySharedWalletsFragment" to MySharedWalletFragment.newInstance(this)
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -64,6 +70,21 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
 
     override fun showDefaultView() {
         showView("BitcoinFragment")
+    }
+
+    override fun showSharedWalletTransactionView(sharedWalletBlock: TrustChainBlock) {
+        val publicKey = sharedWalletBlock.publicKey.toHex()
+        val parsedTransaction = CoinUtil.parseTransaction(sharedWalletBlock.transaction)
+        val votingThresholdText = "${parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)} %"
+        val entranceFeeText = "${parsedTransaction.getDouble(CoinCommunity.SW_ENTRANCE_FEE)} BTC"
+        val users =
+            "${parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS).length()} user(s) in this shared wallet"
+        val fragment =
+            JoinNetworkSteps.newInstance(publicKey, votingThresholdText, entranceFeeText, users)
+        val transaction = parentFragmentManager.beginTransaction()
+        transaction.replace(R.id.landing_bitcoin_container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
 
     companion object {

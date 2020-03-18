@@ -53,7 +53,7 @@
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
         android:label="Bitcoin Overview"
-        tools:layout="@layout/fragment_bitcoin"></fragment>
+        tools:layout="@layout/fragment_bitcoin" />
     <fragment
         android:id="@+id/joinNetworkFragment"
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.JoinNetworkFragment"
@@ -74,4 +74,9 @@
         android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BlockchainDownloading"
         android:label="fragment_blockchain_downloading"
         tools:layout="@layout/fragment_blockchain_downloading" />
+    <fragment
+        android:id="@+id/mySharedWalletsFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.MySharedWalletsFragment"
+        android:label="fragment_my_shared_wallets"
+        tools:layout="@layout/fragment_my_shared_wallets" />
 </navigation>
