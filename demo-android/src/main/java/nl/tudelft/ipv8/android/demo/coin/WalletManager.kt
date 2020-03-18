@@ -122,7 +122,7 @@ class WalletManager(
     fun startNewWalletProcess(
         networkPublicHexKeys: List<String>,
         entranceFee: Coin,
-        threshHold: Int = networkPublicHexKeys.size + 1
+        threshold: Int = networkPublicHexKeys.size + 1
     ): TransactionPackage {
 
         Log.i("Coin", "Coin: we are making a new multi-sig wallet, with some other people.")
@@ -132,13 +132,13 @@ class WalletManager(
         }
 
         Log.i("Coin", "Coin: we will now make a wallet for ${keys.size} people in total.")
-        val contract = createMultiSignatureWallet(keys, entranceFee, threshHold, params)
+        val contract = createMultiSignatureWallet(keys, entranceFee, threshold, params)
 
         Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
         val req = SendRequest.forTx(contract)
         kit.wallet().completeTx(req)
 
-        Log.i("Coin", "Coin: the change adress is hard-reset to your protocol key.")
+        Log.i("Coin", "Coin: the change address is hard-reset to your protocol key.")
         req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
 
         Log.i("Coin", "Coin: committing transaction to wallet.")
