@@ -9,6 +9,7 @@ import java.util.concurrent.Executor
 /**
  * Singleton class for WalletManager which also sets-up Android specific things.
  */
+// TODO: Clean up Thread usage.
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
     private var application: Application? = null
