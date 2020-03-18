@@ -9,6 +9,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.DemoCommunity
 
+
 abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(contentLayoutId) {
     protected val trustchain: TrustChainHelper by lazy {
         TrustChainHelper(getTrustChainCommunity())
@@ -25,4 +26,9 @@ abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
     protected fun getDemoCommunity(): DemoCommunity {
         return getIpv8().getOverlay() ?: throw IllegalStateException("DemoCommunity is not configured")
     }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 6bb285918f79a3bca60568231d009fb76c0c4141
 }
