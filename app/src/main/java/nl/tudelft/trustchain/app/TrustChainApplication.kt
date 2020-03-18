@@ -128,7 +128,6 @@ class TrustChainApplication : Application() {
         )
     }
 
-
     private fun getPrivateKey(): PrivateKey {
         // Load a key from the shared preferences
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -144,6 +143,7 @@ class TrustChainApplication : Application() {
             AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
+
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
