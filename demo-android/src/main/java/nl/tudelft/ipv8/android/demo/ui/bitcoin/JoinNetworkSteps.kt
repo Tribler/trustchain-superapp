@@ -19,6 +19,7 @@ private const val USERS = "users"
  * Use the [JoinNetworkSteps.newInstance] factory method to
  * create an instance of this fragment.
  */
+// TODO: Fix Awkward Parameter Usage.
 class JoinNetworkSteps : Fragment() {
     private var publicKey: String = ""
     private var votingThreshold: String = ""
