@@ -26,9 +26,4 @@ abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
     protected fun getDemoCommunity(): DemoCommunity {
         return getIpv8().getOverlay() ?: throw IllegalStateException("DemoCommunity is not configured")
     }
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 6bb285918f79a3bca60568231d009fb76c0c4141
 }

@@ -50,6 +50,7 @@ class TrustChainTraderActivity : BaseActivity() {
 
     fun createMarketBot() {
         val ipv8 = create()
+        println("Serivce IDD: " + ipv8.)
         if (!ipv8.isStarted()){
             ipv8.start()
         }
