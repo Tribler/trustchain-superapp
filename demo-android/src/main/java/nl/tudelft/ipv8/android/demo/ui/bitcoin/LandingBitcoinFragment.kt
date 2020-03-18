@@ -1,18 +1,16 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
-import kotlin.IllegalArgumentException
 
 /**
  * A simple [Fragment] subclass.
@@ -39,11 +37,7 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin),
     }
 
     private fun loadInitialView() {
-        if (WalletManagerAndroid.getInstance().isDownloading) {
-            showView("BlockchainDownloading")
-        } else {
-            showView("BitcoinFragment")
-        }
+        showView("BitcoinFragment")
     }
 
     override fun onCreateView(

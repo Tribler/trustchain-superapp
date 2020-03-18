@@ -1,10 +1,6 @@
 package nl.tudelft.ipv8.android.demo.coin
 
-import android.app.Application
 import android.content.Context
-import android.os.Handler
-import org.bitcoinj.utils.Threading
-import java.util.concurrent.Executor
 
 /**
  * Singleton class for WalletManager which also sets-up Android specific things.
@@ -12,7 +8,7 @@ import java.util.concurrent.Executor
 // TODO: Clean up Thread usage.
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
-    private var application: Application? = null
+    private var context: Context? = null
 
     fun getInstance(): WalletManager {
         return walletManager
@@ -20,7 +16,7 @@ object WalletManagerAndroid {
     }
 
     class Factory(
-        private val application: Application
+        private val context: Context
     ) {
         private var configuration: WalletManagerConfiguration? = null
 
@@ -30,14 +26,13 @@ object WalletManagerAndroid {
         }
 
         fun init(): WalletManager {
-            val walletDir = application.applicationContext.filesDir
+            val walletDir = context.filesDir
             val configuration = configuration
                 ?: throw IllegalStateException("Configuration is not set")
 
-            WalletManagerAndroid.application = application
+            WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(configuration, walletDir)
-//            setupThread(application.applicationContext)
+            val walletManager = WalletManager(configuration, walletDir, configuration.key)
 
             WalletManagerAndroid.walletManager = walletManager
 
@@ -46,22 +41,4 @@ object WalletManagerAndroid {
 
     }
 
-    val runInUIThread: Executor = object : Executor {
-        override fun execute(runnable: Runnable) {
-            val handler = Handler(application?.applicationContext?.mainLooper)
-            handler.post(runnable)
-        }
-    }
-
-    /**
-     * Sets up in which thread BitcoinJ will conduct its background activities.
-     */
-    fun setupThread(applicationContext: Context) {
-        val runInUIThread: Executor = Executor { runnable ->
-            val handler = Handler(applicationContext.mainLooper)
-            handler.post(runnable)
-        }
-
-        Threading.USER_THREAD = runInUIThread
-    }
 }

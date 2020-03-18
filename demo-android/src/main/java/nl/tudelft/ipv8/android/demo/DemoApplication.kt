@@ -31,17 +31,6 @@ class DemoApplication : Application() {
         super.onCreate()
 
         initIPv8()
-        initWalletManager()
-    }
-
-    private fun initWalletManager() {
-        val config = WalletManagerConfiguration()
-        WalletManagerAndroid.Factory(this)
-            .setConfiguration(config)
-            .init()
-
-        Log.i("Coin", "Coin: ${WalletManagerAndroid.getInstance().kit.wallet()}")
-
     }
 
     private fun initIPv8() {
