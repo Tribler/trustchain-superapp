@@ -9,8 +9,7 @@
     <item
         android:id="@+id/transferFragment"
         android:title="Transfer"
-        android:icon="@drawable/ic_person_black_24dp" />
-
+        android:icon="@drawable/ic_money_transaction_24px" />
     <item
         android:id="@+id/peerFragment"
         android:title="Peers"
