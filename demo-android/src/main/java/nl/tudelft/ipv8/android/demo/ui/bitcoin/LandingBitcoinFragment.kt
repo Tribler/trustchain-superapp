@@ -24,7 +24,7 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
         "BitcoinFragment" to BitcoinFragment.newInstance(this),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
         "CreateSWFragment" to CreateSWFragment.newInstance(this),
-        "BlockchainDownloading" to BlockchainDownloading.newInstance("","")
+        "BlockchainDownloading" to BlockchainDownloading.newInstance(this)
     )
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -60,6 +60,10 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin), 
         transaction.replace(R.id.landing_bitcoin_container, fragment)
         transaction.addToBackStack(null)
         transaction.commit()
+    }
+
+    override fun showDefaultView() {
+        showView("BitcoinFragment")
     }
 
     companion object {

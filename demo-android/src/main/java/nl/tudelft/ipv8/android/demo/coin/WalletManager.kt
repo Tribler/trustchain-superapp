@@ -77,7 +77,7 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
         kit.setBlockingStartup(false)
         kit.startAsync()
         kit.awaitRunning()
-        val ad = LegacyAddress.fromString(params, "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2")
+        val ad = LegacyAddress.fromString(params, "1CN6vbTuKioGThCb2Q7mQF1fow27HZBVJP")
 
         kit.wallet().addWatchedAddress(ad)
 
