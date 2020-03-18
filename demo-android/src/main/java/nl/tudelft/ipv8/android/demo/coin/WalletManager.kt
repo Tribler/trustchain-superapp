@@ -140,7 +140,7 @@ class WalletManager(
         req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
 
         Log.i("Coin", "Coin: committing transaction to wallet.")
-        kit.wallet().commitTx(req.tx)
+//        kit.wallet().commitTx(req.tx)
 
         val transactionId = req.tx.txId.toString()
         Log.i("Coin", "Coin: the transaction ID will be: ${transactionId}")
@@ -417,7 +417,7 @@ class WalletManager(
         Log.i("Coin", "Coin: sendMultiSignatureMessage, transactionId: ${spendTx.txId}")
 
         Log.i("Coin", "Coin: sendMultiSignatureMessage, committing transaction to wallet.")
-        kit.wallet().commitTx(spendTx)
+//        kit.wallet().commitTx(spendTx)
 
         Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcasting transaction.")
         val broadcastTransaction = kit.peerGroup().broadcastTransaction(spendTx)

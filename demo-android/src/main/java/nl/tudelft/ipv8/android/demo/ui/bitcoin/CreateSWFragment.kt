@@ -19,6 +19,9 @@ import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 class CreateSWFragment(
     override val controller: BitcoinViewController
 ) : BitcoinView, BaseFragment(R.layout.fragment_create_sw) {
+    private var currentTransactionId: String? = null
+    private var currentThreshold: Int? = null
+    private var currentEntranceFee: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,21 +37,47 @@ class CreateSWFragment(
 
     private fun createSharedBitcoinWallet() {
         if (validateCreationInput()) {
-            val entranceFee = entrance_fee_tf.text.toString().toDouble()
-            val threshold = voting_threshold_tf.text.toString().toInt()
+            currentEntranceFee = entrance_fee_tf.text.toString().toLong()
+            currentThreshold = voting_threshold_tf.text.toString().toInt()
+            currentTransactionId = getCoinCommunity().createSharedWallet(currentEntranceFee!!)
 
-            getCoinCommunity().createSharedWallet(entranceFee, threshold, ByteArray(5))
-            controller.showView("BitcoinFragment")
+            voting_threshold_tf.isEnabled = false
+            entrance_fee_tf.isEnabled = false
+
+            fetchCurrentSharedWalletStatusLoop()
         } else {
             alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
         }
     }
 
+    private fun fetchCurrentSharedWalletStatusLoop() {
+        var finished = false
+        alert_label.text = "Loading... This might take some time."
+
+        while (!finished) {
+            finished = getCoinCommunity().tryToSerializeWallet(currentTransactionId!!, currentEntranceFee!!, currentThreshold!!)
+            Thread.sleep(1_000)
+        }
+
+        resetWalletInitializationValues()
+        controller.showView("BitcoinFragment")
+    }
+
+    private fun resetWalletInitializationValues() {
+        currentTransactionId = null
+        currentThreshold = null
+        currentEntranceFee = null
+        alert_label.text = ""
+    }
+
     private fun validateCreationInput(): Boolean {
         val entranceFee = entrance_fee_tf.text.toString().toDoubleOrNull()
         val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
-        return entranceFee != null && entranceFee > 0
-            && votingThreshold != null && votingThreshold > 0 && votingThreshold <= 100
+        return entranceFee != null
+            && entranceFee > 0
+            && votingThreshold != null
+            && votingThreshold > 0
+            && votingThreshold <= 100
     }
 
     override fun onCreateView(
