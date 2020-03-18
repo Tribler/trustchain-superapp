@@ -14,6 +14,8 @@ import nl.tudelft.ipv8.android.demo.coin.SerializedDeterminsticKey
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
 
 /**
  * A simple [Fragment] subclass.
@@ -66,6 +68,7 @@ class BitcoinFragment(
                 .init()
 
             refresh()
+            controller.showView("BlockchainDownloading")
         }
 
         refreshButton.setOnClickListener {

@@ -26,11 +26,15 @@ import java.util.*
  * with bitcoin wallets (including multi-signature wallets).
  * NOTE: Ideally should be separated from any Android UI concepts. Not the case currently.
  */
-class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, walletDir: File) {
+class WalletManager(
+    walletManagerConfiguration: WalletManagerConfiguration,
+    walletDir: File,
+    serializedDeterministicKey: SerializedDeterminsticKey? = null
+) {
     val kit: WalletAppKit
     val params: NetworkParameters
     var isDownloading: Boolean = true
-    var progress: Int = 0;
+    var progress: Int = 0
 
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
@@ -52,20 +56,6 @@ class WalletManager(walletManagerConfiguration: WalletManagerConfiguration, wall
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
             }
-        }
-
-        if (serializedDeterministicKey != null) {
-            Log.i(
-                "Coin",
-                "Coin: received a key to import, will clear the wallet and download again."
-            )
-            val deterministicSeed = DeterministicSeed(
-                serializedDeterministicKey.seed,
-                null,
-                "",
-                serializedDeterministicKey.creationTime
-            )
-            kit.restoreWalletFromSeed(deterministicSeed)
         }
 
         if (serializedDeterministicKey != null) {

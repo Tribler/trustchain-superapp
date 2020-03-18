@@ -25,14 +25,14 @@ object WalletManagerAndroid {
             return this
         }
 
-        fun init(tracker: org.bitcoinj.core.listeners.DownloadProgressTracker? = null): WalletManager {
+        fun init(): WalletManager {
             val walletDir = context.filesDir
             val configuration = configuration
                 ?: throw IllegalStateException("Configuration is not set")
 
             WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(configuration, walletDir, configuration.key, tracker)
+            val walletManager = WalletManager(configuration, walletDir, configuration.key)
 
             WalletManagerAndroid.walletManager = walletManager
 
