@@ -7,7 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import kotlinx.android.synthetic.main.fragment_blockchain_downloading.*
+import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_blockchain_download.*
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
@@ -16,17 +17,15 @@ import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
- * Use the [BlockchainDownloading.newInstance] factory method to
+ * Use the [BlockchainDownloadFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BlockchainDownloading(
-     override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_blockchain_downloading) {
+class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_download) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         bitcoin_progress_continue.setOnClickListener {
-            controller.showDefaultView()
+            findNavController().navigate(BlockchainDownloadFragmentDirections.actionBlockchainDownloadFragmentToBitcoinFragment())
         }
     }
 
@@ -35,7 +34,7 @@ class BlockchainDownloading(
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        val fragment = inflater.inflate(R.layout.fragment_blockchain_downloading, container, false)
+        val fragment = inflater.inflate(R.layout.fragment_blockchain_download, container, false)
         fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text = "${WalletManagerAndroid.getInstance().progress.toString()}%"
         fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress = WalletManagerAndroid.getInstance().progress
         thread {
@@ -44,7 +43,7 @@ class BlockchainDownloading(
                 fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text = "${WalletManagerAndroid.getInstance().progress}%"
                 fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress = WalletManagerAndroid.getInstance().progress
             }
-            controller.showDefaultView()
+//            controller.showDefaultView()
         }
         return fragment
     }
@@ -59,6 +58,6 @@ class BlockchainDownloading(
          * @return A new instance of fragment BlockchainDownloading.
          */
         @JvmStatic
-        fun newInstance(viewController: BitcoinViewController) = BlockchainDownloading(viewController)
+        fun newInstance() = BlockchainDownloadFragment()
     }
 }

@@ -24,10 +24,10 @@ class LandingBitcoinFragment : BaseFragment(R.layout.fragment_landing_bitcoin),
      * Loads the view fragments and map them to strings as identifiers.
      */
     private val bitcoinViews = mapOf<String, Fragment>(
-        "BitcoinFragment" to BitcoinFragment.newInstance(this),
+        "BitcoinFragment" to BitcoinFragment.newInstance(),
         "JoinNetworkFragment" to JoinNetworkFragment.newInstance(this),
         "CreateSWFragment" to CreateSWFragment.newInstance(this),
-        "BlockchainDownloading" to BlockchainDownloading.newInstance(this),
+        "BlockchainDownloading" to BlockchainDownloadFragment.newInstance(),
         "MySharedWalletsFragment" to MySharedWalletFragment.newInstance(this)
     )
 
