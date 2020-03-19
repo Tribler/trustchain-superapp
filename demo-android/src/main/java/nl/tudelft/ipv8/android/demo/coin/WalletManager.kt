@@ -102,16 +102,6 @@ class WalletManager(
         Log.i("Coin", "Coin: ${kit.wallet()}")
     }
 
-    // The protocol key we are using (private + public).
-    fun protocolECKey(): ECKey {
-        return kit.wallet().issuedReceiveKeys[0]
-    }
-
-    // Network: public key representing us we can send over network (public).
-    fun networkPublicECKeyHex(): String {
-        return protocolECKey().publicKeyAsHex
-    }
-
     data class TransactionPackage(
         val transactionId: String,
         val serializedTransaction: String
@@ -236,7 +226,8 @@ class WalletManager(
             val keys = Collections.unmodifiableList(publicKeys)
 
             // Create a n-n multi-signature output script.
-            val script = ScriptBuilder.createMultiSigOutputScript(threshold, keys)
+            val clampedThreshold = Math.max(1, Math.min(threshold, keys.size))
+            val script = ScriptBuilder.createMultiSigOutputScript(clampedThreshold, keys)
 
             // Now add an output with the entrance fee & script.
             contract.addOutput(entranceFee, script)
@@ -428,6 +419,17 @@ class WalletManager(
         Log.i("Coin", "Coin: sendMultiSignatureMessage, successfully broad-casted the transaction.")
 
         return spendTx.bitcoinSerialize().toHex()
+    }
+
+
+    // The protocol key we are using (private + public).
+    fun protocolECKey(): ECKey {
+        return kit.wallet().issuedReceiveKeys[0]
+    }
+
+    // Network: public key representing us we can send over network (public).
+    fun networkPublicECKeyHex(): String {
+        return protocolECKey().publicKeyAsHex
     }
 
     fun toSeed(): SerializedDeterminsticKey {
