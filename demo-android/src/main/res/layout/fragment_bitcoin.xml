@@ -160,7 +160,7 @@
                     android:id="@+id/show_wallet_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Your Shared Bitcoin Wallets" />
+                    android:text="My Shared Bitcoin Wallets" />
 
                 <Button
                     android:id="@+id/search_wallet_button"
