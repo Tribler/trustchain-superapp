@@ -10,8 +10,6 @@ import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
-import org.junit.rules.ExpectedException
-import org.junit.Rule
 
 class WalletManagerTest {
 
@@ -134,8 +132,7 @@ class WalletManagerTest {
     }
 
     @Test
-    fun testEntranceFeeTransactionValidOurTx() {
-        // NOTE: CURRENTLY FAILS, BUT TRANSACTION HAS NOT BEEN CONFIRMED, SO RETURNS FALSE
+    fun testEntranceFeeTransactionValidUnconfirmedTx() {
         val params = MainNetParams.get()
 
         // Transaction from our wallet to another wallet for testing
@@ -154,7 +151,8 @@ class WalletManagerTest {
             entranceFee
         )
 
-        assertTrue("The entrance fee should be payed", entranceFeePayed)
+        assertFalse("The transaction is not, and never will be, confirmed. Should not pass",
+            entranceFeePayed)
     }
 
     @Test
