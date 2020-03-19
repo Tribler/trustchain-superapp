@@ -101,17 +101,16 @@ class BitcoinFragment(
             Log.i("Coin", "Coin: value (satoshi) sending: ${value}")
 
             Log.i("Coin", "Coin: createMultisig, starting process.")
-            val result = walletManager.startNewWalletProcess(
-                keys,
-                Coin.valueOf(value),
-                threshHold
-            )
-            Log.i("Coin", "Coin: createMultisig, finished process.")
-
-            Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
-            Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
-            multisigOutputText.setText(result.transactionId)
-
+//            val result = walletManager.startNewWalletProcess(
+//                keys,
+//                Coin.valueOf(value),
+//                threshHold
+//            )
+//            Log.i("Coin", "Coin: createMultisig, finished process.")
+//
+//            Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
+//            Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
+//            multisigOutputText.setText(result.transactionId)
         }
     }
 

@@ -58,10 +58,8 @@ class CoinCommunity: Community() {
         val walletManager = WalletManagerAndroid.getInstance()
         val bitcoinPublicKey = walletManager.networkPublicECKeyHex()
 
-        val transaction = walletManager.startNewWalletProcess(
-            listOf(bitcoinPublicKey),
-            Coin.valueOf(entranceFee),
-            1
+        val transaction = walletManager.safeCreationAndSendGenesisWallet(
+            Coin.valueOf(entranceFee)
         )
 
         return transaction.transactionId
@@ -108,10 +106,8 @@ class CoinCommunity: Community() {
         val thresholdInt = Math.min(totalAmount, threshold).toInt()
 
         // TODO: Fetch funds of old wallet and add to the input of the following transaction (in addition to your input):
-        val transaction = walletManager.startNewWalletProcess(
-            bitcoinPublicKeys,
-            Coin.valueOf(entranceFee),
-            thresholdInt
+        val transaction = walletManager.safeCreationAndSendGenesisWallet(
+            Coin.valueOf(entranceFee)
         )
 
         return transaction.transactionId
