@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
-import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -37,7 +36,18 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        getCoinCommunity().joinSharedWallet(block.calculateHash(), tempBitcoinPk)
+        val transactionId = getCoinCommunity().joinSharedWallet(block.calculateHash())
+        fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
+        getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
+    }
+
+    private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {
+        var finished = false
+
+        while (!finished) {
+            finished = getCoinCommunity().fetchJoinSharedWalletStatus(transactionId)
+            Thread.sleep(1_000)
+        }
     }
 
     override fun onCreateView(

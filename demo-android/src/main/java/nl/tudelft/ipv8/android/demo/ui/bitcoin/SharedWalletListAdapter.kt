@@ -1,6 +1,5 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -10,13 +9,13 @@ import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.CoinUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.util.toHex
 
 class SharedWalletListAdapter(
     private val context: BaseFragment,
     private val items: List<TrustChainBlock>,
     private val myPublicKey: String,
-    private val listButtonText: String) : BaseAdapter() {
+    private val listButtonText: String
+) : BaseAdapter() {
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null, false)
@@ -30,11 +29,12 @@ class SharedWalletListAdapter(
         val yourVotes = view.findViewById<TextView>(R.id.your_votes_tv)
         val clickToJoin = view.findViewById<TextView>(R.id.click_to_join)
 
-        val trustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS))
+        val trustchainPks =
+            CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS))
 
         val walletIdText = "${parsedTransaction.getString(CoinCommunity.SW_UNIQUE_ID)}"
         val votingThresholdText = "${parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)} %"
-        val entranceFeeText = "${parsedTransaction.getDouble(CoinCommunity.SW_ENTRANCE_FEE)} BTC"
+        val entranceFeeText = "${parsedTransaction.getLong(CoinCommunity.SW_ENTRANCE_FEE)} Satoshi"
         val users = "${trustchainPks.size} user(s) in this shared wallet"
         val inWalletText = "${trustchainPks.contains(myPublicKey)}"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"

@@ -74,7 +74,7 @@
                         android:id="@+id/textView4"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Sending 12.0 BTC to 1K6BWqtaXpDiZ4PEiPR3pNyXb4ZveKRWqm"
+                        android:text="Sending 12.0 Satoshi to 1K6BWqtaXpDiZ4PEiPR3pNyXb4ZveKRWqm"
                         android:textAlignment="center" />
                 </LinearLayout>
 
@@ -124,7 +124,7 @@
                         <com.google.android.material.textfield.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Amount of BTC" />
+                            android:hint="Amount of Satoshi" />
 
                         <TextView
                             android:id="@+id/textView11"
