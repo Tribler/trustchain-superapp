@@ -3,16 +3,12 @@ package nl.tudelft.ipv8.android.demo.ui.bitcoin
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.common.util.concurrent.Service.State.RUNNING
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.coin.BitcoinNetworkOptions
-import nl.tudelft.ipv8.android.demo.coin.SerializedDeterminsticKey
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
+import nl.tudelft.ipv8.android.demo.coin.*
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -33,6 +29,12 @@ class BitcoinFragment(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("Coin", "Resuming")
+        refresh()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -82,6 +84,8 @@ class BitcoinFragment(
                 .setConfiguration(config)
                 .init()
             refresh()
+            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         startWalletButtonImportDefaultKey.setOnClickListener {
@@ -96,9 +100,9 @@ class BitcoinFragment(
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config)
                 .init()
-
             refresh()
-//            controller.showView("BlockchainDownloading")
+            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         refreshButton.setOnClickListener {
@@ -123,12 +127,12 @@ class BitcoinFragment(
             keys.add(myKey)
             keys.removeAt(0)
 
-            Log.i("Coin", "Coin: your key: ${myKey}")
+            Log.i("Coin", "Coin: your key: $myKey")
             Log.i("Coin", "Coin: all keys:")
             keys.forEach { key ->
                 Log.i("Coin", "Coin: ${key}}")
             }
-            Log.i("Coin", "Coin: value (satoshi) sending: ${value}")
+            Log.i("Coin", "Coin: value (satoshi) sending: $value")
 
             Log.i("Coin", "Coin: createMultisig, starting process.")
             val result = walletManager.startNewWalletProcess(
@@ -147,7 +151,15 @@ class BitcoinFragment(
 
 
     private fun refresh() {
-        val walletManager = WalletManagerAndroid.getInstance()
+        val walletManager: WalletManager
+        // TODO: Change the error handling.
+        try {
+             walletManager = WalletManagerAndroid.getInstance()
+        } catch (e: IllegalStateException) {
+            Log.w("Coin", "Wallet not yet running")
+            return
+        }
+
         walletStatus.text = "Status: ${walletManager.kit.state()}"
         walletBalance.text =
             "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
