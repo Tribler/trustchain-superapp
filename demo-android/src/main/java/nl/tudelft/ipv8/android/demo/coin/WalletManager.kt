@@ -247,7 +247,7 @@ class WalletManager(
         val oldMultiSigOutput = getMultiSigOutput(oldTransaction).unsignedOutput
 
         Log.i("Coin", "Coin: make the new final transaction for the new wallet.")
-        Log.i("Coin", "Coin: using ${signaturesOfOldOwners} signatures.")
+        Log.i("Coin", "Coin: using ${signaturesOfOldOwners.size} signatures.")
         val transactionSignatures = signaturesOfOldOwners.map { signature ->
             TransactionSignature(signature, Transaction.SigHash.ALL, false)
         }
