@@ -360,20 +360,6 @@ class WalletManager(
         )
     }
 
-    fun debug2() {
-        val txId = "0a0f0c4f40adb42380f07891d355bd1e8445abbd3ceca03155678d52e6049690"
-
-        val serialized = attemptToGetTransactionAndSerialize(txId)
-        if (serialized == null) {
-            Log.i("Coin", "Coin: wait.")
-            return
-        }
-        Log.i("Coin", "Coin: serialized $serialized")
-        val transaction =
-            Transaction(params, attemptToGetTransactionAndSerialize(txId)!!.hexToBytes())
-        printTransactionInformation(transaction)
-    }
-
     /**
      * Helper method to send transaction with logs and progress logs.
      * @param transaction transaction
@@ -396,7 +382,7 @@ class WalletManager(
     /**
      * Helper method to get the multi-sig output from a transaction.
      * NOTE: make sure that there is an actual multi-sig output!
-     * @param transaction transactionn with multi-sig output.
+     * @param transaction transaction with multi-sig output.
      * @return the multi-sig output
      */
     private fun getMultiSigOutput(transaction: Transaction): MultiSigOutputMeta {
