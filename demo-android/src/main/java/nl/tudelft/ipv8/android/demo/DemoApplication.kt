@@ -80,6 +80,19 @@ class DemoApplication : Application() {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
+
+        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.JOIN_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                CoinCommunity.joinAskBlockReceived(block)
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -106,6 +119,7 @@ class DemoApplication : Application() {
     private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
         val randomWalk = RandomWalk.Factory()
         val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
         return OverlayConfiguration(
             Overlay.Factory(CoinCommunity::class.java),
             listOf(randomWalk, nsd)

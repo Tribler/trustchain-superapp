@@ -45,7 +45,7 @@ class JoinNetworkFragment(
         var finished = false
 
         while (!finished) {
-            finished = getCoinCommunity().fetchJoinSharedWalletStatus(transactionId)
+            finished = getCoinCommunity().fetchBitcoinTransactionStatus(transactionId)
             Thread.sleep(1_000)
         }
     }

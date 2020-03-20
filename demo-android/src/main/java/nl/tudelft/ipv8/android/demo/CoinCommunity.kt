@@ -1,5 +1,4 @@
 package nl.tudelft.ipv8.android.demo
-import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
@@ -8,10 +7,15 @@ import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.Address
 import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.Transaction
 import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.ceil
+import kotlin.math.min
 
 @Suppress("UNCHECKED_CAST")
 class CoinCommunity: Community() {
@@ -83,6 +87,7 @@ class CoinCommunity: Community() {
             arrayListOf(trustchainPk.toHex()),
             arrayListOf(bitcoinPublicKey)
         )
+
         trustchain.createProposalBlock(values, trustchainPk, SHARED_WALLET_BLOCK)
         return true
     }
@@ -95,28 +100,37 @@ class CoinCommunity: Community() {
         val oldTrustchainPks = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_TRUSTCHAIN_PKS))
         val bitcoinPublicKeys = CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(SW_BITCOIN_PKS))
         val entranceFee = parsedTransaction.getLong(SW_ENTRANCE_FEE)
+        val oldTransaction = parsedTransaction.getString(SW_TRANSACTION_SERIALIZED)
 
         val walletManager = WalletManagerAndroid.getInstance()
         val myBitcoinPublicKey = walletManager.networkPublicECKeyHex()
         bitcoinPublicKeys.add(myBitcoinPublicKey)
 
         val totalAmount = bitcoinPublicKeys.size.toDouble()
-        val thresholdNumber = parsedTransaction.getInt(SW_VOTING_THRESHOLD).toDouble()
-        var threshold = Math.ceil((thresholdNumber / 100.0) * totalAmount)
-        val thresholdInt = Math.min(totalAmount, threshold).toInt()
+        val oldThreshold = parsedTransaction.getInt(SW_VOTING_THRESHOLD).toDouble()
+        var threshold = ceil((oldThreshold / 100.0) * totalAmount).toInt()
+        val newThreshold = min(bitcoinPublicKeys.size, threshold)
 
-        // TODO: Fetch funds of old wallet and add to the input of the following transaction (in addition to your input):
-        val transaction = walletManager.safeCreationAndSendGenesisWallet(
-            Coin.valueOf(entranceFee)
+        val newTransactionProposal = walletManager.safeCreationJoinWalletTransaction(
+            bitcoinPublicKeys,
+            Coin.valueOf(entranceFee),
+            Transaction(walletManager.params, oldTransaction.hexToBytes()),
+            newThreshold
         )
 
-        return transaction.transactionId
-    }
+        // Ask others for a signature
+        // At this point, enough 'yes' votes are received. They will now send their signatures
+        val serializedTransaction = newTransactionProposal.tx.bitcoinSerialize().toHex()
+        val transactionValues = JSONObject(mapOf(
+            SW_TRANSACTION_SERIALIZED to serializedTransaction,
+            SW_TRANSACTION_SERIALIZED_OLD to oldTransaction
+        )).toString()
 
-    public fun fetchJoinSharedWalletStatus(transactionId: String): Boolean {
-        val walletManager = WalletManagerAndroid.getInstance()
-        val transactionSerialized = walletManager.attemptToGetTransactionAndSerialize(transactionId)
-        return transactionSerialized != null
+        for (swParticipantPk in oldTrustchainPks) {
+            trustchain.createProposalBlock(transactionValues, swParticipantPk.hexToBytes(), JOIN_ASK_BLOCK)
+        }
+
+        return serializedTransaction
     }
 
     /**
@@ -153,12 +167,62 @@ class CoinCommunity: Community() {
         }
     }
 
-    public fun transferFunds(oldSwPk: ByteArray, newSwPk: ByteArray) {
-        // TODO: send funds to new wallet
+    public fun transferFunds(serializedSignatures: List<String>, swBlockHash: ByteArray,
+                             receiverAddress: String, satoshiAmount: Long): String {
+        // We (together) want to send coins to a third-party.
+        // I have received all signatures for this.
+        // I will broadcast the transaction.
+        val mostRecentSWBlock = fetchLatestSharedWalletBlock(swBlockHash)
+            ?: throw IllegalStateException("Something went wrong fetching the latest SW Block: $swBlockHash")
+        val blockData = CoinUtil.parseTransaction(mostRecentSWBlock.transaction)
+        val serializedBitcoinTransaction = blockData.getString(SW_TRANSACTION_SERIALIZED)
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val bitcoinTransaction = Transaction(walletManager.params, serializedBitcoinTransaction.hexToBytes())
+        val signatures = serializedSignatures.map {
+            ECKey.ECDSASignature.decodeFromDER(it.hexToBytes())
+        }
+
+        val sendTransaction = walletManager.safeSendingTransactionFromMultiSig(
+            bitcoinTransaction,
+            signatures,
+            org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddress),
+            Coin.valueOf(satoshiAmount)
+        ) ?: throw IllegalStateException("Not enough (or faulty) signatures to transfer SW funds")
+
+        return sendTransaction.transactionId
+    }
+
+    public fun provideTransferFundsSignature(block: TrustChainBlock) {
+        // I will sign a transaction stating that coins will go from a multi-sig to a third-party.
+        val transactionSerialized = ""
+        val receiverAddressSerialized = ""
+        val value = 10L
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val signature = walletManager.safeSigningTransactionFromMultiSig(
+            Transaction(walletManager.params, transactionSerialized.hexToBytes()),
+            walletManager.protocolECKey(),
+            org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddressSerialized),
+            Coin.valueOf(value)
+        )
+        val signaturesSerialized = signature.encodeToDER().toHex()
+    }
+
+    public fun fetchBitcoinTransactionStatus(transactionId: String): Boolean {
+        val walletManager = WalletManagerAndroid.getInstance()
+        val transactionSerialized = walletManager.attemptToGetTransactionAndSerialize(transactionId)
+        return transactionSerialized != null
     }
 
     private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
         return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
+    }
+
+    private fun fetchLatestSharedWalletBlock(swBlockHash: ByteArray): TrustChainBlock? {
+        val swBlock: TrustChainBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
+            ?: return null
+        return fetchLatestSharedWalletBlock(swBlock, fetchSharedWalletBlocks())
     }
 
     /**
@@ -196,11 +260,65 @@ class CoinCommunity: Community() {
         }
     }
 
+    public fun countJoinSignaturesReceived(sqUniqueId: String) {
+        for (block in getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)) {
+        }
+
+    }
+
     companion object {
+        fun joinAskBlockReceived(block: TrustChainBlock) {
+            val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
+
+            val transactionData = CoinUtil.parseTransaction(block.transaction)
+            val oldTransactionSerialized = transactionData.getString(SW_TRANSACTION_SERIALIZED_OLD)
+            val newTransactionSerialized = transactionData.getString(SW_TRANSACTION_SERIALIZED)
+
+            val walletManager = WalletManagerAndroid.getInstance()
+            val signature = walletManager.safeSigningJoinWalletTransaction(
+                Transaction(walletManager.params, oldTransactionSerialized.hexToBytes()),
+                Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),
+                walletManager.protocolECKey()
+            )
+            val signatureSerialized = signature.encodeToDER().toHex()
+            val transactionValues = mapOf(
+                SW_UNIQUE_ID to transactionData.getString(SW_UNIQUE_ID),
+                SW_SIGNATURE_SERIALIZED to signatureSerialized
+            )
+            val transaction = mapOf("message" to transactionValues)
+
+            trustchain.createAgreementBlock(block, transaction)
+        }
+
+        fun safeSendingJoinWalletTransaction(): String {
+            // I am proposer. I want to join. I have gotten enough signatures. I will broadcast on bitcoin.
+            val signaturesOfOldOwnersSerialized = listOf<String>()
+            val oldTransactionSerialized = ""
+            val newTransactionSerialized = ""
+
+            val walletManager = WalletManagerAndroid.getInstance()
+
+            val signaturesOfOldOwners = signaturesOfOldOwnersSerialized.map {
+                ECKey.ECDSASignature.decodeFromDER(it.hexToBytes())
+            }
+            val newTransactionProposal = Transaction(walletManager.params, newTransactionSerialized.hexToBytes())
+            val oldTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
+            val newTransaction = walletManager.safeSendingJoinWalletTransaction(
+                signaturesOfOldOwners,
+                newTransactionProposal,
+                oldTransaction
+            ) ?: throw IllegalStateException("Not enough (or faulty) signatures to transfer SW funds")
+
+            return newTransaction.transactionId
+        }
+
         public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
+        public const val JOIN_ASK_BLOCK = "JOIN_ASK_BLOCK"
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
+        public const val SW_TRANSACTION_SERIALIZED_OLD = "SW_PK_OLD"
+        public const val SW_SIGNATURE_SERIALIZED = "SW_SIGNATURE_SERIALIZED"
         public const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
         public const val SW_BITCOIN_PKS = "SW_BLOCKCHAIN_PKS"

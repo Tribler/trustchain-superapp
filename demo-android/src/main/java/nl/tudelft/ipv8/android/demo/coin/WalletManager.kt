@@ -211,14 +211,14 @@ class WalletManager(
      * @return the signature (you need to send back)
      */
     fun safeSigningJoinWalletTransaction(
-        newTransaction: SendRequest,
+        newTransaction: Transaction,
         oldTransaction: Transaction,
         key: ECKey
     ): ECDSASignature {
         Log.i("Coin", "Coin: (safeSigningJoinWalletTransaction start).")
 
         val oldMultiSignatureOutput = getMultiSigOutput(oldTransaction).unsignedOutput
-        val sighash: Sha256Hash = newTransaction.tx.hashForSignature(
+        val sighash: Sha256Hash = newTransaction.hashForSignature(
             0,
             oldMultiSignatureOutput.scriptPubKey,
             Transaction.SigHash.ALL,
@@ -240,7 +240,7 @@ class WalletManager(
      */
     fun safeSendingJoinWalletTransaction(
         signaturesOfOldOwners: List<ECDSASignature>,
-        newTransaction: SendRequest,
+        newTransaction: Transaction,
         oldTransaction: Transaction
     ): TransactionPackage? {
         Log.i("Coin", "Coin: (safeSendingJoinWalletTransaction start).")
@@ -254,7 +254,7 @@ class WalletManager(
         val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
 
         // TODO: see if it is a issue to always assume the 1st input is the multi-sig input.
-        val newMultiSigInput = newTransaction.tx.inputs[0]
+        val newMultiSigInput = newTransaction.inputs[0]
         newMultiSigInput.scriptSig = inputScript
 
         // Verify the script before sending.
@@ -266,10 +266,10 @@ class WalletManager(
             return null
         }
 
-        sendTransaction(newTransaction.tx)
+        sendTransaction(newTransaction)
 
         return TransactionPackage(
-            newTransaction.tx.txId.toString(),
+            newTransaction.txId.toString(),
             "temp"
         )
     }
