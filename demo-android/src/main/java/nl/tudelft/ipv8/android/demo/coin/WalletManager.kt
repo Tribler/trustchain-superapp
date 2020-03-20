@@ -100,116 +100,364 @@ class WalletManager(
         kit.startAsync()
         kit.awaitRunning()
         Log.i("Coin", "Coin: finished the setup of kit.")
-
-        Log.i("Coin", "Coin: ${kit.wallet()}")
     }
 
-    data class TransactionPackage(
-        val transactionId: String,
-        val serializedTransaction: String
-    )
+    /**
+     * Returns our bitcoin public key we use in all multi-sig contracts
+     * we are part of.
+     * @return hex representation of our public key (this is not an address)
+     */
+    fun protocolECKey(): ECKey {
+        return kit.wallet().issuedReceiveKeys[0]
+    }
 
-    fun startNewWalletProcess(
-        networkPublicHexKeys: List<String>,
-        entranceFee: Coin,
-        threshold: Int = networkPublicHexKeys.size + 1
+    /**
+     * Returns our bitcoin public key (in hex) we use in all multi-sig contracts
+     * we are part of.
+     * @return hex representation of our public key (this is not an address)
+     */
+    fun networkPublicECKeyHex(): String {
+        return protocolECKey().publicKeyAsHex
+    }
+
+    /**
+     * (1) When you are creating a multi-sig wallet for yourself alone
+     * as the genesis (wallet).
+     * @param entranceFee the entrance fee you are sending
+     * @return TransactionPackage
+     */
+    fun safeCreationAndSendGenesisWallet(
+        entranceFee: Coin
     ): TransactionPackage {
+        Log.i("Coin", "Coin: (safeCreationAndSendGenesisWallet start).")
 
-        Log.i("Coin", "Coin: we are making a new multi-sig wallet, with some other people.")
-        val keys = networkPublicHexKeys.map { publicHexKey: String ->
-            Log.i("Coin", "Coin: deserializing key ${publicHexKey}.")
-            ECKey.fromPublicOnly(publicHexKey.hexToBytes())
-        }
+        Log.i("Coin", "Coin: we are making a new genesis wallet for us alone.")
+        val keys = listOf(ECKey.fromPublicOnly(networkPublicECKeyHex().hexToBytes()))
+        val threshold = 1
 
-        Log.i("Coin", "Coin: we will now make a wallet for ${keys.size} people in total.")
-        val contract = createMultiSignatureWallet(keys, entranceFee, threshold, params)
+        Log.i("Coin", "Coin: we will now make a ${keys.size}/${threshold} wallet")
+        val transaction = Transaction(params)
+
+        // Create the locking multi-sig script for the output.
+        val script = ScriptBuilder.createMultiSigOutputScript(threshold, keys)
+
+        // Add an output with the entrance fee & script.
+        transaction.addOutput(entranceFee, script)
 
         Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
-        val req = SendRequest.forTx(contract)
+        val req = SendRequest.forTx(transaction)
         kit.wallet().completeTx(req)
 
         Log.i("Coin", "Coin: the change address is hard-reset to your protocol key.")
         req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
 
-        Log.i("Coin", "Coin: committing transaction to wallet.")
-//        kit.wallet().commitTx(req.tx)
-
-        val transactionId = req.tx.txId.toString()
-        Log.i("Coin", "Coin: the transaction ID will be: ${transactionId}")
-
-        Log.i("Coin", "Coin: we will broadcast your new multi-sig transaction.")
-        val broadcastTransaction = kit.peerGroup().broadcastTransaction(req.tx)
-        broadcastTransaction.setProgressCallback { progress ->
-            Log.i("Coin", "Coin: broadcast progress is ${progress}.")
-        }
-        broadcastTransaction.broadcast()
-        Log.i("Coin", "Coin: successfully broad-casted the multi-sig wallet.")
-
-        // TODO: figure out how to put attemptToGetTransactionAndSerialize into future
-        val serializedTransaction = "temp"
+        sendTransaction(req.tx)
 
         return TransactionPackage(
-            transactionId,
-            serializedTransaction
+            req.tx.txId.toString(),
+            "temp"
         )
     }
 
-    fun makeSignatureForTransaction(
-        serializedTransaction: String,
-        receiverAddress: String
-    ): String {
-        Log.i("Coin", "Coin: we are going to sign a transaction.")
-        val transaction = Transaction(params, serializedTransaction.hexToBytes())
-        Log.i("Coin", "Coin: transaction Id is ${transaction.txId}")
+    /**
+     * (2) Use this when you want to join an /existing/ wallet.
+     * You need to broadcast this transaction to all the old owners so they can sign it.
+     * @param networkPublicHexKeys list of NEW wallet owners
+     * @param entranceFee the entrance fee
+     * @param oldTransaction the old transaction
+     * @param newThreshold the new threshold (default to # of new owners)
+     * @return the resulting transaction (unsigned multi-sig input!)
+     */
+    fun safeCreationJoinWalletTransaction(
+        networkPublicHexKeys: List<String>,
+        entranceFee: Coin,
+        oldTransaction: Transaction,
+        newThreshold: Int = networkPublicHexKeys.size
+    ): SendRequest {
+        Log.i("Coin", "Coin: (safeCreationJoinWalletTransaction start).")
 
-        val signature: ECDSASignature = signMultiSignatureMessage(
-            transaction,
-            protocolECKey(),
-            Address.fromString(params, receiverAddress),
-            Coin.valueOf(1000),
-            params
-        )
+        Log.i("Coin", "Coin: making a transaction with you in it for everyone to sign.")
+        val newTransaction = Transaction(params)
+        val oldMultiSignatureOutput = getMultiSigOutput(oldTransaction).unsignedOutput
 
-        val serializedSignature = signature.encodeToDER().toHex()
-        Log.i("Coin", "Coin: the signature is ${serializedSignature}")
+        Log.i("Coin", "Coin: output (1) -> we are adding the final new multi-sig output.")
+        val newKeys = networkPublicHexKeys.map { publicHexKey: String ->
+            Log.i("Coin", "Coin: de-serializing key ${publicHexKey}.")
+            ECKey.fromPublicOnly(publicHexKey.hexToBytes())
+        }
+        val newMultiSignatureScript =
+            ScriptBuilder.createMultiSigOutputScript(newThreshold, newKeys)
 
-        return serializedSignature
+        // Calculate the final amount of coins (old coins + entrance fee) that will be the new multi-sig.
+        val newMultiSignatureOutputMoney = oldMultiSignatureOutput.value.add(entranceFee)
+        newTransaction.addOutput(newMultiSignatureOutputMoney, newMultiSignatureScript)
+
+        Log.i("Coin", "Coin: input (1) -> we are adding the old multi-sig as input.")
+        val multiSignatureInput = newTransaction.addInput(oldMultiSignatureOutput)
+        // Disconnecting, because we will supply our own script_sig later (in signing process).
+        multiSignatureInput.disconnect()
+
+        Log.i("Coin", "Coin: use SendRequest to add our entranceFee inputs & change address.")
+        val req = SendRequest.forTx(newTransaction)
+        kit.wallet().completeTx(req)
+
+        return req
     }
 
-    fun combineSignaturesToSendTransaction(
-        serializedTransaction: String,
-        serializedSignatures: List<String>,
-        receiverAddress: String,
-        value: Coin
-    ) {
-        Log.i("Coin", "Coin: we are going to send a transaction.")
-        val transaction = Transaction(params, serializedTransaction.hexToBytes())
-        Log.i("Coin", "Coin: transaction Id is ${transaction.txId}")
+    /**
+     * (2.1) You are (part) owner of a wallet a proposer wants to join. Sign the new wallet
+     * and send it back to the proposer.
+     * @param newTransaction the new transaction
+     * @param oldTransaction the old transaction
+     * @param key the key that will be signed with
+     * @return the signature (you need to send back)
+     */
+    fun safeSigningJoinWalletTransaction(
+        newTransaction: SendRequest,
+        oldTransaction: Transaction,
+        key: ECKey
+    ): ECDSASignature {
+        Log.i("Coin", "Coin: (safeSigningJoinWalletTransaction start).")
 
-        Log.i("Coin", "Coin: there are ${serializedSignatures.size} signatures.")
-        val signatures = serializedSignatures.map { serializedSignature ->
-            ECDSASignature.decodeFromDER(serializedSignature.hexToBytes())
+        val oldMultiSignatureOutput = getMultiSigOutput(oldTransaction).unsignedOutput
+        val sighash: Sha256Hash = newTransaction.tx.hashForSignature(
+            0,
+            oldMultiSignatureOutput.scriptPubKey,
+            Transaction.SigHash.ALL,
+            false
+        )
+        val signature: ECDSASignature = key.sign(sighash)
+        Log.i("Coin", "Coin: key -> ${key.publicKeyAsHex}")
+        Log.i("Coin", "Coin: signature -> ${signature.encodeToDER().toHex()}")
+        return signature
+    }
+
+    /**
+     * (2.2) You are the proposer. You have collected the needed signatures and
+     * will make the final transaction.
+     * @param signaturesOfOldOwners signatures (of the OLD owners only, in correct order)
+     * @param newTransaction SendRequest
+     * @param oldTransaction Transaction
+     * @return TransactionPackage?
+     */
+    fun safeSendingJoinWalletTransaction(
+        signaturesOfOldOwners: List<ECDSASignature>,
+        newTransaction: SendRequest,
+        oldTransaction: Transaction
+    ): TransactionPackage? {
+        Log.i("Coin", "Coin: (safeSendingJoinWalletTransaction start).")
+        val oldMultiSigOutput = getMultiSigOutput(oldTransaction).unsignedOutput
+
+        Log.i("Coin", "Coin: make the new final transaction for the new wallet.")
+        Log.i("Coin", "Coin: using ${signaturesOfOldOwners.size} signatures.")
+        val transactionSignatures = signaturesOfOldOwners.map { signature ->
+            TransactionSignature(signature, Transaction.SigHash.ALL, false)
+        }
+        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
+
+        // TODO: see if it is a issue to always assume the 1st input is the multi-sig input.
+        val newMultiSigInput = newTransaction.tx.inputs[0]
+        newMultiSigInput.scriptSig = inputScript
+
+        // Verify the script before sending.
+        try {
+            newMultiSigInput.verify(oldMultiSigOutput)
+            Log.i("Coin", "Coin: script is valid.")
+        } catch (exception: VerificationException) {
+            Log.i("Coin", "Coin: script is NOT valid. ${exception.message}.")
+            return null
         }
 
-        sendMultiSignatureMessage(
-            transaction,
-            signatures,
-            Address.fromString(params, receiverAddress),
-            value
+        sendTransaction(newTransaction.tx)
+
+        return TransactionPackage(
+            newTransaction.tx.txId.toString(),
+            "temp"
         )
     }
 
+    /**
+     * (3.1) There is a set-up multi-sig wallet and a proposal, create a signature
+     * for the proposal.
+     * @param transaction transaction with the multi-sig output
+     * @param myPublicKey key to sign with (yourself most likely)
+     * @param receiverAddress receiver address
+     * @param value amount for receiver address
+     * @return ECDSASignature
+     */
+    fun safeSigningTransactionFromMultiSig(
+        transaction: Transaction,
+        myPublicKey: ECKey,
+        receiverAddress: Address,
+        value: Coin
+    ): ECDSASignature {
+        Log.i("Coin", "Coin: (safeSigningTransactionFromMultiSig start).")
+
+        Log.i("Coin", "Coin: a transaction will be signed from one of our multi-sig outputs.")
+        // Retrieve the multi-signature contract.
+        val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
+        val multiSigScript: Script = multiSigOutput.scriptPubKey
+
+        // Build the transaction we want to sign.
+        val spendTx = Transaction(params)
+        spendTx.addOutput(value, receiverAddress)
+        spendTx.addInput(multiSigOutput)
+
+        // Sign the transaction and return it.
+        val sighash: Sha256Hash =
+            spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
+        val signature: ECDSASignature = myPublicKey.sign(sighash)
+
+        return signature
+    }
+
+    /**
+     * (3.2) There is a set-up multi-sig wallet and there are enough signatures
+     * to broadcast a transaction with.
+     * @param transaction transaction with multi-sig output.
+     * @param signatures signatures of owners (yourself included)
+     * @param receiverAddress receiver address
+     * @param value amount for receiver address
+     * @return transaction
+     */
+    fun safeSendingTransactionFromMultiSig(
+        transaction: Transaction,
+        signatures: List<ECDSASignature>,
+        receiverAddress: Address,
+        value: Coin
+    ): TransactionPackage? {
+        Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
+
+        // Retrieve the multi-sig output.
+        val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
+
+        Log.i("Coin", "Coin: making the transaction (again) that will be sent.")
+        val spendTx = Transaction(params)
+        spendTx.addOutput(value, receiverAddress)
+        val input = spendTx.addInput(multiSigOutput)
+
+        Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
+        // Create the script that combines the signatures (to spend the multi-signature output).
+        val transactionSignatures = signatures.map { signature ->
+            TransactionSignature(signature, Transaction.SigHash.ALL, false)
+        }
+        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
+        // Set the script on the input.
+        input.scriptSig = inputScript
+
+        // Verify the script before sending.
+        try {
+            input.verify(multiSigOutput)
+            Log.i("Coin", "Coin: script is valid.")
+        } catch (exception: VerificationException) {
+            Log.i("Coin", "Coin: script is NOT valid. ${exception.message}")
+            return null
+        }
+
+        sendTransaction(spendTx)
+
+        return TransactionPackage(
+            spendTx.txId.toString(),
+            spendTx.bitcoinSerialize().toHex()
+        )
+    }
+
+    /**
+     * Helper method to send transaction with logs and progress logs.
+     * @param transaction transaction
+     */
+    private fun sendTransaction(transaction: Transaction) {
+        Log.i("Coin", "Coin: (sendTransaction start).")
+        Log.i("Coin", "Coin: txId: ${transaction.txId}")
+
+        Log.i("Coin", "Coin: committing the transaction to our wallet.")
+        kit.wallet().commitTx(transaction)
+
+        val broadcastTransaction = kit.peerGroup().broadcastTransaction(transaction)
+        broadcastTransaction.setProgressCallback { progress ->
+            Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
+        }
+        broadcastTransaction.broadcast()
+        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
+    }
+
+    /**
+     * Helper method to get the multi-sig output from a transaction.
+     * NOTE: make sure that there is an actual multi-sig output!
+     * @param transaction transaction with multi-sig output.
+     * @return the multi-sig output
+     */
+    private fun getMultiSigOutput(transaction: Transaction): MultiSigOutputMeta {
+        val multiSigOutputs = mutableListOf<TransactionOutput>()
+        transaction.outputs.forEach { output ->
+            if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
+                multiSigOutputs.add(output)
+            }
+        }
+
+        if (multiSigOutputs.size != 1) {
+            Log.i("Coin", "Coin: (getMultiSigOutput) the multi-sig output not available.")
+        }
+
+        val multiSigOutput = multiSigOutputs[0]
+
+        return MultiSigOutputMeta(
+            multiSigOutput.value,
+            multiSigOutput.scriptPubKey.pubKeys,
+            multiSigOutput.index,
+            multiSigOutput.scriptPubKey.numberOfSignaturesRequiredToSpend,
+            multiSigOutput
+        )
+    }
+
+    /**
+     * Helper method to attempt to get the transaction from a transaction ID
+     * and return serialized version.
+     * @param transactionId transactionId
+     * @return null if not available in your wallet yet, else serialized version of transaction.
+     */
     fun attemptToGetTransactionAndSerialize(transactionId: String): String? {
         val transaction = kit.wallet().getTransaction(Sha256Hash.wrap(transactionId))
         if (transaction != null) {
             val serializedTransaction = transaction.bitcoinSerialize().toHex()
-            Log.i("Coin", "Coin: the serialized transaction is:")
-            Log.i("Coin", "Coin: $serializedTransaction")
             return serializedTransaction
         } else {
-            Log.i("Coin", "Coin: ! the transaction could not be found in your wallet.")
+            Log.i(
+                "Coin", "Coin: (attemptToGetTransactionAndSerialize) " +
+                    "the transaction could not be found in your wallet."
+            )
             return null
         }
+    }
+
+    /**
+     * Helper method that prints useful information about a transaction.
+     * @param transaction Transaction
+     */
+    fun printTransactionInformation(transaction: Transaction) {
+        Log.i("Coin", "Coin: ============ Transaction Information ===============")
+        Log.i("Coin", "Coin: txId ${transaction.txId}")
+        Log.i("Coin", "Coin: fee ${transaction.fee}")
+        Log.i("Coin", "Coin: inputs:::")
+        transaction.inputs.forEach {
+            Log.i("Coin", "Coin:    index ${it.index}")
+            Log.i("Coin", "Coin:    value ${it.value}")
+            Log.i("Coin", "Coin:    multi-sig ${ScriptPattern.isSentToMultisig(it.scriptSig)}")
+        }
+        Log.i("Coin", "Coin: outputs:::")
+        transaction.outputs.forEach {
+            Log.i("Coin", "Coin:    index ${it.index}")
+            Log.i("Coin", "Coin:    value ${it.value}")
+            Log.i("Coin", "Coin:    multi-sig ${ScriptPattern.isSentToMultisig(it.scriptPubKey)}")
+        }
+        Log.i("Coin", "Coin: multi-sig output::")
+        val a = getMultiSigOutput(transaction)
+        a.owners.forEach {
+            Log.i("Coin", "Coin: key -> ${it.publicKeyAsHex}")
+        }
+        Log.i("Coin", "Coin:    # needed -> ${a.threshold}")
+        Log.i("Coin", "Coin:    value -> ${a.value}")
+        Log.i("Coin", "Coin: ============ Transaction Information ===============")
     }
 
     companion object {
@@ -226,56 +474,12 @@ class WalletManager(
             val keys = Collections.unmodifiableList(publicKeys)
 
             // Create a n-n multi-signature output script.
-            val clampedThreshold = Math.max(1, Math.min(threshold, keys.size))
-            val script = ScriptBuilder.createMultiSigOutputScript(clampedThreshold, keys)
+            val script = ScriptBuilder.createMultiSigOutputScript(threshold, keys)
 
             // Now add an output with the entrance fee & script.
             contract.addOutput(entranceFee, script)
 
             return contract
-        }
-
-        fun getMultisigOutputFromTransaction(transaction: Transaction): TransactionOutput {
-            var multisigOutput: TransactionOutput? = null
-            for (output in transaction.outputs) {
-                if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
-                    multisigOutput = output
-                }
-            }
-            return multisigOutput!!
-        }
-
-        fun signMultiSignatureMessage(
-            contract: Transaction,
-            myPublicKey: ECKey,
-            receiverAddress: Address,
-            value: Coin,
-            params: NetworkParameters
-        ): ECDSASignature {
-            // Retrieve the multisignature contract.
-            val multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
-            val multisigScript: Script = multisigOutput.scriptPubKey
-
-            // Validate whether the transaction (= contract) is what we expect.
-            if (!ScriptPattern.isSentToMultisig(multisigScript)) {
-                Log.i(
-                    "Coin",
-                    "Coin: signMultiSignatureMessage, failing because we have not found a proper output."
-                )
-                throw Exception("Contract is not a multi-sig contract!")
-            }
-
-            // Build the transaction we want to sign.
-            val spendTx = Transaction(params)
-            spendTx.addOutput(value, receiverAddress)
-            spendTx.addInput(multisigOutput)
-
-            // Sign the transaction and return it.
-            val sighash: Sha256Hash =
-                spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-            val signature: ECDSASignature = myPublicKey.sign(sighash)
-
-            return signature
         }
 
         fun checkEntranceFeeTransaction(
@@ -370,84 +574,24 @@ class WalletManager(
 
     }
 
-    fun sendMultiSignatureMessage(
-        contract: Transaction,
-        signatures: List<ECDSASignature>,
-        receiverAddress: Address,
-        value: Coin
-    ): String {
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, starting process.")
-        // Make the transaction we want to perform.
-        val multisigOutput: TransactionOutput = getMultisigOutputFromTransaction(contract)
-
-        // Validate whether the transaction (= contract) is what we expect.
-        if (!ScriptPattern.isSentToMultisig(multisigOutput.scriptPubKey)) {
-            Log.i(
-                "Coin",
-                "Coin: sendMultiSignatureMessage failing because not multi sig output index correct"
-            )
-            throw Exception("Contract is not a multi signature contract!")
-        }
-
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, making transaction.")
-        val spendTx = Transaction(params)
-        spendTx.addOutput(value, receiverAddress)
-        val input = spendTx.addInput(multisigOutput)
-
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, creating the script (combining).")
-        // Create the script that combines the signatures (to spend the multi-signature output).
-        val transactionSignatures = signatures.map { signature ->
-            TransactionSignature(signature, Transaction.SigHash.ALL, false)
-        }
-        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
-
-        // Add it to the input.
-        input.scriptSig = inputScript
-
-        // Verify the script before sending.
-        try {
-            Log.i("Coin", "Coin: sendMultiSignatureMessage, script is valid.")
-            input.verify(multisigOutput)
-        } catch (exception: VerificationException) {
-            Log.i(
-                "Coin",
-                "Coin: sendMultiSignatureMessage, ! script is not valid, order wrong (most likely) -> ${exception.message}."
-            )
-
-        }
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, transaction is ready to be sent..")
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, transactionId: ${spendTx.txId}")
-
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, committing transaction to wallet.")
-//        kit.wallet().commitTx(spendTx)
-
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcasting transaction.")
-        val broadcastTransaction = kit.peerGroup().broadcastTransaction(spendTx)
-        broadcastTransaction.setProgressCallback { progress ->
-            Log.i("Coin", "Coin: sendMultiSignatureMessage, broadcast progress is ${progress}")
-        }
-        broadcastTransaction.broadcast().get()
-        Log.i("Coin", "Coin: sendMultiSignatureMessage, successfully broad-casted the transaction.")
-
-        return spendTx.bitcoinSerialize().toHex()
-    }
-
-
-    // The protocol key we are using (private + public).
-    fun protocolECKey(): ECKey {
-        return kit.wallet().issuedReceiveKeys[0]
-    }
-
-    // Network: public key representing us we can send over network (public).
-    fun networkPublicECKeyHex(): String {
-        return protocolECKey().publicKeyAsHex
-    }
-
     fun toSeed(): SerializedDeterminsticKey {
         val seed = kit.wallet().keyChainSeed
         val words = Joiner.on(" ").join(seed.mnemonicCode)
         val creationTime = seed.creationTimeSeconds
         return SerializedDeterminsticKey(words, creationTime)
     }
+
+    data class TransactionPackage(
+        val transactionId: String,
+        val serializedTransaction: String
+    )
+
+    data class MultiSigOutputMeta(
+        val value: Coin,
+        val owners: MutableList<ECKey>,
+        val index: Int,
+        val threshold: Int,
+        val unsignedOutput: TransactionOutput
+    )
 
 }
