@@ -36,7 +36,7 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionId = getCoinCommunity().joinSharedWallet(block.calculateHash())
+        val transactionId = getCoinCommunity().createBitcoinSharedWalletAndProposeOnTrustChain(block.calculateHash())
         fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }

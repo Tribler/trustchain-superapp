@@ -6,7 +6,7 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.coin.CoinUtil
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
@@ -20,7 +20,7 @@ class SharedWalletListAdapter(
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null, false)
 
-        val parsedTransaction = CoinUtil.parseTransaction(items[p0].transaction)
+        val parsedTransaction = SWUtil.parseTransaction(items[p0].transaction)
         val walletId = view.findViewById<TextView>(R.id.sw_id_item_t)
         val votingThreshold = view.findViewById<TextView>(R.id.sw_threshold_vt)
         val entranceFee = view.findViewById<TextView>(R.id.sw_entrance_fee_vt)
@@ -30,7 +30,7 @@ class SharedWalletListAdapter(
         val clickToJoin = view.findViewById<TextView>(R.id.click_to_join)
 
         val trustchainPks =
-            CoinUtil.parseJSONArray(parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS))
+            SWUtil.parseJSONArray(parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS))
 
         val walletIdText = "${parsedTransaction.getString(CoinCommunity.SW_UNIQUE_ID)}"
         val votingThresholdText = "${parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)} %"
