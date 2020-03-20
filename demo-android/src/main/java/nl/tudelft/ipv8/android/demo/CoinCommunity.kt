@@ -250,10 +250,15 @@ class CoinCommunity : Community() {
         }
     }
 
-    public fun countJoinSignaturesReceived(sqUniqueId: String) {
-        for (block in getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)) {
+    public fun fetchJoinSignatures(walletId: String, proposalId: String): List<TrustChainBlock> {
+        return getTrustChainCommunity().database.getBlocksWithType(JOIN_ASK_BLOCK).filter {
+            val blockData = SWResponseSignatureTransactionData(it.transaction)
+            it.isAgreement && blockData.matchesProposal(walletId, proposalId)
         }
+    }
 
+    public fun countJoinSignaturesReceived(walletId: String, proposalId: String): Int {
+        return fetchJoinSignatures(walletId, proposalId).size
     }
 
     companion object {
@@ -275,8 +280,11 @@ class CoinCommunity : Community() {
                 walletManager.protocolECKey()
             )
             val signatureSerialized = signature.encodeToDER().toHex()
-            val agreementData =
-                SWResponseSignatureTransactionData(blockData.getUniqueId(), signatureSerialized)
+            val agreementData = SWResponseSignatureTransactionData(
+                blockData.getUniqueId(),
+                blockData.getUniqueProposalId(),
+                signatureSerialized
+            )
             trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
@@ -310,6 +318,7 @@ class CoinCommunity : Community() {
         public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
 
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
+        public const val SW_UNIQUE_PROPOSAL_ID = "SW_UNIQUE_PROPOSAL_ID"
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
         public const val SW_TRANSACTION_SERIALIZED_OLD = "SW_PK_OLD"

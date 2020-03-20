@@ -11,17 +11,27 @@ class SWResponseSignatureTransactionData(data: JSONObject) : SWBlockTransactionD
         return jsonData.getString(CoinCommunity.SW_UNIQUE_ID)
     }
 
+    fun getUniqueProposalId(): String {
+        return jsonData.getString(CoinCommunity.SW_UNIQUE_PROPOSAL_ID)
+    }
+
     fun getSignatureSerialized(): String {
         return jsonData.getString(CoinCommunity.SW_SIGNATURE_SERIALIZED)
     }
 
+    fun matchesProposal(walletId: String, proposalId: String): Boolean {
+        return getUniqueId() == walletId && getUniqueProposalId() == proposalId
+    }
+
     constructor(
         uniqueId: String,
+        uniqueProposalId: String,
         signatureSerialized: String
     ) : this(
         JSONObject(
             mapOf(
                 CoinCommunity.SW_UNIQUE_ID to uniqueId,
+                CoinCommunity.SW_UNIQUE_PROPOSAL_ID to uniqueProposalId,
                 CoinCommunity.SW_SIGNATURE_SERIALIZED to signatureSerialized
             )
         )

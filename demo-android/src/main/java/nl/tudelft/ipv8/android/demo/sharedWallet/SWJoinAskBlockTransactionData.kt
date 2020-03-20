@@ -11,6 +11,10 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
         return jsonData.getString(CoinCommunity.SW_UNIQUE_ID)
     }
 
+    fun getUniqueProposalId(): String {
+        return jsonData.getString(CoinCommunity.SW_UNIQUE_PROPOSAL_ID)
+    }
+
     fun getTransactionSerialized(): String {
         return jsonData.getString(CoinCommunity.SW_TRANSACTION_SERIALIZED)
     }
@@ -22,11 +26,13 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
     constructor(
         uniqueId: String,
         transactionSerialized: String,
-        oldTransactionSerialized: String
+        oldTransactionSerialized: String,
+        uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         JSONObject(
             mapOf(
                 CoinCommunity.SW_UNIQUE_ID to uniqueId,
+                CoinCommunity.SW_UNIQUE_PROPOSAL_ID to uniqueProposalId,
                 CoinCommunity.SW_SIGNATURE_SERIALIZED to transactionSerialized,
                 CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD to oldTransactionSerialized
             )
