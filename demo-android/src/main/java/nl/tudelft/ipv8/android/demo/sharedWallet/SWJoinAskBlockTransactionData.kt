@@ -23,10 +23,15 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
         return jsonData.getString(CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD)
     }
 
+    fun getRequiredSignatures(): Int {
+        return jsonData.getInt(CoinCommunity.SW_SIGNATURES_REQUIRED)
+    }
+
     constructor(
         uniqueId: String,
         transactionSerialized: String,
         oldTransactionSerialized: String,
+        requiredSignatures: Int,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         JSONObject(
@@ -34,7 +39,8 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
                 CoinCommunity.SW_UNIQUE_ID to uniqueId,
                 CoinCommunity.SW_UNIQUE_PROPOSAL_ID to uniqueProposalId,
                 CoinCommunity.SW_SIGNATURE_SERIALIZED to transactionSerialized,
-                CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD to oldTransactionSerialized
+                CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD to oldTransactionSerialized,
+                CoinCommunity.SW_SIGNATURES_REQUIRED to requiredSignatures
             )
         )
     )

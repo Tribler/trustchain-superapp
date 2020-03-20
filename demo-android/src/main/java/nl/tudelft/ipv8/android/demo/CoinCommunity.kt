@@ -2,15 +2,11 @@ package nl.tudelft.ipv8.android.demo
 
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
+import nl.tudelft.ipv8.android.demo.sharedWallet.*
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinAskBlockTransactionData
-import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.ipv8.android.demo.sharedWallet.SWResponseSignatureTransactionData
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
@@ -77,16 +73,14 @@ class CoinCommunity : Community() {
 
     /**
      * This functions handles the process of proposing to join an existing shared wallet.
-     * 1. Create a transaction that creates a new shared wallet. This takes some time to complete.
-     * 2. Send the proposal on the trust chain to ask for signatures.
+     * Create a bitcoin transaction that creates a new shared wallet. This takes some time to complete.
      *
      * NOTE:
      *  - Assumed that the vote passed with enough votes.
-     *  - You have to wait a bit before it is possible to call `addSharedWalletJoinBlock`
-     *  - This function only proposes, it does not add the user to a shared wallet
-     *    (see `addSharedWalletJoinBlock` for that functionality)
+     *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
+     * @param swBlockHash hash of the latest (that you know of) shared wallet block.
      */
-    public fun createBitcoinSharedWalletAndProposeOnTrustChain(swBlockHash: ByteArray): String {
+    public fun createBitcoinSharedWallet(swBlockHash: ByteArray): String {
         val swJoinBlock: TrustChainBlock =
             getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
@@ -109,9 +103,31 @@ class CoinCommunity : Community() {
 
         // Ask others for a signature. Assumption:
         // At this point, enough 'yes' votes are received. They will now send their signatures
-        val serializedTransaction = newTransactionProposal.tx.bitcoinSerialize().toHex()
+        return newTransactionProposal.tx.bitcoinSerialize().toHex()
+    }
+
+    /**
+     * Send a proposal on the trust chain to join a shared wallet and to collect signatures.
+     * Assumption: enough 'yes' votes, you are allowed to enter the wallet.
+     * @param swBlockHash - hash of the latest (that you know of) shared wallet block.
+     * @param serializedTransaction - the serialized Bitcoin new shared wallet transaction.
+     */
+    public fun proposeJoinWalletOnTrustChain(
+        swBlockHash: ByteArray,
+        serializedTransaction: String
+    ): SWJoinAskBlockTransactionData {
+        val swJoinBlock: TrustChainBlock =
+            getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
+        val blockData = SWJoinBlockTransactionData(swJoinBlock.transaction)
+        val oldTransactionSerialized = blockData.getTransactionSerialized()
+        val total = blockData.getBitcoinPks().size
+        val requiredSignatures = SWUtil.percentageToIntThreshold(total, blockData.getThreshold())
         val askSignatureBlockData = SWJoinAskBlockTransactionData(
-            blockData.getUniqueId(), serializedTransaction, oldTransaction
+            blockData.getUniqueId(),
+            serializedTransaction,
+            oldTransactionSerialized,
+            requiredSignatures
         )
 
         for (swParticipantPk in blockData.getTrustChainPks()) {
@@ -121,8 +137,7 @@ class CoinCommunity : Community() {
                 askSignatureBlockData.blockType
             )
         }
-
-        return serializedTransaction
+        return askSignatureBlockData
     }
 
     /**
@@ -250,15 +265,14 @@ class CoinCommunity : Community() {
         }
     }
 
-    public fun fetchJoinSignatures(walletId: String, proposalId: String): List<TrustChainBlock> {
+    public fun fetchJoinSignatures(walletId: String, proposalId: String): List<String> {
         return getTrustChainCommunity().database.getBlocksWithType(JOIN_ASK_BLOCK).filter {
             val blockData = SWResponseSignatureTransactionData(it.transaction)
             it.isAgreement && blockData.matchesProposal(walletId, proposalId)
+        }.map {
+            val blockData = SWResponseSignatureTransactionData(it.transaction)
+            blockData.getSignatureSerialized()
         }
-    }
-
-    public fun countJoinSignaturesReceived(walletId: String, proposalId: String): Int {
-        return fetchJoinSignatures(walletId, proposalId).size
     }
 
     companion object {
@@ -288,15 +302,16 @@ class CoinCommunity : Community() {
             trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
-        fun safeSendingJoinWalletTransaction(): String {
-            // I am proposer. I want to join. I have gotten enough signatures. I will broadcast on bitcoin.
-            val signaturesOfOldOwnersSerialized = listOf<String>()
-            val oldTransactionSerialized = ""
-            val newTransactionSerialized = ""
+        fun safeSendingJoinWalletTransaction(
+            data: SWJoinAskBlockTransactionData,
+            signatures: List<String>
+        ): String {
+            val oldTransactionSerialized = data.getOldTransactionSerialized()
+            val newTransactionSerialized = data.getTransactionSerialized()
 
             val walletManager = WalletManagerAndroid.getInstance()
 
-            val signaturesOfOldOwners = signaturesOfOldOwnersSerialized.map {
+            val signaturesOfOldOwners = signatures.map {
                 ECKey.ECDSASignature.decodeFromDER(it.hexToBytes())
             }
             val newTransactionProposal =
@@ -324,6 +339,7 @@ class CoinCommunity : Community() {
         public const val SW_TRANSACTION_SERIALIZED_OLD = "SW_PK_OLD"
         public const val SW_SIGNATURE_SERIALIZED = "SW_SIGNATURE_SERIALIZED"
         public const val SW_VOTING_THRESHOLD = "SW_VOTING_THRESHOLD"
+        public const val SW_SIGNATURES_REQUIRED = "SW_SIGNATURES_REQUIRED"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
         public const val SW_BITCOIN_PKS = "SW_BLOCKCHAIN_PKS"
     }

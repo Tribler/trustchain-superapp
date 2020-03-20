@@ -7,10 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
+import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinAskBlockTransactionData
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -36,9 +39,42 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionId = getCoinCommunity().createBitcoinSharedWalletAndProposeOnTrustChain(block.calculateHash())
+        val transactionId = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
+        val proposeBlock =
+            getCoinCommunity().proposeJoinWalletOnTrustChain(block.calculateHash(), transactionId)
+
+        // Wait until the new shared wallet is created
         fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
+
+        // Now start a thread to collect and wait (non-blocking) for signatures
+        val requiredSignatures = proposeBlock.getRequiredSignatures()
+
+        thread(start = true) {
+            var finished = false
+            while (!finished) {
+                finished = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
+                Thread.sleep(100)
+            }
+        }
+
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
+    }
+
+    /**
+     * Collect the signatures of a join proposal. Returns true if enough signatures are found.
+     */
+    private fun collectJoinWalletSignatures(
+        data: SWJoinAskBlockTransactionData,
+        requiredSignatures: Int
+    ): Boolean {
+        val signatures =
+            getCoinCommunity().fetchJoinSignatures(data.getUniqueId(), data.getUniqueProposalId())
+
+        if (signatures.size >= requiredSignatures) {
+            CoinCommunity.safeSendingJoinWalletTransaction(data, signatures)
+            return true
+        }
+        return false
     }
 
     private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {
