@@ -7,26 +7,18 @@ import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.ipv8.Address
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinAskBlockTransactionData
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinBlockTransactionData
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
-import java.util.*
 
 @Suppress("UNCHECKED_CAST")
 class CoinCommunity : Community() {
     override val serviceId = "0000bitcoin0000community0000"
 
-    private val discoveredAddressesContacted: MutableMap<Address, Date> = mutableMapOf()
     private val trustchain: TrustChainHelper by lazy {
         TrustChainHelper(getTrustChainCommunity())
-    }
-
-    override fun walkTo(address: Address) {
-        super.walkTo(address)
-        discoveredAddressesContacted[address] = Date()
     }
 
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -156,21 +148,21 @@ class CoinCommunity : Community() {
         }
     }
 
+    /**
+     * Transfer funds from an existing shared wallet to a third-party. Broadcast bitcoin transaction.
+     */
     public fun transferFunds(
         serializedSignatures: List<String>, swBlockHash: ByteArray,
         receiverAddress: String, satoshiAmount: Long
     ): String {
-        // We (together) want to send coins to a third-party.
-        // I have received all signatures for this.
-        // I will broadcast the transaction.
         val mostRecentSWBlock = fetchLatestSharedWalletBlock(swBlockHash)
             ?: throw IllegalStateException("Something went wrong fetching the latest SW Block: $swBlockHash")
-        val blockData = SWUtil.parseTransaction(mostRecentSWBlock.transaction)
-        val serializedBitcoinTransaction = blockData.getString(SW_TRANSACTION_SERIALIZED)
 
+        val blockData = SWJoinBlockTransactionData(mostRecentSWBlock.transaction)
         val walletManager = WalletManagerAndroid.getInstance()
         val bitcoinTransaction =
-            Transaction(walletManager.params, serializedBitcoinTransaction.hexToBytes())
+            Transaction(walletManager.params, blockData.getTransactionSerialized().hexToBytes())
+
         val signatures = serializedSignatures.map {
             ECKey.ECDSASignature.decodeFromDER(it.hexToBytes())
         }
@@ -186,6 +178,7 @@ class CoinCommunity : Community() {
     }
 
     public fun provideTransferFundsSignature(block: TrustChainBlock) {
+        // TODO: implement trust chain blocks for this one
         // I will sign a transaction stating that coins will go from a multi-sig to a third-party.
         val transactionSerialized = ""
         val receiverAddressSerialized = ""
@@ -201,15 +194,11 @@ class CoinCommunity : Community() {
         val signaturesSerialized = signature.encodeToDER().toHex()
     }
 
+    /**
+     * Fetch blocks with type SHARED_WALLET_BLOCK.
+     */
     private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
         return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
-    }
-
-    private fun fetchLatestSharedWalletBlock(swBlockHash: ByteArray): TrustChainBlock? {
-        val swBlock: TrustChainBlock =
-            getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
-                ?: return null
-        return fetchLatestSharedWalletBlock(swBlock, fetchSharedWalletBlocks())
     }
 
     /**
@@ -219,17 +208,26 @@ class CoinCommunity : Community() {
      */
     private fun fetchLatestSharedWalletBlock(
         block: TrustChainBlock,
-        sharedWalletBlocks: List<TrustChainBlock>
-    )
-        : TrustChainBlock? {
+        fromBlocks: List<TrustChainBlock>
+    ): TrustChainBlock? {
         val walletId = SWUtil.parseTransaction(block.transaction).getString(SW_UNIQUE_ID)
-        return sharedWalletBlocks
+        return fromBlocks
             .filter { SWUtil.parseTransaction(it.transaction).getString(SW_UNIQUE_ID) == walletId }
             .maxBy { it.timestamp.time }
     }
 
     /**
-     * Discover shared wallets that you can join, return the latest (known) blocks
+     * Fetch the latest block associated with a shared wallet.
+     * swBlockHash - the hash of one of the blocks associated with a shared wallet.
+     */
+    private fun fetchLatestSharedWalletBlock(swBlockHash: ByteArray): TrustChainBlock? {
+        val swBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
+            ?: return null
+        return fetchLatestSharedWalletBlock(swBlock, fetchSharedWalletBlocks())
+    }
+
+    /**
+     * Discover shared wallets that you can join, return the latest (known) blocks.
      */
     public fun discoverSharedWallets(): List<TrustChainBlock> {
         val sharedWalletBlocks = fetchSharedWalletBlocks()
@@ -257,6 +255,10 @@ class CoinCommunity : Community() {
     }
 
     companion object {
+        /**
+         * Given a shared wallet proposal block, calculate the signature and send in an agreement block.
+         * Called by the listener for the JOIN_ASK_BLOCK type.
+         */
         fun joinAskBlockReceived(block: TrustChainBlock) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 

@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.sharedWallet
 
 import nl.tudelft.ipv8.android.demo.CoinCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import org.json.JSONObject
 
 class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
@@ -31,4 +32,6 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
             )
         )
     )
+
+    constructor(transaction: TrustChainTransaction) : this(SWUtil.parseTransaction(transaction))
 }
