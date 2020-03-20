@@ -34,12 +34,14 @@ class DemoApplication : Application() {
     }
 
     private fun initIPv8() {
-        val config = IPv8Configuration(overlays = listOf(
-            createDiscoveryCommunity(),
-            createTrustChainCommunity(),
-            createDemoCommunity(),
-            createCoinCommunity()
-        ), walkerInterval = 1.0)
+        val config = IPv8Configuration(
+            overlays = listOf(
+                createDiscoveryCommunity(),
+                createTrustChainCommunity(),
+                createDemoCommunity(),
+                createCoinCommunity()
+            ), walkerInterval = 1.0
+        )
 
         IPv8Android.Factory(this)
             .setConfiguration(config)
@@ -81,16 +83,16 @@ class DemoApplication : Application() {
             }
         })
 
-        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+        trustchain.addListener(CoinCommunity.JOIN_ASK_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
 
-        trustchain.addListener(CoinCommunity.JOIN_ASK_BLOCK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
+        trustchain.registerBlockSigner(CoinCommunity.JOIN_ASK_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
                 CoinCommunity.joinAskBlockReceived(block)
-                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
             }
         })
     }

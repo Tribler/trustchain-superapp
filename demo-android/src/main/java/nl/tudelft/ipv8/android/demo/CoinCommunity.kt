@@ -9,6 +9,8 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinAskBlockTransactionData
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWResponseSignatureTransactionData
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
@@ -257,29 +259,25 @@ class CoinCommunity : Community() {
     companion object {
         /**
          * Given a shared wallet proposal block, calculate the signature and send in an agreement block.
-         * Called by the listener for the JOIN_ASK_BLOCK type.
+         * Called by the listener of the [JOIN_ASK_BLOCK] type. Respond with [SIGNATURE_AGREEMENT_BLOCK].
          */
         fun joinAskBlockReceived(block: TrustChainBlock) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
-            val transactionData = SWUtil.parseTransaction(block.transaction)
-            val oldTransactionSerialized = transactionData.getString(SW_TRANSACTION_SERIALIZED_OLD)
-            val newTransactionSerialized = transactionData.getString(SW_TRANSACTION_SERIALIZED)
-
+            val blockData = SWJoinAskBlockTransactionData(block.transaction)
             val walletManager = WalletManagerAndroid.getInstance()
+
+            val oldTransactionSerialized = blockData.getOldTransactionSerialized()
+            val newTransactionSerialized = blockData.getTransactionSerialized()
             val signature = walletManager.safeSigningJoinWalletTransaction(
                 Transaction(walletManager.params, oldTransactionSerialized.hexToBytes()),
                 Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),
                 walletManager.protocolECKey()
             )
             val signatureSerialized = signature.encodeToDER().toHex()
-            val transactionValues = mapOf(
-                SW_UNIQUE_ID to transactionData.getString(SW_UNIQUE_ID),
-                SW_SIGNATURE_SERIALIZED to signatureSerialized
-            )
-            val transaction = mapOf("message" to transactionValues)
-
-            trustchain.createAgreementBlock(block, transaction)
+            val agreementData =
+                SWResponseSignatureTransactionData(blockData.getUniqueId(), signatureSerialized)
+            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
         fun safeSendingJoinWalletTransaction(): String {
@@ -309,6 +307,8 @@ class CoinCommunity : Community() {
 
         public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
         public const val JOIN_ASK_BLOCK = "JOIN_ASK_BLOCK"
+        public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
+
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
         public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
