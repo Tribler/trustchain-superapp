@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -31,6 +32,7 @@ class BitcoinFragment(
         setHasOptionsMenu(true)
     }
 
+
     override fun onResume() {
         super.onResume()
         Log.i("Coin", "Resuming")
@@ -47,6 +49,7 @@ class BitcoinFragment(
         }
 
         inflater.inflate(R.menu.bitcoin_options, menu)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -54,6 +57,14 @@ class BitcoinFragment(
             R.id.item_blockchain_download_progress -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+                true
+            }
+            R.id.item_blockchain_refresh -> {
+                bitcoin_refresh_swiper.isRefreshing = true
+                this.refresh()
+                Handler().postDelayed({
+                    bitcoin_refresh_swiper.isRefreshing = false
+                }, 1500)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -88,6 +99,10 @@ class BitcoinFragment(
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
+        import_custom_keys.setOnClickListener {
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToImportKeysFragment())
+        }
+
         startWalletButtonImportDefaultKey.setOnClickListener {
             val config = WalletManagerConfiguration(
                 BitcoinNetworkOptions.TEST_NET,
@@ -103,10 +118,6 @@ class BitcoinFragment(
             refresh()
             Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }
-
-        refreshButton.setOnClickListener {
-            refresh()
         }
 
         generateRandomHexes.setOnClickListener {
@@ -147,14 +158,20 @@ class BitcoinFragment(
             multisigOutputText.setText(result.transactionId)
 
         }
-    }
 
+        bitcoin_refresh_swiper.setOnRefreshListener {
+            this.refresh()
+            Handler().postDelayed({
+                bitcoin_refresh_swiper.isRefreshing = false
+            }, 1500)
+        }
+    }
 
     private fun refresh() {
         val walletManager: WalletManager
         // TODO: Change the error handling.
         try {
-             walletManager = WalletManagerAndroid.getInstance()
+            walletManager = WalletManagerAndroid.getInstance()
         } catch (e: IllegalStateException) {
             Log.w("Coin", "Wallet not yet running")
             return
