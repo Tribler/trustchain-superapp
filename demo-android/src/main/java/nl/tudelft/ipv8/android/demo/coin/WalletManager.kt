@@ -278,17 +278,18 @@ class WalletManager(
     /**
      * (3.1) There is a set-up multi-sig wallet and a proposal, create a signature
      * for the proposal.
+     * The transaction includes an output for residual funds using calculated fee estimates.
      * @param transaction transaction with the multi-sig output
      * @param myPrivateKey key to sign with (yourself most likely)
      * @param receiverAddress receiver address
-     * @param value amount for receiver address
+     * @param paymentAmount amount for receiver address
      * @return ECDSASignature
      */
     fun safeSigningTransactionFromMultiSig(
         transaction: Transaction,
         myPrivateKey: ECKey,
         receiverAddress: Address,
-        value: Coin
+        paymentAmount: Coin
     ): ECDSASignature {
         Log.i("Coin", "Coin: (safeSigningTransactionFromMultiSig start).")
 
@@ -299,9 +300,17 @@ class WalletManager(
 
         // Build the transaction we want to sign.
         val spendTx = Transaction(params)
-        spendTx.addOutput(value, receiverAddress)
-        spendTx.addOutput(multiSigOutput.value - value - Coin.valueOf(15000), multiSigScript)
+        spendTx.addOutput(paymentAmount, receiverAddress)
+        val tempResidualOutput = spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
         spendTx.addInput(multiSigOutput)
+
+        // Calculate fee and set the change output corresponding to calculated fee
+        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
+        // Make sure that the fee does not exceed the amount of funds available
+        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((multiSigOutput.value - paymentAmount).value))
+        val residualFunds = multiSigOutput.value - paymentAmount - calculatedFee
+        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of ${calculatedFee} satoshi.")
+        tempResidualOutput.value = residualFunds
 
         // Sign the transaction and return it.
         val sighash: Sha256Hash =
@@ -314,29 +323,40 @@ class WalletManager(
     /**
      * (3.2) There is a set-up multi-sig wallet and there are enough signatures
      * to broadcast a transaction with.
+     * The transaction includes an output for residual funds using calculated fee estimates.
      * @param transaction transaction with multi-sig output.
      * @param signatures signatures of owners (yourself included)
      * @param receiverAddress receiver address
-     * @param value amount for receiver address
+     * @param paymentAmount amount for receiver address
      * @return transaction
      */
     fun safeSendingTransactionFromMultiSig(
         transaction: Transaction,
         signatures: List<ECDSASignature>,
         receiverAddress: Address,
-        value: Coin
+        paymentAmount: Coin
     ): TransactionPackage? {
         Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
 
         // Retrieve the multi-sig output.
         val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
-        val originalScript = multiSigOutput.scriptPubKey
+        val multiSigScript = multiSigOutput.scriptPubKey
 
         Log.i("Coin", "Coin: making the transaction (again) that will be sent.")
         val spendTx = Transaction(params)
-        spendTx.addOutput(value, receiverAddress)
-        spendTx.addOutput(multiSigOutput.value - value - Coin.valueOf(15000), originalScript)
+        spendTx.addOutput(paymentAmount, receiverAddress)
+        // Use a placeholder value for the residual output. Size of Tx needs to be accurate to estimate fee.
+        val tempResidualOutput = spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
         val input = spendTx.addInput(multiSigOutput)
+
+        // Calculate fee and set the change output corresponding to calculated fee
+        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
+        // Make sure that the fee does not exceed the amount of funds available
+        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((multiSigOutput.value - paymentAmount).value))
+        val residualFunds = multiSigOutput.value - paymentAmount - calculatedFee
+        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of ${calculatedFee} satoshi.")
+        tempResidualOutput.value = residualFunds
+
 
         Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
         // Create the script that combines the signatures (to spend the multi-signature output).
