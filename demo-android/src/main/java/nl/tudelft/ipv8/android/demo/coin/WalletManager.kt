@@ -19,6 +19,7 @@ import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.SendRequest
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -278,14 +279,14 @@ class WalletManager(
      * (3.1) There is a set-up multi-sig wallet and a proposal, create a signature
      * for the proposal.
      * @param transaction transaction with the multi-sig output
-     * @param myPublicKey key to sign with (yourself most likely)
+     * @param myPrivateKey key to sign with (yourself most likely)
      * @param receiverAddress receiver address
      * @param value amount for receiver address
      * @return ECDSASignature
      */
     fun safeSigningTransactionFromMultiSig(
         transaction: Transaction,
-        myPublicKey: ECKey,
+        myPrivateKey: ECKey,
         receiverAddress: Address,
         value: Coin
     ): ECDSASignature {
@@ -299,12 +300,13 @@ class WalletManager(
         // Build the transaction we want to sign.
         val spendTx = Transaction(params)
         spendTx.addOutput(value, receiverAddress)
+        spendTx.addOutput(multiSigOutput.value - value - Coin.valueOf(15000), multiSigScript)
         spendTx.addInput(multiSigOutput)
 
         // Sign the transaction and return it.
         val sighash: Sha256Hash =
             spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
-        val signature: ECDSASignature = myPublicKey.sign(sighash)
+        val signature: ECDSASignature = myPrivateKey.sign(sighash)
 
         return signature
     }
@@ -328,10 +330,12 @@ class WalletManager(
 
         // Retrieve the multi-sig output.
         val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
+        val originalScript = multiSigOutput.scriptPubKey
 
         Log.i("Coin", "Coin: making the transaction (again) that will be sent.")
         val spendTx = Transaction(params)
         spendTx.addOutput(value, receiverAddress)
+        spendTx.addOutput(multiSigOutput.value - value - Coin.valueOf(15000), originalScript)
         val input = spendTx.addInput(multiSigOutput)
 
         Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
@@ -367,16 +371,18 @@ class WalletManager(
     private fun sendTransaction(transaction: Transaction) {
         Log.i("Coin", "Coin: (sendTransaction start).")
         Log.i("Coin", "Coin: txId: ${transaction.txId}")
+        printTransactionInformation(transaction)
 
-        Log.i("Coin", "Coin: committing the transaction to our wallet.")
-        kit.wallet().commitTx(transaction)
-
+        Log.i("Coin", "Waiting for peers")
+        kit.peerGroup().waitForPeers(3).get()
+        Log.i("Coin", "Got >= 3 peers: ${kit.peerGroup().connectedPeers}")
         val broadcastTransaction = kit.peerGroup().broadcastTransaction(transaction)
         broadcastTransaction.setProgressCallback { progress ->
             Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
         }
-        broadcastTransaction.broadcast()
         Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
+        broadcastTransaction.broadcast().get(60.toLong(), TimeUnit.SECONDS)
+        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is complete!")
     }
 
     /**
@@ -385,7 +391,7 @@ class WalletManager(
      * @param transaction transaction with multi-sig output.
      * @return the multi-sig output
      */
-    private fun getMultiSigOutput(transaction: Transaction): MultiSigOutputMeta {
+    fun getMultiSigOutput(transaction: Transaction): MultiSigOutputMeta {
         val multiSigOutputs = mutableListOf<TransactionOutput>()
         transaction.outputs.forEach { output ->
             if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
