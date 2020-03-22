@@ -295,24 +295,14 @@ class WalletManager(
 
         Log.i("Coin", "Coin: a transaction will be signed from one of our multi-sig outputs.")
         // Retrieve the multi-signature contract.
-        val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
-        val multiSigScript: Script = multiSigOutput.scriptPubKey
+        val previousMultiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
 
-        // Build the transaction we want to sign.
-        val spendTx = Transaction(params)
-        spendTx.addOutput(paymentAmount, receiverAddress)
-        val tempResidualOutput = spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
-        spendTx.addInput(multiSigOutput)
-
-        // Calculate fee and set the change output corresponding to calculated fee
-        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
-        // Make sure that the fee does not exceed the amount of funds available
-        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((multiSigOutput.value - paymentAmount).value))
-        val residualFunds = multiSigOutput.value - paymentAmount - calculatedFee
-        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of ${calculatedFee} satoshi.")
-        tempResidualOutput.value = residualFunds
+        // Create the transaction which will have the multisig output as input,
+        // The outputs will be the receiver address and another one for residual funds
+        val spendTx = createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput)
 
         // Sign the transaction and return it.
+        val multiSigScript = previousMultiSigOutput.scriptPubKey
         val sighash: Sha256Hash =
             spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
         val signature: ECDSASignature = myPrivateKey.sign(sighash)
@@ -338,25 +328,8 @@ class WalletManager(
     ): TransactionPackage? {
         Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
 
-        // Retrieve the multi-sig output.
-        val multiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
-        val multiSigScript = multiSigOutput.scriptPubKey
-
-        Log.i("Coin", "Coin: making the transaction (again) that will be sent.")
-        val spendTx = Transaction(params)
-        spendTx.addOutput(paymentAmount, receiverAddress)
-        // Use a placeholder value for the residual output. Size of Tx needs to be accurate to estimate fee.
-        val tempResidualOutput = spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
-        val input = spendTx.addInput(multiSigOutput)
-
-        // Calculate fee and set the change output corresponding to calculated fee
-        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
-        // Make sure that the fee does not exceed the amount of funds available
-        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((multiSigOutput.value - paymentAmount).value))
-        val residualFunds = multiSigOutput.value - paymentAmount - calculatedFee
-        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of ${calculatedFee} satoshi.")
-        tempResidualOutput.value = residualFunds
-
+        // Retrieve the multi-sig output. Will become the input of this tx
+        val previousMultiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
 
         Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
         // Create the script that combines the signatures (to spend the multi-signature output).
@@ -364,12 +337,17 @@ class WalletManager(
             TransactionSignature(signature, Transaction.SigHash.ALL, false)
         }
         val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
-        // Set the script on the input.
-        input.scriptSig = inputScript
+
+        // Create the transaction which will sign the previous multisig output and use it as input
+        // The outputs will be the receiver address and another one for residual funds
+        val spendTx = createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput, inputScript)
+
+        // We assume a multisig payment transaction only has the multisig as input here, be careful!
+        val input = spendTx.inputs[0]
 
         // Verify the script before sending.
         try {
-            input.verify(multiSigOutput)
+            input.verify(previousMultiSigOutput)
             Log.i("Coin", "Coin: script is valid.")
         } catch (exception: VerificationException) {
             Log.i("Coin", "Coin: script is NOT valid. ${exception.message}")
@@ -482,6 +460,53 @@ class WalletManager(
         Log.i("Coin", "Coin:    # needed -> ${a.threshold}")
         Log.i("Coin", "Coin:    value -> ${a.value}")
         Log.i("Coin", "Coin: ============ Transaction Information ===============")
+    }
+
+    /**
+     * Creates a MultiSig payment transaction
+     *
+     * The two outputs of this transaction will be one to the receiver address (the payment) and
+     *  one for the residual funds back to the MultiSig address.
+     * Uses a previously created MultiSig output as the input of this transaction.
+     * Optionally, the input MultiSig can be signed using the inputScriptSig field.
+     *
+     * @param receiverAddress: the receiver of the payment
+     * @param paymentAmount: the amount to be transferred/payed to the receiver
+     * @param previousMultiSigOutput: the MultiSig output of the shared wallet, used as new input
+     * @param inputScriptSig: (Optional) the input script (ScriptBuilder.createMultiSigInputScript)
+     *  created using signatures (TransactionSignature) of a transaction made with this method.
+     */
+    fun createMultiSigPaymentTransaction(
+        receiverAddress: Address,
+        paymentAmount: Coin,
+        previousMultiSigOutput: TransactionOutput,
+        inputScriptSig: Script? = null
+    ): Transaction {
+        // Get multisig script of previous output, which will become the input of this tx
+        val multiSigScript = previousMultiSigOutput.scriptPubKey
+
+        Log.i("Coin", "Coin: making the transaction (again) that will be sent.")
+        val spendTx = Transaction(params)
+        spendTx.addOutput(paymentAmount, receiverAddress)
+        // Use a placeholder value for the residual output. Size of Tx needs to be accurate to estimate fee.
+        val tempResidualOutput = spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
+        // Be careful with adding more inputs!! We assume the first input is the multisig input
+        val input = spendTx.addInput(previousMultiSigOutput)
+
+        // Calculate fee and set the change output corresponding to calculated fee
+        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
+        // Make sure that the fee does not exceed the amount of funds available
+        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - paymentAmount).value))
+        val residualFunds = previousMultiSigOutput.value - paymentAmount - calculatedFee
+        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of ${calculatedFee} satoshi.")
+        tempResidualOutput.value = residualFunds
+
+        // Set input script signatures if passed to the method
+        if (inputScriptSig != null) {
+            input.scriptSig = inputScriptSig
+        }
+
+        return spendTx
     }
 
     companion object {
