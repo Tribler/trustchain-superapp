@@ -39,12 +39,12 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionId = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
+        val transactionPackage = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
         val proposeBlock =
-            getCoinCommunity().proposeJoinWalletOnTrustChain(block.calculateHash(), transactionId)
+            getCoinCommunity().proposeJoinWalletOnTrustChain(block.calculateHash(), transactionPackage.serializedTransaction)
 
         // Wait until the new shared wallet is created
-        fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
+        fetchCurrentSharedWalletStatusLoop(transactionPackage.transactionId) // TODO: cleaner solution for blocking
 
         // Now start a thread to collect and wait (non-blocking) for signatures
         val requiredSignatures = proposeBlock.getRequiredSignatures()

@@ -2,6 +2,7 @@ package nl.tudelft.ipv8.android.demo
 
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.demo.coin.WalletManager
 import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.android.demo.sharedWallet.*
 import nl.tudelft.ipv8.attestation.trustchain.*
@@ -80,7 +81,7 @@ class CoinCommunity : Community() {
      *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
      * @param swBlockHash hash of the latest (that you know of) shared wallet block.
      */
-    public fun createBitcoinSharedWallet(swBlockHash: ByteArray): String {
+    public fun createBitcoinSharedWallet(swBlockHash: ByteArray): WalletManager.TransactionPackage {
         val swJoinBlock: TrustChainBlock =
             getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
@@ -103,7 +104,7 @@ class CoinCommunity : Community() {
 
         // Ask others for a signature. Assumption:
         // At this point, enough 'yes' votes are received. They will now send their signatures
-        return newTransactionProposal.tx.bitcoinSerialize().toHex()
+        return newTransactionProposal
     }
 
     /**

@@ -154,7 +154,7 @@ class WalletManager(
 
         return TransactionPackage(
             req.tx.txId.toString(),
-            "temp"
+            req.tx.bitcoinSerialize().toHex()
         )
     }
 
@@ -172,7 +172,7 @@ class WalletManager(
         entranceFee: Coin,
         oldTransaction: Transaction,
         newThreshold: Int = networkPublicHexKeys.size
-    ): SendRequest {
+    ): TransactionPackage {
         Log.i("Coin", "Coin: (safeCreationJoinWalletTransaction start).")
 
         Log.i("Coin", "Coin: making a transaction with you in it for everyone to sign.")
@@ -200,7 +200,10 @@ class WalletManager(
         val req = SendRequest.forTx(newTransaction)
         kit.wallet().completeTx(req)
 
-        return req
+        return TransactionPackage(
+            req.tx.txId.toString(),
+            req.tx.bitcoinSerialize().toHex()
+        )
     }
 
     /**
