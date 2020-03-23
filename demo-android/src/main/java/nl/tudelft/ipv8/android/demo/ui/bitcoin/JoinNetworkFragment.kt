@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
-import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
@@ -41,13 +40,16 @@ class JoinNetworkFragment(
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
         val transactionPackage = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
         val proposeBlock =
-            getCoinCommunity().proposeJoinWalletOnTrustChain(block.calculateHash(), transactionPackage.serializedTransaction)
+            getCoinCommunity().proposeJoinWalletOnTrustChain(
+                block.calculateHash(),
+                transactionPackage.serializedTransaction
+            )
 
         // Wait until the new shared wallet is created
         fetchCurrentSharedWalletStatusLoop(transactionPackage.transactionId) // TODO: cleaner solution for blocking
 
         // Now start a thread to collect and wait (non-blocking) for signatures
-        val requiredSignatures = proposeBlock.getRequiredSignatures()
+        val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
 
         thread(start = true) {
             var finished = false
@@ -67,8 +69,9 @@ class JoinNetworkFragment(
         data: SWSignatureAskTransactionData,
         requiredSignatures: Int
     ): Boolean {
+        val blockData = data.getData()
         val signatures =
-            getCoinCommunity().fetchJoinSignatures(data.getUniqueId(), data.getUniqueProposalId())
+            getCoinCommunity().fetchJoinSignatures(blockData.SW_UNIQUE_ID, blockData.SW_UNIQUE_PROPOSAL_ID)
 
         if (signatures.size >= requiredSignatures) {
             getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)

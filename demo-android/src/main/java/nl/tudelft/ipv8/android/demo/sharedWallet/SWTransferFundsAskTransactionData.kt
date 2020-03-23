@@ -5,36 +5,42 @@ import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import org.json.JSONObject
 
-data class SWSignatureAskBlockTD(
+data class SWTransferFundsAskBlockTD(
     var SW_UNIQUE_ID: String,
     var SW_UNIQUE_PROPOSAL_ID: String,
-    var SW_TRANSACTION_SERIALIZED: String,
     var SW_TRANSACTION_SERIALIZED_OLD: String,
-    var SW_SIGNATURES_REQUIRED: Int
+    var SW_BITCOIN_PKS: List<String>,
+    var SW_SIGNATURES_REQUIRED: Int,
+    var SW_TRANSFER_FUNDS_AMOUNT: Long,
+    var SW_TRANSFER_FUNDS_TARGET_SERIALIZED: String
 )
 
-open class SWSignatureAskTransactionData(data: JSONObject) : SWBlockTransactionData(
-    data, CoinCommunity.SIGNATURE_ASK_BLOCK
+class SWTransferFundsAskTransactionData(data: JSONObject) : SWBlockTransactionData(
+    data, CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
 ) {
-    fun getData(): SWSignatureAskBlockTD {
-        return Gson().fromJson(getJsonString(), SWSignatureAskBlockTD::class.java)
+    fun getData(): SWTransferFundsAskBlockTD {
+        return Gson().fromJson(getJsonString(), SWTransferFundsAskBlockTD::class.java)
     }
 
     constructor(
         uniqueId: String,
-        transactionSerialized: String,
         oldTransactionSerialized: String,
         requiredSignatures: Int,
+        satoshiAmount: Long,
+        bitcoinPks: List<String>,
+        transferFundsAddressSerialized: String,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         JSONObject(
             Gson().toJson(
-                SWSignatureAskBlockTD(
+                SWTransferFundsAskBlockTD(
                     uniqueId,
                     uniqueProposalId,
-                    transactionSerialized,
                     oldTransactionSerialized,
-                    requiredSignatures
+                    bitcoinPks,
+                    requiredSignatures,
+                    satoshiAmount,
+                    transferFundsAddressSerialized
                 )
             )
         )
