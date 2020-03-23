@@ -302,7 +302,7 @@ class WalletManager(
 
         // Create the transaction which will have the multisig output as input,
         // The outputs will be the receiver address and another one for residual funds
-        val spendTx = createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput)
+        val spendTx = createMultiSigPaymentTx(receiverAddress, paymentAmount, previousMultiSigOutput)
 
         // Sign the transaction and return it.
         val multiSigScript = previousMultiSigOutput.scriptPubKey
@@ -343,7 +343,7 @@ class WalletManager(
 
         // Create the transaction which will sign the previous multisig output and use it as input
         // The outputs will be the receiver address and another one for residual funds
-        val spendTx = createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput, inputScript)
+        val spendTx = createMultiSigPaymentTxWithInputSig(receiverAddress, paymentAmount, previousMultiSigOutput, inputScript)
 
         // We assume a multisig payment transaction only has the multisig as input here, be careful!
         val input = spendTx.inputs[0]
@@ -479,7 +479,7 @@ class WalletManager(
      * @param inputScriptSig: (Optional) the input script (ScriptBuilder.createMultiSigInputScript)
      *  created using signatures (TransactionSignature) of a transaction made with this method.
      */
-    fun createMultiSigPaymentTransaction(
+    private fun createMultiSigPaymentTransaction(
         receiverAddress: Address,
         paymentAmount: Coin,
         previousMultiSigOutput: TransactionOutput,
@@ -510,6 +510,39 @@ class WalletManager(
         }
 
         return spendTx
+    }
+
+    /**
+     * Wrapper for creating a MultiSig payment transaction without an input signature
+     *
+     * @param receiverAddress: the receiver of the payment
+     * @param paymentAmount: the amount to be transferred/payed to the receiver
+     * @param previousMultiSigOutput: the MultiSig output of the shared wallet, used as new input
+     */
+    fun createMultiSigPaymentTx(
+        receiverAddress: Address,
+        paymentAmount: Coin,
+        previousMultiSigOutput: TransactionOutput
+    ): Transaction {
+        return createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput)
+    }
+
+    /**
+     * Wrapper for creating a MultiSig payment transaction with input signature
+     *
+     * @param receiverAddress: the receiver of the payment
+     * @param paymentAmount: the amount to be transferred/payed to the receiver
+     * @param previousMultiSigOutput: the MultiSig output of the shared wallet, used as new input
+     * @param inputScriptSig: (Optional) the input script (ScriptBuilder.createMultiSigInputScript)
+     *  created using signatures (TransactionSignature) of a transaction made with this method.
+     */
+    fun createMultiSigPaymentTxWithInputSig(
+        receiverAddress: Address,
+        paymentAmount: Coin,
+        previousMultiSigOutput: TransactionOutput,
+        inputScriptSig: Script
+    ): Transaction {
+        return createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput, inputScriptSig)
     }
 
     companion object {
