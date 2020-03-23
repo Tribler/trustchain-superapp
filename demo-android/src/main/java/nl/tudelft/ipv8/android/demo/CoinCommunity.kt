@@ -195,6 +195,10 @@ class CoinCommunity : Community() {
         return sendTransaction.transactionId
     }
 
+    public fun askForTransferFundsSignatures() {
+
+    }
+
     public fun provideTransferFundsSignature(block: TrustChainBlock) {
         // TODO: implement trust chain blocks for this one
         // I will sign a transaction stating that coins will go from a multi-sig to a third-party.
@@ -331,11 +335,13 @@ class CoinCommunity : Community() {
 
         public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
         public const val JOIN_ASK_BLOCK = "JOIN_ASK_BLOCK"
+        public const val TRANSFER_FUNDS_ASK_BLOCK = "TRANSFER_FUNDS_ASK_BLOCK"
         public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
 
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_UNIQUE_PROPOSAL_ID = "SW_UNIQUE_PROPOSAL_ID"
         public const val SW_ENTRANCE_FEE = "SW_ENTRANCE_FEE"
+        public const val SW_TRANSFER_FUNDS_AMOUNT = "SW_TRANSFER_FUNDS_AMOUNT"
         public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
         public const val SW_TRANSACTION_SERIALIZED_OLD = "SW_PK_OLD"
         public const val SW_SIGNATURE_SERIALIZED = "SW_SIGNATURE_SERIALIZED"
