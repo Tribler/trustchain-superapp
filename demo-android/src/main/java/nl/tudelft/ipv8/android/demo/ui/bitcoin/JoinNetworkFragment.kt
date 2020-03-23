@@ -18,8 +18,7 @@ import nl.tudelft.ipv8.util.toHex
  * create an instance of this fragment.
  */
 class JoinNetworkFragment(
-    override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_join_network) {
+) : BaseFragment(R.layout.fragment_join_network) {
     private val tempBitcoinPk = ByteArray(2)
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -60,6 +59,6 @@ class JoinNetworkFragment(
 
     companion object {
         @JvmStatic
-        fun newInstance(controller: BitcoinViewController) = JoinNetworkFragment(controller)
+        fun newInstance() = JoinNetworkFragment()
     }
 }

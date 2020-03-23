@@ -2,17 +2,13 @@ package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.google.common.util.concurrent.Service.State.RUNNING
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.coin.BitcoinNetworkOptions
-import nl.tudelft.ipv8.android.demo.coin.SerializedDeterminsticKey
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
+import nl.tudelft.ipv8.android.demo.coin.*
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -23,25 +19,61 @@ import org.bitcoinj.core.ECKey
  * create an instance of this fragment.
  */
 class BitcoinFragment(
-    override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_bitcoin) {
+) : BaseFragment(R.layout.fragment_bitcoin) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("Coin", "Resuming")
+        refresh()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        // TODO: Try catch not too nice.
+        try {
+            WalletManagerAndroid.getInstance()
+        } catch (e: IllegalStateException) {
+            Log.w("Coin", "Wallet Manager not initialized.")
+            return
+        }
+
+        inflater.inflate(R.menu.bitcoin_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.item_blockchain_download_progress -> {
+                Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun initClickListeners() {
         show_wallet_button.setOnClickListener {
-            controller.showView("MySharedWalletsFragment")
+            Log.i("Coin", "Navigating from BitcoinFragment to MySharedWalletsFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToMySharedWalletsFragment())
         }
 
         create_wallet_button.setOnClickListener {
-            controller.showView("CreateSWFragment")
+            Log.i("Coin", "Navigating from BitcoinFragment to CreateSWFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToCreateSWFragment())
         }
 
         search_wallet_button.setOnClickListener {
-            controller.showView("JoinNetworkFragment")
+            Log.i("Coin", "Navigating from BitcoinFragment to JoinNetworkFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
         }
 
         startWalletButtonExisting.setOnClickListener {
@@ -52,6 +84,8 @@ class BitcoinFragment(
                 .setConfiguration(config)
                 .init()
             refresh()
+            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         startWalletButtonImportDefaultKey.setOnClickListener {
@@ -66,9 +100,9 @@ class BitcoinFragment(
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config)
                 .init()
-
             refresh()
-            controller.showView("BlockchainDownloading")
+            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         refreshButton.setOnClickListener {
@@ -93,12 +127,12 @@ class BitcoinFragment(
             keys.add(myKey)
             keys.removeAt(0)
 
-            Log.i("Coin", "Coin: your key: ${myKey}")
+            Log.i("Coin", "Coin: your key: $myKey")
             Log.i("Coin", "Coin: all keys:")
             keys.forEach { key ->
                 Log.i("Coin", "Coin: ${key}}")
             }
-            Log.i("Coin", "Coin: value (satoshi) sending: ${value}")
+            Log.i("Coin", "Coin: value (satoshi) sending: $value")
 
             Log.i("Coin", "Coin: createMultisig, starting process.")
             val result = walletManager.startNewWalletProcess(
@@ -116,9 +150,16 @@ class BitcoinFragment(
     }
 
 
+    private fun refresh() {
+        val walletManager: WalletManager
+        // TODO: Change the error handling.
+        try {
+             walletManager = WalletManagerAndroid.getInstance()
+        } catch (e: IllegalStateException) {
+            Log.w("Coin", "Wallet not yet running")
+            return
+        }
 
-    fun refresh() {
-        val walletManager = WalletManagerAndroid.getInstance()
         walletStatus.text = "Status: ${walletManager.kit.state()}"
         walletBalance.text =
             "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
@@ -136,6 +177,7 @@ class BitcoinFragment(
             generateRandomHexes.isEnabled = true
             createMultisig.isEnabled = true
         }
+        requireActivity().invalidateOptionsMenu()
     }
 
     override fun onCreateView(
@@ -154,6 +196,6 @@ class BitcoinFragment(
          * @return A new instance of fragment bitcoinFragment.
          */
         @JvmStatic
-        fun newInstance(controller: BitcoinViewController) = BitcoinFragment(controller)
+        fun newInstance() = BitcoinFragment()
     }
 }
