@@ -4,8 +4,8 @@ import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import org.json.JSONObject
 
-class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
-    data, CoinCommunity.JOIN_ASK_BLOCK
+open class SWSignatureAskTransactionData(data: JSONObject) : SWBlockTransactionData(
+    data, CoinCommunity.SIGNATURE_ASK_BLOCK
 ) {
     fun getUniqueId(): String {
         return jsonData.getString(CoinCommunity.SW_UNIQUE_ID)
@@ -38,7 +38,7 @@ class SWJoinAskBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
             mapOf(
                 CoinCommunity.SW_UNIQUE_ID to uniqueId,
                 CoinCommunity.SW_UNIQUE_PROPOSAL_ID to uniqueProposalId,
-                CoinCommunity.SW_SIGNATURE_SERIALIZED to transactionSerialized,
+                CoinCommunity.SW_TRANSACTION_SERIALIZED to transactionSerialized,
                 CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD to oldTransactionSerialized,
                 CoinCommunity.SW_SIGNATURES_REQUIRED to requiredSignatures
             )

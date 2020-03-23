@@ -15,38 +15,44 @@ class SWTransferFundsAskBlockData(data: JSONObject) : SWBlockTransactionData(
         return jsonData.getString(CoinCommunity.SW_UNIQUE_PROPOSAL_ID)
     }
 
-    fun getTransactionSerialized(): String {
-        return jsonData.getString(CoinCommunity.SW_TRANSACTION_SERIALIZED)
-    }
-
     fun getOldTransactionSerialized(): String {
         return jsonData.getString(CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD)
-    }
-
-    fun getSatoshiAmount(): Long {
-        return jsonData.getLong(CoinCommunity.SW_TRANSFER_FUNDS_AMOUNT)
     }
 
     fun getRequiredSignatures(): Int {
         return jsonData.getInt(CoinCommunity.SW_SIGNATURES_REQUIRED)
     }
 
+    fun getBitcoinPks(): ArrayList<String> {
+        return SWUtil.parseJSONArray(jsonData.getJSONArray(CoinCommunity.SW_BITCOIN_PKS))
+    }
+
+    fun getSatoshiAmount(): Long {
+        return jsonData.getLong(CoinCommunity.SW_TRANSFER_FUNDS_AMOUNT)
+    }
+
+    fun getTransferFundsTargetSerialized(): String {
+        return jsonData.getString(CoinCommunity.SW_TRANSFER_FUNDS_TARGET_SERIALIZED)
+    }
+
     constructor(
         uniqueId: String,
-        transactionSerialized: String,
         oldTransactionSerialized: String,
         requiredSignatures: Int,
         satoshiAmount: Long,
+        bitcoinPks: List<String>,
+        transferFundsAddressSerialized: String,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         JSONObject(
             mapOf(
                 CoinCommunity.SW_UNIQUE_ID to uniqueId,
                 CoinCommunity.SW_UNIQUE_PROPOSAL_ID to uniqueProposalId,
-                CoinCommunity.SW_SIGNATURE_SERIALIZED to transactionSerialized,
                 CoinCommunity.SW_TRANSACTION_SERIALIZED_OLD to oldTransactionSerialized,
-                CoinCommunity.SW_TRANSFER_FUNDS_AMOUNT to satoshiAmount,
-                CoinCommunity.SW_SIGNATURES_REQUIRED to requiredSignatures
+                CoinCommunity.SW_BITCOIN_PKS to bitcoinPks,
+                CoinCommunity.SW_SIGNATURES_REQUIRED to requiredSignatures,
+                CoinCommunity.SW_TRANSFER_FUNDS_AMOUNT to satoshiAmount, // Only new value of this class
+                CoinCommunity.SW_TRANSFER_FUNDS_TARGET_SERIALIZED to transferFundsAddressSerialized
             )
         )
     )

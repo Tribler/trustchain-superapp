@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
-import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinAskBlockTransactionData
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -64,14 +64,14 @@ class JoinNetworkFragment(
      * Collect the signatures of a join proposal. Returns true if enough signatures are found.
      */
     private fun collectJoinWalletSignatures(
-        data: SWJoinAskBlockTransactionData,
+        data: SWSignatureAskTransactionData,
         requiredSignatures: Int
     ): Boolean {
         val signatures =
             getCoinCommunity().fetchJoinSignatures(data.getUniqueId(), data.getUniqueProposalId())
 
         if (signatures.size >= requiredSignatures) {
-            CoinCommunity.safeSendingJoinWalletTransaction(data, signatures)
+            getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)
             return true
         }
         return false
