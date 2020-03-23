@@ -125,7 +125,8 @@ class CoinCommunity : Community() {
         val blockData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
         val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
         val total = blockData.SW_BITCOIN_PKS.size
-        val requiredSignatures = SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
+        val requiredSignatures =
+            SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
         val askSignatureBlockData = SWSignatureAskTransactionData(
             blockData.SW_UNIQUE_ID,
             serializedTransaction,
@@ -229,7 +230,8 @@ class CoinCommunity : Community() {
         val blockData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
         val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
         val total = blockData.SW_BITCOIN_PKS.size
-        val requiredSignatures = SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
+        val requiredSignatures =
+            SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
 
         val askSignatureBlockData = SWTransferFundsAskTransactionData(
             blockData.SW_UNIQUE_ID,
@@ -256,8 +258,8 @@ class CoinCommunity : Community() {
     public fun transferFunds(
         serializedSignatures: List<String>, swBlockHash: ByteArray,
         receiverAddress: String, satoshiAmount: Long
-    ): String {
-        val mostRecentSWBlock = fetchLatestSharedWalletBlock(swBlockHash)
+    ): WalletManager.TransactionPackage {
+        val mostRecentSWBlock = fetchLatestSharedWalletTransactionBlock(swBlockHash)
             ?: throw IllegalStateException("Something went wrong fetching the latest SW Block: $swBlockHash")
 
         val transactionSerialized = tryToFetchSerializedTransaction(mostRecentSWBlock)
@@ -277,14 +279,46 @@ class CoinCommunity : Community() {
             Coin.valueOf(satoshiAmount)
         ) ?: throw IllegalStateException("Not enough (or faulty) signatures to transfer SW funds")
 
-        return sendTransaction.transactionId
+        return sendTransaction
+    }
+
+    /**
+     * 3.3 Everything is done, publish the final serialized bitcoin transaction data on trustchain.
+     */
+    public fun postTransactionSucceededOnTrustChain(
+        initialData: SWTransferFundsAskTransactionData,
+        transactionSerialized: String
+    ) {
+        val initialBlockData = initialData.getData()
+
+        val transactionData = SWTransferDoneTransactionData(
+            initialBlockData.SW_UNIQUE_ID,
+            transactionSerialized,
+            initialBlockData.SW_TRANSFER_FUNDS_AMOUNT,
+            initialBlockData.SW_BITCOIN_PKS,
+            initialBlockData.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
+        )
+
+        trustchain.createProposalBlock(
+            transactionData.getJsonString(),
+            myPeer.publicKey.keyToBin(),
+            transactionData.blockType
+        )
     }
 
     /**
      * Fetch blocks with type SHARED_WALLET_BLOCK.
      */
     private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
-        return getTrustChainCommunity().database.getBlocksWithType(SHARED_WALLET_BLOCK)
+        return fetchSharedWalletBlocks(listOf(SHARED_WALLET_BLOCK))
+    }
+
+    private fun fetchSharedWalletBlocks(blockTypes: List<String>): List<TrustChainBlock> {
+        var result = arrayListOf<TrustChainBlock>()
+        for (type in blockTypes) {
+            result.addAll(getTrustChainCommunity().database.getBlocksWithType(type))
+        }
+        return result
     }
 
     /**
@@ -307,10 +341,12 @@ class CoinCommunity : Community() {
      * Fetch the latest block associated with a shared wallet.
      * swBlockHash - the hash of one of the blocks associated with a shared wallet.
      */
-    private fun fetchLatestSharedWalletBlock(swBlockHash: ByteArray): TrustChainBlock? {
+    private fun fetchLatestSharedWalletTransactionBlock(swBlockHash: ByteArray): TrustChainBlock? {
         val swBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
             ?: return null
-        return fetchLatestSharedWalletBlock(swBlock, fetchSharedWalletBlocks())
+        val transactionBlockTypes = listOf(SHARED_WALLET_BLOCK, TRANSFER_FINAL_BLOCK)
+        val transactionBlocks = fetchSharedWalletBlocks(transactionBlockTypes)
+        return fetchLatestSharedWalletBlock(swBlock, transactionBlocks)
     }
 
     /**
@@ -418,6 +454,7 @@ class CoinCommunity : Community() {
         }
 
         public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
+        public const val TRANSFER_FINAL_BLOCK = "TRANSFER_FINAL_BLOCK"
         public const val SIGNATURE_ASK_BLOCK = "JOIN_ASK_BLOCK"
         public const val TRANSFER_FUNDS_ASK_BLOCK = "TRANSFER_FUNDS_ASK_BLOCK"
         public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
