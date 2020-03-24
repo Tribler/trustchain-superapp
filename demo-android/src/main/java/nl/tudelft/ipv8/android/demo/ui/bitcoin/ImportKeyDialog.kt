@@ -4,10 +4,10 @@ import android.app.Dialog
 import android.os.Bundle
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import nl.tudelft.ipv8.android.demo.R
-
 
 class ImportKeyDialog : DialogFragment() {
     private lateinit var listener: ImportKeyDialogListener
@@ -32,6 +32,7 @@ class ImportKeyDialog : DialogFragment() {
             val builder = AlertDialog.Builder(it)
             val inflater = requireActivity().layoutInflater
             val view = inflater.inflate(R.layout.import_key_dialog, null)
+
             builder.setView(view)
                 .setTitle("Import Existing Address")
                 .setPositiveButton(
@@ -42,13 +43,32 @@ class ImportKeyDialog : DialogFragment() {
                     val sk = view.findViewById<TextView>(R.id.private_key_input)
                     val netSwitch = view.findViewById<Switch>(R.id.net_switch)
 
-                    listener.onImport(pk.text.toString(), sk.text.toString(), netSwitch.isChecked)
+                    val address = pk.text.toString()
+                    val privateKey = sk.text.toString()
 
-                    pk.text = ""
-                    sk.text = ""
-                    netSwitch.isSelected = true
+                    val address_valid = isAddressValid(address)
+                    val privateKeyValid = isPrivateKeyValid(privateKey)
 
-                    listener.onImportDone()
+                    if (address_valid && privateKeyValid) {
+                        listener.onImport(address, privateKey, netSwitch.isChecked)
+                        pk.text = ""
+                        sk.text = ""
+                        netSwitch.isSelected = true
+
+                        listener.onImportDone()
+                        Toast.makeText(
+                            this.requireContext(),
+                            "Key imported successfully.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            this.requireContext(),
+                            "The address or private key is not formatted correctly.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
                 }
                 .setNegativeButton(
                     "Cancel"
@@ -59,4 +79,13 @@ class ImportKeyDialog : DialogFragment() {
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
+
+    fun isAddressValid(address: String): Boolean {
+        return address.length in 26..35
+    }
+
+    fun isPrivateKeyValid(privateKey: String): Boolean {
+        return privateKey.length in 51..52 || privateKey.length == 64
+    }
+
 }

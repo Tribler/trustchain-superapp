@@ -160,15 +160,8 @@ class WalletManager(
             )
 
             val privateKey = publicPrivateKeyPair.privateKey
-            val key: ECKey
-            key = if (privateKey.length == 51 || privateKey.length == 52) {
-                val dumpedPrivateKey =
-                    DumpedPrivateKey.fromBase58(params, privateKey)
-                dumpedPrivateKey.key
-            } else {
-                val bigIntegerPrivateKey = Base58.decodeToBigInteger(privateKey)
-                ECKey.fromPrivate(bigIntegerPrivateKey)
-            }
+            val key = formatKey(privateKey)
+
             Log.i(
                 "Coin",
                 "Coin: Address from private key is: " + LegacyAddress.fromKey(
@@ -178,22 +171,6 @@ class WalletManager(
             )
 
             kit.wallet().importKey(key)
-
-//            val wallet = Wallet.createDeterministic(params, Script.ScriptType.P2PKH)
-//            wallet.importKey(key)
-//
-//            val seed = wallet.keyChainSeed
-//            val creationTime = seed.creationTimeSeconds
-//            val mnemonicCode = Utils.SPACE_JOINER.join(seed.mnemonicCode)
-//
-//            Log.i(
-//                "Coin",
-//                "Coin: Wallet Seed Information: \n\n Seed: $seed \n Creation Time: " +
-//                    "$creationTime \n Mnemonic Code: ${seed.mnemonicCode} \n Mnemonic Code Joined: " +
-//                    "$mnemonicCode"
-//            )
-//
-//            kit.restoreWalletFromSeed(seed)
         }
 
 
@@ -204,6 +181,17 @@ class WalletManager(
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().importedKeys}")
 
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
+    }
+
+    fun formatKey(privateKey: String): ECKey {
+        return if (privateKey.length == 51 || privateKey.length == 52) {
+            val dumpedPrivateKey =
+                DumpedPrivateKey.fromBase58(params, privateKey)
+            dumpedPrivateKey.key
+        } else {
+            val bigIntegerPrivateKey = Base58.decodeToBigInteger(privateKey)
+            ECKey.fromPrivate(bigIntegerPrivateKey)
+        }
     }
 
     // The protocol key we are using (private + public).
@@ -539,6 +527,11 @@ class WalletManager(
         val words = Joiner.on(" ").join(seed.mnemonicCode)
         val creationTime = seed.creationTimeSeconds
         return SerializedDeterministicKey(words, creationTime)
+    }
+
+    fun addKey(privateKey: String) {
+        Log.i("Coin", "Coin: Importing key in existing wallet: $privateKey")
+        this.kit.wallet().importKey(formatKey(privateKey))
     }
 
 }

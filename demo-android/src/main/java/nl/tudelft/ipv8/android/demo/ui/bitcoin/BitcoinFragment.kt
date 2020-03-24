@@ -230,15 +230,21 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     }
 
     override fun onImport(address: String, privateKey: String, testNet: Boolean) {
-        val config = WalletManagerConfiguration(
-            if (testNet) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
-            null,
-            PublicPrivateKeyPair(address, privateKey)
-        )
+        if (!WalletManagerAndroid.isRunning) {
+            val config = WalletManagerConfiguration(
+                if (testNet) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
+                null,
+                PublicPrivateKeyPair(address, privateKey)
+            )
 
-        WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-            .setConfiguration(config)
-            .init()
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config)
+                .init()
+        } else {
+            WalletManagerAndroid.getInstance().addKey(privateKey)
+        }
+
+
     }
 
     override fun onImportDone() {
