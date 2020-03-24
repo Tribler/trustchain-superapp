@@ -1,6 +1,6 @@
 package nl.tudelft.ipv8.android.demo.coin
 
-data class SerializedDeterminsticKey(
+data class SerializedDeterministicKey(
     val seed: String,
     val creationTime: Long
 )
@@ -16,6 +16,6 @@ enum class BitcoinNetworkOptions {
 
 class WalletManagerConfiguration(
     val network: BitcoinNetworkOptions = BitcoinNetworkOptions.TEST_NET,
-    val key: SerializedDeterminsticKey? = null,
+    val key: SerializedDeterministicKey? = null,
     val publicPrivateKeyPair: PublicPrivateKeyPair? = null
 )

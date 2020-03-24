@@ -13,15 +13,15 @@ import nl.tudelft.ipv8.android.demo.coin.*
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.wallet.Wallet
+
 
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment(
-) : BaseFragment(R.layout.fragment_bitcoin) {
+class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
+    ImportKeyDialog.ImportKeyDialogListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -61,12 +61,16 @@ class BitcoinFragment(
                 true
             }
             R.id.item_blockchain_refresh -> {
-                bitcoin_refresh_swiper.isRefreshing = true
-                this.refresh()
-                Handler().postDelayed({
-                    bitcoin_refresh_swiper.isRefreshing = false
-                }, 1500)
-                Log.i("Coin", WalletManagerAndroid.getInstance().kit.wallet().toString(true,  false, false, null))
+                this.refresh(true)
+                Log.i(
+                    "Coin",
+                    WalletManagerAndroid.getInstance().kit.wallet().toString(
+                        true,
+                        false,
+                        false,
+                        null
+                    )
+                )
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -102,13 +106,15 @@ class BitcoinFragment(
         }
 
         import_custom_keys.setOnClickListener {
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToImportKeysFragment())
+            val dialog = ImportKeyDialog()
+            dialog.setTargetFragment(this, 0)
+            dialog.show(parentFragmentManager, "Import Key")
         }
 
         startWalletButtonImportDefaultKey.setOnClickListener {
             val config = WalletManagerConfiguration(
                 BitcoinNetworkOptions.TEST_NET,
-                SerializedDeterminsticKey(
+                SerializedDeterministicKey(
                     "spell seat genius horn argue family steel buyer spawn chef guard vast",
                     1583488954L
                 )
@@ -169,10 +175,18 @@ class BitcoinFragment(
         }
     }
 
-    private fun refresh() {
+    private fun refresh(animation: Boolean? = false) {
+        if (animation!!) {
+            bitcoin_refresh_swiper.isRefreshing = true
+            Handler().postDelayed({
+                bitcoin_refresh_swiper.isRefreshing = false
+            }, 1500)
+        }
+
         if (!WalletManagerAndroid.isRunning) {
             return
         }
+
 
         var walletManager = WalletManagerAndroid.getInstance()
 
@@ -214,4 +228,21 @@ class BitcoinFragment(
         @JvmStatic
         fun newInstance() = BitcoinFragment()
     }
+
+    override fun onImport(address: String, privateKey: String, testNet: Boolean) {
+        val config = WalletManagerConfiguration(
+            if (testNet) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
+            null,
+            PublicPrivateKeyPair(address, privateKey)
+        )
+
+        WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+            .setConfiguration(config)
+            .init()
+    }
+
+    override fun onImportDone() {
+        this.refresh(true)
+    }
+
 }

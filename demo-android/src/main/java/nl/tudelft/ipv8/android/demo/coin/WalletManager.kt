@@ -19,10 +19,8 @@ import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.wallet.DeterministicSeed
 import org.bitcoinj.wallet.SendRequest
-import org.bitcoinj.wallet.Wallet
 import java.io.File
 import java.util.*
-import kotlin.concurrent.thread
 
 const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
@@ -35,7 +33,7 @@ const val MAIN_NET_WALLET_NAME = "forwarding-service"
 class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
-    serializedDeterministicKey: SerializedDeterminsticKey? = null,
+    serializedDeterministicKey: SerializedDeterministicKey? = null,
     publicPrivateKeyPair: PublicPrivateKeyPair? = null
 
 ) {
@@ -536,11 +534,11 @@ class WalletManager(
         return spendTx.bitcoinSerialize().toHex()
     }
 
-    fun toSeed(): SerializedDeterminsticKey {
+    fun toSeed(): SerializedDeterministicKey {
         val seed = kit.wallet().keyChainSeed
         val words = Joiner.on(" ").join(seed.mnemonicCode)
         val creationTime = seed.creationTimeSeconds
-        return SerializedDeterminsticKey(words, creationTime)
+        return SerializedDeterministicKey(words, creationTime)
     }
 
 }
