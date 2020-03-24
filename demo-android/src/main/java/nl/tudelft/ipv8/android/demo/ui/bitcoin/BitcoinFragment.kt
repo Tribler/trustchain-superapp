@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.android.demo.coin.*
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
+import org.bitcoinj.wallet.Wallet
 
 /**
  * A simple [Fragment] subclass.
@@ -65,6 +66,7 @@ class BitcoinFragment(
                 Handler().postDelayed({
                     bitcoin_refresh_swiper.isRefreshing = false
                 }, 1500)
+                Log.i("Coin", WalletManagerAndroid.getInstance().kit.wallet().toString(true,  false, false, null))
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -168,14 +170,11 @@ class BitcoinFragment(
     }
 
     private fun refresh() {
-        val walletManager: WalletManager
-        // TODO: Change the error handling.
-        try {
-            walletManager = WalletManagerAndroid.getInstance()
-        } catch (e: IllegalStateException) {
-            Log.w("Coin", "Wallet not yet running")
+        if (!WalletManagerAndroid.isRunning) {
             return
         }
+
+        var walletManager = WalletManagerAndroid.getInstance()
 
         walletStatus.text = "Status: ${walletManager.kit.state()}"
         walletBalance.text =
@@ -185,7 +184,7 @@ class BitcoinFragment(
         walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
         yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
 
-        if (walletManager.kit.state().equals(RUNNING)) {
+        if (walletManager.kit.state() == RUNNING) {
             startWalletButtonExisting.isEnabled = false
             startWalletButtonExisting.isClickable = false
             startWalletButtonImportDefaultKey.isEnabled = false

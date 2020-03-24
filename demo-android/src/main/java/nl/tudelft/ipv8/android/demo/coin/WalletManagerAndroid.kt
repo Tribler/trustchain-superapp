@@ -9,6 +9,7 @@ import android.content.Context
 object WalletManagerAndroid {
     private var walletManager: WalletManager? = null
     private var context: Context? = null
+    var isRunning: Boolean = false
 
     fun getInstance(): WalletManager {
         return walletManager
@@ -32,9 +33,10 @@ object WalletManagerAndroid {
 
             WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(configuration, walletDir, configuration.key)
+            val walletManager = WalletManager(configuration, walletDir, configuration.key, configuration.publicPrivateKeyPair)
 
             WalletManagerAndroid.walletManager = walletManager
+            isRunning = true
 
             return walletManager
         }
