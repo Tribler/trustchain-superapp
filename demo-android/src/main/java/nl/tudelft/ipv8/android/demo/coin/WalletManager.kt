@@ -83,48 +83,6 @@ class WalletManager(
             kit.restoreWalletFromSeed(deterministicSeed)
         }
 
-//        if (publicPrivateKeyPair != null) {
-//            Log.i(
-//                "Coin",
-//                "Coin: Importing PK: ${publicPrivateKeyPair.publicKey}, " +
-//                    "with SK: ${publicPrivateKeyPair.privateKey}"
-//            )
-//
-//            val privateKey = publicPrivateKeyPair.privateKey
-//            val key: ECKey
-//            key = if (privateKey.length == 51 || privateKey.length == 52) {
-//                val dumpedPrivateKey =
-//                    DumpedPrivateKey.fromBase58(params, privateKey)
-//                dumpedPrivateKey.key
-//            } else {
-//                val bigIntegerPrivateKey = Base58.decodeToBigInteger(privateKey)
-//                ECKey.fromPrivate(bigIntegerPrivateKey)
-//            }
-//            Log.i(
-//                "Coin",
-//                "Coin: Address from private key is: " + LegacyAddress.fromKey(
-//                    params,
-//                    key
-//                ).toString()
-//            )
-//
-//            val wallet = Wallet.createDeterministic(params, Script.ScriptType.P2PKH)
-//            wallet.importKey(key)
-//
-//            val seed = wallet.keyChainSeed
-//            val creationTime = seed.creationTimeSeconds
-//            val mnemonicCode = Utils.SPACE_JOINER.join(seed.mnemonicCode)
-//
-//            Log.i(
-//                "Coin",
-//                "Coin: Wallet Seed Information: \n\n Seed: $seed \n Creation Time: " +
-//                    "$creationTime \n Mnemonic Code: ${seed.mnemonicCode} \n Mnemonic Code Joined: " +
-//                    "$mnemonicCode"
-//            )
-//
-//            kit.restoreWalletFromSeed(seed)
-//        }
-
         kit.setDownloadListener(object : DownloadProgressTracker() {
             override fun progress(
                 pct: Double,
@@ -176,8 +134,7 @@ class WalletManager(
 
 
         Log.i("Coin", "Coin: finished the setup of kit.")
-
-//        Log.i("Coin", "Coin: ${kit.wallet()}")
+        
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().importedKeys}")
 
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
