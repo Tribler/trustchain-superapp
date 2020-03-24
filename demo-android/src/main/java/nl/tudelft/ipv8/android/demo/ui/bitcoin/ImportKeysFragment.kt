@@ -20,8 +20,6 @@ class ImportKeysFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         import_btc_address_btn.setOnClickListener {
-            sk_input.setText("91t95oKzxqVo5SpEAEezfBHqYUuSkcBHNCq9ThcyVYSVuzhvWwL")
-            pk_input.setText("mgyatP8Xy59oRH8SH8jPXe55VXoNCfGQQS")
 
             val config = WalletManagerConfiguration(
                 if (net_switch.isChecked) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,

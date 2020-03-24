@@ -134,7 +134,7 @@ class WalletManager(
 
 
         Log.i("Coin", "Coin: finished the setup of kit.")
-        
+
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().importedKeys}")
 
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
