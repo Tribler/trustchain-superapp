@@ -249,6 +249,9 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
     override fun onImportDone() {
         this.refresh(true)
+        Handler().postDelayed({
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+        }, 1500)
     }
 
 }
