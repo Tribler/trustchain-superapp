@@ -426,19 +426,8 @@ class CoinCommunity : Community() {
                 blockData.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             )
 
-            val newTransactionPackage = walletManager.safeCreationJoinWalletTransaction(
-                blockData.SW_BITCOIN_PKS,
-                satoshiAmount,
-                previousTransaction,
-                blockData.SW_SIGNATURES_REQUIRED
-            )
-            val newTransaction = Transaction(
-                walletManager.params,
-                newTransactionPackage.serializedTransaction.hexToBytes()
-            )
-
             val signature = walletManager.safeSigningTransactionFromMultiSig(
-                newTransaction,
+                previousTransaction,
                 walletManager.protocolECKey(),
                 receiverAddress,
                 satoshiAmount

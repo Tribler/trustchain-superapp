@@ -282,7 +282,7 @@ class WalletManager(
      * (3.1) There is a set-up multi-sig wallet and a proposal, create a signature
      * for the proposal.
      * The transaction includes an output for residual funds using calculated fee estimates.
-     * @param transaction transaction with the multi-sig output
+     * @param transaction PREVIOUS transaction with the multi-sig output
      * @param myPrivateKey key to sign with (yourself most likely)
      * @param receiverAddress receiver address
      * @param paymentAmount amount for receiver address
