@@ -24,7 +24,7 @@ class ImportKeysFragment : Fragment() {
             val config = WalletManagerConfiguration(
                 if (net_switch.isChecked) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
                 null,
-                PublicPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
+                AddressPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
             )
 
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)

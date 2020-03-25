@@ -33,7 +33,7 @@ object WalletManagerAndroid {
 
             WalletManagerAndroid.context = context
 
-            val walletManager = WalletManager(configuration, walletDir, configuration.key, configuration.publicPrivateKeyPair)
+            val walletManager = WalletManager(configuration, walletDir, configuration.key, configuration.addressPrivateKeyPair)
 
             WalletManagerAndroid.walletManager = walletManager
             isRunning = true

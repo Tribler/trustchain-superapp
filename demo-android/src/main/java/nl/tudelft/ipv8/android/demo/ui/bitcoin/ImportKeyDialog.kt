@@ -39,19 +39,19 @@ class ImportKeyDialog : DialogFragment() {
                     "Import"
                 ) { _, _ ->
 
-                    val pk = view.findViewById<TextView>(R.id.public_key_input)
+                    val ad = view.findViewById<TextView>(R.id.address_input)
                     val sk = view.findViewById<TextView>(R.id.private_key_input)
                     val netSwitch = view.findViewById<Switch>(R.id.net_switch)
 
-                    val address = pk.text.toString()
+                    val address = ad.text.toString()
                     val privateKey = sk.text.toString()
 
-                    val address_valid = isAddressValid(address)
+                    val addressValid = isAddressValid(address)
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
-                    if (address_valid && privateKeyValid) {
+                    if (addressValid && privateKeyValid) {
                         listener.onImport(address, privateKey, netSwitch.isChecked)
-                        pk.text = ""
+                        ad.text = ""
                         sk.text = ""
                         netSwitch.isSelected = true
 

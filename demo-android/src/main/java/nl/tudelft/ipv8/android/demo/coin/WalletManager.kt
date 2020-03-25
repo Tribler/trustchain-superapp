@@ -34,16 +34,16 @@ class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
     serializedDeterministicKey: SerializedDeterministicKey? = null,
-    publicPrivateKeyPair: PublicPrivateKeyPair? = null
-
+    addressPrivateKeyPair: AddressPrivateKeyPair? = null
 ) {
-
-
     val kit: WalletAppKit
     val params: NetworkParameters
     var isDownloading: Boolean = true
     var progress: Int = 0
 
+    /**
+     * Initializes WalletManager.
+     */
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
 
@@ -110,14 +110,14 @@ class WalletManager(
             .startAsync()
             .awaitRunning()
 
-        if (publicPrivateKeyPair != null) {
+        if (addressPrivateKeyPair != null) {
             Log.i(
                 "Coin",
-                "Coin: Importing PK: ${publicPrivateKeyPair.publicKey}, " +
-                    "with SK: ${publicPrivateKeyPair.privateKey}"
+                "Coin: Importing Address: ${addressPrivateKeyPair.address}, " +
+                    "with SK: ${addressPrivateKeyPair.privateKey}"
             )
 
-            val privateKey = publicPrivateKeyPair.privateKey
+            val privateKey = addressPrivateKeyPair.privateKey
             val key = formatKey(privateKey)
 
             Log.i(
@@ -130,13 +130,8 @@ class WalletManager(
 
             kit.wallet().importKey(key)
         }
-
-
-
         Log.i("Coin", "Coin: finished the setup of kit.")
-
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().importedKeys}")
-
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
     }
 

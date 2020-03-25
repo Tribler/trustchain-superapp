@@ -33,7 +33,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         setHasOptionsMenu(true)
     }
 
-
     override fun onResume() {
         super.onResume()
         Log.i("Coin", "Resuming")
@@ -159,10 +158,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 Coin.valueOf(value),
                 threshHold
             )
-            Log.i("Coin", "Coin: createMultisig, finished process.")
 
+            Log.i("Coin", "Coin: createMultisig, finished process.")
             Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
             Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
+
             multisigOutputText.setText(result.transactionId)
 
         }
@@ -234,7 +234,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             val config = WalletManagerConfiguration(
                 if (testNet) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
                 null,
-                PublicPrivateKeyPair(address, privateKey)
+                AddressPrivateKeyPair(address, privateKey)
             )
 
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)

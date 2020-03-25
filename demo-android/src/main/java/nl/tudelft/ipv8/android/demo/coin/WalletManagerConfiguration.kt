@@ -5,8 +5,8 @@ data class SerializedDeterministicKey(
     val creationTime: Long
 )
 
-data class PublicPrivateKeyPair(
-    val publicKey: String,
+data class AddressPrivateKeyPair(
+    val address: String,
     val privateKey: String
 )
 
@@ -17,5 +17,5 @@ enum class BitcoinNetworkOptions {
 class WalletManagerConfiguration(
     val network: BitcoinNetworkOptions = BitcoinNetworkOptions.TEST_NET,
     val key: SerializedDeterministicKey? = null,
-    val publicPrivateKeyPair: PublicPrivateKeyPair? = null
+    val addressPrivateKeyPair: AddressPrivateKeyPair? = null
 )
