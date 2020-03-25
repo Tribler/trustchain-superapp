@@ -7,8 +7,6 @@ import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
@@ -83,15 +81,22 @@ class DemoApplication : Application() {
             }
         })
 
-        trustchain.addListener(CoinCommunity.JOIN_ASK_BLOCK, object : BlockListener {
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
 
-        trustchain.registerBlockSigner(CoinCommunity.JOIN_ASK_BLOCK, object : BlockSigner {
+        trustchain.registerBlockSigner(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 CoinCommunity.joinAskBlockReceived(block)
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.registerBlockSigner(CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                CoinCommunity.transferFundsBlockReceived(block)
                 Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
             }
         })

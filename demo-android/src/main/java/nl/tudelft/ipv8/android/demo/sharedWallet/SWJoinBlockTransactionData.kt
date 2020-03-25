@@ -1,65 +1,59 @@
 package nl.tudelft.ipv8.android.demo.sharedWallet
 
+import com.google.gson.Gson
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import org.json.JSONObject
 
+data class SWJoinBlockTD(
+    var SW_UNIQUE_ID: String,
+    var SW_ENTRANCE_FEE: Long,
+    var SW_TRANSACTION_SERIALIZED: String,
+    var SW_VOTING_THRESHOLD: Int,
+    var SW_TRUSTCHAIN_PKS: ArrayList<String>,
+    var SW_BITCOIN_PKS: ArrayList<String>
+)
+
 class SWJoinBlockTransactionData(data: JSONObject) : SWBlockTransactionData(
     data, CoinCommunity.SHARED_WALLET_BLOCK
 ) {
-    fun getUniqueId(): String {
-        return jsonData.getString(CoinCommunity.SW_UNIQUE_ID)
-    }
-
-    fun getEntranceFee(): Long {
-        return jsonData.getLong(CoinCommunity.SW_ENTRANCE_FEE)
-    }
-
-    fun getTransactionSerialized(): String {
-        return jsonData.getString(CoinCommunity.SW_TRANSACTION_SERIALIZED)
-    }
-
-    fun getThreshold(): Int {
-        return jsonData.getInt(CoinCommunity.SW_VOTING_THRESHOLD)
-    }
-
-    fun getTrustChainPks(): ArrayList<String> {
-        return SWUtil.parseJSONArray(jsonData.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS))
-    }
-
-    fun getBitcoinPks(): ArrayList<String> {
-        return SWUtil.parseJSONArray(jsonData.getJSONArray(CoinCommunity.SW_BITCOIN_PKS))
+    fun getData(): SWJoinBlockTD {
+        return Gson().fromJson(getJsonString(), SWJoinBlockTD::class.java)
     }
 
     fun addTrustChainPk(publicKey: String) {
-        val union = getTrustChainPks()
-        union.add(publicKey)
-        jsonData.put(CoinCommunity.SW_TRUSTCHAIN_PKS, union)
+        val data = getData()
+        data.SW_TRUSTCHAIN_PKS.add(publicKey)
+        jsonData = JSONObject(Gson().toJson(data))
     }
 
     fun addBitcoinPk(publicKey: String) {
-        val union = getBitcoinPks()
-        union.add(publicKey)
-        jsonData.put(CoinCommunity.SW_BITCOIN_PKS, union)
+        val data = getData()
+        data.SW_BITCOIN_PKS.add(publicKey)
+        jsonData = JSONObject(Gson().toJson(data))
     }
 
     constructor(
         entranceFee: Long,
         transactionSerialized: String,
         votingThreshold: Int,
-        trustChainPks: List<String>,
-        bitcoinPks: List<String>,
-        uniqueId: String? = null
-    ) : this(JSONObject(
-        mapOf(
-            CoinCommunity.SW_UNIQUE_ID to (uniqueId ?: SWUtil.randomUUID()),
-            CoinCommunity.SW_ENTRANCE_FEE to entranceFee,
-            CoinCommunity.SW_TRANSACTION_SERIALIZED to transactionSerialized,
-            CoinCommunity.SW_VOTING_THRESHOLD to votingThreshold,
-            CoinCommunity.SW_TRUSTCHAIN_PKS to trustChainPks,
-            CoinCommunity.SW_BITCOIN_PKS to bitcoinPks
+        trustChainPks: ArrayList<String>,
+        bitcoinPks: ArrayList<String>,
+        uniqueId: String = SWUtil.randomUUID()
+    ) : this(
+        JSONObject(
+            Gson().toJson(
+                SWJoinBlockTD(
+                    uniqueId,
+                    entranceFee,
+                    transactionSerialized,
+                    votingThreshold,
+                    trustChainPks,
+                    bitcoinPks
+                )
+            )
         )
-    ))
+    )
 
     constructor(transaction: TrustChainTransaction) : this(SWUtil.parseTransaction(transaction))
 }
