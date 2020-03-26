@@ -79,7 +79,12 @@ class TrustChainHelper(
      * a receiver.
      */
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
+
         return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
+    }
+
+    fun getBlocksByType(type: String): List<TrustChainBlock>{
+        return trustChainCommunity.database.getBlocksWithType(type)
     }
 
     /**
