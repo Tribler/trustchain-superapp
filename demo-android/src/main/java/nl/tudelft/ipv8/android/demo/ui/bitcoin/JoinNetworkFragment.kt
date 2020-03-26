@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -36,16 +38,53 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionId = getCoinCommunity().joinSharedWallet(block.calculateHash())
-        fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
+        val transactionPackage = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
+        val proposeBlock =
+            getCoinCommunity().proposeJoinWalletOnTrustChain(
+                block.calculateHash(),
+                transactionPackage.serializedTransaction
+            )
+
+        // Wait until the new shared wallet is created
+        fetchCurrentSharedWalletStatusLoop(transactionPackage.transactionId) // TODO: cleaner solution for blocking
+
+        // Now start a thread to collect and wait (non-blocking) for signatures
+        val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
+
+        thread(start = true) {
+            var finished = false
+            while (!finished) {
+                finished = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
+                Thread.sleep(100)
+            }
+        }
+
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
+    }
+
+    /**
+     * Collect the signatures of a join proposal. Returns true if enough signatures are found.
+     */
+    private fun collectJoinWalletSignatures(
+        data: SWSignatureAskTransactionData,
+        requiredSignatures: Int
+    ): Boolean {
+        val blockData = data.getData()
+        val signatures =
+            getCoinCommunity().fetchJoinSignatures(blockData.SW_UNIQUE_ID, blockData.SW_UNIQUE_PROPOSAL_ID)
+
+        if (signatures.size >= requiredSignatures) {
+            getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)
+            return true
+        }
+        return false
     }
 
     private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {
         var finished = false
 
         while (!finished) {
-            finished = getCoinCommunity().fetchJoinSharedWalletStatus(transactionId)
+            finished = getCoinCommunity().fetchBitcoinTransactionStatus(transactionId)
             Thread.sleep(1_000)
         }
     }
