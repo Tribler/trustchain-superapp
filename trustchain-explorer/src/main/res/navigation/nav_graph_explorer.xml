@@ -29,7 +29,7 @@
     </fragment>
     <fragment
         android:id="@+id/blocksFragment"
-        android:name="nl.tudelft.trustchain.explorer.ui.blocks.BlocksFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.trader_blocks.BlocksFragment"
         android:label="Blocks">
         <argument
             android:name="publicKey"
@@ -37,10 +37,10 @@
     </fragment>
     <fragment
         android:id="@+id/myChainFragment"
-        android:name="nl.tudelft.trustchain.explorer.ui.blocks.MyChainFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.trader_blocks.MyChainFragment"
         android:label="My Chain" />
     <fragment
         android:id="@+id/latestBlocksFragment"
-        android:name="nl.tudelft.trustchain.explorer.ui.blocks.LatestBlocksFragment"
+        android:name="nl.tudelft.trustchain.trader.ui.trader_blocks.LatestBlocksFragment"
         android:label="All Blocks" />
 </navigation>

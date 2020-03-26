@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.explorer.ui.blocks
+package nl.tudelft.trustchain.trader.ui.trader_blocks
 
 import android.os.Bundle
 import android.text.InputType
@@ -19,14 +19,13 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.explorer.R
-import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
-
+import nl.tudelft.trustchain.trader.R
+import nl.tudelft.trustchain.trader.R.layout.fragment_blocks
+import nl.tudelft.trustchain.trader.databinding.FragmentBlocksBinding
 
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
+open class BlocksFragment : BaseFragment(fragment_blocks) {
     private val adapter = ItemAdapter()
 
     private lateinit var publicKey: ByteArray
