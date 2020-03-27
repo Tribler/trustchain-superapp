@@ -6,7 +6,9 @@ import info.blockchain.api.blockexplorer.BlockExplorer
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.*
+import org.bitcoinj.core.DumpedPrivateKey
 import org.bitcoinj.core.ECKey.ECDSASignature
+import org.bitcoinj.core.LegacyAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
@@ -21,6 +23,8 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
+const val MAIN_NET_WALLET_NAME = "forwarding-service"
 
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
@@ -30,13 +34,17 @@ import java.util.concurrent.TimeUnit
 class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
-    serializedDeterministicKey: SerializedDeterminsticKey? = null
+    serializedDeterministicKey: SerializedDeterministicKey? = null,
+    addressPrivateKeyPair: AddressPrivateKeyPair? = null
 ) {
     val kit: WalletAppKit
     val params: NetworkParameters
     var isDownloading: Boolean = true
     var progress: Int = 0
 
+    /**
+     * Initializes WalletManager.
+     */
     init {
         Log.i("Coin", "Coin: WalletManager attempting to start.")
 
@@ -46,14 +54,17 @@ class WalletManager(
         }
 
         val filePrefix = when (walletManagerConfiguration.network) {
-            BitcoinNetworkOptions.TEST_NET -> "forwarding-service-testnet"
-            BitcoinNetworkOptions.PRODUCTION -> "forwarding-service"
+            BitcoinNetworkOptions.TEST_NET -> TEST_NET_WALLET_NAME
+            BitcoinNetworkOptions.PRODUCTION -> MAIN_NET_WALLET_NAME
         }
 
         kit = object : WalletAppKit(params, walletDir, filePrefix) {
             override fun onSetupCompleted() {
                 // Make a fresh new key if no keys in stored wallet.
-                if (wallet().keyChainGroupSize < 1) wallet().importKey(ECKey())
+                if (wallet().keyChainGroupSize < 1) {
+                    Log.i("Coin", "Coin: Added manually created fresh key")
+                    wallet().importKey(ECKey())
+                }
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
             }
@@ -88,7 +99,8 @@ class WalletManager(
 
             override fun doneDownload() {
                 super.doneDownload()
-                Log.w("Coin", "Download Complete!")
+                progress = 100
+                Log.i("Coin", "Download Complete!")
                 Log.i("Coin", "Balance: ${kit.wallet().balance}")
                 isDownloading = false
             }
@@ -96,9 +108,43 @@ class WalletManager(
 
         Log.i("Coin", "Coin: starting the setup of kit.")
         kit.setBlockingStartup(false)
-        kit.startAsync()
-        kit.awaitRunning()
+            .startAsync()
+            .awaitRunning()
+
+        if (addressPrivateKeyPair != null) {
+            Log.i(
+                "Coin",
+                "Coin: Importing Address: ${addressPrivateKeyPair.address}, " +
+                    "with SK: ${addressPrivateKeyPair.privateKey}"
+            )
+
+            val privateKey = addressPrivateKeyPair.privateKey
+            val key = formatKey(privateKey)
+
+            Log.i(
+                "Coin",
+                "Coin: Address from private key is: " + LegacyAddress.fromKey(
+                    params,
+                    key
+                ).toString()
+            )
+
+            kit.wallet().importKey(key)
+        }
         Log.i("Coin", "Coin: finished the setup of kit.")
+        Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().importedKeys}")
+        Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
+    }
+
+    fun formatKey(privateKey: String): ECKey {
+        return if (privateKey.length == 51 || privateKey.length == 52) {
+            val dumpedPrivateKey =
+                DumpedPrivateKey.fromBase58(params, privateKey)
+            dumpedPrivateKey.key
+        } else {
+            val bigIntegerPrivateKey = Base58.decodeToBigInteger(privateKey)
+            ECKey.fromPrivate(bigIntegerPrivateKey)
+        }
     }
 
     /**
@@ -647,12 +693,16 @@ class WalletManager(
         }
 
     }
-
-    fun toSeed(): SerializedDeterminsticKey {
+    fun toSeed(): SerializedDeterministicKey {
         val seed = kit.wallet().keyChainSeed
         val words = Joiner.on(" ").join(seed.mnemonicCode)
         val creationTime = seed.creationTimeSeconds
-        return SerializedDeterminsticKey(words, creationTime)
+        return SerializedDeterministicKey(words, creationTime)
+    }
+
+    fun addKey(privateKey: String) {
+        Log.i("Coin", "Coin: Importing key in existing wallet: $privateKey")
+        this.kit.wallet().importKey(formatKey(privateKey))
     }
 
     data class TransactionPackage(

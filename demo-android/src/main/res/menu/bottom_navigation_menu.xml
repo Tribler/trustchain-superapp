@@ -23,7 +23,7 @@
 <!--        android:title="Debug"-->
 <!--        android:icon="@drawable/ic_bug_report_black_24dp" />-->
     <item
-        android:id="@+id/landingBitcoinFragment"
+        android:id="@+id/bitcoinFragment"
         android:title="@string/bitcoin"
-        android:icon="@drawable/ic_device_hub_black_24dp" />
+        android:icon="@drawable/ic_attach_money_black_24dp" />
 </menu>

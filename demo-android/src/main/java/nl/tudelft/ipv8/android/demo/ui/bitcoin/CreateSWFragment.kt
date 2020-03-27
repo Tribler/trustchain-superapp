@@ -15,9 +15,7 @@ import nl.tudelft.ipv8.android.demo.ui.BaseFragment
  * Use the [CreateSWFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class CreateSWFragment(
-    override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_create_sw) {
+class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
     private var currentTransactionId: String? = null
     private var currentThreshold: Int? = null
     private var currentEntranceFee: Long? = null
@@ -65,7 +63,6 @@ class CreateSWFragment(
         }
 
         resetWalletInitializationValues()
-        controller.showView("BitcoinFragment")
     }
 
     private fun resetWalletInitializationValues() {
@@ -96,6 +93,6 @@ class CreateSWFragment(
     companion object {
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(controller: BitcoinViewController) = CreateSWFragment(controller)
+        fun newInstance() = CreateSWFragment()
     }
 }
