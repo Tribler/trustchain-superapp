@@ -27,7 +27,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
-import nl.tudelft.trustchain.trader.MarketCommunity
+import nl.tudelft.trustchain.common.MarketCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {

@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.trader.constants.BlockTypes
+import nl.tudelft.trustchain.trader.constants.BlockType
 import nl.tudelft.trustchain.trader.validators.DDValidator
 
 @ExperimentalUnsignedTypes
@@ -16,10 +16,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lifecycleScope.launchWhenStarted {
             val trustchain = getTrustChainCommunity()
+            trustchain.registerTransactionValidator(BlockType.DEMO_TX_BLOCK.value, DDValidator())
 
-            trustchain.registerTransactionValidator(BlockTypes.DEMO_TX_BLOCK.value, DDValidator())
-
-            trustchain.addListener(BlockTypes.DEMO_TX_BLOCK.value, object : BlockListener {
+            trustchain.addListener(BlockType.DEMO_TX_BLOCK.value, object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
                     Log.d(
                         "TrustChainDemo",
