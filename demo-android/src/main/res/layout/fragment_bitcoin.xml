@@ -84,54 +84,6 @@
                         android:enabled="true"
                         android:text="Import Own Keys" />
                 </LinearLayout>
-
-                <Button
-                    android:id="@+id/generateRandomHexes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:text="Generate Random Hexes" />
-
-                <Button
-                    android:id="@+id/createMultisig"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:text="Create Multisig" />
-
-                <EditText
-                    android:id="@+id/publicKeyHexes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="start|top"
-                    android:hint="Public key hexes here (1 per line)"
-                    android:inputType="textMultiLine" />
-
-                <EditText
-                    android:id="@+id/threshHoldText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Threshhold"
-                    android:inputType="textPersonName" />
-
-                <EditText
-                    android:id="@+id/coinValue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Satoshi amount (entrance fee)"
-                    android:inputType="textPersonName" />
-
-                <EditText
-                    android:id="@+id/multisigOutputText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Transaction ID (result)"
-                    android:inputType="textPostalAddress" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -145,6 +97,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Your wallet actions"
+                        android:textAlignment="center" />
 
                     <Button
                         android:id="@+id/create_wallet_button"
