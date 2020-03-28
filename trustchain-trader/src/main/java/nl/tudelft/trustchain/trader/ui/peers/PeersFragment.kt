@@ -14,7 +14,6 @@ import kotlinx.coroutines.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.trader.MarketCommunity
 import nl.tudelft.trustchain.trader.R
 import nl.tudelft.trustchain.trader.databinding.FragmentPeersBinding
 
@@ -97,9 +96,5 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 delay(1000)
             }
         }
-    }
-
-    protected fun getMarketCommunity(): MarketCommunity {
-        return getIpv8().getOverlay() ?: throw IllegalStateException("MarketCommunity is not configured")
     }
 }

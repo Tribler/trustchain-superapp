@@ -9,21 +9,19 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import nl.tudelft.ipv8.*
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeEndpoint
 import nl.tudelft.ipv8.android.messaging.bluetooth.GattServerManager
 import nl.tudelft.ipv8.android.messaging.bluetooth.IPv8BluetoothLeAdvertiser
 import nl.tudelft.ipv8.android.messaging.udp.AndroidUdpEndpoint
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.trader.MarketCommunity
+import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.trader.R
 import java.net.InetAddress
 
