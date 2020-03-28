@@ -1,8 +1,8 @@
-package nl.tudelft.ipv8.android.demo.coin
+package nl.tudelft.ipv8.android.demo
 
 import io.mockk.*
-import nl.tudelft.ipv8.android.demo.CoinCommunity
-import nl.tudelft.ipv8.android.demo.TrustChainHelper
+import nl.tudelft.ipv8.android.demo.coin.WalletManager
+import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
 import nl.tudelft.ipv8.util.hexToBytes
 import org.bitcoinj.core.Coin
 import org.junit.Test
@@ -19,7 +19,6 @@ class WalletManagerTrustchainTest {
     fun testTrustGenesisBlock() {
         // Setup mocks
         val walletManager = mockk<WalletManager>()
-
         mockkObject(WalletManagerAndroid)
         every { WalletManagerAndroid.getInstance() } returns walletManager
 
@@ -30,18 +29,22 @@ class WalletManagerTrustchainTest {
         every { walletManager.networkPublicECKeyHex() } returns BTC_PK
 
         val coinCommunity = spyk(CoinCommunity(), recordPrivateCalls = true)
-        every { coinCommunity.myPeer.publicKey.keyToBin() } returns TRUSTCHAIN_PK.hexToBytes()
         val trustchain = mockk<TrustChainHelper>()
+        every { coinCommunity.myPeer.publicKey.keyToBin() } returns TRUSTCHAIN_PK.hexToBytes()
         every { coinCommunity getProperty "trustchain" } returns trustchain
+        every { trustchain.createProposalBlock(any<String>(), any<ByteArray>(), any<String>())} returns Unit
+
 
         // Actual test
         val txId = coinCommunity.createGenesisSharedWallet(ENTRANCE_FEE)
         val serializedTx = coinCommunity.fetchBitcoinTransaction(txId)
-
         coinCommunity.broadcastCreatedSharedWallet(serializedTx!!, ENTRANCE_FEE, 1)
 
         // Verify that the trustchain method is called
         verify { trustchain.createProposalBlock(any<String>(), TRUSTCHAIN_PK.hexToBytes(), CoinCommunity.SHARED_WALLET_BLOCK) }
     }
+
+
+
 
 }
