@@ -63,6 +63,14 @@ class CoinCommunity : Community() {
     ) {
         val bitcoinPublicKey = WalletManagerAndroid.getInstance().networkPublicECKeyHex()
         val trustChainPk = myPeer.publicKey.keyToBin()
+
+        println(entranceFee)
+        println(transactionSerialized)
+        println(votingThreshold)
+        println(arrayListOf(trustChainPk.toHex()))
+        println(arrayListOf(bitcoinPublicKey))
+        println()
+
         val blockData = SWJoinBlockTransactionData(
             entranceFee,
             transactionSerialized,
@@ -70,6 +78,12 @@ class CoinCommunity : Community() {
             arrayListOf(trustChainPk.toHex()),
             arrayListOf(bitcoinPublicKey)
         )
+
+        println(blockData.jsonData)
+
+        println(blockData.getJsonString())
+        println(trustChainPk)
+        println(blockData.blockType)
 
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)
     }
