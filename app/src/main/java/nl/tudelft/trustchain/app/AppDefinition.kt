@@ -7,6 +7,7 @@ import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
+import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -31,5 +32,11 @@ enum class AppDefinition(
         "TrustChain Trader",
         R.color.blue,
         TrustChainTraderActivity::class.java
+    ),
+    TRUSTCHAIN_PAYLOADGENERATOR(
+        R.drawable.ic_add_black_24dp,
+        "TrustChain Payload Generator",
+        R.color.black,
+        TrustChainPayloadGeneratorActivity::class.java
     ),
 }

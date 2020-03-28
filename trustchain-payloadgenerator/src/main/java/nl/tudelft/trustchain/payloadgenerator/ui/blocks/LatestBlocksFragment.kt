@@ -1,7 +1,8 @@
-package nl.tudelft.trustchain.trader.ui.trader_blocks
+package nl.tudelft.trustchain.payloadgenerator.ui.blocks
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.payloadgenerator.ui.blocks.BlocksFragment
 
 class LatestBlocksFragment : BlocksFragment() {
     override val isNewBlockAllowed = false

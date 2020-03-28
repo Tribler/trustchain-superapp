@@ -1,14 +1,12 @@
-package nl.tudelft.trustchain.explorer.ui.blocks
+package nl.tudelft.trustchain.payloadgenerator.ui.blocks
 
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,14 +17,15 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.explorer.R
-import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
-
+import nl.tudelft.trustchain.payloadgenerator.ui.blocks.BlockItemRenderer
+import nl.tudelft.trustchain.payloadgenerator.R
+import nl.tudelft.trustchain.payloadgenerator.R.layout.fragment_blocks
+import nl.tudelft.trustchain.payloadgenerator.ui.blocks.BlockItem
+import nl.tudelft.trustchain.payloadgenerator.databinding.FragmentBlocksBinding
 
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
+open class BlocksFragment : BaseFragment(fragment_blocks) {
     private val adapter = ItemAdapter()
 
     private lateinit var publicKey: ByteArray
@@ -85,33 +84,30 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
         binding.recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (isNewBlockAllowed) {
-            inflater.inflate(R.menu.blocks_options, menu)
-        }
-    }
+//    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+//    }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        menu.findItem(R.id.item_crawl)?.isVisible = isCrawlAllowed
-    }
+//    override fun onPrepareOptionsMenu(menu: Menu) {
+//        menu.findItem(R.id.item_crawl)?.isVisible = isCrawlAllowed
+//    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.item_new_block -> {
-                showNewBlockDialog()
-                true
-            }
-            R.id.item_crawl -> {
-                lifecycleScope.launch {
-                    Toast.makeText(requireContext(), "Crawl started", Toast.LENGTH_SHORT).show()
-                    crawlChain()
-                    Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
-                }
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        return when (item.itemId) {
+//            R.id.item_new_block -> {
+//                showNewBlockDialog()
+//                true
+//            }
+//            R.id.item_crawl -> {
+//                lifecycleScope.launch {
+//                    Toast.makeText(requireContext(), "Crawl started", Toast.LENGTH_SHORT).show()
+//                    crawlChain()
+//                    Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+//                }
+//                true
+//            }
+//            else -> super.onOptionsItemSelected(item)
+//        }
+//    }
 
     protected open fun getPublicKey(): ByteArray {
 //        val args = BlocksFragmentArgs.fromBundle(requireArguments())
@@ -120,7 +116,7 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
-        return trustchain.getChainByUser(publicKey)
+        return trustchain.getBlocksByType("tribler_bandwidth")
     }
 
     private suspend fun refreshBlocks() = withContext(Dispatchers.IO) {
@@ -130,8 +126,8 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     protected open suspend fun updateView() {
         val items = createItems(blocks)
         adapter.updateItems(items)
-        binding.imgNoBlocks.isVisible = items.isEmpty()
-        binding.progress.isVisible = false
+//        binding.imgNoBlocks.isVisible = items.isEmpty()
+//        binding.progress.isVisible = false
     }
 
     private suspend fun createItems(blocks: List<TrustChainBlock>): List<Item> =
