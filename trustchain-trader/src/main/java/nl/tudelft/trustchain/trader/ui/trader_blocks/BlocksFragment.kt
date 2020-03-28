@@ -119,7 +119,7 @@ open class BlocksFragment : BaseFragment(fragment_blocks) {
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
-        return trustchain.getChainByUser(publicKey)
+        return trustchain.getBlocksByType("tribler_bandwidth")
     }
 
     private suspend fun refreshBlocks() = withContext(Dispatchers.IO) {

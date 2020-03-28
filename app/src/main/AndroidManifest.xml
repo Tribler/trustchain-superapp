@@ -42,6 +42,10 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.currencyii.MainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
