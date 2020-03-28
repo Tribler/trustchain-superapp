@@ -6,8 +6,13 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_join_network.*
+import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
+import nl.tudelft.ipv8.android.demo.coin.CoinUtil
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
 
@@ -17,9 +22,7 @@ import nl.tudelft.ipv8.util.toHex
  * Use the [MySharedWalletFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MySharedWalletFragment(
-    override val controller: BitcoinViewController
-) : BitcoinView, BaseFragment(R.layout.fragment_my_shared_wallets) {
+class MySharedWalletFragment() : BaseFragment(R.layout.fragment_my_shared_wallets) {
 
     private fun initListView() {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
@@ -27,7 +30,16 @@ class MySharedWalletFragment(
         val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to enter wallet")
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
-            controller.showSharedWalletTransactionView(sharedWalletBlocks[position])
+            val block = sharedWalletBlocks[position]
+            val blockData = SWJoinBlockTransactionData(block.transaction).getData()
+            findNavController().navigate(
+                MySharedWalletFragmentDirections.actionMySharedWalletsFragmentToSharedWalletTransaction(
+                    blockData.SW_UNIQUE_ID,
+                    blockData.SW_VOTING_THRESHOLD,
+                    blockData.SW_ENTRANCE_FEE,
+                    blockData.SW_TRUSTCHAIN_PKS.size
+                )
+            )
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
     }
@@ -47,6 +59,6 @@ class MySharedWalletFragment(
 
     companion object {
         @JvmStatic
-        fun newInstance(controller: BitcoinViewController) = MySharedWalletFragment(controller)
+        fun newInstance() = MySharedWalletFragment()
     }
 }
