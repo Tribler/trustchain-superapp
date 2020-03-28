@@ -127,46 +127,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
-        generateRandomHexes.setOnClickListener {
-            val key = ECKey()
-            publicKeyHexes.setText("${publicKeyHexes.text}${System.lineSeparator()}${key.publicKeyAsHex}")
-        }
-
-        createMultisig.setOnClickListener {
-            Log.i("Coin", "Coin: createMultisig clicked.")
-            val walletManager = WalletManagerAndroid.getInstance()
-
-            val myKey = walletManager.networkPublicECKeyHex()
-            val lines = publicKeyHexes.text.lines()
-            val value = coinValue.text.toString().toLong()
-            val threshHold = threshHoldText.text.toString().toInt()
-
-            val keys = lines.toMutableList()
-            keys.add(myKey)
-            keys.removeAt(0)
-
-            Log.i("Coin", "Coin: your key: $myKey")
-            Log.i("Coin", "Coin: all keys:")
-            keys.forEach { key ->
-                Log.i("Coin", "Coin: ${key}}")
-            }
-            Log.i("Coin", "Coin: value (satoshi) sending: $value")
-
-            Log.i("Coin", "Coin: createMultisig, starting process.")
-            val result = walletManager.startNewWalletProcess(
-                keys,
-                Coin.valueOf(value),
-                threshHold
-            )
-
-            Log.i("Coin", "Coin: createMultisig, finished process.")
-            Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
-            Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
-
-            multisigOutputText.setText(result.transactionId)
-
-        }
-
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
             Handler().postDelayed({
@@ -203,9 +163,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             startWalletButtonExisting.isClickable = false
             startWalletButtonImportDefaultKey.isEnabled = false
             startWalletButtonImportDefaultKey.isClickable = false
-
-            generateRandomHexes.isEnabled = true
-            createMultisig.isEnabled = true
         }
         requireActivity().invalidateOptionsMenu()
     }
@@ -243,7 +200,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         } else {
             WalletManagerAndroid.getInstance().addKey(privateKey)
         }
-
 
     }
 

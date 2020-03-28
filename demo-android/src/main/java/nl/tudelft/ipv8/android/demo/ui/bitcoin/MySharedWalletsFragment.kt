@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.fragment_join_network.*
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.coin.CoinUtil
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
 
@@ -25,22 +27,17 @@ class MySharedWalletFragment() : BaseFragment(R.layout.fragment_my_shared_wallet
     private fun initListView() {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-        val adaptor =
-            SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to enter wallet")
+        val adaptor = SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to enter wallet")
         list_view.adapter = adaptor
         list_view.setOnItemClickListener { _, view, position, id ->
             val block = sharedWalletBlocks[position]
-            val parsedTransaction = CoinUtil.parseTransaction(block.transaction)
-            val votingThreshold = parsedTransaction.getInt(CoinCommunity.SW_VOTING_THRESHOLD)
-            val entranceFee = parsedTransaction.getDouble(CoinCommunity.SW_ENTRANCE_FEE)
-            val users =
-                parsedTransaction.getJSONArray(CoinCommunity.SW_TRUSTCHAIN_PKS).length()
+            val blockData = SWJoinBlockTransactionData(block.transaction).getData()
             findNavController().navigate(
                 MySharedWalletFragmentDirections.actionMySharedWalletsFragmentToSharedWalletTransaction(
-                    block.publicKey.toHex(),
-                    votingThreshold,
-                    entranceFee.toLong(),
-                    users
+                    blockData.SW_UNIQUE_ID,
+                    blockData.SW_VOTING_THRESHOLD,
+                    blockData.SW_ENTRANCE_FEE,
+                    blockData.SW_TRUSTCHAIN_PKS.size
                 )
             )
             Log.i("Coin", "Clicked: $view, $position, $id")

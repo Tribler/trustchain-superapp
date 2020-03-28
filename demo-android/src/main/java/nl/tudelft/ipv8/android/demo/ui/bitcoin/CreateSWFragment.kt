@@ -1,7 +1,6 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -37,7 +36,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         if (validateCreationInput()) {
             currentEntranceFee = entrance_fee_tf.text.toString().toLong()
             currentThreshold = voting_threshold_tf.text.toString().toInt()
-            currentTransactionId = getCoinCommunity().createSharedWallet(currentEntranceFee!!)
+            currentTransactionId = getCoinCommunity().createGenesisSharedWallet(currentEntranceFee!!)
 
             voting_threshold_tf.isEnabled = false
             entrance_fee_tf.isEnabled = false
@@ -53,8 +52,14 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         alert_label.text = "Loading... This might take some time."
 
         while (!finished) {
-            finished = getCoinCommunity().tryToSerializeWallet(currentTransactionId!!, currentEntranceFee!!, currentThreshold!!)
-            Thread.sleep(1_000)
+            val serializedTransaction = getCoinCommunity().fetchBitcoinTransaction(currentTransactionId!!)
+            if (serializedTransaction == null) {
+                Thread.sleep(1_000)
+                continue
+            }
+
+            getCoinCommunity().broadcastCreatedSharedWallet(serializedTransaction, currentEntranceFee!!, currentThreshold!!)
+            finished = true
         }
 
         resetWalletInitializationValues()

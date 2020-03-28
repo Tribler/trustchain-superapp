@@ -102,6 +102,9 @@ dependencies {
 
     // Blockchain Info
     implementation 'info.blockchain:api:1.1.4'
+
+    // GSON
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
