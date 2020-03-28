@@ -320,7 +320,7 @@ class WalletManager(
 
         return TransactionPackage(
             newTransaction.txId.toString(),
-            "temp"
+            newTransaction.bitcoinSerialize().toHex()
         )
     }
 
