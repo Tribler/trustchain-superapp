@@ -8,8 +8,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.constants.Currency
-import nl.tudelft.trustchain.common.messaging.AskPayload
+import nl.tudelft.trustchain.common.messaging.TradePayload
 import java.util.*
 
 class MarketCommunity : Community() {
@@ -17,11 +16,11 @@ class MarketCommunity : Community() {
         sha1("4c69624e61434c504b3ab5bb7dc5a3a61de442585122b24c9f752469a212dc6d8ffa3d42bbf9c2f8d10ba569b270f615ef78aeff0547f38745d22af268037ad64935ee7c054b7921b23b".toByteArray()).toHex()
 
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
-    val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
+    private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
+    private val listenersMap: MutableMap<TradePayload.Type?, MutableList<(TradePayload) -> Unit>> = mutableMapOf()
 
     init {
-        messageHandlers[MessageId.ASK] = ::onAskPacket
-        messageHandlers[MessageId.BID] = ::onBidPacket
+        messageHandlers[MessageId.TRADE.index] = ::onTradePacket
     }
 
     override fun walkTo(address: IPv4Address) {
@@ -38,24 +37,42 @@ class MarketCommunity : Community() {
         }
     }
 
-    fun broadcastAsk(payload: AskPayload) {
-        val packet = serializePacket(MessageId.ASK, payload)
-        for (peer in getPeers()) {
+    fun broadcast(payload: TradePayload) {
+        val packet = serializePacket(MessageId.TRADE.index, payload)
+        for (peer in getPeers().filter { it != myPeer }) {
             send(peer, packet)
         }
     }
 
-    private fun onAskPacket(packet: Packet) {
-        val payload = packet.getAuthPayload(AskPayload.Deserializer).second
-        Log.d("MarketCommunity::onAskPacket", "Received packet:{${payload.askCurrency}, ${payload.paymentCurrency}, ${payload.amount}, ${payload.price}}")
+    private fun onTradePacket(packet: Packet) {
+        val payload = packet.getAuthPayload(TradePayload.Deserializer).second
+        notifyListeners(payload)
+        Log.d("MarketCommunity::onTradePacket", "Received packet:{${payload.primaryCurrency}, ${payload.secondaryCurrency}, ${payload.amount}, ${payload.price}, ${payload.type}}")
     }
 
-    private fun onBidPacket(packet: Packet) {
-        return
+    fun addListener(type: TradePayload.Type?, listener: (TradePayload) -> Unit) {
+        val listeners = listenersMap[type] ?: mutableListOf()
+        listeners.add(listener)
+        listenersMap[type] = listeners
     }
 
-    object MessageId {
-        const val BID = 1
-        const val ASK = 2
+    fun removeListener(type: TradePayload.Type?, listener: (TradePayload) -> Unit) {
+        listenersMap[type]?.remove(listener)
+    }
+
+    private fun notifyListeners(payload: TradePayload) {
+        val universalListeners = listenersMap[null] ?: listOf<(TradePayload) -> Unit>()
+        for (listener in universalListeners) {
+            listener(payload)
+        }
+
+        val listeners = listenersMap[payload.type] ?: listOf<(TradePayload) -> Unit>()
+        for (listener in listeners) {
+            listener(payload)
+        }
+    }
+
+    enum class MessageId(val index: Int) {
+        TRADE(1)
     }
 }
