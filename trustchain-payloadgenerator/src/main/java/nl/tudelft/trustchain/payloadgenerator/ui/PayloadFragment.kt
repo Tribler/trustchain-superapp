@@ -1,42 +1,47 @@
 package nl.tudelft.trustchain.payloadgenerator.ui
 
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
-import nl.tudelft.trustchain.payloadgenerator.R
-import nl.tudelft.trustchain.payloadgenerator.R.layout.activity_main
+import kotlinx.android.synthetic.main.fragment_payload.*
+import nl.tudelft.trustchain.common.constants.Currency
+import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.payloadgenerator.R.layout.fragment_payload
-import nl.tudelft.trustchain.payloadgenerator.ui.dummy.DummyContent
-import nl.tudelft.trustchain.payloadgenerator.ui.dummy.DummyContent.DummyItem
 
 /**
  * A fragment representing a list of Items.
  * Activities containing this fragment MUST implement the
  * [PayloadFragment.OnListFragmentInteractionListener] interface.
  */
+class PayloadFragment : BaseFragment(fragment_payload) {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val marketCommunity = getMarketCommunity()
+        marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
 
-
-
-class PayloadFragment : BaseFragment() {
-    private var isSending = true
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_payload, container, false)
+        buttonask.setOnClickListener {
+            marketCommunity.broadcast(
+                TradePayload(
+                    Currency.BTC,
+                    Currency.DYMBE_DOLLAR,
+                    10.0,
+                    5.0,
+                    TradePayload.Type.ASK
+                )
+            )
+        }
     }
 
-    @ExperimentalUnsignedTypes
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onDestroy() {
+        super.onDestroy()
+        val marketCommunity = getMarketCommunity()
+        marketCommunity.removeListener(TradePayload.Type.ASK, ::askListener)
+    }
+
+    private fun askListener(payload: TradePayload) {
+        Log.d(
+            "PayloadFragment::onViewCreated",
+            "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
+        )
     }
 }
