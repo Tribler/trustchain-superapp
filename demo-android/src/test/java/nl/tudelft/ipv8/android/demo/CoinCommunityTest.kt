@@ -20,7 +20,7 @@ import org.bitcoinj.core.Transaction
 import org.bitcoinj.params.TestNet3Params
 import org.junit.Test
 
-class WalletManagerTrustchainTest {
+class CoinCommunityTest {
 
     val ENTRANCE_FEE = 10000L
 
