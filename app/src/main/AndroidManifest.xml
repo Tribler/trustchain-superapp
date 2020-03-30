@@ -37,6 +37,8 @@
             android:name="nl.tudelft.trustchain.debug.DebugActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
+        <activity android:name="com.example.musicdao.net.MusicService" />
+
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>
 
