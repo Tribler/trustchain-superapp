@@ -5,12 +5,14 @@ import org.bitcoinj.core.*
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.bitcoinj.script.ScriptPattern
+import org.junit.Assert.*
 import org.junit.BeforeClass
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExpectedException
 import java.io.File
-
+import java.lang.IllegalArgumentException
 
 class WalletManagerTest {
 
@@ -25,64 +27,6 @@ class WalletManagerTest {
                 config,
                 File(".")
             )
-        }
-    }
-
-    @Test
-    fun testCreateMultisignatureWallet() {
-        val ECKey_1: ECKey =
-            WalletManager.privateKeyStringToECKey("5KffUB9YUsvoGjrcn76PjVnC61PcWLzws4QPfrT9RFNd85utCkZ")
-        val ECKey_2: ECKey =
-            WalletManager.privateKeyStringToECKey("5KawqZHB1H6Af12ZhgTBXwQUY1jACgvGMywET7NF5bdYYzCxomY")
-        val ECKey_3: ECKey =
-            WalletManager.privateKeyStringToECKey("5KiDGG8sfmTNnzKDmm1MteWHV2TQQaUBbaEY3huVLwVz1i6i5be")
-
-        println("Keys used for 2-3 MultiSig:")
-        println(ECKey_1.privateKeyAsHex)
-        println(ECKey_2.privateKeyAsHex)
-        println(ECKey_3.privateKeyAsHex)
-
-        val contract: Transaction =
-            WalletManager.createMultiSignatureWallet(
-                listOf(ECKey_1, ECKey_2, ECKey_3),
-                Coin.ZERO,
-                2,
-                TestNet3Params.get()
-            )
-
-        val scriptPubKey: Script = contract.outputs[0].scriptPubKey
-        val scriptPubKeyBytes: ByteArray = contract.outputs[0].scriptBytes
-
-    }
-
-    @Test
-    fun testMultiSigFromECDSA() {
-        val params = MainNetParams.get()
-
-        val key1: ECKey = ecdsaPubKeyToECKey(
-            params,
-            "04A97B658C114D77DC5F71736AB78FBE408CE632ED1478D7EAA106EEF67C55D58A91C6449DE4858FAF11721E85FE09EC850C6578432EB4BE9A69C76232AC593C3B"
-        )
-        val key2: ECKey = ecdsaPubKeyToECKey(
-            params,
-            "04019EF04A316792F0ECBE5AB1718C833C3964DEE3626CFABE19D97745DBCAA5198919081B456E8EEEA5898AFA0E36D5C17AB693A80D728721128ED8C5F38CDBA0"
-        )
-        val key3: ECKey = ecdsaPubKeyToECKey(
-            params,
-            "04A04F29F308160E6F945B33D943304B1B471ED8F9EACEEB5412C04E60A0FAB0376871D9D1108948B67CAFBC703E565A18F8351FB8558FD7C7482D7027EECD687C"
-        )
-
-        val keys = listOf(key1, key2, key3)
-
-        val contract = WalletManager.createMultiSignatureWallet(keys, Coin.ZERO, 2, params)
-
-        println("Inputs:")
-        for (input in contract.inputs) {
-            println(input)
-        }
-        println("Outputs:")
-        for (output in contract.outputs) {
-            println(output)
         }
     }
 
@@ -133,8 +77,7 @@ class WalletManagerTest {
     }
 
     @Test
-    fun testEntranceFeeTransactionValidOurTx() {
-        // NOTE: CURRENTLY FAILS, BUT TRANSACTION HAS NOT BEEN CONFIRMED, SO RETURNS FALSE
+    fun testEntranceFeeTransactionValidUnconfirmedTx() {
         val params = MainNetParams.get()
 
         // Transaction from our wallet to another wallet for testing
@@ -153,7 +96,8 @@ class WalletManagerTest {
             entranceFee
         )
 
-        assertTrue("The entrance fee should be payed", entranceFeePayed)
+        assertFalse("The transaction is not, and never will be, confirmed. Should not pass",
+            entranceFeePayed)
     }
 
     @Test
@@ -179,14 +123,62 @@ class WalletManagerTest {
         assertTrue("The entrance fee should be payed", entranceFeePayed)
     }
 
-    fun ecdsaPubKeyToAddress(params: NetworkParameters, ecdsaPubKey: String): Address {
-        val ecKey = ECKey.fromPublicOnly(ecdsaPubKey.hexToBytes())
-        return LegacyAddress.fromKey(params, ecKey)
+    @Test
+    fun testCreateMultiSignatureWallet2of3MultiSigCorrect() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = 2
+
+        val transaction = WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+
+        assertTrue("Not exactly one output in transaction", transaction.outputs.size == 1)
+
+        val output = transaction.outputs[0]
+        assertTrue("Transaction output value is not equal to the entrance fee", output.value == entranceFee)
+
+        val script = output.scriptPubKey
+        assertTrue("Script is not a multisig script", ScriptPattern.isSentToMultisig(script))
+
+        assertTrue("Amount of signatures that are needed to complete the transaction is not correct in the script",
+            script.numberOfSignaturesRequiredToSpend == threshold)
+
+        // Check whether all keys are in the script
+        assertTrue("First pubkey did not match first pubkey in script",
+            script.pubKeys[0].pubKey.contentEquals(key1.pubKey))
+        assertTrue("Second pubkey did not match second pubkey in script",
+            script.pubKeys[1].pubKey.contentEquals(key2.pubKey))
+        assertTrue("Third pubkey did not match third pubkey in script",
+            script.pubKeys[2].pubKey.contentEquals(key3.pubKey))
     }
 
-    fun ecdsaPubKeyToECKey(params: NetworkParameters, ecdsaPubKey: String): ECKey {
-        val ecKey = ECKey.fromPublicOnly(ecdsaPubKey.hexToBytes())
-        return ecKey
+    @Test(expected = IllegalArgumentException::class)
+    fun testCreateMultiSignatureWallet2of3MultiSigThresholdTooHigh() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = 10
+
+        WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun testCreateMultiSignatureWallet2of3MultiSigNegativeThreshold() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = -1
+
+        WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
     }
 
 }
