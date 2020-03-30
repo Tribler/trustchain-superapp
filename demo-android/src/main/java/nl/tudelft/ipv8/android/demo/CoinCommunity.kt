@@ -339,14 +339,14 @@ class CoinCommunity : Community() {
     }
 
     /**
+     * Discover shared wallets that you can join, return the latest (known) blocks
      * Fetch the latest block associated with a shared wallet.
      * swBlockHash - the hash of one of the blocks associated with a shared wallet.
      */
     private fun fetchLatestSharedWalletTransactionBlock(swBlockHash: ByteArray): TrustChainBlock? {
         val swBlock = getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
             ?: return null
-        val transactionBlockTypes = listOf(SHARED_WALLET_BLOCK, TRANSFER_FINAL_BLOCK)
-        val transactionBlocks = fetchSharedWalletBlocks(transactionBlockTypes)
+        val transactionBlocks = fetchSharedWalletBlocks(SW_TRANSACTION_BLOCK_KEYS)
         return fetchLatestSharedWalletBlock(swBlock, transactionBlocks)
     }
 
@@ -450,6 +450,8 @@ class CoinCommunity : Community() {
         public const val TRANSFER_FUNDS_ASK_BLOCK = "TRANSFER_FUNDS_ASK_BLOCK"
         public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
 
+        // Values below are present in SW_TRANSACTION_BLOCK_KEYS block types
+        public val SW_TRANSACTION_BLOCK_KEYS = listOf(SHARED_WALLET_BLOCK, TRANSFER_FINAL_BLOCK)
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"

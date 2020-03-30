@@ -118,7 +118,7 @@ class TrustChainCrawler {
     }
 
     companion object {
-        private const val CHAIN_CRAWL_TIMEOUT = 120_000L
+        public const val CHAIN_CRAWL_TIMEOUT = 120_000L
         private const val MAX_CRAWL_REQUEST_ATTEMPTS = 3
     }
 
