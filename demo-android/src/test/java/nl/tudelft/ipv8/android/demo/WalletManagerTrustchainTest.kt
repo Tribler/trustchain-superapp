@@ -226,9 +226,6 @@ class WalletManagerTrustchainTest {
         val swSignatureAskTransactionData =
             coinCommunity.proposeJoinWalletOnTrustChain(SW_BLOCK_HASH, TX_ADD_USER_SERIALIZED)
 
-        println(swSignatureAskTransactionData.getData().SW_TRANSACTION_SERIALIZED)
-        println(swSignatureAskTransactionData.getData().SW_TRANSACTION_SERIALIZED_OLD)
-
         // just using an empty list of signatures since walletManager is mocked anyway
         val sigList = listOf<String>()
         val sigListECDSA = sigList.map {
@@ -354,6 +351,7 @@ class WalletManagerTrustchainTest {
 
 
         // Actual test
+        // just using an empty list of signatures since walletManager is mocked anyway
         val serializedSignatures = listOf<String>()
         val sigListECDSA = serializedSignatures.map {
             ECKey.ECDSASignature.decodeFromDER(it.hexToBytes())
