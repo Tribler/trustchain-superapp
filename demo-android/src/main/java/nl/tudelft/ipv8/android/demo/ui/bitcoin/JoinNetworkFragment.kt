@@ -11,11 +11,8 @@ import kotlinx.android.synthetic.main.fragment_join_network.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.android.demo.R
-<<<<<<< Updated upstream
-=======
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
->>>>>>> Stashed changes
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.android.demo.ui.users.UserItem
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
@@ -106,8 +103,6 @@ class JoinNetworkFragment(
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }
 
-<<<<<<< Updated upstream
-=======
     /**
      * Collect the signatures of a join proposal. Returns true if enough signatures are found.
      */
@@ -129,7 +124,6 @@ class JoinNetworkFragment(
         return false
     }
 
->>>>>>> Stashed changes
     private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {
         var finished = false
 
