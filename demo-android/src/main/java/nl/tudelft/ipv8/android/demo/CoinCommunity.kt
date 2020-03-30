@@ -255,8 +255,10 @@ class CoinCommunity : Community() {
      * 3.2 Transfer funds from an existing shared wallet to a third-party. Broadcast bitcoin transaction.
      */
     public fun transferFunds(
-        serializedSignatures: List<String>, swBlockHash: ByteArray,
-        receiverAddress: String, satoshiAmount: Long
+        serializedSignatures: List<String>,
+        swBlockHash: ByteArray,
+        receiverAddress: String,
+        satoshiAmount: Long
     ): WalletManager.TransactionPackage {
         val mostRecentSWBlock = fetchLatestSharedWalletTransactionBlock(swBlockHash)
             ?: throw IllegalStateException("Something went wrong fetching the latest SW Block: $swBlockHash")
