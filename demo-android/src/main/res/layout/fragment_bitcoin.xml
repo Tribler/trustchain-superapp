@@ -4,6 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/bitcoin_refresh_swiper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -73,61 +77,13 @@
                         android:text="Import Default Wallet" />
 
                     <Button
-                        android:id="@+id/importFreshWalletButton"
+                        android:id="@+id/import_custom_keys"
                         android:layout_width="196dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:enabled="false"
-                        android:text="Import Fresh Wallet" />
+                        android:enabled="true"
+                        android:text="Import Own Keys" />
                 </LinearLayout>
-
-                <Button
-                    android:id="@+id/generateRandomHexes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:text="Generate Random Hexes" />
-
-                <Button
-                    android:id="@+id/createMultisig"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:text="Create Multisig" />
-
-                <EditText
-                    android:id="@+id/publicKeyHexes"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:gravity="start|top"
-                    android:hint="Public key hexes here (1 per line)"
-                    android:inputType="textMultiLine" />
-
-                <EditText
-                    android:id="@+id/threshHoldText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Threshhold"
-                    android:inputType="textPersonName" />
-
-                <EditText
-                    android:id="@+id/coinValue"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Satoshi amount (entrance fee)"
-                    android:inputType="textPersonName" />
-
-                <EditText
-                    android:id="@+id/multisigOutputText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="Transaction ID (result)"
-                    android:inputType="textPostalAddress" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -142,11 +98,12 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <Button
-                        android:id="@+id/refreshButton"
+                    <TextView
+                        android:id="@+id/textView3"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Refresh" />
+                        android:text="Your wallet actions"
+                        android:textAlignment="center" />
 
                     <Button
                         android:id="@+id/create_wallet_button"
@@ -172,5 +129,6 @@
 
         </LinearLayout>
     </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

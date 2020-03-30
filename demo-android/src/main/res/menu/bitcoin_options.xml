@@ -2,8 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/item_blockchain_refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_loop_black_24dp"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/item_blockchain_download_progress"
-        android:title="Download Progress"
+        android:enabled="true"
         android:icon="@drawable/ic_cloud_download_black_24dp"
+        android:title="Download Progress"
         app:showAsAction="always" />
 </menu>

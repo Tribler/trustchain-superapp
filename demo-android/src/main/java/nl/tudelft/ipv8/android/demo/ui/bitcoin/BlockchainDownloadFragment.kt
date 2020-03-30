@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.navigation.fragment.findNavController
@@ -35,19 +36,25 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
     ): View? {
         // Inflate the layout for this fragment
         val fragment = inflater.inflate(R.layout.fragment_blockchain_download, container, false)
-        fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text = "${WalletManagerAndroid.getInstance().progress.toString()}%"
-        fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress = WalletManagerAndroid.getInstance().progress
+        fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
+            "${WalletManagerAndroid.getInstance().progress.toString()}%"
+        fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
+            WalletManagerAndroid.getInstance().progress
         thread {
             while (WalletManagerAndroid.getInstance().progress < 100) {
                 Thread.sleep(500)
-                fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text = "${WalletManagerAndroid.getInstance().progress}%"
-                fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress = WalletManagerAndroid.getInstance().progress
+                fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
+                    "${WalletManagerAndroid.getInstance().progress}%"
+                fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
+                    WalletManagerAndroid.getInstance().progress
             }
-//            controller.showDefaultView()
+            fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
+                "Fully Synced!"
+            fragment.findViewById<Button>(R.id.bitcoin_progress_continue).text =
+                "Continue"
         }
         return fragment
     }
-
 
 
     companion object {

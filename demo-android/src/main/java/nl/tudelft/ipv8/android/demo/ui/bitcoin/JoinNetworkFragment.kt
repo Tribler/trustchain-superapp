@@ -14,10 +14,9 @@ import nl.tudelft.ipv8.android.demo.R
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
-import nl.tudelft.ipv8.android.demo.ui.users.UserItem
-import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -98,8 +97,27 @@ class JoinNetworkFragment(
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionId = getCoinCommunity().joinSharedWallet(block.calculateHash())
-        fetchCurrentSharedWalletStatusLoop(transactionId) // TODO: cleaner solution for blocking
+        val transactionPackage = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
+        val proposeBlock =
+            getCoinCommunity().proposeJoinWalletOnTrustChain(
+                block.calculateHash(),
+                transactionPackage.serializedTransaction
+            )
+
+        // Wait until the new shared wallet is created
+        fetchCurrentSharedWalletStatusLoop(transactionPackage.transactionId) // TODO: cleaner solution for blocking
+
+        // Now start a thread to collect and wait (non-blocking) for signatures
+        val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
+
+        thread(start = true) {
+            var finished = false
+            while (!finished) {
+                finished = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
+                Thread.sleep(100)
+            }
+        }
+
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }
 
@@ -128,7 +146,7 @@ class JoinNetworkFragment(
         var finished = false
 
         while (!finished) {
-            finished = getCoinCommunity().fetchJoinSharedWalletStatus(transactionId)
+            finished = getCoinCommunity().fetchBitcoinTransactionStatus(transactionId)
             Thread.sleep(1_000)
         }
     }

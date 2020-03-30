@@ -82,6 +82,13 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_importKeysFragment"
+            app:destination="@id/importKeysFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
     <fragment
         android:id="@+id/joinNetworkFragment"
@@ -137,4 +144,9 @@
             android:name="users"
             app:argType="integer" />
     </fragment>
+    <fragment
+        android:id="@+id/importKeysFragment"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.ImportKeysFragment"
+        android:label="Import Keys"
+        tools:layout="@layout/fragment_import_keys" />
 </navigation>

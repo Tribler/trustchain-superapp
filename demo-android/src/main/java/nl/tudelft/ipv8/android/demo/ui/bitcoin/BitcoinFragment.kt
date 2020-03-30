@@ -1,6 +1,7 @@
 package nl.tudelft.ipv8.android.demo.ui.bitcoin
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -13,13 +14,14 @@ import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 
+
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment(
-) : BaseFragment(R.layout.fragment_bitcoin) {
+class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
+    ImportKeyDialog.ImportKeyDialogListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -47,6 +49,7 @@ class BitcoinFragment(
         }
 
         inflater.inflate(R.menu.bitcoin_options, menu)
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -54,6 +57,19 @@ class BitcoinFragment(
             R.id.item_blockchain_download_progress -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+                true
+            }
+            R.id.item_blockchain_refresh -> {
+                this.refresh(true)
+                Log.i(
+                    "Coin",
+                    WalletManagerAndroid.getInstance().kit.wallet().toString(
+                        true,
+                        false,
+                        false,
+                        null
+                    )
+                )
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -88,10 +104,16 @@ class BitcoinFragment(
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
+        import_custom_keys.setOnClickListener {
+            val dialog = ImportKeyDialog()
+            dialog.setTargetFragment(this, 0)
+            dialog.show(parentFragmentManager, "Import Key")
+        }
+
         startWalletButtonImportDefaultKey.setOnClickListener {
             val config = WalletManagerConfiguration(
                 BitcoinNetworkOptions.TEST_NET,
-                SerializedDeterminsticKey(
+                SerializedDeterministicKey(
                     "spell seat genius horn argue family steel buyer spawn chef guard vast",
                     1583488954L
                 )
@@ -105,60 +127,28 @@ class BitcoinFragment(
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
-        refreshButton.setOnClickListener {
-            refresh()
-        }
-
-        generateRandomHexes.setOnClickListener {
-            val key = ECKey()
-            publicKeyHexes.setText("${publicKeyHexes.text}${System.lineSeparator()}${key.publicKeyAsHex}")
-        }
-
-        createMultisig.setOnClickListener {
-            Log.i("Coin", "Coin: createMultisig clicked.")
-            val walletManager = WalletManagerAndroid.getInstance()
-
-            val myKey = walletManager.networkPublicECKeyHex()
-            val lines = publicKeyHexes.text.lines()
-            val value = coinValue.text.toString().toLong()
-            val threshHold = threshHoldText.text.toString().toInt()
-
-            val keys = lines.toMutableList()
-            keys.add(myKey)
-            keys.removeAt(0)
-
-            Log.i("Coin", "Coin: your key: $myKey")
-            Log.i("Coin", "Coin: all keys:")
-            keys.forEach { key ->
-                Log.i("Coin", "Coin: ${key}}")
-            }
-            Log.i("Coin", "Coin: value (satoshi) sending: $value")
-
-            Log.i("Coin", "Coin: createMultisig, starting process.")
-            val result = walletManager.startNewWalletProcess(
-                keys,
-                Coin.valueOf(value),
-                threshHold
-            )
-            Log.i("Coin", "Coin: createMultisig, finished process.")
-
-            Log.i("Coin", "Coin: createMultisig, transactionID = ${result.transactionId}")
-            Log.i("Coin", "Coin: createMultisig, serialized = ${result.serializedTransaction}")
-            multisigOutputText.setText(result.transactionId)
-
+        bitcoin_refresh_swiper.setOnRefreshListener {
+            this.refresh()
+            Handler().postDelayed({
+                bitcoin_refresh_swiper.isRefreshing = false
+            }, 1500)
         }
     }
 
+    private fun refresh(animation: Boolean? = false) {
+        if (animation!!) {
+            bitcoin_refresh_swiper.isRefreshing = true
+            Handler().postDelayed({
+                bitcoin_refresh_swiper.isRefreshing = false
+            }, 1500)
+        }
 
-    private fun refresh() {
-        val walletManager: WalletManager
-        // TODO: Change the error handling.
-        try {
-             walletManager = WalletManagerAndroid.getInstance()
-        } catch (e: IllegalStateException) {
-            Log.w("Coin", "Wallet not yet running")
+        if (!WalletManagerAndroid.isRunning) {
             return
         }
+
+
+        var walletManager = WalletManagerAndroid.getInstance()
 
         walletStatus.text = "Status: ${walletManager.kit.state()}"
         walletBalance.text =
@@ -168,14 +158,11 @@ class BitcoinFragment(
         walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
         yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
 
-        if (walletManager.kit.state().equals(RUNNING)) {
+        if (walletManager.kit.state() == RUNNING) {
             startWalletButtonExisting.isEnabled = false
             startWalletButtonExisting.isClickable = false
             startWalletButtonImportDefaultKey.isEnabled = false
             startWalletButtonImportDefaultKey.isClickable = false
-
-            generateRandomHexes.isEnabled = true
-            createMultisig.isEnabled = true
         }
         requireActivity().invalidateOptionsMenu()
     }
@@ -198,4 +185,29 @@ class BitcoinFragment(
         @JvmStatic
         fun newInstance() = BitcoinFragment()
     }
+
+    override fun onImport(address: String, privateKey: String, testNet: Boolean) {
+        if (!WalletManagerAndroid.isRunning) {
+            val config = WalletManagerConfiguration(
+                if (testNet) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
+                null,
+                AddressPrivateKeyPair(address, privateKey)
+            )
+
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config)
+                .init()
+        } else {
+            WalletManagerAndroid.getInstance().addKey(privateKey)
+        }
+
+    }
+
+    override fun onImportDone() {
+        this.refresh(true)
+        Handler().postDelayed({
+            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+        }, 1500)
+    }
+
 }

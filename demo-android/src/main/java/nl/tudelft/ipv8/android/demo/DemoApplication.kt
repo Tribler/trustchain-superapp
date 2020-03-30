@@ -7,8 +7,6 @@ import androidx.preference.PreferenceManager
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerAndroid
-import nl.tudelft.ipv8.android.demo.coin.WalletManagerConfiguration
 import nl.tudelft.ipv8.android.demo.service.DemoService
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
@@ -34,12 +32,14 @@ class DemoApplication : Application() {
     }
 
     private fun initIPv8() {
-        val config = IPv8Configuration(overlays = listOf(
-            createDiscoveryCommunity(),
-            createTrustChainCommunity(),
-            createDemoCommunity(),
-            createCoinCommunity()
-        ), walkerInterval = 1.0)
+        val config = IPv8Configuration(
+            overlays = listOf(
+                createDiscoveryCommunity(),
+                createTrustChainCommunity(),
+                createDemoCommunity(),
+                createCoinCommunity()
+            ), walkerInterval = 1.0
+        )
 
         IPv8Android.Factory(this)
             .setConfiguration(config)
@@ -80,6 +80,26 @@ class DemoApplication : Application() {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
+
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.registerBlockSigner(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                CoinCommunity.joinAskBlockReceived(block)
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.registerBlockSigner(CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                CoinCommunity.transferFundsBlockReceived(block)
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -106,6 +126,7 @@ class DemoApplication : Application() {
     private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
         val randomWalk = RandomWalk.Factory()
         val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
         return OverlayConfiguration(
             Overlay.Factory(CoinCommunity::class.java),
             listOf(randomWalk, nsd)
