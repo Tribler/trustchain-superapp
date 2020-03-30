@@ -35,6 +35,10 @@ class JoinNetworkFragment(
         loadSharedWallets()
     }
 
+    /**
+     * Load shared wallet trust chain blocks. Blocks are crawled from trust chain users and loaded
+     * from the local database.
+     */
     private fun loadSharedWallets() {
         lifecycleScope.launchWhenStarted {
             val discoveredWallets = getCoinCommunity().discoverSharedWallets()
@@ -58,6 +62,7 @@ class JoinNetworkFragment(
 
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
 
+            // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
                 this@JoinNetworkFragment,
                 allWallets,
@@ -72,14 +77,18 @@ class JoinNetworkFragment(
         }
     }
 
+    /**
+     * Crawl all shared wallet blocks of users in the trust chain.
+     */
     private suspend fun crawlAvailableSharedWallets(): ArrayList<TrustChainBlock> {
         val allUsers = trustchain.getUsers()
         val discoveredBlocks: ArrayList<TrustChainBlock> = arrayListOf()
 
         for (index in allUsers.indices) {
+            // Continue with the next user if the peer is not found!
             val publicKey = allUsers[index].publicKey
-            // Continue if the peer is not found!
             val peer = trustchain.getPeerByPublicKeyBin(publicKey) ?: continue
+
             try {
                 withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                     trustchain.crawlChain(peer)
