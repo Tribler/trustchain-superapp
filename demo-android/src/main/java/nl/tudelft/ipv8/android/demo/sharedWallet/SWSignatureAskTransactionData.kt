@@ -1,9 +1,9 @@
 package nl.tudelft.ipv8.android.demo.sharedWallet
 
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import nl.tudelft.ipv8.android.demo.CoinCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
-import org.json.JSONObject
 
 data class SWSignatureAskBlockTD(
     var SW_UNIQUE_ID: String,
@@ -13,7 +13,7 @@ data class SWSignatureAskBlockTD(
     var SW_SIGNATURES_REQUIRED: Int
 )
 
-open class SWSignatureAskTransactionData(data: JSONObject) : SWBlockTransactionData(
+open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionData(
     data, CoinCommunity.SIGNATURE_ASK_BLOCK
 ) {
     fun getData(): SWSignatureAskBlockTD {
@@ -27,16 +27,15 @@ open class SWSignatureAskTransactionData(data: JSONObject) : SWBlockTransactionD
         requiredSignatures: Int,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
-        JSONObject(
-            Gson().toJson(
-                SWSignatureAskBlockTD(
-                    uniqueId,
-                    uniqueProposalId,
-                    transactionSerialized,
-                    oldTransactionSerialized,
-                    requiredSignatures
-                )
+        SWUtil.objectToJsonObject(
+            SWSignatureAskBlockTD(
+                uniqueId,
+                uniqueProposalId,
+                transactionSerialized,
+                oldTransactionSerialized,
+                requiredSignatures
             )
+
         )
     )
 

@@ -5,12 +5,11 @@ import org.bitcoinj.core.*
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import org.bitcoinj.script.ScriptPattern
+import org.junit.Assert.*
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
-
 
 class WalletManagerTest {
 
@@ -133,8 +132,7 @@ class WalletManagerTest {
     }
 
     @Test
-    fun testEntranceFeeTransactionValidOurTx() {
-        // NOTE: CURRENTLY FAILS, BUT TRANSACTION HAS NOT BEEN CONFIRMED, SO RETURNS FALSE
+    fun testEntranceFeeTransactionValidUnconfirmedTx() {
         val params = MainNetParams.get()
 
         // Transaction from our wallet to another wallet for testing
@@ -153,7 +151,8 @@ class WalletManagerTest {
             entranceFee
         )
 
-        assertTrue("The entrance fee should be payed", entranceFeePayed)
+        assertFalse("The transaction is not, and never will be, confirmed. Should not pass",
+            entranceFeePayed)
     }
 
     @Test
@@ -177,6 +176,107 @@ class WalletManagerTest {
         )
 
         assertTrue("The entrance fee should be payed", entranceFeePayed)
+    }
+
+    @Test
+    fun testCreateMultiSignatureWallet2of3MultiSigCorrect() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = 2
+
+        val transaction = WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+
+        assertTrue("Not exactly one output in transaction", transaction.outputs.size == 1)
+
+        val output = transaction.outputs[0]
+        assertTrue("Transaction output value is not equal to the entrance fee", output.value == entranceFee)
+
+        val script = output.scriptPubKey
+        assertTrue("Script is not a multisig script", ScriptPattern.isSentToMultisig(script))
+
+        assertTrue("Amount of signatures that are needed to complete the transaction is not correct in the script",
+            script.numberOfSignaturesRequiredToSpend == threshold)
+
+        // Check whether all keys are in the script
+        assertTrue("First pubkey did not match first pubkey in script",
+            script.pubKeys[0].pubKey.contentEquals(key1.pubKey))
+        assertTrue("Second pubkey did not match second pubkey in script",
+            script.pubKeys[1].pubKey.contentEquals(key2.pubKey))
+        assertTrue("Third pubkey did not match third pubkey in script",
+            script.pubKeys[2].pubKey.contentEquals(key3.pubKey))
+    }
+
+    @Test
+    fun testCreateMultiSignatureWallet2of3MultiSigThresholdTooHigh() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = 10
+
+        val transaction = WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+
+        assertTrue("Not exactly one output in transaction", transaction.outputs.size == 1)
+
+        val output = transaction.outputs[0]
+        assertTrue("Transaction output value is not equal to the entrance fee", output.value == entranceFee)
+
+        val script = output.scriptPubKey
+        assertTrue("Script is not a multisig script", ScriptPattern.isSentToMultisig(script))
+
+        // The threshold is set to an amount greater than the amount of keys, the method should
+        // make sure the script sets the threshold to the amount of keys, so n-of-n
+        assertTrue("Amount of signatures that are needed to complete the transaction is not correct in the script, " +
+            "amount of signatures needed is not clamped to the amount of keys",
+            script.numberOfSignaturesRequiredToSpend == publicKeys.size)
+
+        // Check whether all keys are in the script
+        assertTrue("First pubkey did not match first pubkey in script",
+            script.pubKeys[0].pubKey.contentEquals(key1.pubKey))
+        assertTrue("Second pubkey did not match second pubkey in script",
+            script.pubKeys[1].pubKey.contentEquals(key2.pubKey))
+        assertTrue("Third pubkey did not match third pubkey in script",
+            script.pubKeys[2].pubKey.contentEquals(key3.pubKey))
+    }
+
+    @Test
+    fun testCreateMultiSignatureWallet2of3MultiSigNegativeThreshold() {
+        val key1 = ECKey()
+        val key2 = ECKey()
+        val key3 = ECKey()
+
+        val publicKeys = listOf(key1, key2, key3)
+        val entranceFee = Coin.valueOf(100000)
+        val threshold = -1
+
+        val transaction = WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+
+        assertTrue("Not exactly one output in transaction", transaction.outputs.size == 1)
+
+        val output = transaction.outputs[0]
+        assertTrue("Transaction output value is not equal to the entrance fee", output.value == entranceFee)
+
+        val script = output.scriptPubKey
+        assertTrue("Script is not a multisig script", ScriptPattern.isSentToMultisig(script))
+
+        // The threshold is set to -1, the method should make sure the script sets the threshold to 1, so 1-of-n
+        assertTrue("Amount of signatures that are needed to complete the transaction is not correct in the script" +
+            "amount of signatures needed is not set to 1 because of negative threshold",
+            script.numberOfSignaturesRequiredToSpend == 1)
+
+        // Check whether all keys are in the script
+        assertTrue("First pubkey did not match first pubkey in script",
+            script.pubKeys[0].pubKey.contentEquals(key1.pubKey))
+        assertTrue("Second pubkey did not match second pubkey in script",
+            script.pubKeys[1].pubKey.contentEquals(key2.pubKey))
+        assertTrue("Third pubkey did not match third pubkey in script",
+            script.pubKeys[2].pubKey.contentEquals(key3.pubKey))
     }
 
     fun ecdsaPubKeyToAddress(params: NetworkParameters, ecdsaPubKey: String): Address {

@@ -2,6 +2,8 @@ package nl.tudelft.ipv8.android.demo.coin
 
 import android.util.Log
 import com.google.common.base.Joiner
+import com.google.gson.JsonParser
+import info.blockchain.api.APIException
 import info.blockchain.api.blockexplorer.BlockExplorer
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -623,9 +625,20 @@ class WalletManager(
             val blockExplorer = BlockExplorer()
             val tx = try {
                 blockExplorer.getTransaction(bitcoinTransactionHash.toString())
-            } catch (e: Exception) {
-                e.printStackTrace()
-                return false
+            } catch (e: APIException) {
+                // Return false if API Exception is thrown with reason "Transaction not found: (...)"
+                // The library does not support accessing the reason, so use JSON parser to parse message to a JSON object
+                if (e.message !== null) {
+                    val reason = JsonParser().parse(e.message).asJsonObject.get("reason")
+                    if (reason != null) {
+                        if (reason.asString.startsWith("Transaction not found: ")) {
+                            return false
+                        }
+                    }
+                }
+
+                // API Exception was something other than transaction not found, so still throw it
+                throw e
             }
 
             // Check block confirmations
