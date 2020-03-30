@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.fragment_payload.*
 import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.payloadgenerator.R.layout.fragment_payload
+import nl.tudelft.trustchain.payloadgenerator.util.getMyPublicKey
 
 /**
  * A fragment representing a list of Items.
@@ -17,11 +18,13 @@ import nl.tudelft.trustchain.payloadgenerator.R.layout.fragment_payload
 class PayloadFragment : BaseFragment(fragment_payload) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val marketCommunity = getMarketCommunity()
+        val trustchain = getTrustChainCommunity()
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
 
         buttonask.setOnClickListener {
             marketCommunity.broadcast(
                 TradePayload(
+                    trustchain.getMyPublicKey(),
                     Currency.BTC,
                     Currency.DYMBE_DOLLAR,
                     10.0,
