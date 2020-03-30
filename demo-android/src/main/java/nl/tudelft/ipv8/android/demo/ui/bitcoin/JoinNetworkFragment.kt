@@ -15,6 +15,7 @@ import nl.tudelft.ipv8.android.demo.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.ipv8.android.demo.sharedWallet.SWUtil
 import nl.tudelft.ipv8.android.demo.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.util.toHex
 import kotlin.concurrent.thread
 
@@ -31,66 +32,69 @@ class JoinNetworkFragment(
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-//        var foundWallets = waitForCrawlAvailableSharedWallets().filter {
-//            CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
-//        }.distinctBy {
-//            SWUtil.parseTransaction(it.transaction).getString(CoinCommunity.SW_UNIQUE_ID)
-//        }
-
-//        Log.i("Coin", foundWallets.joinToString())
-
-//        val sharedWalletBlocks = getCoinCommunity().discoverSharedWallets()
         loadSharedWallets()
     }
 
     private fun loadSharedWallets() {
         lifecycleScope.launchWhenStarted {
-            var foundWallets = waitForCrawlAvailableSharedWallets().filter {
-                CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
-            }.distinctBy {
-                SWUtil.parseTransaction(it.transaction).getString(CoinCommunity.SW_UNIQUE_ID)
+            val discoveredWallets = getCoinCommunity().discoverSharedWallets()
+            val foundWallets = withContext(Dispatchers.IO) {
+                crawlAvailableSharedWallets()
             }
-            Log.i("Coin", "${foundWallets.size} peers unique shared wallets found")
+
+            Log.i(
+                "Coin",
+                "${foundWallets.size} found with crawling and ${discoveredWallets.size} in database"
+            )
+
+            // Filter the wallets on the correct block type and unique wallet ids
+            val allWallets = discoveredWallets
+                .union(foundWallets)
+                .filter {
+                    CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
+                }.distinctBy {
+                    SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+                }
 
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
 
             adapter = SharedWalletListAdapter(
                 this@JoinNetworkFragment,
-                foundWallets,
+                allWallets,
                 publicKey,
                 "Click to join"
             )
             list_view.adapter = adapter
             list_view.setOnItemClickListener { _, view, position, id ->
-                joinSharedWalletClicked(foundWallets[position])
+                joinSharedWalletClicked(allWallets[position])
                 Log.i("Coin", "Clicked: $view, $position, $id")
             }
         }
     }
 
-    private fun waitForCrawlAvailableSharedWallets(): ArrayList<TrustChainBlock> {
-        var foundWallets: ArrayList<TrustChainBlock> = arrayListOf()
-        runBlocking {
-            //            withTimeout(TrustChainCrawler.CHAIN_CRAWL_TIMEOUT) {
-            foundWallets = crawlAvailableSharedWallets()
-//            }
-        }
-        return foundWallets
-    }
-
     private suspend fun crawlAvailableSharedWallets(): ArrayList<TrustChainBlock> {
-        val allPeers = getTrustChainCommunity().getPeers()
-        Log.i("Coin", "${allPeers.size} peers found")
+        val allUsers = trustchain.getUsers()
         val discoveredBlocks: ArrayList<TrustChainBlock> = arrayListOf()
 
-        for (peer in allPeers) {
-            discoveredBlocks.addAll(
-                getTrustChainCommunity().sendCrawlRequest(
-                    peer,
-                    peer.publicKey.keyToBin(),
-                    LongRange(-1, -1)
-                )
-            )
+        for (index in allUsers.indices) {
+            val publicKey = allUsers[index].publicKey
+            // Continue if the peer is not found!
+            val peer = trustchain.getPeerByPublicKeyBin(publicKey) ?: continue
+            try {
+                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
+                    trustchain.crawlChain(peer)
+                    var crawlResult = trustchain
+                        .getChainByUser(peer.publicKey.keyToBin())
+
+                    crawlResult = crawlResult.filter {
+                        CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
+                    }
+                    discoveredBlocks.addAll(crawlResult)
+                }
+            } catch (t: Throwable) {
+                val message = t.message ?: "no message"
+                Log.i("Coin", "Crawling failed for: ${peer.publicKey} message: $message")
+            }
         }
 
         return discoveredBlocks
@@ -162,5 +166,7 @@ class JoinNetworkFragment(
     companion object {
         @JvmStatic
         fun newInstance() = JoinNetworkFragment()
+
+        public const val SW_CRAWLING_TIMEOUT_MILLI: Long = 5_000
     }
 }
