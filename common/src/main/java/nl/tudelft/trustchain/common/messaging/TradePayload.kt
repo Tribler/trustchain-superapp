@@ -7,8 +7,8 @@ class TradePayload(
     val publicKey: ByteArray,        //
     val primaryCurrency: Currency,   // Currency to be sold in an ask, to buy in a bid
     val secondaryCurrency: Currency, // Currency to be paid in in an ask, to pay with in a bid
-    val amount: Double,              // Amount of primary currency
-    val price: Double,               // Price per unit of primary currency
+    val amount: Double?,              // Amount of primary currency
+    val price: Double?,               // Price per unit of primary currency
     val type: Type                   // Type of message
 ) : Serializable {
     override fun serialize(): ByteArray {
