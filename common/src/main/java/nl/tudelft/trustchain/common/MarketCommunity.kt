@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
@@ -37,7 +38,7 @@ class MarketCommunity : Community() {
         }
     }
 
-    fun broadcast(payload: TradePayload) {
+    fun broadcast(payload: Serializable) {
         val packet = serializePacket(MessageId.TRADE.index, payload)
         for (peer in getPeers().filter { it != myPeer }) {
             send(peer, packet)

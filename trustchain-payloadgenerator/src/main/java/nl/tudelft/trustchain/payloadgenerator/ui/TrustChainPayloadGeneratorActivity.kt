@@ -21,6 +21,7 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.payloadgenerator.MarketCommunity
 import nl.tudelft.trustchain.payloadgenerator.R
 import nl.tudelft.trustchain.payloadgenerator.R.id.navHostFragment
@@ -28,6 +29,10 @@ import java.net.InetAddress
 
 class TrustChainPayloadGeneratorActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_payloadgenerator
+
+    companion object PayloadsList{
+        var payloads: MutableList<TradePayload> = mutableListOf()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +46,7 @@ class TrustChainPayloadGeneratorActivity : BaseActivity() {
         )
         createMarketBot()
     }
+
 
     fun createMarketBot() {
         val ipv8 = create()
