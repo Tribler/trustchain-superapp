@@ -88,39 +88,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
         }
 
-        startWalletButtonExisting.setOnClickListener {
-            val config = WalletManagerConfiguration(
-                BitcoinNetworkOptions.TEST_NET
-            )
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
-            refresh()
-            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }
-
         import_custom_keys.setOnClickListener {
             val dialog = ImportKeyDialog()
             dialog.setTargetFragment(this, 0)
             dialog.show(parentFragmentManager, "Import Key")
-        }
-
-        startWalletButtonImportDefaultKey.setOnClickListener {
-            val config = WalletManagerConfiguration(
-                BitcoinNetworkOptions.TEST_NET,
-                SerializedDeterministicKey(
-                    "spell seat genius horn argue family steel buyer spawn chef guard vast",
-                    1583488954L
-                )
-            )
-
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
-            refresh()
-            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         bitcoin_refresh_swiper.setOnRefreshListener {
@@ -153,12 +124,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
         yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
 
-        if (walletManager.kit.state() == RUNNING) {
-            startWalletButtonExisting.isEnabled = false
-            startWalletButtonExisting.isClickable = false
-            startWalletButtonImportDefaultKey.isEnabled = false
-            startWalletButtonImportDefaultKey.isClickable = false
-        }
         requireActivity().invalidateOptionsMenu()
     }
 
