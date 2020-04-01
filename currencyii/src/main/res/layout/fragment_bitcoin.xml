@@ -35,11 +35,13 @@
                     android:layout_height="wrap_content"
                     android:text="Bitcoin available: N/A" />
 
-                <TextView
+                <EditText
                     android:id="@+id/walletSeed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Seed: N/A" />
+                    android:ems="10"
+                    android:hint="seed and creation date"
+                    android:inputType="textPersonName" />
 
                 <TextView
                     android:id="@+id/chosenNetwork"
@@ -58,6 +60,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Progress: waiting..." />
+
+                <EditText
+                    android:id="@+id/protocolKey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="protocol address"
+                    android:inputType="textPersonName" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
