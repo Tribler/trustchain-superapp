@@ -47,10 +47,17 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url = 'https://raw.githubusercontent.com/blockchain/api-v1-client-java/mvn-repo/'
+    }
+}
+
 dependencies {
     implementation project(':common')
     implementation project(':trustchain-explorer')
     implementation project(':debug')
+    implementation project(':currencyii')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

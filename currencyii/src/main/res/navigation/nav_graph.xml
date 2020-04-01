@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/peersFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.peers.PeersFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.peers.PeersFragment"
         android:label="Peers">
         <action
             android:id="@+id/action_peersFragment_to_blocksFragment"
@@ -19,7 +19,7 @@
     </fragment>
     <fragment
         android:id="@+id/usersFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.users.UsersFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.users.UsersFragment"
         android:label="All Chains">
         <action
             android:id="@+id/action_usersFragment_to_blocksFragment"
@@ -31,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/blocksFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.BlocksFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.BlocksFragment"
         android:label="Blocks">
         <argument
             android:name="publicKey"
@@ -39,19 +39,19 @@
     </fragment>
     <fragment
         android:id="@+id/myChainFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.MyChainFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.MyChainFragment"
         android:label="My Chain" />
     <fragment
         android:id="@+id/debugFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.debug.DebugFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.debug.DebugFragment"
         android:label="Debug" />
     <fragment
         android:id="@+id/latestBlocksFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.blocks.LatestBlocksFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.LatestBlocksFragment"
         android:label="All Blocks" />
     <fragment
         android:id="@+id/bitcoinFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BitcoinFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BitcoinFragment"
         android:label="Bitcoin Overview"
         tools:layout="@layout/fragment_bitcoin" >
         <action
@@ -92,17 +92,17 @@
     </fragment>
     <fragment
         android:id="@+id/joinNetworkFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.JoinNetworkFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.JoinNetworkFragment"
         android:label="Join Shared Wallet"
         tools:layout="@layout/fragment_join_network" />
     <fragment
         android:id="@+id/createSWFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.CreateSWFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.CreateSWFragment"
         android:label="Create New Shared Wallet"
         tools:layout="@layout/fragment_create_sw" />
     <fragment
         android:id="@+id/blockchainDownloadFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.BlockchainDownloadFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BlockchainDownloadFragment"
         android:label="Bitcoin Download Progress"
         android:layout="@layout/fragment_blockchain_download">
         <action
@@ -115,7 +115,7 @@
     </fragment>
     <fragment
         android:id="@+id/mySharedWalletsFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.MySharedWalletFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MySharedWalletFragment"
         android:label="My Shared Wallets"
         tools:layout="@layout/fragment_my_shared_wallets" >
         <action
@@ -128,7 +128,7 @@
     </fragment>
     <fragment
         android:id="@+id/sharedWalletTransaction"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.SharedWalletTransaction"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.SharedWalletTransaction"
         android:label="Start New Shared Wallet Transaction"
         tools:layout="@layout/fragment_shared_wallet_transaction">
         <argument
@@ -146,7 +146,7 @@
     </fragment>
     <fragment
         android:id="@+id/importKeysFragment"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.ImportKeysFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.ImportKeysFragment"
         android:label="Import Keys"
         tools:layout="@layout/fragment_import_keys" />
 </navigation>
