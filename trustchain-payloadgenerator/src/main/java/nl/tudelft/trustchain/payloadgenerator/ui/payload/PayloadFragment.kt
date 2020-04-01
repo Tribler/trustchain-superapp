@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -61,6 +62,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
         val marketCommunity = getMarketCommunity()
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
+        marketCommunity.addListener(TradePayload.Type.BID, ::bidListener)
 
         var availableAmount = arguments?.getDouble("available amount")
         var requiredAmount = arguments?.getDouble("required amount")
@@ -145,6 +147,14 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
+        (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+    }
+    private fun bidListener(payload: TradePayload) {
+        Log.d(
+            "PayloadFragment::onViewCreated",
+            "New ask came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
+        )
+        (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
     }
 
     private fun loadCurrentPayloads(payloads: List<TradePayload>) {
