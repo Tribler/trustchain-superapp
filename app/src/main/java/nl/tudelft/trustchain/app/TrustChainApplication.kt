@@ -27,6 +27,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.common.MarketCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {
@@ -39,7 +40,8 @@ class TrustChainApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
-            createDemoCommunity()
+            createDemoCommunity(),
+            createMarketCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -118,6 +120,14 @@ class TrustChainApplication : Application() {
         )
     }
 
+    private fun createMarketCommunity(): OverlayConfiguration<MarketCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            Overlay.Factory(MarketCommunity::class.java),
+            listOf(randomWalk)
+        )
+    }
+
     private fun getPrivateKey(): PrivateKey {
         // Load a key from the shared preferences
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -133,6 +143,7 @@ class TrustChainApplication : Application() {
             AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
+
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"

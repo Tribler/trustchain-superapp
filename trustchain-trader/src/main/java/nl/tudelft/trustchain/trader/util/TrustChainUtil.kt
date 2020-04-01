@@ -1,15 +1,14 @@
 package nl.tudelft.trustchain.trader.util
 
-import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.trustchain.trader.constants.BlockTypes
+import nl.tudelft.trustchain.trader.constants.BlockType
 
 fun TrustChainBlock.getAmount(): Float {
     val amount = this.transaction["amount"].toString().toFloatOrNull()
 
-    if (this.type != BlockTypes.DEMO_TX_BLOCK.value) {
+    if (this.type != BlockType.DEMO_TX_BLOCK.value) {
         throw IllegalStateException("Block is of uncorrect type")
     }
 

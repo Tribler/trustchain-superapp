@@ -24,6 +24,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
 
+
 @UseExperimental(ExperimentalUnsignedTypes::class)
 open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     private val adapter = ItemAdapter()
@@ -113,8 +114,9 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     }
 
     protected open fun getPublicKey(): ByteArray {
-        val args = BlocksFragmentArgs.fromBundle(requireArguments())
-        return args.publicKey.hexToBytes()
+//        val args = BlocksFragmentArgs.fromBundle(requireArguments())
+//        return args.publicKey.hexToBytes()
+        return getTrustChainCommunity().myPeer.publicKey.keyToBin()
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
