@@ -61,7 +61,7 @@ class TrustChainHelper(
     /**
      * Creates a new proposal block of type "demo_tx_block", using a float as transaction amount.
      */
-    fun createTxProposalBlock(amount: Float, publicKey: ByteArray): TrustChainBlock {
+    fun createTxProposalBlock(amount: Float?, publicKey: ByteArray): TrustChainBlock {
         val blockType = "demo_tx_block"
         val transaction = mapOf("amount" to amount)
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
