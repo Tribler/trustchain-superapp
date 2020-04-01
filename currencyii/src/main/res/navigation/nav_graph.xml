@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/bitcoinFragment">
+
+    <fragment
+        android:id="@+id/peersFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.peers.PeersFragment"
+        android:label="Peers">
+        <action
+            android:id="@+id/action_peersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.users.UsersFragment"
+        android:label="All Chains">
+        <action
+            android:id="@+id/action_usersFragment_to_blocksFragment"
+            app:destination="@id/blocksFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/blocksFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.BlocksFragment"
+        android:label="Blocks">
+        <argument
+            android:name="publicKey"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/myChainFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.MyChainFragment"
+        android:label="My Chain" />
+    <fragment
+        android:id="@+id/debugFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.debug.DebugFragment"
+        android:label="Debug" />
+    <fragment
+        android:id="@+id/latestBlocksFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.LatestBlocksFragment"
+        android:label="All Blocks" />
+    <fragment
+        android:id="@+id/bitcoinFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BitcoinFragment"
+        android:label="Bitcoin Overview"
+        tools:layout="@layout/fragment_bitcoin" >
+        <action
+            android:id="@+id/action_bitcoinFragment_to_blockchainDownloadFragment"
+            app:destination="@id/blockchainDownloadFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_createSWFragment"
+            app:destination="@id/createSWFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_joinNetworkFragment"
+            app:destination="@id/joinNetworkFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_mySharedWalletsFragment"
+            app:destination="@id/mySharedWalletsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_importKeysFragment"
+            app:destination="@id/importKeysFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/joinNetworkFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.JoinNetworkFragment"
+        android:label="Join Shared Wallet"
+        tools:layout="@layout/fragment_join_network" />
+    <fragment
+        android:id="@+id/createSWFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.CreateSWFragment"
+        android:label="Create New Shared Wallet"
+        tools:layout="@layout/fragment_create_sw" />
+    <fragment
+        android:id="@+id/blockchainDownloadFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BlockchainDownloadFragment"
+        android:label="Bitcoin Download Progress"
+        android:layout="@layout/fragment_blockchain_download">
+        <action
+            android:id="@+id/action_blockchainDownloadFragment_to_bitcoinFragment"
+            app:destination="@id/bitcoinFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/mySharedWalletsFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MySharedWalletFragment"
+        android:label="My Shared Wallets"
+        tools:layout="@layout/fragment_my_shared_wallets" >
+        <action
+            android:id="@+id/action_mySharedWalletsFragment_to_sharedWalletTransaction"
+            app:destination="@id/sharedWalletTransaction"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/sharedWalletTransaction"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.SharedWalletTransaction"
+        android:label="Start New Shared Wallet Transaction"
+        tools:layout="@layout/fragment_shared_wallet_transaction">
+        <argument
+            android:name="publicKey"
+            app:argType="string" />
+        <argument
+            android:name="votingThreshold"
+            app:argType="integer" />
+        <argument
+            android:name="entranceFee"
+            app:argType="long" />
+        <argument
+            android:name="users"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/importKeysFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.ImportKeysFragment"
+        android:label="Import Keys"
+        tools:layout="@layout/fragment_import_keys" />
+</navigation>
