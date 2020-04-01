@@ -154,7 +154,9 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+        if(!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
+            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+        }
     }
 
     private fun loadCurrentPayloads(payloads: List<TradePayload>) {
