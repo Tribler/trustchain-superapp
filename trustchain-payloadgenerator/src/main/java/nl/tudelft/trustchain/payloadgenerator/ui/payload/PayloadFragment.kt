@@ -41,9 +41,9 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         super.onCreate(savedInstanceState)
 
         adapter.registerRenderer(PayloadItemRenderer {
-//            findNavController().navigate(
-//                PayloadFragmentDirections.actionFragmentToBlocksFragment(it.publicKey)
-//            )
+
+            trustchain.createTxProposalBlock(it.availableAmount?.toFloat(), it.publicKey)
+            Log.d("PayloadFragment::onCreate","TX block send to: ${it.publicKey}!")
         })
     }
 
@@ -152,7 +152,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
     private fun bidListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
-            "New ask came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
+            "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
     }
