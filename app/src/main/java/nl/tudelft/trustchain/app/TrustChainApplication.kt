@@ -27,6 +27,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {
@@ -39,7 +40,8 @@ class TrustChainApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
-            createDemoCommunity()
+            createDemoCommunity(),
+            createCoinCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -115,6 +117,16 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
+        )
+    }
+
+    private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
+        return OverlayConfiguration(
+            Overlay.Factory(CoinCommunity::class.java),
+            listOf(randomWalk, nsd)
         )
     }
 

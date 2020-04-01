@@ -27,7 +27,7 @@ enum class AppDefinition(
         DebugActivity::class.java
     ),
     CURRENCYII(
-        R.drawable.ic_edit_black_24dp,
+        R.drawable.ic_attach_money_black_24dp,
         "Currency",
         R.color.blue,
         MainActivity::class.java
