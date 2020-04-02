@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii
 
+import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.currencyii.coin.WalletManager
@@ -15,7 +16,7 @@ import org.json.JSONException
 
 @Suppress("UNCHECKED_CAST")
 class CoinCommunity : Community() {
-    override val serviceId = "0000bitcoin0000community0000"
+    override val serviceId = "02313685c1912a141279f8248fc8db5899c5df5b"
 
     private val trustchain: TrustChainHelper by lazy {
         TrustChainHelper(getTrustChainCommunity())
@@ -242,6 +243,10 @@ class CoinCommunity : Community() {
         )
 
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
+            Log.i(
+                "Coin",
+                "Sending proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
+            )
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
                 swParticipantPk.hexToBytes(),
@@ -262,7 +267,7 @@ class CoinCommunity : Community() {
     ): WalletManager.TransactionPackage {
         val mostRecentSWBlock = fetchLatestSharedWalletTransactionBlock(swBlockHash)
             ?: throw IllegalStateException("Something went wrong fetching the latest SW Block: $swBlockHash")
-
+        Log.i("Coin", mostRecentSWBlock.transaction["message"].toString())
         val transactionSerialized = tryToFetchSerializedTransaction(mostRecentSWBlock)
             ?: throw IllegalStateException("Invalid most recent SW block found. No serialized transaction!")
         val walletManager = WalletManagerAndroid.getInstance()
@@ -368,19 +373,21 @@ class CoinCommunity : Community() {
         return discoverSharedWallets().filter {
             val blockData = SWUtil.parseTransaction(it.transaction)
 
-            val userTrustchainPks = SWUtil.parseJSONArray(blockData.get(SW_TRUSTCHAIN_PKS).asJsonArray)
+            val userTrustchainPks =
+                SWUtil.parseJSONArray(blockData.get(SW_TRUSTCHAIN_PKS).asJsonArray)
             userTrustchainPks.contains(myPeer.publicKey.keyToBin().toHex())
         }
     }
 
-    public fun fetchJoinSignatures(walletId: String, proposalId: String): List<String> {
-        return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_ASK_BLOCK).filter {
-            val blockData = SWResponseSignatureTransactionData(it.transaction)
-            it.isAgreement && blockData.matchesProposal(walletId, proposalId)
-        }.map {
-            val blockData = SWResponseSignatureTransactionData(it.transaction).getData()
-            blockData.SW_SIGNATURE_SERIALIZED
-        }
+    public fun fetchProposalSignatures(walletId: String, proposalId: String): List<String> {
+        return getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_AGREEMENT_BLOCK)
+            .filter {
+                val blockData = SWResponseSignatureTransactionData(it.transaction)
+                blockData.matchesProposal(walletId, proposalId)
+            }.map {
+                val blockData = SWResponseSignatureTransactionData(it.transaction).getData()
+                blockData.SW_SIGNATURE_SERIALIZED
+            }
     }
 
     companion object {
@@ -388,7 +395,7 @@ class CoinCommunity : Community() {
          * Given a shared wallet proposal block, calculate the signature and send an agreement block.
          * Called by the listener of the [SIGNATURE_ASK_BLOCK] type. Respond with [SIGNATURE_AGREEMENT_BLOCK].
          */
-        fun joinAskBlockReceived(block: TrustChainBlock) {
+        fun joinAskBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
@@ -407,17 +414,20 @@ class CoinCommunity : Community() {
                 blockData.SW_UNIQUE_PROPOSAL_ID,
                 signatureSerialized
             )
-            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
+
+            // TODO: Fix this! No need for two separate block types (also in join!).
+            trustchain.createProposalBlock(agreementData.getTransactionData(), myPublicKey, agreementData.blockType)
+//            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
         /**
          * Given a shared wallet transfer fund proposal block, calculate the signature and send an agreement block.
          */
-        public fun transferFundsBlockReceived(block: TrustChainBlock) {
+        public fun transferFundsBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
             val walletManager = WalletManagerAndroid.getInstance()
             val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
-
+            Log.i("Coin", "Data received: ${blockData.toString()}")
             val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
             val previousTransaction = Transaction(
                 walletManager.params,
@@ -441,7 +451,10 @@ class CoinCommunity : Community() {
                 blockData.SW_UNIQUE_PROPOSAL_ID,
                 signatureSerialized
             )
-            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
+
+            // TODO: Fix this! No need for two separate block types (also in join!).
+            trustchain.createProposalBlock(agreementData.getTransactionData(), myPublicKey, agreementData.blockType)
+//            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
         public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
@@ -453,7 +466,7 @@ class CoinCommunity : Community() {
         // Values below are present in SW_TRANSACTION_BLOCK_KEYS block types
         public val SW_TRANSACTION_BLOCK_KEYS = listOf(SHARED_WALLET_BLOCK, TRANSFER_FINAL_BLOCK)
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
-        public const val SW_TRANSACTION_SERIALIZED = "SW_PK"
+        public const val SW_TRANSACTION_SERIALIZED = "SW_TRANSACTION_SERIALIZED"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
     }
 }

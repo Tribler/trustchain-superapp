@@ -24,7 +24,6 @@ import kotlin.concurrent.thread
  * create an instance of this fragment.
  */
 class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
-    private val tempBitcoinPk = ByteArray(2)
     private var adapter: SharedWalletListAdapter? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -125,7 +124,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             var finished = false
             while (!finished) {
                 finished = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
-                Thread.sleep(100)
+                Thread.sleep(1000)
             }
         }
 
@@ -141,7 +140,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     ): Boolean {
         val blockData = data.getData()
         val signatures =
-            getCoinCommunity().fetchJoinSignatures(
+            getCoinCommunity().fetchProposalSignatures(
                 blockData.SW_UNIQUE_ID,
                 blockData.SW_UNIQUE_PROPOSAL_ID
             )

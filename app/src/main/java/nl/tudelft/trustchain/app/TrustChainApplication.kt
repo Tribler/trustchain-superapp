@@ -77,6 +77,33 @@ class TrustChainApplication : Application() {
                 Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
+
+
+        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
+                CoinCommunity.joinAskBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.i("Coin", "block received for signature request: ${block.blockId} ${block.transaction}")
+                CoinCommunity.transferFundsBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
+            }
+        })
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
