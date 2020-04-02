@@ -23,12 +23,19 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.trader.R
 import java.net.InetAddress
 
 class TrustChainTraderActivity : BaseActivity() {
+
     override val navigationGraph = R.navigation.nav_graph_trader
     override val bottomNavigationMenu = R.menu.bottom_navigation_menu_trader
+
+    companion object PayloadsList{
+        var acceptedPayloads: MutableList<TradePayload> = mutableListOf()
+        var declinedPayloads: MutableList<TradePayload> = mutableListOf()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
