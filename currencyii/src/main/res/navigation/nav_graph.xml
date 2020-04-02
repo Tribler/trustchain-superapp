@@ -179,6 +179,9 @@
         <argument
             android:name="users"
             app:argType="integer" />
+        <argument
+            android:name="trustChainBlockHash"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/importKeysFragment"
