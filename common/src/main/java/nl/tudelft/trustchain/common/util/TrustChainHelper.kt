@@ -42,9 +42,9 @@ class TrustChainHelper(
 
     /**
      * Creates a new proposal block, using a text message as the transaction content.
+     * Optionally, the blockType can be passed as an argument. Default value is "demo_block".
      */
-    fun createProposalBlock(message: String, publicKey: ByteArray) {
-        val blockType = "demo_block"
+    fun createProposalBlock(message: String, publicKey: ByteArray, blockType: String = "demo_block") {
         val transaction = mapOf("message" to message)
         trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
