@@ -45,8 +45,5 @@ class AI_HistoryFragment : BaseFragment(R.layout.fragment_ai_history) {
                 }
             })
         }
-//        buttonConfirmReceiptTransferEnd.setOnClickListener {
-//            view.findNavController().navigate(R.id.action_AI_HistoryFragment_to_traderFragment)
-//        }
     }
 }
