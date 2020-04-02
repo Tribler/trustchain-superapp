@@ -1,0 +1,98 @@
+import com.goterl.lazycode.lazysodium.LazySodiumJava
+import com.goterl.lazycode.lazysodium.SodiumJava
+import io.mockk.mockk
+import io.mockk.spyk
+import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
+import nl.tudelft.ipv8.keyvault.LibNaClSK
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.messaging.EndpointAggregator
+import nl.tudelft.ipv8.peerdiscovery.Network
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.util.VotingHelper
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
+
+private val lazySodium = LazySodiumJava(SodiumJava())
+
+class VotingHelperTest {
+
+    private val votingHelper = VotingHelper()
+
+    private fun getCommunity(): TrustChainCommunity {
+        val settings = TrustChainSettings()
+        val store = mockk<TrustChainStore>(relaxed = true)
+        val community = TrustChainCommunity(settings = settings, database = store)
+        community.myPeer = getMyPeer()
+        community.endpoint = getEndpoint()
+        community.network = Network()
+        community.maxPeers = 20
+        community.cryptoProvider = JavaCryptoProvider
+        community.load()
+        return community
+    }
+
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @ExperimentalCoroutinesApi
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
+        testDispatcher.cleanupTestCoroutines()
+    }
+
+    protected fun getPrivateKey(): PrivateKey {
+        val privateKey = "81df0af4c88f274d5228abb894a68906f9e04c902a09c68b9278bf2c7597eaf6"
+        val signSeed = "c5c416509d7d262bddfcef421fc5135e0d2bdeb3cb36ae5d0b50321d766f19f2"
+        return LibNaClSK(privateKey.hexToBytes(), signSeed.hexToBytes(), lazySodium)
+    }
+
+    protected fun getMyPeer(): Peer {
+        return Peer(getPrivateKey())
+    }
+
+    protected fun getEndpoint(): EndpointAggregator {
+        return spyk(EndpointAggregator(mockk(relaxed = true), null))
+    }
+
+
+
+    @Test
+    fun startVote() {
+        val community = getCommunity()
+
+        // Create list of your peers and include yourself
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.addAll(community.getPeers().map { it.publicKey })
+        peers.add(community.myPeer.publicKey)
+
+        votingHelper.startVote("There should be tests", peers)
+
+        // Placeholder, should test if vote proposal block is present
+        verify { 1 == 1 }
+    }
+
+    @Test
+    fun respondToVote() {
+    }
+
+    @Test
+    fun countVotes() {
+    }
+}

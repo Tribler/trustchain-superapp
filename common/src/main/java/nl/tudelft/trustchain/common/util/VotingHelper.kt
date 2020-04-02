@@ -22,7 +22,7 @@ class VotingHelper {
     /**
      * Initiate a vote amongst a set of peers
      */
-    fun startVote(voteSubject: String, peers: List<PublicKey>, self: PublicKey) {
+    fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
         val voteList = JSONArray(peers)
@@ -63,6 +63,7 @@ class VotingHelper {
      * Return the tally on a vote proposal in a pair(yes, no).
      */
     fun countVotes(voters: List<String>, voteName: String, proposerKey: ByteArray): Pair<Int, Int> {
+
         // ArrayList for keeping track of already counted votes
         val votes: MutableList<String> = ArrayList()
 
