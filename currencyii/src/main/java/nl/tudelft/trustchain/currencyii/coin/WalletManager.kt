@@ -20,6 +20,8 @@ import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.wallet.DeterministicSeed
+import org.bitcoinj.wallet.KeyChainGroup
+import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.SendRequest
 import java.io.File
 import java.util.*
@@ -704,12 +706,33 @@ class WalletManager(
         ): String {
             return ecKey.getPrivateKeyAsWiF(params)
         }
+
+        /**
+         * A method to create a serialized seed for use in BitcoinJ.
+         * @param paramsRaw BitcoinNetworkOptions
+         * @return SerializedDeterministicKey
+         */
+        fun generateRandomDeterministicSeed(paramsRaw: BitcoinNetworkOptions): SerializedDeterministicKey {
+            val params = when (paramsRaw) {
+                BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
+                BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
+            }
+            val keyChainGroup = KeyChainGroup.builder(params, KeyChainGroupStructure.DEFAULT)
+                .fromRandom(Script.ScriptType.P2PKH).build()
+            return deterministicSeedToSerializedDeterministicKey(keyChainGroup.activeKeyChain.seed!!)
+        }
+
+        fun deterministicSeedToSerializedDeterministicKey(seed: DeterministicSeed): SerializedDeterministicKey {
+            val words = Joiner.on(" ").join(seed.mnemonicCode)
+            val creationTime = seed.creationTimeSeconds
+            return SerializedDeterministicKey(words, creationTime)
+        }
+
     }
+
     fun toSeed(): SerializedDeterministicKey {
         val seed = kit.wallet().keyChainSeed
-        val words = Joiner.on(" ").join(seed.mnemonicCode)
-        val creationTime = seed.creationTimeSeconds
-        return SerializedDeterministicKey(words, creationTime)
+        return deterministicSeedToSerializedDeterministicKey(seed)
     }
 
     fun addKey(privateKey: String) {

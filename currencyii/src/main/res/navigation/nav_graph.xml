@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/bitcoinFragment">
+    app:startDestination="@id/daoLoginChoice">
 
     <fragment
         android:id="@+id/peersFragment"
@@ -85,6 +85,42 @@
         <action
             android:id="@+id/action_bitcoinFragment_to_importKeysFragment"
             app:destination="@id/importKeysFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_daoLoginChoice"
+            app:destination="@id/daoLoginChoice"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/daoLoginChoice"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.DaoLoginChoice">
+        <action
+            android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
+            app:destination="@id/daoImportOrCreate"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_daoLoginChoice_to_blockchainDownloadFragment"
+            app:destination="@id/blockchainDownloadFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/daoImportOrCreate"
+        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.DaoImportOrCreate">
+        <action
+            android:id="@+id/action_daoImportOrCreate_to_blockchainDownloadFragment"
+            app:destination="@id/blockchainDownloadFragment"
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"

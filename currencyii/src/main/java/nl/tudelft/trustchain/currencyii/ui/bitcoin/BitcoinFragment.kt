@@ -6,11 +6,12 @@ import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.google.common.util.concurrent.Service.State.RUNNING
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Address
+import org.bitcoinj.script.Script
 
 /**
  * A simple [Fragment] subclass.
@@ -88,39 +89,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
         }
 
-        startWalletButtonExisting.setOnClickListener {
-            val config = WalletManagerConfiguration(
-                BitcoinNetworkOptions.TEST_NET
-            )
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
-            refresh()
-            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }
-
         import_custom_keys.setOnClickListener {
             val dialog = ImportKeyDialog()
             dialog.setTargetFragment(this, 0)
             dialog.show(parentFragmentManager, "Import Key")
-        }
-
-        startWalletButtonImportDefaultKey.setOnClickListener {
-            val config = WalletManagerConfiguration(
-                BitcoinNetworkOptions.TEST_NET,
-                SerializedDeterministicKey(
-                    "spell seat genius horn argue family steel buyer spawn chef guard vast",
-                    1583488954L
-                )
-            )
-
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
-            refresh()
-            Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
 
         bitcoin_refresh_swiper.setOnRefreshListener {
@@ -150,15 +122,16 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
         chosenNetwork.text = "Network: ${walletManager.params.id}"
         val seed = walletManager.toSeed()
-        walletSeed.text = "Seed: ${seed.seed}, ${seed.creationTime}"
+        walletSeed.setText("${seed.seed}, ${seed.creationTime}")
         yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
+        protocolKey.setText(
+            Address.fromKey(
+                walletManager.params,
+                walletManager.protocolECKey(),
+                Script.ScriptType.P2PKH
+            ).toString()
+        )
 
-        if (walletManager.kit.state() == RUNNING) {
-            startWalletButtonExisting.isEnabled = false
-            startWalletButtonExisting.isClickable = false
-            startWalletButtonImportDefaultKey.isEnabled = false
-            startWalletButtonImportDefaultKey.isClickable = false
-        }
         requireActivity().invalidateOptionsMenu()
     }
 
