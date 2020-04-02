@@ -5,6 +5,8 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.UserInfo
+import nl.tudelft.trustchain.common.constants.Currency
+import nl.tudelft.trustchain.common.messaging.TradePayload
 
 /**
  * A helper class for interacting with TrustChain.
@@ -46,6 +48,16 @@ class TrustChainHelper(
     fun createProposalBlock(message: String, publicKey: ByteArray): TrustChainBlock {
         val blockType = "demo_block"
         val transaction = mapOf("message" to message)
+        return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
+    }
+    /**
+     * Creates a new proposal block of type "accept_ask_block", using a float as transaction amount.
+     */
+    fun createAcceptTxProposalBlock(primaryCurrency: Currency, secondaryCurrency: Currency, availableAmount: Float?,
+                                    requiredAmount:Float?, type: TradePayload.Type, publicKey: ByteArray): TrustChainBlock {
+        val blockType = "demo_tx_block"
+        val transaction = mapOf("From" to primaryCurrency.toString(), "Amount from" to availableAmount.toString(),
+            "To" to secondaryCurrency.toString(),"Amount to" to requiredAmount.toString(),"type" to type.toString())
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
 

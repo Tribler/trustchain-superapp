@@ -39,7 +39,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
         adapter.registerRenderer(PayloadItemRenderer {
 
-            trustchain.createTxProposalBlock(it.availableAmount?.toFloat(), it.publicKey)
+            trustchain.createAcceptTxProposalBlock(it.primaryCurrency,it.secondaryCurrency,it.availableAmount?.toFloat(),it.requiredAmount?.toFloat(),it.type, it.publicKey)
             Log.d("PayloadFragment::onCreate","TX block send to: ${it.publicKey}!")
         })
     }
