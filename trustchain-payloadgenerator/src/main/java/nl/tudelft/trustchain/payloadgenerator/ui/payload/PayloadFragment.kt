@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +19,6 @@ import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.payloadgenerator.R
 import nl.tudelft.trustchain.payloadgenerator.databinding.FragmentPayloadBinding
-import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 
 /**
@@ -74,11 +71,11 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             requiredAmount = 0.0
         }
         if (availableAmount != 0.0 && requiredAmount !=0.0) {
-            var payload_serializable =
+            val payloadSerializable =
                 createPayloadSerializable(availableAmount, requiredAmount, type)
-            var payload = createPayload(availableAmount, requiredAmount, type)
+            val payload = createPayload(availableAmount, requiredAmount, type)
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
-            marketCommunity.broadcast(payload_serializable)
+            marketCommunity.broadcast(payloadSerializable)
         }
         val trustchain = getTrustChainCommunity()
 
@@ -95,12 +92,12 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         requiredAmount: Double,
         type: String?
     ): TradePayload {
-        var primaryCurrency = Currency.DYMBE_DOLLAR
-        var secondaryCurrency = Currency.BTC
+        var primaryCurrency = Currency.BTC
+        var secondaryCurrency = Currency.DYMBE_DOLLAR
         var type2 = TradePayload.Type.BID
         if (type.equals("Ask")) {
-            primaryCurrency = Currency.BTC
-            secondaryCurrency = Currency.DYMBE_DOLLAR
+            primaryCurrency = Currency.DYMBE_DOLLAR
+            secondaryCurrency = Currency.BTC
             type2 = TradePayload.Type.ASK
         }
         return TradePayload(

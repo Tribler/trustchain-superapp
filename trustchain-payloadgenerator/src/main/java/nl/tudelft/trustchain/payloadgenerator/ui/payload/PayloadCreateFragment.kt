@@ -24,7 +24,6 @@ class PayloadCreateFragment : BaseFragment() {
 
     @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
 
         askBidSwitch.setOnClickListener {
             if (isAsk) {
