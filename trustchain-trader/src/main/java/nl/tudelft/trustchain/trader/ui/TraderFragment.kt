@@ -57,14 +57,34 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
         switchTrader.setOnClickListener {
             if (!isTrading) {
-                TrustChainTraderActivity.acceptedPayloads.add(
+//                TrustChainTraderActivity.acceptedPayloads.add(
+//                    TradePayload(
+//                        trustchain.getMyPublicKey(),
+//                        Currency.DYMBE_DOLLAR,
+//                        Currency.BTC,
+//                        43.0,
+//                        13.0,
+//                        TradePayload.Type.ASK
+//                    )
+//                )
+                this.askListener(
                     TradePayload(
                         trustchain.getMyPublicKey(),
                         Currency.DYMBE_DOLLAR,
                         Currency.BTC,
-                        43.0,
-                        13.0,
+                        100.0,
+                        1.0,
                         TradePayload.Type.ASK
+                    )
+                )
+                this.bidListener(
+                    TradePayload(
+                        trustchain.getMyPublicKey(),
+                        Currency.BTC,
+                        Currency.DYMBE_DOLLAR,
+                        1.0,
+                        120.0,
+                        TradePayload.Type.BID
                     )
                 )
             }
