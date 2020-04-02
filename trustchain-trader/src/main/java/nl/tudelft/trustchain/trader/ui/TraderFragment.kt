@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_trader.*
-import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.coroutines.*
 import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
@@ -22,13 +21,13 @@ import nl.tudelft.trustchain.trader.databinding.FragmentTraderBinding
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItem
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItemRenderer
 import kotlin.math.roundToInt
-import kotlin.math.roundToLong
 
 @ExperimentalUnsignedTypes
 class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     private val adapterAccepted = ItemAdapter()
     private val adapterDeclined = ItemAdapter()
     private var isTrading = true
+    private val ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
 
     private val binding by viewBinding(FragmentTraderBinding::bind)
 
@@ -107,12 +106,11 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     }
 
     private fun askListener(payload: TradePayload) {
-        val ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
         Log.d(
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        var type = if(payload.type == TradePayload.Type.ASK) 0 else 1
+        val type = 1
         if (ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt(), type) == 1){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
         } else {
@@ -120,12 +118,11 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         }
     }
     private fun bidListener(payload: TradePayload) {
-        val ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
         Log.d(
             "PayloadFragment::onViewCreated",
-            "New ask came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
+            "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        var type = if(payload.type == TradePayload.Type.BID) 1 else 0
+        val type = 0
         if (ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt(), type) == 1){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
         } else {
