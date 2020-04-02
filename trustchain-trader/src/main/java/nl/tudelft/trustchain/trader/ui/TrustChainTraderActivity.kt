@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.trader.ui
 
+import nl.tudelft.trustchain.trader.ai.NaiveBayes
 import android.bluetooth.BluetoothManager
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -22,12 +23,19 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.trader.R
 import java.net.InetAddress
 
 class TrustChainTraderActivity : BaseActivity() {
+
     override val navigationGraph = R.navigation.nav_graph_trader
     override val bottomNavigationMenu = R.menu.bottom_navigation_menu_trader
+
+    companion object PayloadsList{
+        var acceptedPayloads: MutableList<TradePayload> = mutableListOf()
+        var declinedPayloads: MutableList<TradePayload> = mutableListOf()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +52,10 @@ class TrustChainTraderActivity : BaseActivity() {
             appBarConfiguration
         )
         createMarketBot()
+        val ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
+        ai.test()   // Test the model
+        // Call ai.predict(price in dymbe dollars for 1 btc, type=0=bid and type=1=ask)
+        // returns 0 for don't act, 1 for buy, 2 for sell
     }
 
     fun createMarketBot() {
