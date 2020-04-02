@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.trader.ui
 
+import nl.tudelft.trustchain.trader.ai.NaiveBayes
 import android.bluetooth.BluetoothManager
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -44,6 +45,10 @@ class TrustChainTraderActivity : BaseActivity() {
             appBarConfiguration
         )
         createMarketBot()
+        val ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
+        ai.test()   // Test the model
+        // Call ai.predict(price in dymbe dollars for 1 btc, type=0=bid and type=1=ask)
+        // returns 0 for don't act, 1 for buy, 2 for sell
     }
 
     fun createMarketBot() {
