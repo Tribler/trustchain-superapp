@@ -10,7 +10,7 @@ v0.1 implements a trained bot for the DD_BTC pairing, assuming a mean of 100DD p
 1. Columns:
     1. Price (DD_BTC pairing, integer values only)
     1. Bid_or_Ask (Binary, 0 for bid, 1 for ask)
-    1. Labels (0
+    1. Labels (0, 1, 2)
     
 1. Training data: 100,000 data points with 3 target labels
     1. 0: Do nothing
