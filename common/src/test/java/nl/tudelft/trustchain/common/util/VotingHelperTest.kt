@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
@@ -83,6 +84,7 @@ class VotingHelperTest {
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
 
+        // Add a validator to the community
         val validator = mockk<TransactionValidator>()
         every { validator.validate(any(), any()) } returns true
         community.registerTransactionValidator("voting_block", validator)
@@ -109,5 +111,37 @@ class VotingHelperTest {
 
     @Test
     fun countVotes() {
+        val community = getCommunity()
+        val helper = TrustChainHelper(community)
+        val votingHelper = VotingHelper(community)
+
+        // Add a validator to the community
+        val validator = mockk<TransactionValidator>()
+        every { validator.validate(any(), any()) } returns true
+        community.registerTransactionValidator("voting_block", validator)
+
+        // Create list of your peers and include yourself
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.addAll(community.getPeers().map { it.publicKey })
+        peers.add(community.myPeer.publicKey)
+
+        val voteSubject = "There should be tests"
+
+        val propBlock = community.createProposalBlock("voting_block", mapOf("message" to voteSubject), EMPTY_PK)
+
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_REPLY", "YES")
+
+        // Put the JSON string in the transaction's 'message' field.
+        val transaction = mapOf("message" to voteJSON.toString())
+
+        community.createAgreementBlock(propBlock, transaction)
+
+        val count = votingHelper.countVotes(peers, voteSubject, propBlock.publicKey)
+
+        val expectedCount = Pair(0, 1)
+
+        verify { count == expectedCount }
     }
 }
