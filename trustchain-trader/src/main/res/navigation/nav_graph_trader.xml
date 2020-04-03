@@ -10,9 +10,6 @@
         android:name="nl.tudelft.trustchain.trader.ui.TraderFragment"
         android:label="Trader"
         tools:layout="@layout/fragment_trader" >
-        <action
-            android:id="@+id/action_traderFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment" />
     </fragment>
 
     <fragment
@@ -23,9 +20,6 @@
         <action
             android:id="@+id/action_peerFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
-        <action
-            android:id="@+id/action_peerFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment" />
     </fragment>
 
     <fragment
@@ -74,9 +68,4 @@
             android:id="@+id/action_transferSendFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/blocksFragment"
-        tools:layout="@layout/fragment_blocks"
-        android:name="nl.tudelft.trustchain.trader.ui.trader_blocks.BlocksFragment"
-        android:label="Market Blocks" />
 </navigation>
