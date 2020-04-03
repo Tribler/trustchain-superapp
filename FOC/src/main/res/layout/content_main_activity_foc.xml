@@ -9,59 +9,46 @@
         android:id="@+id/downloadTorrent"
         android:layout_width="129dp"
         android:layout_height="105dp"
-        android:layout_alignLeft="@id/torrentView"
-        android:layout_alignRight="@id/torrentView"
+        android:layout_alignRight="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
         android:layout_marginLeft="195dp"
         android:layout_marginTop="300dp"
-        android:text="DOWNLOAD (TORRENT)"
-        />
+        android:text="DOWNLOAD (TORRENT)" />
 
     <Button
         android:id="@+id/uploadTorrent"
         android:layout_width="129dp"
         android:layout_height="105dp"
-        android:layout_alignLeft="@id/torrentView"
-        android:layout_alignRight="@id/torrentView"
+        android:layout_alignRight="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
         android:layout_marginLeft="195dp"
         android:layout_marginTop="500dp"
         android:layout_marginRight="0dp"
-        android:text="UPLOAD TORRENT"
-         />
+        android:text="UPLOAD TORRENT" />
 
     <Button
         android:id="@+id/downloadMagnet"
         android:layout_width="129dp"
         android:layout_height="105dp"
-        android:layout_alignLeft="@id/torrentView"
+        android:layout_alignLeft="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
         android:layout_marginTop="300dp"
-        android:text="DOWNLOAD (MAGNET LINK)"
-        />
+        android:text="DOWNLOAD (MAGNET LINK)" />
 
     <Button
         android:id="@+id/greetPeersButton"
         android:layout_width="129dp"
         android:layout_height="105dp"
-        android:layout_alignLeft="@id/torrentView"
+        android:layout_alignLeft="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
         android:layout_marginTop="500dp"
-        android:text="Greet Other Peers"
-         />
+        android:text="Greet Other Peers" />
 
-    <TextView
-        android:id="@+id/torrentView"
-        android:layout_width="322dp"
-        android:layout_height="188dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:gravity="center"
-        android:hint="Torrent info will appear here" />
+
 
     <!--style="?android:attr/progressBarStyleHorizontal"-->
     <ProgressBar
@@ -73,19 +60,33 @@
         android:layout_marginTop="250dp"
         android:max="100"
         android:progress="0"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
         android:visibility="visible" />
 
     <EditText
         android:id="@+id/enterTorrent"
-        android:layout_width="312dp"
+        android:layout_width="343dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="430dp"
         android:ems="10"
         android:hint="Enter magnet link/torrent name"
         android:inputType="textPersonName" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="242dp">
+
+        <TextView
+            android:id="@+id/torrentView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:gravity="center"
+            android:hint="Torrent info will appear here" />
+
+    </ScrollView>
 
 
 </android.widget.RelativeLayout>
