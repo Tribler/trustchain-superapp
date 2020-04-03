@@ -20,11 +20,6 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 class DaoLoginChoice : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        // If the manager is initialized, redirect to bitcoin fragment.
-        if (WalletManagerAndroid.isInitialized()) {
-            findNavController().navigate(DaoLoginChoiceDirections.actionDaoLoginChoiceToBlockchainDownloadFragment())
-        }
-
         load_existing_button.setOnClickListener {
             val config = WalletManagerConfiguration(BitcoinNetworkOptions.TEST_NET)
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)

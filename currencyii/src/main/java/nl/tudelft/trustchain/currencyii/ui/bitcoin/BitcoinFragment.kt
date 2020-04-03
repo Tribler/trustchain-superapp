@@ -21,6 +21,14 @@ import org.bitcoinj.script.Script
 class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val navController = findNavController()
+        if (!WalletManagerAndroid.isInitialized()) {
+            navController.navigate(R.id.daoLoginChoice)
+        }
+    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
