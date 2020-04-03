@@ -39,8 +39,8 @@ Use `predict` in NaiveBayesClassifier to obtain a target label prediction. `pred
 Use `predictWithProbability` in NaiveBayesClassifier to obtain a target label prediction and its associated probability.
 
 ### Wallet
-After the AI algorithm has decided to either buy or sell, it virtually trades the coins and update to it's wallet.
-By default, it does not really tries to make the transaction, since it does not send a proposal block upon accepting a
+After the AI algorithm has decided to either buy or sell, it virtually trades the coins and updates its wallet.
+By default, it does try to make the transaction, since it does not send a proposal block upon accepting an offer
 In order to switch this on, look at the comments in TraderFragment.accept().
 
 ## Sending and receiving money to other peers.
