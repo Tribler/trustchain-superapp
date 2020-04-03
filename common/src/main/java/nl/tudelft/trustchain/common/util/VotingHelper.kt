@@ -52,13 +52,21 @@ class VotingHelper(
      * @param vote boolean value indicating the decision.
      * @param proposalBlock TrustChainBlock of the proposalblock.
      */
-    fun respondToVote(voteSubject: String, vote: Boolean, proposalBlock: TrustChainBlock) {
+    fun respondToVote(vote: Boolean, proposalBlock: TrustChainBlock) {
+
+        // Parse the subject of the vote
+        val proposalSubject = try {
+            JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
+        } catch (e: JSONException) {
+            Log.e("vote-debug", "Invalidly formatted proposal block, perhaps not a proposal")
+        }
+
         // Reply to the vote with YES or NO.
         val voteReply = if (vote) "YES" else "NO"
 
         // Create a JSON object containing the vote subject and the reply.
         val voteJSON = JSONObject()
-            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_SUBJECT", proposalSubject)
             .put("VOTE_REPLY", voteReply)
 
         // Put the JSON string in the transaction's 'message' field.
