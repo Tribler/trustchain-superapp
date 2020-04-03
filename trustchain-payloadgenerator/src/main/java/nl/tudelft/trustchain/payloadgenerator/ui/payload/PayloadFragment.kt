@@ -168,6 +168,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         super.onDestroy()
         val marketCommunity = getMarketCommunity()
         marketCommunity.removeListener(TradePayload.Type.ASK, ::askListener)
+        marketCommunity.removeListener(TradePayload.Type.BID, ::bidListener)
+        isAutoSending = false
     }
 
     private fun askListener(payload: TradePayload) {
