@@ -6,10 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import nl.tudelft.ipv8.util.hexToBytes
@@ -72,21 +75,32 @@ class TransferFragment : BaseFragment() {
         }
 
         btnSendProposalBlock.setOnClickListener {
-            val amount = if(editTxtAmount.text != null) {
+            val amount = if(editTxtAmount.text != null && !editTxtAmount.text.isEmpty()) {
                 editTxtAmount.text.toString().toFloat()
             } else {
                 0f
             }
-            val publicKey = if(editTxtAddress.text != null) {
+            val publicKey = if(editTxtAddress.text != null
+                    && !editTxtAddress.text.isEmpty()
+                    && editTxtAddress.text.length % 2 == 0) {
                 editTxtAddress.text.toString().hexToBytes()
             } else {
                 "null".hexToBytes()
             }
-            if(editTxtAddress.text != null && editTxtAmount.text != null) {
-                val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
-                trustchain.createTxProposalBlock(amount, publicKey)
-                requireView().findNavController()
-                    .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+            if(editTxtAddress.text != null && editTxtAmount.text != null
+                    && !editTxtAmount.text.isEmpty() && !editTxtAddress.text.isEmpty()) {
+                if (editTxtAddress.text.length % 2 == 0) {
+                    val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
+                    trustchain.createTxProposalBlock(amount, publicKey)
+                    requireView().findNavController()
+                        .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "The address is not a valid public key",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
