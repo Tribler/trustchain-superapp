@@ -57,6 +57,7 @@ class TrustChainPayloadGeneratorActivity : BaseActivity() {
         var payloads: MutableList<TradePayload> = mutableListOf()
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val appBarConfiguration = AppBarConfiguration.Builder(

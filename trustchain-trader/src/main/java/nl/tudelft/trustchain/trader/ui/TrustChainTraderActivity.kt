@@ -35,6 +35,8 @@ class TrustChainTraderActivity : BaseActivity() {
     companion object PayloadsList{
         var acceptedPayloads: MutableList<TradePayload> = mutableListOf()
         var declinedPayloads: MutableList<TradePayload> = mutableListOf()
+        var amountDD = 10000.0
+        var amountBTC = 1000.0
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

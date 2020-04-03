@@ -42,7 +42,7 @@
             app:destination="@id/transferReceiveFragment" />
         <action
             android:id="@+id/action_transferFragment_to_transferSendFragment"
-            app:destination="@id/transferSendFragment" />
+            app:destination="@id/transferConfirmationFragment" />
     </fragment>
 
     <fragment
