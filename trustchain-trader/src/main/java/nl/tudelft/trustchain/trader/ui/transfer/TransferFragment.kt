@@ -19,7 +19,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.trader.util.getBalance
+
 
 
 class TransferFragment : BaseFragment() {
@@ -61,13 +61,6 @@ class TransferFragment : BaseFragment() {
                 transferSendLayout.visibility = View.VISIBLE
             }
             isSending = !isSending
-        }
-
-        QRPK_Next.setOnClickListener {
-            QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
-            //Temporary QR scan skip
-//            val bundle = bundleOf("Proposal Block" to "Prop blockje")
-//            view.findNavController().navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
         }
 
         btnScanPk.setOnClickListener {
@@ -115,14 +108,8 @@ class TransferFragment : BaseFragment() {
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) { // This is a result returned by the QR scanner
             val content = result.contents
-            if (content != null) {
-                if (isSending) {
-                    editTxtAddress.setText(content)
-                } else {
-                    val bundle = bundleOf("Proposal Block" to content)
-                    requireView().findNavController()
-                        .navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
-                }
+            if (content != null && isSending) {
+                editTxtAddress.setText(content)
             } else {
                 Log.d("QR Scan", "Scan failed")
             }

@@ -48,7 +48,7 @@
             android:id="@+id/SenderScanPK"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sender to scan this QR-code containing your details:"
+            android:text="Let the sender scan this QR code to retrieve your address"
             android:paddingHorizontal="3dp" />
 
         <ImageView
@@ -61,17 +61,6 @@
             android:paddingHorizontal="20dp"
             android:paddingVertical="20dp"
             android:clickable="false" />
-
-        <Button
-            android:id="@+id/QRPK_Next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="20dp"
-            android:layout_marginBottom="50dp"
-            android:padding="13dp"
-            android:text="Scan"
-            app:layout_constraintTop_toBottomOf="@id/ScanAfterQRPK" />
     </LinearLayout>
 
     <LinearLayout
@@ -98,14 +87,15 @@
             android:orientation="horizontal"
             android:layout_marginBottom="30dp">
 
-            <EditText
+            <TextView
                 android:id="@+id/editTxtAddress"
                 android:gravity="start"
                 android:layout_weight="1"
+                android:paddingVertical="15dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:hint="Enter Address" />
+                android:hint="Scan Address" />
 
             <Button
                 android:id="@+id/btnScanPk"

@@ -15,8 +15,8 @@
     <fragment
         android:id="@+id/peerFragment"
         android:name="nl.tudelft.trustchain.trader.ui.peers.PeersFragment"
-        android:label="Peer Fragment"
-        tools:layout="@layout/fragment_peers" >
+        android:label="Choose peer to send money"
+        tools:layout="@layout/fragment_peers">
         <action
             android:id="@+id/action_peerFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
@@ -26,9 +26,6 @@
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferFragment"
         android:label="Transfer" >
-        <action
-            android:id="@+id/action_transferFragment_to_transferReceiveFragment"
-            app:destination="@id/transferReceiveFragment" />
         <action
             android:id="@+id/action_transferFragment_to_transferSendFragment"
             app:destination="@id/transferConfirmationFragment" />
@@ -45,27 +42,4 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <fragment
-        android:id="@+id/transferReceiveFragment"
-        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferReceiveFragment"
-        android:label="TransferReceiveFragment" >
-        <action
-            android:id="@+id/action_transferReceiveFragment_to_transferConfirmationFragment"
-            app:destination="@id/transferConfirmationFragment" />
-        <action
-            android:id="@+id/action_transferReceiveFragment_to_transferFragment"
-            app:destination="@id/transferFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/transferSendFragment"
-        android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferSendFragment"
-        android:label="TransferSendFragment" >
-        <action
-            android:id="@+id/action_transferSendFragment_to_transferConfirmationFragment"
-            app:destination="@id/transferConfirmationFragment" />
-        <action
-            android:id="@+id/action_transferSendFragment_to_transferFragment"
-            app:destination="@id/transferFragment" />
-    </fragment>
 </navigation>
