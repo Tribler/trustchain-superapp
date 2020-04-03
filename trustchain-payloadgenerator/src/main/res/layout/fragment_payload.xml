@@ -10,17 +10,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="40dp"
-        android:layout_marginBottom="49dp"
+        android:layout_marginTop="20dp"
         android:text="New Payload"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewPayload"
+    <Switch
+        android:id="@+id/switchAutoMessage"
+        android:layout_width="161dp"
+        android:layout_height="59dp"
+        android:layout_marginEnd="200dp"
+        android:layout_marginTop="16dp"
+        android:checked="false"
+        android:text="Generate Payloads"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/Wallet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:layout_marginTop="80dp"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPayload"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/imgEmpty"

@@ -13,8 +13,9 @@ import nl.tudelft.trustchain.common.messaging.TradePayload
 import java.util.*
 
 class MarketCommunity : Community() {
-    override val serviceId =
-        sha1("4c69624e61434c504b3ab5bb7dc5a3a61de442585122b24c9f752469a212dc6d8ffa3d42bbf9c2f8d10ba569b270f615ef78aeff0547f38745d22af268037ad64935ee7c054b7921b23b".toByteArray()).toHex()
+//    This is the serviceId of the 'real' market community, for development purposes a smaller community is used
+//    override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fb"
+    override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fc"
 
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()

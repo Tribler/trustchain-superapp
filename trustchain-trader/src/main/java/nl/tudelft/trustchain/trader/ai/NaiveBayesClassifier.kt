@@ -9,7 +9,7 @@ import kotlin.math.ln
 fun <T,F,C> Iterable<T>.toNaiveBayesClassifier(
     featuresSelector: ((T) -> Iterable<F>),
     categorySelector: ((T) -> C),
-    observationLimit: Int = 5000,
+    observationLimit: Int = 100000,
     k1: Double = 0.5,
     k2: Double = k1 * 2.0
 ) = NaiveBayesClassifier<F,C>(observationLimit, k1,k2).also { nbc ->

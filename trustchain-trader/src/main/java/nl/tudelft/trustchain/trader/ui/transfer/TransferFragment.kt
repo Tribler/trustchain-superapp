@@ -6,17 +6,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
+import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.trader.util.getBalance
+
 
 
 class TransferFragment : BaseFragment() {
@@ -33,7 +36,7 @@ class TransferFragment : BaseFragment() {
     @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d("PKPK", trustchain.getMyPublicKey().toHex())
-        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
+//        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
 
         transferSendLayout.visibility = View.VISIBLE
         transferReceiveLayout.visibility = View.GONE
@@ -60,31 +63,38 @@ class TransferFragment : BaseFragment() {
             isSending = !isSending
         }
 
-        QRPK_Next.setOnClickListener {
-            QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
-            //Temporary QR scan skip
-//            val bundle = bundleOf("Proposal Block" to "Prop blockje")
-//            view.findNavController().navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
-        }
-
         btnScanPk.setOnClickListener {
             QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
         }
 
         btnSendProposalBlock.setOnClickListener {
-            val amount = if(editTxtAmount.text != null) {
+            val amount = if(editTxtAmount.text != null && !editTxtAmount.text.isEmpty()) {
                 editTxtAmount.text.toString().toFloat()
             } else {
                 0f
             }
-            val publicKey = if(editTxtAddress.text != null) {
+            val publicKey = if(editTxtAddress.text != null
+                    && !editTxtAddress.text.isEmpty()
+                    && editTxtAddress.text.length % 2 == 0) {
                 editTxtAddress.text.toString().hexToBytes()
             } else {
                 "null".hexToBytes()
             }
-            val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
-            requireView().findNavController()
-                .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+            if(editTxtAddress.text != null && editTxtAmount.text != null
+                    && !editTxtAmount.text.isEmpty() && !editTxtAddress.text.isEmpty()) {
+                if (editTxtAddress.text.length % 2 == 0) {
+                    val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
+                    trustchain.createTxProposalBlock(amount, publicKey)
+                    requireView().findNavController()
+                        .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "The address is not a valid public key",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
     }
 
@@ -98,14 +108,8 @@ class TransferFragment : BaseFragment() {
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) { // This is a result returned by the QR scanner
             val content = result.contents
-            if (content != null) {
-                if (isSending) {
-                    editTxtAddress.setText(content)
-                } else {
-                    val bundle = bundleOf("Proposal Block" to content)
-                    requireView().findNavController()
-                        .navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
-                }
+            if (content != null && isSending) {
+                editTxtAddress.setText(content)
             } else {
                 Log.d("QR Scan", "Scan failed")
             }
