@@ -29,10 +29,12 @@ class MainActivityFOC : AppCompatActivity() {
 
         Toast.makeText(applicationContext, "No magnet link provided, using default one...", Toast.LENGTH_LONG).show()
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
+        //fab.setOnClickListener { view ->
+        //    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+        //        .setAction("Action", null).show()
+        //}
+
+        
 
         downloadTorrent.setOnClickListener { view ->
             Toast.makeText(applicationContext, "No magnet again", Toast.LENGTH_LONG).show()
