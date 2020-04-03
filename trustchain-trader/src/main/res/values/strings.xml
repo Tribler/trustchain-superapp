@@ -25,7 +25,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="amount_currency">$100</string>
-    <string name="Amount_Bandwidth">50pcs</string>
+    <string name="Amount_Bandwidth">50</string>
     <string name="ai_history">AI history</string>
     <string name="machine_learning_overview">Machine Learning Overview</string>
 </resources>

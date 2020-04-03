@@ -43,11 +43,12 @@
             android:layout_weight="1"
             android:paddingHorizontal="5dp"
             android:paddingVertical="40dp"
-            android:text="Dymbe Dollars:"
+            android:text="Dymbe $:"
             android:textAlignment="textStart"
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/amountFieldDD"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_weight="1"
@@ -63,11 +64,12 @@
             android:layout_weight="1"
             android:paddingHorizontal="0dp"
             android:paddingVertical="40dp"
-            android:text="Tribler Bandwidth:"
+            android:text="Bitcoin:"
             android:textAlignment="textStart"
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/amountFieldBTC"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_weight="1"

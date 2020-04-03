@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:layout_marginHorizontal="3dp"
-            android:text="Amount of currency required:" />
+            android:text="Price:" />
 
         <EditText
             android:id="@+id/editTextRequiredAmount"
@@ -79,7 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:hint="Enter Amount Available" />
+            android:hint="Price" />
 
         <Button
             android:id="@+id/btnCreatePayload"
