@@ -56,7 +56,10 @@ class BlankFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.findPeersButton.setOnClickListener { view ->
+
+        //MainActivityFOC.setBinding(binding)
+
+        binding.greetPeers.setOnClickListener { view ->
             val ipv8 = IPv8Android.getInstance()
             val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
             val peers = demoCommunity.getPeers()
@@ -68,6 +71,15 @@ class BlankFragment : Fragment() {
 
             demoCommunity.broadcastGreeting();
         }
+
+        binding.downloadMagnet.setOnClickListener { view ->
+               binding.progressBar.setProgress(70, true);
+            activity.print
+            MainActivityFOC.debug(binding)
+               //MainFunctionsJava.getMagnet(activity?.baseContext, binding)
+        }
+
+
     }
 
     companion object {

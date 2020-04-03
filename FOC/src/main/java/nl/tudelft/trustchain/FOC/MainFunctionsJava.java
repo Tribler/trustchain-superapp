@@ -2,9 +2,12 @@ package nl.tudelft.trustchain.FOC;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -31,6 +34,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
 import dalvik.system.DexClassLoader;
+import nl.tudelft.trustchain.FOC.databinding.BlankFragmentBinding;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -56,7 +60,101 @@ public class MainFunctionsJava {
         }
     }
 
-    public static void getTorrent(){
+    public static void getMagnet(Context context, BlankFragmentBinding binding){
+
+        //String uri = "magnet:?xt=urn:btih:86d0502ead28e495c9e67665340f72aa72fe304e&dn=Frostwire.5.3.6.+%5BWindows%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337";
+        //String uri = "magnet:?xt=urn:btih:737d38ed01da1df727a3e0521a6f2c457cb812de&dn=HOME+-+a+film+by+Yann+Arthus-Bertrand+%282009%29+%5BEnglish%5D+%5BHD+MP4%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969";
+        //String uri = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c";
+        String uri = "magnet:?xt=urn:btih:209c8226b299b308beaf2b9cd3fb49212dbd13ec&dn=Tears+of+Steel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Ftears-of-steel.torrent";
+        //String uri = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent";
+
+        final SessionManager s = new SessionManager();
+
+        SettingsPack sp = new SettingsPack();
+
+        SessionParams params = new SessionParams(sp);
+
+        final CountDownLatch signal = new CountDownLatch(1);
+
+        s.addListener(new AlertListener() {
+            @Override
+            public int[] types() {
+                return null;
+            }
+
+            @Override
+            public void alert(Alert<?> alert) {
+                AlertType type = alert.type();
+
+                switch (type) {
+                    case ADD_TORRENT:
+                        Log.i("personal", "Torrent added");
+                        //System.out.println("Torrent added");
+                        ((AddTorrentAlert) alert).handle().resume();
+                        break;
+                    case BLOCK_FINISHED:
+                        BlockFinishedAlert a = (BlockFinishedAlert) alert;
+                        int p = (int) (a.handle().status().progress() * 100);
+
+                        binding.progressBar.setProgress(p, true);
+
+                        ((Activity)context).runOnUiThread(new Runnable() {
+                              public void run() {
+                                  binding.progressBar.setProgress(p, true);
+                              }
+                        });
+
+                        Log.i("personal", "Progress: " + p + " for torrent name: " + a.torrentName());
+                        Log.i("personal", Long.toString(s.stats().totalDownload()));
+                        break;
+                    case TORRENT_FINISHED:
+                        Log.i("personal", "Torrent finished");
+                        signal.countDown();
+                        break;
+                }
+            }
+        });
+
+        s.start(params);
+
+        final Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                long nodes = s.stats().dhtNodes();
+                // wait for at least 10 nodes in the DHT.
+                if (nodes >= 10) {
+                    Log.i("personal", "DHT contains " + nodes + " nodes");
+                    //signal.countDown();
+                    timer.cancel();
+                }
+            }
+        }, 0, 1000);
+
+
+
+        Log.i("personal", "Fetching the magnet uri, please wait...");
+        byte[] data = s.fetchMagnet(uri, 30);
+
+        if (data != null) {
+            Log.i("personal", Entry.bdecode(data).toString());
+        } else {
+            Log.i("personal", "Failed to retrieve the magnet");
+        }
+
+        TorrentInfo ti = TorrentInfo.bdecode(data);
+        s.download(ti, new File("/storage/emulated/0"));
+
+        try {
+            signal.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        s.stop();
+    }
+
+    public static void getTorrent(BlankFragmentBinding binding){
 
         //String uri = "magnet:?xt=urn:btih:86d0502ead28e495c9e67665340f72aa72fe304e&dn=Frostwire.5.3.6.+%5BWindows%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337";
         //String uri = "magnet:?xt=urn:btih:737d38ed01da1df727a3e0521a6f2c457cb812de&dn=HOME+-+a+film+by+Yann+Arthus-Bertrand+%282009%29+%5BEnglish%5D+%5BHD+MP4%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969";
