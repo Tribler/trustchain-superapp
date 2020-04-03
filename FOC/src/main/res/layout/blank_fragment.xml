@@ -7,17 +7,29 @@
 
     <!-- TODO: Update blank fragment layout -->
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
-
     <Button
         android:id="@+id/findPeersButton"
         android:layout_width="143dp"
         android:layout_height="168dp"
         android:layout_centerInParent="true"
-        android:layout_centerVertical="true"
-        tools:text="findPeers" />
+        android:layout_centerVertical="false"
+        tools:text="Greet Other Peers" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="284dp"
+        android:layout_height="141dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:gravity="center"
+        android:text="blablabla" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="365dp"
+        android:layout_height="64dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="200dp" />
 
 </RelativeLayout>
