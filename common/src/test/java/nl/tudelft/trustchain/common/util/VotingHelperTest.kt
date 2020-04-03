@@ -28,8 +28,6 @@ private val lazySodium = LazySodiumJava(SodiumJava())
 
 class VotingHelperTest {
 
-    private val votingHelper = VotingHelper()
-
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
         val store = mockk<TrustChainStore>(relaxed = true)
@@ -72,10 +70,10 @@ class VotingHelperTest {
     }
 
 
-
     @Test
     fun startVote() {
         val community = getCommunity()
+        val votingHelper = VotingHelper(community)
 
         // Create list of your peers and include yourself
         val peers: MutableList<PublicKey> = ArrayList()

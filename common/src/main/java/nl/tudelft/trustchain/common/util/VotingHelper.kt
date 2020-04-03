@@ -12,12 +12,17 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
 
-class VotingHelper {
+/**
+ * Helper class for creating votes proposals, casting and counting.
+ * @param trustChainCommunity the community where the votes will be dealt.
+ */
+class VotingHelper(
+    trustChainCommunity: TrustChainCommunity
+) {
     private val votingBlock = "voting_block"
 
-    private val trustchain: TrustChainHelper by lazy {
-        TrustChainHelper(getTrustChainCommunity())
-    }
+    private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
+
 
     /**
      * Initiate a vote amongst a set of peers.
@@ -37,7 +42,7 @@ class VotingHelper {
         val transaction = voteJSON.toString()
 
         // Create any-counterpary block for the transaction
-        trustchain.createProposalBlock(transaction, EMPTY_PK, votingBlock)
+        trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
 
     }
 
@@ -60,7 +65,7 @@ class VotingHelper {
         // Put the JSON string in the transaction's 'message' field.
         val transaction = mapOf("message" to voteJSON.toString())
 
-        trustchain.createAgreementBlock(proposalBlock, transaction)
+        trustChainHelper.createAgreementBlock(proposalBlock, transaction)
     }
 
 
@@ -84,7 +89,7 @@ class VotingHelper {
         var noCount = 0
 
         // Crawl the chain of the proposer.
-        for (it in trustchain.getChainByUser(proposerKey)) {
+        for (it in trustChainHelper.getChainByUser(proposerKey)) {
             val blockPublicKey = defaultCryptoProvider.keyFromPublicBin(it.publicKey)
 
             // Check whether vote has already been counted
@@ -151,18 +156,11 @@ class VotingHelper {
         return Pair(yesCount, noCount)
     }
 
+
     /**
      * Helper function for debugging purposes
      */
     private fun handleInvalidVote(errorType: String) {
         Log.e("vote_debug", errorType)
-    }
-
-    /**
-     * @return the TrustChainCommunity in use
-     */
-    private fun getTrustChainCommunity(): TrustChainCommunity {
-        return IPv8Android.getInstance().getOverlay()
-            ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
 }

@@ -2,16 +2,30 @@ package nl.tudelft.trustchain.common
 
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import nl.tudelft.trustchain.common.util.TrustChainHelper
+import nl.tudelft.trustchain.common.util.VotingHelper
 import java.util.*
 
-class DemoCommunity : Community() {
+open class DemoCommunity : Community() {
     override val serviceId = "02313685c1912a141279f8248fc8db5899c5df5a"
 
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
 
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
+
+    // Retrieve the trustchain community
+    private fun getTrustChainCommunity(): TrustChainCommunity {
+        return IPv8Android.getInstance().getOverlay()
+            ?: throw IllegalStateException("TrustChainCommunity is not configured")
+    }
+
+    // Create a votingHelper instance for voting across the community
+    val votingHelper: VotingHelper = VotingHelper(getTrustChainCommunity())
 
     override fun walkTo(address: IPv4Address) {
         super.walkTo(address)
