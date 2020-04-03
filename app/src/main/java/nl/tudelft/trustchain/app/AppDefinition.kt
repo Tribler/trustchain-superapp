@@ -29,13 +29,13 @@ enum class AppDefinition(
     ),
     TRUSTCHAIN_TRADER(
         R.drawable.ic_device_hub_black_24dp,
-        "TrustChain Trader",
+        "Trader",
         R.color.blue,
         TrustChainTraderActivity::class.java
     ),
     TRUSTCHAIN_PAYLOADGENERATOR(
         R.drawable.ic_add_black_24dp,
-        "TrustChain Payload Generator",
+        "Market Bot",
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
