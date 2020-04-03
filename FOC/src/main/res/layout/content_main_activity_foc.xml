@@ -18,14 +18,14 @@
 
     <Button
         android:id="@+id/executeCodeButton"
-        android:layout_width="129dp"
-        android:layout_height="105dp"
+        android:layout_width="128dp"
+        android:layout_height="72dp"
         android:layout_alignRight="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
         android:layout_marginLeft="195dp"
-        android:layout_marginTop="550dp"
-        android:layout_marginRight="0dp"
+        android:layout_marginTop="530dp"
+        android:layout_marginRight="2dp"
         android:text="EXECUTE CODE FROM JAR" />
 
     <Button
@@ -40,12 +40,12 @@
 
     <Button
         android:id="@+id/greetPeersButton"
-        android:layout_width="129dp"
-        android:layout_height="105dp"
+        android:layout_width="127dp"
+        android:layout_height="72dp"
         android:layout_alignLeft="@id/progressBar"
         android:layout_centerHorizontal="false"
         android:layout_centerVertical="false"
-        android:layout_marginTop="550dp"
+        android:layout_marginTop="530dp"
         android:text="Greet Other Peers" />
 
 
