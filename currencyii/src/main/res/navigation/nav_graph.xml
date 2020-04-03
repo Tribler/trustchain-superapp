@@ -6,50 +6,6 @@
     app:startDestination="@id/daoLoginChoice">
 
     <fragment
-        android:id="@+id/peersFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.peers.PeersFragment"
-        android:label="Peers">
-        <action
-            android:id="@+id/action_peersFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-    </fragment>
-    <fragment
-        android:id="@+id/usersFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.users.UsersFragment"
-        android:label="All Chains">
-        <action
-            android:id="@+id/action_usersFragment_to_blocksFragment"
-            app:destination="@id/blocksFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-    </fragment>
-    <fragment
-        android:id="@+id/blocksFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.BlocksFragment"
-        android:label="Blocks">
-        <argument
-            android:name="publicKey"
-            app:argType="string" />
-    </fragment>
-    <fragment
-        android:id="@+id/myChainFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.MyChainFragment"
-        android:label="My Chain" />
-    <fragment
-        android:id="@+id/debugFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.debug.DebugFragment"
-        android:label="Debug" />
-    <fragment
-        android:id="@+id/latestBlocksFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.blocks.LatestBlocksFragment"
-        android:label="All Blocks" />
-    <fragment
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BitcoinFragment"
         android:label="Bitcoin Overview"

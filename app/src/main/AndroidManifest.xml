@@ -38,7 +38,7 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.currencyii.ui.peers.MainActivity"
+            android:name="nl.tudelft.trustchain.currencyii.MainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
