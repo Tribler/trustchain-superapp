@@ -33,7 +33,8 @@ class MySharedWalletFragment() : BaseFragment(R.layout.fragment_my_shared_wallet
                     blockData.SW_UNIQUE_ID,
                     blockData.SW_VOTING_THRESHOLD,
                     blockData.SW_ENTRANCE_FEE,
-                    blockData.SW_TRUSTCHAIN_PKS.size
+                    blockData.SW_TRUSTCHAIN_PKS.size,
+                    block.calculateHash().toHex()
                 )
             )
             Log.i("Coin", "Clicked: $view, $position, $id")
