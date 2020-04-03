@@ -153,10 +153,17 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         )
         if (ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt()) == 1){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
-        } else {
+        } else if (ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt()) == 2){
+            val price = round(payload.price!!.roundToInt()/payload.amount!!.roundToInt())
+            if(ai.predict(price)==1){
+                (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+            }
+        }
+        else {
             (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
         }
     }
+
     private fun bidListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
@@ -164,8 +171,24 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         )
         if (ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt()) == 0){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
-        } else {
+        } else if (ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt()) == 2){
+            val price = round(payload.amount!!.roundToInt()/payload.price!!.roundToInt())
+            if (ai.predict(price) == 0){
+                (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+            }
+        }
+        else {
             (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
+        }
+    }
+    private fun round(price: Int):Int{
+        if (price>115){
+            return 115
+        }else if(price<85){
+            return 85
+        }
+        else{
+            return price
         }
     }
 
