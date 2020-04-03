@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.trader.ui
 
-import nl.tudelft.trustchain.trader.ai.NaiveBayes
 import android.bluetooth.BluetoothManager
 import android.net.ConnectivityManager
 import android.os.Bundle
@@ -45,8 +44,7 @@ class TrustChainTraderActivity : BaseActivity() {
             setOf(
                 R.id.transferFragment,
                 R.id.traderFragment,
-                R.id.peerFragment,
-                R.id.AI_HistoryFragment
+                R.id.peerFragment
             )
         ).build()
         setupActionBarWithNavController(
