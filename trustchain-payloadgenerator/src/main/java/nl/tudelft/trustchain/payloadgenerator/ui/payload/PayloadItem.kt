@@ -8,7 +8,7 @@ data class PayloadItem(
     val publicKey: ByteArray,
     val primaryCurrency: Currency,
     val secondaryCurrency: Currency,
-    val availableAmount: Double?,
-    val requiredAmount: Double?,
+    val amount: Double?,
+    val price: Double?,
     val type: TradePayload.Type
 ) : Item()
