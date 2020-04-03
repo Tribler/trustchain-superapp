@@ -44,7 +44,7 @@
         />
 
     <Button
-        android:id="@+id/greetPeers"
+        android:id="@+id/greetPeersButton"
         android:layout_width="129dp"
         android:layout_height="105dp"
         android:layout_alignLeft="@id/torrentView"
