@@ -72,7 +72,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         trustchain.getMyPublicKey(),
                         Currency.DYMBE_DOLLAR,
                         Currency.BTC,
-                        100.0,
+                        80.0,
                         1.0,
                         TradePayload.Type.ASK
                     )
@@ -84,6 +84,26 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         Currency.DYMBE_DOLLAR,
                         1.0,
                         120.0,
+                        TradePayload.Type.BID
+                    )
+                )
+                this.askListener(
+                    TradePayload(
+                        trustchain.getMyPublicKey(),
+                        Currency.DYMBE_DOLLAR,
+                        Currency.BTC,
+                        100.0,
+                        1.0,
+                        TradePayload.Type.ASK
+                    )
+                )
+                this.bidListener(
+                    TradePayload(
+                        trustchain.getMyPublicKey(),
+                        Currency.BTC,
+                        Currency.DYMBE_DOLLAR,
+                        1.0,
+                        100.0,
                         TradePayload.Type.BID
                     )
                 )
@@ -144,7 +164,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         val type = 0
-        if (ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt(), type) == 2){
+        if (ai.predict(payload.price!!.roundToInt() / payload.amount!!.roundToInt(), type) == 2){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
         } else {
             (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
