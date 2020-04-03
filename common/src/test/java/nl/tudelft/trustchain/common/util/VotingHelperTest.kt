@@ -24,13 +24,16 @@ import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 private val lazySodium = LazySodiumJava(SodiumJava())
+
 
 class VotingHelperTest {
 
@@ -81,6 +84,13 @@ class VotingHelperTest {
     @Test
     fun startVote() {
         val community = getCommunity()
+        val store = community.database
+        every { store.getLatest(any(), any()) } returns null
+        every { store.contains(any()) } returns false
+        every { store.addBlock(any()) } returns Unit
+        every { store.getBlockBefore(any()) } returns null
+        every { store.getBlockAfter(any()) } returns null
+
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
 
@@ -98,11 +108,11 @@ class VotingHelperTest {
         votingHelper.startVote(voteSubject, peers)
 
         // Verify that the proposal block has been casted
-        verify {
+        assert(
             helper.getChainByUser(community.myPeer.publicKey.keyToBin()).any {
                 JSONObject(it.transaction["message"].toString()).get("VOTE_SUBJECT") == voteSubject
             }
-        }
+        )
     }
 
     @Test
@@ -112,6 +122,13 @@ class VotingHelperTest {
     @Test
     fun countVotes() {
         val community = getCommunity()
+        val store = community.database
+        every { store.getLatest(any(), any()) } returns null
+        every { store.contains(any()) } returns false
+        every { store.addBlock(any()) } returns Unit
+        every { store.getBlockBefore(any()) } returns null
+        every { store.getBlockAfter(any()) } returns null
+
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
 
@@ -127,8 +144,23 @@ class VotingHelperTest {
 
         val voteSubject = "There should be tests"
 
-        val propBlock = community.createProposalBlock("voting_block", mapOf("message" to voteSubject), EMPTY_PK)
+        // Launch proposition
+        val voteList = JSONArray(peers)
 
+        // Create a JSON object containing the vote subject, as well as a log of the eligible voters
+        val voteJSONProp = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+
+        val transactionProp = voteJSONProp.toString()
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transactionProp),
+            EMPTY_PK
+        )
+
+
+        // Create a reply agreement block
         val voteJSON = JSONObject()
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_REPLY", "YES")
@@ -139,9 +171,6 @@ class VotingHelperTest {
         community.createAgreementBlock(propBlock, transaction)
 
         val count = votingHelper.countVotes(peers, voteSubject, propBlock.publicKey)
-
-        val expectedCount = Pair(0, 1)
-
-        verify { count == expectedCount }
+        Assert.assertEquals(Pair(0, 1), count)
     }
 }
