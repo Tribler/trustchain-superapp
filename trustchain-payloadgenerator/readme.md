@@ -3,7 +3,7 @@
 This app can generate bid and asks which are received by the community where it exists in.
 The bid and asks can either be send automatically or manually. Those bids and asks will be send as IPv8 messages.
 
-##Sending
+## Sending
 
 1. Automatically:
    Toggle the "Generate payloads" switch to send random bid and asks to the community.
@@ -13,9 +13,10 @@ The bid and asks can either be send automatically or manually. Those bids and as
     Press the "New Payload" button.
     You will be guided to the next fragment where you can either, bid or ask from BTC to Dymbe Dollars.
 
-##Buying
+## Buying
 
 In the mainframe, upon clicking on an bid or ask offer, a proposal block is being send to make a transaction.
 The receiving peer sends an agreement block (Signs block) to make the trade valid.
-![payloadFragment](/GeneratorImages/payloadFragment.png)
-![payloadCreateFragment](/GeneratorImages/payloadCreateFragment.png)
+
+![payloadFragment](GeneratorImages/PayloadFragment.png)
+![payloadCreateFragment](GeneratorImages/PayloadCreateFragment.png)
