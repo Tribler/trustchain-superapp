@@ -20,11 +20,13 @@ v0.1 implements a trained bot for the DD_BTC pairing, assuming a mean of 100DD p
 
 1. Columns:
     1. Price (DD_BTC pairing, integer values only)
-    1. Buy/Sell (Binary, 0 for buy, 1 for sell)
+    1. Bid_or_Ask (Binary, 0 for bid, 1 for ask)
+    1. Labels (0, 1, 2)
 
-1. Training data: 100,000 data points with 2 target labels
-    1. 0: Below mean
-    1. 1: Above mean
+1. Training data: 100,000 data points with 3 target labels
+    1. 0: Do nothing
+    1. 1: Execute buy order (ask price surpasses bid threshold under the mean)
+    1. 2: Execute sell order (bid price surpasses ask threshold above the mean)
 
 #### Training the model
 Training data is in .csv format. Import the training data by creating a `NaiveBayes` object with the training data as argument. After instantiating an instance of the model, it is automatically trained for prediction.
