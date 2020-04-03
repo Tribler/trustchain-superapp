@@ -51,6 +51,7 @@ There are two ways to find a public key:
 
 The public key is now filled in the Transfer fragment. Now you can enter an amount and send the money.
 The receiving peer will receive a proposal block in its chain.
+
 ![trader](TraderImages/Trader.png)
 ![transfer](TraderImages/Transfer.png)
 ![transfer2](TraderImages/Transfer2.png)
