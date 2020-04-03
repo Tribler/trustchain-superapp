@@ -19,14 +19,15 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.trader.R
 import nl.tudelft.trustchain.trader.ai.NaiveBayes
 import nl.tudelft.trustchain.trader.databinding.FragmentTraderBinding
+import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amountBTC
+import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amountDD
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItem
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItemRenderer
 import kotlin.math.roundToInt
 
 @ExperimentalUnsignedTypes
 class TraderFragment : BaseFragment(R.layout.fragment_trader) {
-    private var amountDD = 10000.0
-    private var amountBTC = 1000.0
+
     private val adapterAccepted = ItemAdapter()
     private val adapterDeclined = ItemAdapter()
     private var isTrading = true
@@ -153,8 +154,8 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
     private fun accept(payload: TradePayload,type:Int){
 //        Commenting the following two rules will let the AI bot stop sending proposal blocks to the sender of the bid/ask
-        trustchain.createAcceptTxProposalBlock(payload.primaryCurrency,payload.secondaryCurrency,
-            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
+//        trustchain.createAcceptTxProposalBlock(payload.primaryCurrency,payload.secondaryCurrency,
+//            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
 
@@ -172,6 +173,8 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             amountDD -=DD
             amountBTC+=BTC
         }
+        amountDD = String.format("%.2f", amountDD).toDouble()
+        amountBTC = String.format("%.2f", amountBTC).toDouble()
         amountFieldDD.text = amountDD.toString()
         amountFieldBTC.text = amountBTC.toString()
     }

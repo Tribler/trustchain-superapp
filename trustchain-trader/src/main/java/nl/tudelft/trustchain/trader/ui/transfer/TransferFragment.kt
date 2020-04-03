@@ -33,7 +33,7 @@ class TransferFragment : BaseFragment() {
     @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d("PKPK", trustchain.getMyPublicKey().toHex())
-        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
+//        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
 
         transferSendLayout.visibility = View.VISIBLE
         transferReceiveLayout.visibility = View.GONE
@@ -82,9 +82,12 @@ class TransferFragment : BaseFragment() {
             } else {
                 "null".hexToBytes()
             }
-            val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
-            requireView().findNavController()
-                .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+            if(editTxtAddress.text != null && editTxtAmount.text != null) {
+                val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
+                trustchain.createTxProposalBlock(amount, publicKey)
+                requireView().findNavController()
+                    .navigate(R.id.action_transferFragment_to_transferSendFragment, bundle)
+            }
         }
     }
 
