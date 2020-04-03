@@ -19,7 +19,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
-import nl.tudelft.trustchain.trader.util.getBalance
+
 
 
 class TransferFragment : BaseFragment() {
