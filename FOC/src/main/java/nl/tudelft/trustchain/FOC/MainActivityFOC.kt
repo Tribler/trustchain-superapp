@@ -18,7 +18,6 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import dalvik.system.DexClassLoader
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
-import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
 import java.io.File
@@ -27,7 +26,6 @@ import java.io.RandomAccessFile
 import java.nio.channels.FileChannel
 import java.util.*
 import java.util.concurrent.CountDownLatch
-import kotlin.math.roundToInt
 
 
 class MainActivityFOC : AppCompatActivity() {
@@ -39,14 +37,17 @@ class MainActivityFOC : AppCompatActivity() {
 
         printToast("STARTED")
 
+        //option 1: download a torrent through a magnet link
         downloadMagnetButton.setOnClickListener { view ->
             getMagnetLink()
         }
 
+        //option 2: download a torrent through a .torrent file on your phone
         downloadTorrentButton.setOnClickListener { view ->
             getTorrent()
         }
 
+        //option 3: Send a message to every other peer using the superapp
         greetPeersButton.setOnClickListener { view ->
             val ipv8 = IPv8Android.getInstance()
             val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
@@ -61,19 +62,20 @@ class MainActivityFOC : AppCompatActivity() {
             printToast("Greeted " + peers.size.toString() + " peers")
         }
 
+        //option 4: dynamically load and execute code from a jar/apk file
         executeCodeButton.setOnClickListener { view ->
             loadDynamicCode()
         }
 
 
-
-        requestPermission();
+        //upon launching our activity, we ask for the "Storage" permission
+        requestStoragePermission();
 
     }
 
     val MY_PERMISSIONS_REQUEST = 0
 
-    fun requestPermission() {
+    fun requestStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED ) {
             ActivityCompat.requestPermissions(
@@ -84,29 +86,16 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    fun printPeersInfo(overlay: Overlay) {
-        val peers = overlay.getPeers()
-        //Log.i("personal", overlay::class.simpleName + ": ${peers.size} peers")
-        for (peer in peers) {
-            val avgPing = peer.getAveragePing()
-            val lastRequest = peer.lastRequest
-            val lastResponse = peer.lastResponse
-
-            val lastRequestStr = if (lastRequest != null)
-                "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
-
-            val lastResponseStr = if (lastResponse != null)
-                "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
-
-            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
-            Log.i("personal","${peer.mid} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
-        }
-    }
-
+    /**
+     * Display a short message on the screen
+     */
     fun printToast(s: String) {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
+    /**
+     * Download a torrent through a magnet link
+     */
     fun getMagnetLink(){
         var magnetLink: String? = null
         val inputText = enterTorrent.text.toString()
@@ -146,14 +135,8 @@ class MainActivityFOC : AppCompatActivity() {
                         val a = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
                         progressBar.setProgress(p, true)
-                        Log.i(
-                            "personal",
-                            "Progress: " + p + " for torrent name: " + a.torrentName()
-                        )
-                        Log.i(
-                            "personal",
-                            java.lang.Long.toString(s.stats().totalDownload())
-                        )
+                        Log.i("personal","Progress: " + p + " for torrent name: " + a.torrentName() )
+                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
                         Log.i("personal", "Torrent finished")
@@ -187,8 +170,7 @@ class MainActivityFOC : AppCompatActivity() {
         val data = s.fetchMagnet(magnetLink, 30)
 
         if (data != null) {
-            val torrentInfo =
-                Entry.bdecode(data).toString()
+            val torrentInfo = Entry.bdecode(data).toString()
             Log.i("personal", torrentInfo)
             torrentView.text = torrentInfo
 
@@ -201,6 +183,9 @@ class MainActivityFOC : AppCompatActivity() {
 
     }
 
+    /**
+     *  Download a torrent through a .torrent file on your phone
+     */
     fun getTorrent(){
 
         var torrentName: String? = null
@@ -247,14 +232,8 @@ class MainActivityFOC : AppCompatActivity() {
                         val a = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
                         progressBar.setProgress(p, true)
-                        Log.i(
-                            "personal",
-                            "Progress: " + p + " for torrent name: " + a.torrentName()
-                        )
-                        Log.i(
-                            "personal",
-                            java.lang.Long.toString(s.stats().totalDownload())
-                        )
+                        Log.i("personal", "Progress: " + p + " for torrent name: " + a.torrentName())
+                        Log.i(   "personal",  java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
                         Log.i("personal", "Torrent finished")
@@ -280,6 +259,10 @@ class MainActivityFOC : AppCompatActivity() {
         s.download(ti, torrentFile.parentFile)
     }
 
+    /**
+     * Reads a .torrent file and displays information about it on the screen
+     * Part of the getTorrent() function
+     */
     @Throws(IOException::class)
     fun readTorrentSuccesfully(torrent: String?): Boolean {
         val torrentFile = File(torrent)
@@ -300,16 +283,31 @@ class MainActivityFOC : AppCompatActivity() {
         return true
     }
 
+    /**
+     * Dynamically load and execute code from a jar/apk file
+     * The name of the class to be loaded, and the name of the
+     * function to execute, have to be known beforehand
+     */
     fun loadDynamicCode() {
         try {
+            var jarName: String? = null
+            val inputText = enterJar.text.toString()
+            if (inputText == "") {
+                printToast("No jar/apk given, using default")
+                jarName = "Injected.jar"
+            } else jarName = inputText
             val libPath =
-                Environment.getExternalStorageDirectory().absolutePath + "/Injected.jar"
+                Environment.getExternalStorageDirectory().absolutePath + "/" + jarName
             val dexOutputDir = getDir("dex", Context.MODE_PRIVATE)
             val tmpDir = File(libPath)
             val exists = tmpDir.exists()
             val extStore =
                 Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
-            if (exists && extStore) Log.i("personal", "yes")
+            if (exists && extStore) Log.i("personal", "exists")
+            else {
+                printToast("Something went wrong, check logs")
+                return
+            }
             val classloader = DexClassLoader(
                 libPath, dexOutputDir.absolutePath, null,
                 this.javaClass.classLoader
