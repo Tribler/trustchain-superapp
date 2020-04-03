@@ -26,30 +26,16 @@ class MainActivityFOC : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //binding = BlankFragmentBinding.inflate(layoutInflater)
-        //val view = binding.root
-        //setContentView(view)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
 
         printToast("STARTED")
 
-        //fab.setOnClickListener { view ->
-        //    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-        //        .setAction("Action", null).show()
-        //}
-
         downloadMagnet.setOnClickListener { view ->
-            //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-            //    .setAction("Action", null).show()
-            //Toast.makeText(nl.tudelft.trustchain.common., "No magnet link provided, using default one...", Toast.LENGTH_LONG).show()
             getMagnetLink()
         }
 
         downloadTorrent.setOnClickListener { view ->
-            //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-            //    .setAction("Action", null).show()
-            //Toast.makeText(nl.tudelft.trustchain.common., "No magnet link provided, using default one...", Toast.LENGTH_LONG).show()
             getTorrent()
         }
 
@@ -57,11 +43,6 @@ class MainActivityFOC : AppCompatActivity() {
             Toast.makeText(applicationContext, "No magnet again", Toast.LENGTH_LONG).show()
         }
 
-
-
-        //binding.downloadMagnet.setOnClickListener { view ->
-        //    MainFunctionsJava.getMagnet(binding)
-        //}
 
         MainFunctionsJava.requestPermission(this);
 
@@ -186,6 +167,23 @@ class MainActivityFOC : AppCompatActivity() {
 
     fun getTorrent(){
 
+        var torrentName: String? = null
+        val inputText = enterTorrent.text.toString()
+        if (inputText == "") {
+            printToast("No torrent name given, using default")
+            torrentName = "sintel.torrent"
+        } else torrentName = inputText
+        val torrent =
+            Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
+        try {
+            if (!readTorrentSuccesfully(torrent)) {
+                printToast("Something went wrong, check logs")
+                return
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
         val s = SessionManager()
 
         val sp = SettingsPack()
@@ -235,14 +233,6 @@ class MainActivityFOC : AppCompatActivity() {
 
         s.start(params)
 
-        val torrent =
-            Environment.getExternalStorageDirectory().absolutePath + "/sintel.torrent"
-        try {
-            readTorrent(torrent)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
         printToast("Starting download, please wait...")
 
         val torrentFile = File(torrent)
@@ -255,8 +245,13 @@ class MainActivityFOC : AppCompatActivity() {
     }
 
     @Throws(IOException::class)
-    fun readTorrent(torrent: String?) {
+    fun readTorrentSuccesfully(torrent: String?): Boolean {
         val torrentFile = File(torrent)
+
+        if (!torrentFile.exists()){
+            return false
+        }
+
         val ti = TorrentInfo(torrentFile)
         val fc = RandomAccessFile(torrent, "r").channel
         val buffer =
@@ -266,6 +261,7 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", ti.toEntry().toString())
         Log.i("personal", ti2.toEntry().toString())
         torrentView.text = toPrint
+        return true
     }
 
 }
