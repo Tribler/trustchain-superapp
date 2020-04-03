@@ -4,9 +4,11 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.FOC.databinding.BlankFragmentBinding
@@ -25,10 +27,18 @@ class MainActivityFOC : AppCompatActivity() {
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
 
+        Toast.makeText(applicationContext, "No magnet link provided, using default one...", Toast.LENGTH_LONG).show()
+
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+
+        downloadTorrent.setOnClickListener { view ->
+            Toast.makeText(applicationContext, "No magnet again", Toast.LENGTH_LONG).show()
+        }
+
+
 
         //binding.downloadMagnet.setOnClickListener { view ->
         //    MainFunctionsJava.getMagnet(binding)
@@ -56,27 +66,5 @@ class MainActivityFOC : AppCompatActivity() {
             Log.i("personal","${peer.mid} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
         }
     }
-
-
-    companion object {
-        private lateinit var binding: BlankFragmentBinding
-
-        @JvmStatic
-        fun setBinding(bind: BlankFragmentBinding) {
-            binding = bind
-        }
-
-        fun debug(bind: BlankFragmentBinding) {
-            bind.progressBar.setProgress(70, true);
-        }
-
-
-    }
-
-
-    //a
-    //blabla
-
-
 
 }

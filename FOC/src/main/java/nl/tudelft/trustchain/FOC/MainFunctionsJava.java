@@ -96,13 +96,7 @@ public class MainFunctionsJava {
                         BlockFinishedAlert a = (BlockFinishedAlert) alert;
                         int p = (int) (a.handle().status().progress() * 100);
 
-                        binding.progressBar.setProgress(p, true);
 
-                        ((Activity)context).runOnUiThread(new Runnable() {
-                              public void run() {
-                                  binding.progressBar.setProgress(p, true);
-                              }
-                        });
 
                         Log.i("personal", "Progress: " + p + " for torrent name: " + a.torrentName());
                         Log.i("personal", Long.toString(s.stats().totalDownload()));

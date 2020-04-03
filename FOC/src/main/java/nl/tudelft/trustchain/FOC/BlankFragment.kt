@@ -47,38 +47,11 @@ class BlankFragment : Fragment() {
         _binding = BlankFragmentBinding.inflate(inflater, container, false)
         val view = binding.root
 
-        //val ipv8 = IPv8Android.getInstance()
-        //val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-        //demoCommunity.giveContext(activity?.applicationContext)
-
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //MainActivityFOC.setBinding(binding)
-
-        binding.greetPeers.setOnClickListener { view ->
-            val ipv8 = IPv8Android.getInstance()
-            val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-            val peers = demoCommunity.getPeers()
-
-            Log.i("personal", "n:" + peers.size.toString())
-            for (peer in peers) {
-                Log.i("personal", peer.mid)
-            }
-
-            demoCommunity.broadcastGreeting();
-        }
-
-        binding.downloadMagnet.setOnClickListener { view ->
-               binding.progressBar.setProgress(70, true);
-            activity.print
-            MainActivityFOC.debug(binding)
-               //MainFunctionsJava.getMagnet(activity?.baseContext, binding)
-        }
-
 
     }
 
