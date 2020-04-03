@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_payload.*
 import kotlinx.coroutines.*
+import nl.tudelft.ipv8.IPv8
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
@@ -20,6 +22,9 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.payloadgenerator.R
 import nl.tudelft.trustchain.payloadgenerator.databinding.FragmentPayloadBinding
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
+import java.util.*
+import kotlin.concurrent.thread
+import kotlin.random.Random
 
 /**
  * A fragment representing a list of Items.
@@ -29,7 +34,7 @@ import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActiv
 class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
     private val adapter = ItemAdapter()
-
+    private var isAutoSending = false
     private lateinit var publicKey: ByteArray
 
     protected val binding: FragmentPayloadBinding by viewBinding(FragmentPayloadBinding::bind)
@@ -56,6 +61,13 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 LinearLayout.VERTICAL
             )
         )
+
+        switchAutoMessage.setOnClickListener {
+            if(!isAutoSending){
+                sendAutoMessages()
+            }
+            isAutoSending=!isAutoSending
+        }
 
         val marketCommunity = getMarketCommunity()
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
@@ -84,6 +96,30 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         }
 
         loadCurrentPayloads((TrustChainPayloadGeneratorActivity.PayloadsList).payloads)
+    }
+    fun sendAutoMessages(){
+        thread(start = true) {
+            while (isAutoSending) {
+                Thread.sleep(1000)
+                val marketCommunity = getMarketCommunity()
+                val r = java.util.Random()
+                val typeInt = Random.nextInt(0,2)
+                var type = "Bid"
+                var availableAmount = r.nextGaussian()*15+100
+                var requiredAmount = 1.0
+                if (typeInt==1){
+                    type = "Ask"
+                    availableAmount = 1.0
+                    requiredAmount = r.nextGaussian()*15+100
+                }
+                availableAmount = String.format("%.2f", availableAmount).toDouble()
+                requiredAmount = String.format("%.2f", requiredAmount).toDouble()
+                val payloadSerializable =
+                    createPayloadSerializable(availableAmount, requiredAmount, type)
+                marketCommunity.broadcast(payloadSerializable)
+                Log.d("TrustChainPayloadGeneratorActivity::sendAutoMessages", "message send!")
+            }
+        }
     }
 
 
