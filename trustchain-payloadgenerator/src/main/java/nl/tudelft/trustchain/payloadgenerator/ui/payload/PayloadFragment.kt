@@ -90,7 +90,6 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         buttonPayload.setOnClickListener {
             view.findNavController().navigate(R.id.action_payloadFragment_to_payloadCreateFragment)
         }
-
         loadCurrentPayloads((TrustChainPayloadGeneratorActivity.PayloadsList).payloads)
     }
     fun sendAutoMessages(){

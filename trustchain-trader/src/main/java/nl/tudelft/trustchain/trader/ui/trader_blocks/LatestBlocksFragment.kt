@@ -1,9 +1,8 @@
 package nl.tudelft.trustchain.trader.ui.trader_blocks
 
 import androidx.recyclerview.widget.LinearLayoutManager
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
-class LatestBlocksFragment : BlocksFragment() {
+class LatestBlocksFragment : MarketBlocksFragment() {
     override val isNewBlockAllowed = false
 
 //    override fun getBlocks(): List<TrustChainBlock> {

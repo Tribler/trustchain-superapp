@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.trader.ui.trader_blocks
 
-class MyChainFragment : BlocksFragment() {
+class MyChainFragment : MarketBlocksFragment() {
     override val isCrawlAllowed = false
 
     override fun getPublicKey(): ByteArray {

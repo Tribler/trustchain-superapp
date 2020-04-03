@@ -25,7 +25,7 @@ import nl.tudelft.trustchain.trader.R.layout.fragment_blocks
 import nl.tudelft.trustchain.trader.databinding.FragmentBlocksBinding
 
 @UseExperimental(ExperimentalUnsignedTypes::class)
-open class BlocksFragment : BaseFragment(fragment_blocks) {
+open class MarketBlocksFragment : BaseFragment(fragment_blocks) {
     private val adapter = ItemAdapter()
 
     private lateinit var publicKey: ByteArray
