@@ -112,7 +112,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         }
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
         loadCurrentPayloads((TrustChainTraderActivity.declinedPayloads), "declined")
-        ai = NaiveBayes(resources.openRawResource(R.raw.trustchain_trade_data_v7_int))
+        ai = NaiveBayes(resources.openRawResource(R.raw.training_5600_mean1))
     }
 
     private fun loadCurrentPayloads(
@@ -151,8 +151,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        val type = 1
-        if ( ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt(), type) == 1){
+        if (ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt()) == 1){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
         } else {
             (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
@@ -163,8 +162,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        val type = 0
-        if ( ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt(), type) == 2){
+        if (ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt()) == 0){
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
         } else {
             (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
