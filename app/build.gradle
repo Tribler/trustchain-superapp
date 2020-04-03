@@ -57,8 +57,8 @@ repositories {
 dependencies {
     implementation project(':common')
     implementation project(':trustchain-explorer')
-    implementation project(':trustchain-trader')
-    implementation project(':trustchain-payloadgenerator')
+    implementation project(':trader')
+    implementation project(':marketbot')
     implementation project(':debug')
     implementation project(':currencyii')
     implementation project(':FOC')
