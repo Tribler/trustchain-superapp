@@ -67,7 +67,6 @@ class TrustChainPayloadGeneratorActivity : BaseActivity() {
             findNavController(navHostFragment),
             appBarConfiguration
         )
-
     }
 
 }

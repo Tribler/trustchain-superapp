@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.trader.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -24,6 +25,8 @@ import kotlin.math.roundToInt
 
 @ExperimentalUnsignedTypes
 class TraderFragment : BaseFragment(R.layout.fragment_trader) {
+    private var amountDD = 10000.0
+    private var amountBTC = 1000.0
     private val adapterAccepted = ItemAdapter()
     private val adapterDeclined = ItemAdapter()
     private var isTrading = true
@@ -39,6 +42,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
     }
 
+    @SuppressLint("SetTextI18n")
     @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -54,60 +58,11 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         val marketCommunity = getMarketCommunity()
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
         marketCommunity.addListener(TradePayload.Type.BID, ::bidListener)
+        amountFieldDD.text = amountDD.toString()
+        amountFieldBTC.text = amountBTC.toString()
+
 
         switchTrader.setOnClickListener {
-            if (!isTrading) {
-//                TrustChainTraderActivity.acceptedPayloads.add(
-//                    TradePayload(
-//                        trustchain.getMyPublicKey(),
-//                        Currency.DYMBE_DOLLAR,
-//                        Currency.BTC,
-//                        43.0,
-//                        13.0,
-//                        TradePayload.Type.ASK
-//                    )
-//                )
-                this.askListener(
-                    TradePayload(
-                        trustchain.getMyPublicKey(),
-                        Currency.DYMBE_DOLLAR,
-                        Currency.BTC,
-                        80.0,
-                        1.0,
-                        TradePayload.Type.ASK
-                    )
-                )
-                this.bidListener(
-                    TradePayload(
-                        trustchain.getMyPublicKey(),
-                        Currency.BTC,
-                        Currency.DYMBE_DOLLAR,
-                        1.0,
-                        120.0,
-                        TradePayload.Type.BID
-                    )
-                )
-                this.askListener(
-                    TradePayload(
-                        trustchain.getMyPublicKey(),
-                        Currency.DYMBE_DOLLAR,
-                        Currency.BTC,
-                        100.0,
-                        1.0,
-                        TradePayload.Type.ASK
-                    )
-                )
-                this.bidListener(
-                    TradePayload(
-                        trustchain.getMyPublicKey(),
-                        Currency.BTC,
-                        Currency.DYMBE_DOLLAR,
-                        1.0,
-                        100.0,
-                        TradePayload.Type.BID
-                    )
-                )
-            }
             isTrading = !isTrading
         }
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
@@ -151,16 +106,18 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        if (ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt()) == 1){
-            (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
-        } else if (ai.predict(payload.price!!.roundToInt()/payload.amount!!.roundToInt()) == 2){
-            val price = round(payload.price!!.roundToInt()/payload.amount!!.roundToInt())
-            if(ai.predict(price)==1){
-                (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+        if (isTrading) {
+            val type = ai.predict(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
+            if ( type== 1) {
+                accept(payload,type)
+            } else if (type == 2) {
+                val price = round(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
+                if (ai.predict(price) == 1) {
+                    accept(payload,1)
+                }
+            } else {
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
             }
-        }
-        else {
-            (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
         }
     }
 
@@ -169,16 +126,18 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        if (ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt()) == 0){
-            (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
-        } else if (ai.predict(payload.amount!!.roundToInt()/payload.price!!.roundToInt()) == 2){
-            val price = round(payload.amount!!.roundToInt()/payload.price!!.roundToInt())
-            if (ai.predict(price) == 0){
-                (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+        if(isTrading) {
+            val type = ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
+            if (type == 0) {
+                accept(payload,type)
+            } else if (type == 2) {
+                val price = round(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
+                if (ai.predict(price) == 0) {
+                    accept(payload,0)
+                }
+            } else {
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
             }
-        }
-        else {
-            (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
         }
     }
     private fun round(price: Int):Int{
@@ -190,6 +149,31 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         else{
             return price
         }
+    }
+
+    private fun accept(payload: TradePayload,type:Int){
+//        Commenting the following two rules will let the AI bot stop sending proposal blocks to the sender of the bid/ask
+        trustchain.createAcceptTxProposalBlock(payload.primaryCurrency,payload.secondaryCurrency,
+            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
+
+        (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+
+        if (type ==0){
+            updateWallet(payload.amount!!,payload.price!!,type)
+        } else if(type==1){
+            updateWallet(payload.price!!,payload.amount!!,type)
+        }
+    }
+    private fun updateWallet(DD:Double,BTC:Double,type:Int){
+        if (type ==0){
+            amountDD+=DD
+            amountBTC-=BTC
+        } else if (type ==1){
+            amountDD -=DD
+            amountBTC+=BTC
+        }
+        amountFieldDD.text = amountDD.toString()
+        amountFieldBTC.text = amountBTC.toString()
     }
 
     override fun onDestroy() {
