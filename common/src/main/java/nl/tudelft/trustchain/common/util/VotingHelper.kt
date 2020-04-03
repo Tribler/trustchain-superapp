@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.common.util
 
 import android.util.Log
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -41,7 +40,7 @@ class VotingHelper(
 
         val transaction = voteJSON.toString()
 
-        // Create any-counterpary block for the transaction
+        // Create any-counterparty block for the transaction
         trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
 
     }

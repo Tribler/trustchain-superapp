@@ -19,7 +19,10 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import org.json.JSONException
+import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -41,6 +44,7 @@ class VotingHelperTest {
         return community
     }
 
+    @ExperimentalCoroutinesApi
     private val testDispatcher = TestCoroutineDispatcher()
 
     @ExperimentalCoroutinesApi
@@ -49,6 +53,7 @@ class VotingHelperTest {
         Dispatchers.setMain(testDispatcher)
     }
 
+    @ExperimentalCoroutinesApi
     @After
     fun tearDown() {
         Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
@@ -73,6 +78,7 @@ class VotingHelperTest {
     @Test
     fun startVote() {
         val community = getCommunity()
+        val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
 
         // Create list of your peers and include yourself
@@ -80,10 +86,15 @@ class VotingHelperTest {
         peers.addAll(community.getPeers().map { it.publicKey })
         peers.add(community.myPeer.publicKey)
 
-        votingHelper.startVote("There should be tests", peers)
+        val voteSubject = "There should be tests"
+        votingHelper.startVote(voteSubject, peers)
 
-        // Placeholder, should test if vote proposal block is present
-        verify { 1 == 1 }
+        // Verify that the proposal block has been casted
+        verify {
+            helper.getChainByUser(community.myPeer.publicKey.keyToBin()).any {
+                JSONObject(it.transaction["message"].toString()).get("VOTE_SUBJECT") == voteSubject
+            }
+        }
     }
 
     @Test
