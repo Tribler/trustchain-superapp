@@ -53,11 +53,11 @@ class TrustChainHelper(
     /**
      * Creates a new proposal block of type "accept_ask_block", using a float as transaction amount.
      */
-    fun createAcceptTxProposalBlock(primaryCurrency: Currency, secondaryCurrency: Currency, availableAmount: Float?,
-                                    requiredAmount:Float?, type: TradePayload.Type, publicKey: ByteArray): TrustChainBlock {
+    fun createAcceptTxProposalBlock(primaryCurrency: Currency, secondaryCurrency: Currency, amount: Float?,
+                                    price:Float?, type: TradePayload.Type, publicKey: ByteArray): TrustChainBlock {
         val blockType = "demo_tx_block"
-        val transaction = mapOf("From" to primaryCurrency.toString(), "Amount from" to availableAmount.toString(),
-            "To" to secondaryCurrency.toString(),"Amount to" to requiredAmount.toString(),"type" to type.toString())
+        val transaction = mapOf("From" to primaryCurrency.toString(), "Amount from" to amount.toString(),
+            "To" to secondaryCurrency.toString(),"Amount to" to price.toString(),"type" to type.toString())
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
 

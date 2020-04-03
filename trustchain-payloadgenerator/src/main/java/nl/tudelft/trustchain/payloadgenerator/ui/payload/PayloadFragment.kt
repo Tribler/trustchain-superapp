@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_payload.*
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.IPv8
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
@@ -22,7 +20,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.payloadgenerator.R
 import nl.tudelft.trustchain.payloadgenerator.databinding.FragmentPayloadBinding
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
-import java.util.*
 import kotlin.concurrent.thread
 import kotlin.random.Random
 
@@ -44,7 +41,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
         adapter.registerRenderer(PayloadItemRenderer {
 
-            trustchain.createAcceptTxProposalBlock(it.primaryCurrency,it.secondaryCurrency,it.availableAmount?.toFloat(),it.requiredAmount?.toFloat(),it.type, it.publicKey)
+            trustchain.createAcceptTxProposalBlock(it.primaryCurrency,it.secondaryCurrency,it.amount?.toFloat(),it.price?.toFloat(),it.type, it.publicKey)
             Log.d("PayloadFragment::onCreate","TX block send to: ${it.publicKey}!")
         })
     }
@@ -73,23 +70,22 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
         marketCommunity.addListener(TradePayload.Type.BID, ::bidListener)
 
-        var availableAmount = arguments?.getDouble("available amount")
-        var requiredAmount = arguments?.getDouble("required amount")
+        var amount = arguments?.getDouble("amount")
+        var price = arguments?.getDouble("price")
         val type = arguments?.getString("type")
-        if (availableAmount == null) {
-            availableAmount = 0.0
+        if (amount == null) {
+            amount = 0.0
         }
-        if (requiredAmount == null) {
-            requiredAmount = 0.0
+        if (price == null) {
+            price = 0.0
         }
-        if (availableAmount != 0.0 && requiredAmount !=0.0) {
+        if (amount != 0.0 && price !=0.0) {
             val payloadSerializable =
-                createPayloadSerializable(availableAmount, requiredAmount, type)
-            val payload = createPayload(availableAmount, requiredAmount, type)
+                createPayloadSerializable(amount, price, type)
+            val payload = createPayload(amount, price, type)
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
             marketCommunity.broadcast(payloadSerializable)
         }
-        val trustchain = getTrustChainCommunity()
 
         buttonPayload.setOnClickListener {
             view.findNavController().navigate(R.id.action_payloadFragment_to_payloadCreateFragment)
@@ -100,22 +96,22 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
     fun sendAutoMessages(){
         thread(start = true) {
             while (isAutoSending) {
-                Thread.sleep(1000)
+                Thread.sleep(3000)
                 val marketCommunity = getMarketCommunity()
                 val r = java.util.Random()
                 val typeInt = Random.nextInt(0,2)
                 var type = "Bid"
-                var availableAmount = r.nextGaussian()*15+100
-                var requiredAmount = 1.0
+                var amount = r.nextGaussian()*15+100
+                var price = 1.0
                 if (typeInt==1){
                     type = "Ask"
-                    availableAmount = 1.0
-                    requiredAmount = r.nextGaussian()*15+100
+                    amount = 1.0
+                    price = r.nextGaussian()*15+100
                 }
-                availableAmount = String.format("%.2f", availableAmount).toDouble()
-                requiredAmount = String.format("%.2f", requiredAmount).toDouble()
+                amount = String.format("%.2f", amount).toDouble()
+                price = String.format("%.2f", price).toDouble()
                 val payloadSerializable =
-                    createPayloadSerializable(availableAmount, requiredAmount, type)
+                    createPayloadSerializable(amount, price, type)
                 marketCommunity.broadcast(payloadSerializable)
                 Log.d("TrustChainPayloadGeneratorActivity::sendAutoMessages", "message send!")
             }
@@ -124,8 +120,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
 
     private fun createPayload(
-        availableAmount: Double,
-        requiredAmount: Double,
+        amount: Double,
+        price: Double,
         type: String?
     ): TradePayload {
         var primaryCurrency = Currency.BTC
@@ -140,15 +136,15 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             trustchain.getMyPublicKey(),
             primaryCurrency,
             secondaryCurrency,
-            availableAmount,
-            requiredAmount,
+            amount,
+            price,
             type2
         )
     }
 
     private fun createPayloadSerializable(
-        availableAmount: Double,
-        requiredAmount: Double,
+        amount: Double,
+        price: Double,
         type: String?
     ): Serializable {
         var primaryCurrency = Currency.DYMBE_DOLLAR
@@ -163,8 +159,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             trustchain.getMyPublicKey(),
             primaryCurrency,
             secondaryCurrency,
-            availableAmount,
-            requiredAmount,
+            amount,
+            price,
             type2
         )
     }
