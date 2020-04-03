@@ -20,7 +20,9 @@ class VotingHelper {
     }
 
     /**
-     * Initiate a vote amongst a set of peers
+     * Initiate a vote amongst a set of peers.
+     * @param voteSubject the matter to be voted upon.
+     * @param peers list of the public keys of those eligible to vote.
      */
     fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
@@ -41,15 +43,18 @@ class VotingHelper {
 
 
     /**
-     * Respond to a proposal block on the trustchain, either agree with "YES" or disagree "NO"
+     * Respond to a proposal block on the trustchain, either agree with "YES" or disagree "NO".
+     * @param voteSubject the matter to be voted upon.
+     * @param vote boolean value indicating the decision.
+     * @param proposalBlock TrustChainBlock of the proposalblock.
      */
-    fun respondToVote(voteName: String, vote: Boolean, proposalBlock: TrustChainBlock) {
+    fun respondToVote(voteSubject: String, vote: Boolean, proposalBlock: TrustChainBlock) {
         // Reply to the vote with YES or NO.
         val voteReply = if (vote) "YES" else "NO"
 
         // Create a JSON object containing the vote subject and the reply.
         val voteJSON = JSONObject()
-            .put("VOTE_SUBJECT", voteName)
+            .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_REPLY", voteReply)
 
         // Put the JSON string in the transaction's 'message' field.
@@ -61,8 +66,16 @@ class VotingHelper {
 
     /**
      * Return the tally on a vote proposal in a pair(yes, no).
+     * @param voters list of the public keys of the eligible voters.
+     * @param voteSubject the matter to be voted upon.
+     * @param proposerKey the identifier of the vote proposer .
+     * @return Pair<Int, Int> indicating the election results.
      */
-    fun countVotes(voters: List<String>, voteName: String, proposerKey: ByteArray): Pair<Int, Int> {
+    fun countVotes(
+        voters: List<PublicKey>,
+        voteSubject: String,
+        proposerKey: ByteArray
+    ): Pair<Int, Int> {
 
         // ArrayList for keeping track of already counted votes
         val votes: MutableList<String> = ArrayList()
@@ -72,7 +85,7 @@ class VotingHelper {
 
         // Crawl the chain of the proposer.
         for (it in trustchain.getChainByUser(proposerKey)) {
-            val blockPublicKey = defaultCryptoProvider.keyFromPublicBin(it.publicKey).toString()
+            val blockPublicKey = defaultCryptoProvider.keyFromPublicBin(it.publicKey)
 
             // Check whether vote has already been counted
             if (votes.contains(it.publicKey.contentToString())) {
@@ -105,7 +118,7 @@ class VotingHelper {
             }
 
             // A block with another VOTE_SUBJECT belongs to another vote.
-            if (voteJSON.get("VOTE_SUBJECT") != voteName) {
+            if (voteJSON.get("VOTE_SUBJECT") != voteSubject) {
                 // Block belongs to another vote.
                 continue
             }
@@ -138,10 +151,16 @@ class VotingHelper {
         return Pair(yesCount, noCount)
     }
 
+    /**
+     * Helper function for debugging purposes
+     */
     private fun handleInvalidVote(errorType: String) {
         Log.e("vote_debug", errorType)
     }
 
+    /**
+     * @return the TrustChainCommunity in use
+     */
     private fun getTrustChainCommunity(): TrustChainCommunity {
         return IPv8Android.getInstance().getOverlay()
             ?: throw IllegalStateException("TrustChainCommunity is not configured")
