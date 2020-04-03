@@ -1,5 +1,6 @@
 import com.goterl.lazycode.lazysodium.LazySodiumJava
 import com.goterl.lazycode.lazysodium.SodiumJava
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
@@ -12,6 +13,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.keyvault.LibNaClSK
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -80,6 +82,10 @@ class VotingHelperTest {
         val community = getCommunity()
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
+
+        val validator = mockk<TransactionValidator>()
+        every { validator.validate(any(), any()) } returns true
+        community.registerTransactionValidator("voting_block", validator)
 
         // Create list of your peers and include yourself
         val peers: MutableList<PublicKey> = ArrayList()
