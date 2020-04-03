@@ -1,11 +1,15 @@
 package nl.tudelft.trustchain.FOC
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
@@ -63,8 +67,21 @@ class MainActivityFOC : AppCompatActivity() {
 
 
 
-        MainFunctionsJava.requestPermission(this);
+        requestPermission();
 
+    }
+
+    val MY_PERMISSIONS_REQUEST = 0
+
+    fun requestPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                MY_PERMISSIONS_REQUEST
+            )
+        }
     }
 
     fun printPeersInfo(overlay: Overlay) {
