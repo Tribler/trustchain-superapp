@@ -17,3 +17,5 @@ The bid and asks can either be send automatically or manually. Those bids and as
 
 In the mainframe, upon clicking on an bid or ask offer, a proposal block is being send to make a transaction.
 The receiving peer sends an agreement block (Signs block) to make the trade valid.
+![payloadFragment](/GeneratorImages/payloadFragment.png)
+![payloadCreateFragment](/GeneratorImages/payloadCreateFragment.png)
