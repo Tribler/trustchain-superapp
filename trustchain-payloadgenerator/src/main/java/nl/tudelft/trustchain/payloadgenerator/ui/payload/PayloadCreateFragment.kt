@@ -35,13 +35,13 @@ class PayloadCreateFragment : BaseFragment() {
         }
 
         btnCreatePayload.setOnClickListener {
-            val availableAmount = if(editTextAvailableAmount.text != null) {
-                editTextAvailableAmount.text.toString().toDouble()
+            val amount = if(editTextAmount.text != null) {
+                editTextAmount.text.toString().toDouble()
             } else {
                 0.0
             }
-            val requiredAmount = if(editTextRequiredAmount.text != null) {
-                editTextRequiredAmount.text.toString().toDouble()
+            val price = if(editTextPrice.text != null) {
+                editTextPrice.text.toString().toDouble()
             } else {
                 0.0
             }
@@ -49,7 +49,7 @@ class PayloadCreateFragment : BaseFragment() {
             if (isAsk){
                 type = "Ask"
             }
-            val bundle = bundleOf("available amount" to availableAmount, "required amount" to requiredAmount, "type" to type)
+            val bundle = bundleOf("amount" to amount, "price" to price, "type" to type)
             view.findNavController().navigate(R.id.action_payloadCreateFragment_to_payloadFragment, bundle)
         }
     }
