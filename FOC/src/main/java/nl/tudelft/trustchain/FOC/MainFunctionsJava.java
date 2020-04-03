@@ -280,24 +280,20 @@ public class MainFunctionsJava {
         s.stop();
     }
 
-    public static void loadDynamicCode(){
-        Log.i("personal", "50");
-        Context thisContext = null;
-        Activity thisActivity = (Activity) thisContext;
-
+    public static void loadDynamicCode(Activity activity){
         try {
 
             final String libPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/Injected.jar";
-            File dexOutputDir = thisActivity.getDir("dex", MODE_PRIVATE);
+            File dexOutputDir = activity.getDir("dex", MODE_PRIVATE);
             File tmpDir = new File(libPath);
-            ;
+
             boolean exists = tmpDir.exists();
             boolean extStore = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
             if (exists && extStore)
                 Log.i("personal", "yes");
 
             final DexClassLoader classloader = new DexClassLoader(libPath, dexOutputDir.getAbsolutePath(), null,
-                thisActivity.getClass().getClassLoader());
+                activity.getClass().getClassLoader());
             final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("com.example.injected.Injected");
             //final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("p000.Example");
 

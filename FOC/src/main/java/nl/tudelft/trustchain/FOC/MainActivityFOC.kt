@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.FOC
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -10,9 +11,12 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import dalvik.system.DexClassLoader
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.common.DemoCommunity
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
@@ -31,17 +35,32 @@ class MainActivityFOC : AppCompatActivity() {
 
         printToast("STARTED")
 
-        downloadMagnet.setOnClickListener { view ->
+        downloadMagnetButton.setOnClickListener { view ->
             getMagnetLink()
         }
 
-        downloadTorrent.setOnClickListener { view ->
+        downloadTorrentButton.setOnClickListener { view ->
             getTorrent()
         }
 
-        uploadTorrent.setOnClickListener { view ->
-            Toast.makeText(applicationContext, "No magnet again", Toast.LENGTH_LONG).show()
+        greetPeersButton.setOnClickListener { view ->
+            val ipv8 = IPv8Android.getInstance()
+            val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
+            val peers = demoCommunity.getPeers()
+
+            Log.i("personal", "n:" + peers.size.toString())
+            for (peer in peers) {
+                Log.i("personal", peer.mid)
+            }
+
+            demoCommunity.broadcastGreeting();
+            printToast("Greeted " + peers.size.toString() + " peers")
         }
+
+        executeCodeButton.setOnClickListener { view ->
+            loadDynamicCode()
+        }
+
 
 
         MainFunctionsJava.requestPermission(this);
@@ -262,6 +281,32 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", ti2.toEntry().toString())
         torrentView.text = toPrint
         return true
+    }
+
+    fun loadDynamicCode() {
+        try {
+            val libPath =
+                Environment.getExternalStorageDirectory().absolutePath + "/Injected.jar"
+            val dexOutputDir = getDir("dex", Context.MODE_PRIVATE)
+            val tmpDir = File(libPath)
+            val exists = tmpDir.exists()
+            val extStore =
+                Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
+            if (exists && extStore) Log.i("personal", "yes")
+            val classloader = DexClassLoader(
+                libPath, dexOutputDir.absolutePath, null,
+                this.javaClass.classLoader
+            )
+            val classToLoad =
+                classloader.loadClass("com.example.injected.Injected") as Class<Any>
+            //final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("p000.Example");
+            val myInstance = classToLoad.newInstance()
+            val printStuff = classToLoad.getMethod("printStuff")
+            printStuff.invoke(myInstance)
+            printToast("Check your logs for interdimensional message!")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
 }

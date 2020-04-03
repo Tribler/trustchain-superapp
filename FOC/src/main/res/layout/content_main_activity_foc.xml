@@ -6,7 +6,7 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <Button
-        android:id="@+id/downloadTorrent"
+        android:id="@+id/downloadTorrentButton"
         android:layout_width="129dp"
         android:layout_height="105dp"
         android:layout_alignRight="@id/progressBar"
@@ -17,7 +17,7 @@
         android:text="DOWNLOAD (TORRENT)" />
 
     <Button
-        android:id="@+id/uploadTorrent"
+        android:id="@+id/executeCodeButton"
         android:layout_width="129dp"
         android:layout_height="105dp"
         android:layout_alignRight="@id/progressBar"
@@ -29,7 +29,7 @@
         android:text="EXECUTE CODE FROM JAR" />
 
     <Button
-        android:id="@+id/downloadMagnet"
+        android:id="@+id/downloadMagnetButton"
         android:layout_width="129dp"
         android:layout_height="105dp"
         android:layout_alignLeft="@id/progressBar"
