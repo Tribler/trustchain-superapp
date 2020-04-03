@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.currencyii.ui.peers.MainActivity
+import nl.tudelft.trustchain.currencyii.MainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 
