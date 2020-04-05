@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.common.util
 
+import android.annotation.SuppressLint
 import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -137,6 +138,7 @@ class VotingHelper(
             }
 
             // Check whether the voter is in voting list
+            @SuppressLint
             if (!voters.any { v -> v.toString().equals(blockPublicKey.toString()) }) {
                 continue
             }

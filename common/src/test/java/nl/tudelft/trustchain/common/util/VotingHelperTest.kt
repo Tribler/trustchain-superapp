@@ -22,7 +22,6 @@ import org.junit.Test
 
 class VotingHelperTest {
 
-
     private val lazySodium = LazySodiumJava(SodiumJava())
 
     private fun createTrustChainStore(): TrustChainSQLiteStore {
@@ -67,7 +66,6 @@ class VotingHelperTest {
     private fun getEndpoint(): EndpointAggregator {
         return spyk(EndpointAggregator(mockk(relaxed = true), null))
     }
-
 
     @Test
     fun startVote() {
@@ -117,7 +115,6 @@ class VotingHelperTest {
                 JSONObject(it.transaction["message"].toString()).get("VOTE_REPLY") == "YES"
             }
         )
-
     }
 
     @Test
@@ -148,6 +145,4 @@ class VotingHelperTest {
 
         Assert.assertEquals(Pair(1, 0), count)
     }
-
-
 }
