@@ -94,7 +94,7 @@ class MainActivityFOC : AppCompatActivity() {
      * Download a torrent through a magnet link
      */
     fun getMagnetLink() {
-        var magnetLink: String?
+        val magnetLink: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
             printToast("No magnet link given, using default")
@@ -181,9 +181,10 @@ class MainActivityFOC : AppCompatActivity() {
     /**
      *  Download a torrent through a .torrent file on your phone
      */
+    @Suppress("deprecation")
     fun getTorrent() {
 
-        var torrentName: String?
+        val torrentName: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
             printToast("No torrent name given, using default")
@@ -268,7 +269,7 @@ class MainActivityFOC : AppCompatActivity() {
         val buffer =
             fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
         val ti2 = TorrentInfo(buffer)
-        var toPrint = ti.toEntry().toString() + ti2.toEntry().toString()
+        val toPrint = ti.toEntry().toString() + ti2.toEntry().toString()
         Log.i("personal", ti.toEntry().toString())
         Log.i("personal", ti2.toEntry().toString())
         torrentView.text = toPrint
@@ -280,9 +281,10 @@ class MainActivityFOC : AppCompatActivity() {
      * The name of the class to be loaded, and the name of the
      * function to execute, have to be known beforehand
      */
+    @Suppress("deprecation", "unchecked_cast")
     fun loadDynamicCode() {
         try {
-            var jarName: String?
+            val jarName: String?
             val inputText = enterJar.text.toString()
             if (inputText == "") {
                 printToast("No jar/apk given, using default")
