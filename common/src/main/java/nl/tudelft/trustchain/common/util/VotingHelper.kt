@@ -139,7 +139,10 @@ class VotingHelper(
 
             // Check whether the voter is in voting list
             @SuppressLint
-            if (!voters.any { v -> v.toString().equals(blockPublicKey.toString()) }) {
+            if (!voters.any { v ->
+                    val voteString = v.keyToBin()
+                    voteString.contentEquals(blockPublicKey.keyToBin())
+                }) {
                 continue
             }
 
