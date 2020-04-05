@@ -120,11 +120,18 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
         val propBlock = community.createProposalBlock(
             "voting_block",
-            mapOf("message" to voteSubject),
+            mapOf("message" to transaction),
             EMPTY_PK
         )
+
 
         // Create a reply agreement block
         votingHelper.respondToVote(true, propBlock)
@@ -147,24 +154,31 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
         val propBlock = community.createProposalBlock(
             "voting_block",
-            mapOf("message" to voteSubject),
+            mapOf("message" to transaction),
             EMPTY_PK
         )
 
         // Create a reply agreement block
         votingHelper.respondToVote(true, propBlock)
 
-        val helper = TrustChainHelper(community)
-        helper.getChainByUser(community.myPeer.publicKey.keyToBin()).forEach {
-            println(JSONObject(it.transaction["message"].toString()))
-        }
+        // For debugging purposes
+//        val helper = TrustChainHelper(community)
+//        helper.getChainByUser(community.myPeer.publicKey.keyToBin()).forEach {
+//            println(JSONObject(it.transaction["message"].toString()))
+//        }
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
 
-        Assert.assertEquals(Pair(0, 1), count)
+        Assert.assertEquals(Pair(1, 0), count)
     }
 
 

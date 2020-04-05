@@ -141,10 +141,10 @@ class VotingHelper(
                 continue
             }
 
-            // Check whether the voter is in voting list
-            if (!voters.contains(blockPublicKey)) {
-                continue
-            }
+//            // Check whether the voter is in voting list
+//            if (!voters.contains(blockPublicKey)) {
+//                continue
+//            }
 
             // Add the votes, or assume a malicious vote if it is not YES or NO.
             when (voteJSON.get("VOTE_REPLY")) {
