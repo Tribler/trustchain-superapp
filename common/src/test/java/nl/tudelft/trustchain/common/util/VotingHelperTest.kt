@@ -75,13 +75,7 @@ class VotingHelperTest {
 
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
-
-        // Create list of your peers and include yourself
-        val peers: MutableList<PublicKey> = ArrayList()
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(community.myPeer.publicKey)
+        val peers = getPeers()
 
         val voteSubject = "There should be tests"
         votingHelper.startVote(voteSubject, peers)
@@ -98,13 +92,7 @@ class VotingHelperTest {
     fun respondToVote() {
         val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
-
-        // Create list of your peers and include yourself
-        val peers: MutableList<PublicKey> = ArrayList()
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(community.myPeer.publicKey)
+        val peers = getPeers()
 
         // Launch proposition
         val voteSubject = "A vote should be counted"
@@ -119,7 +107,6 @@ class VotingHelperTest {
             mapOf("message" to transaction),
             EMPTY_PK
         )
-
 
         // Create a reply agreement block
         votingHelper.respondToVote(true, propBlock)
@@ -139,7 +126,6 @@ class VotingHelperTest {
         val votingHelper = VotingHelper(community)
         val peers = getPeers()
 
-
         // Launch proposition
         val voteSubject = "A vote should be counted"
         val voteJSON = JSONObject()
@@ -156,12 +142,6 @@ class VotingHelperTest {
 
         // Create a reply agreement block
         votingHelper.respondToVote(true, propBlock)
-
-        // For debugging purposes
-//        val helper = TrustChainHelper(community)
-//        helper.getChainByUser(community.myPeer.publicKey.keyToBin()).forEach {
-//            println(JSONObject(it.transaction["message"].toString()))
-//        }
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())

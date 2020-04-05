@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -95,6 +96,7 @@ class VotingHelper(
 
         // Crawl the chain of the proposer.
         for (it in trustChainHelper.getChainByUser(proposerKey)) {
+            val blockPublicKey: PublicKey = defaultCryptoProvider.keyFromPublicBin(it.publicKey)
 
             // Check whether vote has already been counted
             if (votes.contains(it.publicKey.contentToString())) {
@@ -138,10 +140,10 @@ class VotingHelper(
                 continue
             }
 
-//            // Check whether the voter is in voting list
-//            if (!voters.contains(blockPublicKey)) {
-//                continue
-//            }
+            // Check whether the voter is in voting list
+            if (!voters.any { v -> v.pub().toString() == blockPublicKey.pub().toString() }) {
+                continue
+            }
 
             // Add the votes, or assume a malicious vote if it is not YES or NO.
             when (voteJSON.get("VOTE_REPLY")) {
