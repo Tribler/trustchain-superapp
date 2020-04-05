@@ -114,7 +114,7 @@ class VotingHelper(
                 // proper JSON.
                 handleInvalidVote(
                     "Block was a voting block but did not contain " +
-                        "proper JSON in its message field: ${it.transaction["message"].toString()}."
+                        "proper JSON in its message field: ${it.transaction["message"]}."
                 )
                 continue
             }
