@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <Button
+        android:id="@+id/downloadTorrentButton"
+        android:layout_width="129dp"
+        android:layout_height="105dp"
+        android:layout_alignRight="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginLeft="195dp"
+        android:layout_marginTop="300dp"
+        android:text="DOWNLOAD (TORRENT)" />
+
+    <Button
+        android:id="@+id/executeCodeButton"
+        android:layout_width="128dp"
+        android:layout_height="72dp"
+        android:layout_alignRight="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginLeft="195dp"
+        android:layout_marginTop="530dp"
+        android:layout_marginRight="2dp"
+        android:text="EXECUTE CODE FROM JAR" />
+
+    <Button
+        android:id="@+id/downloadMagnetButton"
+        android:layout_width="129dp"
+        android:layout_height="105dp"
+        android:layout_alignLeft="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginTop="300dp"
+        android:text="DOWNLOAD (MAGNET LINK)" />
+
+    <Button
+        android:id="@+id/greetPeersButton"
+        android:layout_width="127dp"
+        android:layout_height="72dp"
+        android:layout_alignLeft="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginTop="530dp"
+        android:text="Greet Other Peers" />
+
+
+
+    <!--style="?android:attr/progressBarStyleHorizontal"-->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="354dp"
+        android:layout_height="48dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/enterTorrent"
+        android:layout_width="343dp"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="430dp"
+        android:ems="10"
+        android:hint="Enter magnet link/torrent name. Empty = default"
+        android:inputType="textPersonName"
+        android:textSize="14sp" />
+
+    <EditText
+        android:id="@+id/enterJar"
+        android:layout_width="343dp"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/enterTorrent"
+        android:layout_marginTop="480dp"
+        android:ems="10"
+        android:hint="Enter name of jar/apk to execute. Empty = default"
+        android:inputType="textPersonName"
+        android:textSize="14sp" />
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="242dp">
+
+        <TextView
+            android:id="@+id/torrentView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:gravity="center"
+            android:hint="Torrent info will appear here" />
+
+    </ScrollView>
+
+
+</android.widget.RelativeLayout>

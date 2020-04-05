@@ -7,7 +7,7 @@ ktlint {
     version = "$ktlint_version"
     android = true
     outputToConsole = true
-    ignoreFailures = true
+    ignoreFailures = false
 }
 
 android {
@@ -37,6 +37,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        allWarningsAsErrors = true
     }
 
     viewBinding {
