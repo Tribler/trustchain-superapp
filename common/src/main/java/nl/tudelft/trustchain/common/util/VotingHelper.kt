@@ -22,7 +22,6 @@ class VotingHelper(
 
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
 
-
     /**
      * Initiate a vote amongst a set of peers.
      * @param voteSubject the matter to be voted upon.
@@ -42,9 +41,7 @@ class VotingHelper(
 
         // Create any-counterparty block for the transaction
         trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
-
     }
-
 
     /**
      * Respond to a proposal block on the trustchain, either agree with "YES" or disagree "NO".
@@ -73,7 +70,6 @@ class VotingHelper(
 
         trustChainHelper.createAgreementBlock(proposalBlock, transaction)
     }
-
 
     /**
      * Return the tally on a vote proposal in a pair(yes, no).
@@ -141,7 +137,7 @@ class VotingHelper(
             }
 
             // Check whether the voter is in voting list
-            if (!voters.any { v -> v.pub().toString() == blockPublicKey.pub().toString() }) {
+            if (!voters.any { v -> v.toString().equals(blockPublicKey.toString()) }) {
                 continue
             }
 
@@ -161,7 +157,6 @@ class VotingHelper(
 
         return Pair(yesCount, noCount)
     }
-
 
     /**
      * Helper function for debugging purposes

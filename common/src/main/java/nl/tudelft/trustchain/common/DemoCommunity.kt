@@ -2,12 +2,10 @@ package nl.tudelft.trustchain.common
 
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
 import java.util.*
 
