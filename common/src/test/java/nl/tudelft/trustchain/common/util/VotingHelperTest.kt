@@ -1,8 +1,11 @@
 import com.goterl.lazycode.lazysodium.LazySodiumJava
 import com.goterl.lazycode.lazysodium.SodiumJava
+import com.squareup.sqldelight.db.SqlDriver
+import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -12,11 +15,13 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.*
 import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
+import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
@@ -32,33 +37,33 @@ private val lazySodium = LazySodiumJava(SodiumJava())
 
 class VotingHelperTest {
 
+    private fun createTrustChainStore(): TrustChainSQLiteStore {
+        val driver: SqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        Database.Schema.create(driver)
+        val database = Database(driver)
+        return TrustChainSQLiteStore(database)
+    }
+
+    private fun getPeers(): List<PublicKey> {
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.add(defaultCryptoProvider.generateKey().pub())
+        peers.add(defaultCryptoProvider.generateKey().pub())
+        peers.add(defaultCryptoProvider.generateKey().pub())
+        peers.add(getMyPeer().publicKey)
+
+        return peers
+    }
+
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
-        val store = mockk<TrustChainStore>(relaxed = true)
+        val store = createTrustChainStore()
         val community = TrustChainCommunity(settings = settings, database = store)
         community.myPeer = getMyPeer()
         community.endpoint = getEndpoint()
         community.network = Network()
         community.maxPeers = 20
         community.cryptoProvider = JavaCryptoProvider
-        community.load()
         return community
-    }
-
-    @ExperimentalCoroutinesApi
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @ExperimentalCoroutinesApi
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @ExperimentalCoroutinesApi
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain() // reset main dispatcher to the original Main dispatcher
-        testDispatcher.cleanupTestCoroutines()
     }
 
     protected fun getPrivateKey(): PrivateKey {
@@ -78,12 +83,7 @@ class VotingHelperTest {
 
     @Test
     fun startVote() {
-        val community = getCommunity()
-        every { community.database.getLatest(any(), any()) } returns null
-        every { community.database.contains(any()) } returns false
-        every { community.database.addBlock(any()) } returns Unit
-        every { community.database.getBlockBefore(any()) } returns null
-        every { community.database.getBlockAfter(any()) } returns null
+        val community = spyk(getCommunity())
 
         val helper = TrustChainHelper(community)
         val votingHelper = VotingHelper(community)
@@ -108,17 +108,7 @@ class VotingHelperTest {
 
     @Test
     fun respondToVote() {
-    }
-
-    @Test
-    fun countVotes() {
-        val community = getCommunity()
-        every { community.database.getLatest(any(), any()) } returns null
-        every { community.database.contains(any()) } returns false
-        every { community.database.addBlock(any()) } returns Unit
-        every { community.database.getBlockBefore(any()) } returns null
-        every { community.database.getBlockAfter(any()) } returns null
-
+        val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
 
         // Create list of your peers and include yourself
@@ -128,40 +118,54 @@ class VotingHelperTest {
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(community.myPeer.publicKey)
 
-        val voteSubject = "There should be tests"
-
         // Launch proposition
-        val voteList = JSONArray(peers)
-
-        // Create a JSON object containing the vote subject, as well as a log of the eligible voters
-        val voteJSONProp = JSONObject()
-            .put("VOTE_SUBJECT", voteSubject)
-            .put("VOTE_LIST", voteList)
-
-        val transactionProp = voteJSONProp.toString()
+        val voteSubject = "A vote should be counted"
         val propBlock = community.createProposalBlock(
             "voting_block",
-            mapOf("message" to transactionProp),
+            mapOf("message" to voteSubject),
             EMPTY_PK
         )
-        community.database.addBlock(propBlock)
 
         // Create a reply agreement block
-        val voteJSON = JSONObject()
-            .put("VOTE_SUBJECT", voteSubject)
-            .put("VOTE_REPLY", "YES")
+        votingHelper.respondToVote(true, propBlock)
 
-        // Put the JSON string in the transaction's 'message' field.
-        val transaction = mapOf("message" to voteJSON.toString())
-        community.createAgreementBlock(propBlock, transaction)
+        val helper = TrustChainHelper(community)
+        assert(
+            helper.getChainByUser(community.myPeer.publicKey.keyToBin()).any {
+                JSONObject(it.transaction["message"].toString()).get("VOTE_REPLY") == "YES"
+            }
+        )
+
+    }
+
+    @Test
+    fun countVotes() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to voteSubject),
+            EMPTY_PK
+        )
+
+        // Create a reply agreement block
+        votingHelper.respondToVote(true, propBlock)
+
+        val helper = TrustChainHelper(community)
+        helper.getChainByUser(community.myPeer.publicKey.keyToBin()).forEach {
+            println(JSONObject(it.transaction["message"].toString()))
+        }
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
 
-        // Why does this return 0?
-        println(community.database.getBlockCount())
-
-
         Assert.assertEquals(Pair(0, 1), count)
     }
+
+
 }
