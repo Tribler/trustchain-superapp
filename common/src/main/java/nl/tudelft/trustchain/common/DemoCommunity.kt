@@ -37,7 +37,7 @@ class DemoCommunity : Community() {
         const val THALIS_MESSAGE = 222
     }
 
-    //SEND MESSAGE
+    // SEND MESSAGE
     fun broadcastGreeting() {
         for (peer in getPeers()) {
             val packet = serializePacket(MessageId.THALIS_MESSAGE, MyMessage("Hello from Freedom of Computing!"), true)
@@ -45,7 +45,7 @@ class DemoCommunity : Community() {
         }
     }
 
-    //RECEIVE MESSAGE
+    // RECEIVE MESSAGE
     init {
         messageHandlers[MessageId.THALIS_MESSAGE] = ::onMessage
     }
@@ -53,11 +53,10 @@ class DemoCommunity : Community() {
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
         Log.i("personal", peer.mid + ": " + payload.message)
-        //Toast.makeText(myContext, "blabla", Toast.LENGTH_LONG).show()
     }
 }
 
-//THE MESSAGE (CLASS)
+// THE MESSAGE (CLASS)
 data class MyMessage(val message: String) : nl.tudelft.ipv8.messaging.Serializable {
     override fun serialize(): ByteArray {
         return message.toByteArray()
@@ -65,7 +64,7 @@ data class MyMessage(val message: String) : nl.tudelft.ipv8.messaging.Serializab
 
     companion object Deserializer : Deserializable<MyMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<MyMessage, Int> {
-            var toReturn = buffer.toString(Charsets.UTF_8);
+            var toReturn = buffer.toString(Charsets.UTF_8)
             return Pair(MyMessage(toReturn), buffer.size)
         }
     }
