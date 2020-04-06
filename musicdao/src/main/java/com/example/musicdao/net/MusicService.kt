@@ -1,16 +1,15 @@
 package com.example.musicdao.net
 
-import android.app.Activity
-import android.app.Application
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
-import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicdao.R
 import com.example.musicdao.databinding.FragmentBlankBinding
+import com.squareup.sqldelight.android.AndroidSqliteDriver
+import kotlinx.android.synthetic.main.fragment_blank.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -20,9 +19,12 @@ import nl.tudelft.ipv8.OverlayConfiguration
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
+import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
+import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
@@ -68,7 +70,16 @@ class MusicService: BaseActivity() {
             listOf(RandomWalk.Factory())
         )
 
-        val config = IPv8Configuration(overlays = listOf(community))
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        val trustChainCommunity = OverlayConfiguration(
+            TrustChainCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+
+        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
 
         IPv8Android.Factory(application)
             .setConfiguration(config)
@@ -78,22 +89,61 @@ class MusicService: BaseActivity() {
         items.add("I am " + IPv8Android.getInstance().myPeer.mid)
         viewAdapter.notifyDataSetChanged()
 
-        val overlay = IPv8Android.getInstance().getOverlay<MusicDemoCommunity>()!!
-        overlay.messageHandlers[MESSAGE_ID] = ::onMessage
-        lifecycleScope.launch {
-            while (isActive) {
-                peers = overlay.getPeers()
-                overlay.messageHandlers
-                if (peers.isNotEmpty()) overlay.broadcastGreeting()
-                delay(1000)
+        val overlay = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        registerBlockListener()
+        registerBlockSigner()
+
+        sendProposalButton.setOnClickListener {
+            peers = overlay.getPeers()
+            if (peers.isNotEmpty()) {
+                for (peer in peers) {
+                    items.add("Sending to peer ${peer.mid}")
+                    publishRandomTrack(peer)
+                }
+            } else {
+                items.add("No peers found")
             }
+            viewAdapter.notifyDataSetChanged()
         }
+    }
+
+    private fun publishRandomTrack(peer: Peer) {
+        val trackId = Random().nextInt()
+        val myPeer = IPv8Android.getInstance().myPeer
+
+        val transaction = mapOf("trackId" to trackId, "author" to myPeer.mid, "magnet" to "magnet:?xt=urn:btih:e825e94efe8a5a88c98bd7e0c6b9f1ae6b8d522b")
+        val publicKey = peer.publicKey.keyToBin()
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        items.add("Creating proposal block")
+        viewAdapter.notifyDataSetChanged()
+        trustchain.createProposalBlock("publish_track", transaction, publicKey)
+    }
+
+    private fun registerBlockSigner() {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                items.add("Signing block ${block.blockId}")
+                viewAdapter.notifyDataSetChanged()
+                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
+    }
+
+    private fun registerBlockListener() {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        trustchain.addListener("publish_track", object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                items.add("BLOCK: ${block.transaction}")
+                viewAdapter.notifyDataSetChanged()
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(SongMessage.Deserializer)
-        items.add("Song from" + peer.mid + ": " + payload.message + " at " + Date())
-        viewAdapter.notifyDataSetChanged()
+        items.add("Song from " + peer.mid + " : " + payload.message)
     }
 
     companion object {
