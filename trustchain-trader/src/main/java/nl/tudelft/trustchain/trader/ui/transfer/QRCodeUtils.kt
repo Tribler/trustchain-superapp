@@ -69,12 +69,12 @@ class QRCodeUtils(private val activity: FragmentActivity?, private val context: 
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
                 pixels[offset + x] = if (bitMatrix.get(x, y))
-                    ContextCompat.getColor(context, R.color.black);
+                    ContextCompat.getColor(context, R.color.black)
                 else
-                    ContextCompat.getColor(context, R.color.white);
+                    ContextCompat.getColor(context, R.color.white)
             }
         }
-        val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444)
+        val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
 
         bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight)
         return bitmap
