@@ -9,12 +9,13 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import java.util.*
 
 class TransferBlockParser {
-    val UNKNOWN_SEQ = 0u
+    @Suppress("EXPERIMENTAL_UNSIGNED_LITERALS")
+    private val UNKNOWN_SEQ = 0u
 
-
+    @ExperimentalUnsignedTypes
     fun proposalToString(block: TrustChainBlock): String {
 
-        val serializableBlock: SerializableBlock = SerializableBlock(
+        val serializableBlock = SerializableBlock(
             block.publicKey.toHex(),
             block.sequenceNumber.toInt(),
             block.previousHash,
@@ -26,6 +27,7 @@ class TransferBlockParser {
         return json.stringify(SerializableBlock.serializer(), serializableBlock)
     }
 
+    @ExperimentalUnsignedTypes
     fun stringToProposal(jsonString: String, trustChain: TrustChainHelper): TrustChainBlock {
         val json = Json(JsonConfiguration.Stable)
         val serializableBlock = json.parse(SerializableBlock.serializer(), jsonString)
