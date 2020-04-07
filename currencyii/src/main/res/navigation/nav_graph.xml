@@ -117,7 +117,7 @@
     </fragment>
     <fragment
         android:id="@+id/daoImportOrCreate"
-        android:name="nl.tudelft.ipv8.android.demo.ui.bitcoin.DaoImportOrCreate">
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoImportOrCreate">
         <action
             android:id="@+id/action_daoImportOrCreate_to_blockchainDownloadFragment"
             app:destination="@id/blockchainDownloadFragment"
