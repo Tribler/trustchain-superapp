@@ -29,7 +29,7 @@ This repository contains a collection of Android apps built on top of [IPv8](htt
 
 ### Do you want to add your own app?
 
-- [Adding your own app to the TrustChain Super App](AppTutorial.md).
+- [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
 
 ## Build
 
