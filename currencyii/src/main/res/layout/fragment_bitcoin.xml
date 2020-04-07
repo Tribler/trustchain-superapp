@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/bitcoin_refresh_swiper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20px">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/walletStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Status: N/A" />
+
+                <TextView
+                    android:id="@+id/walletBalance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bitcoin available: N/A" />
+
+                <EditText
+                    android:id="@+id/walletSeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="seed and creation date"
+                    android:inputType="textPersonName" />
+
+                <TextView
+                    android:id="@+id/chosenNetwork"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Network: N/A" />
+
+                <TextView
+                    android:id="@+id/yourPublicHex"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Public Key:" />
+
+                <TextView
+                    android:id="@+id/progressField"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Progress: waiting..." />
+
+                <EditText
+                    android:id="@+id/protocolKey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="protocol address"
+                    android:inputType="textPersonName" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/import_custom_keys"
+                        android:layout_width="196dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:enabled="true"
+                        android:text="Import Own Keys" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="false"
+                android:gravity="bottom"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Your wallet actions"
+                        android:textAlignment="center" />
+
+                    <Button
+                        android:id="@+id/create_wallet_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Create Shared Bitcoin Wallet" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/show_wallet_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="My Shared Bitcoin Wallets" />
+
+                <Button
+                    android:id="@+id/search_wallet_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Join Shared Bitcoin Wallet" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

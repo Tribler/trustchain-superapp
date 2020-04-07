@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
@@ -16,7 +16,6 @@ android {
     buildToolsVersion "29.0.2"
 
     defaultConfig {
-        applicationId "nl.tudelft.trustchain"
         minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
@@ -32,12 +31,11 @@ android {
         }
     }
 
-    // To inline the bytecode built with JVM target 1.8 into
-    // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
         allWarningsAsErrors = true
@@ -45,6 +43,14 @@ android {
 
     viewBinding {
         enabled = true
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    lintOptions {
+        abortOnError false
     }
 }
 
@@ -55,11 +61,8 @@ repositories {
 }
 
 dependencies {
+    implementation project(':ipv8-android')
     implementation project(':common')
-    implementation project(':trustchain-explorer')
-    implementation project(':debug')
-    implementation project(':currencyii')
-    implementation project(':FOC')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -86,18 +89,31 @@ dependencies {
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
-    implementation 'com.github.tony19:logback-android:2.0.0'
 
     implementation 'com.mattskala:itemadapter:0.3'
 
     // Testing
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'
+    testImplementation "io.mockk:mockk:1.9.3"
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    // BitcoinJ
+    implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
+
+    // Google Core
+    implementation "com.google.guava:guava:28.2-android"
+
+    // Blockchain Info
+    implementation 'info.blockchain:api:1.1.4'
+
+    // GSON
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
+            "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
     ]
 }

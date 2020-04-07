@@ -27,6 +27,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {
@@ -39,7 +40,8 @@ class TrustChainApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
-            createDemoCommunity()
+            createDemoCommunity(),
+            createCoinCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -73,6 +75,32 @@ class TrustChainApplication : Application() {
         trustchain.addListener(BLOCK_TYPE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
+                CoinCommunity.joinAskBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
+            }
+        })
+
+        trustchain.addListener(CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.i("Coin", "block received for signature request: ${block.blockId} ${block.transaction}")
+                CoinCommunity.transferFundsBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
             }
         })
     }
@@ -115,6 +143,16 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
+        )
+    }
+
+    private fun createCoinCommunity(): OverlayConfiguration<CoinCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val nsd = NetworkServiceDiscovery.Factory(getSystemService()!!)
+
+        return OverlayConfiguration(
+            Overlay.Factory(CoinCommunity::class.java),
+            listOf(randomWalk, nsd)
         )
     }
 
