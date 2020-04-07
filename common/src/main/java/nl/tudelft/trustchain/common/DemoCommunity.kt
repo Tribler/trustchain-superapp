@@ -8,7 +8,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.messaging.*
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import nl.tudelft.trustchain.common.util.VotingHelper
 import java.util.*
 
 class DemoCommunity : Community() {
