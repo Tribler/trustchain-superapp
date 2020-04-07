@@ -427,7 +427,7 @@ class CoinCommunity : Community() {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
             val walletManager = WalletManagerAndroid.getInstance()
             val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
-            Log.i("Coin", "Data received: ${blockData.toString()}")
+            Log.i("Coin", "Data received: $blockData")
             val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
             val previousTransaction = Transaction(
                 walletManager.params,

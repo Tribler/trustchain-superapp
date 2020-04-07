@@ -32,7 +32,8 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
@@ -156,9 +157,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     private fun validateCreationInput(): Boolean {
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
-        return bitcoinPublicKey != null
-            && satoshiTransferAmount >= 5000
-            && blockHash != null
+        return bitcoinPublicKey != "" && satoshiTransferAmount >= 5000 && blockHash != null
     }
 
     companion object {

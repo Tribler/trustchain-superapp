@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package nl.tudelft.trustchain.currencyii
 
 import io.mockk.*

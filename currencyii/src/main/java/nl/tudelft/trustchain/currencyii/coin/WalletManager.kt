@@ -35,6 +35,7 @@ const val MAIN_NET_WALLET_NAME = "forwarding-service"
  * with bitcoin wallets (including multi-signature wallets).
  * NOTE: Ideally should be separated from any Android UI concepts. Not the case currently.
  */
+@Suppress("DEPRECATION", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 class WalletManager(
     walletManagerConfiguration: WalletManagerConfiguration,
     walletDir: File,
@@ -727,7 +728,6 @@ class WalletManager(
             val creationTime = seed.creationTimeSeconds
             return SerializedDeterministicKey(words, creationTime)
         }
-
     }
 
     fun toSeed(): SerializedDeterministicKey {

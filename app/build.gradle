@@ -40,6 +40,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        allWarningsAsErrors = true
     }
 
     viewBinding {
@@ -58,6 +59,7 @@ dependencies {
     implementation project(':trustchain-explorer')
     implementation project(':debug')
     implementation project(':currencyii')
+    implementation project(':FOC')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -96,7 +98,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-Werror" // Set Kotlin compiler warnings as errors
+        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
     ]
 }

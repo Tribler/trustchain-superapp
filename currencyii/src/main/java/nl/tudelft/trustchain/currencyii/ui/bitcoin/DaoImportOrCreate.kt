@@ -10,7 +10,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
-
+import nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoImportOrCreateDirections
 
 /**
  * A simple [Fragment] subclass.
@@ -112,6 +112,5 @@ class DaoImportOrCreate : Fragment() {
         fun isPrivateKeyValid(privateKey: String): Boolean {
             return privateKey.length in 51..52 || privateKey.length == 64
         }
-
     }
 }

@@ -50,5 +50,4 @@ object WalletManagerAndroid {
         walletManager!!.kit.stopAsync()
         walletManager = null
     }
-
 }
