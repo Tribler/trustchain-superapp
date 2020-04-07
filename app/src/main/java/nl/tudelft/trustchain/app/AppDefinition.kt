@@ -32,7 +32,7 @@ enum class AppDefinition(
         "Currency",
         R.color.blue,
         MainActivity::class.java
-    )
+    ),
     FOC(
         R.drawable.ic_naruto,
         "FOC",
