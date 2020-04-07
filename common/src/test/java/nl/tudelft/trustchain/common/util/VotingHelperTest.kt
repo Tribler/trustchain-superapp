@@ -145,4 +145,35 @@ class VotingHelperTest {
 
         Assert.assertEquals(Pair(1, 0), count)
     }
+
+    @Test
+    fun preventDoubleVoteCount() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create some reply agreement blocks
+        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToVote(false, propBlock)
+        votingHelper.respondToVote(true, propBlock)
+
+        val count =
+            votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
+
+        Assert.assertEquals(Pair(1, 0), count)
+    }
 }
