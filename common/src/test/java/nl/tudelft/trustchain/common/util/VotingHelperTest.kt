@@ -31,15 +31,18 @@ class VotingHelperTest {
         return TrustChainSQLiteStore(database)
     }
 
-    private fun getPeers(): List<PublicKey> {
+    private fun getPeers(excludeSelf: Boolean = false): MutableList<PublicKey> {
         val peers: MutableList<PublicKey> = ArrayList()
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(getMyPeer().publicKey)
-
+        if(!excludeSelf) {
+            peers.add(getMyPeer().publicKey)
+        }
         return peers
     }
+
+
 
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
@@ -196,5 +199,35 @@ class VotingHelperTest {
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
 
         Assert.assertEquals(Pair(1, 0), count)
+    }
+
+    @Test
+    fun countEligibleVotes() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        var peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create a reply agreement block
+        votingHelper.respondToVote(true, propBlock)
+
+        val count =
+            votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
+
+        // verify my own vote has not been counted
+        Assert.assertEquals(Pair(0, 0), count)
     }
 }
