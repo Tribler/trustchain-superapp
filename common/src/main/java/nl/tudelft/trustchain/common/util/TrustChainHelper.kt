@@ -44,12 +44,13 @@ class TrustChainHelper(
 
     /**
      * Creates a new proposal block, using a text message as the transaction content.
+     * Optionally, the blockType can be passed as an argument. Default value is "demo_block".
      */
-    fun createProposalBlock(message: String, publicKey: ByteArray): TrustChainBlock {
-        val blockType = "demo_block"
+    fun createProposalBlock(message: String, publicKey: ByteArray, blockType: String = "demo_block"): TrustChainBlock {
         val transaction = mapOf("message" to message)
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
+
     /**
      * Creates a new proposal block of type "accept_ask_block", using a float as transaction amount.
      */
@@ -91,7 +92,6 @@ class TrustChainHelper(
      * a receiver.
      */
     fun getChainByUser(publicKeyBin: ByteArray): List<TrustChainBlock> {
-
         return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
     }
 

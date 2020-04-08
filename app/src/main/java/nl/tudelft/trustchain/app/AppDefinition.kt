@@ -3,7 +3,9 @@ package nl.tudelft.trustchain.app
 import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
+import nl.tudelft.trustchain.currencyii.MainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -39,4 +41,16 @@ enum class AppDefinition(
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
+    CURRENCYII(
+        R.drawable.ic_attach_money_black_24dp,
+        "Currency",
+        R.color.blue,
+        MainActivity::class.java
+    ),
+    FOC(
+        R.drawable.ic_naruto,
+        "FOC",
+        R.color.blue,
+        MainActivityFOC::class.java
+    )
 }
