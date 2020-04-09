@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 
-
 /**
  * A simple [Fragment] subclass.
  * Use the [DaoImportOrCreate.newInstance] factory method to
@@ -112,6 +111,5 @@ class DaoImportOrCreate : Fragment() {
         fun isPrivateKeyValid(privateKey: String): Boolean {
             return privateKey.length in 51..52 || privateKey.length == 64
         }
-
     }
 }

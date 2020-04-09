@@ -727,7 +727,6 @@ class WalletManager(
             val creationTime = seed.creationTimeSeconds
             return SerializedDeterministicKey(words, creationTime)
         }
-
     }
 
     fun toSeed(): SerializedDeterministicKey {
