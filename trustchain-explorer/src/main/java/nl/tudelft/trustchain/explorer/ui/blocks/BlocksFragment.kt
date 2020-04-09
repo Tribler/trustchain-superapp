@@ -23,7 +23,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
 
-@UseExperimental(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class)
 open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     private val adapter = ItemAdapter()
 
