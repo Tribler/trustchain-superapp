@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="nl.tudelft.trustchain.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -16,7 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name="nl.tudelft.trustchain.app.TrustChainApplication">
+        android:name="nl.tudelft.trustchain.app.TrustChainApplication"
+        android:allowBackup="true"
+        tools:ignore="AllowBackup">
 
         <activity
             android:name=".ui.dashboard.DashboardActivity"
@@ -51,7 +54,8 @@
 
         <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            tools:ignore="InnerclassSeparator" />
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>

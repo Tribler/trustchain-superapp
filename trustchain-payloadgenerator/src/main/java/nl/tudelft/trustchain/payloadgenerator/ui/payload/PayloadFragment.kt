@@ -24,9 +24,7 @@ import kotlin.concurrent.thread
 import kotlin.random.Random
 
 /**
- * A fragment representing a list of Items.
- * Activities containing this fragment MUST implement the
- * [PayloadFragment.OnListFragmentInteractionListener] interface.
+ * A fragment representing a list of Payloads.
  */
 class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
@@ -41,8 +39,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
         adapter.registerRenderer(PayloadItemRenderer {
 
-            trustchain.createAcceptTxProposalBlock(it.primaryCurrency,it.secondaryCurrency,it.amount?.toFloat(),it.price?.toFloat(),it.type, it.publicKey)
-            Log.d("PayloadFragment::onCreate","TX block send to: ${it.publicKey}!")
+            trustchain.createAcceptTxProposalBlock(it.primaryCurrency, it.secondaryCurrency, it.amount?.toFloat(), it.price?.toFloat(), it.type, it.publicKey)
+            Log.d("PayloadFragment::onCreate", "TX block send to: ${it.publicKey}!")
         })
     }
 
@@ -60,10 +58,10 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
 
         switchAutoMessage.setOnClickListener {
-            if(!isAutoSending){
+            if (!isAutoSending) {
                 sendAutoMessages()
             }
-            isAutoSending=!isAutoSending
+            isAutoSending != isAutoSending
         }
 
         val marketCommunity = getMarketCommunity()
@@ -79,7 +77,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         if (price == null) {
             price = 0.0
         }
-        if (amount != 0.0 && price !=0.0) {
+        if (amount != 0.0 && price != 0.0) {
             val payloadSerializable =
                 createPayloadSerializable(amount, price, type)
             val payload = createPayload(amount, price, type)
@@ -92,20 +90,20 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         }
         loadCurrentPayloads((TrustChainPayloadGeneratorActivity.PayloadsList).payloads)
     }
-    fun sendAutoMessages(){
+    fun sendAutoMessages() {
         thread(start = true) {
             while (isAutoSending) {
                 Thread.sleep(3000)
                 val marketCommunity = getMarketCommunity()
                 val r = java.util.Random()
-                val typeInt = Random.nextInt(0,2)
+                val typeInt = Random.nextInt(0, 2)
                 var type = "Bid"
-                var amount = r.nextGaussian()*15+100
+                var amount = r.nextGaussian() * 15 + 100
                 var price = 1.0
-                if (typeInt==1){
+                if (typeInt == 1) {
                     type = "Ask"
                     amount = 1.0
-                    price = r.nextGaussian()*15+100
+                    price = r.nextGaussian() * 15 + 100
                 }
                 amount = String.format("%.2f", amount).toDouble()
                 price = String.format("%.2f", price).toDouble()
@@ -116,7 +114,6 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             }
         }
     }
-
 
     private fun createPayload(
         amount: Double,
@@ -177,8 +174,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        if(!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
-            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+        if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
+            TrustChainPayloadGeneratorActivity.payloads.add(payload)
         }
     }
     private fun bidListener(payload: TradePayload) {
@@ -186,7 +183,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        if(!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
+        if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
         }
     }
@@ -215,6 +212,3 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         }
     }
 }
-
-
-

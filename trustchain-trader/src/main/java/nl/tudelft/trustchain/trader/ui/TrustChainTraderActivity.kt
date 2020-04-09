@@ -14,7 +14,7 @@ class TrustChainTraderActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_trader
     override val bottomNavigationMenu = R.menu.bottom_navigation_menu_trader
 
-    companion object PayloadsList{
+    companion object PayloadsList {
         var acceptedPayloads: MutableList<TradePayload> = mutableListOf()
         var declinedPayloads: MutableList<TradePayload> = mutableListOf()
         var amountDD = 10000.0
@@ -35,5 +35,4 @@ class TrustChainTraderActivity : BaseActivity() {
             appBarConfiguration
         )
     }
-
 }

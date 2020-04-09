@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_trader.*
 import kotlinx.coroutines.*
-import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -37,10 +36,8 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        adapterAccepted.registerRenderer(PayloadItemRenderer{})
-        adapterDeclined.registerRenderer(PayloadItemRenderer{})
-
+        adapterAccepted.registerRenderer(PayloadItemRenderer {})
+        adapterDeclined.registerRenderer(PayloadItemRenderer {})
     }
 
     @SuppressLint("SetTextI18n")
@@ -61,7 +58,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         marketCommunity.addListener(TradePayload.Type.BID, ::bidListener)
         amountFieldDD.text = amountDD.toString()
         amountFieldBTC.text = amountBTC.toString()
-
 
         switchTrader.setOnClickListener {
             isTrading = !isTrading
@@ -91,7 +87,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
                 if (adapterString == "accepted") {
                     adapterAccepted.updateItems(items)
-                }else if (adapterString == "declined") {
+                } else if (adapterString == "declined") {
                     adapterDeclined.updateItems(items)
                 }
 
@@ -109,12 +105,12 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         )
         if (isTrading) {
             val type = ai.predict(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
-            if ( type== 1) {
-                accept(payload,type)
+            if (type == 1) {
+                accept(payload, type)
             } else if (type == 2) {
                 val price = round(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
                 if (ai.predict(price) == 1) {
-                    accept(payload,1)
+                    accept(payload, 1)
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
@@ -127,51 +123,54 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        if(isTrading) {
+        if (isTrading) {
             val type = ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
             if (type == 0) {
-                accept(payload,type)
+                accept(payload, type)
             } else if (type == 2) {
                 val price = round(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
                 if (ai.predict(price) == 0) {
-                    accept(payload,0)
+                    accept(payload, 0)
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
             }
         }
     }
-    private fun round(price: Int):Int{
-        if (price>115){
-            return 115
-        }else if(price<85){
-            return 85
-        }
-        else{
-            return price
+    private fun round(price: Int): Int {
+        return when {
+            price > 115 -> {
+                115
+            }
+            price < 85 -> {
+                85
+            }
+            else -> {
+                price
+            }
         }
     }
 
-    private fun accept(payload: TradePayload,type:Int){
+    private fun accept(payload: TradePayload, type: Int) {
 //        Commenting the following two rules will let the AI bot stop sending proposal blocks to the sender of the bid/ask
 //        trustchain.createAcceptTxProposalBlock(payload.primaryCurrency,payload.secondaryCurrency,
 //            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
 
-        if (type ==0){
-            updateWallet(payload.amount!!,payload.price!!,type)
-        } else if(type==1){
-            updateWallet(payload.price!!,payload.amount!!,type)
+        if (type == 0) {
+            updateWallet(payload.amount!!, payload.price!!, type)
+        } else if (type == 1) {
+            updateWallet(payload.price!!, payload.amount!!, type)
         }
     }
-    private fun updateWallet(DD:Double,BTC:Double,type:Int){
-        if (type ==0){
-            amountDD+=DD
-            amountBTC-=BTC
-        } else if (type ==1){
-            amountDD -=DD
-            amountBTC+=BTC
+    private fun updateWallet(DD: Double, BTC: Double, type: Int) {
+        if (type == 0) {
+            amountDD += DD
+            amountBTC -= BTC
+        } else if (type == 1) {
+            amountDD -= DD
+            amountBTC += BTC
         }
         amountDD = String.format("%.2f", amountDD).toDouble()
         amountBTC = String.format("%.2f", amountBTC).toDouble()
@@ -185,5 +184,4 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         marketCommunity.removeListener(TradePayload.Type.ASK, ::askListener)
         marketCommunity.removeListener(TradePayload.Type.BID, ::bidListener)
     }
-
 }

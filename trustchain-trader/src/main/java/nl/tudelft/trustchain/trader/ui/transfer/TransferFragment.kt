@@ -9,18 +9,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.navigation.findNavController
-import com.google.android.material.snackbar.Snackbar
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
-import kotlinx.android.synthetic.*
 import kotlinx.android.synthetic.main.fragment_transfer.*
 import kotlinx.android.synthetic.main.fragment_transfer.view.*
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.trader.R
-
-
 
 class TransferFragment : BaseFragment() {
     private var isSending = true
@@ -68,20 +64,19 @@ class TransferFragment : BaseFragment() {
         }
 
         btnSendProposalBlock.setOnClickListener {
-            val amount = if(editTxtAmount.text != null && !editTxtAmount.text.isEmpty()) {
+            val amount = if (editTxtAmount.text != null && editTxtAmount.text.isNotEmpty()) {
                 editTxtAmount.text.toString().toFloat()
             } else {
                 0f
             }
-            val publicKey = if(editTxtAddress.text != null
-                    && !editTxtAddress.text.isEmpty()
-                    && editTxtAddress.text.length % 2 == 0) {
+            val publicKey = if (editTxtAddress.text != null && editTxtAddress.text.isNotEmpty() &&
+                editTxtAddress.text.length % 2 == 0) {
                 editTxtAddress.text.toString().hexToBytes()
             } else {
                 "null".hexToBytes()
             }
-            if(editTxtAddress.text != null && editTxtAmount.text != null
-                    && !editTxtAmount.text.isEmpty() && !editTxtAddress.text.isEmpty()) {
+            if (editTxtAddress.text != null && editTxtAmount.text != null &&
+                editTxtAmount.text.isNotEmpty() && editTxtAddress.text.isNotEmpty()) {
                 if (editTxtAddress.text.length % 2 == 0) {
                     val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
                     trustchain.createTxProposalBlock(amount, publicKey)
