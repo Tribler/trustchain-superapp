@@ -28,9 +28,9 @@ enum class AppDefinition(
         DebugActivity::class.java
     ),
     CURRENCYII(
-        R.drawable.ic_attach_money_black_24dp,
-        "Currency",
-        R.color.blue,
+        R.drawable.ic_bitcoin,
+        "Currency II",
+        R.color.,
         MainActivity::class.java
     ),
     FOC(
