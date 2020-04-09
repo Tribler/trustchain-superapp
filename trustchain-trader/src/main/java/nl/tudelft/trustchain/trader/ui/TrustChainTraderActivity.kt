@@ -27,7 +27,8 @@ class TrustChainTraderActivity : BaseActivity() {
             setOf(
                 R.id.transferFragment,
                 R.id.traderFragment,
-                R.id.peerFragment
+                R.id.peerFragment,
+                R.id.AI_HistoryFragment
             )
         ).build()
         setupActionBarWithNavController(

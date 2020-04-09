@@ -59,6 +59,13 @@ class TransferFragment : BaseFragment() {
             isSending = !isSending
         }
 
+        QRPK_Next.setOnClickListener {
+            QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
+            //Temporary QR scan skip
+//            val bundle = bundleOf("Proposal Block" to "Prop blockje")
+//            view.findNavController().navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
+        }
+
         btnScanPk.setOnClickListener {
             QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
         }
@@ -103,8 +110,14 @@ class TransferFragment : BaseFragment() {
             IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) { // This is a result returned by the QR scanner
             val content = result.contents
-            if (content != null && isSending) {
-                editTxtAddress.setText(content)
+            if (content != null) {
+                if (isSending) {
+                    editTxtAddress.setText(content)
+                } else {
+                    val bundle = bundleOf("Proposal Block" to content)
+                    requireView().findNavController()
+                        .navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
+                }
             } else {
                 Log.d("QR Scan", "Scan failed")
             }
