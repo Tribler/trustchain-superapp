@@ -14,10 +14,10 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 
 /**
  * A simple [Fragment] subclass.
- * Use the [DaoLoginChoice.newInstance] factory method to
+ * Use the [DAOLoginFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DaoLoginChoice : Fragment() {
+class DAOLoginFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -29,19 +29,19 @@ class DaoLoginChoice : Fragment() {
                     .setConfiguration(config).init()
 
                 findNavController().navigate(
-                    DaoLoginChoiceDirections.actionDaoLoginChoiceToBitcoinFragment(
+                    DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment(
                         true
                     )
                 )
             } else {
                 findNavController().navigate(
-                    DaoLoginChoiceDirections.actionDaoLoginChoiceToBitcoinFragment()
+                    DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment()
                 )
             }
         }
 
         import_create_button.setOnClickListener {
-            findNavController().navigate(DaoLoginChoiceDirections.actionDaoLoginChoiceToDaoImportOrCreate())
+            findNavController().navigate(DAOLoginFragmentDirections.actionDaoLoginChoiceToDaoImportOrCreate())
         }
 
         super.onActivityCreated(savedInstanceState)
@@ -58,6 +58,6 @@ class DaoLoginChoice : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = DaoLoginChoice()
+        fun newInstance() = DAOLoginFragment()
     }
 }

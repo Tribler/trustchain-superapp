@@ -60,7 +60,7 @@
     <fragment
         android:id="@+id/daoLoginChoice"
         android:label="DAO Start Screen"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoLoginChoice">
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOLoginFragment">
         <action
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
