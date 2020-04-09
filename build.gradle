@@ -6,7 +6,7 @@ buildscript {
     ext.ktlint_gradle_version = '9.1.1'
     ext.sqldelight_version = '1.2.2'
     ext.nav_version = "2.2.1"
-    ext.fragment_version = "1.2.2"
+    ext.fragment_version = '1.2.4'
     ext.lifecycle_version = "2.2.0"
     ext.dokka_version = "0.10.1"
     repositories {
@@ -15,7 +15,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.1'
+        classpath 'com.android.tools.build:gradle:3.6.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_gradle_version"
         classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight_version"
@@ -24,6 +24,9 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+
+        // TODO: Find a way to move this to trustchain-trader
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 

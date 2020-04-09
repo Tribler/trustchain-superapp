@@ -13,7 +13,7 @@ ktlint {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
@@ -57,6 +57,8 @@ repositories {
 dependencies {
     implementation project(':common')
     implementation project(':trustchain-explorer')
+    implementation project(':trustchain-trader')
+    implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
     implementation project(':currencyii')
     implementation project(':FOC')

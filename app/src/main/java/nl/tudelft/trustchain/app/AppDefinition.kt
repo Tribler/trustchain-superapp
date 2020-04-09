@@ -8,6 +8,8 @@ import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.MainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
+import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
+import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -27,6 +29,18 @@ enum class AppDefinition(
         R.color.dark_gray,
         DebugActivity::class.java
     ),
+    TRUSTCHAIN_TRADER(
+        R.drawable.ic_device_hub_black_24dp,
+        "Trader",
+        R.color.blue,
+        TrustChainTraderActivity::class.java
+    ),
+    TRUSTCHAIN_PAYLOADGENERATOR(
+        R.drawable.ic_add_black_24dp,
+        "Market Bot",
+        R.color.black,
+        TrustChainPayloadGeneratorActivity::class.java
+    ),
     CURRENCYII(
         R.drawable.ic_attach_money_black_24dp,
         "Currency",
@@ -38,5 +52,5 @@ enum class AppDefinition(
         "FOC",
         R.color.blue,
         MainActivityFOC::class.java
-    ),
+    )
 }

@@ -27,6 +27,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 
 class TrustChainApplication : Application() {
@@ -41,6 +42,7 @@ class TrustChainApplication : Application() {
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
             createDemoCommunity(),
+            createMarketCommunity(),
             createCoinCommunity()
         ), walkerInterval = 5.0)
 
@@ -142,6 +144,14 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(DemoCommunity::class.java),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createMarketCommunity(): OverlayConfiguration<MarketCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            Overlay.Factory(MarketCommunity::class.java),
             listOf(randomWalk)
         )
     }
