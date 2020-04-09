@@ -90,7 +90,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         }
         loadCurrentPayloads((TrustChainPayloadGeneratorActivity.PayloadsList).payloads)
     }
-    fun sendAutoMessages() {
+    private fun sendAutoMessages() {
         thread(start = true) {
             while (isAutoSending) {
                 Thread.sleep(3000)
