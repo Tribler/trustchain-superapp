@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="nl.tudelft.ipv8.android.demo.ui.bitcoin.DaoImportOrCreate">
+    tools:context=".ui.bitcoin.DaoImportOrCreate">
 
     <LinearLayout
         android:layout_width="match_parent"

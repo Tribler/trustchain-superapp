@@ -18,6 +18,7 @@ import org.bitcoinj.script.Script
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@Suppress("DEPRECATION")
 class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
