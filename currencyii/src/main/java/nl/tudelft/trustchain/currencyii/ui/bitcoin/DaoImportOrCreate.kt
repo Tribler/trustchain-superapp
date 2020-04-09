@@ -94,7 +94,7 @@ class DaoImportOrCreate : Fragment() {
             .setConfiguration(config)
             .init()
 
-        findNavController().navigate(DaoImportOrCreateDirections.actionDaoImportOrCreateToBlockchainDownloadFragment())
+        findNavController().navigate(DaoImportOrCreateDirections.actionDaoImportOrCreateToBitcoinFragment(showDownload = true))
     }
 
     override fun onCreateView(
