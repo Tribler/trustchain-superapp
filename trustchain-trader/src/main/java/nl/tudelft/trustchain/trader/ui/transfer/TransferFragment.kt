@@ -61,7 +61,7 @@ class TransferFragment : BaseFragment() {
 
         QRPK_Next.setOnClickListener {
             QRCodeUtils(requireActivity(), requireContext()).startQRScanner(this)
-            //Temporary QR scan skip
+//            Temporary QR scan skip
 //            val bundle = bundleOf("Proposal Block" to "Prop blockje")
 //            view.findNavController().navigate(R.id.action_transferFragment_to_transferReceiveFragment, bundle)
         }
