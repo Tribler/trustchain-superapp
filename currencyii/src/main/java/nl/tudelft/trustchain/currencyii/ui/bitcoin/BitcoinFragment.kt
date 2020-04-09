@@ -28,6 +28,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         if (!WalletManagerAndroid.isInitialized()) {
             navController.navigate(R.id.daoLoginChoice)
         }
+
+        val args = BitcoinFragmentArgs.fromBundle(requireArguments())
+        if (args.showDownload) {
+            navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+        }
     }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

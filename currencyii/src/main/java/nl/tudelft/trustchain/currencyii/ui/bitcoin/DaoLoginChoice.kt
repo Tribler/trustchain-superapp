@@ -1,9 +1,10 @@
-package nl.tudelft.ipv8.android.demo.ui.bitcoin
+package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_login_choice.*
@@ -20,12 +21,24 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 class DaoLoginChoice : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        load_existing_button.setOnClickListener {
-            val config = WalletManagerConfiguration(BitcoinNetworkOptions.TEST_NET)
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config).init()
+        super.onActivityCreated(savedInstanceState)
 
-            findNavController().navigate(DaoLoginChoiceDirections.actionDaoLoginChoiceToBlockchainDownloadFragment())
+        load_existing_button.setOnClickListener {
+            if (!WalletManagerAndroid.isInitialized()) {
+                val config = WalletManagerConfiguration(BitcoinNetworkOptions.TEST_NET)
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                    .setConfiguration(config).init()
+
+                findNavController().navigate(
+                    DaoLoginChoiceDirections.actionDaoLoginChoiceToBitcoinFragment(
+                        true
+                    )
+                )
+            } else {
+                findNavController().navigate(
+                    DaoLoginChoiceDirections.actionDaoLoginChoiceToBitcoinFragment()
+                )
+            }
         }
 
         import_create_button.setOnClickListener {
