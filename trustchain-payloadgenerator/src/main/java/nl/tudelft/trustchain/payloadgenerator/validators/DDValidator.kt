@@ -29,10 +29,12 @@ class DDValidator : TransactionValidator {
             val balance =
                 database.getBalance(block.linkPublicKey, block.linkSequenceNumber - 1u)
             return balance > amount
-        } else if (block.isAgreement){
-            val balance =
-                database.getBalance(block.publicKey, block.sequenceNumber - 1u)
-            return balance > amount
+        } else {
+            if (block.isAgreement) {
+                val balance =
+                    database.getBalance(block.publicKey, block.sequenceNumber - 1u)
+                return balance > amount
+            }
         }
         return false
     }

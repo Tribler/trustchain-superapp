@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.payloadgenerator.ui.payload
 
 import android.annotation.SuppressLint
-import android.text.Html
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_payload.view.*
@@ -14,8 +13,8 @@ class PayloadItemRenderer(
     @SuppressLint("SetTextI18n")
     override fun bindView(item: PayloadItem, view: View) = with(view) {
         txtPeerId.text = item.publicKey.toString()
-        txtSending.text = item.primaryCurrency.toString()+" "+item.amount.toString()
-        txtReceiving.text = item.secondaryCurrency.toString()+" "+item.price.toString()
+        txtSending.text = item.primaryCurrency.toString() + " " + item.amount.toString()
+        txtReceiving.text = item.secondaryCurrency.toString() + " " + item.price.toString()
         txtPayloadType.text = item.type.toString()
         setOnClickListener {
             onItemClick(item)

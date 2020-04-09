@@ -13,8 +13,8 @@ class PayloadItemRenderer(
     @SuppressLint("SetTextI18n")
     override fun bindView(item: PayloadItem, view: View) = with(view) {
         txtPeerId.text = item.publicKey.toString()
-        txtSending.text = item.primaryCurrency.toString()+" "+item.availableAmount.toString()
-        txtReceiving.text = item.secondaryCurrency.toString()+" "+item.requiredAmount.toString()
+        txtSending.text = item.primaryCurrency.toString() + " " + item.availableAmount.toString()
+        txtReceiving.text = item.secondaryCurrency.toString() + " " + item.requiredAmount.toString()
         txtPayloadType.text = item.type.toString()
         setOnClickListener {
             onItemClick(item)

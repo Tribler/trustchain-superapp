@@ -39,7 +39,6 @@ class QRCodeUtils(private val activity: FragmentActivity?, private val context: 
             } catch (e: WriterException) {
                 e.printStackTrace()
             }
-
         }
         return null
     }

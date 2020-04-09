@@ -12,15 +12,16 @@ import nl.tudelft.trustchain.trader.R
 /**
  * Fragment for the success animation. Can handle some logic if necessary
  */
-class TransferConfirmationFragment: BaseFragment(R.layout.fragment_transfer_confirmation) {
+class TransferConfirmationFragment : BaseFragment(R.layout.fragment_transfer_confirmation) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        animation_view.addAnimatorListener(object: AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                super.onAnimationEnd(animation)
-                view.findNavController().navigate(TransferConfirmationFragmentDirections.actionTransferConfirmationFragmentToTransferFragment())
-            }
-        })
+        animation_view.run {
+            animation_view.addAnimatorListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    view.findNavController().navigate(TransferConfirmationFragmentDirections.actionTransferConfirmationFragmentToTransferFragment())
+                }
+            })
+        }
     }
 }

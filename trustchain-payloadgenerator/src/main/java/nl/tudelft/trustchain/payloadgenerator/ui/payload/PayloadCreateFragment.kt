@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.payloadgenerator.ui.payload
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,9 +11,8 @@ import kotlinx.android.synthetic.main.fragment_create_payload.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.payloadgenerator.R
 
-
 class PayloadCreateFragment : BaseFragment() {
-    var isAsk = false
+    private var isAsk = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -22,6 +22,7 @@ class PayloadCreateFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_create_payload, container, false)
     }
 
+    @SuppressLint("SetTextI18n")
     @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
@@ -35,18 +36,18 @@ class PayloadCreateFragment : BaseFragment() {
         }
 
         btnCreatePayload.setOnClickListener {
-            val amount = if(editTextAmount.text != null) {
+            val amount = if (editTextAmount.text != null) {
                 editTextAmount.text.toString().toDouble()
             } else {
                 0.0
             }
-            val price = if(editTextPrice.text != null) {
+            val price = if (editTextPrice.text != null) {
                 editTextPrice.text.toString().toDouble()
             } else {
                 0.0
             }
             var type = "Bid"
-            if (isAsk){
+            if (isAsk) {
                 type = "Ask"
             }
             val bundle = bundleOf("amount" to amount, "price" to price, "type" to type)

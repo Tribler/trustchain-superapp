@@ -6,13 +6,13 @@ import kotlin.math.ln
  * New sets of features `F` can then be used to predict a category `C`.
  * From: https://github.com/thomasnield/kotlin-statistics
  */
-fun <T,F,C> Iterable<T>.toNaiveBayesClassifier(
+fun <T, F, C> Iterable<T>.toNaiveBayesClassifier(
     featuresSelector: ((T) -> Iterable<F>),
     categorySelector: ((T) -> C),
     observationLimit: Int = 100000,
     k1: Double = 0.5,
     k2: Double = k1 * 2.0
-) = NaiveBayesClassifier<F,C>(observationLimit, k1,k2).also { nbc ->
+) = NaiveBayesClassifier<F, C>(observationLimit, k1, k2).also { nbc ->
     forEach { nbc.addObservation(categorySelector(it), featuresSelector(it)) }
 }
 
@@ -20,13 +20,13 @@ fun <T,F,C> Iterable<T>.toNaiveBayesClassifier(
  * Returns a `NaiveBayesClassifier` that associates each set of `F` features from an item `T` with a category `C`.
  * New sets of features `F` can then be used to predict a category `C`.
  */
-fun <T,F,C> Sequence<T>.toNaiveBayesClassifier(
+fun <T, F, C> Sequence<T>.toNaiveBayesClassifier(
     featuresSelector: ((T) -> Iterable<F>),
     categorySelector: ((T) -> C),
     observationLimit: Int = Int.MAX_VALUE,
     k1: Double = 0.5,
     k2: Double = k1 * 2.0
-) = NaiveBayesClassifier<F,C>(observationLimit, k1,k2).also { nbc ->
+) = NaiveBayesClassifier<F, C>(observationLimit, k1, k2).also { nbc ->
     forEach { nbc.addObservation(categorySelector(it), featuresSelector(it)) }
 }
 
@@ -34,17 +34,17 @@ fun <T,F,C> Sequence<T>.toNaiveBayesClassifier(
  * A `NaiveBayesClassifier` that associates each set of `F` features from an item `T` with a category `C`.
  * New sets of features `F` can then be used to predict a category `C`.
  */
-class NaiveBayesClassifier<F,C>(
+class NaiveBayesClassifier<F, C>(
     val observationLimit: Int = Int.MAX_VALUE,
     val k1: Double = 0.5,
     val k2: Double = k1 * 2.0
 ) {
-    private val _population = mutableListOf<BayesInput<F,C>>()
+    private val _population = mutableListOf<BayesInput<F, C>>()
     private val modelStale = AtomicBoolean(false)
 
     @Volatile
-    var probabilities = mapOf<FeatureProbability.Key<F,C>, FeatureProbability<F,C>>()
-    val population: List<BayesInput<F,C>> get() = _population
+    var probabilities = mapOf<FeatureProbability.Key<F, C>, FeatureProbability<F, C>>()
+    val population: List<BayesInput<F, C>> get() = _population
 
     /**
      * Adds an observation of features to a category
@@ -70,7 +70,7 @@ class NaiveBayesClassifier<F,C>(
                 _population.asSequence()
                     .map { it.category }
                     .distinct()
-                    .map { c -> FeatureProbability.Key(f,c) }
+                    .map { c -> FeatureProbability.Key(f, c) }
             }.map { it to FeatureProbability(it.feature, it.category, this) }
             .toMap()
 
@@ -106,7 +106,7 @@ class NaiveBayesClassifier<F,C>(
         val f = features.toSet()
 
         return categories.asSequence()
-            .filter { c ->  population.any { it.category == c} && probabilities.values.any { it.feature in f } }
+            .filter { c -> population.any { it.category == c } && probabilities.values.any { it.feature in f } }
             .map { c ->
                 val probIfCategory = probabilities.values.asSequence().filter { it.category == c }.map {
                     if (it.feature in f) {
@@ -128,23 +128,19 @@ class NaiveBayesClassifier<F,C>(
             }.filter { it.probability >= .1 }
             .sortedByDescending { it.probability }
             .firstOrNull()
-
     }
 
-    class FeatureProbability<F,C>(val feature: F, val category: C, nbc: NaiveBayesClassifier<F,C>) {
-
-        val probability = (nbc.k1 + nbc.population.count { it.category == category && feature in it.features } ) /
+    class FeatureProbability<F, C>(val feature: F, val category: C, nbc: NaiveBayesClassifier<F, C>) {
+        val probability = (nbc.k1 + nbc.population.count { it.category == category && feature in it.features }) /
                 (nbc.k2 + nbc.population.count { it.category == category })
 
-        val notProbability = (nbc.k1 + nbc.population.count { it.category != category && feature in it.features } ) /
-                (nbc.k2 + nbc.population.count { it.category != category })
-
-        data class Key<F,C>(val feature: F, val category: C)
-        val key get() = Key(feature, category)
-
+        val notProbability = (nbc.k1 + nbc.population.count {
+            it.category != category && feature in it.features
+        }) / (nbc.k2 + nbc.population.count { it.category != category })
+        data class Key<F, C>(val feature: F, val category: C)
     }
 }
 
-data class BayesInput<F,C>(val category: C, val features: Set<F>)
+data class BayesInput<F, C>(val category: C, val features: Set<F>)
 
 data class CategoryProbability<C>(val category: C, val probability: Double)
