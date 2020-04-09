@@ -46,7 +46,11 @@ class TrustChainHelper(
      * Creates a new proposal block, using a text message as the transaction content.
      * Optionally, the blockType can be passed as an argument. Default value is "demo_block".
      */
-    fun createProposalBlock(message: String, publicKey: ByteArray, blockType: String = "demo_block"): TrustChainBlock {
+    fun createProposalBlock(
+        message: String,
+        publicKey: ByteArray,
+        blockType: String = "demo_block"
+    ): TrustChainBlock {
         val transaction = mapOf("message" to message)
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
@@ -54,11 +58,22 @@ class TrustChainHelper(
     /**
      * Creates a new proposal block of type "accept_ask_block", using a float as transaction amount.
      */
-    fun createAcceptTxProposalBlock(primaryCurrency: Currency, secondaryCurrency: Currency, amount: Float?,
-                                    price:Float?, type: TradePayload.Type, publicKey: ByteArray): TrustChainBlock {
+    fun createAcceptTxProposalBlock(
+        primaryCurrency: Currency,
+        secondaryCurrency: Currency,
+        amount: Float?,
+        price: Float?,
+        type: TradePayload.Type,
+        publicKey: ByteArray
+    ): TrustChainBlock {
         val blockType = "demo_tx_block"
-        val transaction = mapOf("From" to primaryCurrency.toString(), "Amount from" to amount.toString(),
-            "To" to secondaryCurrency.toString(),"Amount to" to price.toString(),"type" to type.toString())
+        val transaction = mapOf(
+            "From" to primaryCurrency.toString(),
+            "Amount from" to amount.toString(),
+            "To" to secondaryCurrency.toString(),
+            "Amount to" to price.toString(),
+            "type" to type.toString()
+        )
         return trustChainCommunity.createProposalBlock(blockType, transaction, publicKey)
     }
 
@@ -83,7 +98,10 @@ class TrustChainHelper(
     /**
      * Creates an agreement block to a specified proposal block, using a custom transaction.
      */
-    fun createAgreementBlock(link: TrustChainBlock, transaction: TrustChainTransaction): TrustChainBlock {
+    fun createAgreementBlock(
+        link: TrustChainBlock,
+        transaction: TrustChainTransaction
+    ): TrustChainBlock {
         return trustChainCommunity.createAgreementBlock(link, transaction)
     }
 
@@ -95,7 +113,7 @@ class TrustChainHelper(
         return trustChainCommunity.database.getMutualBlocks(publicKeyBin, 1000)
     }
 
-    fun getBlocksByType(type: String): List<TrustChainBlock>{
+    fun getBlocksByType(type: String): List<TrustChainBlock> {
         return trustChainCommunity.database.getBlocksWithType(type)
     }
 

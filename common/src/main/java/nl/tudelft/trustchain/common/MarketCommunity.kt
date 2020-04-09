@@ -7,8 +7,6 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import nl.tudelft.ipv8.util.sha1
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.messaging.TradePayload
 import java.util.*
 
