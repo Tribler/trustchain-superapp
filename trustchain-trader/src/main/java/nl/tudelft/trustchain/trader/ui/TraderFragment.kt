@@ -63,16 +63,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
         switchTrader.setOnClickListener {
             isTrading = !isTrading
-            this.askListener(
-                TradePayload(
-                    trustchain.getMyPublicKey(),
-                    Currency.BTC,
-                    Currency.DYMBE_DOLLAR,
-                    1.0,
-                    80.0,
-                    TradePayload.Type.ASK
-                )
-            )
         }
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
         loadCurrentPayloads((TrustChainTraderActivity.declinedPayloads), "declined")
