@@ -1,83 +1,113 @@
 package nl.tudelft.trustchain.common.util
 
+import android.annotation.SuppressLint
 import android.util.Log
-import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.IllegalArgumentException
 import java.util.*
 
-class VotingHelper {
+/**
+ * Helper class for creating votes proposals, casting and counting.
+ * @param trustChainCommunity the community where the votes will be dealt.
+ */
+class VotingHelper(
+    trustChainCommunity: TrustChainCommunity
+) {
     private val votingBlock = "voting_block"
 
-    private val trustchain: TrustChainHelper by lazy {
-        TrustChainHelper(getTrustChainCommunity())
-    }
+    private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
 
-    fun startVote(voteSubject: String, peers: List<PublicKey>, self: PublicKey) {
+    /**
+     * Initiate a vote amongst a set of peers.
+     * @param voteSubject the matter to be voted upon.
+     * @param peers list of the public keys of those eligible to vote.
+     */
+    fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        // Get all peers in the community and create a JSON array of their public keys.
-        val voteList = JSONArray(peers.map { it.toString() })
+        if (!voteSubject.matches(Regex("""^[a-z A-Z]*$"""))){
+            throw IllegalArgumentException("VoteSubject may only contain letters")
+        }
 
-        // Create a JSON object containing the vote subject
+        val voteList = JSONArray(peers)
+
+        // Create a JSON object containing the vote subject, as well as a log of the eligible voters
         val voteJSON = JSONObject()
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
 
-        // Put the JSON string in the transaction's 'message' field.
         val transaction = voteJSON.toString()
 
-        // Loop through all peers in the voting community and send a proposal.
-        for (peer in peers) {
-            trustchain.createProposalBlock(transaction, peer.keyToBin(), blockType = votingBlock)
-        }
-
-        // Update the JSON to include a VOTE_END message.
-        voteJSON.put("VOTE_END", "True")
-        val endTransaction = voteJSON.toString()
-
-        trustchain.createProposalBlock(endTransaction, self.keyToBin(), votingBlock)
+        // Create any-counterparty block for the transaction
+        trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
     }
 
-    fun respondToVote(voteName: String, vote: Boolean, proposalBlock: TrustChainBlock) {
+    /**
+     * Respond to a proposal block on the trustchain, either agree with "YES" or disagree "NO".
+     * @param vote boolean value indicating the decision.
+     * @param proposalBlock TrustChainBlock of the proposalblock.
+     */
+    fun respondToVote(vote: Boolean, proposalBlock: TrustChainBlock) {
+
+        // Parse the subject of the vote
+        val proposalSubject = try {
+            JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
+        } catch (e: JSONException) {
+            Log.e("vote-debug", "Invalidly formatted proposal block, perhaps not a proposal")
+        }
+
         // Reply to the vote with YES or NO.
         val voteReply = if (vote) "YES" else "NO"
 
         // Create a JSON object containing the vote subject and the reply.
         val voteJSON = JSONObject()
-            .put("VOTE_SUBJECT", voteName)
+            .put("VOTE_SUBJECT", proposalSubject)
             .put("VOTE_REPLY", voteReply)
 
         // Put the JSON string in the transaction's 'message' field.
         val transaction = mapOf("message" to voteJSON.toString())
 
-        trustchain.createAgreementBlock(proposalBlock, transaction)
+        trustChainHelper.createAgreementBlock(proposalBlock, transaction)
     }
 
     /**
      * Return the tally on a vote proposal in a pair(yes, no).
+     * @param voters list of the public keys of the eligible voters.
+     * @param voteSubject the matter to be voted upon.
+     * @param proposerKey the identifier of the vote proposer .
+     * @return Pair<Int, Int> indicating the election results.
      */
-    fun countVotes(voteName: String, proposerKey: ByteArray): Pair<Int, Int> {
+    fun countVotes(
+        voters: List<PublicKey>,
+        voteSubject: String,
+        proposerKey: ByteArray
+    ): Pair<Int, Int> {
 
-        val voters: MutableList<String> = ArrayList()
+        // ArrayList for keeping track of already counted votes
+        val votes: MutableList<String> = ArrayList()
 
         var yesCount = 0
         var noCount = 0
 
         // Crawl the chain of the proposer.
-        for (it in trustchain.getChainByUser(proposerKey)) {
+        for (it in trustChainHelper.getChainByUser(proposerKey)) {
+            val blockPublicKey: PublicKey = defaultCryptoProvider.keyFromPublicBin(it.publicKey)
 
-            if (voters.contains(it.publicKey.contentToString())){
+            // Check whether vote has already been counted
+            if (votes.contains(it.publicKey.contentToString())) {
                 continue
             }
 
             // Skip all blocks which are not voting blocks
             // and don't have a 'message' field in their transaction.
-            if (it.type != "voting_block" || !it.transaction.containsKey("message")) {
+            if (it.type != votingBlock || !it.transaction.containsKey("message")) {
                 continue
             }
 
@@ -87,8 +117,9 @@ class VotingHelper {
             } catch (e: JSONException) {
                 // Assume a malicious vote if it claims to be a vote but does not contain
                 // proper JSON.
-                handleInvalidVote("Block was a voting block but did not contain " +
-                    "proper JSON in its message field: ${it.transaction["message"].toString()}."
+                handleInvalidVote(
+                    "Block was a voting block but did not contain " +
+                        "proper JSON in its message field: ${it.transaction["message"]}."
                 )
                 continue
             }
@@ -100,7 +131,7 @@ class VotingHelper {
             }
 
             // A block with another VOTE_SUBJECT belongs to another vote.
-            if (voteJSON.get("VOTE_SUBJECT") != voteName) {
+            if (voteJSON.get("VOTE_SUBJECT") != voteSubject) {
                 // Block belongs to another vote.
                 continue
             }
@@ -111,15 +142,24 @@ class VotingHelper {
                 continue
             }
 
+            // Check whether the voter is in voting list
+            @SuppressLint
+            if (!voters.any { v ->
+                    val voteString = v.keyToBin()
+                    voteString.contentEquals(blockPublicKey.keyToBin())
+                }) {
+                continue
+            }
+
             // Add the votes, or assume a malicious vote if it is not YES or NO.
             when (voteJSON.get("VOTE_REPLY")) {
                 "YES" -> {
                     yesCount++
-                    voters.add(it.publicKey.contentToString())
+                    votes.add(it.publicKey.contentToString())
                 }
                 "NO" -> {
                     noCount++
-                    voters.add(it.publicKey.contentToString())
+                    votes.add(it.publicKey.contentToString())
                 }
                 else -> handleInvalidVote("Vote was not 'YES' or 'NO' but: '${voteJSON.get("VOTE_REPLY")}'.")
             }
@@ -128,12 +168,10 @@ class VotingHelper {
         return Pair(yesCount, noCount)
     }
 
+    /**
+     * Helper function for debugging purposes
+     */
     private fun handleInvalidVote(errorType: String) {
         Log.e("vote_debug", errorType)
-    }
-
-    private fun getTrustChainCommunity(): TrustChainCommunity {
-        return IPv8Android.getInstance().getOverlay()
-            ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
 }
