@@ -2,8 +2,10 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.view.menu.MenuView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_login_choice.*
@@ -11,13 +13,14 @@ import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
  * A simple [Fragment] subclass.
  * Use the [DAOLoginFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DAOLoginFragment : Fragment() {
+class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -53,6 +56,8 @@ class DAOLoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        hideNavBar()
+
         return inflater.inflate(R.layout.fragment_dao_login_choice, container, false)
     }
 
