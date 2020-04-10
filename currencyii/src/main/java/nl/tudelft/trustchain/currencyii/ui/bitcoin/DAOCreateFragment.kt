@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 
-
 /**
  * A simple [Fragment] subclass.
  * Use the [DAOCreateFragment.newInstance] factory method to

@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.app
 
 import android.app.Activity
-import android.graphics.Color
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.FOC.MainActivityFOC
@@ -28,10 +27,10 @@ enum class AppDefinition(
         R.color.dark_gray,
         DebugActivity::class.java
     ),
-    CURRENCYII(
+    CURRENCY_II(
         R.drawable.ic_bitcoin,
         "Currency II",
-        R.color.gold,
+        R.color.metallic_gold,
         CurrencyIIMainActivity::class.java
     ),
     FOC(
