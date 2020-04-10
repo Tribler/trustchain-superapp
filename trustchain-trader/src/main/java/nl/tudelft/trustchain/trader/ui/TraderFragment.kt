@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_trader.*
 import kotlinx.coroutines.*
@@ -76,15 +77,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
         loadCurrentPayloads((TrustChainTraderActivity.declinedPayloads), "declined")
         ai = NaiveBayes(resources.openRawResource(R.raw.ai_trading_data))
-//        for (i in 0 until 10) {
-//            adapterAccepted.updateItems(items)(TradePayload(ByteArray(5),
-//                Currency.BTC,
-//                Currency.DYMBE_DOLLAR,
-//                10.0,
-//                1.0,
-//                TradePayload.Type.ASK
-//            ))
-//        }
     }
 
     private fun loadCurrentPayloads(
@@ -106,9 +98,17 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                     }
                 }
                 if (adapterString == "accepted") {
+                    val adapterCount = adapterAccepted.itemCount
                     adapterAccepted.updateItems(items)
+                    if (adapterCount != adapterAccepted.itemCount) {
+                        acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
+                    }
                 } else if (adapterString == "declined") {
+                    val adapterCount = adapterDeclined.itemCount
                     adapterDeclined.updateItems(items)
+                    if (adapterCount != adapterDeclined.itemCount) {
+                        declinedPayloads.layoutManager!!.smoothScrollToPosition(declinedPayloads, RecyclerView.State(), 0)
+                    }
                 }
 
                 binding.imgEmpty.isVisible = items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()

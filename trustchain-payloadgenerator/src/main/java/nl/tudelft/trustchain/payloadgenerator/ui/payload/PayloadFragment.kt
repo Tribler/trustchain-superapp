@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_payload.*
 import kotlinx.coroutines.*
@@ -82,6 +83,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 createPayloadSerializable(amount, price, type)
             val payload = createPayload(amount, price, type)
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
             marketCommunity.broadcast(payloadSerializable)
         }
 
@@ -176,6 +178,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
             TrustChainPayloadGeneratorActivity.payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
         }
     }
     private fun bidListener(payload: TradePayload) {
@@ -185,6 +188,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
         }
     }
 
