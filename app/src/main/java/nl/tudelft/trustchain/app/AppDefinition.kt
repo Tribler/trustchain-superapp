@@ -1,11 +1,12 @@
 package nl.tudelft.trustchain.app
 
 import android.app.Activity
+import android.graphics.Color
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.currencyii.MainActivity
+import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 
@@ -30,8 +31,8 @@ enum class AppDefinition(
     CURRENCYII(
         R.drawable.ic_bitcoin,
         "Currency II",
-        R.color.,
-        MainActivity::class.java
+        R.color.gold,
+        CurrencyIIMainActivity::class.java
     ),
     FOC(
         R.drawable.ic_naruto,
