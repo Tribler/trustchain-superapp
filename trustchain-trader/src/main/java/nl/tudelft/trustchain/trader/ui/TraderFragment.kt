@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_trader.*
 import kotlinx.coroutines.*
+import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -61,10 +62,29 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
         switchTrader.setOnClickListener {
             isTrading = !isTrading
+            this.askListener(
+                TradePayload(
+                    trustchain.getMyPublicKey(),
+                    Currency.BTC,
+                    Currency.DYMBE_DOLLAR,
+                    1.0,
+                    80.0,
+                    TradePayload.Type.ASK
+                )
+            )
         }
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
         loadCurrentPayloads((TrustChainTraderActivity.declinedPayloads), "declined")
         ai = NaiveBayes(resources.openRawResource(R.raw.training_5600_mean1))
+//        for (i in 0 until 10) {
+//            adapterAccepted.updateItems(items)(TradePayload(ByteArray(5),
+//                Currency.BTC,
+//                Currency.DYMBE_DOLLAR,
+//                10.0,
+//                1.0,
+//                TradePayload.Type.ASK
+//            ))
+//        }
     }
 
     private fun loadCurrentPayloads(
@@ -110,10 +130,14 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             } else if (type == 2) {
                 val price = round(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
                 if (ai.predict(price) == 1) {
+                    Log.d(
+                        "PayloadFragment::onViewCreated",
+                        "Accepted!"
+                    )
                     accept(payload, 1)
                 }
             } else {
-                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, payload)
             }
         }
     }
@@ -133,7 +157,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                     accept(payload, 0)
                 }
             } else {
-                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(payload)
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, payload)
             }
         }
     }
@@ -156,7 +180,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 //        trustchain.createAcceptTxProposalBlock(payload.primaryCurrency,payload.secondaryCurrency,
 //            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
-        (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(payload)
+        (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(0, payload)
 
         if (type == 0) {
             updateWallet(payload.amount!!, payload.price!!, type)

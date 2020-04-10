@@ -81,7 +81,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             val payloadSerializable =
                 createPayloadSerializable(amount, price, type)
             val payload = createPayload(amount, price, type)
-            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
             marketCommunity.broadcast(payloadSerializable)
         }
 
@@ -175,7 +175,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
-            TrustChainPayloadGeneratorActivity.payloads.add(payload)
+            TrustChainPayloadGeneratorActivity.payloads.add(0, payload)
         }
     }
     private fun bidListener(payload: TradePayload) {
@@ -184,7 +184,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
-            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
         }
     }
 
