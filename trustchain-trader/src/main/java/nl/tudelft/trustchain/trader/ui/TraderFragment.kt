@@ -75,7 +75,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         }
         loadCurrentPayloads((TrustChainTraderActivity.acceptedPayloads), "accepted")
         loadCurrentPayloads((TrustChainTraderActivity.declinedPayloads), "declined")
-        ai = NaiveBayes(resources.openRawResource(R.raw.training_5600_mean1))
+        ai = NaiveBayes(resources.openRawResource(R.raw.ai_trading_data))
 //        for (i in 0 until 10) {
 //            adapterAccepted.updateItems(items)(TradePayload(ByteArray(5),
 //                Currency.BTC,
