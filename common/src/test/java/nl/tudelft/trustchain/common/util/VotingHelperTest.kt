@@ -36,13 +36,11 @@ class VotingHelperTest {
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
-        if(!excludeSelf) {
+        if (!excludeSelf) {
             peers.add(getMyPeer().publicKey)
         }
         return peers
     }
-
-
 
     private fun getCommunity(): TrustChainCommunity {
         val settings = TrustChainSettings()
@@ -100,15 +98,13 @@ class VotingHelperTest {
         var caught = false
         try {
             votingHelper.startVote(voteSubject, peers)
-        } catch (e: IllegalArgumentException){
+        } catch (e: IllegalArgumentException) {
             caught = true
         }
 
         // Verify that votingHelper raises exception
-        assert(caught==true)
+        assert(caught == true)
     }
-
-
 
     @Test
     fun respondToVote() {
@@ -205,7 +201,7 @@ class VotingHelperTest {
     fun countEligibleVotes() {
         val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
-        var peers = getPeers(excludeSelf = true)
+        val peers = getPeers(excludeSelf = true)
 
         // Launch proposition
         val voteSubject = "A vote should be counted"

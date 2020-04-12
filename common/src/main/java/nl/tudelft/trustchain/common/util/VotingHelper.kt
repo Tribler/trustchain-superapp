@@ -32,7 +32,7 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        if (!voteSubject.matches(Regex("""^[a-z A-Z]*$"""))){
+        if (!voteSubject.matches(Regex("""^[a-z A-Z]*$"""))) {
             throw IllegalArgumentException("VoteSubject may only contain letters")
         }
 
