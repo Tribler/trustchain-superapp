@@ -1,25 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".VotingActivity">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="354dp"
+        android:layout_height="48dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:max="100"
+        android:progress="0"
+        android:visibility="visible" />
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+    <Button
+        android:id="@+id/startVoteButton"
+        android:layout_width="129dp"
+        android:layout_height="105dp"
+        android:layout_alignParentLeft="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="300dp"
+        android:text="Start vote!" />
 
-    </com.google.android.material.appbar.AppBarLayout>
+    <Button
+        android:id="@+id/castVoteButton"
+        android:layout_width="129dp"
+        android:layout_height="105dp"
+        android:layout_alignParentBottom="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginLeft="125dp"
+        android:layout_marginTop="300dp"
+        android:text="Cast vote!" />
 
-<!--    <include layout="@layout/content_main_activity_foc" />-->
+    <Button
+        android:id="@+id/tallyVoteButton"
+        android:layout_width="129dp"
+        android:layout_height="105dp"
+        android:layout_alignRight="@id/progressBar"
+        android:layout_centerHorizontal="false"
+        android:layout_centerVertical="false"
+        android:layout_marginLeft="195dp"
+        android:layout_marginTop="300dp"
+        android:text="Tally votes!" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</android.widget.RelativeLayout>
