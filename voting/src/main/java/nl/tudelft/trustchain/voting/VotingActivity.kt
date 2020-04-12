@@ -12,7 +12,8 @@ class VotingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main_voting)
 //        setSupportActionBar(toolbar)
 
-        printToast("STARTED")
+        printToast("Looks like your mic is working")
+        printToast("You sound different when you're awake...")
 //
 //        // option 1: download a torrent through a magnet link
 //        downloadMagnetButton.setOnClickListener { _ ->
