@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/payloadFragment">
+
+    <fragment
+        android:id="@+id/payloadFragment"
+        android:name="nl.tudelft.trustchain.payloadgenerator.ui.payload.PayloadFragment"
+        android:label="PayloadFragment" >
+        <action
+            android:id="@+id/action_payloadFragment_to_payloadCreateFragment"
+            app:destination="@id/payloadCreateFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/payloadCreateFragment"
+        android:name="nl.tudelft.trustchain.payloadgenerator.ui.payload.PayloadCreateFragment"
+        android:label="PayloadCreateFragment" >
+        <action
+            android:id="@+id/action_payloadCreateFragment_to_payloadFragment"
+            app:destination="@id/payloadFragment"
+            app:enterAnim="@anim/fragment_close_enter"
+            app:exitAnim="@anim/fragment_close_exit" />
+    </fragment>
+</navigation>
