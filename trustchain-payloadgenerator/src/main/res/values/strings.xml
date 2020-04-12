@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">TrustChain Explorer</string>
+
+    <plurals name="x_peers">
+        <item quantity="one">%d peer</item>
+        <item quantity="other">%d peers</item>
+    </plurals>
+
+    <plurals name="x_blocks">
+        <item quantity="one">%d block</item>
+        <item quantity="other">%d blocks</item>
+    </plurals>
+
+    <string name="sign_block">Sign block</string>
+    <string name="block_status">Block Status: %s</string>
+
+    <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
+    <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
+    <string name="transferInfoMessage">Check the transfer information below</string>
+    <string name="transferReceiveBttnConfirm">Confirm</string>
+    <string name="transferReceiveCancel">Cancel</string>
+    <string name="receiverLetSenderConfirm">Let the sender scan this code to confirm the trasfer of funds</string>
+    <string name="next">Next</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="amount_currency">$100</string>
+    <string name="Amount_Bandwidth">50pcs</string>
+    <string name="ai_history">AI history</string>
+    <string name="machine_learning_overview">Machine Learning Overview</string>
+</resources>
