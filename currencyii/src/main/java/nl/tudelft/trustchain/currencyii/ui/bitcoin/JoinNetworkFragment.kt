@@ -114,19 +114,17 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         // Now start a thread to collect and wait (non-blocking) for signatures
         val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
 
-        thread(start = true) {
-            var finished = false
-            while (!finished) {
-                val transactionId = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
-                if (transactionId == null) {
-                    Thread.sleep(1000)
-                } else {
-                    fetchCurrentSharedWalletStatusLoop(transactionId)
-                    finished = true
-                }
+        var finished = false
+        while (!finished) {
+            val transactionId = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
+            if (transactionId == null) {
+                Thread.sleep(1000)
+            } else {
+                fetchCurrentSharedWalletStatusLoop(transactionId)
+                finished = true
             }
-            getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
         }
+        getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }
 
     /**
