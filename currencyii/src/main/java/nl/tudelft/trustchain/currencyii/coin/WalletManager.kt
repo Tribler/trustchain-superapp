@@ -434,8 +434,7 @@ class WalletManager(
             Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
         }
         Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
-        broadcastTransaction.broadcast().get(60.toLong(), TimeUnit.SECONDS)
-        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is complete!")
+        broadcastTransaction.broadcast()
     }
 
     /**
@@ -476,7 +475,7 @@ class WalletManager(
     fun attemptToGetTransactionAndSerialize(transactionId: String): String? {
         val transaction = kit.wallet().getTransaction(Sha256Hash.wrap(transactionId))
         if (transaction != null) {
-            Log.i("Coin", "Transaction $transaction found")
+            Log.i("Coin", "Transaction (attemptToGetTransactionAndSerialize) $transaction found")
             val serializedTransaction = transaction.bitcoinSerialize().toHex()
             return serializedTransaction
         } else {

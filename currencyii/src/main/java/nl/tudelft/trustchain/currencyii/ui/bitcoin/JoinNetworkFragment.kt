@@ -122,6 +122,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                     Thread.sleep(1000)
                 } else {
                     fetchCurrentSharedWalletStatusLoop(transactionId)
+                    finished = true
                 }
             }
             getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
@@ -153,7 +154,11 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
         while (!finished) {
             finished = getCoinCommunity().fetchBitcoinTransactionStatus(transactionId)
-            Thread.sleep(1_000)
+            if (!finished) {
+                Thread.sleep(1_000)
+            } else {
+                break
+            }
         }
     }
 
