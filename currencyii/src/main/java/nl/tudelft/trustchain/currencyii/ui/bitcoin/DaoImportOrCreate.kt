@@ -1,4 +1,4 @@
-package nl.tudelft.ipv8.android.demo.ui.bitcoin
+package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +10,6 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
-import nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoImportOrCreateDirections
 
 /**
  * A simple [Fragment] subclass.
@@ -94,7 +93,11 @@ class DaoImportOrCreate : Fragment() {
             .setConfiguration(config)
             .init()
 
-        findNavController().navigate(DaoImportOrCreateDirections.actionDaoImportOrCreateToBitcoinFragment(showDownload = true))
+        findNavController().navigate(
+            DaoImportOrCreateDirections.actionDaoImportOrCreateToBitcoinFragment(
+                showDownload = true
+            )
+        )
     }
 
     override fun onCreateView(

@@ -59,8 +59,8 @@
     </fragment>
     <fragment
         android:id="@+id/daoLoginChoice"
-        android:label="DAO Start Screen"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoLoginChoice">
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoLoginChoice"
+        android:label="DAO Start Screen">
         <action
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
@@ -76,8 +76,7 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/bitcoinFragment"
-            app:popUpToInclusive="true"
-            />
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/daoImportOrCreate"
@@ -114,7 +113,7 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@+id/bitcoinFragment"
-            app:popUpToInclusive="true"/>
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/mySharedWalletsFragment"

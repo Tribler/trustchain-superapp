@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_create_sw.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Coin
 
 /**
  * A simple [Fragment] subclass.
@@ -33,7 +34,8 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
 
     private fun createSharedBitcoinWallet() {
         if (validateCreationInput()) {
-            currentEntranceFee = entrance_fee_tf.text.toString().toLong()
+            val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
+            currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
             currentThreshold = voting_threshold_tf.text.toString().toInt()
             currentTransactionId = getCoinCommunity().createGenesisSharedWallet(currentEntranceFee!!)
 
