@@ -128,19 +128,28 @@ class CoinCommunity : Community() {
         val total = blockData.SW_BITCOIN_PKS.size
         val requiredSignatures =
             SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
-        val askSignatureBlockData = SWSignatureAskTransactionData(
+
+        var askSignatureBlockData = SWSignatureAskTransactionData(
             blockData.SW_UNIQUE_ID,
             serializedTransaction,
             oldTransactionSerialized,
             requiredSignatures,
-            myPeer.publicKey.keyToBin().toHex()
+            ""
         )
-
+        
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
             Log.i(
                 "Coin",
                 "Sending JOIN proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
             )
+            askSignatureBlockData = SWSignatureAskTransactionData(
+                blockData.SW_UNIQUE_ID,
+                serializedTransaction,
+                oldTransactionSerialized,
+                requiredSignatures,
+                swParticipantPk
+            )
+
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
                 swParticipantPk.hexToBytes(),
