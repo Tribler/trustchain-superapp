@@ -15,13 +15,16 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toStartOf="@id/bottomNavigation"
         app:navGraph="@navigation/nav_graph_trader" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:background="@color/light_gray"
         app:menu="@menu/bottom_navigation_menu_trader"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/navHostFragment"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
