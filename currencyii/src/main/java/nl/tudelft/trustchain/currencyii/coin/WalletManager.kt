@@ -25,7 +25,6 @@ import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.SendRequest
 import java.io.File
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
