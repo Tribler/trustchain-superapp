@@ -6,6 +6,7 @@ import android.text.InputType
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
 import nl.tudelft.ipv8.android.IPv8Android
@@ -21,7 +22,6 @@ class VotingActivity : AppCompatActivity() {
     lateinit var vh: VotingHelper
     lateinit var community: TrustChainCommunity
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_voting)
@@ -34,18 +34,16 @@ class VotingActivity : AppCompatActivity() {
         community = ipv8.getOverlay()!!
         vh = VotingHelper(community)
 
-        val tch = TrustChainHelper(community);
+        val tch = TrustChainHelper(community)
 
-        // data to populate the RecyclerView with
-        val votePropositions = ArrayList<String>()
-
-        tch.getBlocksByType("voting_block")
-            .map { JSONObject(it.transaction["message"].toString()).get("VOTE_SUBJECT") }
-            .forEach { votePropositions.add(it as String) }
-
-
+        blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
-        val adapter = blockListAdapter(votePropositions)
+
+        val adapter = blockListAdapter(tch.getBlocksByType("voting_block"))
+        adapter.onItemClick = {
+            printToast("Clicked on $it")
+        }
+
         blockList.adapter = adapter
     }
 
@@ -86,7 +84,5 @@ class VotingActivity : AppCompatActivity() {
         }
 
         builder.show()
-
     }
-
 }
