@@ -2,5 +2,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="ongoing_votes">Ongoing Votes</string>
+    <string name="initiate_vote">Initiate Vote</string>
 
 </resources>
