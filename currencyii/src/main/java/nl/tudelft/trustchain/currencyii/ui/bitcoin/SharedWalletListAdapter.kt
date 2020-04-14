@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
