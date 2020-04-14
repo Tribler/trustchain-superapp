@@ -6,11 +6,15 @@ import android.text.InputType
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import org.json.JSONObject
+
 
 class VotingActivity : AppCompatActivity() {
 
@@ -30,6 +34,19 @@ class VotingActivity : AppCompatActivity() {
         community = ipv8.getOverlay()!!
         vh = VotingHelper(community)
 
+        val tch = TrustChainHelper(community);
+
+        // data to populate the RecyclerView with
+        val votePropositions = ArrayList<String>()
+
+        tch.getBlocksByType("voting_block")
+            .map { JSONObject(it.transaction["message"].toString()).get("VOTE_SUBJECT") }
+            .forEach { votePropositions.add(it as String) }
+
+
+        blockList.layoutManager = LinearLayoutManager(this)
+        val adapter = blockListAdapter(votePropositions)
+        blockList.adapter = adapter
     }
 
     /**
