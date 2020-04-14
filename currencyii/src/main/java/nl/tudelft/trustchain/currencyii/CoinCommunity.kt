@@ -132,7 +132,8 @@ class CoinCommunity : Community() {
             blockData.SW_UNIQUE_ID,
             serializedTransaction,
             oldTransactionSerialized,
-            requiredSignatures
+            requiredSignatures,
+            myPeer.publicKey.keyToBin().toHex()
         )
 
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
@@ -404,6 +405,9 @@ class CoinCommunity : Community() {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
+            if (blockData.SW_RECEIVER_PK == myPublicKey.toHex()) {
+                return
+            }
             Log.i("Coin", "Signing join block transaction: $blockData")
 
             val walletManager = WalletManagerAndroid.getInstance()
