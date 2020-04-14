@@ -136,42 +136,22 @@ class CoinCommunity : Community() {
         )
 
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
+            Log.i(
+                "Coin",
+                "Sending JOIN proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
+            )
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
                 swParticipantPk.hexToBytes(),
                 askSignatureBlockData.blockType
             )
         }
+
         return askSignatureBlockData
     }
 
     /**
-     * 2.3 Add the final shared wallet join block to the trust chain.
-     *
-     * NOTE:
-     * - This function ASSUMES that the user already joined the bitcoin shared wallet
-     * - The user should have paid the fee and should have created the new wallet
-     * - See `createBitcoinSharedWalletAndProposeOnTrustChain` if this is not the case.
-     */
-    public fun addSharedWalletJoinBlock(swBlockHash: ByteArray) {
-        val swJoinBlock: TrustChainBlock =
-            getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
-                ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
-
-        val block = SWJoinBlockTransactionData(swJoinBlock.transaction)
-        val oldTrustChainPks = block.getData().SW_TRUSTCHAIN_PKS.toMutableList()
-        block.addBitcoinPk(WalletManagerAndroid.getInstance().networkPublicECKeyHex())
-        block.addTrustChainPk(myPeer.publicKey.keyToBin().toHex())
-
-        for (swParticipantPk in oldTrustChainPks) {
-            trustchain.createProposalBlock(
-                block.getJsonString(), swParticipantPk.hexToBytes(), block.blockType
-            )
-        }
-    }
-
-    /**
-     * 2.4 Last step, commit the join wallet transaction on the bitcoin blockchain.
+     * 2.3 Last step, commit the join wallet transaction on the bitcoin blockchain.
      *
      * Note:
      * There should be enough sufficient signatures, based on the multisig wallet data.
@@ -201,6 +181,31 @@ class CoinCommunity : Community() {
             ?: throw IllegalStateException("Not enough (or faulty) signatures to transfer SW funds")
 
         return newTransaction.transactionId
+    }
+
+    /**
+     * 2.4 Add the final shared wallet join block to the trust chain.
+     *
+     * NOTE:
+     * - This function ASSUMES that the user already joined the bitcoin shared wallet
+     * - The user should have paid the fee and should have created the new wallet
+     * - See `createBitcoinSharedWalletAndProposeOnTrustChain` if this is not the case.
+     */
+    public fun addSharedWalletJoinBlock(swBlockHash: ByteArray) {
+        val swJoinBlock: TrustChainBlock =
+            getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
+
+        val block = SWJoinBlockTransactionData(swJoinBlock.transaction)
+        val oldTrustChainPks = block.getData().SW_TRUSTCHAIN_PKS.toMutableList()
+        block.addBitcoinPk(WalletManagerAndroid.getInstance().networkPublicECKeyHex())
+        block.addTrustChainPk(myPeer.publicKey.keyToBin().toHex())
+
+        for (swParticipantPk in oldTrustChainPks) {
+            trustchain.createProposalBlock(
+                block.getJsonString(), swParticipantPk.hexToBytes(), block.blockType
+            )
+        }
     }
 
     /**
@@ -245,7 +250,7 @@ class CoinCommunity : Community() {
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
             Log.i(
                 "Coin",
-                "Sending proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
+                "Sending TRANSFER proposal (total: ${blockData.SW_TRUSTCHAIN_PKS.size}) to $swParticipantPk"
             )
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
@@ -399,13 +404,15 @@ class CoinCommunity : Community() {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
+            Log.i("Coin", "Signing join block transaction: $blockData")
+
             val walletManager = WalletManagerAndroid.getInstance()
 
             val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED_OLD
             val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
             val signature = walletManager.safeSigningJoinWalletTransaction(
-                Transaction(walletManager.params, oldTransactionSerialized.hexToBytes()),
                 Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),
+                Transaction(walletManager.params, oldTransactionSerialized.hexToBytes()),
                 walletManager.protocolECKey()
             )
             val signatureSerialized = signature.encodeToDER().toHex()
@@ -427,7 +434,7 @@ class CoinCommunity : Community() {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
             val walletManager = WalletManagerAndroid.getInstance()
             val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
-            Log.i("Coin", "Data received: $blockData")
+            Log.i("Coin", "Signing transfer funds transaction: $blockData")
             val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
             val previousTransaction = Transaction(
                 walletManager.params,

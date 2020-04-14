@@ -111,21 +111,21 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 transactionPackage.serializedTransaction
             )
 
-        // Wait until the new shared wallet is created
-        fetchCurrentSharedWalletStatusLoop(transactionPackage.transactionId) // TODO: cleaner solution for blocking
-
         // Now start a thread to collect and wait (non-blocking) for signatures
         val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
 
         thread(start = true) {
             var finished = false
             while (!finished) {
-                finished = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
-                Thread.sleep(1000)
+                val transactionId = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
+                if (transactionId == null) {
+                    Thread.sleep(1000)
+                } else {
+                    fetchCurrentSharedWalletStatusLoop(transactionId)
+                }
             }
+            getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
         }
-
-        getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }
 
     /**
@@ -134,7 +134,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun collectJoinWalletSignatures(
         data: SWSignatureAskTransactionData,
         requiredSignatures: Int
-    ): Boolean {
+    ): String? {
         val blockData = data.getData()
         val signatures =
             getCoinCommunity().fetchProposalSignatures(
@@ -143,10 +143,9 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             )
 
         if (signatures.size >= requiredSignatures) {
-            getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)
-            return true
+            return getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)
         }
-        return false
+        return null
     }
 
     private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {

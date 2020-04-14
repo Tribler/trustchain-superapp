@@ -249,6 +249,7 @@ class WalletManager(
 
         Log.i("Coin", "Coin: use SendRequest to add our entranceFee inputs & change address.")
         val req = SendRequest.forTx(newTransaction)
+        printTransactionInformation(req.tx)
         kit.wallet().completeTx(req)
 
         return TransactionPackage(
@@ -475,12 +476,13 @@ class WalletManager(
     fun attemptToGetTransactionAndSerialize(transactionId: String): String? {
         val transaction = kit.wallet().getTransaction(Sha256Hash.wrap(transactionId))
         if (transaction != null) {
+            Log.i("Coin", "Transaction $transaction found")
             val serializedTransaction = transaction.bitcoinSerialize().toHex()
             return serializedTransaction
         } else {
             Log.i(
                 "Coin", "Coin: (attemptToGetTransactionAndSerialize) " +
-                    "the transaction could not be found in your wallet."
+                    "the transaction $transaction could not be found in your wallet."
             )
             return null
         }
