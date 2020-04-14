@@ -65,12 +65,12 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.item_blockchain_download_progress -> {
+            R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
                 true
             }
-            R.id.item_blockchain_refresh -> {
+            R.id.item_dao_overview_refresh -> {
                 this.refresh(true)
                 Log.i(
                     "Coin",
@@ -81,6 +81,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                         null
                     )
                 )
+                true
+            }
+            R.id.item_dao_logout -> {
+                Log.i("Coin", "Logging out of current DAO user")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoLoginChoice())
                 true
             }
             else -> super.onOptionsItemSelected(item)

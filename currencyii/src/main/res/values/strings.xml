@@ -21,7 +21,10 @@
     <string name="send_bitcoin">Send Bitcoin</string>
     <string name="enter_private_key">Enter Private Key</string>
     <string name="bitcoin">Bitcoin</string>
-    <string name="dao_overview">DAO Overview</string>
+    <string name="dao_overview">Home</string>
+    <string name="my_wallet">My Wallet</string>
+    <string name="my_daos">My DAOs</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

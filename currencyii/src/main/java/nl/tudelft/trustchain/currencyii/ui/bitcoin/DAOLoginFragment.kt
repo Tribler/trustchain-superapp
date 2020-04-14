@@ -35,9 +35,8 @@ class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
                     )
                 )
             } else {
-                findNavController().navigate(
-                    DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment()
-                )
+                // TODO: Make app not crash.
+                WalletManagerAndroid.close()
             }
         }
 
