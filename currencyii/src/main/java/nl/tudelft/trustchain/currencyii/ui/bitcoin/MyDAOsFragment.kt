@@ -1,10 +1,13 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_my_daos.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
@@ -19,16 +22,25 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        my_daos_btn.setOnClickListener {
+            Log.i("Coin", "Navigating from BitcoinFragment to MySharedWalletsFragment")
+            findNavController().navigate(R.id.mySharedWalletsFragment)
         }
+
+        create_dao_btn.setOnClickListener {
+            Log.i("Coin", "Navigating from BitcoinFragment to CreateSWFragment")
+            findNavController().navigate(R.id.createSWFragment)
+        }
+
+        join_dao_btn.setOnClickListener {
+            Log.i("Coin", "Navigating from BitcoinFragment to JoinNetworkFragment")
+            findNavController().navigate(R.id.joinNetworkFragment)
+        }
+
     }
 
     override fun onCreateView(
@@ -39,23 +51,4 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         return inflater.inflate(R.layout.fragment_my_daos, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MyDAOsFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MyDAOsFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
 }

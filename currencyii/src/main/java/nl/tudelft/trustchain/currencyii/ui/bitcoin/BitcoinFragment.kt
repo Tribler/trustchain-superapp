@@ -93,21 +93,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     }
 
     private fun initClickListeners() {
-        show_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to MySharedWalletsFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToMySharedWalletsFragment())
-        }
-
-        create_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to CreateSWFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToCreateSWFragment())
-        }
-
-        search_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to JoinNetworkFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
-        }
-
         import_custom_keys.setOnClickListener {
             val dialog = ImportKeyDialog()
             dialog.setTargetFragment(this, 0)

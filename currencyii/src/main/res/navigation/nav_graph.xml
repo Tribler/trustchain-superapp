@@ -18,34 +18,6 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
         <action
-            android:id="@+id/action_bitcoinFragment_to_createSWFragment"
-            app:destination="@id/createSWFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_joinNetworkFragment"
-            app:destination="@id/joinNetworkFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_mySharedWalletsFragment"
-            app:destination="@id/mySharedWalletsFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_importKeysFragment"
-            app:destination="@id/importKeysFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
             android:id="@+id/action_bitcoinFragment_to_daoLoginChoice"
             app:destination="@id/daoLoginChoice"
             app:enterAnim="@anim/fragment_fade_enter"
@@ -159,5 +131,27 @@
         android:id="@+id/myDAOsFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyDAOsFragment"
         android:label="fragment_my_daos"
-        tools:layout="@layout/fragment_my_daos" />
+        tools:layout="@layout/fragment_my_daos" >
+        <action
+            android:id="@+id/action_myDAOsFragment_to_createSWFragment"
+            app:destination="@id/createSWFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_joinNetworkFragment"
+            app:destination="@id/joinNetworkFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_mySharedWalletsFragment"
+            app:destination="@id/mySharedWalletsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
 </navigation>

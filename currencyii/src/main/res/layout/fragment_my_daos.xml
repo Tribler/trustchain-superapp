@@ -6,9 +6,30 @@
     tools:context=".ui.bitcoin.MyDAOsFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/join_dao_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Join Shared Bitcoin Wallet" />
+
+        <Button
+            android:id="@+id/my_daos_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="My Shared Bitcoin Wallets" />
+
+        <Button
+            android:id="@+id/create_dao_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Shared Bitcoin Wallet" />
+    </LinearLayout>
 
 </FrameLayout>
