@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import org.json.JSONException
 import org.json.JSONObject
 
 
@@ -41,7 +43,7 @@ class VotingActivity : AppCompatActivity() {
 
         val adapter = blockListAdapter(tch.getBlocksByType("voting_block"))
         adapter.onItemClick = {
-            printToast("Clicked on $it")
+            showNewCastVoteDialog(it)
         }
 
         blockList.adapter = adapter
@@ -85,4 +87,36 @@ class VotingActivity : AppCompatActivity() {
 
         builder.show()
     }
+
+    private fun showNewCastVoteDialog(block: TrustChainBlock) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Cast vote")
+
+        // Get the vote subject from the proposal.
+        val voteSubject: String = try {
+            // Parse the JSON object in the transaction's 'message' field.
+            val voteJSON = JSONObject(block.transaction["message"].toString())
+
+            // Retrieve the vote subject.
+            voteJSON.get("VOTE_SUBJECT").toString()
+        } catch (e: JSONException) {
+            "Wrongly formatted vote request."
+        }
+
+        builder.setMessage(voteSubject)
+
+        builder.setPositiveButton("YES") { _, _ ->
+            vh.respondToVote(true, block)
+        }
+
+        builder.setNegativeButton("NO") { dialog, _ ->
+            vh.respondToVote(false, block)
+            dialog.cancel()
+        }
+
+        builder.setCancelable(true)
+
+        builder.show()
+    }
+
 }
