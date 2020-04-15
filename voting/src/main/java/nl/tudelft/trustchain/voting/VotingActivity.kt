@@ -24,7 +24,6 @@ import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
 
-
 class VotingActivity : AppCompatActivity() {
 
     lateinit var vh: VotingHelper
@@ -50,11 +49,11 @@ class VotingActivity : AppCompatActivity() {
         uncastedToggle.setOnCheckedChangeListener { _, isChecked ->
             displayAllVotes = if (isChecked) {
                 proposalOverViewTitle.text = "New Votes"
-                printToast("Displaying proposals to cast on")
+                printShortToast("Displaying proposals to cast on")
                 false
             } else {
                 proposalOverViewTitle.text = "All Votes"
-                printToast("Displaying all votes")
+                printShortToast("Displaying all votes")
                 true
             }
         }
