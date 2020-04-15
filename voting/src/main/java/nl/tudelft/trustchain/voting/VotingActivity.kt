@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.voting
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.InputType
@@ -21,6 +22,7 @@ import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
 
+
 class VotingActivity : AppCompatActivity() {
 
     lateinit var vh: VotingHelper
@@ -29,16 +31,30 @@ class VotingActivity : AppCompatActivity() {
     lateinit var tch: TrustChainHelper
 
     var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
+    var displayAllVotes: Boolean = true
 
     /**
      * Setup method, binds functionality
      */
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_voting)
 
         initiateButton.setOnClickListener {
             showNewVoteDialog()
+        }
+
+        uncastedToggle.setOnCheckedChangeListener { _, isChecked ->
+            displayAllVotes = if (isChecked) {
+                proposalOverViewTitle.text = "New Votes"
+                printToast("Displaying proposals to cast on")
+                false
+            } else {
+                proposalOverViewTitle.text = "All Votes"
+                printToast("Displaying all votes")
+                true
+            }
         }
 
         // Initiate community and helpers
@@ -142,20 +158,26 @@ class VotingActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
+                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && checkCasted(it)
                 }.asReversed()
 
                 // Update vote proposal set
-                if (!voteProposals.equals(currentProposals)) {
+                if (voteProposals != currentProposals) {
                     voteProposals.clear()
-                    voteProposals.addAll(tch.getBlocksByType("voting_block").filter {
-                        !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-                    }.asReversed())
+                    voteProposals.addAll(currentProposals)
                     adapter.notifyDataSetChanged()
                 }
 
                 delay(1000)
             }
         }
+    }
+
+    /**
+     * Check if proposal should be displayed
+     */
+    private fun checkCasted(block: TrustChainBlock): Boolean {
+        if (displayAllVotes) return true
+        return !vh.myPeerHasCasted(block)
     }
 }
