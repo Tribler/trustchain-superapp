@@ -117,7 +117,7 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Cast vote")
+        builder.setTitle("Cast vote on proposal:")
 
         // Get the vote subject from the proposal.
         val voteSubject: String = try {
