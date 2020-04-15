@@ -4,21 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_my_daos.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -26,7 +17,6 @@ import kotlin.concurrent.thread
  * create an instance of this fragment.
  */
 class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
-    private var adapter: SharedWalletListAdapter? = null
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -34,7 +24,8 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
@@ -45,7 +36,6 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.dao_options, menu)
@@ -89,5 +79,4 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
                 "You are currently not enrolled in any DAOs. Press the + button to join or create one."
         }
     }
-
 }

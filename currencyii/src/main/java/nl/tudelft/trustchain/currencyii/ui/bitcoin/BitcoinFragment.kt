@@ -107,7 +107,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                     bitcoin_refresh_swiper.isRefreshing = false
                 } catch (e: IllegalStateException) {
                 }
-
             }, 1500)
         }
     }
