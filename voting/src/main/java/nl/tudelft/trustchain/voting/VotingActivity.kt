@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.voting
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Html
 import android.text.InputType
 import android.widget.EditText
 import android.widget.Toast
@@ -17,6 +18,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
@@ -63,7 +65,7 @@ class VotingActivity : AppCompatActivity() {
         vh = VotingHelper(community)
         tch = TrustChainHelper(community)
 
-        // Stying
+        // Styling
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
@@ -81,8 +83,8 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Display a short message on the screen
      */
-    fun printToast(s: String) {
-        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
+    private fun printShortToast(s: String) {
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -107,7 +109,7 @@ class VotingActivity : AppCompatActivity() {
 
             // Start voting procedure
             vh.startVote(proposal, peers)
-            Toast.makeText(this, "Voting procedure started", Toast.LENGTH_SHORT).show()
+            printShortToast("Voting procedure started")
         }
 
         builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -122,27 +124,36 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Cast vote")
+        builder.setTitle("Cast vote on proposal:")
 
-        // Get the vote subject from the proposal.
-        val voteSubject: String = try {
-            // Parse the JSON object in the transaction's 'message' field.
+        // Parse the 'message' field as JSON.
+        var voteSubject = ""
+        try {
             val voteJSON = JSONObject(block.transaction["message"].toString())
-
-            // Retrieve the vote subject.
-            voteJSON.get("VOTE_SUBJECT").toString()
+            voteSubject = voteJSON.get("VOTE_SUBJECT").toString()
         } catch (e: JSONException) {
-            "Wrongly formatted vote request."
+            "Block was a voting block but did not contain " +
+                "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        builder.setMessage(voteSubject)
+        builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
+            "<br><br>" +
+            "<i><small>Proposed by: " +
+            defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
+            "</small></i>", Html.FROM_HTML_MODE_LEGACY))
 
         builder.setPositiveButton("YES") { _, _ ->
             vh.respondToVote(true, block)
+            printShortToast("You voted: YES")
         }
 
-        builder.setNegativeButton("NO") { dialog, _ ->
+        builder.setNegativeButton("NO") { _, _ ->
             vh.respondToVote(false, block)
+            printShortToast("You voted: NO")
+        }
+
+        builder.setNeutralButton("CANCEL") { dialog, _ ->
+            printShortToast("No vote was cast")
             dialog.cancel()
         }
 
