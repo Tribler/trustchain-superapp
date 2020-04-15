@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.trader
+package nl.tudelft.trustchain.payloadgenerator
 
 import org.junit.Test
 

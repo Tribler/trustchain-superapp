@@ -3,8 +3,8 @@ package nl.tudelft.trustchain.trader.validators
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.trustchain.trader.util.getAmount
 import nl.tudelft.trustchain.trader.util.getBalance
+import nl.tudelft.trustchain.trader.util.getAmount
 
 class DDValidator : TransactionValidator {
     @ExperimentalUnsignedTypes
@@ -13,8 +13,8 @@ class DDValidator : TransactionValidator {
         database: TrustChainStore
     ): Boolean {
         // Do not validate offline transactions
-        val offline = block.transaction["offline"]?.toString()?.toBoolean()
-        if (offline != null && offline) {
+        val offline = block.transaction["offline"].toString().toBoolean()
+        if (offline) {
             return true
         }
 
@@ -23,15 +23,15 @@ class DDValidator : TransactionValidator {
             return true
         }
 
-        val amount = block.getAmount()
+        val amount = getAmount(block)
 
         if (block.isProposal) {
             val balance =
-                database.getBalance(block.linkPublicKey, block.linkSequenceNumber - 1u)
+                getBalance(block.linkPublicKey, database, block.linkSequenceNumber - 1u)
             return balance > amount
         } else if (block.isAgreement) {
             val balance =
-                database.getBalance(block.publicKey, block.sequenceNumber - 1u)
+                getBalance(block.publicKey, database, block.sequenceNumber - 1u)
             return balance > amount
         }
         return false
