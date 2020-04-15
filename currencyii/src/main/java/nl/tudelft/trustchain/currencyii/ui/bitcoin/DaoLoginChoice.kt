@@ -24,7 +24,7 @@ class DaoLoginChoice : Fragment() {
 
         load_existing_button.setOnClickListener {
             if (!WalletManagerAndroid.isInitialized()) {
-                val config = WalletManagerConfiguration(BitcoinNetworkOptions.PRODUCTION)
+                val config = WalletManagerConfiguration(BitcoinNetworkOptions.TEST_NET)
                 WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                     .setConfiguration(config).init()
 
