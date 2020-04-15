@@ -1,30 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.widget.LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".VotingActivity"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="60dp"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/textView"
-            android:layout_width="wrap_content"
+            android:layout_width="186dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="158dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="159dp"
             android:text="@string/ongoing_votes"
             android:textSize="24sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.492"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/body"
+        android:layout_width="match_parent"
+        android:layout_height="495dp"
+        android:orientation="horizontal">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/blockList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="12dp" />
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <Button
             android:id="@+id/initiateButton"
@@ -37,19 +57,6 @@
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/blockList"
-            android:layout_width="365dp"
-            android:layout_height="572dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="19dp"
-            android:layout_marginEnd="23dp"
-            android:layout_marginBottom="28dp"
-            app:layout_constraintBottom_toTopOf="@+id/initiateButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-</android.widget.RelativeLayout>
+
+</android.widget.LinearLayout>
