@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.voting
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +43,4 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = myDataset.size
-
-
 }
