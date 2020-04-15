@@ -211,6 +211,7 @@ class CoinCommunity : Community() {
         block.addBitcoinPk(WalletManagerAndroid.getInstance().networkPublicECKeyHex())
         block.addTrustChainPk(myPeer.publicKey.keyToBin().toHex())
 
+        // TODO: send to all trustchain PKs?
         for (swParticipantPk in oldTrustChainPks) {
             trustchain.createProposalBlock(
                 block.getJsonString(), swParticipantPk.hexToBytes(), block.blockType
