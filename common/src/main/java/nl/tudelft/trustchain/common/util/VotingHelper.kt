@@ -10,7 +10,6 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.IllegalArgumentException
 import java.util.*
 
 /**
@@ -32,9 +31,9 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        if (!voteSubject.matches(Regex("""^[a-z A-Z]*$"""))) {
-            throw IllegalArgumentException("VoteSubject may only contain letters")
-        }
+//        if (!voteSubject.matches(Regex("""^[a-zA-Z0-9?!()]*$"""))) {
+//            throw IllegalArgumentException("VoteSubject may only contain letters")
+//        }
 
         val voteList = JSONArray(peers)
 
