@@ -59,10 +59,13 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
 
         switchAutoMessage.setOnClickListener {
+            Log.d("SwitchAutoMessage","button switched")
             if (!isAutoSending) {
+                isAutoSending = true
                 sendAutoMessages()
+            }else{
+                isAutoSending = false
             }
-            isAutoSending != isAutoSending
         }
 
         val marketCommunity = getMarketCommunity()
