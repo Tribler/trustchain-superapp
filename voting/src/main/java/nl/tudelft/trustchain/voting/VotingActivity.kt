@@ -18,7 +18,6 @@ import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
 
-
 class VotingActivity : AppCompatActivity() {
 
     lateinit var vh: VotingHelper
@@ -121,5 +120,4 @@ class VotingActivity : AppCompatActivity() {
 
         builder.show()
     }
-
 }
