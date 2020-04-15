@@ -207,4 +207,53 @@ class VotingHelperTest {
         // verify my own vote has not been counted
         Assert.assertEquals(Pair(0, 0), count)
     }
+
+    @Test
+    fun checkIfCastedTrue() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create a reply agreement block
+        votingHelper.respondToVote(true, propBlock)
+
+        Assert.assertTrue(votingHelper.myPeerHasCasted(propBlock))
+    }
+
+    @Test
+    fun checkIfCastedFalse() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        Assert.assertFalse(votingHelper.myPeerHasCasted(propBlock))
+    }
 }

@@ -20,7 +20,7 @@ class VotingHelper(
     trustChainCommunity: TrustChainCommunity
 ) {
     private val votingBlock = "voting_block"
-
+    private val myPublicKey = trustChainCommunity.myPeer.publicKey
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
 
     /**
@@ -168,5 +168,13 @@ class VotingHelper(
      */
     private fun handleInvalidVote(errorType: String) {
         Log.e("vote_debug", errorType)
+    }
+
+    /**
+     * Check if the user has casted a vote upon a proposal already.
+     */
+    fun myPeerHasCasted(block: TrustChainBlock): Boolean {
+        val pair = countVotes(listOf(myPublicKey), JSONObject(block.transaction["message"].toString()).get("VOTE_SUBJECT").toString(), block.publicKey)
+        return pair.first != 0 || pair.second != 0
     }
 }
