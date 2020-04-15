@@ -105,7 +105,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         Log.i("Coin", "Coin: broadcast of transfer funds transaction progress: $progress.")
 
         activity?.runOnUiThread {
-            if (progress >= 100) {
+            if (progress >= 1) {
                 alert_view?.text = "Transfer funds progress: completed!"
             } else {
                 val progressString = "%.0f".format(progress * 100)
