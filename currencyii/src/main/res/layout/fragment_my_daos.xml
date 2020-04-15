@@ -3,33 +3,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="10px"
     tools:context=".ui.bitcoin.MyDAOsFragment">
-
-    <!-- TODO: Update blank fragment layout -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/join_dao_btn"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Join Shared Bitcoin Wallet" />
+            android:layout_height="280dp"
+            android:orientation="vertical">
 
-        <Button
-            android:id="@+id/my_daos_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="My Shared Bitcoin Wallets" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="My DAOs"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
-        <Button
-            android:id="@+id/create_dao_btn"
+            <TextView
+                android:id="@+id/enrolled_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="You are currently enrolled in the following DAOs" />
+
+            <ListView
+                android:id="@+id/my_daos_list_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <View
+            android:id="@+id/divider5"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Create Shared Bitcoin Wallet" />
+            android:layout_height="1dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
+            android:background="@color/gray" />
+
     </LinearLayout>
 
 </FrameLayout>
