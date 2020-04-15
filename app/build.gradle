@@ -52,6 +52,7 @@ dependencies {
     implementation project(':common')
     implementation project(':trustchain-explorer')
     implementation project(':debug')
+    implementation project(':dna')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

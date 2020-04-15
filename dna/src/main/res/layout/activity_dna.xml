@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="622dp"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/dna_x_value2"
+            android:layout_width="165dp"
+            android:layout_height="44dp"
+            android:ems="10"
+            android:hint="add x"
+            android:inputType="number"
+            app:layout_constraintBottom_toTopOf="@+id/dna_iterations"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/dna_y_value2"
+            android:layout_width="165dp"
+            android:layout_height="44dp"
+            android:ems="10"
+            android:hint="add y"
+            android:inputType="number"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/dna_x_value2" />
+
+        <EditText
+            android:id="@+id/dna_x_value"
+            android:layout_width="165dp"
+            android:layout_height="44dp"
+            android:ems="10"
+            android:hint="add x"
+            android:inputType="number"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/dna_y_value" />
+
+        <EditText
+            android:id="@+id/dna_y_value"
+            android:layout_width="165dp"
+            android:layout_height="44dp"
+            android:ems="10"
+            android:hint="add y"
+            android:inputType="number"
+            app:layout_constraintBottom_toTopOf="@+id/dna_x_value2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/dna_x_value"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.492" />
+
+        <EditText
+            android:id="@+id/dna_iterations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Number Of Iterations"
+            android:inputType="number"
+            app:layout_constraintBottom_toTopOf="@+id/button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.885" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="sendMessage"
+            android:text="sendMessage"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.androidplot.xy.XYPlot
+            android:id="@+id/plot"
+            style="@style/APDefacto.Dark"
+            android:layout_width="332dp"
+            android:layout_height="237dp"
+            app:domainTitle="domain"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button"
+            app:lineLabelRotationBottom="-45"
+            app:lineLabels="left|bottom"
+            app:rangeTitle="range"
+            app:title="ML accuracy" />
+    </LinearLayout>
+</FrameLayout>

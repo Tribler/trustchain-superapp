@@ -1,6 +1,6 @@
 rootProject.name='TrustChain'
 
-include ':ipv8'
+include ':ipv8', 'dna'
 project(':ipv8').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8')
 
 include ':ipv8-android'

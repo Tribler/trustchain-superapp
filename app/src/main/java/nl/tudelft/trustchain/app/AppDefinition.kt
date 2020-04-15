@@ -5,6 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.debug.DebugActivity
+import nl.tudelft.trustchain.dna.DnaActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 
 enum class AppDefinition(
@@ -24,5 +25,11 @@ enum class AppDefinition(
         "Debug",
         R.color.dark_gray,
         DebugActivity::class.java
+    ),
+    DNA(
+    R.drawable.ic_bug_report_black_24dp,
+    "DNA",
+    R.color.dark_gray,
+    DnaActivity::class.java
     )
 }
