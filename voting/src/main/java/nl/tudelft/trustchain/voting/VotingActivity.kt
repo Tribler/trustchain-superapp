@@ -22,7 +22,13 @@ class VotingActivity : AppCompatActivity() {
 
     lateinit var vh: VotingHelper
     lateinit var community: TrustChainCommunity
+    lateinit var adapter: blockListAdapter
+    lateinit var voteProposals: List<TrustChainBlock>
+    lateinit var tch: TrustChainHelper
 
+    /**
+     * Setup method, binds functionality
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_voting)
@@ -32,17 +38,20 @@ class VotingActivity : AppCompatActivity() {
         }
 
         val ipv8 = IPv8Android.getInstance()
+
+        // Initiate community and helpers
         community = ipv8.getOverlay()!!
         vh = VotingHelper(community)
-
-        val tch = TrustChainHelper(community)
+        tch = TrustChainHelper(community)
 
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
-        val adapter = blockListAdapter(tch.getBlocksByType("voting_block").filter {
+        voteProposals = tch.getBlocksByType("voting_block").filter {
             !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-        })
+        }
+
+        adapter = blockListAdapter(voteProposals)
 
         adapter.onItemClick = {
             showNewCastVoteDialog(it)
@@ -81,6 +90,9 @@ class VotingActivity : AppCompatActivity() {
             // Start voting procedure
             vh.startVote(proposal, peers)
             Toast.makeText(this, "Voting procedure started", Toast.LENGTH_SHORT).show()
+
+            // Update list
+            updateVoteProposalList()
         }
 
         builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -90,6 +102,19 @@ class VotingActivity : AppCompatActivity() {
         builder.show()
     }
 
+    /**
+     * Refresh the vote proposals
+     */
+    private fun updateVoteProposalList() {
+        voteProposals = tch.getBlocksByType("voting_block").filter {
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
+        }
+        adapter.notifyDataSetChanged()
+    }
+
+    /**
+     * Show dialog from which the user can propose a vote
+     */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle("Cast vote")
