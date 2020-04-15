@@ -6,11 +6,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_create_sw.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
-
 
 /**
  * A simple [Fragment] subclass.
@@ -18,15 +21,15 @@ import org.bitcoinj.core.Coin
  * create an instance of this fragment.
  */
 class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         create_sw_wallet_button.setOnClickListener {
-            createSharedBitcoinWallet()
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    createSharedBitcoinWallet()
+                }
+            }
         }
     }
 
@@ -35,20 +38,23 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
             alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
             return
         }
-        alert_label.text = "Creating wallet, might take some time..."
+        alert_label.text = "Creating wallet, might take some time... (0%)"
 
         val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
         val currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
         val currentThreshold = voting_threshold_tf.text.toString().toInt()
-        voting_threshold_tf.isEnabled = false
-        entrance_fee_tf.isEnabled = false
+
+        activity?.runOnUiThread {
+            voting_threshold_tf.isEnabled = false
+            entrance_fee_tf.isEnabled = false
+        }
 
         try {
             // Try to create the bitcoin DAO
             getCoinCommunity().createBitcoinGenesisWallet(
                 currentEntranceFee,
                 currentThreshold,
-                ::updateAlertLabel
+                ::updateProgressStatus
             )
             resetWalletInitializationValues()
             alert_label.text = "Wallet created successfully!"
@@ -58,11 +64,13 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         }
     }
 
-    private fun updateAlertLabel(progress: Double) {
+    private fun updateProgressStatus(progress: Double) {
         Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
-        // TODO: fix co-routines, threads etc to show progress
-//        val progressString = "%.1f".format(progress)
-//        alert_label.text = "Current progress: $progressString%..."
+
+        activity?.runOnUiThread {
+            val progressString = "%.0f".format(progress * 100)
+            alert_label.text = "DAO creation progress: $progressString%..."
+        }
     }
 
     private fun resetWalletInitializationValues() {
