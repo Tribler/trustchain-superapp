@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.voting
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.text.Html
 import android.text.InputType
 import android.widget.EditText
 import android.widget.Toast
@@ -130,7 +131,11 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        builder.setMessage(voteSubject + "\n\n" + "Proposed by: " + defaultCryptoProvider.keyFromPublicBin(block.publicKey))
+        builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
+            "<br><br>" +
+            "<i><small>Proposed by: " +
+            defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
+            "</small></i>", Html.FROM_HTML_MODE_LEGACY))
 
         builder.setPositiveButton("YES") { _, _ ->
             vh.respondToVote(true, block)
