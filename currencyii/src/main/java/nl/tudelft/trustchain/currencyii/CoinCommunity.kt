@@ -12,7 +12,9 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.TransactionBroadcast
 import org.json.JSONException
+import java.util.concurrent.TimeUnit
 
 @Suppress("UNCHECKED_CAST")
 class CoinCommunity : Community() {
@@ -41,22 +43,41 @@ class CoinCommunity : Community() {
 
     /**
      * 1.1 Create a shared wallet block.
-     * The transaction may take some time to finish. Use `fetchBitcoinTransactionStatus()` to get the status.
-     * entranceFee - the fee that has to be paid for new participants
+     * The bitcoin transaction may take some time to finish.
+     * If the transaction is valid, the result is broadcasted on trust chain.
+     * entranceFee - the fee that has to be paid for new participants.
      */
-    public fun createGenesisSharedWallet(entranceFee: Long): String {
+    public fun createBitcoinGenesisWallet(
+        entranceFee: Long,
+        threshold: Int,
+        progressCallback: ((progress: Double) -> Unit)? = null,
+        timeout: Long = DEFAULT_BITCOIN_MAX_TIMEOUT
+    ) {
         val walletManager = WalletManagerAndroid.getInstance()
-        val transaction = walletManager.safeCreationAndSendGenesisWallet(
+        val transactionBroadcast = walletManager.safeCreationAndSendGenesisWallet(
             Coin.valueOf(entranceFee)
         )
-        return transaction.transactionId
+
+        if (progressCallback != null) {
+            transactionBroadcast.setProgressCallback { progress ->
+                progressCallback(progress)
+            }
+        }
+
+        val transaction = transactionBroadcast.broadcast().get(timeout, TimeUnit.SECONDS)
+        val serializedTransaction = getSerializedTransaction(transaction)
+        broadcastCreatedSharedWallet(
+            serializedTransaction,
+            entranceFee,
+            threshold
+        )
     }
 
     /**
      * 1.2 Finishes the last step of creating a shared bitcoin wallet.
      * Posts a self-signed trust chain block containing the shared wallet data.
      */
-    public fun broadcastCreatedSharedWallet(
+    private fun broadcastCreatedSharedWallet(
         transactionSerialized: String,
         entranceFee: Long,
         votingThreshold: Int
@@ -84,7 +105,7 @@ class CoinCommunity : Community() {
      *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
      * @param swBlockHash hash of the latest (that you know of) shared wallet block.
      */
-    public fun createBitcoinSharedWallet(swBlockHash: ByteArray): WalletManager.TransactionPackage {
+    public fun createBitcoinSharedWalletForJoining(swBlockHash: ByteArray): WalletManager.TransactionPackage {
         val swJoinBlock: TrustChainBlock =
             getTrustChainCommunity().database.getBlockWithHash(swBlockHash)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: $swBlockHash")
@@ -105,8 +126,6 @@ class CoinCommunity : Community() {
             newThreshold
         )
 
-        // Ask others for a signature. Assumption:
-        // At this point, enough 'yes' votes are received. They will now send their signatures
         return newTransactionProposal
     }
 
@@ -332,7 +351,7 @@ class CoinCommunity : Community() {
      * Fetch blocks with type SHARED_WALLET_BLOCK.
      */
     private fun fetchSharedWalletBlocks(): List<TrustChainBlock> {
-        return fetchSharedWalletBlocks(listOf(SHARED_WALLET_BLOCK))
+        return fetchSharedWalletBlocks(listOf(JOIN_BLOCK))
     }
 
     private fun fetchSharedWalletBlocks(blockTypes: List<String>): List<TrustChainBlock> {
@@ -437,7 +456,11 @@ class CoinCommunity : Community() {
             )
 
             // TODO: Fix this! No need for two separate block types (also in join!).
-            trustchain.createProposalBlock(agreementData.getTransactionData(), myPublicKey, agreementData.blockType)
+            trustchain.createProposalBlock(
+                agreementData.getTransactionData(),
+                myPublicKey,
+                agreementData.blockType
+            )
 //            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
@@ -474,18 +497,41 @@ class CoinCommunity : Community() {
             )
 
             // TODO: Fix this! No need for two separate block types (also in join!).
-            trustchain.createProposalBlock(agreementData.getTransactionData(), myPublicKey, agreementData.blockType)
+            trustchain.createProposalBlock(
+                agreementData.getTransactionData(),
+                myPublicKey,
+                agreementData.blockType
+            )
 //            trustchain.createAgreementBlock(block, agreementData.getTransactionData())
         }
 
-        public const val SHARED_WALLET_BLOCK = "SHARED_WALLET_BLOCK"
-        public const val TRANSFER_FINAL_BLOCK = "TRANSFER_FINAL_BLOCK"
-        public const val SIGNATURE_ASK_BLOCK = "JOIN_ASK_BLOCK"
-        public const val TRANSFER_FUNDS_ASK_BLOCK = "TRANSFER_FUNDS_ASK_BLOCK"
-        public const val SIGNATURE_AGREEMENT_BLOCK = "SIGNATURE_AGREEMENT_BLOCK"
+        /**
+         * Helper method that serializes a bitcoin transaction to a string.
+         */
+        public fun getSerializedTransaction(transaction: Transaction): String {
+            return transaction.bitcoinSerialize().toHex()
+        }
+
+        // Default maximum wait timeout for bitcoin transaction broadcasts in seconds
+        private const val DEFAULT_BITCOIN_MAX_TIMEOUT: Long = 60 * 5
+
+        // Block type for join DAO blocks
+        public const val JOIN_BLOCK = "DAO_JOIN"
+
+        // Block type for transfer funds (from a DAO)
+        public const val TRANSFER_FINAL_BLOCK = "DAO_TRANSFER_FINAL"
+
+        // Block type for basic signature requests
+        public const val SIGNATURE_ASK_BLOCK = "DAO_ASK_SIGNATURE"
+
+        // Block type for transfer funds signature requests
+        public const val TRANSFER_FUNDS_ASK_BLOCK = "DAO_TRANSFER_ASK_SIGNATURE"
+
+        // Block type for responding to a signature request with a (should be valid) signature
+        public const val SIGNATURE_AGREEMENT_BLOCK = "DAO_SIGNATURE_AGREEMENT"
 
         // Values below are present in SW_TRANSACTION_BLOCK_KEYS block types
-        public val SW_TRANSACTION_BLOCK_KEYS = listOf(SHARED_WALLET_BLOCK, TRANSFER_FINAL_BLOCK)
+        public val SW_TRANSACTION_BLOCK_KEYS = listOf(JOIN_BLOCK, TRANSFER_FINAL_BLOCK)
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
         public const val SW_TRANSACTION_SERIALIZED = "SW_TRANSACTION_SERIALIZED"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"

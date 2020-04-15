@@ -177,7 +177,7 @@ class WalletManager(
      */
     fun safeCreationAndSendGenesisWallet(
         entranceFee: Coin
-    ): TransactionPackage {
+    ): TransactionBroadcast {
         Log.i("Coin", "Coin: (safeCreationAndSendGenesisWallet start).")
 
         Log.i("Coin", "Coin: we are making a new genesis wallet for us alone.")
@@ -200,12 +200,7 @@ class WalletManager(
         Log.i("Coin", "Coin: the change address is hard-reset to your protocol key.")
         req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
 
-        sendTransaction(req.tx)
-
-        return TransactionPackage(
-            req.tx.txId.toString(),
-            req.tx.bitcoinSerialize().toHex()
-        )
+        return sendTransaction(req.tx)
     }
 
     /**
@@ -349,11 +344,13 @@ class WalletManager(
 
         Log.i("Coin", "Coin: a transaction will be signed from one of our multi-sig outputs.")
         // Retrieve the multi-signature contract.
-        val previousMultiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
+        val previousMultiSigOutput: TransactionOutput =
+            getMultiSigOutput(transaction).unsignedOutput
 
         // Create the transaction which will have the multisig output as input,
         // The outputs will be the receiver address and another one for residual funds
-        val spendTx = createMultiSigPaymentTx(receiverAddress, paymentAmount, previousMultiSigOutput)
+        val spendTx =
+            createMultiSigPaymentTx(receiverAddress, paymentAmount, previousMultiSigOutput)
 
         // Sign the transaction and return it.
         val multiSigScript = previousMultiSigOutput.scriptPubKey
@@ -383,7 +380,8 @@ class WalletManager(
         Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
 
         // Retrieve the multi-sig output. Will become the input of this tx
-        val previousMultiSigOutput: TransactionOutput = getMultiSigOutput(transaction).unsignedOutput
+        val previousMultiSigOutput: TransactionOutput =
+            getMultiSigOutput(transaction).unsignedOutput
 
         Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
         // Create the script that combines the signatures (to spend the multi-signature output).
@@ -394,7 +392,12 @@ class WalletManager(
 
         // Create the transaction which will sign the previous multisig output and use it as input
         // The outputs will be the receiver address and another one for residual funds
-        val spendTx = createMultiSigPaymentTxWithInputSig(receiverAddress, paymentAmount, previousMultiSigOutput, inputScript)
+        val spendTx = createMultiSigPaymentTxWithInputSig(
+            receiverAddress,
+            paymentAmount,
+            previousMultiSigOutput,
+            inputScript
+        )
 
         // We assume a multisig payment transaction only has the multisig as input here, be careful!
         val input = spendTx.inputs[0]
@@ -420,7 +423,7 @@ class WalletManager(
      * Helper method to send transaction with logs and progress logs.
      * @param transaction transaction
      */
-    private fun sendTransaction(transaction: Transaction) {
+    private fun sendTransaction(transaction: Transaction): TransactionBroadcast {
         Log.i("Coin", "Coin: (sendTransaction start).")
         Log.i("Coin", "Coin: txId: ${transaction.txId}")
         printTransactionInformation(transaction)
@@ -428,12 +431,17 @@ class WalletManager(
         Log.i("Coin", "Waiting for peers")
         kit.peerGroup().waitForPeers(3).get()
         Log.i("Coin", "Got >= 3 peers: ${kit.peerGroup().connectedPeers}")
-        val broadcastTransaction = kit.peerGroup().broadcastTransaction(transaction)
-        broadcastTransaction.setProgressCallback { progress ->
-            Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
-        }
-        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
-        broadcastTransaction.broadcast()
+        Log.i(
+            "Coin",
+            "Transaction broadcast setup ${transaction.txId} completed. Not broadcasted yet."
+        )
+        return kit.peerGroup().broadcastTransaction(transaction)
+
+//        broadcastTransaction.setProgressCallback { progress ->
+//            Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
+//        }
+//        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
+//        broadcastTransaction.broadcast()
     }
 
     /**
@@ -548,11 +556,19 @@ class WalletManager(
         val input = spendTx.addInput(previousMultiSigOutput)
 
         // Calculate fee and set the change output corresponding to calculated fee
-        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(spendTx, params, CoinUtil.TxPriority.LOW_PRIORITY)
+        val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(
+            spendTx,
+            params,
+            CoinUtil.TxPriority.LOW_PRIORITY
+        )
         // Make sure that the fee does not exceed the amount of funds available
-        val calculatedFee = Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - paymentAmount).value))
+        val calculatedFee =
+            Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - paymentAmount).value))
         val residualFunds = previousMultiSigOutput.value - paymentAmount - calculatedFee
-        Log.i("Coin", "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of $calculatedFee satoshi.")
+        Log.i(
+            "Coin",
+            "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of $calculatedFee satoshi."
+        )
         tempResidualOutput.value = residualFunds
 
         // Set input script signatures if passed to the method
@@ -575,7 +591,11 @@ class WalletManager(
         paymentAmount: Coin,
         previousMultiSigOutput: TransactionOutput
     ): Transaction {
-        return createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput)
+        return createMultiSigPaymentTransaction(
+            receiverAddress,
+            paymentAmount,
+            previousMultiSigOutput
+        )
     }
 
     /**
@@ -593,7 +613,12 @@ class WalletManager(
         previousMultiSigOutput: TransactionOutput,
         inputScriptSig: Script
     ): Transaction {
-        return createMultiSigPaymentTransaction(receiverAddress, paymentAmount, previousMultiSigOutput, inputScriptSig)
+        return createMultiSigPaymentTransaction(
+            receiverAddress,
+            paymentAmount,
+            previousMultiSigOutput,
+            inputScriptSig
+        )
     }
 
     companion object {

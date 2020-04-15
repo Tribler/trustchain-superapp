@@ -68,13 +68,13 @@ class CoinCommunityTest {
         every { trustchain.createProposalBlock(any<String>(), any<ByteArray>(), any<String>()) } returns Unit
 
         // Actual test
-        val txId = coinCommunity.createGenesisSharedWallet(ENTRANCE_FEE)
+        val txId = coinCommunity.createBitcoinGenesisWallet(ENTRANCE_FEE)
         val serializedTx = coinCommunity.fetchBitcoinTransaction(txId)
         coinCommunity.broadcastCreatedSharedWallet(serializedTx!!, ENTRANCE_FEE, 1)
 
         // Verify that the trustchain method is called
         verify { trustchain.createProposalBlock(any<String>(), TRUSTCHAIN_PK.hexToBytes(),
-            CoinCommunity.SHARED_WALLET_BLOCK
+            CoinCommunity.JOIN_BLOCK
         ) }
     }
 
@@ -119,7 +119,7 @@ class CoinCommunityTest {
 
         // Actual test
         val newTransactionProposal =
-            coinCommunity.createBitcoinSharedWallet(SW_BLOCK_HASH)
+            coinCommunity.createBitcoinSharedWalletForJoining(SW_BLOCK_HASH)
 
         assertEquals("Old wallet TX in block is not correct", TX_ADD_USER_ID, newTransactionProposal.transactionId)
         assertEquals("New wallet TX in block is not correct", TX_ADD_USER_SERIALIZED, newTransactionProposal.serializedTransaction)
@@ -177,7 +177,7 @@ class CoinCommunityTest {
             trustchain.createProposalBlock(
                 any<String>(),
                 any(),
-                CoinCommunity.SHARED_WALLET_BLOCK
+                CoinCommunity.JOIN_BLOCK
             )
         }
     }

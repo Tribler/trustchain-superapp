@@ -103,7 +103,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     }
 
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionPackage = getCoinCommunity().createBitcoinSharedWallet(block.calculateHash())
+        val transactionPackage = getCoinCommunity().createBitcoinSharedWalletForJoining(block.calculateHash())
         val proposeBlock =
             getCoinCommunity().proposeJoinWalletOnTrustChain(
                 block.calculateHash(),
