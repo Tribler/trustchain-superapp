@@ -130,7 +130,7 @@
     <fragment
         android:id="@+id/myDAOsFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyDAOsFragment"
-        android:label="fragment_my_daos"
+        android:label="My DAOs"
         tools:layout="@layout/fragment_my_daos" >
         <action
             android:id="@+id/action_myDAOsFragment_to_createSWFragment"
