@@ -7,9 +7,12 @@ import android.text.InputType
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -25,8 +28,9 @@ class VotingActivity : AppCompatActivity() {
     lateinit var vh: VotingHelper
     lateinit var community: TrustChainCommunity
     lateinit var adapter: blockListAdapter
-    lateinit var voteProposals: List<TrustChainBlock>
     lateinit var tch: TrustChainHelper
+
+    var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
 
     /**
      * Setup method, binds functionality
@@ -39,19 +43,15 @@ class VotingActivity : AppCompatActivity() {
             showNewVoteDialog()
         }
 
-        val ipv8 = IPv8Android.getInstance()
-
         // Initiate community and helpers
+        val ipv8 = IPv8Android.getInstance()
         community = ipv8.getOverlay()!!
         vh = VotingHelper(community)
         tch = TrustChainHelper(community)
 
+        // Styling
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
-
-        voteProposals = tch.getBlocksByType("voting_block").filter {
-            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-        }
 
         adapter = blockListAdapter(voteProposals)
 
@@ -60,6 +60,8 @@ class VotingActivity : AppCompatActivity() {
         }
 
         blockList.adapter = adapter
+
+        periodicUpdate()
     }
 
     /**
@@ -92,9 +94,6 @@ class VotingActivity : AppCompatActivity() {
             // Start voting procedure
             vh.startVote(proposal, peers)
             printShortToast("Voting procedure started")
-
-            // Update list
-            updateVoteProposalList()
         }
 
         builder.setNegativeButton("Cancel") { dialog, _ ->
@@ -102,16 +101,6 @@ class VotingActivity : AppCompatActivity() {
         }
 
         builder.show()
-    }
-
-    /**
-     * Refresh the vote proposals
-     */
-    private fun updateVoteProposalList() {
-        voteProposals = tch.getBlocksByType("voting_block").filter {
-            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-        }
-        adapter.notifyDataSetChanged()
     }
 
     /**
@@ -155,5 +144,29 @@ class VotingActivity : AppCompatActivity() {
         builder.setCancelable(true)
 
         builder.show()
+    }
+
+    /**
+     * Periodically update vote proposal set
+     */
+    private fun periodicUpdate() {
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                val currentProposals = tch.getBlocksByType("voting_block").filter {
+                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
+                }.asReversed()
+
+                // Update vote proposal set
+                if (!voteProposals.equals(currentProposals)) {
+                    voteProposals.clear()
+                    voteProposals.addAll(tch.getBlocksByType("voting_block").filter {
+                        !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
+                    }.asReversed())
+                    adapter.notifyDataSetChanged()
+                }
+
+                delay(1000)
+            }
+        }
     }
 }

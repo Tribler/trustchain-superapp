@@ -88,25 +88,6 @@ class VotingHelperTest {
     }
 
     @Test
-    fun startVoteMaliciousInput() {
-        val community = spyk(getCommunity())
-
-        val votingHelper = VotingHelper(community)
-        val peers = getPeers()
-
-        val voteSubject = "}{"
-        var caught = false
-        try {
-            votingHelper.startVote(voteSubject, peers)
-        } catch (e: IllegalArgumentException) {
-            caught = true
-        }
-
-        // Verify that votingHelper raises exception
-        assert(caught == true)
-    }
-
-    @Test
     fun respondToVote() {
         val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
