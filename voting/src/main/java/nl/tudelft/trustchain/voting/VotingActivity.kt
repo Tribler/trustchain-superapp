@@ -159,6 +159,16 @@ class VotingActivity : AppCompatActivity() {
         builder.setCancelable(true)
 
         builder.show()
+
+        showTally(voteSubject, block)
+    }
+
+    fun showTally(voteSubject: String, block: TrustChainBlock) {
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.addAll(community.getPeers().map { it.publicKey })
+        peers.add(community.myPeer.publicKey)
+        val tally = vh.countVotes(peers, voteSubject, block.publicKey)
+        printShortToast("Yes votes: ${tally.first}. No votes: ${tally.second}.")
     }
 
     /**
