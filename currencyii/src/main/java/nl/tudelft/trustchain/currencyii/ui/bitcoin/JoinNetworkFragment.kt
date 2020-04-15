@@ -16,7 +16,6 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
-import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
