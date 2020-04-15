@@ -41,7 +41,10 @@ class VotingActivity : AppCompatActivity() {
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
-        val adapter = blockListAdapter(tch.getBlocksByType("voting_block"))
+        val adapter = blockListAdapter(tch.getBlocksByType("voting_block").filter {
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
+        })
+
         adapter.onItemClick = {
             showNewCastVoteDialog(it)
         }
@@ -65,7 +68,7 @@ class VotingActivity : AppCompatActivity() {
 
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
-        input.setHint("p != np")
+        input.hint = "p != np"
         builder.setView(input)
 
         builder.setPositiveButton("Create") { _, _ ->
