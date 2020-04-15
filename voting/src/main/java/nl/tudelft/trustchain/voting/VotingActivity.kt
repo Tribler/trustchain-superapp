@@ -66,7 +66,7 @@ class VotingActivity : AppCompatActivity() {
      * Display a short message on the screen
      */
     private fun printShortToast(s: String) {
-        Toast.makeText(this, s, Toast.LENGTH_LONG).show()
+        Toast.makeText(this, s, Toast.LENGTH_SHORT).show()
     }
 
     /**
