@@ -89,7 +89,8 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 this@JoinNetworkFragment,
                 allWallets,
                 publicKey,
-                "Click to join"
+                "Click to join",
+                disableOnUserJoined = true
             )
             list_view.adapter = adapter
             list_view.setOnItemClickListener { _, view, position, id ->
