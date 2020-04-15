@@ -23,7 +23,7 @@ class VotingActivity : AppCompatActivity() {
     lateinit var vh: VotingHelper
     lateinit var community: TrustChainCommunity
     lateinit var adapter: blockListAdapter
-    lateinit var voteProposals: List<TrustChainBlock>
+    lateinit var voteProposals: MutableList<TrustChainBlock>
     lateinit var tch: TrustChainHelper
 
     /**
@@ -49,7 +49,7 @@ class VotingActivity : AppCompatActivity() {
 
         voteProposals = tch.getBlocksByType("voting_block").filter {
             !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-        }
+        }.toMutableList()
 
         adapter = blockListAdapter(voteProposals)
 
@@ -106,9 +106,10 @@ class VotingActivity : AppCompatActivity() {
      * Refresh the vote proposals
      */
     private fun updateVoteProposalList() {
-        voteProposals = tch.getBlocksByType("voting_block").filter {
+        voteProposals.clear()
+        voteProposals.addAll(tch.getBlocksByType("voting_block").filter {
             !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-        }
+        })
         adapter.notifyDataSetChanged()
     }
 
