@@ -143,14 +143,14 @@ class VotingActivity : AppCompatActivity() {
             while (isActive) {
                 val currentProposals = tch.getBlocksByType("voting_block").filter {
                     !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-                }
+                }.asReversed()
 
                 // Update vote proposal set
                 if (!voteProposals.equals(currentProposals)) {
                     voteProposals.clear()
                     voteProposals.addAll(tch.getBlocksByType("voting_block").filter {
                         !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY")
-                    })
+                    }.asReversed())
                     adapter.notifyDataSetChanged()
                 }
 
