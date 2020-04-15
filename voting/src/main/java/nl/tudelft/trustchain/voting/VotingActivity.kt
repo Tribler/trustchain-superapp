@@ -147,7 +147,7 @@ class VotingActivity : AppCompatActivity() {
             printShortToast("You voted: NO")
         }
 
-        builder.setNeutralButton("CANCEL") {dialog, _ ->
+        builder.setNeutralButton("CANCEL") { dialog, _ ->
             printShortToast("No vote was cast")
             dialog.cancel()
         }
