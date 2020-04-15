@@ -292,7 +292,7 @@ class WalletManager(
         signaturesOfOldOwners: List<ECDSASignature>,
         newTransaction: Transaction,
         oldTransaction: Transaction
-    ): TransactionPackage? {
+    ): TransactionBroadcast {
         Log.i("Coin", "Coin: (safeSendingJoinWalletTransaction start).")
         val oldMultiSigOutput = getMultiSigOutput(oldTransaction).unsignedOutput
 
@@ -313,15 +313,10 @@ class WalletManager(
             Log.i("Coin", "Coin: script is valid.")
         } catch (exception: VerificationException) {
             Log.i("Coin", "Coin: script is NOT valid. ${exception.message}.")
-            return null
+            throw IllegalStateException("The join bitcoin DAO transaction script is invalid")
         }
 
-        sendTransaction(newTransaction)
-
-        return TransactionPackage(
-            newTransaction.txId.toString(),
-            newTransaction.bitcoinSerialize().toHex()
-        )
+        return sendTransaction(newTransaction)
     }
 
     /**

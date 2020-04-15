@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.fragment_create_sw.*
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
@@ -60,7 +59,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
     }
 
     private fun updateAlertLabel(progress: Double) {
-        Log.i("Coin", "Coin: broadcast of transaction progress: $progress.")
+        Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
         // TODO: fix co-routines, threads etc to show progress
 //        val progressString = "%.1f".format(progress)
 //        alert_label.text = "Current progress: $progressString%..."

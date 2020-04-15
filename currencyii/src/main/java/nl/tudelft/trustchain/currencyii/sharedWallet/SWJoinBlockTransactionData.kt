@@ -33,6 +33,12 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
         jsonData = SWUtil.objectToJsonObject(data)
     }
 
+    fun setTransactionSerialized(serializedTransaction: String) {
+        val data = getData()
+        data.SW_TRANSACTION_SERIALIZED = serializedTransaction
+        jsonData = SWUtil.objectToJsonObject(data)
+    }
+
     constructor(
         entranceFee: Long,
         transactionSerialized: String,

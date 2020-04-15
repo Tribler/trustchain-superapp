@@ -10,12 +10,12 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import kotlinx.coroutines.*
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
 
 /**
  * A simple [Fragment] subclass.
@@ -87,10 +87,12 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                     trustchain.crawlChain(peer)
                     var crawlResult = trustchain
                         .getChainByUser(peer.publicKey.keyToBin())
-
-                    crawlResult = crawlResult.filter {
-                        CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
-                    }
+                        .filter {
+                            CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
+                        }.distinctBy {
+                            SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID)
+                                .asString
+                        }
                     discoveredBlocks.addAll(crawlResult)
                 }
             } catch (t: Throwable) {
@@ -102,62 +104,63 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         return discoveredBlocks
     }
 
+    /**
+     * Join a shared bitcoin wallet.
+     */
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val transactionPackage = getCoinCommunity().createBitcoinSharedWalletForJoining(block.calculateHash())
-        val proposeBlock =
+        // Add a proposal to trust chain to join a shared wallet
+        val proposeBlockData =
             getCoinCommunity().proposeJoinWalletOnTrustChain(
-                block.calculateHash(),
-                transactionPackage.serializedTransaction
-            )
+                block.transaction
+            ).getData()
 
-        // Now start a thread to collect and wait (non-blocking) for signatures
-        val requiredSignatures = proposeBlock.getData().SW_SIGNATURES_REQUIRED
-
-        var finished = false
-        while (!finished) {
-            val transactionId = collectJoinWalletSignatures(proposeBlock, requiredSignatures)
-            if (transactionId == null) {
-                Thread.sleep(1000)
-            } else {
-                fetchCurrentSharedWalletStatusLoop(transactionId)
-                finished = true
-            }
+        // Wait and collect signatures
+        var signatures: List<String>? = null
+        while (signatures == null) {
+            Thread.sleep(1000)
+            signatures = collectJoinWalletSignatures(proposeBlockData)
         }
-        // TODO: should not be sent to the original block? New serialized tx is not updated
-        getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
+
+        // Create a new shared wallet using the signatures of the others.
+        // Broadcast the new shared bitcoin wallet on trust chain.
+        try {
+            getCoinCommunity().safeSendingJoinWalletTransaction(
+                block.transaction,
+                proposeBlockData,
+                signatures,
+                ::updateAlertLabel
+            )
+        } catch (t: Throwable) {
+            Log.i("Coin", "Joining failed: ${t.message ?: '-'}")
+        }
+
+        // Update wallets UI list
+        loadSharedWallets()
+    }
+
+    private fun updateAlertLabel(progress: Double) {
+        Log.i("Coin", "Coin: broadcast of join transaction progress: $progress.")
     }
 
     /**
      * Collect the signatures of a join proposal. Returns true if enough signatures are found.
      */
     private fun collectJoinWalletSignatures(
-        data: SWSignatureAskTransactionData,
-        requiredSignatures: Int
-    ): String? {
-        val blockData = data.getData()
+        blockData: SWSignatureAskBlockTD
+    ): List<String>? {
         val signatures =
             getCoinCommunity().fetchProposalSignatures(
                 blockData.SW_UNIQUE_ID,
                 blockData.SW_UNIQUE_PROPOSAL_ID
             )
-
-        if (signatures.size >= requiredSignatures) {
-            return getCoinCommunity().safeSendingJoinWalletTransaction(data, signatures)
+        Log.i(
+            "Coin",
+            "Waiting for signatures. ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} found!"
+        )
+        if (signatures.size >= blockData.SW_SIGNATURES_REQUIRED) {
+            return signatures
         }
         return null
-    }
-
-    private fun fetchCurrentSharedWalletStatusLoop(transactionId: String) {
-        var finished = false
-
-        while (!finished) {
-            finished = getCoinCommunity().fetchBitcoinTransactionStatus(transactionId)
-            if (!finished) {
-                Thread.sleep(1_000)
-            } else {
-                break
-            }
-        }
     }
 
     override fun onCreateView(
