@@ -35,6 +35,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
     }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
@@ -102,7 +103,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
+
             }, 1500)
         }
     }
@@ -111,7 +116,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         if (animation!!) {
             bitcoin_refresh_swiper.isRefreshing = true
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
             }, 1500)
         }
 
