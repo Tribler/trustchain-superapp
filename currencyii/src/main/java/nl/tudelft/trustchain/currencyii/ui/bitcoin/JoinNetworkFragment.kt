@@ -28,8 +28,32 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+        initListeners()
+        this.refresh()
+    }
 
-        loadSharedWallets()
+    private fun initListeners() {
+        join_dao_refresh_swiper.setOnRefreshListener {
+            this.refresh()
+        }
+    }
+
+    private fun refresh() {
+        this.loadSharedWallets()
+    }
+
+    private fun enableRefresher() {
+        try {
+            join_dao_refresh_swiper.isRefreshing = true
+        } catch (e: IllegalStateException) {
+        }
+    }
+
+    private fun disableRefresher() {
+        try {
+            join_dao_refresh_swiper.isRefreshing = false
+        } catch (e: IllegalStateException) {
+        }
     }
 
     /**
@@ -38,6 +62,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
      */
     private fun loadSharedWallets() {
         lifecycleScope.launchWhenStarted {
+            enableRefresher()
             val discoveredWallets = getCoinCommunity().discoverSharedWallets()
             val foundWallets = withContext(Dispatchers.IO) {
                 crawlAvailableSharedWallets()
@@ -71,6 +96,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 joinSharedWalletClicked(allWallets[position])
                 Log.i("Coin", "Clicked: $view, $position, $id")
             }
+            disableRefresher()
         }
     }
 
