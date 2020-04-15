@@ -37,6 +37,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
             val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
             currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
             currentThreshold = voting_threshold_tf.text.toString().toInt()
+            // TODO: catch exception
             currentTransactionId = getCoinCommunity().createGenesisSharedWallet(currentEntranceFee!!)
 
             voting_threshold_tf.isEnabled = false

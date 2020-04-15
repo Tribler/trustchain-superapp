@@ -123,6 +123,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 finished = true
             }
         }
+        // TODO: should not be sent to the original block? New serialized tx is not updated
         getCoinCommunity().addSharedWalletJoinBlock(block.calculateHash())
     }
 
