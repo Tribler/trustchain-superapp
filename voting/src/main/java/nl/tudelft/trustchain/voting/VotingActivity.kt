@@ -136,9 +136,11 @@ class VotingActivity : AppCompatActivity() {
             vh.respondToVote(true, block)
         }
 
-        builder.setNegativeButton("NO") { dialog, _ ->
+        builder.setNegativeButton("NO") { _, _ ->
             vh.respondToVote(false, block)
-            dialog.cancel()
+        }
+
+        builder.setNeutralButton("CANCEL") {_, _ ->
         }
 
         builder.setCancelable(true)
