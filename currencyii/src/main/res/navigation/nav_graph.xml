@@ -153,5 +153,17 @@
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_sharedWalletTransaction"
+            app:destination="@id/sharedWalletTransaction"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_enter"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
+    <fragment
+        android:id="@+id/myWalletFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyWalletFragment"
+        android:label="My Wallet"
+        tools:layout="@layout/fragment_my_wallet" />
 </navigation>

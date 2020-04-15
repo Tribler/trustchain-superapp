@@ -6,7 +6,7 @@
         android:title="@string/dao_overview"
         android:icon="@drawable/ic_home_black_24dp" />
     <item
-        android:id="@+id/myWallet"
+        android:id="@+id/myWalletFragment"
         android:title="@string/my_wallet"
         android:icon="@drawable/ic_account_balance_wallet_black_24dp" />
     <item
