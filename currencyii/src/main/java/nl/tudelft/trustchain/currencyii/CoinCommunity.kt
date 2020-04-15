@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
-import org.json.JSONException
 import java.util.concurrent.TimeUnit
 
 @Suppress("UNCHECKED_CAST")
@@ -232,18 +231,6 @@ class CoinCommunity : Community() {
     }
 
     /**
-     * Try to fetch the serialized transaction of a trust chain block.
-     * @return serializedTransaction string if it exists.
-     */
-    private fun tryToFetchSerializedTransaction(block: TrustChainBlock): String? {
-        return try {
-            SWUtil.parseTransaction(block.transaction).get(SW_TRANSACTION_SERIALIZED).asString
-        } catch (exception: JSONException) {
-            null
-        }
-    }
-
-    /**
      * 3.1 Send a proposal block on trustchain to ask for the signatures.
      * Assumed that people agreed to the transfer.
      */
@@ -326,6 +313,8 @@ class CoinCommunity : Community() {
 
         val transaction = transactionBroadcast.broadcast().get(timeout, TimeUnit.SECONDS)
         val serializedTransaction = getSerializedTransaction(transaction)
+
+        // Publish the result on trust chain, if no errors were thrown during transaction initialization.
         broadcastTransferFundSuccessful(
             walletData,
             transferFundsData,
@@ -398,7 +387,6 @@ class CoinCommunity : Community() {
         block: TrustChainBlock,
         fromBlocks: List<TrustChainBlock>
     ): TrustChainBlock? {
-        // TODO: only fetch shared wallet blocks with [SW_TRANSACTION_SERIALIZED] in it
         val walletId = SWUtil.parseTransaction(block.transaction).get(SW_UNIQUE_ID).asString
         return fromBlocks
             .filter { SWUtil.parseTransaction(it.transaction).get(SW_UNIQUE_ID).asString == walletId }
@@ -570,7 +558,6 @@ class CoinCommunity : Community() {
 
         // Values below are present in SW_TRANSACTION_BLOCK_KEYS block types
         public const val SW_UNIQUE_ID = "SW_UNIQUE_ID"
-        public const val SW_TRANSACTION_SERIALIZED = "SW_TRANSACTION_SERIALIZED"
         public const val SW_TRUSTCHAIN_PKS = "SW_TRUSTCHAIN_PKS"
     }
 }

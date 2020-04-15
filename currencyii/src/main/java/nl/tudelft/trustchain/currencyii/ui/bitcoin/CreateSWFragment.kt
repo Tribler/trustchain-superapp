@@ -70,8 +70,12 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
 
         activity?.runOnUiThread {
-            val progressString = "%.0f".format(progress * 100)
-            alert_label?.text = "DAO creation progress: $progressString%..."
+            if (progress >= 100) {
+                alert_label?.text = "DAO creation progress: completed!"
+            } else {
+                val progressString = "%.0f".format(progress * 100)
+                alert_label?.text = "DAO creation progress: $progressString%..."
+            }
         }
     }
 

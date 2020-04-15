@@ -89,6 +89,9 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 satoshiTransferAmount,
                 ::updateAlertLabel
             )
+            activity?.runOnUiThread {
+                alert_view.text = "Funds transfered!"
+            }
         } catch (t: Throwable) {
             Log.i("Coin", "Joining failed: ${t.message ?: '-'}")
             resetWalletInitializationValues()
@@ -96,15 +99,18 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 alert_view.text = t.message ?: "Unexpected error occurred. Try again"
             }
         }
-        resetWalletInitializationValues()
     }
 
     private fun updateAlertLabel(progress: Double) {
         Log.i("Coin", "Coin: broadcast of transfer funds transaction progress: $progress.")
 
         activity?.runOnUiThread {
-            val progressString = "%.0f".format(progress * 100)
-            alert_view.text = "Transfer funds progress: $progressString%..."
+            if (progress >= 100) {
+                alert_view?.text = "Transfer funds progress: completed!"
+            } else {
+                val progressString = "%.0f".format(progress * 100)
+                alert_view.text = "Transfer funds progress: $progressString%..."
+            }
         }
     }
 
