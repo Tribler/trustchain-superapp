@@ -31,10 +31,6 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-//        if (!voteSubject.matches(Regex("""^[a-zA-Z0-9?!()]*$"""))) {
-//            throw IllegalArgumentException("VoteSubject may only contain letters")
-//        }
-
         val voteList = JSONArray(peers)
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
