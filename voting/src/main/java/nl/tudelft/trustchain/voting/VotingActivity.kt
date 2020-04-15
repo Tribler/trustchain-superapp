@@ -135,7 +135,6 @@ class VotingActivity : AppCompatActivity() {
         builder.show()
     }
 
-
     /**
      * Periodically update vote proposal set
      */
