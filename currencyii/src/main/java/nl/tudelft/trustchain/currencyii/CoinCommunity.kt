@@ -426,7 +426,7 @@ class CoinCommunity : Community() {
             }.map {
                 val blockData = SWResponseSignatureTransactionData(it.transaction).getData()
                 blockData.SW_SIGNATURE_SERIALIZED
-            }.distinct()
+            }
     }
 
     companion object {

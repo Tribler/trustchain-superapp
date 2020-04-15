@@ -16,6 +16,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
+import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -24,51 +25,85 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
  */
 class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
+    private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        lifecycleScope.launchWhenStarted {
+            fetchSharedWallets()
+        }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        loadSharedWallets()
+        thread {
+            while (true) {
+                Thread.sleep(1000)
+                updateSharedWalletsUI()
+            }
+        }
+    }
+
+    private fun fetchSharedWallets() {
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                val discoveredWallets = getCoinCommunity().discoverSharedWallets()
+
+                updateSharedWallets(discoveredWallets)
+
+                crawlAvailableSharedWallets()
+            }
+        }
+    }
+
+    private fun updateSharedWallets(newWallets: List<TrustChainBlock>) {
+        val walletIds = fetchedWallets.map {
+            SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+        }
+        val distinctById = newWallets
+            .filter {
+                // Make sure that the trust chain block has the correct type
+                CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
+            }.distinctBy {
+                SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+            }
+
+        Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
+
+        for (wallet in distinctById) {
+            val currentId =
+                SWUtil.parseTransaction(wallet.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+            if (!walletIds.contains(currentId)) {
+                fetchedWallets.add(wallet)
+            }
+        }
     }
 
     /**
      * Load shared wallet trust chain blocks. Blocks are crawled from trust chain users and loaded
      * from the local database.
      */
-    private fun loadSharedWallets() {
+    private fun updateSharedWalletsUI() {
         lifecycleScope.launchWhenStarted {
-            val discoveredWallets = getCoinCommunity().discoverSharedWallets()
-            val foundWallets = withContext(Dispatchers.IO) {
-                crawlAvailableSharedWallets()
-            }
-
-            Log.i(
-                "Coin",
-                "${foundWallets.size} found with crawling and ${discoveredWallets.size} in database"
-            )
-
-            // Filter the wallets on the correct block type and unique wallet ids
-            val allWallets = discoveredWallets
-                .union(foundWallets)
-                .filter {
-                    CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
-                }.distinctBy {
-                    SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
-                }
-
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
 
             // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
                 this@JoinNetworkFragment,
-                allWallets,
+                fetchedWallets,
                 publicKey,
                 "Click to join"
             )
             list_view.adapter = adapter
             list_view.setOnItemClickListener { _, view, position, id ->
-                joinSharedWalletClicked(allWallets[position])
-                Log.i("Coin", "Clicked: $view, $position, $id")
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        joinSharedWalletClicked(fetchedWallets[position])
+                        Log.i("Coin", "Clicked: $view, $position, $id")
+                    }
+                }
             }
         }
     }
@@ -76,32 +111,24 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     /**
      * Crawl all shared wallet blocks of users in the trust chain.
      */
-    private suspend fun crawlAvailableSharedWallets(): ArrayList<TrustChainBlock> {
+    private suspend fun crawlAvailableSharedWallets() {
         val allUsers = getDemoCommunity().getPeers()
         Log.i("Coin", "Found ${allUsers.size} peers, crawling")
-        val discoveredBlocks: ArrayList<TrustChainBlock> = arrayListOf()
 
         for (peer in allUsers) {
             try {
                 withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                     trustchain.crawlChain(peer)
-                    var crawlResult = trustchain
+                    val crawlResult = trustchain
                         .getChainByUser(peer.publicKey.keyToBin())
-                        .filter {
-                            CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
-                        }.distinctBy {
-                            SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID)
-                                .asString
-                        }
-                    discoveredBlocks.addAll(crawlResult)
+
+                    updateSharedWallets(crawlResult)
                 }
             } catch (t: Throwable) {
                 val message = t.message ?: "no message"
                 Log.i("Coin", "Crawling failed for: ${peer.publicKey} message: $message")
             }
         }
-
-        return discoveredBlocks
     }
 
     /**
@@ -135,11 +162,17 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         }
 
         // Update wallets UI list
-        loadSharedWallets()
+        fetchSharedWallets()
+        alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
     }
 
     private fun updateAlertLabel(progress: Double) {
-        Log.i("Coin", "Coin: broadcast of join transaction progress: $progress.")
+        Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
+
+        activity?.runOnUiThread {
+            val progressString = "%.0f".format(progress * 100)
+            alert_tf.text = "Join wallet progress: $progressString%..."
+        }
     }
 
     /**
@@ -155,8 +188,14 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             )
         Log.i(
             "Coin",
-            "Waiting for signatures. ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} found!"
+            "Waiting for signatures. ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
+
+        activity?.runOnUiThread {
+            alert_tf?.text =
+                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+        }
+
         if (signatures.size >= blockData.SW_SIGNATURES_REQUIRED) {
             return signatures
         }

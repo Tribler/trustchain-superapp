@@ -69,7 +69,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
 
         activity?.runOnUiThread {
             val progressString = "%.0f".format(progress * 100)
-            alert_label.text = "DAO creation progress: $progressString%..."
+            alert_label?.text = "DAO creation progress: $progressString%..."
         }
     }
 
