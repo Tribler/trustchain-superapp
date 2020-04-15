@@ -65,7 +65,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         val distinctById = newWallets
             .filter {
                 // Make sure that the trust chain block has the correct type
-                CoinCommunity.SW_TRANSACTION_BLOCK_KEYS.contains(it.type)
+                it.type == CoinCommunity.JOIN_BLOCK
             }.distinctBy {
                 SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
             }
@@ -135,10 +135,13 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
      * Join a shared bitcoin wallet.
      */
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
+        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletTransactionBlock(block.calculateHash())
+            ?: block
+
         // Add a proposal to trust chain to join a shared wallet
         val proposeBlockData =
             getCoinCommunity().proposeJoinWalletOnTrustChain(
-                block.transaction
+                mostRecentSWBlock.transaction
             ).getData()
 
         // Wait and collect signatures
@@ -152,18 +155,23 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         // Broadcast the new shared bitcoin wallet on trust chain.
         try {
             getCoinCommunity().safeSendingJoinWalletTransaction(
-                block.transaction,
+                mostRecentSWBlock.transaction,
                 proposeBlockData,
                 signatures,
                 ::updateAlertLabel
             )
         } catch (t: Throwable) {
             Log.i("Coin", "Joining failed: ${t.message ?: '-'}")
+            activity?.runOnUiThread {
+                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
+            }
         }
 
         // Update wallets UI list
         fetchSharedWallets()
-        alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
+        activity?.runOnUiThread {
+            alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
+        }
     }
 
     private fun updateAlertLabel(progress: Double) {

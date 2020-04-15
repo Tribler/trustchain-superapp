@@ -60,7 +60,9 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
             alert_label.text = "Wallet created successfully!"
         } catch (t: Throwable) {
             resetWalletInitializationValues()
-            alert_label.text = t.message ?: "Unexpected error occurred. Try again"
+            activity?.runOnUiThread {
+                alert_label.text = t.message ?: "Unexpected error occurred. Try again"
+            }
         }
     }
 

@@ -28,6 +28,7 @@ import java.util.*
 
 const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
+const val MIN_BLOCKCHAIN_PEERS = 10
 
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
@@ -371,7 +372,7 @@ class WalletManager(
         signatures: List<ECDSASignature>,
         receiverAddress: Address,
         paymentAmount: Coin
-    ): TransactionPackage? {
+    ): TransactionBroadcast {
         Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
 
         // Retrieve the multi-sig output. Will become the input of this tx
@@ -398,20 +399,10 @@ class WalletManager(
         val input = spendTx.inputs[0]
 
         // Verify the script before sending.
-        try {
-            input.verify(previousMultiSigOutput)
-            Log.i("Coin", "Coin: script is valid.")
-        } catch (exception: VerificationException) {
-            Log.i("Coin", "Coin: script is NOT valid. ${exception.message}")
-            return null
-        }
+        input.verify(previousMultiSigOutput)
+        Log.i("Coin", "Coin: script is valid.")
 
-        sendTransaction(spendTx)
-
-        return TransactionPackage(
-            spendTx.txId.toString(),
-            spendTx.bitcoinSerialize().toHex()
-        )
+        return sendTransaction(spendTx)
     }
 
     /**
@@ -424,8 +415,8 @@ class WalletManager(
         printTransactionInformation(transaction)
 
         Log.i("Coin", "Waiting for peers")
-        kit.peerGroup().waitForPeers(3).get()
-        Log.i("Coin", "Got >= 3 peers: ${kit.peerGroup().connectedPeers}")
+        kit.peerGroup().waitForPeers(MIN_BLOCKCHAIN_PEERS).get()
+        Log.i("Coin", "Got >= $MIN_BLOCKCHAIN_PEERS peers: ${kit.peerGroup().connectedPeers}")
         Log.i(
             "Coin",
             "Transaction broadcast setup ${transaction.txId} completed. Not broadcasted yet."
