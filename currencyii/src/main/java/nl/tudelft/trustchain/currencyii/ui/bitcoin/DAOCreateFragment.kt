@@ -93,7 +93,11 @@ class DAOCreateFragment : Fragment() {
             .setConfiguration(config)
             .init()
 
-        findNavController().navigate(DaoImportOrCreateDirections.actionDaoImportOrCreateToBitcoinFragment(showDownload = true))
+        findNavController().navigate(
+            DAOCreateFragmentDirections.actionDaoImportOrCreateToBitcoinFragment(
+                showDownload = true
+            )
+        )
     }
 
     override fun onCreateView(
