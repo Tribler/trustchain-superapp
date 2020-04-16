@@ -98,6 +98,7 @@ class VotingActivity : AppCompatActivity() {
         input.hint = "p != np"
         builder.setView(input)
 
+        // PositiveButton is always the rightmost button
         builder.setPositiveButton("Create") { _, _ ->
             val proposal = input.text.toString()
 
@@ -111,7 +112,8 @@ class VotingActivity : AppCompatActivity() {
             printShortToast("Voting procedure started")
         }
 
-        builder.setNegativeButton("Cancel") { dialog, _ ->
+        // NeutralButton is always the leftmost button
+        builder.setNeutralButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
 
@@ -156,41 +158,50 @@ class VotingActivity : AppCompatActivity() {
             ""
         }
 
+        // Get tally values
+        val tally = getTally(voteSubject, block)
+
+        // Show vote subject, proposer and current tally
         builder.setMessage(
             Html.fromHtml(
                 "<big>\"" + voteSubject + "\"</big>" +
                     "<br><br>" +
-                    "<small><b>Proposed by</b>: <i>" +
-                    defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-                    "</i></small>" +
+                    "<small><b>Proposed by<b>:" +
+                    "<br>" +
+                    "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
-                    "<small><b>Date</b>: <i>" +
-                    block.timestamp +
-                    "</i></small>" +
-                    castedString, Html.FROM_HTML_MODE_LEGACY
-            )
-        )
+                    "<small><b>Date</b>: " +
+                    "<i>" + block.timestamp + "</i></small>" + castedString +
+                    "<small><b>Current tally:" +
+                    "<br>" +
+                    "Yes votes: " + tally.first +
+                    " | No votes: " + tally.second + "</small></i>",
+                Html.FROM_HTML_MODE_LEGACY))
 
         // Display vote options is not previously casted a vote
         if (hasCasted == null) {
             builder.setTitle("Cast vote on proposal:")
 
+            // PositiveButton is always the rightmost button
             builder.setPositiveButton("YES") { _, _ ->
                 vh.respondToVote(true, block)
                 printShortToast("You voted: YES")
             }
 
+            // NegativeButton is always second-from-right button
             builder.setNegativeButton("NO") { _, _ ->
                 vh.respondToVote(false, block)
                 printShortToast("You voted: NO")
             }
+
+            // NeutralButton is always the leftmost button
             builder.setNeutralButton("CANCEL") { dialog, _ ->
                 printShortToast("No vote was cast")
                 dialog.cancel()
             }
         } else {
             builder.setTitle("Inspect proposal:")
-
+            // NeutralButton is always the leftmost button
             builder.setNeutralButton("Exit") { dialog, _ ->
                 dialog.cancel()
             }
@@ -199,6 +210,16 @@ class VotingActivity : AppCompatActivity() {
         builder.setCancelable(true)
 
         builder.show()
+    }
+
+    /**
+     * Count votes and return tally
+     */
+    fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.addAll(community.getPeers().map { it.publicKey })
+        peers.add(community.myPeer.publicKey)
+        return vh.countVotes(peers, voteSubject, block.publicKey)
     }
 
     /**
