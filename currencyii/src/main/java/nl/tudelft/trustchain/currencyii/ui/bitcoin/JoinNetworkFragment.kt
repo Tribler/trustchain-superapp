@@ -16,7 +16,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
-import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -31,29 +30,20 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
-            fetchSharedWallets()
+            fetchSharedWalletsAndUpdateUI()
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        thread {
-            while (true) {
-                Thread.sleep(1000)
-                updateSharedWalletsUI()
-            }
-        }
-    }
-
-    private fun fetchSharedWallets() {
+    private fun fetchSharedWalletsAndUpdateUI() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
 
                 updateSharedWallets(discoveredWallets)
+                updateSharedWalletsUI()
 
                 crawlAvailableSharedWallets()
+                updateSharedWalletsUI()
             }
         }
     }
@@ -169,7 +159,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         }
 
         // Update wallets UI list
-        fetchSharedWallets()
+        fetchSharedWalletsAndUpdateUI()
         activity?.runOnUiThread {
             alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
         }
