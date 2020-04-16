@@ -166,13 +166,15 @@ class VotingActivity : AppCompatActivity() {
             Html.fromHtml(
                 "<big>\"" + voteSubject + "\"</big>" +
                     "<br><br>" +
-                    "<small><b>Proposed by<b>:" +
+                    "<small><b>Proposed by</b>:" +
                     "<br>" +
                     "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
                     "<small><b>Date</b>: " +
-                    "<i>" + block.timestamp + "</i></small>" + castedString +
-                    "<small><b>Current tally:" +
+                    "<i>" + block.timestamp + "</i></small>" +
+                    castedString +
+                    "<br><br>" +
+                    "<small><b>Current tally</b>:" +
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
