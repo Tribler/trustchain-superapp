@@ -137,12 +137,18 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        // Show vote subject and its proposer
+        // Get tally values
+        val tally = getTally(voteSubject, block)
+
+        // Show vote subject, proposer and current tally
         builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
             "<br><br>" +
             "<i><small>Proposed by: " +
             defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-            "</small></i>", Html.FROM_HTML_MODE_LEGACY))
+            "</small></i>" +
+            "<br><br>" +
+            "<i><small>Current tally: <br>" + "Yes: " + tally.first + " | No: " + tally.second + "</small></i>",
+            Html.FROM_HTML_MODE_LEGACY))
 
         // PositiveButton is always the rightmost button
         builder.setPositiveButton("YES") { _, _ ->
@@ -165,19 +171,16 @@ class VotingActivity : AppCompatActivity() {
         builder.setCancelable(true)
 
         builder.show()
-
-        showTally(voteSubject, block)
     }
 
     /**
-     * Count votes and show tally
+     * Count votes and return tally
      */
-    fun showTally(voteSubject: String, block: TrustChainBlock) {
+    fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
         val peers: MutableList<PublicKey> = ArrayList()
         peers.addAll(community.getPeers().map { it.publicKey })
         peers.add(community.myPeer.publicKey)
-        val tally = vh.countVotes(peers, voteSubject, block.publicKey)
-        printShortToast("Yes votes: ${tally.first}. No votes: ${tally.second}.")
+        return vh.countVotes(peers, voteSubject, block.publicKey)
     }
 
     /**
