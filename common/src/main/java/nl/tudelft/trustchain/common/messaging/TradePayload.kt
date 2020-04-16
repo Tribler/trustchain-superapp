@@ -20,6 +20,22 @@ class TradePayload(
             serializeVarLen(type.toString().toByteArray(Charsets.UTF_8))
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as TradePayload
+
+        if (!publicKey.contentEquals(other.publicKey)) return false
+        if (primaryCurrency != other.primaryCurrency) return false
+        if (secondaryCurrency != other.secondaryCurrency) return false
+        if (amount != other.amount) return false
+        if (price != other.price) return false
+        if (type != other.type) return false
+
+        return true
+    }
+
     companion object Deserializer : Deserializable<TradePayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TradePayload, Int> {
             var localOffset = 0
