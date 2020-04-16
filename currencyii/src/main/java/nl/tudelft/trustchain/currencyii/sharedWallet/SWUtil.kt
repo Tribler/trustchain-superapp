@@ -1,12 +1,10 @@
 package nl.tudelft.trustchain.currencyii.sharedWallet
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.min
 
@@ -28,13 +26,6 @@ object SWUtil {
     @JvmStatic
     fun parseTransaction(transaction: TrustChainTransaction): JsonObject {
         return stringToJsonObject(transaction["message"].toString())
-    }
-
-    @JvmStatic
-    fun parseJSONArray(jsonArray: JsonArray): ArrayList<String> {
-        return Array(jsonArray.size()) {
-            jsonArray.get(it).asString
-        }.toCollection(ArrayList())
     }
 
     @JvmStatic

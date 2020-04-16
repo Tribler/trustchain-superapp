@@ -10,7 +10,8 @@ data class SWSignatureAskBlockTD(
     var SW_UNIQUE_PROPOSAL_ID: String,
     var SW_TRANSACTION_SERIALIZED: String,
     var SW_TRANSACTION_SERIALIZED_OLD: String,
-    var SW_SIGNATURES_REQUIRED: Int
+    var SW_SIGNATURES_REQUIRED: Int,
+    var SW_RECEIVER_PK: String
 )
 
 open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionData(
@@ -25,6 +26,7 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
         transactionSerialized: String,
         oldTransactionSerialized: String,
         requiredSignatures: Int,
+        receiverPk: String,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         SWUtil.objectToJsonObject(
@@ -33,7 +35,8 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
                 uniqueProposalId,
                 transactionSerialized,
                 oldTransactionSerialized,
-                requiredSignatures
+                requiredSignatures,
+                receiverPk
             )
 
         )

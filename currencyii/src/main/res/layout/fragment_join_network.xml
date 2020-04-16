@@ -17,6 +17,12 @@
             android:layout_height="wrap_content"
             android:text="Join a shared Wallet"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+
+        <TextView
+            android:id="@+id/alert_tf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
