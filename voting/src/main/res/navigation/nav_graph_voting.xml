@@ -2,6 +2,6 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph_voting"
-    app:startDestination="@layout/voting_fragment">
+    app:startDestination="@layout/activity_main_voting">
 
 </navigation>
