@@ -135,6 +135,8 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
+
+
         builder.setMessage(
             Html.fromHtml(
                 "<big>\"" + voteSubject + "\"</big>" +
@@ -176,7 +178,7 @@ class VotingActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && checkCasted(
+                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
                         it
                     )
                 }.asReversed()
@@ -194,10 +196,11 @@ class VotingActivity : AppCompatActivity() {
     }
 
     /**
-     * Check if proposal should be displayed
+     * Check if proposal block should be displayed
      */
-    private fun checkCasted(block: TrustChainBlock): Boolean {
+    private fun displayBlock(block: TrustChainBlock): Boolean {
         if (displayAllVotes) return true
-        return !vh.myPeerHasCasted(block)
+        val votePair = vh.castedByPeer(block, community.myPeer.publicKey)
+        return votePair == Pair(0, 0)
     }
 }
