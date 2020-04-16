@@ -98,6 +98,7 @@ class VotingActivity : AppCompatActivity() {
         input.hint = "p != np"
         builder.setView(input)
 
+        // PositiveButton is always the rightmost button
         builder.setPositiveButton("Create") { _, _ ->
             val proposal = input.text.toString()
 
@@ -111,7 +112,8 @@ class VotingActivity : AppCompatActivity() {
             printShortToast("Voting procedure started")
         }
 
-        builder.setNegativeButton("Cancel") { dialog, _ ->
+        // NeutralButton is always the leftmost button
+        builder.setNeutralButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
 
@@ -135,22 +137,32 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
+        // Get tally values
+        val tally = getTally(voteSubject, block)
+
+        // Show vote subject, proposer and current tally
         builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
             "<br><br>" +
             "<i><small>Proposed by: " +
             defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-            "</small></i>", Html.FROM_HTML_MODE_LEGACY))
+            "</small></i>" +
+            "<br><br>" +
+            "<i><small>Current tally: <br>" + "Yes: " + tally.first + " | No: " + tally.second + "</small></i>",
+            Html.FROM_HTML_MODE_LEGACY))
 
+        // PositiveButton is always the rightmost button
         builder.setPositiveButton("YES") { _, _ ->
             vh.respondToVote(true, block)
             printShortToast("You voted: YES")
         }
 
+        // NegativeButton is always second-from-right button
         builder.setNegativeButton("NO") { _, _ ->
             vh.respondToVote(false, block)
             printShortToast("You voted: NO")
         }
 
+        // NeutralButton is always the leftmost button
         builder.setNeutralButton("CANCEL") { dialog, _ ->
             printShortToast("No vote was cast")
             dialog.cancel()
@@ -159,6 +171,16 @@ class VotingActivity : AppCompatActivity() {
         builder.setCancelable(true)
 
         builder.show()
+    }
+
+    /**
+     * Count votes and return tally
+     */
+    fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
+        val peers: MutableList<PublicKey> = ArrayList()
+        peers.addAll(community.getPeers().map { it.publicKey })
+        peers.add(community.myPeer.publicKey)
+        return vh.countVotes(peers, voteSubject, block.publicKey)
     }
 
     /**
