@@ -231,7 +231,7 @@ class VotingHelperTest {
         // Create a reply agreement block
         votingHelper.respondToVote(true, propBlock)
 
-        Assert.assertTrue(votingHelper.myPeerHasCasted(propBlock))
+        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(1, 0))
     }
 
     @Test
@@ -254,6 +254,6 @@ class VotingHelperTest {
             EMPTY_PK
         )
 
-        Assert.assertFalse(votingHelper.myPeerHasCasted(propBlock))
+        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(0, 0))
     }
 }

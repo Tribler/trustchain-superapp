@@ -26,13 +26,13 @@ import org.json.JSONObject
 
 class VotingActivity : AppCompatActivity() {
 
-    lateinit var vh: VotingHelper
-    lateinit var community: TrustChainCommunity
-    lateinit var adapter: blockListAdapter
-    lateinit var tch: TrustChainHelper
+    private lateinit var vh: VotingHelper
+    private lateinit var community: TrustChainCommunity
+    private lateinit var adapter: blockListAdapter
+    private lateinit var tch: TrustChainHelper
 
-    var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
-    var displayAllVotes: Boolean = true
+    private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
+    private var displayAllVotes: Boolean = true
 
     /**
      * Setup method, binds functionality
@@ -125,7 +125,6 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Cast vote on proposal:")
 
         // Parse the 'message' field as JSON.
         var voteSubject = ""
@@ -137,35 +136,77 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
+        val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
+        val hasCasted = when {
+            previouslyCastedVotes.first == 1 -> {
+                "Yes"
+            }
+            previouslyCastedVotes.second == 1 -> {
+                "No"
+            }
+            else -> {
+                null
+            }
+        }
+
+        val castedString = if (hasCasted != null) {
+            "<br><br>" +
+                "<small><b>You have voted</b>: <i>" +
+                hasCasted +
+                "</i></small>"
+        } else {
+            ""
+        }
+
         // Get tally values
         val tally = getTally(voteSubject, block)
 
         // Show vote subject, proposer and current tally
-        builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
-            "<br><br>" +
-            "<i><small>Proposed by: " +
-            defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-            "</small></i>" +
-            "<br><br>" +
-            "<i><small>Current tally: <br>" + "Yes: " + tally.first + " | No: " + tally.second + "</small></i>",
-            Html.FROM_HTML_MODE_LEGACY))
+        builder.setMessage(
+            Html.fromHtml(
+                "<big>\"" + voteSubject + "\"</big>" +
+                    "<br><br>" +
+                    "<small><b>Proposed by</b>:" +
+                    "<br>" +
+                    "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
+                    "<br><br>" +
+                    "<small><b>Date</b>: " +
+                    "<i>" + block.timestamp + "</i></small>" +
+                    castedString +
+                    "<br><br>" +
+                    "<small><b>Current tally</b>:" +
+                    "<br>" +
+                    "Yes votes: " + tally.first +
+                    " | No votes: " + tally.second + "</small></i>",
+                Html.FROM_HTML_MODE_LEGACY))
 
-        // PositiveButton is always the rightmost button
-        builder.setPositiveButton("YES") { _, _ ->
-            vh.respondToVote(true, block)
-            printShortToast("You voted: YES")
-        }
+        // Display vote options is not previously casted a vote
+        if (hasCasted == null) {
+            builder.setTitle("Cast vote on proposal:")
 
-        // NegativeButton is always second-from-right button
-        builder.setNegativeButton("NO") { _, _ ->
-            vh.respondToVote(false, block)
-            printShortToast("You voted: NO")
-        }
+            // PositiveButton is always the rightmost button
+            builder.setPositiveButton("YES") { _, _ ->
+                vh.respondToVote(true, block)
+                printShortToast("You voted: YES")
+            }
 
-        // NeutralButton is always the leftmost button
-        builder.setNeutralButton("CANCEL") { dialog, _ ->
-            printShortToast("No vote was cast")
-            dialog.cancel()
+            // NegativeButton is always second-from-right button
+            builder.setNegativeButton("NO") { _, _ ->
+                vh.respondToVote(false, block)
+                printShortToast("You voted: NO")
+            }
+
+            // NeutralButton is always the leftmost button
+            builder.setNeutralButton("CANCEL") { dialog, _ ->
+                printShortToast("No vote was cast")
+                dialog.cancel()
+            }
+        } else {
+            builder.setTitle("Inspect proposal:")
+            // NeutralButton is always the leftmost button
+            builder.setNeutralButton("Exit") { dialog, _ ->
+                dialog.cancel()
+            }
         }
 
         builder.setCancelable(true)
@@ -190,7 +231,9 @@ class VotingActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && checkCasted(it)
+                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
+                        it
+                    )
                 }.asReversed()
 
                 // Update vote proposal set
@@ -206,10 +249,11 @@ class VotingActivity : AppCompatActivity() {
     }
 
     /**
-     * Check if proposal should be displayed
+     * Check if proposal block should be displayed
      */
-    private fun checkCasted(block: TrustChainBlock): Boolean {
+    private fun displayBlock(block: TrustChainBlock): Boolean {
         if (displayAllVotes) return true
-        return !vh.myPeerHasCasted(block)
+        val votePair = vh.castedByPeer(block, community.myPeer.publicKey)
+        return votePair == Pair(0, 0)
     }
 }
