@@ -68,7 +68,7 @@ class VotingActivity : AppCompatActivity() {
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals, vh, community.myPeer.publicKey)
+        adapter = blockListAdapter(voteProposals)
 
         adapter.onItemClick = {
             showNewCastVoteDialog(it)
