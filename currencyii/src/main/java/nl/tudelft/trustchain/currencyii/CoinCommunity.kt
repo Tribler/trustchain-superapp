@@ -98,14 +98,16 @@ class CoinCommunity : Community() {
         val newThreshold =
             SWUtil.percentageToIntThreshold(bitcoinPublicKeys.size, blockData.SW_VOTING_THRESHOLD)
 
-        // Ask others for a signature. Assumption:
-        // At this point, enough 'yes' votes are received. They will now send their signatures
-        return walletManager.safeCreationJoinWalletTransaction(
+        val newTransactionProposal = walletManager.safeCreationJoinWalletTransaction(
             bitcoinPublicKeys,
             Coin.valueOf(blockData.SW_ENTRANCE_FEE),
             Transaction(walletManager.params, oldTransaction.hexToBytes()),
             newThreshold
         )
+
+        // Ask others for a signature. Assumption:
+        // At this point, enough 'yes' votes are received. They will now send their signatures
+        return newTransactionProposal
     }
 
     /**
