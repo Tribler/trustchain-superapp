@@ -139,13 +139,13 @@ class VotingActivity : AppCompatActivity() {
             Html.fromHtml(
                 "<big>\"" + voteSubject + "\"</big>" +
                     "<br><br>" +
-                    "<i><small>Proposed by: " +
+                    "<small><b>Proposed by</b>: <i>" +
                     defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-                    "</small></i>" +
+                    "</i></small>" +
                     "<br><br>" +
-                    "<i><small>Proposed on: " +
+                    "<small><b>Date</b>: <i>" +
                     block.timestamp +
-                    "</small></i>", Html.FROM_HTML_MODE_LEGACY
+                    "</i></small>", Html.FROM_HTML_MODE_LEGACY
             )
         )
 
