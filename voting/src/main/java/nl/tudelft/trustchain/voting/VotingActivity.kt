@@ -135,11 +135,19 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        builder.setMessage(Html.fromHtml("<big>\"" + voteSubject + "\"</big>" +
-            "<br><br>" +
-            "<i><small>Proposed by: " +
-            defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
-            "</small></i>", Html.FROM_HTML_MODE_LEGACY))
+        builder.setMessage(
+            Html.fromHtml(
+                "<big>\"" + voteSubject + "\"</big>" +
+                    "<br><br>" +
+                    "<i><small>Proposed by: " +
+                    defaultCryptoProvider.keyFromPublicBin(block.publicKey) +
+                    "</small></i>" +
+                    "<br><br>" +
+                    "<i><small>Proposed on: " +
+                    block.timestamp +
+                    "</small></i>", Html.FROM_HTML_MODE_LEGACY
+            )
+        )
 
         builder.setPositiveButton("YES") { _, _ ->
             vh.respondToVote(true, block)
@@ -168,7 +176,9 @@ class VotingActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && checkCasted(it)
+                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && checkCasted(
+                        it
+                    )
                 }.asReversed()
 
                 // Update vote proposal set
