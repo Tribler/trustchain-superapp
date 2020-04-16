@@ -38,7 +38,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
             alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
             return
         }
-        alert_label.text = "Creating wallet, might take some time... (0%)"
+        alert_label.text = "Creating wallet, this might take some time... (0%)"
 
         val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
         val currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()

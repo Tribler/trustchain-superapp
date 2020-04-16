@@ -10,11 +10,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import kotlinx.coroutines.*
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
 import kotlin.concurrent.thread
 
@@ -60,21 +60,20 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
     private fun updateSharedWallets(newWallets: List<TrustChainBlock>) {
         val walletIds = fetchedWallets.map {
-            SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+            SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
         }
         val distinctById = newWallets
             .filter {
                 // Make sure that the trust chain block has the correct type
                 it.type == CoinCommunity.JOIN_BLOCK
             }.distinctBy {
-                SWUtil.parseTransaction(it.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+                SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
             }
 
         Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
 
         for (wallet in distinctById) {
-            val currentId =
-                SWUtil.parseTransaction(wallet.transaction).get(CoinCommunity.SW_UNIQUE_ID).asString
+            val currentId = SWJoinBlockTransactionData(wallet.transaction).getData().SW_UNIQUE_ID
             if (!walletIds.contains(currentId)) {
                 fetchedWallets.add(wallet)
             }
@@ -96,6 +95,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 publicKey,
                 "Click to join"
             )
+
             list_view.adapter = adapter
             list_view.setOnItemClickListener { _, view, position, id ->
                 lifecycleScope.launch {
@@ -135,12 +135,13 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
      * Join a shared bitcoin wallet.
      */
     private fun joinSharedWalletClicked(block: TrustChainBlock) {
-        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletTransactionBlock(block.calculateHash())
-            ?: block
+        val mostRecentSWBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(block.calculateHash())
+                ?: block
 
         // Add a proposal to trust chain to join a shared wallet
         val proposeBlockData =
-            getCoinCommunity().proposeJoinWalletOnTrustChain(
+            getCoinCommunity().proposeJoinWallet(
                 mostRecentSWBlock.transaction
             ).getData()
 
@@ -154,7 +155,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         // Create a new shared wallet using the signatures of the others.
         // Broadcast the new shared bitcoin wallet on trust chain.
         try {
-            getCoinCommunity().safeSendingJoinWalletTransaction(
+            getCoinCommunity().joinBitcoinWallet(
                 mostRecentSWBlock.transaction,
                 proposeBlockData,
                 signatures,

@@ -28,7 +28,7 @@ import java.util.*
 
 const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
-const val MIN_BLOCKCHAIN_PEERS = 10
+const val MIN_BLOCKCHAIN_PEERS = 5
 
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
