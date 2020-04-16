@@ -149,7 +149,7 @@ class VotingActivity : AppCompatActivity() {
 
         val castedString = if (hasCasted != null) {
             "<br><br>" +
-                "<small><b>Your cast</b>: <i>" +
+                "<small><b>You have voted</b>: <i>" +
                 hasCasted +
                 "</i></small>"
         } else {
