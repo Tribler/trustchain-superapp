@@ -123,7 +123,6 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Cast vote on proposal:")
 
         // Parse the 'message' field as JSON.
         var voteSubject = ""
@@ -135,7 +134,17 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
+        val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
+        val hasCasted = previouslyCastedVotes != Pair(0, 0)
 
+        val castedString = if (hasCasted) {
+            "<br><br>" +
+                "<small><b>Your cast</b>: <i>" +
+                previouslyCastedVotes.toString() +
+                "</i></small>"
+        } else {
+            ""
+        }
 
         builder.setMessage(
             Html.fromHtml(
@@ -147,23 +156,34 @@ class VotingActivity : AppCompatActivity() {
                     "<br><br>" +
                     "<small><b>Date</b>: <i>" +
                     block.timestamp +
-                    "</i></small>", Html.FROM_HTML_MODE_LEGACY
+                    "</i></small>" +
+                    castedString, Html.FROM_HTML_MODE_LEGACY
             )
         )
 
-        builder.setPositiveButton("YES") { _, _ ->
-            vh.respondToVote(true, block)
-            printShortToast("You voted: YES")
-        }
+        // Display vote options is not previously casted a vote
+        if (!hasCasted) {
+            builder.setTitle("Cast vote on proposal:")
 
-        builder.setNegativeButton("NO") { _, _ ->
-            vh.respondToVote(false, block)
-            printShortToast("You voted: NO")
-        }
+            builder.setPositiveButton("YES") { _, _ ->
+                vh.respondToVote(true, block)
+                printShortToast("You voted: YES")
+            }
 
-        builder.setNeutralButton("CANCEL") { dialog, _ ->
-            printShortToast("No vote was cast")
-            dialog.cancel()
+            builder.setNegativeButton("NO") { _, _ ->
+                vh.respondToVote(false, block)
+                printShortToast("You voted: NO")
+            }
+            builder.setNeutralButton("CANCEL") { dialog, _ ->
+                printShortToast("No vote was cast")
+                dialog.cancel()
+            }
+        } else {
+            builder.setTitle("Inspect proposal:")
+
+            builder.setNeutralButton("Exit") { dialog, _ ->
+                dialog.cancel()
+            }
         }
 
         builder.setCancelable(true)
