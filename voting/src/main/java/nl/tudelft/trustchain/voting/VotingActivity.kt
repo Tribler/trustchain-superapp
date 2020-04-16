@@ -41,6 +41,7 @@ class VotingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_voting)
+        title = "TrustChain Voter"
 
         initiateButton.setOnClickListener {
             showNewVoteDialog()
@@ -48,12 +49,12 @@ class VotingActivity : AppCompatActivity() {
 
         uncastedToggle.setOnCheckedChangeListener { _, isChecked ->
             displayAllVotes = if (isChecked) {
-                proposalOverViewTitle.text = "New Votes"
+                proposalOverViewTitle.text = "New Proposals"
                 printShortToast("Displaying proposals to cast on")
                 false
             } else {
-                proposalOverViewTitle.text = "All Votes"
-                printShortToast("Displaying all votes")
+                proposalOverViewTitle.text = "All Proposals"
+                printShortToast("Displaying all proposals")
                 true
             }
         }
@@ -87,11 +88,11 @@ class VotingActivity : AppCompatActivity() {
     }
 
     /**
-     * Dialog for a new proposal vote
+     * Dialog for creating a new proposal
      */
     private fun showNewVoteDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("New proposal vote")
+        builder.setTitle("Create proposal")
 
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
@@ -109,7 +110,7 @@ class VotingActivity : AppCompatActivity() {
 
             // Start voting procedure
             vh.startVote(proposal, peers)
-            printShortToast("Voting procedure started")
+            printShortToast("Proposal has been created")
         }
 
         // NeutralButton is always the leftmost button

@@ -1,8 +1,8 @@
 <resources>
 
-    <string name="ongoing_votes">Ongoing Votes</string>
-    <string name="initiate_vote">Initiate Vote</string>
-    <string name="new_votes">New Votes</string>
-    <string name="all_votes">All Votes</string>
+    <string name="ongoing_proposals">Ongoing Proposals</string>
+    <string name="create_proposal">Create Proposal</string>
+    <string name="new_proposals">New Proposals</string>
+    <string name="all_proposals">All Proposals</string>
 
 </resources>
