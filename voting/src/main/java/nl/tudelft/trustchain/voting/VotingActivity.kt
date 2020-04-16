@@ -49,12 +49,12 @@ class VotingActivity : AppCompatActivity() {
 
         uncastedToggle.setOnCheckedChangeListener { _, isChecked ->
             displayAllVotes = if (isChecked) {
-                proposalOverViewTitle.text = "New Votes"
+                proposalOverViewTitle.text = "New Proposals"
                 printShortToast("Displaying proposals to cast on")
                 false
             } else {
-                proposalOverViewTitle.text = "All Votes"
-                printShortToast("Displaying all votes")
+                proposalOverViewTitle.text = "All Proposals"
+                printShortToast("Displaying all proposals")
                 true
             }
         }
