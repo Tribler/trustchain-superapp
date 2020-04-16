@@ -26,13 +26,13 @@ import org.json.JSONObject
 
 class VotingActivity : AppCompatActivity() {
 
-    lateinit var vh: VotingHelper
-    lateinit var community: TrustChainCommunity
-    lateinit var adapter: blockListAdapter
-    lateinit var tch: TrustChainHelper
+    private lateinit var vh: VotingHelper
+    private lateinit var community: TrustChainCommunity
+    private lateinit var adapter: blockListAdapter
+    private lateinit var tch: TrustChainHelper
 
-    var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
-    var displayAllVotes: Boolean = true
+    private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
+    private var displayAllVotes: Boolean = true
 
     /**
      * Setup method, binds functionality
@@ -68,7 +68,7 @@ class VotingActivity : AppCompatActivity() {
         blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals)
+        adapter = blockListAdapter(voteProposals, vh, community.myPeer.publicKey)
 
         adapter.onItemClick = {
             showNewCastVoteDialog(it)

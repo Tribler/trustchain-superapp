@@ -1,13 +1,20 @@
 package nl.tudelft.trustchain.voting
 
+import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONObject
 
-class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
+class blockListAdapter(
+    private val myDataset: List<TrustChainBlock>,
+    private val votingHelper: VotingHelper,
+    private val myPublicKey: nl.tudelft.ipv8.keyvault.PublicKey
+) :
 
     RecyclerView.Adapter<blockListAdapter.MyViewHolder>() {
 
@@ -35,7 +42,11 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
     }
 
     // Display vote proposition
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        if (votingHelper.castedByPeer(myDataset[position], myPublicKey) == Pair(0, 0))
+            holder.textView.setTypeface(null, Typeface.BOLD)
+
         holder.textView.text =
             JSONObject(myDataset[position].transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
