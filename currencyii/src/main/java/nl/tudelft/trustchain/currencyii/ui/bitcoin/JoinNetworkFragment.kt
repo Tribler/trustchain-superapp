@@ -218,6 +218,6 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         @JvmStatic
         fun newInstance() = JoinNetworkFragment()
 
-        public const val SW_CRAWLING_TIMEOUT_MILLI: Long = 5_000
+        public const val SW_CRAWLING_TIMEOUT_MILLI: Long = 1_000 * 10
     }
 }

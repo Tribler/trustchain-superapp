@@ -52,7 +52,7 @@ class CoinCommunity : Community() {
     public fun proposeJoinWallet(
         walletBlockData: TrustChainTransaction
     ): SWSignatureAskTransactionData {
-        return daoJoinHelper.proposeJoinWallet(walletBlockData)
+        return daoJoinHelper.proposeJoinWallet(myPeer, walletBlockData)
     }
 
     /**
@@ -89,6 +89,7 @@ class CoinCommunity : Community() {
         satoshiAmount: Long
     ): SWTransferFundsAskTransactionData {
         return daoTransferFundsHelper.proposeTransferFunds(
+            myPeer,
             walletData,
             receiverAddressSerialized,
             satoshiAmount

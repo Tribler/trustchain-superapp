@@ -31,6 +31,7 @@ class DAOTransferFundsHelper {
      * Assumed that people agreed to the transfer.
      */
     public fun proposeTransferFunds(
+        myPeer: Peer,
         walletData: SWJoinBlockTD,
         receiverAddressSerialized: String,
         satoshiAmount: Long
@@ -67,7 +68,7 @@ class DAOTransferFundsHelper {
 
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
-                swParticipantPk.hexToBytes(),
+                myPeer.publicKey.keyToBin(),
                 askSignatureBlockData.blockType
             )
         }

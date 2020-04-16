@@ -37,6 +37,7 @@ class DAOJoinHelper {
      * @param walletBlockData - the latest (that you know of) shared wallet block.
      */
     public fun proposeJoinWallet(
+        myPeer: Peer,
         walletBlockData: TrustChainTransaction
     ): SWSignatureAskTransactionData {
         val blockData = SWJoinBlockTransactionData(walletBlockData).getData()
@@ -72,7 +73,7 @@ class DAOJoinHelper {
 
             trustchain.createProposalBlock(
                 askSignatureBlockData.getJsonString(),
-                swParticipantPk.hexToBytes(),
+                myPeer.publicKey.keyToBin(),
                 askSignatureBlockData.blockType
             )
         }
