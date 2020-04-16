@@ -135,12 +135,22 @@ class VotingActivity : AppCompatActivity() {
         }
 
         val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
-        val hasCasted = previouslyCastedVotes != Pair(0, 0)
+        val hasCasted = when {
+            previouslyCastedVotes.first == 1 -> {
+                "Yes"
+            }
+            previouslyCastedVotes.second == 1 -> {
+                "No"
+            }
+            else -> {
+                null
+            }
+        }
 
-        val castedString = if (hasCasted) {
+        val castedString = if (hasCasted != null) {
             "<br><br>" +
                 "<small><b>Your cast</b>: <i>" +
-                previouslyCastedVotes.toString() +
+                hasCasted +
                 "</i></small>"
         } else {
             ""
@@ -162,7 +172,7 @@ class VotingActivity : AppCompatActivity() {
         )
 
         // Display vote options is not previously casted a vote
-        if (!hasCasted) {
+        if (hasCasted == null) {
             builder.setTitle("Cast vote on proposal:")
 
             builder.setPositiveButton("YES") { _, _ ->
