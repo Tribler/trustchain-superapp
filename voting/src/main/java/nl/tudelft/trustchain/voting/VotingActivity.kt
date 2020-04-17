@@ -87,6 +87,7 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Dialog for creating a new proposal
      */
+    @SuppressLint("InflateParams")
     private fun showNewVoteDialog() {
 
         val dialogView = LayoutInflater.from(this).inflate(R.layout.initiate_dialog, null)
