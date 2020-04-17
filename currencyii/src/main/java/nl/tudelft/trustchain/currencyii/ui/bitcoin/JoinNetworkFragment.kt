@@ -6,11 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.forEach
-import androidx.core.view.forEachIndexed
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_join_network.*
-import kotlinx.android.synthetic.main.join_sw_row_data.view.*
 import kotlinx.coroutines.*
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
@@ -19,7 +16,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
-import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -64,7 +60,6 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         } catch (e: IllegalStateException) {
         }
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
