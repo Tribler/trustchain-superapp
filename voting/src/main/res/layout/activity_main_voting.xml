@@ -12,6 +12,8 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal">
 
@@ -29,7 +31,7 @@
             android:id="@+id/uncastedToggle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
     </LinearLayout>
 
@@ -55,8 +57,8 @@
             android:id="@+id/initiateButton"
             android:layout_width="155dp"
             android:layout_height="58dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="12dp"
             android:backgroundTint="@color/colorPrimary"
             android:text="@string/create_proposal"
             android:textColor="@color/white"
