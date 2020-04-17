@@ -10,8 +10,8 @@
         android:id="@+id/proposalInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30px"
-        android:layout_marginRight="30px"
-        android:hint="P != NP" />
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:hint="@string/p_np" />
 
 </LinearLayout>
