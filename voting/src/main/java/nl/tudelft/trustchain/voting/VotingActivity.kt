@@ -218,7 +218,7 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Count votes and return tally
      */
-    fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
+    private fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
         val peers: MutableList<PublicKey> = ArrayList()
         peers.addAll(community.getPeers().map { it.publicKey })
         peers.add(community.myPeer.publicKey)
