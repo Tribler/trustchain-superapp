@@ -45,7 +45,9 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
             JSONObject(myDataset[position].transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
 
-        holder.propDate.text = myDataset[position].timestamp.toString()
+        val regex = Regex("^(.*?)GMT")
+        val strippedText = regex.find(myDataset[position].timestamp.toString())?.value.toString()
+        holder.propDate.text = strippedText.substring(0, strippedText.length - 3)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
