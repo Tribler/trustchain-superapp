@@ -4,14 +4,14 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Html
-import android.text.InputType
-import android.widget.EditText
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
+import kotlinx.android.synthetic.main.initiate_dialog.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -91,17 +91,15 @@ class VotingActivity : AppCompatActivity() {
      * Dialog for creating a new proposal
      */
     private fun showNewVoteDialog() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Create proposal")
 
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        input.hint = "p != np"
-        builder.setView(input)
+        val mDialogView = LayoutInflater.from(this).inflate(R.layout.initiate_dialog, null)
 
-        // PositiveButton is always the rightmost button
-        builder.setPositiveButton("Create") { _, _ ->
-            val proposal = input.text.toString()
+        val mBuilder = AlertDialog.Builder(this)
+            .setView(mDialogView)
+            .setTitle("Initiate vote on proposal")
+
+        mBuilder.setPositiveButton("Create") { _, _ ->
+            val proposal = proposalInput.text.toString()
 
             // Create list of your peers and include yourself
             val peers: MutableList<PublicKey> = ArrayList()
@@ -114,11 +112,11 @@ class VotingActivity : AppCompatActivity() {
         }
 
         // NeutralButton is always the leftmost button
-        builder.setNeutralButton("Cancel") { dialog, _ ->
+        mBuilder.setNeutralButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
 
-        builder.show()
+        mBuilder.show()
     }
 
     /**
