@@ -177,10 +177,13 @@ class VotingHelper(
         return countVotes(listOf(publicKey), JSONObject(block.transaction["message"].toString()).get("VOTE_SUBJECT").toString(), block.publicKey)
     }
 
-    fun votingComplete(voters: List<PublicKey>, voteSubject: String, proposerKey: ByteArray, threshold: Int) : Boolean {
+    fun votingComplete(voters: List<PublicKey>, voteSubject: String, proposerKey: ByteArray, threshold: Int? = null) : Boolean {
         val count = countVotes(voters, voteSubject, proposerKey)
         val yescount = count.first
         val nocount = count.second
-        return (yescount > threshold || yescount + nocount == voters.size)
+        if (threshold != null) {
+            return (yescount > threshold || yescount + nocount == voters.size)
+        }
+        return (yescount + nocount == voters.size)
     }
 }
