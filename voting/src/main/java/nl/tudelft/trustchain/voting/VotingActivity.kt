@@ -89,13 +89,13 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun showNewVoteDialog() {
 
-        val mDialogView = LayoutInflater.from(this).inflate(R.layout.initiate_dialog, null)
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.initiate_dialog, null)
 
-        val mBuilder = AlertDialog.Builder(this)
-            .setView(mDialogView)
+        val builder = AlertDialog.Builder(this)
+            .setView(dialogView)
             .setTitle("Initiate vote on proposal")
 
-        mBuilder.setPositiveButton("Create") { _, _ ->
+        builder.setPositiveButton("Create") { _, _ ->
             val proposal = proposalInput.text.toString()
 
             // Create list of your peers and include yourself
@@ -109,11 +109,11 @@ class VotingActivity : AppCompatActivity() {
         }
 
         // NeutralButton is always the leftmost button
-        mBuilder.setNeutralButton("Cancel") { dialog, _ ->
+        builder.setNeutralButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
 
-        mBuilder.show()
+        builder.show()
     }
 
     /**
