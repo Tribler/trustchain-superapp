@@ -15,7 +15,7 @@ data class SWJoinBlockTD(
 )
 
 class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
-    data, CoinCommunity.SHARED_WALLET_BLOCK
+    data, CoinCommunity.JOIN_BLOCK
 ) {
     fun getData(): SWJoinBlockTD {
         return Gson().fromJson(getJsonString(), SWJoinBlockTD::class.java)
@@ -30,6 +30,12 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
     fun addBitcoinPk(publicKey: String) {
         val data = getData()
         data.SW_BITCOIN_PKS.add(publicKey)
+        jsonData = SWUtil.objectToJsonObject(data)
+    }
+
+    fun setTransactionSerialized(serializedTransaction: String) {
+        val data = getData()
+        data.SW_TRANSACTION_SERIALIZED = serializedTransaction
         jsonData = SWUtil.objectToJsonObject(data)
     }
 

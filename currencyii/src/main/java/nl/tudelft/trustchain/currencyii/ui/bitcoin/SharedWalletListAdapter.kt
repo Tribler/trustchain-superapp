@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.graphics.Color
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -22,7 +21,6 @@ class SharedWalletListAdapter(
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
         val view = context.layoutInflater.inflate(R.layout.join_sw_row_data, null, false)
 
-        Log.i("Coin", items[p0].transaction["message"] as String)
         val blockData = SWJoinBlockTransactionData(items[p0].transaction).getData()
 
         val walletId = view.findViewById<TextView>(R.id.sw_id_item_t)

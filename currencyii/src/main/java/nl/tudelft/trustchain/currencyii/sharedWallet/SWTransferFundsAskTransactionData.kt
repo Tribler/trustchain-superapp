@@ -12,7 +12,8 @@ data class SWTransferFundsAskBlockTD(
     var SW_BITCOIN_PKS: List<String>,
     var SW_SIGNATURES_REQUIRED: Int,
     var SW_TRANSFER_FUNDS_AMOUNT: Long,
-    var SW_TRANSFER_FUNDS_TARGET_SERIALIZED: String
+    var SW_TRANSFER_FUNDS_TARGET_SERIALIZED: String,
+    var SW_RECEIVER_PK: String
 )
 
 class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionData(
@@ -29,6 +30,7 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
         satoshiAmount: Long,
         bitcoinPks: List<String>,
         transferFundsAddressSerialized: String,
+        receiverPk: String,
         uniqueProposalId: String = SWUtil.randomUUID()
     ) : this(
         SWUtil.objectToJsonObject(
@@ -39,7 +41,8 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
                 bitcoinPks,
                 requiredSignatures,
                 satoshiAmount,
-                transferFundsAddressSerialized
+                transferFundsAddressSerialized,
+                receiverPk
             )
 
         )

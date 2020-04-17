@@ -78,7 +78,7 @@ class TrustChainApplication : Application() {
             }
         })
 
-        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+        trustchain.addListener(CoinCommunity.JOIN_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }

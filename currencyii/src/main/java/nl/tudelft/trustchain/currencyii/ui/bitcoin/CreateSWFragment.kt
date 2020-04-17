@@ -1,11 +1,16 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_create_sw.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
@@ -16,60 +21,65 @@ import org.bitcoinj.core.Coin
  * create an instance of this fragment.
  */
 class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
-    private var currentTransactionId: String? = null
-    private var currentThreshold: Int? = null
-    private var currentEntranceFee: Long? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         create_sw_wallet_button.setOnClickListener {
-            createSharedBitcoinWallet()
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    createSharedBitcoinWallet()
+                }
+            }
         }
     }
 
     private fun createSharedBitcoinWallet() {
-        if (validateCreationInput()) {
-            val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
-            currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
-            currentThreshold = voting_threshold_tf.text.toString().toInt()
-            currentTransactionId = getCoinCommunity().createGenesisSharedWallet(currentEntranceFee!!)
+        if (!validateCreationInput()) {
+            alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
+            return
+        }
+        alert_label.text = "Creating wallet, this might take some time... (0%)"
 
+        val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
+        val currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
+        val currentThreshold = voting_threshold_tf.text.toString().toInt()
+
+        activity?.runOnUiThread {
             voting_threshold_tf.isEnabled = false
             entrance_fee_tf.isEnabled = false
+        }
 
-            fetchCurrentSharedWalletStatusLoop()
-        } else {
-            alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
+        try {
+            // Try to create the bitcoin DAO
+            getCoinCommunity().createBitcoinGenesisWallet(
+                currentEntranceFee,
+                currentThreshold,
+                ::updateProgressStatus
+            )
+            resetWalletInitializationValues()
+            alert_label.text = "Wallet created successfully!"
+        } catch (t: Throwable) {
+            resetWalletInitializationValues()
+            activity?.runOnUiThread {
+                alert_label.text = t.message ?: "Unexpected error occurred. Try again"
+            }
         }
     }
 
-    private fun fetchCurrentSharedWalletStatusLoop() {
-        var finished = false
-        alert_label.text = "Loading... This might take some time."
+    private fun updateProgressStatus(progress: Double) {
+        Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
 
-        while (!finished) {
-            val serializedTransaction = getCoinCommunity().fetchBitcoinTransaction(currentTransactionId!!)
-            if (serializedTransaction == null) {
-                Thread.sleep(1_000)
-                continue
+        activity?.runOnUiThread {
+            if (progress >= 1) {
+                alert_label?.text = "DAO creation progress: completed!"
+            } else {
+                val progressString = "%.0f".format(progress * 100)
+                alert_label?.text = "DAO creation progress: $progressString%..."
             }
-
-            getCoinCommunity().broadcastCreatedSharedWallet(serializedTransaction, currentEntranceFee!!, currentThreshold!!)
-            finished = true
         }
-
-        resetWalletInitializationValues()
     }
 
     private fun resetWalletInitializationValues() {
-        currentTransactionId = null
-        currentThreshold = null
-        currentEntranceFee = null
         alert_label.text = ""
     }
 
