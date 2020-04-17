@@ -28,7 +28,7 @@ class VotingHelper(
      * @param voteSubject the matter to be voted upon.
      * @param peers list of the public keys of those eligible to vote.
      */
-    fun startVote(voteSubject: String, peers: List<PublicKey>) {
+    fun startVote(voteSubject: String, peers: List<PublicKey>, threshold: Int?) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
         val voteList = JSONArray(peers)
@@ -38,7 +38,12 @@ class VotingHelper(
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
 
+        if (threshold != null) {
+            voteJSON.put("VOTE_THRESHOLD", threshold)
+        }
+
         val transaction = voteJSON.toString()
+
 
         // Create any-counterparty block for the transaction
         trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
@@ -177,13 +182,38 @@ class VotingHelper(
         return countVotes(listOf(publicKey), JSONObject(block.transaction["message"].toString()).get("VOTE_SUBJECT").toString(), block.publicKey)
     }
 
-    fun votingComplete(voters: List<PublicKey>, voteSubject: String, proposerKey: ByteArray, threshold: Int? = null) : Boolean {
-        val count = countVotes(voters, voteSubject, proposerKey)
-        val yescount = count.first
-        val nocount = count.second
-        if (threshold != null) {
-            return (yescount > threshold || yescount + nocount == voters.size)
-        }
-        return (yescount + nocount == voters.size)
-    }
+//    fun getVoters(block: TrustChainBlock) {
+//        val voteJSON = try {
+//            JSONObject(block.transaction["message"].toString())
+//        } catch (e: JSONException) {
+//            // Assume a malicious vote if it claims to be a vote but does not contain
+//            // proper JSON.
+//            handleInvalidVote(
+//                "Block was a voting block but did not contain " +
+//                    "proper JSON in its message field: ${block.transaction["message"]}."
+//            )
+//            return
+//        }
+//        if (voteJSON.has("VOTE_LIST")) {
+//            val jsonKeys = voteJSON.getJSONArray("VOTE_LIST")
+//            val publicKeys: MutableList<PublicKey> = ArrayList()
+//            for (i in 0 until jsonKeys.length()){
+//                val string = jsonKeys.get(i)
+//                val key = string.
+//                publicKeys.add(key)
+//            }
+//        }
+//    }
+//
+//
+//
+//    fun votingComplete(block: TrustChainBlock) : Boolean {
+//        val count = countVotes(voters, voteSubject, proposerKey)
+//        val yescount = count.first
+//        val nocount = count.second
+//        if (threshold != null) {
+//            return (yescount > threshold || yescount + nocount == voters.size)
+//        }
+//        return (yescount + nocount == voters.size)
+//    }
 }

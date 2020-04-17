@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.voting
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.bluetooth.BluetoothClass
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
@@ -71,6 +72,7 @@ class VotingActivity : AppCompatActivity() {
 
         adapter.onItemClick = {
             showNewCastVoteDialog(it)
+            checkVoteCompleteness(it)
         }
 
         blockList.adapter = adapter
@@ -118,6 +120,10 @@ class VotingActivity : AppCompatActivity() {
 
         builder.show()
     }
+
+//    private fun checkVoteCompleteness(block: TrustChainBlock) {
+//        printShortToast(vh.votingComplete(block).toString())
+//    }
 
     /**
      * Show dialog from which the user can propose a vote
