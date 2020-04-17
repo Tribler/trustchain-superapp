@@ -7,6 +7,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import org.json.JSONObject
+import java.util.*
 
 class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
 
@@ -20,6 +21,7 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
                 onItemClick?.invoke(myDataset[adapterPosition])
             }
         }
+
         val propTitle = cardView.findViewById<TextView>(R.id.propTitle)
         val propDate = cardView.findViewById<TextView>(R.id.propDate)
     }
