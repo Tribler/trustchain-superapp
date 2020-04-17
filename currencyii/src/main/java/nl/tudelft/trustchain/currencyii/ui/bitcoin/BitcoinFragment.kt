@@ -35,6 +35,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }
     }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
@@ -65,12 +66,12 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.item_blockchain_download_progress -> {
+            R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
                 true
             }
-            R.id.item_blockchain_refresh -> {
+            R.id.item_dao_overview_refresh -> {
                 this.refresh(true)
                 Log.i(
                     "Coin",
@@ -83,26 +84,16 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 )
                 true
             }
+            R.id.item_dao_logout -> {
+                Log.i("Coin", "Logging out of current DAO user")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoLoginChoice())
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun initClickListeners() {
-        show_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to MySharedWalletsFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToMySharedWalletsFragment())
-        }
-
-        create_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to CreateSWFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToCreateSWFragment())
-        }
-
-        search_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to JoinNetworkFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
-        }
-
         import_custom_keys.setOnClickListener {
             val dialog = ImportKeyDialog()
             dialog.setTargetFragment(this, 0)
@@ -112,7 +103,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
             }, 1500)
         }
     }
@@ -121,7 +115,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         if (animation!!) {
             bitcoin_refresh_swiper.isRefreshing = true
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
             }, 1500)
         }
 
@@ -155,6 +152,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        showNavBar()
         return inflater.inflate(R.layout.fragment_bitcoin, container, false)
     }
 

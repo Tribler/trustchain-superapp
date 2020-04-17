@@ -18,34 +18,6 @@
             app:popEnterAnim="@anim/fragment_fade_enter"
             app:popExitAnim="@anim/fragment_fade_exit" />
         <action
-            android:id="@+id/action_bitcoinFragment_to_createSWFragment"
-            app:destination="@id/createSWFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_joinNetworkFragment"
-            app:destination="@id/joinNetworkFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_mySharedWalletsFragment"
-            app:destination="@id/mySharedWalletsFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
-            android:id="@+id/action_bitcoinFragment_to_importKeysFragment"
-            app:destination="@id/importKeysFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
-        <action
             android:id="@+id/action_bitcoinFragment_to_daoLoginChoice"
             app:destination="@id/daoLoginChoice"
             app:enterAnim="@anim/fragment_fade_enter"
@@ -59,7 +31,7 @@
     </fragment>
     <fragment
         android:id="@+id/daoLoginChoice"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoLoginChoice"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOLoginFragment"
         android:label="DAO Start Screen">
         <action
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
@@ -80,7 +52,7 @@
     </fragment>
     <fragment
         android:id="@+id/daoImportOrCreate"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DaoImportOrCreate">
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOCreateFragment">
         <action
             android:id="@+id/action_daoImportOrCreate_to_bitcoinFragment"
             app:destination="@id/bitcoinFragment"
@@ -102,7 +74,7 @@
     <fragment
         android:id="@+id/blockchainDownloadFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BlockchainDownloadFragment"
-        android:label="Bitcoin Download Progress"
+        android:label="Bitcoin Blockchain Download"
         android:layout="@layout/fragment_blockchain_download"
         app:startDestination="@id/action_blockchainDownloadFragment_to_bitcoinFragment">
         <action
@@ -154,4 +126,43 @@
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.ImportKeysFragment"
         android:label="Import Keys"
         tools:layout="@layout/fragment_import_keys" />
+    <fragment
+        android:id="@+id/myDAOsFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyDAOsFragment"
+        android:label="My DAOs"
+        tools:layout="@layout/fragment_my_daos">
+        <action
+            android:id="@+id/action_myDAOsFragment_to_createSWFragment"
+            app:destination="@id/createSWFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_joinNetworkFragment"
+            app:destination="@id/joinNetworkFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_mySharedWalletsFragment"
+            app:destination="@id/mySharedWalletsFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+        <action
+            android:id="@+id/action_myDAOsFragment_to_sharedWalletTransaction"
+            app:destination="@id/sharedWalletTransaction"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_enter"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/myWalletFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyWalletFragment"
+        android:label="My Wallet"
+        tools:layout="@layout/fragment_my_wallet" />
 </navigation>

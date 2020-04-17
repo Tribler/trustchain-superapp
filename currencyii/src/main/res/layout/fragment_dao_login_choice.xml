@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:label="DAO Login Screen"
-    tools:context=".ui.bitcoin.DaoLoginChoice">
+    tools:context=".ui.bitcoin.DAOLoginFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

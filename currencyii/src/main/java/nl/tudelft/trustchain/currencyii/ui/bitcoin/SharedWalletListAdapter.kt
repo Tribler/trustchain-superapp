@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -13,7 +14,8 @@ class SharedWalletListAdapter(
     private val context: BaseFragment,
     private val items: List<TrustChainBlock>,
     private val myPublicKey: String,
-    private val listButtonText: String
+    private val listButtonText: String,
+    private val disableOnUserJoined: Boolean? = false
 ) : BaseAdapter() {
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View {
@@ -30,12 +32,13 @@ class SharedWalletListAdapter(
         val clickToJoin = view.findViewById<TextView>(R.id.click_to_join)
 
         val trustchainPks = blockData.SW_TRUSTCHAIN_PKS
+        val isUserInWallet = trustchainPks.contains(myPublicKey)
 
         val walletIdText = "${blockData.SW_UNIQUE_ID}"
         val votingThresholdText = "${blockData.SW_VOTING_THRESHOLD} %"
         val entranceFeeText = "${blockData.SW_ENTRANCE_FEE} Satoshi"
         val users = "${trustchainPks.size} user(s) in this shared wallet"
-        val inWalletText = "${trustchainPks.contains(myPublicKey)}"
+        val inWalletText = "$isUserInWallet"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"
 
         walletId.text = walletIdText
@@ -45,6 +48,10 @@ class SharedWalletListAdapter(
         inWallet.text = inWalletText
         yourVotes.text = votes
         clickToJoin.text = listButtonText
+        if (this.disableOnUserJoined!! && isUserInWallet) {
+            clickToJoin.isEnabled = false
+            clickToJoin.setTextColor(Color.GRAY)
+        }
 
         return view
     }

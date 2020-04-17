@@ -53,6 +53,7 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
             fragment.findViewById<Button>(R.id.bitcoin_progress_continue).text =
                 "Continue"
         }
+        hideNavBar()
         return fragment
     }
 

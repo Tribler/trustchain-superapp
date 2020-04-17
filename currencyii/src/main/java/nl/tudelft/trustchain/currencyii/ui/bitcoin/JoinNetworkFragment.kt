@@ -25,6 +25,41 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
 class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
+    private var isFetching: Boolean = false
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        initListeners()
+        this.refresh()
+    }
+
+    private fun initListeners() {
+        join_dao_refresh_swiper.setOnRefreshListener {
+            this.refresh()
+        }
+    }
+
+    private fun refresh() {
+        enableRefresher()
+        lifecycleScope.launchWhenStarted {
+            fetchSharedWalletsAndUpdateUI()
+        }
+    }
+
+    private fun enableRefresher() {
+        try {
+            this.isFetching = true
+            join_dao_refresh_swiper.isRefreshing = true
+        } catch (e: IllegalStateException) {
+        }
+    }
+
+    private fun disableRefresher() {
+        try {
+            join_dao_refresh_swiper.isRefreshing = false
+        } catch (e: IllegalStateException) {
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -38,10 +73,8 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
-
                 updateSharedWallets(discoveredWallets)
                 updateSharedWalletsUI()
-
                 crawlAvailableSharedWallets()
                 updateSharedWalletsUI()
             }
@@ -83,7 +116,8 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 this@JoinNetworkFragment,
                 fetchedWallets,
                 publicKey,
-                "Click to join"
+                "Click to join",
+                disableOnUserJoined = true
             )
 
             list_view.adapter = adapter
@@ -119,12 +153,13 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 Log.i("Coin", "Crawling failed for: ${peer.publicKey} message: $message")
             }
         }
+        disableRefresher()
     }
 
     /**
      * Join a shared bitcoin wallet.
      */
-    private fun joinSharedWalletClicked(block: TrustChainBlock) {
+    fun joinSharedWalletClicked(block: TrustChainBlock) {
         val mostRecentSWBlock =
             getCoinCommunity().fetchLatestSharedWalletBlock(block.calculateHash())
                 ?: block

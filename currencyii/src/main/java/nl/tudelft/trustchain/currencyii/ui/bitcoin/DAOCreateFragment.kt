@@ -13,10 +13,10 @@ import nl.tudelft.trustchain.currencyii.coin.*
 
 /**
  * A simple [Fragment] subclass.
- * Use the [DaoImportOrCreate.newInstance] factory method to
+ * Use the [DAOCreateFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DaoImportOrCreate : Fragment() {
+class DAOCreateFragment : Fragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
 
@@ -94,7 +94,7 @@ class DaoImportOrCreate : Fragment() {
             .init()
 
         findNavController().navigate(
-            DaoImportOrCreateDirections.actionDaoImportOrCreateToBitcoinFragment(
+            DAOCreateFragmentDirections.actionDaoImportOrCreateToBitcoinFragment(
                 showDownload = true
             )
         )
@@ -110,7 +110,7 @@ class DaoImportOrCreate : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance() = DaoImportOrCreate()
+        fun newInstance() = DAOCreateFragment()
 
         fun isPrivateKeyValid(privateKey: String): Boolean {
             return privateKey.length in 51..52 || privateKey.length == 64

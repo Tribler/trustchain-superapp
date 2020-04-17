@@ -13,6 +13,7 @@
     <color name="mild_gray">#CCCCCC</color>
     <color name="gray">#a9a9a9</color>
     <color name="dark_gray">#444444</color>
+    <color name="metallic_gold">#D4AF37</color>
 
     <array name="colorsChain">
         <item>#EF5350</item>
