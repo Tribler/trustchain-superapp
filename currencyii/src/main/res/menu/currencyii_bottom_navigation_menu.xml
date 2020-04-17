@@ -12,8 +12,8 @@
         android:icon="@drawable/ic_group_work_black_24dp" />
 
     <item
-        android:id="@+id/myWalletFragment"
-        android:title="Proposals"
+        android:id="@+id/myProposals"
+        android:title="@string/proposals"
         android:icon="@drawable/ic_account_balance_wallet_black_24dp" />
 
 </menu>
