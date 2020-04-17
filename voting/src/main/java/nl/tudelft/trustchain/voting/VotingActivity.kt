@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -97,7 +98,8 @@ class VotingActivity : AppCompatActivity() {
             .setTitle("Initiate vote on proposal")
 
         builder.setPositiveButton("Create") { _, _ ->
-            val proposal = proposalInput.text.toString()
+
+            val proposal = dialogView.findViewById<EditText>(R.id.proposalInput).text.toString()
 
             // Create list of your peers and include yourself
             val peers: MutableList<PublicKey> = ArrayList()
@@ -180,7 +182,9 @@ class VotingActivity : AppCompatActivity() {
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
-                Html.FROM_HTML_MODE_LEGACY))
+                Html.FROM_HTML_MODE_LEGACY
+            )
+        )
 
         // Display vote options is not previously casted a vote
         if (hasCasted == null) {
