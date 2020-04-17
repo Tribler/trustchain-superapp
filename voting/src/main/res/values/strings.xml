@@ -4,6 +4,6 @@
     <string name="create_proposal">Create Proposal</string>
     <string name="new_proposals">New Proposals</string>
     <string name="all_proposals">All Proposals</string>
-    <string name="p_np">P != NP</string>
+    <string name="p_np">e.g. P != NP</string>
 
 </resources>
