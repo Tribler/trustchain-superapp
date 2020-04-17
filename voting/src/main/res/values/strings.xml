@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="ongoing_proposals">Ongoing Proposals</string>
+    <string name="create_proposal">Create Proposal</string>
+    <string name="new_proposals">New Proposals</string>
+    <string name="all_proposals">All Proposals</string>
+
+</resources>

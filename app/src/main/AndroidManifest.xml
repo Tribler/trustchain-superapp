@@ -57,6 +57,10 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             tools:ignore="InnerclassSeparator" />
 
+        <activity
+            android:name="nl.tudelft.trustchain.voting.VotingActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>
 

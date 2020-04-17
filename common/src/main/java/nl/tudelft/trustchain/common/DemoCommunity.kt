@@ -23,9 +23,6 @@ class DemoCommunity : Community() {
             ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
 
-    // Create a votingHelper instance for voting across the community
-    // val votingHelper: VotingHelper = VotingHelper(getTrustChainCommunity())
-
     override fun walkTo(address: IPv4Address) {
         super.walkTo(address)
 
