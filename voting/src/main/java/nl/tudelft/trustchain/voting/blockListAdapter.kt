@@ -42,6 +42,7 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
         holder.propTitle.text =
             JSONObject(myDataset[position].transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
+
         holder.propDate.text = myDataset[position].timestamp.toString()
     }
 

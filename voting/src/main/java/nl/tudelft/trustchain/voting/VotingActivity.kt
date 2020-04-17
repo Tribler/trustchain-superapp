@@ -65,8 +65,6 @@ class VotingActivity : AppCompatActivity() {
         vh = VotingHelper(community)
         tch = TrustChainHelper(community)
 
-        // Styling
-        blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
         adapter = blockListAdapter(voteProposals)
