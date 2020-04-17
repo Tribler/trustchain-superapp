@@ -176,4 +176,11 @@ class VotingHelper(
     fun castedByPeer(block: TrustChainBlock, publicKey: PublicKey): Pair<Int, Int> {
         return countVotes(listOf(publicKey), JSONObject(block.transaction["message"].toString()).get("VOTE_SUBJECT").toString(), block.publicKey)
     }
+
+    fun votingComplete(voters: List<PublicKey>, voteSubject: String, peers: List<PublicKey>, proposerKey: ByteArray, threshold: Int) : Boolean {
+        val count = countVotes(voters, voteSubject, proposerKey)
+        val yescount = count.first
+        val nocount = count.second
+        return (yescount > threshold || yescount + nocount == voters.size)
+    }
 }
