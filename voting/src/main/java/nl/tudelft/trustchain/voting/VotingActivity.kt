@@ -132,6 +132,11 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
+        // Parse date field
+        val regex = Regex("^(.*?)GMT")
+        var strippedDate = regex.find(block.timestamp.toString())?.value.toString()
+        strippedDate = strippedDate.substring(0, strippedDate.length - 3)
+
         val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
         val hasCasted = when {
             previouslyCastedVotes.first == 1 -> {
@@ -167,7 +172,7 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
                     "<small><b>Date</b>: " +
-                    "<i>" + block.timestamp + "</i></small>" +
+                    "<i>" + strippedDate + "</i></small>" +
                     castedString +
                     "<br><br>" +
                     "<small><b>Current tally</b>:" +
