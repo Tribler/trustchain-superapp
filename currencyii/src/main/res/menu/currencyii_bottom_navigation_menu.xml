@@ -5,12 +5,15 @@
         android:id="@+id/bitcoinFragment"
         android:title="@string/dao_overview"
         android:icon="@drawable/ic_home_black_24dp" />
-    <item
-        android:id="@+id/myWalletFragment"
-        android:title="@string/my_wallet"
-        android:icon="@drawable/ic_account_balance_wallet_black_24dp" />
+
     <item
         android:id="@+id/myDAOsFragment"
         android:title="@string/my_daos"
         android:icon="@drawable/ic_group_work_black_24dp" />
+
+    <item
+        android:id="@+id/myProposals"
+        android:title="@string/proposals"
+        android:icon="@drawable/ic_account_balance_wallet_black_24dp" />
+
 </menu>

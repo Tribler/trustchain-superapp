@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BitcoinFragment"
-        android:label="DAO Overview Screen"
+        android:label="Home"
         tools:layout="@layout/fragment_bitcoin">
         <action
             android:id="@+id/action_bitcoinFragment_to_blockchainDownloadFragment"
@@ -32,7 +32,7 @@
     <fragment
         android:id="@+id/daoLoginChoice"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOLoginFragment"
-        android:label="DAO Start Screen">
+        android:label="Welcome">
         <action
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"
@@ -161,8 +161,8 @@
             app:popExitAnim="@anim/fragment_fade_exit" />
     </fragment>
     <fragment
-        android:id="@+id/myWalletFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyWalletFragment"
-        android:label="My Wallet"
-        tools:layout="@layout/fragment_my_wallet" />
+        android:id="@+id/myProposals"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.MyProposalsFragment"
+        android:label="@string/proposals"
+        tools:layout="@layout/fragment_my_proposals" />
 </navigation>

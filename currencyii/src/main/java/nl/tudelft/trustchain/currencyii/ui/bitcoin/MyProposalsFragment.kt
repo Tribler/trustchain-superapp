@@ -15,10 +15,10 @@ private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
- * Use the [MyWalletFragment.newInstance] factory method to
+ * Use the [MyProposalsFragment] factory method to
  * create an instance of this fragment.
  */
-class MyWalletFragment : BaseFragment(R.layout.fragment_my_wallet) {
+class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -26,6 +26,6 @@ class MyWalletFragment : BaseFragment(R.layout.fragment_my_wallet) {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_my_wallet, container, false)
+        return inflater.inflate(R.layout.fragment_my_proposals, container, false)
     }
 }

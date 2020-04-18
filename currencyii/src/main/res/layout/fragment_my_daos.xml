@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10px"
+    android:padding="16dp"
     tools:context=".ui.bitcoin.MyDAOsFragment">
 
     <LinearLayout
@@ -11,60 +11,17 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/enrolled_text"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="You are currently enrolled in the following DAOs." />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="My DAOs"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <TextView
-                android:id="@+id/enrolled_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="You are currently enrolled in the following DAOs" />
-
-            <ListView
-                android:id="@+id/my_daos_list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </LinearLayout>
-
-        <View
+        <ListView
+            android:id="@+id/my_daos_list_view"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@color/gray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Proposals"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="You can vote on the following proposals" />
-
-            <ListView
-                android:id="@+id/proposal_list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </LinearLayout>
-
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </FrameLayout>
