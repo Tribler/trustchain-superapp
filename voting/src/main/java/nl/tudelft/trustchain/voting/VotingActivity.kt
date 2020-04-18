@@ -13,7 +13,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
-import kotlinx.android.synthetic.main.initiate_dialog.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -102,15 +101,15 @@ class VotingActivity : AppCompatActivity() {
         val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
-        var votingMode: votingMode
+        var votingMode: VotingMode
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 switchLabel.text = getString(R.string.threshold_mode)
-                votingMode = VotingActivity.votingMode.YESNO
+                votingMode = VotingMode.YESNO
             } else {
                 switchLabel.text = getString(R.string.yes_no_mode)
-                votingMode = VotingActivity.votingMode.THRESHOLD
+                votingMode = VotingMode.THRESHOLD
             }
             printShortToast(votingMode.toString())
         }
@@ -279,12 +278,5 @@ class VotingActivity : AppCompatActivity() {
         if (displayAllVotes) return true
         val votePair = vh.castedByPeer(block, community.myPeer.publicKey)
         return votePair == Pair(0, 0)
-    }
-
-    /**
-     * Helper enum
-     */
-    enum class votingMode {
-        YESNO, THRESHOLD
     }
 }
