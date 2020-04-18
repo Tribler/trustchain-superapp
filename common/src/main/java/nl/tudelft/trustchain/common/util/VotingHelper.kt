@@ -35,6 +35,7 @@ class VotingHelper(
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
         val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", myPublicKey.keyToBin().toString())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
 
@@ -182,38 +183,41 @@ class VotingHelper(
         return countVotes(listOf(publicKey), JSONObject(block.transaction["message"].toString()).get("VOTE_SUBJECT").toString(), block.publicKey)
     }
 
-//    fun getVoters(block: TrustChainBlock) {
-//        val voteJSON = try {
-//            JSONObject(block.transaction["message"].toString())
-//        } catch (e: JSONException) {
-//            // Assume a malicious vote if it claims to be a vote but does not contain
-//            // proper JSON.
-//            handleInvalidVote(
-//                "Block was a voting block but did not contain " +
-//                    "proper JSON in its message field: ${block.transaction["message"]}."
-//            )
-//            return
-//        }
-//        if (voteJSON.has("VOTE_LIST")) {
-//            val jsonKeys = voteJSON.getJSONArray("VOTE_LIST")
-//            val publicKeys: MutableList<PublicKey> = ArrayList()
-//            for (i in 0 until jsonKeys.length()){
-//                val string = jsonKeys.get(i)
-//                val key = string.
-//                publicKeys.add(key)
-//            }
-//        }
-//    }
-//
-//
-//
-//    fun votingComplete(block: TrustChainBlock) : Boolean {
-//        val count = countVotes(voters, voteSubject, proposerKey)
-//        val yescount = count.first
-//        val nocount = count.second
-//        if (threshold != null) {
-//            return (yescount > threshold || yescount + nocount == voters.size)
-//        }
-//        return (yescount + nocount == voters.size)
-//    }
+    fun getVoters(block: TrustChainBlock) : List<PublicKey> {
+
+        val jsonKeys = JSONArray(getVoteJSON(block, "VOTE_LIST"))
+        val publicKeys: MutableList<PublicKey> = ArrayList()
+        for (i in 0 until jsonKeys.length()){
+            val string = try {
+                jsonKeys.get(i)
+            } catch (e: JSONException) {
+                throw JSONException("No value for index ${i}")
+            }
+            val key = defaultCryptoProvider.keyFromPublicBin(string.toString().toByteArray())
+            publicKeys.add(key)
+        }
+        return publicKeys
+
+    }
+
+    fun getVoteJSON(block: TrustChainBlock, key: String) : String {
+        return try {
+            JSONObject(block.transaction["message"].toString()).get(key).toString()
+        } catch (e: JSONException) {
+            throw JSONException("No value for key ${key}")
+        }
+    }
+
+    fun votingComplete(block: TrustChainBlock, threshold: Int?) : Boolean {
+        val voters = getVoters(block)
+        val voteSubject = getVoteJSON(block,"VOTE_SUBJECT")
+        val proposerKey = getVoteJSON(block, "VOTE_PROPOSER")
+        val count = countVotes(voters, voteSubject, proposerKey.toByteArray())
+        val yescount = count.first
+        val nocount = count.second
+        if (threshold != null) {
+            return (yescount > threshold || yescount + nocount == voters.size)
+        }
+        return (yescount + nocount == voters.size)
+    }
 }

@@ -109,7 +109,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers)
+            vh.startVote(proposal, peers, null)
             printShortToast("Proposal has been created")
         }
 
@@ -121,9 +121,9 @@ class VotingActivity : AppCompatActivity() {
         builder.show()
     }
 
-//    private fun checkVoteCompleteness(block: TrustChainBlock) {
-//        printShortToast(vh.votingComplete(block).toString())
-//    }
+    private fun checkVoteCompleteness(block: TrustChainBlock) {
+        printShortToast(vh.votingComplete(block, null).toString())
+    }
 
     /**
      * Show dialog from which the user can propose a vote
