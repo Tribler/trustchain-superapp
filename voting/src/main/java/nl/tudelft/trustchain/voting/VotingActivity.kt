@@ -6,12 +6,13 @@ import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
 import android.widget.EditText
+import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
-import kotlinx.android.synthetic.main.initiate_dialog.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -97,6 +98,22 @@ class VotingActivity : AppCompatActivity() {
             .setView(dialogView)
             .setTitle("Initiate vote on proposal")
 
+        val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
+        val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
+        switchLabel.text = getString(R.string.yes_no_mode)
+        var votingMode: VotingMode
+
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                switchLabel.text = getString(R.string.threshold_mode)
+                votingMode = VotingMode.YESNO
+            } else {
+                switchLabel.text = getString(R.string.yes_no_mode)
+                votingMode = VotingMode.THRESHOLD
+            }
+            printShortToast(votingMode.toString())
+        }
+
         builder.setPositiveButton("Create") { _, _ ->
 
             val proposal = dialogView.findViewById<EditText>(R.id.proposalInput).text.toString()
@@ -107,7 +124,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers)
+            vh.startVote(proposal, peers) // TODO make use of votingMode variable
             printShortToast("Proposal has been created")
         }
 
