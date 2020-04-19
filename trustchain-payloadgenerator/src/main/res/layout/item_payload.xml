@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -27,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:drawableStart="@drawable/ic_arrow_drop_up_black_16dp"
-            android:drawableTint="@color/green"
+            android:drawableTint="@color/red"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/green" />
 
@@ -50,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:drawableStart="@drawable/ic_arrow_drop_down_black_16dp"
-            android:drawableTint="@color/red"
+            android:drawableTint="@color/green"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/red" />
         <TextView
