@@ -58,11 +58,11 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
 
         switchAutoMessage.setOnClickListener {
-            Log.d("SwitchAutoMessage","button switched")
+            Log.d("SwitchAutoMessage", "button switched")
             if (!isAutoSending) {
                 isAutoSending = true
                 sendAutoMessages()
-            }else{
+            } else {
                 isAutoSending = false
             }
         }
