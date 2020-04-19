@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.voting
 
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -45,9 +46,7 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
             JSONObject(myDataset[position].transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
 
-        val regex = Regex("^(.*?)GMT")
-        val strippedText = regex.find(myDataset[position].timestamp.toString())?.value.toString()
-        holder.propDate.text = strippedText.substring(0, strippedText.length - 3)
+        holder.propDate.text = DateFormat.format("EEE MMM d HH:mm", myDataset[position].timestamp).toString()
     }
 
     // Return the size of your dataset (invoked by the layout manager)

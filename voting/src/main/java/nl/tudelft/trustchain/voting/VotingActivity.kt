@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Html
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.widget.EditText
 import android.widget.Switch
@@ -24,6 +25,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
@@ -152,10 +154,8 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        // Parse date field
-        val regex = Regex("^(.*?)GMT")
-        var strippedDate = regex.find(block.timestamp.toString())?.value.toString()
-        strippedDate = strippedDate.substring(0, strippedDate.length - 3)
+        // Convert block date to simpler format
+        val date = DateFormat.format("EEE MMM d HH:mm", block.timestamp).toString()
 
         val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
         val hasCasted = when {
@@ -192,7 +192,7 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
                     "<small><b>Date</b>: " +
-                    "<i>" + strippedDate + "</i></small>" +
+                    "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
                     "<small><b>Current tally</b>:" +
