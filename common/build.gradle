@@ -91,5 +91,4 @@ dependencies {
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
-
 }

@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_payload.*
 import kotlinx.coroutines.*
@@ -30,9 +31,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
     private val adapter = ItemAdapter()
     private var isAutoSending = false
-    private lateinit var publicKey: ByteArray
 
-    protected val binding: FragmentPayloadBinding by viewBinding(FragmentPayloadBinding::bind)
+    private val binding: FragmentPayloadBinding by viewBinding(FragmentPayloadBinding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,10 +58,13 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
 
         switchAutoMessage.setOnClickListener {
+            Log.d("SwitchAutoMessage", "button switched")
             if (!isAutoSending) {
+                isAutoSending = true
                 sendAutoMessages()
+            } else {
+                isAutoSending = false
             }
-            isAutoSending != isAutoSending
         }
 
         val marketCommunity = getMarketCommunity()
@@ -81,7 +84,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             val payloadSerializable =
                 createPayloadSerializable(amount, price, type)
             val payload = createPayload(amount, price, type)
-            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
             marketCommunity.broadcast(payloadSerializable)
         }
 
@@ -93,7 +97,6 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
     private fun sendAutoMessages() {
         thread(start = true) {
             while (isAutoSending) {
-                Thread.sleep(3000)
                 val marketCommunity = getMarketCommunity()
                 val r = java.util.Random()
                 val typeInt = Random.nextInt(0, 2)
@@ -109,8 +112,12 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 price = String.format("%.2f", price).toDouble()
                 val payloadSerializable =
                     createPayloadSerializable(amount, price, type)
+                val payload = createPayload(amount, price, type)
                 marketCommunity.broadcast(payloadSerializable)
                 Log.d("TrustChainPayloadGeneratorActivity::sendAutoMessages", "message send!")
+                (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
+                recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
+                Thread.sleep(3000)
             }
         }
     }
@@ -120,12 +127,12 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         price: Double,
         type: String?
     ): TradePayload {
-        var primaryCurrency = Currency.BTC
-        var secondaryCurrency = Currency.DYMBE_DOLLAR
+        var primaryCurrency = Currency.DYMBE_DOLLAR
+        var secondaryCurrency = Currency.BTC
         var type2 = TradePayload.Type.BID
         if (type.equals("Ask")) {
-            primaryCurrency = Currency.DYMBE_DOLLAR
-            secondaryCurrency = Currency.BTC
+            primaryCurrency = Currency.BTC
+            secondaryCurrency = Currency.DYMBE_DOLLAR
             type2 = TradePayload.Type.ASK
         }
         return TradePayload(
@@ -175,7 +182,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
-            TrustChainPayloadGeneratorActivity.payloads.add(payload)
+            TrustChainPayloadGeneratorActivity.payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
         }
     }
     private fun bidListener(payload: TradePayload) {
@@ -184,7 +192,8 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
-            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(payload)
+            (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
         }
     }
 
