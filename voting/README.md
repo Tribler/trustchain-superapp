@@ -11,6 +11,7 @@ This module currently contains the following functionality:
 
 ## Creating a new proposal
 
+
 ### Yes / No voting mode
 In the Yes / No voting mode the result of the proposal is determined by counting the number of Yes and No votes.
 
