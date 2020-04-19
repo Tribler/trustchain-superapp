@@ -31,11 +31,12 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>, threshold: Int?) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        val voteList = JSONArray(peers)
+        val voteList = JSONArray(peers.map { i -> i.toString()})
 
+        // TODO: Replace mypubkey.keytobin.tostring with something simple.
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
         val voteJSON = JSONObject()
-            .put("VOTE_PROPOSER", myPublicKey.keyToBin().toString())
+            .put("VOTE_PROPOSER", myPublicKey)
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
 
@@ -186,26 +187,32 @@ class VotingHelper(
     fun getVoters(block: TrustChainBlock) : List<PublicKey> {
 
         val jsonKeys = JSONArray(getVoteJSON(block, "VOTE_LIST"))
+
+        Log.e("vote_debug", "String is ${jsonKeys.toString()}")
+
         val publicKeys: MutableList<PublicKey> = ArrayList()
         for (i in 0 until jsonKeys.length()){
             val string = try {
                 jsonKeys.get(i)
             } catch (e: JSONException) {
-                throw JSONException("No value for index ${i}")
+                throw JSONException("No value for index ${i}.")
             }
+
+            // TODO: Check for malicious input.
+
+            Log.e("vote_debug", "String is ${string.toString()}")
+
+
+            val mngl = string.toString().toByteArray()
+            Log.e("vote_debug", "Byte array is ${mngl}")
+
+            // TODO: Throws an error if keys are not properly formatted.
             val key = defaultCryptoProvider.keyFromPublicBin(string.toString().toByteArray())
+
             publicKeys.add(key)
         }
         return publicKeys
 
-    }
-
-    fun getVoteJSON(block: TrustChainBlock, key: String) : String {
-        return try {
-            JSONObject(block.transaction["message"].toString()).get(key).toString()
-        } catch (e: JSONException) {
-            throw JSONException("No value for key ${key}")
-        }
     }
 
     fun votingComplete(block: TrustChainBlock, threshold: Int?) : Boolean {
@@ -219,5 +226,15 @@ class VotingHelper(
             return (yescount > threshold || yescount + nocount == voters.size)
         }
         return (yescount + nocount == voters.size)
+    }
+
+    private fun getVoteJSON(block: TrustChainBlock, key: String) : String {
+        return try {
+
+            Log.e("vote_debug", block.transaction["message"].toString())
+            JSONObject(block.transaction["message"].toString()).get(key).toString()
+        } catch (e: JSONException) {
+            throw JSONException("No value for key ${key}")
+        }
     }
 }
