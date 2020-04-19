@@ -4,5 +4,8 @@
     <string name="create_proposal">Create Proposal</string>
     <string name="new_proposals">New Proposals</string>
     <string name="all_proposals">All Proposals</string>
+    <string name="p_np">e.g. P != NP</string>
+    <string name="yes_no_mode">Yes / No mode</string>
+    <string name="threshold_mode">Threshold mode</string>
 
 </resources>

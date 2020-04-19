@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Html
-import android.text.InputType
+import android.text.format.DateFormat
+import android.view.LayoutInflater
 import android.widget.EditText
+import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
 import kotlinx.coroutines.delay
@@ -23,6 +25,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
@@ -65,8 +68,6 @@ class VotingActivity : AppCompatActivity() {
         vh = VotingHelper(community)
         tch = TrustChainHelper(community)
 
-        // Styling
-        blockList.addItemDecoration(DividerItemDecoration(this, LinearLayoutManager.VERTICAL))
         blockList.layoutManager = LinearLayoutManager(this)
 
         adapter = blockListAdapter(voteProposals)
@@ -90,18 +91,34 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Dialog for creating a new proposal
      */
+    @SuppressLint("InflateParams")
     private fun showNewVoteDialog() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Create proposal")
 
-        val input = EditText(this)
-        input.inputType = InputType.TYPE_CLASS_TEXT
-        input.hint = "p != np"
-        builder.setView(input)
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.initiate_dialog, null)
 
-        // PositiveButton is always the rightmost button
+        val builder = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setTitle("Initiate vote on proposal")
+
+        val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
+        val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
+        switchLabel.text = getString(R.string.yes_no_mode)
+        var votingMode: VotingMode
+
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                switchLabel.text = getString(R.string.threshold_mode)
+                votingMode = VotingMode.YESNO
+            } else {
+                switchLabel.text = getString(R.string.yes_no_mode)
+                votingMode = VotingMode.THRESHOLD
+            }
+            printShortToast(votingMode.toString())
+        }
+
         builder.setPositiveButton("Create") { _, _ ->
-            val proposal = input.text.toString()
+
+            val proposal = dialogView.findViewById<EditText>(R.id.proposalInput).text.toString()
 
             // Create list of your peers and include yourself
             val peers: MutableList<PublicKey> = ArrayList()
@@ -109,7 +126,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers)
+            vh.startVote(proposal, peers) // TODO make use of votingMode variable
             printShortToast("Proposal has been created")
         }
 
@@ -136,6 +153,9 @@ class VotingActivity : AppCompatActivity() {
             "Block was a voting block but did not contain " +
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
+
+        // Convert block date to simpler format
+        val date = DateFormat.format("EEE MMM d HH:mm", block.timestamp).toString()
 
         val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
         val hasCasted = when {
@@ -172,14 +192,16 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
                     "<small><b>Date</b>: " +
-                    "<i>" + block.timestamp + "</i></small>" +
+                    "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
                     "<small><b>Current tally</b>:" +
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
-                Html.FROM_HTML_MODE_LEGACY))
+                Html.FROM_HTML_MODE_LEGACY
+            )
+        )
 
         // Display vote options is not previously casted a vote
         if (hasCasted == null) {
@@ -218,7 +240,7 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Count votes and return tally
      */
-    fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
+    private fun getTally(voteSubject: String, block: TrustChainBlock): Pair<Int, Int> {
         val peers: MutableList<PublicKey> = ArrayList()
         peers.addAll(community.getPeers().map { it.publicKey })
         peers.add(community.myPeer.publicKey)
