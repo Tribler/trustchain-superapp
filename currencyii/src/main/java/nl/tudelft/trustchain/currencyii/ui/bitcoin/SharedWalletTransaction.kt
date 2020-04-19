@@ -62,7 +62,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     }
 
     private fun transferFundsClicked() {
-        if (!validateCreationInput()) {
+        if (!validateTransferInput()) {
             activity?.runOnUiThread {
                 alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: 5000"
             }
@@ -73,11 +73,19 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
         val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
 
-        val transferFundsData = getCoinCommunity().proposeTransferFunds(
-            walletData,
-            bitcoinPublicKey,
-            satoshiTransferAmount
-        )
+        val transferFundsData = try {
+            getCoinCommunity().proposeTransferFunds(
+                walletData,
+                bitcoinPublicKey,
+                satoshiTransferAmount
+            )
+        } catch (t: Throwable) {
+            Log.i("Coin", "Proposing transfer funds failed. ${t.message ?: "No further information"}.")
+            activity?.runOnUiThread {
+                alert_view.text = t.message ?: "Unexpected error occurred. Try again"
+            }
+            return
+        }
 
         val signatures = collectSignatures(transferFundsData)
         try {
@@ -93,7 +101,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 alert_view.text = "Funds transfered!"
             }
         } catch (t: Throwable) {
-            Log.i("Coin", "Joining failed: ${t.message ?: '-'}")
+            Log.i("Coin", "Transferring funds failed. ${t.message ?: "No further information"}.")
             resetWalletInitializationValues()
             activity?.runOnUiThread {
                 alert_view.text = t.message ?: "Unexpected error occurred. Try again"
@@ -163,7 +171,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
     }
 
-    private fun validateCreationInput(): Boolean {
+    private fun validateTransferInput(): Boolean {
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
         return bitcoinPublicKey != "" && satoshiTransferAmount >= 5000 && blockHash != null

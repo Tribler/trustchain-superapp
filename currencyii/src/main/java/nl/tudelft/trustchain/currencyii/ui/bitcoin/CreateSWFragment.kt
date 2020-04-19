@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.Coin
 
 /**
  * A simple [Fragment] subclass.
@@ -35,13 +34,18 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
 
     private fun createSharedBitcoinWallet() {
         if (!validateCreationInput()) {
-            alert_label.text = "Entrance fee should be a double, threshold an integer, both >0"
+            activity?.runOnUiThread {
+                alert_label.text =
+                    "Entrance fee should be an integer >= 5000, threshold an integer > 0 and <= 100"
+            }
             return
         }
-        alert_label.text = "Creating wallet, this might take some time... (0%)"
 
-        val currentEntranceFeeBTC = entrance_fee_tf.text.toString().toDouble()
-        val currentEntranceFee = (Coin.COIN.value * currentEntranceFeeBTC).toLong()
+        activity?.runOnUiThread {
+            alert_label.text = "Creating wallet, this might take some time... (0%)"
+        }
+
+        val currentEntranceFee = entrance_fee_tf.text.toString().toLong()
         val currentThreshold = voting_threshold_tf.text.toString().toInt()
 
         activity?.runOnUiThread {
@@ -56,10 +60,10 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
                 currentThreshold,
                 ::updateProgressStatus
             )
-            resetWalletInitializationValues()
+            enableInputFields()
             alert_label.text = "Wallet created successfully!"
         } catch (t: Throwable) {
-            resetWalletInitializationValues()
+            enableInputFields()
             activity?.runOnUiThread {
                 alert_label.text = t.message ?: "Unexpected error occurred. Try again"
             }
@@ -79,15 +83,18 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         }
     }
 
-    private fun resetWalletInitializationValues() {
-        alert_label.text = ""
+    private fun enableInputFields() {
+        activity?.runOnUiThread {
+            voting_threshold_tf.isEnabled = true
+            entrance_fee_tf.isEnabled = true
+        }
     }
 
     private fun validateCreationInput(): Boolean {
-        val entranceFee = entrance_fee_tf.text.toString().toDoubleOrNull()
+        val entranceFee = entrance_fee_tf.text.toString().toLongOrNull()
         val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
         return entranceFee != null &&
-            entranceFee > 0 &&
+            entranceFee >= 5000 &&
             votingThreshold != null &&
             votingThreshold > 0 &&
             votingThreshold <= 100

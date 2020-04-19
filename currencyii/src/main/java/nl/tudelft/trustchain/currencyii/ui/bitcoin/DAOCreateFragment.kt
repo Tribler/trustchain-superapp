@@ -10,6 +10,8 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
+import org.bitcoinj.crypto.MnemonicCode
+import org.bitcoinj.crypto.MnemonicException
 
 /**
  * A simple [Fragment] subclass.
@@ -65,6 +67,19 @@ class DAOCreateFragment : Fragment() {
             return
         }
 
+        // Check for errors in the seed
+        val words = seed.split(" ")
+        try {
+            MnemonicCode.INSTANCE.check(words)
+        } catch (e: MnemonicException) {
+            Toast.makeText(
+                this.requireContext(),
+                "The mnemonic seed provided is not correct. ${e.message?: "No further information"}.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         if (privateKeys[0].isNotEmpty() && !isPrivateKeyValid(privateKeys[0])) {
             Toast.makeText(
                 this.requireContext(),
@@ -87,6 +102,11 @@ class DAOCreateFragment : Fragment() {
                 SerializedDeterministicKey(seed, creationNumber),
                 AddressPrivateKeyPair("", privateKeys[0])
             )
+        }
+
+        // Close the current wallet manager if there is one running, blocks thread until it is closed
+        if (WalletManagerAndroid.isInitialized()) {
+            WalletManagerAndroid.close()
         }
 
         WalletManagerAndroid.Factory(this.requireContext().applicationContext)
