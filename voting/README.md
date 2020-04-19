@@ -7,7 +7,7 @@ This module currently contains the following functionality:
 - Create a new proposal based in Yes / No voting mode or threshold voting mode
 
 ## Context
-*In what setting this module is used*
+*TODO: In what setting this module is used*
 
 ## Proposal list
 When entering the submodule, the user sees the proposal list at first. Using the toggle, the user can switch between a list of all proposals (left) and a list of new proposals (right), which contains proposals on which the user has not casted a vote yet.
@@ -21,11 +21,8 @@ A user can create a new proposal by clicking on the `create proposal` button in 
 <!-- TODO: change file path when merging to Tribler repo -->
 <img src="https://raw.githubusercontent.com/emieldesmidt/trustchain-superapp/doc/doc/voting/create-yes-no-proposal.png" width="180"> <img src="https://raw.githubusercontent.com/emieldesmidt/trustchain-superapp/doc/doc/voting/create-threshold-proposal.png" width="180">
 
-
-
-
-### Yes / No voting mode
-In the Yes / No voting mode the result of the proposal is determined by counting the number of Yes and No votes.
+### Yes/No voting mode
+In the Yes/No voting mode the result of the proposal is determined by counting the number of Yes and No votes.
 
 ### Threshold voting mode
 In the threshold voting mode, the result of the proposal is determined by deciding whether the number of Yes votes reaches a certain threshold. This threshold is decided upon when the community or dao is created and by default is `80%`.
