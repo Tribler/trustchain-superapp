@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -36,7 +37,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         if (!validateCreationInput()) {
             activity?.runOnUiThread {
                 alert_label.text =
-                    "Entrance fee should be an integer >= 5000, threshold an integer > 0 and <= 100"
+                    "Entrance fee should be an integer >= ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}, threshold an integer > 0 and <= 100"
             }
             return
         }
@@ -94,7 +95,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
         val entranceFee = entrance_fee_tf.text.toString().toLongOrNull()
         val votingThreshold = voting_threshold_tf.text.toString().toIntOrNull()
         return entranceFee != null &&
-            entranceFee >= 5000 &&
+            entranceFee >= SWUtil.MINIMAL_TRANSACTION_AMOUNT &&
             votingThreshold != null &&
             votingThreshold > 0 &&
             votingThreshold <= 100

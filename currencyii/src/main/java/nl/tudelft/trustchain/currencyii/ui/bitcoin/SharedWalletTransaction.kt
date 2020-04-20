@@ -17,6 +17,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -64,7 +65,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     private fun transferFundsClicked() {
         if (!validateTransferInput()) {
             activity?.runOnUiThread {
-                alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: 5000"
+                alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}"
             }
         }
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
@@ -174,7 +175,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     private fun validateTransferInput(): Boolean {
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
-        return bitcoinPublicKey != "" && satoshiTransferAmount >= 5000 && blockHash != null
+        return bitcoinPublicKey != "" && satoshiTransferAmount >= SWUtil.MINIMAL_TRANSACTION_AMOUNT && blockHash != null
     }
 
     companion object {
