@@ -37,14 +37,11 @@ class MainActivityFOC : AppCompatActivity() {
     val s = SessionManager()
     var sessionActive = false
 
-    private var arrayList = ArrayList<String>()//Creating an empty arraylist
+    private var torrentList = ArrayList<String>()//Creating an empty arraylist
 
-    private lateinit var adapter : ArrayAdapter<String>
+    private lateinit var adapterLV : ArrayAdapter<String>
 
     private var uploadingTorrent = "greatBigTorrent"
-
-   val mobileArray = arrayOf("Android","IPhone","WindowsMobile","Blackberry",
-      "WebOS","Ubuntu","Windows7","Max OS X")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,20 +50,22 @@ class MainActivityFOC : AppCompatActivity() {
 
         initializeTorrentSession()
 
+        //create a list view for any incoming torrents
+        //that are seeded
         val listView = myListView as ListView
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
-        adapter = ArrayAdapter<String>(
+        adapterLV = ArrayAdapter<String>(
             this,
-             android.R.layout.simple_list_item_1, arrayList
+             android.R.layout.simple_list_item_1, torrentList
         )
-        listView.setAdapter(adapter)
+        listView.setAdapter(adapterLV)
 
+        //whenever an available torrent is seeded, clicking on it
+        //inserts it into the input for torrent names/magnet links
         listView.setOnItemClickListener { parent, _, position, _ ->
             var item = parent.getItemAtPosition(position);
-            printToast(item.toString());
             enterTorrent.setText(item.toString().substringAfter(" - "))
         };
-
 
         printToast("STARTED")
 
@@ -82,24 +81,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         // option 3: Send a message to every other peer using the superapp
         informPeersButton.setOnClickListener { _ ->
-            val ipv8 = IPv8Android.getInstance()
-            val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-            val peers = demoCommunity.getPeers()
-
-            Log.i("personal", "n:" + peers.size.toString())
-            for (peer in peers) {
-                Log.i("personal", peer.mid)
-            }
-
-            //demoCommunity.broadcastGreeting()
-            //printToast("Greeted " + peers.size.toString() + " peers")
-
-            //CreateTorrentTest.testFromFile();
-
-            demoCommunity.informAboutTorrent(uploadingTorrent)
-
-
-
+           informPeersAboutSeeding()
         }
 
         // option 4: dynamically load and execute code from a jar/apk file
@@ -140,7 +122,6 @@ class MainActivityFOC : AppCompatActivity() {
     }
 
     fun initializeTorrentSession(){
-        //val signal = CountDownLatch(1)
         s.addListener(object : AlertListener {
             override fun types(): IntArray? {
                 return null
@@ -152,7 +133,6 @@ class MainActivityFOC : AppCompatActivity() {
                 when (type) {
                     AlertType.ADD_TORRENT -> {
                         Log.i("personal", "Torrent added")
-                        // System.out.println("Torrent added");
                         (alert as AddTorrentAlert).handle().resume()
                     }
                     AlertType.BLOCK_FINISHED -> {
@@ -168,10 +148,9 @@ class MainActivityFOC : AppCompatActivity() {
                         downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)");
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
-                        //signal.countDown()
                     }
                     else -> {
-                        //Log.i("personal", "something")
+
                     }
                 }
             }
@@ -182,6 +161,8 @@ class MainActivityFOC : AppCompatActivity() {
      * Download a torrent through a magnet link
      */
     fun getMagnetLink() {
+        //Handling of the case where the user is already downloading the
+        //same or another torrent
         if (sessionActive){
             s.stop()
             sessionActive = false
@@ -248,6 +229,8 @@ class MainActivityFOC : AppCompatActivity() {
      */
     @Suppress("deprecation")
     fun getTorrent() {
+        //Handling of the case where the user is already downloading the
+        //same or another torrent
         if (sessionActive){
             s.stop()
             sessionActive = false
@@ -281,10 +264,7 @@ class MainActivityFOC : AppCompatActivity() {
             SessionParams(sp)
         s.start(params)
 
-        //val data: String = "8419d694e1049229bae56b5418a277be75aa9f15"
-        //s.dhtPutItem(Entry(data)).toString()
-
-        //printToast("Starting download, please wait...")
+        printToast("Starting download, please wait...")
 
         val torrentFile = File(torrent)
         val ti = TorrentInfo(torrentFile)
@@ -295,25 +275,6 @@ class MainActivityFOC : AppCompatActivity() {
         downloadTorrentButton.setText("STOP")
         s.download(ti, torrentFile.parentFile)
 
-        /*
-        val thread: Thread = object : Thread() {
-            override fun run() {
-                while (true) {
-                    try {
-                        sleep(5000)
-                    } catch (e: InterruptedException) {
-                        e.printStackTrace()
-                    }
-                    Log.i("personal", "is Running: "  + s.isRunning.toString());
-                    Log.i("personal", "total upload: " + s.totalUpload().toString());
-                }
-            }
-        }
-        thread.start()
-
-         */
-
-        //System.`in`.read()
     }
 
     /**
@@ -339,6 +300,22 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", ti2.toEntry().toString())
         torrentView.text = toPrint
         return true
+    }
+
+    /* Let others peers know of the torrent you are seeding,
+    by sending the magnet link
+     */
+    fun informPeersAboutSeeding(){
+        val ipv8 = IPv8Android.getInstance()
+        val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
+        val peers = demoCommunity.getPeers()
+
+        Log.i("personal", "n:" + peers.size.toString())
+        for (peer in peers) {
+            Log.i("personal", peer.mid)
+        }
+
+        demoCommunity.informAboutTorrent(uploadingTorrent)
     }
 
     /**
@@ -383,8 +360,12 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    /*
+    Creates a torrent from a file given as input
+    The extension of the file must be included (for example, .png)
+     */
+    @Suppress("deprecation")
     fun createTorrent(){
-
         val fileName: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
@@ -397,10 +378,10 @@ class MainActivityFOC : AppCompatActivity() {
         if (!file.exists()) {
             Log.i("personal", "doesnt exist")
         }
-        //Utils.writeByteArrayToFile(f, new byte[]{0}, false);
+
         val fs = file_storage()
         val l1: add_files_listener = object : add_files_listener() {
-            override fun pred(p: String): Boolean { //assertEquals(f.getAbsolutePath(), p);
+            override fun pred(p: String): Boolean {
                 return true
             }
         }
@@ -441,6 +422,10 @@ class MainActivityFOC : AppCompatActivity() {
         getTorrent()
     }
 
+    /*
+    Displays the list of all the torrents being seeded at the moment,
+    based on the messages received from those peers that seed
+     */
     fun retrieveListOfAvailableTorrents(){
         val ipv8 = IPv8Android.getInstance()
         val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
@@ -452,23 +437,24 @@ class MainActivityFOC : AppCompatActivity() {
             var torrentName = payload.message.substringAfter("&dn=").
                 substringBefore('&')
             var containsItem = false;
-            for (i in 0..adapter.count-1){
-                if (adapter.getItem(i).equals(torrentName)){
+            for (i in 0..adapterLV.count-1){
+                if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!.startsWith(torrentName)){
                     containsItem = true
                     break
                 }
             }
             if (!containsItem) {
-                adapter.add(torrentName + " - " + magnetLink);
+                adapterLV.add(torrentName + " - " + magnetLink);
                 setListViewHeightBasedOnChildren(myListView)
             }
 
         }
 
-        //arrayList.add("blabla" + counter++);
-        //adapter.notifyDataSetChanged();
     }
 
+    /*
+    Handles correct viewing of our list of torrents, since it is within a ScrollView
+     */
     fun setListViewHeightBasedOnChildren(listView : ListView) {
         var listAdapter: ListAdapter = listView.getAdapter()
 
