@@ -7,6 +7,8 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -31,12 +33,12 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>, threshold: Int?) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        val voteList = JSONArray(peers.map { i -> i.toString()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
 
         // TODO: Replace mypubkey.keytobin.tostring with something simple.
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
         val voteJSON = JSONObject()
-            .put("VOTE_PROPOSER", myPublicKey)
+            .put("VOTE_PROPOSER", myPublicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
 
@@ -202,12 +204,8 @@ class VotingHelper(
 
             Log.e("vote_debug", "String is ${string.toString()}")
 
-
-            val mngl = string.toString().toByteArray()
-            Log.e("vote_debug", "Byte array is ${mngl}")
-
             // TODO: Throws an error if keys are not properly formatted.
-            val key = defaultCryptoProvider.keyFromPublicBin(string.toString().toByteArray())
+            val key = defaultCryptoProvider.keyFromPublicBin(string.toString().hexToBytes())
 
             publicKeys.add(key)
         }
@@ -219,11 +217,11 @@ class VotingHelper(
         val voters = getVoters(block)
         val voteSubject = getVoteJSON(block,"VOTE_SUBJECT")
         val proposerKey = getVoteJSON(block, "VOTE_PROPOSER")
-        val count = countVotes(voters, voteSubject, proposerKey.toByteArray())
+        val count = countVotes(voters, voteSubject, defaultCryptoProvider.keyFromPublicBin(proposerKey.hexToBytes()).keyToBin())
         val yescount = count.first
         val nocount = count.second
         if (threshold != null) {
-            return (yescount > threshold || yescount + nocount == voters.size)
+            return (yescount >= threshold || yescount + nocount == voters.size)
         }
         return (yescount + nocount == voters.size)
     }

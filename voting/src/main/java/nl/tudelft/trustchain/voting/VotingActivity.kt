@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.voting
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.bluetooth.BluetoothClass
 import android.os.Bundle
 import android.text.Html
 import android.view.LayoutInflater
@@ -12,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
-import kotlinx.android.synthetic.main.initiate_dialog.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -122,7 +120,7 @@ class VotingActivity : AppCompatActivity() {
     }
 
     private fun checkVoteCompleteness(block: TrustChainBlock) {
-        printShortToast(vh.votingComplete(block, null).toString())
+        printShortToast(vh.votingComplete(block, 1).toString())
     }
 
     /**
