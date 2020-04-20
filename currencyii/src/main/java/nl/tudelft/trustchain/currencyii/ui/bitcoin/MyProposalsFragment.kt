@@ -45,7 +45,6 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             val adaptor = ProposalListAdapter(this, proposals)
             proposal_list_view.adapter = adaptor
             proposal_list_view.setOnItemClickListener { _, _, position, _ ->
-                Log.i("Coin", "Clicked: $position")
                 val block = proposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                     Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")

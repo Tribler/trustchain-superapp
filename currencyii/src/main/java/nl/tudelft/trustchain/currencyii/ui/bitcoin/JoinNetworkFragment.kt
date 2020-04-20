@@ -149,8 +149,8 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                     updateSharedWallets(crawlResult)
                 }
             } catch (t: Throwable) {
-                val message = t.message ?: "no message"
-                Log.i("Coin", "Crawling failed for: ${peer.publicKey} message: $message")
+                val message = t.message ?: "No further information"
+                Log.i("Coin", "Crawling failed for: ${peer.publicKey}. $message.")
             }
         }
         disableRefresher()
@@ -165,10 +165,17 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 ?: block
 
         // Add a proposal to trust chain to join a shared wallet
-        val proposeBlockData =
+        val proposeBlockData = try {
             getCoinCommunity().proposeJoinWallet(
                 mostRecentSWBlock.transaction
             ).getData()
+        } catch (t: Throwable) {
+            Log.i("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
+            activity?.runOnUiThread {
+                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
+            }
+            return
+        }
 
         // Wait and collect signatures
         var signatures: List<String>? = null
@@ -187,7 +194,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                 ::updateAlertLabel
             )
         } catch (t: Throwable) {
-            Log.i("Coin", "Joining failed: ${t.message ?: '-'}")
+            Log.i("Coin", "Joining failed. ${t.message ?: "No further information"}.")
             activity?.runOnUiThread {
                 alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
             }

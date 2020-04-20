@@ -9,6 +9,12 @@ import kotlin.math.ceil
 import kotlin.math.min
 
 object SWUtil {
+
+    /**
+     * The minimal tx amount defined for creating transactions to avoid dusty transactions
+     */
+    const val MINIMAL_TRANSACTION_AMOUNT: Int = 5000
+
     /**
      * Generate a random 128 bit string
      * From: https://sakthipriyan.com/2017/04/02/creating-base64-uuid-in-java.html

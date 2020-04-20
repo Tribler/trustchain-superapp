@@ -46,8 +46,12 @@ object WalletManagerAndroid {
         return walletManager != null
     }
 
+    /**
+     * Stops and resets the current wallet manager.
+     * This method will block the thread until the kit has been shut down.
+     */
     fun close() {
-        walletManager!!.kit.stopAsync()
+        walletManager!!.kit.stopAsync().awaitTerminated()
         walletManager = null
     }
 }
