@@ -182,6 +182,7 @@ class MainActivityFOC : AppCompatActivity() {
                         Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
+                        progressBar.setProgress(100, true)
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                         signal.countDown()

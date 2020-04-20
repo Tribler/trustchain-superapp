@@ -29,12 +29,19 @@ class DemoCommunity : Community() {
         }
     }
 
+    private var torrentMessagesList = ArrayList<Packet>()
+
+    public fun getTorrentMessages() : ArrayList<Packet> {
+        return torrentMessagesList
+    }
+
     object MessageId {
         const val PUNCTURE_REQUEST = 250
         const val PUNCTURE = 249
         const val INTRODUCTION_REQUEST = 246
         const val INTRODUCTION_RESPONSE = 245
         const val THALIS_MESSAGE = 222
+        const val TORRENT_MESSAGE = 223
     }
 
     // SEND MESSAGE
@@ -45,12 +52,26 @@ class DemoCommunity : Community() {
         }
     }
 
+    fun informAboutTorrent(torrentName : String) {
+        for (peer in getPeers()) {
+            val packet = serializePacket(MessageId.TORRENT_MESSAGE, MyMessage("FOC:" + torrentName), true)
+            send(peer.address, packet)
+        }
+    }
+
     // RECEIVE MESSAGE
     init {
         messageHandlers[MessageId.THALIS_MESSAGE] = ::onMessage
+        messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
     }
 
     private fun onMessage(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
+        Log.i("personal", peer.mid + ": " + payload.message)
+    }
+
+    private fun onTorrentMessage(packet: Packet) {
+        torrentMessagesList.add(packet)
         val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
         Log.i("personal", peer.mid + ": " + payload.message)
     }
