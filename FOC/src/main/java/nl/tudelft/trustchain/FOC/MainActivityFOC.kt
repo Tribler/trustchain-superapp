@@ -34,11 +34,12 @@ import java.util.concurrent.CountDownLatch
 
 class MainActivityFOC : AppCompatActivity() {
 
+    val s = SessionManager()
+    var sessionActive = false
+
     private var arrayList = ArrayList<String>()//Creating an empty arraylist
 
     private lateinit var adapter : ArrayAdapter<String>
-
-    var counter = 0
 
     private var uploadingTorrent = "greatBigTorrent"
 
@@ -49,6 +50,8 @@ class MainActivityFOC : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
+
+        initializeTorrentSession()
 
         val listView = myListView as ListView
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
@@ -74,7 +77,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         // option 2: download a torrent through a .torrent file on your phone
         downloadTorrentButton.setOnClickListener { _ ->
-            getTorrent(false)
+            getTorrent()
         }
 
         // option 3: Send a message to every other peer using the superapp
@@ -136,30 +139,8 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    /**
-     * Download a torrent through a magnet link
-     */
-    fun getMagnetLink() {
-        val magnetLink: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No magnet link given, using default")
-            // magnetLink = "magnet:?xt=urn:btih:86d0502ead28e495c9e67665340f72aa72fe304e&dn=Frostwire.5.3.6.+%5BWindows%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337";
-            // magnetLink = "magnet:?xt=urn:btih:737d38ed01da1df727a3e0521a6f2c457cb812de&dn=HOME+-+a+film+by+Yann+Arthus-Bertrand+%282009%29+%5BEnglish%5D+%5BHD+MP4%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969";
-            // magnetLink = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c";
-            magnetLink = "magnet:?xt=urn:btih:209c8226b299b308beaf2b9cd3fb49212dbd13ec&dn=Tears+of+Steel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Ftears-of-steel.torrent"
-            // magnetLink = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent";
-        } else magnetLink = inputText
-
-        val s = SessionManager()
-
-        val sp = SettingsPack()
-
-        val params =
-            SessionParams(sp)
-
-        val signal = CountDownLatch(1)
-
+    fun initializeTorrentSession(){
+        //val signal = CountDownLatch(1)
         s.addListener(object : AlertListener {
             override fun types(): IntArray? {
                 return null
@@ -183,17 +164,50 @@ class MainActivityFOC : AppCompatActivity() {
                     }
                     AlertType.TORRENT_FINISHED -> {
                         progressBar.setProgress(100, true)
+                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)");
+                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)");
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
-                        signal.countDown()
-
-                        s.stop()
+                        //signal.countDown()
                     }
-                    else -> {}
+                    else -> {
+                        //Log.i("personal", "something")
+                    }
                 }
             }
         })
+    }
 
+    /**
+     * Download a torrent through a magnet link
+     */
+    fun getMagnetLink() {
+        if (sessionActive){
+            s.stop()
+            sessionActive = false
+            downloadTorrentButton.setText("DOWNLOAD (TORRENT)");
+            if (downloadMagnetButton.text.equals("STOP")){
+                downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                return
+            } else progressBar.setProgress(0, true)
+        }
+
+        val magnetLink: String?
+        val inputText = enterTorrent.text.toString()
+        if (inputText == "") {
+            printToast("No magnet link given, using default")
+            // magnetLink = "magnet:?xt=urn:btih:86d0502ead28e495c9e67665340f72aa72fe304e&dn=Frostwire.5.3.6.+%5BWindows%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337";
+            // magnetLink = "magnet:?xt=urn:btih:737d38ed01da1df727a3e0521a6f2c457cb812de&dn=HOME+-+a+film+by+Yann+Arthus-Bertrand+%282009%29+%5BEnglish%5D+%5BHD+MP4%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969";
+            // magnetLink = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c";
+            magnetLink = "magnet:?xt=urn:btih:209c8226b299b308beaf2b9cd3fb49212dbd13ec&dn=Tears+of+Steel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Ftears-of-steel.torrent"
+            // magnetLink = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent";
+        } else magnetLink = inputText
+
+
+        val sp = SettingsPack()
+        sp.seedingOutgoingConnections(true)
+        val params =
+            SessionParams(sp)
         s.start(params)
 
         val timer = Timer()
@@ -220,6 +234,8 @@ class MainActivityFOC : AppCompatActivity() {
             torrentView.text = torrentInfo
 
             val ti = TorrentInfo.bdecode(data)
+            sessionActive = true
+            downloadMagnetButton.setText("STOP")
             s.download(ti, File("/storage/emulated/0"))
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
@@ -231,7 +247,16 @@ class MainActivityFOC : AppCompatActivity() {
      *  Download a torrent through a .torrent file on your phone
      */
     @Suppress("deprecation")
-    fun getTorrent(seed : Boolean) {
+    fun getTorrent() {
+        if (sessionActive){
+            s.stop()
+            sessionActive = false
+            downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)");
+            if (downloadTorrentButton.text.equals("STOP")){
+                downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                return
+            } else progressBar.setProgress(0, true)
+        }
 
         val torrentName: String?
         val inputText = enterTorrent.text.toString()
@@ -250,57 +275,10 @@ class MainActivityFOC : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        val s = SessionManager()
-
         val sp = SettingsPack()
-
-        Log.i("personal", sp.seedingOutgoingConnections().toString());
-        if (seed)
-            sp.seedingOutgoingConnections(true)
-        Log.i("personal", sp.seedingOutgoingConnections().toString());
-
+        sp.seedingOutgoingConnections(true)
         val params =
             SessionParams(sp)
-
-        //val signal = CountDownLatch(1)
-
-        s.addListener(object : AlertListener {
-            override fun types(): IntArray? {
-                return null
-            }
-
-            override fun alert(alert: Alert<*>) {
-                val type = alert.type()
-
-                when (type) {
-                    AlertType.ADD_TORRENT -> {
-                        Log.i("personal", "Torrent added")
-                        // System.out.println("Torrent added");
-                        (alert as AddTorrentAlert).handle().resume()
-                    }
-                    AlertType.BLOCK_FINISHED -> {
-                        val a = alert as BlockFinishedAlert
-                        val p = (a.handle().status().progress() * 100).toInt()
-                        progressBar.setProgress(p, true)
-                        Log.i("personal", "Progress: " + p + " for torrent name: " + a.torrentName())
-                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
-                    }
-                    AlertType.TORRENT_FINISHED -> {
-                        progressBar.setProgress(100, true)
-                        Log.i("personal", "Torrent finished")
-                        printToast("Torrent downloaded!!")
-                        //signal.countDown()
-
-                        if (!seed)
-                        s.stop()
-                    }
-                    else -> {
-                        //Log.i("personal", "something")
-                    }
-                }
-            }
-        })
-
         s.start(params)
 
         //val data: String = "8419d694e1049229bae56b5418a277be75aa9f15"
@@ -313,6 +291,8 @@ class MainActivityFOC : AppCompatActivity() {
 
         Log.i("personal", "Storage of downloads: " + torrentFile.parentFile!!.toString())
 
+        sessionActive = true
+        downloadTorrentButton.setText("STOP")
         s.download(ti, torrentFile.parentFile)
 
         /*
@@ -458,7 +438,7 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", magnet_link)
 
         enterTorrent.setText(torrentName)
-        getTorrent(true)
+        getTorrent()
     }
 
     fun retrieveListOfAvailableTorrents(){
