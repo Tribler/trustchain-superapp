@@ -1,17 +1,14 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import kotlinx.android.synthetic.main.fragment_my_proposals.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
 /**
  * A simple [Fragment] subclass.
@@ -19,6 +16,22 @@ private const val ARG_PARAM2 = "param2"
  * create an instance of this fragment.
  */
 class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
+
+    private fun updateProposalList() {
+        val sharedWalletBlocks = getCoinCommunity().fetchProposalBlocks()
+        Log.i("Coin", "${sharedWalletBlocks.size} proposals found!")
+        val adaptor =
+            ProposalListAdapter(this, sharedWalletBlocks)
+        proposal_list_view.adapter = adaptor
+        proposal_list_view.setOnItemClickListener { _, view, position, id ->
+            Log.i("Coin", "Clicked: $view, $position, $id")
+        }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        updateProposalList()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

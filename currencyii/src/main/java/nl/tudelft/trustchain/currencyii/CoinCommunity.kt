@@ -174,6 +174,26 @@ class CoinCommunity : Community() {
     }
 
     /**
+     * Fetch all join and transfer proposals in descending timestamp order.
+     * Speed assumption: each proposal has a unique proposal ID (distinct by unique proposal id,
+     * without taking the unique wallet id into account).
+     */
+    public fun fetchProposalBlocks(): List<TrustChainBlock> {
+        val joinProposals = getTrustChainCommunity().database.getBlocksWithType(SIGNATURE_ASK_BLOCK)
+        val transferProposals = getTrustChainCommunity().database.getBlocksWithType(
+            TRANSFER_FUNDS_ASK_BLOCK
+        )
+        return joinProposals
+            .union(transferProposals)
+            .distinctBy {
+                val data = SWSignatureAskTransactionData(it.transaction).getData()
+                data.SW_UNIQUE_PROPOSAL_ID
+            }.sortedByDescending {
+                it.timestamp
+            }
+    }
+
+    /**
      * Fetch all DAO blocks that contain a signature. These blocks are the response of a signature request.
      * Signatures are fetched from [SIGNATURE_AGREEMENT_BLOCK] type blocks.
      */
