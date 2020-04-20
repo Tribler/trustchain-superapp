@@ -186,6 +186,8 @@ class MainActivityFOC : AppCompatActivity() {
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                         signal.countDown()
+
+                        s.stop()
                     }
                     else -> {}
                 }
@@ -235,7 +237,7 @@ class MainActivityFOC : AppCompatActivity() {
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
             printToast("No torrent name given, using default")
-            torrentName = "image.torrent"
+            torrentName = "sintel.torrent"
         } else torrentName = inputText
         val torrent =
             Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
@@ -284,9 +286,13 @@ class MainActivityFOC : AppCompatActivity() {
                         Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
+                        progressBar.setProgress(100, true)
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                         //signal.countDown()
+
+                        if (!seed)
+                        s.stop()
                     }
                     else -> {
                         //Log.i("personal", "something")
@@ -309,6 +315,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         s.download(ti, torrentFile.parentFile)
 
+        /*
         val thread: Thread = object : Thread() {
             override fun run() {
                 while (true) {
@@ -323,6 +330,8 @@ class MainActivityFOC : AppCompatActivity() {
             }
         }
         thread.start()
+
+         */
 
         //System.`in`.read()
     }
