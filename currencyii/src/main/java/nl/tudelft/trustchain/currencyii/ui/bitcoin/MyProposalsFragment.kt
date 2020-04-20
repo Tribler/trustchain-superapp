@@ -34,8 +34,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 Log.i("Coin", "${databaseProposals.size} proposals found in database!")
                 updateProposals(databaseProposals)
                 updateProposalListUI()
-                crawlProposals()
-                updateProposalListUI()
+                crawlProposalsAndUpdateIfNewFound()
             }
         }
     }
@@ -80,7 +79,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
     /**
      * Crawl all shared wallet blocks of users in the trust chain.
      */
-    private suspend fun crawlProposals() {
+    private suspend fun crawlProposalsAndUpdateIfNewFound() {
         val allUsers = getDemoCommunity().getPeers()
         Log.i("Coin", "Found ${allUsers.size} peers, crawling")
 
@@ -95,7 +94,10 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                                 it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
                         }
                     Log.i("Coin", "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})")
-                    updateProposals(crawlResult)
+                    if (crawlResult.isNotEmpty()) {
+                        updateProposals(crawlResult)
+                        updateProposalListUI()
+                    }
                 }
             } catch (t: Throwable) {
                 val message = t.message ?: "no message"
