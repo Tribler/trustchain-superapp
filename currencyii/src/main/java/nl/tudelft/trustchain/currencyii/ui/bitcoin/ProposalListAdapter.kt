@@ -23,6 +23,7 @@ class ProposalListAdapter(
         val block = items[p0]
         val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm")
 
+        val about = view.findViewById<TextView>(R.id.about_tv)
         val createdAt = view.findViewById<TextView>(R.id.timestamp_tv)
         val doaId = view.findViewById<TextView>(R.id.dao_id_tv)
         val proposalId = view.findViewById<TextView>(R.id.proposal_id_tv)
@@ -30,6 +31,7 @@ class ProposalListAdapter(
 
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
+            about.text = "Transfer funds request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
@@ -38,6 +40,7 @@ class ProposalListAdapter(
 
         if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
+            about.text = "Join request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
