@@ -63,7 +63,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
     private fun updateProposals(newProposals: List<TrustChainBlock>) {
         val coinCommunity = getCoinCommunity()
         val proposalIds = proposals.map {
-            coinCommunity.fetchSignatureRequestProposalId(it) ?: "no-id"
+            coinCommunity.fetchSignatureRequestProposalId(it)
         }
         val distinctById = newProposals.distinctBy {
             coinCommunity.fetchSignatureRequestProposalId(it)
