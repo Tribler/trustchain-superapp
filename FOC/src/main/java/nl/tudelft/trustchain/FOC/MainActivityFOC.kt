@@ -6,6 +6,10 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.ListAdapter
+import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -15,24 +19,51 @@ import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import com.frostwire.jlibtorrent.swig.*
 import dalvik.system.DexClassLoader
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
-import java.io.File
-import java.io.IOException
-import java.io.RandomAccessFile
+import nl.tudelft.trustchain.common.MyMessage
+import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
 import java.util.concurrent.CountDownLatch
 
+
 class MainActivityFOC : AppCompatActivity() {
+
+    private var arrayList = ArrayList<String>()//Creating an empty arraylist
+
+    private lateinit var adapter : ArrayAdapter<String>
+
+    var counter = 0
+
+    private var uploadingTorrent = "greatBigTorrent"
+
+   val mobileArray = arrayOf("Android","IPhone","WindowsMobile","Blackberry",
+      "WebOS","Ubuntu","Windows7","Max OS X")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
+
+        val listView = myListView as ListView
+        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
+        adapter = ArrayAdapter<String>(
+            this,
+             android.R.layout.simple_list_item_1, arrayList
+        )
+        listView.setAdapter(adapter)
+
+        listView.setOnItemClickListener { parent, _, position, _ ->
+            var item = parent.getItemAtPosition(position);
+            printToast(item.toString());
+            enterTorrent.setText(item.toString().substringAfter(" - "))
+        };
+
 
         printToast("STARTED")
 
@@ -43,11 +74,11 @@ class MainActivityFOC : AppCompatActivity() {
 
         // option 2: download a torrent through a .torrent file on your phone
         downloadTorrentButton.setOnClickListener { _ ->
-            getTorrent()
+            getTorrent(false)
         }
 
         // option 3: Send a message to every other peer using the superapp
-        greetPeersButton.setOnClickListener { _ ->
+        informPeersButton.setOnClickListener { _ ->
             val ipv8 = IPv8Android.getInstance()
             val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
             val peers = demoCommunity.getPeers()
@@ -57,13 +88,28 @@ class MainActivityFOC : AppCompatActivity() {
                 Log.i("personal", peer.mid)
             }
 
-            demoCommunity.broadcastGreeting()
-            printToast("Greeted " + peers.size.toString() + " peers")
+            //demoCommunity.broadcastGreeting()
+            //printToast("Greeted " + peers.size.toString() + " peers")
+
+            //CreateTorrentTest.testFromFile();
+
+            demoCommunity.informAboutTorrent(uploadingTorrent)
+
+
+
         }
 
         // option 4: dynamically load and execute code from a jar/apk file
         executeCodeButton.setOnClickListener { _ ->
             loadDynamicCode()
+        }
+
+        uploadTorrentButton.setOnClickListener { _ ->
+            createTorrent()
+        }
+
+        retrieveListButton.setOnClickListener { _ ->
+            retrieveListOfAvailableTorrents()
         }
 
         // upon launching our activity, we ask for the "Storage" permission
@@ -182,19 +228,19 @@ class MainActivityFOC : AppCompatActivity() {
      *  Download a torrent through a .torrent file on your phone
      */
     @Suppress("deprecation")
-    fun getTorrent() {
+    fun getTorrent(seed : Boolean) {
 
         val torrentName: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
             printToast("No torrent name given, using default")
-            torrentName = "sintel.torrent"
+            torrentName = "image.torrent"
         } else torrentName = inputText
         val torrent =
             Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
         try {
             if (!readTorrentSuccesfully(torrent)) {
-                printToast("Something went wrong, check logs")
+                //printToast("Something went wrong, check logs")
                 return
             }
         } catch (e: IOException) {
@@ -205,10 +251,15 @@ class MainActivityFOC : AppCompatActivity() {
 
         val sp = SettingsPack()
 
+        Log.i("personal", sp.seedingOutgoingConnections().toString());
+        if (seed)
+            sp.seedingOutgoingConnections(true)
+        Log.i("personal", sp.seedingOutgoingConnections().toString());
+
         val params =
             SessionParams(sp)
 
-        val signal = CountDownLatch(1)
+        //val signal = CountDownLatch(1)
 
         s.addListener(object : AlertListener {
             override fun types(): IntArray? {
@@ -234,22 +285,45 @@ class MainActivityFOC : AppCompatActivity() {
                     AlertType.TORRENT_FINISHED -> {
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
-                        signal.countDown()
+                        //signal.countDown()
                     }
-                    else -> {}
+                    else -> {
+                        //Log.i("personal", "something")
+                    }
                 }
             }
         })
 
         s.start(params)
 
-        printToast("Starting download, please wait...")
+        //val data: String = "8419d694e1049229bae56b5418a277be75aa9f15"
+        //s.dhtPutItem(Entry(data)).toString()
+
+        //printToast("Starting download, please wait...")
 
         val torrentFile = File(torrent)
         val ti = TorrentInfo(torrentFile)
 
         Log.i("personal", "Storage of downloads: " + torrentFile.parentFile!!.toString())
+
         s.download(ti, torrentFile.parentFile)
+
+        val thread: Thread = object : Thread() {
+            override fun run() {
+                while (true) {
+                    try {
+                        sleep(5000)
+                    } catch (e: InterruptedException) {
+                        e.printStackTrace()
+                    }
+                    Log.i("personal", "is Running: "  + s.isRunning.toString());
+                    Log.i("personal", "total upload: " + s.totalUpload().toString());
+                }
+            }
+        }
+        thread.start()
+
+        //System.`in`.read()
     }
 
     /**
@@ -265,6 +339,7 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         val ti = TorrentInfo(torrentFile)
+
         val fc = RandomAccessFile(torrent, "r").channel
         val buffer =
             fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
@@ -317,4 +392,109 @@ class MainActivityFOC : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
+    fun createTorrent(){
+
+        val fileName: String?
+        val inputText = enterTorrent.text.toString()
+        if (inputText == "") {
+            printToast("No torrent name given, using default")
+            fileName = "image.png"
+        } else fileName = inputText
+
+        val file =
+            File(Environment.getExternalStorageDirectory().absolutePath + "/" + fileName)
+        if (!file.exists()) {
+            Log.i("personal", "doesnt exist")
+        }
+        //Utils.writeByteArrayToFile(f, new byte[]{0}, false);
+        val fs = file_storage()
+        val l1: add_files_listener = object : add_files_listener() {
+            override fun pred(p: String): Boolean { //assertEquals(f.getAbsolutePath(), p);
+                return true
+            }
+        }
+        libtorrent.add_files_ex(fs, file.absolutePath, l1, create_flags_t())
+        val ct = create_torrent(fs)
+        val l2: set_piece_hashes_listener = object : set_piece_hashes_listener() {
+            override fun progress(i: Int) { }
+        }
+
+        val ec = error_code()
+        libtorrent.set_piece_hashes_ex(ct, file.parent, l2, ec)
+        val torrent = ct.generate()
+        val buffer = torrent.bencode()
+
+        var torrentName = fileName.substringBeforeLast('.') + ".torrent"
+
+        var os: OutputStream? = null
+        try {
+            os =
+                FileOutputStream(File(
+                    Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
+            os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                os!!.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
+        val magnet_link = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+        uploadingTorrent = magnet_link
+        Log.i("personal", magnet_link)
+
+        enterTorrent.setText(torrentName)
+        getTorrent(true)
+    }
+
+    fun retrieveListOfAvailableTorrents(){
+        val ipv8 = IPv8Android.getInstance()
+        val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
+        var torrentListMessages = demoCommunity.getTorrentMessages()
+        for (packet in torrentListMessages){
+            val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
+            Log.i("personal", peer.mid + ": " + payload.message)
+            var magnetLink = payload.message.substringAfter("FOC:")
+            var torrentName = payload.message.substringAfter("&dn=").
+                substringBefore('&')
+            var containsItem = false;
+            for (i in 0..adapter.count-1){
+                if (adapter.getItem(i).equals(torrentName)){
+                    containsItem = true
+                    break
+                }
+            }
+            if (!containsItem) {
+                adapter.add(torrentName + " - " + magnetLink);
+                setListViewHeightBasedOnChildren(myListView)
+            }
+
+        }
+
+        //arrayList.add("blabla" + counter++);
+        //adapter.notifyDataSetChanged();
+    }
+
+    fun setListViewHeightBasedOnChildren(listView : ListView) {
+        var listAdapter: ListAdapter = listView.getAdapter()
+
+        var totalHeight = 0;
+        var desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
+        for (i in 0..listAdapter.getCount()-1) {
+            var listItem = listAdapter.getView(i, null, listView);
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
+            totalHeight += listItem.getMeasuredHeight();
+        }
+
+        var params = listView.getLayoutParams();
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+        listView.setLayoutParams(params);
+        listView.requestLayout();
+    }
 }
+
+

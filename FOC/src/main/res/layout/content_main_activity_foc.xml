@@ -7,6 +7,7 @@
 
 
     <!--style="?android:attr/progressBarStyleHorizontal"-->
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="@android:style/Widget.ProgressBar.Horizontal"
@@ -37,7 +38,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="480dp"
+        android:layout_height="match_parent"
         android:layout_alignTop="@id/progressBar"
         android:layout_marginTop="60dp">
 
@@ -45,6 +46,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
+            <ListView
+                android:id="@+id/myListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="430dp" />
 
             <EditText
                 android:id="@+id/enterJar"
@@ -78,13 +85,13 @@
                 android:text="DOWNLOAD (MAGNET LINK)" />
 
             <Button
-                android:id="@+id/useless1"
+                android:id="@+id/uploadTorrentButton"
                 android:layout_width="129dp"
                 android:layout_height="105dp"
                 android:layout_alignLeft="@id/enterTorrent"
                 android:layout_centerVertical="false"
                 android:layout_marginTop="320dp"
-                android:text="useless1" />
+                android:text="UPLOAD TORRENT" />
 
             <Button
                 android:id="@+id/executeCodeButton"
@@ -103,20 +110,20 @@
                 android:text="DOWNLOAD (TORRENT)" />
 
             <Button
-                android:id="@+id/useless2"
+                android:id="@+id/retrieveListButton"
                 android:layout_width="129dp"
                 android:layout_height="105dp"
                 android:layout_alignRight="@id/enterTorrent"
                 android:layout_marginTop="320dp"
-                android:text="useless2" />
+                android:text="RETRIEVE LIST OF TORRENTS" />
 
             <Button
-                android:id="@+id/greetPeersButton"
+                android:id="@+id/informPeersButton"
                 android:layout_width="129dp"
                 android:layout_height="105dp"
                 android:layout_alignLeft="@id/enterTorrent"
                 android:layout_marginTop="210dp"
-                android:text="Greet Other Peers" />
+                android:text="INFORM PEERS ABOUT SEEDING" />
         </RelativeLayout>
     </ScrollView>
 
