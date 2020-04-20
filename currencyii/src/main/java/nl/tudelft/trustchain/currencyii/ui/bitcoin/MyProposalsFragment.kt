@@ -44,8 +44,17 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         activity?.runOnUiThread {
             val adaptor = ProposalListAdapter(this, proposals)
             proposal_list_view.adapter = adaptor
-            proposal_list_view.setOnItemClickListener { some, view, position, id ->
-                Log.i("Coin", "Clicked: $some, $view, $position, $id")
+            proposal_list_view.setOnItemClickListener { _, _, position, _ ->
+                Log.i("Coin", "Clicked: $position")
+                val block = proposals[position]
+                if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
+                    Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
+                    CoinCommunity.transferFundsBlockReceived(block, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                }
+                if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
+                    Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
+                    CoinCommunity.joinAskBlockReceived(block, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                }
             }
         }
     }
@@ -83,10 +92,10 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                     val crawlResult = trustchain
                         .getChainByUser(peer.publicKey.keyToBin())
                         .filter {
-                            it.type == CoinCommunity.SIGNATURE_ASK_BLOCK
-                                || it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                            it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                                it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
                         }
-                    Log.i("Coin", "Crawl result: ${crawlResult.size} proposals found")
+                    Log.i("Coin", "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})")
                     updateProposals(crawlResult)
                 }
             } catch (t: Throwable) {
