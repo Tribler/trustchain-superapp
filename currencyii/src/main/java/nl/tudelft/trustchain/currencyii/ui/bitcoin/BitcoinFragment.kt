@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.*
+import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -194,9 +195,18 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 AddressPrivateKeyPair(address, privateKey)
             )
 
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
+            try {
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                    .setConfiguration(config)
+                    .init()
+            } catch (t: Throwable) {
+                Toast.makeText(
+                    this.requireContext(),
+                    "Something went wrong while initializing the new wallet. ${t.message ?: "No further information"}.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
         } else {
             WalletManagerAndroid.getInstance().addKey(privateKey)
         }

@@ -109,9 +109,18 @@ class DAOCreateFragment : Fragment() {
             WalletManagerAndroid.close()
         }
 
-        WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-            .setConfiguration(config)
-            .init()
+        try {
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config)
+                .init()
+        } catch (t: Throwable) {
+            Toast.makeText(
+                this.requireContext(),
+                "Something went wrong while initializing the wallet. ${t.message ?: "No further information"}.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
 
         findNavController().navigate(
             DAOCreateFragmentDirections.actionDaoImportOrCreateToBitcoinFragment(

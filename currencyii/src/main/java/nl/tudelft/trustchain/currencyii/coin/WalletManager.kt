@@ -112,13 +112,9 @@ class WalletManager(
         })
 
         Log.i("Coin", "Coin: starting the setup of kit.")
-        try {
-            kit.setBlockingStartup(false)
-                .startAsync()
-                .awaitRunning()
-        } catch (t: Throwable) {
-            Log.i("Coin", "Exception thrown when starting wallet app kit: \nMessage:\n ${t.message} \nCause:\n ${t.cause} \nFull exception:\n $t")
-        }
+        kit.setBlockingStartup(false)
+            .startAsync()
+            .awaitRunning()
 
         if (addressPrivateKeyPair != null) {
             Log.i(
