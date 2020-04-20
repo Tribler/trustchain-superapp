@@ -17,9 +17,7 @@ import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.Address
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.script.Script
 
 /**
  * A simple [Fragment] subclass.
@@ -104,7 +102,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     private fun initClickListeners() {
         button_copy_public_address.setOnClickListener {
             val walletManager = WalletManagerAndroid.getInstance()
-            copyToClipboard( walletManager.protocolAddress().toString() )
+            copyToClipboard(walletManager.protocolAddress().toString())
         }
 
         button_copy_wallet_seed.setOnClickListener {

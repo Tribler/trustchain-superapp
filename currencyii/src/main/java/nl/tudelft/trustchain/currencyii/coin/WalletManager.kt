@@ -208,7 +208,6 @@ class WalletManager(
         req.changeAddress = protocolAddress()
         kit.wallet().completeTx(req)
 
-
         return sendTransaction(req.tx)
     }
 
