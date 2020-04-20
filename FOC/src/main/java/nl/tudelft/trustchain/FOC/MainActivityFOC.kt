@@ -76,7 +76,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         // option 2: download a torrent through a .torrent file on your phone
         downloadTorrentButton.setOnClickListener { _ ->
-            getTorrent()
+            getTorrent(false)
         }
 
         // option 3: Send a message to every other peer using the superapp
@@ -228,7 +228,7 @@ class MainActivityFOC : AppCompatActivity() {
      *  Download a torrent through a .torrent file on your phone
      */
     @Suppress("deprecation")
-    fun getTorrent() {
+    fun getTorrent(uploadHappening : Boolean) {
         //Handling of the case where the user is already downloading the
         //same or another torrent
         if (sessionActive){
@@ -272,7 +272,8 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", "Storage of downloads: " + torrentFile.parentFile!!.toString())
 
         sessionActive = true
-        downloadTorrentButton.setText("STOP")
+        if (!uploadHappening)
+            downloadTorrentButton.setText("STOP")
         s.download(ti, torrentFile.parentFile)
 
     }
@@ -419,7 +420,7 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", magnet_link)
 
         enterTorrent.setText(torrentName)
-        getTorrent()
+        getTorrent(true)
     }
 
     /*
