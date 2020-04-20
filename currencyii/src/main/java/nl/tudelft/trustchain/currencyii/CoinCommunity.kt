@@ -173,6 +173,30 @@ class CoinCommunity : Community() {
         }
     }
 
+    public fun fetchSignatureRequestReceiver(block: TrustChainBlock): String {
+        if (block.type == SIGNATURE_ASK_BLOCK) {
+            return SWSignatureAskTransactionData(block.transaction).getData().SW_RECEIVER_PK
+        }
+
+        if (block.type == TRANSFER_FUNDS_ASK_BLOCK) {
+            return SWTransferFundsAskTransactionData(block.transaction).getData().SW_RECEIVER_PK
+        }
+
+        return "invalid-pk"
+    }
+
+    public fun fetchSignatureRequestProposalId(block: TrustChainBlock): String {
+        if (block.type == SIGNATURE_ASK_BLOCK) {
+            return SWSignatureAskTransactionData(block.transaction).getData().SW_UNIQUE_PROPOSAL_ID
+        }
+        if (block.type == TRANSFER_FUNDS_ASK_BLOCK) {
+            return SWTransferFundsAskTransactionData(block.transaction).getData()
+                .SW_UNIQUE_PROPOSAL_ID
+        }
+
+        return "invalid-proposal-id"
+    }
+
     /**
      * Fetch all join and transfer proposals in descending timestamp order.
      * Speed assumption: each proposal has a unique proposal ID (distinct by unique proposal id,
@@ -185,12 +209,9 @@ class CoinCommunity : Community() {
         )
         return joinProposals
             .union(transferProposals)
-            .distinctBy {
-                val data = SWSignatureAskTransactionData(it.transaction).getData()
-                data.SW_UNIQUE_PROPOSAL_ID
-            }.sortedByDescending {
-                it.timestamp
-            }
+            .filter { fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin().toHex() }
+            .distinctBy { fetchSignatureRequestProposalId(it) }
+            .sortedByDescending {  it.timestamp }
     }
 
     /**

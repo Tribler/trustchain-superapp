@@ -61,15 +61,16 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
      * Update the currently stored proposals. Only new and unique proposals are added.
      */
     private fun updateProposals(newProposals: List<TrustChainBlock>) {
+        val coinCommunity = getCoinCommunity()
         val proposalIds = proposals.map {
-            proposalIdFromBlock(it) ?: "no-id"
+            coinCommunity.fetchSignatureRequestProposalId(it) ?: "no-id"
         }
         val distinctById = newProposals.distinctBy {
-            proposalIdFromBlock(it)
+            coinCommunity.fetchSignatureRequestProposalId(it)
         }
 
         for (proposal in distinctById) {
-            val currentId = proposalIdFromBlock(proposal)
+            val currentId = coinCommunity.fetchSignatureRequestProposalId(proposal)
             if (!proposalIds.contains(currentId)) {
                 proposals.add(proposal)
             }
@@ -104,18 +105,6 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 Log.i("Coin", "Crawling failed for: ${peer.address} message: $message")
             }
         }
-    }
-
-    private fun proposalIdFromBlock(block: TrustChainBlock): Any? {
-        if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
-            return SWSignatureAskTransactionData(block.transaction).getData().SW_UNIQUE_PROPOSAL_ID
-        }
-        if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
-            return SWTransferFundsAskTransactionData(block.transaction).getData()
-                .SW_UNIQUE_PROPOSAL_ID
-        }
-
-        return null
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
