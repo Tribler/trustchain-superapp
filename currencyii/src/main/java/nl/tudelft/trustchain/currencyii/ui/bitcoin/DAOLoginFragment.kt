@@ -24,24 +24,24 @@ class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
         super.onActivityCreated(savedInstanceState)
 
         load_existing_button.setOnClickListener {
-            if (!WalletManagerAndroid.isInitialized()) {
-                val params = when (production_testnet_input_load_existing.isChecked) {
-                    true -> BitcoinNetworkOptions.TEST_NET
-                    false -> BitcoinNetworkOptions.PRODUCTION
-                }
-                val config = WalletManagerConfiguration(params)
-                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                    .setConfiguration(config).init()
-
-                findNavController().navigate(
-                    DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment(
-                        true
-                    )
-                )
-            } else {
-                // TODO: Make app not crash.
+            // Close the current wallet manager if there is one running, blocks thread until it is closed
+            if (WalletManagerAndroid.isInitialized()) {
                 WalletManagerAndroid.close()
             }
+
+            val params = when (production_testnet_input_load_existing.isChecked) {
+                true -> BitcoinNetworkOptions.TEST_NET
+                false -> BitcoinNetworkOptions.PRODUCTION
+            }
+            val config = WalletManagerConfiguration(params)
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config).init()
+
+            findNavController().navigate(
+                DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment(
+                    true
+                )
+            )
         }
 
         import_create_button.setOnClickListener {
