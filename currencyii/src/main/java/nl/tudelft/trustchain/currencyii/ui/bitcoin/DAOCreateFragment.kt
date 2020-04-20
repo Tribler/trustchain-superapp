@@ -74,7 +74,7 @@ class DAOCreateFragment : Fragment() {
         } catch (e: MnemonicException) {
             Toast.makeText(
                 this.requireContext(),
-                "The mnemonic seed provided is not correct. ${e.message?: "No further information"}.",
+                "The mnemonic seed provided is not correct. ${e.message ?: "No further information"}.",
                 Toast.LENGTH_SHORT
             ).show()
             return
