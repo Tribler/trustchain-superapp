@@ -104,13 +104,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     private fun initClickListeners() {
         button_copy_public_address.setOnClickListener {
             val walletManager = WalletManagerAndroid.getInstance()
-            copyToClipboard(
-                Address.fromKey(
-                    walletManager.params,
-                    walletManager.protocolECKey(),
-                    Script.ScriptType.P2PKH
-                ).toString()
-            )
+            copyToClipboard( walletManager.protocolAddress().toString() )
         }
 
         button_copy_wallet_seed.setOnClickListener {
@@ -156,12 +150,8 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         }
         val seed = walletManager.toSeed()
         walletSeed.text = "${seed.seed}, ${seed.creationTime}"
-        yourPublicHex.text = "${walletManager.networkPublicECKeyHex()}"
-        protocolKey.text = Address.fromKey(
-            walletManager.params,
-            walletManager.protocolECKey(),
-            Script.ScriptType.P2PKH
-        ).toString()
+        yourPublicHex.text = walletManager.networkPublicECKeyHex()
+        protocolKey.text = walletManager.protocolAddress().toString()
 
         requireActivity().invalidateOptionsMenu()
     }

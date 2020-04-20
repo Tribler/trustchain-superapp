@@ -153,6 +153,15 @@ class WalletManager(
     }
 
     /**
+     * Returns our bitcoin address we use in all multi-sig contracts
+     * we are part of.
+     * @return hex representation of our address
+     */
+    fun protocolAddress(): Address {
+        return kit.wallet().issuedReceiveAddresses[0]
+    }
+
+    /**
      * Returns our bitcoin public key we use in all multi-sig contracts
      * we are part of.
      * @return hex representation of our public key (this is not an address)
@@ -194,12 +203,11 @@ class WalletManager(
         // Add an output with the entrance fee & script.
         transaction.addOutput(entranceFee, script)
 
-        Log.i("Coin", "Coin: your inputs will now be matched to entrance and fees.")
+        Log.i("Coin", "Coin: use SendRequest to add our entranceFee input & change address.")
         val req = SendRequest.forTx(transaction)
+        req.changeAddress = protocolAddress()
         kit.wallet().completeTx(req)
 
-        Log.i("Coin", "Coin: the change address is hard-reset to your protocol key.")
-        req.changeAddress = Address.fromKey(params, protocolECKey(), Script.ScriptType.P2PKH)
 
         return sendTransaction(req.tx)
     }
@@ -245,6 +253,7 @@ class WalletManager(
         Log.i("Coin", "Coin: use SendRequest to add our entranceFee inputs & change address.")
         val req = SendRequest.forTx(newTransaction)
         printTransactionInformation(req.tx)
+        req.changeAddress = protocolAddress()
         kit.wallet().completeTx(req)
 
         return TransactionPackage(
