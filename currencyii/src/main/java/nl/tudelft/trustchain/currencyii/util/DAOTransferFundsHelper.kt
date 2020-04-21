@@ -37,6 +37,7 @@ class DAOTransferFundsHelper {
         satoshiAmount: Long
     ): SWTransferFundsAskTransactionData {
         val walletData = SWJoinBlockTransactionData(mostRecentWallet.transaction).getData()
+        val walletHash = mostRecentWallet.calculateHash().toHex()
 
         val oldTransactionSerialized = walletData.SW_TRANSACTION_SERIALIZED
         val total = walletData.SW_BITCOIN_PKS.size
@@ -45,7 +46,7 @@ class DAOTransferFundsHelper {
 
         var askSignatureBlockData = SWTransferFundsAskTransactionData(
             walletData.SW_UNIQUE_ID,
-            oldTransactionSerialized,
+            walletHash,
             requiredSignatures,
             satoshiAmount,
             walletData.SW_BITCOIN_PKS,
@@ -60,7 +61,7 @@ class DAOTransferFundsHelper {
             )
             askSignatureBlockData = SWTransferFundsAskTransactionData(
                 walletData.SW_UNIQUE_ID,
-                oldTransactionSerialized,
+                walletHash,
                 requiredSignatures,
                 satoshiAmount,
                 walletData.SW_BITCOIN_PKS,
