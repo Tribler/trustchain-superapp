@@ -120,7 +120,7 @@ class VotingActivity : AppCompatActivity() {
     }
 
     private fun checkVoteCompleteness(block: TrustChainBlock) {
-        printShortToast(vh.votingComplete(block, 1).toString())
+        printShortToast(vh.votingIsComplete(block, 1).toString())
     }
 
     /**

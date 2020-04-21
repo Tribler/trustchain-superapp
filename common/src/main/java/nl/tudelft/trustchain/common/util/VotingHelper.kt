@@ -47,8 +47,7 @@ class VotingHelper(
         }
 
         val transaction = voteJSON.toString()
-
-
+        
         // Create any-counterparty block for the transaction
         trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
     }
@@ -188,7 +187,7 @@ class VotingHelper(
 
     fun getVoters(block: TrustChainBlock) : List<PublicKey> {
 
-        val jsonKeys = JSONArray(getVoteJSON(block, "VOTE_LIST"))
+        val jsonKeys = JSONArray(getVoteBlockAttributesByKey(block, "VOTE_LIST"))
 
         Log.e("vote_debug", "String is ${jsonKeys.toString()}")
 
@@ -213,10 +212,10 @@ class VotingHelper(
 
     }
 
-    fun votingComplete(block: TrustChainBlock, threshold: Int?) : Boolean {
+    fun votingIsComplete(block: TrustChainBlock, threshold: Int?) : Boolean {
         val voters = getVoters(block)
-        val voteSubject = getVoteJSON(block,"VOTE_SUBJECT")
-        val proposerKey = getVoteJSON(block, "VOTE_PROPOSER")
+        val voteSubject = getVoteBlockAttributesByKey(block,"VOTE_SUBJECT")
+        val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
         val count = countVotes(voters, voteSubject, defaultCryptoProvider.keyFromPublicBin(proposerKey.hexToBytes()).keyToBin())
         val yescount = count.first
         val nocount = count.second
@@ -226,7 +225,7 @@ class VotingHelper(
         return (yescount + nocount == voters.size)
     }
 
-    private fun getVoteJSON(block: TrustChainBlock, key: String) : String {
+    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String) : String {
         return try {
 
             Log.e("vote_debug", block.transaction["message"].toString())

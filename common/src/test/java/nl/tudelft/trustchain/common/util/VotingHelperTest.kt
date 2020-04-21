@@ -286,7 +286,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(true, propBlock)
 
-        Assert.assertTrue(votingHelper.votingComplete(propBlock, 1))
+        Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 1))
     }
 
     @Test
@@ -316,7 +316,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(false, propBlock)
 
-        Assert.assertFalse(votingHelper.votingComplete(propBlock, 1))
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 1))
     }
 
     @Test
@@ -346,7 +346,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(true, propBlock)
 
-        Assert.assertFalse(votingHelper.votingComplete(propBlock, 5))
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 5))
     }
 
     @Test
@@ -375,7 +375,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(false, propBlock)
 
-        Assert.assertTrue(votingHelper.votingComplete(propBlock, null))
+        Assert.assertTrue(votingHelper.votingIsComplete(propBlock, null))
     }
 
     @Test
@@ -405,8 +405,9 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(true, propBlock)
 
-        Assert.assertFalse(votingHelper.votingComplete(propBlock, null))
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock, null))
     }
+
 
 
 }
