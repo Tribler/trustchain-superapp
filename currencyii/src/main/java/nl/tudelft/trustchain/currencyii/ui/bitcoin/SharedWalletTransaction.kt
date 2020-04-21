@@ -76,7 +76,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
 
         val transferFundsData = try {
             getCoinCommunity().proposeTransferFunds(
-                walletData,
+                swJoinBlock,
                 bitcoinPublicKey,
                 satoshiTransferAmount
             )
