@@ -47,7 +47,7 @@ class VotingHelper(
         }
 
         val transaction = voteJSON.toString()
-        
+
         // Create any-counterparty block for the transaction
         trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
     }
@@ -212,14 +212,14 @@ class VotingHelper(
 
     }
 
-    fun votingIsComplete(block: TrustChainBlock, threshold: Int?) : Boolean {
+    fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1) : Boolean {
         val voters = getVoters(block)
         val voteSubject = getVoteBlockAttributesByKey(block,"VOTE_SUBJECT")
         val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
         val count = countVotes(voters, voteSubject, defaultCryptoProvider.keyFromPublicBin(proposerKey.hexToBytes()).keyToBin())
         val yescount = count.first
         val nocount = count.second
-        if (threshold != null) {
+        if (threshold != -1) {
             return (yescount >= threshold || yescount + nocount == voters.size)
         }
         return (yescount + nocount == voters.size)
