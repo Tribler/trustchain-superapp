@@ -184,7 +184,11 @@ class DAOJoinHelper {
          * Given a shared wallet proposal block, calculate the signature and send an agreement block.
          * Called by the listener of the [SIGNATURE_ASK_BLOCK] type. Respond with [SIGNATURE_AGREEMENT_BLOCK].
          */
-        fun joinAskBlockReceived(oldTransactionSerialized: String, block: TrustChainBlock, myPublicKey: ByteArray) {
+        fun joinAskBlockReceived(
+            oldTransactionSerialized: String,
+            block: TrustChainBlock,
+            myPublicKey: ByteArray
+        ) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()

@@ -45,12 +45,16 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             proposal_list_view.setOnItemClickListener { _, _, position, _ ->
                 val block = proposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
-                    Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
-                    CoinCommunity.transferFundsBlockReceived(block, myPublicKey)
+                    try {
+                        Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
+                        getCoinCommunity().transferFundsBlockReceived(block, myPublicKey)
+                    } catch (t: Throwable) {
+                        Log.i("Coin", "transfer voting failed: ${t.message ?: "no message"}")
+                    }
                 }
                 if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
-                    Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
                     try {
+                        Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
                         getCoinCommunity().joinAskBlockReceived(block, myPublicKey)
                     } catch (t: Throwable) {
                         Log.i("Coin", "join voting failed: ${t.message ?: "no message"}")

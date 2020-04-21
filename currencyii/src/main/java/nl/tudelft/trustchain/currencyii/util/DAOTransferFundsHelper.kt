@@ -32,10 +32,12 @@ class DAOTransferFundsHelper {
      */
     public fun proposeTransferFunds(
         myPeer: Peer,
-        walletData: SWJoinBlockTD,
+        mostRecentWallet: TrustChainBlock,
         receiverAddressSerialized: String,
         satoshiAmount: Long
     ): SWTransferFundsAskTransactionData {
+        val walletData = SWJoinBlockTransactionData(mostRecentWallet.transaction).getData()
+
         val oldTransactionSerialized = walletData.SW_TRANSACTION_SERIALIZED
         val total = walletData.SW_BITCOIN_PKS.size
         val requiredSignatures =
@@ -168,7 +170,11 @@ class DAOTransferFundsHelper {
         /**
          * Given a shared wallet transfer fund proposal block, calculate the signature and send an agreement block.
          */
-        public fun transferFundsBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
+        public fun transferFundsBlockReceived(
+            oldTransactionSerialized: String,
+            block: TrustChainBlock,
+            myPublicKey: ByteArray
+        ) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
             val walletManager = WalletManagerAndroid.getInstance()
             val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
@@ -186,7 +192,7 @@ class DAOTransferFundsHelper {
             val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
             val previousTransaction = Transaction(
                 walletManager.params,
-                blockData.SW_TRANSACTION_SERIALIZED_OLD.hexToBytes()
+                oldTransactionSerialized.hexToBytes()
             )
             val receiverAddress = org.bitcoinj.core.Address.fromString(
                 walletManager.params,

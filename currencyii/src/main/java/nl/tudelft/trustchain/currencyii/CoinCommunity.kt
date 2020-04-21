@@ -85,13 +85,13 @@ class CoinCommunity : Community() {
      * Assumed that people agreed to the transfer.
      */
     public fun proposeTransferFunds(
-        walletData: SWJoinBlockTD,
+        mostRecentWallet: TrustChainBlock,
         receiverAddressSerialized: String,
         satoshiAmount: Long
     ): SWTransferFundsAskTransactionData {
         return daoTransferFundsHelper.proposeTransferFunds(
             myPeer,
-            walletData,
+            mostRecentWallet,
             receiverAddressSerialized,
             satoshiAmount
         )
@@ -247,14 +247,21 @@ class CoinCommunity : Community() {
         DAOJoinHelper.joinAskBlockReceived(oldTransaction, block, myPublicKey)
     }
 
-    companion object {
-        /**
-         * Given a shared wallet transfer fund proposal block, calculate the signature and respond with a trust chain block.
-         */
-        public fun transferFundsBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
-            DAOTransferFundsHelper.transferFundsBlockReceived(block, myPublicKey)
-        }
+    /**
+     * Given a shared wallet transfer fund proposal block, calculate the signature and respond with a trust chain block.
+     */
+    public fun transferFundsBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
+        val latestHash = SWTransferFundsAskTransactionData(block.transaction).getData()
+            .SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
 
+        DAOTransferFundsHelper.transferFundsBlockReceived(oldTransaction, block, myPublicKey)
+    }
+
+    companion object {
         /**
          * Helper method that serializes a bitcoin transaction to a string.
          */
