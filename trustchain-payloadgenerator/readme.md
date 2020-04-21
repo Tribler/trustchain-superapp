@@ -1,4 +1,4 @@
-# Trustchain Bid/Ask generator
+# Market bot
 
 This app can generate bid and asks which are received by the community where it exists in.
 The bid and asks can either be send automatically or manually. Those bids and asks will be send as IPv8 messages.
