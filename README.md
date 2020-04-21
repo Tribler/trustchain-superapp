@@ -39,10 +39,10 @@ Upon receiving a bid or ask, it decides to either execute the offer or not.
 The bot can be toggled on and off using the toggle on the home screen.
 
 **Send/Receive**
-In the sending/receiving money tab one can send money to a different peer, or receive money from a different peer.
+In the sending/receiving money tab one can send money to, or receive money from a different peer.
 There are two ways to find a public key:
 1. The receiving peer presses the send/receive toggle. His public key will be shown as a QR-code. Now pressing the "scan" button on the sender's device allows you can scan the QR code of the receiver.
-1. As a sender, go to the "Peers" fragment in the app, and press the public key of the receiver.
+2. As a sender, go to the "Peers" fragment in the app, and press the public key of the receiver.
 
 <img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
 [More about AI trading bot](trustchain-trader/readme.md)
