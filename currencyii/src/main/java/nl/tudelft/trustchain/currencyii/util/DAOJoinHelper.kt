@@ -34,18 +34,18 @@ class DAOJoinHelper {
      * 2.1 Send a proposal on the trust chain to join a shared wallet and to collect signatures.
      * The proposal is a serialized bitcoin join transaction.
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
-     * @param walletBlockData - the latest (that you know of) shared wallet block.
+     * @param mostRecentWalletBlock - the latest (that you know of) shared wallet block.
      */
     public fun proposeJoinWallet(
         myPeer: Peer,
-        walletBlockData: TrustChainTransaction
+        mostRecentWalletBlock: TrustChainBlock
     ): SWSignatureAskTransactionData {
-        val blockData = SWJoinBlockTransactionData(walletBlockData).getData()
+        val mostRecentBlockHash = mostRecentWalletBlock.calculateHash().toHex()
+        val blockData = SWJoinBlockTransactionData(mostRecentWalletBlock.transaction).getData()
 
         val serializedTransaction =
             createBitcoinSharedWalletForJoining(blockData).serializedTransaction
 
-        val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
         val total = blockData.SW_BITCOIN_PKS.size
         val requiredSignatures =
             SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
@@ -53,7 +53,7 @@ class DAOJoinHelper {
         var askSignatureBlockData = SWSignatureAskTransactionData(
             blockData.SW_UNIQUE_ID,
             serializedTransaction,
-            oldTransactionSerialized,
+            mostRecentBlockHash,
             requiredSignatures,
             ""
         )
@@ -66,7 +66,7 @@ class DAOJoinHelper {
             askSignatureBlockData = SWSignatureAskTransactionData(
                 blockData.SW_UNIQUE_ID,
                 serializedTransaction,
-                oldTransactionSerialized,
+                mostRecentBlockHash,
                 requiredSignatures,
                 swParticipantPk
             )
@@ -126,7 +126,9 @@ class DAOJoinHelper {
         progressCallback: ((progress: Double) -> Unit)? = null,
         timeout: Long = CoinCommunity.DEFAULT_BITCOIN_MAX_TIMEOUT
     ) {
-        val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED_OLD
+        val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
+
+        val oldTransactionSerialized = oldWalletBlockData.getData().SW_TRANSACTION_SERIALIZED
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
 
         val walletManager = WalletManagerAndroid.getInstance()
@@ -153,7 +155,6 @@ class DAOJoinHelper {
         val transaction = transactionBroadcast.broadcast().get(timeout, TimeUnit.SECONDS)
         val serializedTransaction = CoinCommunity.getSerializedTransaction(transaction)
 
-        val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         broadcastJoinedSharedWallet(myPeer, oldWalletBlockData, serializedTransaction)
     }
 
@@ -183,10 +184,11 @@ class DAOJoinHelper {
          * Given a shared wallet proposal block, calculate the signature and send an agreement block.
          * Called by the listener of the [SIGNATURE_ASK_BLOCK] type. Respond with [SIGNATURE_AGREEMENT_BLOCK].
          */
-        fun joinAskBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
+        fun joinAskBlockReceived(oldTransactionSerialized: String, block: TrustChainBlock, myPublicKey: ByteArray) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
+
             Log.i(
                 "Coin",
                 "Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}"
@@ -199,7 +201,6 @@ class DAOJoinHelper {
 
             val walletManager = WalletManagerAndroid.getInstance()
 
-            val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED_OLD
             val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
             val signature = walletManager.safeSigningJoinWalletTransaction(
                 Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),

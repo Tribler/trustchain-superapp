@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.currencyii
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import nl.tudelft.trustchain.currencyii.util.DAOCreateHelper
@@ -47,12 +48,12 @@ class CoinCommunity : Community() {
      * 2.1 Send a proposal on the trust chain to join a shared wallet and to collect signatures.
      * The proposal is a serialized bitcoin join transaction.
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
-     * @param walletBlockData - the latest (that you know of) shared wallet block.
+     * @param walletBlock - the latest (that you know of) shared wallet block.
      */
     public fun proposeJoinWallet(
-        walletBlockData: TrustChainTransaction
+        walletBlock: TrustChainBlock
     ): SWSignatureAskTransactionData {
-        return daoJoinHelper.proposeJoinWallet(myPeer, walletBlockData)
+        return daoJoinHelper.proposeJoinWallet(myPeer, walletBlock)
     }
 
     /**
@@ -211,7 +212,7 @@ class CoinCommunity : Community() {
             .union(transferProposals)
             .filter { fetchSignatureRequestReceiver(it) == myPeer.publicKey.keyToBin().toHex() }
             .distinctBy { fetchSignatureRequestProposalId(it) }
-            .sortedByDescending {  it.timestamp }
+            .sortedByDescending { it.timestamp }
     }
 
     /**
@@ -229,14 +230,24 @@ class CoinCommunity : Community() {
             }
     }
 
-    companion object {
-        /**
-         * Given a shared wallet proposal block, calculate the signature and respond with a trust chain block.
-         */
-        fun joinAskBlockReceived(block: TrustChainBlock, myPublicKey: ByteArray) {
-            DAOJoinHelper.joinAskBlockReceived(block, myPublicKey)
-        }
+    /**
+     * Given a shared wallet proposal block, calculate the signature and respond with a trust chain block.
+     */
+    public fun joinAskBlockReceived(
+        block: TrustChainBlock,
+        myPublicKey: ByteArray
+    ) {
+        val latestHash = SWSignatureAskTransactionData(block.transaction).getData()
+            .SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
 
+        DAOJoinHelper.joinAskBlockReceived(oldTransaction, block, myPublicKey)
+    }
+
+    companion object {
         /**
          * Given a shared wallet transfer fund proposal block, calculate the signature and respond with a trust chain block.
          */
@@ -255,18 +266,18 @@ class CoinCommunity : Community() {
         public const val DEFAULT_BITCOIN_MAX_TIMEOUT: Long = 60 * 5
 
         // Block type for join DAO blocks
-        public const val JOIN_BLOCK = "DAO_JOIN"
+        public const val JOIN_BLOCK = "v1DAO_JOIN"
 
         // Block type for transfer funds (from a DAO)
-        public const val TRANSFER_FINAL_BLOCK = "DAO_TRANSFER_FINAL"
+        public const val TRANSFER_FINAL_BLOCK = "v1DAO_TRANSFER_FINAL"
 
         // Block type for basic signature requests
-        public const val SIGNATURE_ASK_BLOCK = "DAO_ASK_SIGNATURE"
+        public const val SIGNATURE_ASK_BLOCK = "v1DAO_ASK_SIGNATURE"
 
         // Block type for transfer funds signature requests
-        public const val TRANSFER_FUNDS_ASK_BLOCK = "DAO_TRANSFER_ASK_SIGNATURE"
+        public const val TRANSFER_FUNDS_ASK_BLOCK = "v1DAO_TRANSFER_ASK_SIGNATURE"
 
         // Block type for responding to a signature request with a (should be valid) signature
-        public const val SIGNATURE_AGREEMENT_BLOCK = "DAO_SIGNATURE_AGREEMENT"
+        public const val SIGNATURE_AGREEMENT_BLOCK = "v1DAO_SIGNATURE_AGREEMENT"
     }
 }

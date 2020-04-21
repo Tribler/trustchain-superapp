@@ -15,8 +15,6 @@ import kotlinx.coroutines.withTimeout
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -43,15 +41,20 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         activity?.runOnUiThread {
             val adaptor = ProposalListAdapter(this, proposals)
             proposal_list_view.adapter = adaptor
+            val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
             proposal_list_view.setOnItemClickListener { _, _, position, _ ->
                 val block = proposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                     Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
-                    CoinCommunity.transferFundsBlockReceived(block, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                    CoinCommunity.transferFundsBlockReceived(block, myPublicKey)
                 }
                 if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
                     Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
-                    CoinCommunity.joinAskBlockReceived(block, getTrustChainCommunity().myPeer.publicKey.keyToBin())
+                    try {
+                        getCoinCommunity().joinAskBlockReceived(block, myPublicKey)
+                    } catch (t: Throwable) {
+                        Log.i("Coin", "join voting failed: ${t.message ?: "no message"}")
+                    }
                 }
             }
         }
@@ -94,7 +97,10 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                             it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
                                 it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
                         }
-                    Log.i("Coin", "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})")
+                    Log.i(
+                        "Coin",
+                        "Crawl result: ${crawlResult.size} proposals found (from ${peer.address})"
+                    )
                     if (crawlResult.isNotEmpty()) {
                         updateProposals(crawlResult)
                         updateProposalListUI()
@@ -105,10 +111,6 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 Log.i("Coin", "Crawling failed for: ${peer.address} message: $message")
             }
         }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
