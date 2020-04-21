@@ -44,16 +44,16 @@ There are two ways to find a public key:
 1. The other peer presses the send/receive toggle. His public key will be shown in a QR-code. Now upon pressing the "scan" button on your device, you can scan the QR code.
 1. Go to the "Peers" fragment in the app, and press a public key.
 
+<img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
 [More about AI trading bot](trustchain-trader/readme.md)
-![trader](trustchain-trader/TraderImages/live_trading.gif)
 
 ### Market Bot
 
 The market bot app can generate bid and asks which are received by the community where it exists in.
 The bid and asks can either be send automatically or manually. Those bids and asks will be send as IPv8 messages.
 
+<img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
 [More about Market Bot](trustchain-payloadgenerator/readme.md)
-![payloadFragment](trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png)
 
 ### Do you want to add your own app?
 
