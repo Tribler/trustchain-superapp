@@ -1,18 +1,19 @@
 package com.example.musicdao.net
 
+import android.content.Intent
+import android.content.res.Resources.NotFoundException
+import android.net.Uri
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicdao.R
 import com.example.musicdao.databinding.FragmentBlankBinding
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.turn.ttorrent.client.Client
+import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.android.synthetic.main.fragment_blank.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -28,9 +29,16 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
+import java.io.File
+import java.io.FileOutputStream
+import java.net.InetAddress
+import java.net.URI
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.util.*
 
-class MusicService: BaseActivity() {
+
+class MusicService : BaseActivity() {
     private lateinit var binding: FragmentBlankBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -105,13 +113,91 @@ class MusicService: BaseActivity() {
             }
             viewAdapter.notifyDataSetChanged()
         }
+
+        shareTrackButton.setOnClickListener {
+            selectLocalTrackFile()
+        }
     }
 
+    private fun selectLocalTrackFile() {
+        val chooseFile = Intent(Intent.ACTION_GET_CONTENT)
+        chooseFile.type = "audio/*"
+        val chooseFileActivity = Intent.createChooser(chooseFile, "Choose a file")
+        startActivityForResult(chooseFileActivity, 1)
+        val uri = chooseFileActivity.data
+        if (uri != null) {
+            println(uri.path)
+        }
+    }
+
+    /**
+     * This is called when the chooseFile is completed
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val uri = data?.data
+        if (uri != null) {
+            //This should be reached when the chooseFile intent is completed and the user selected
+            //an audio file
+            shareTorrent(uri)
+        }
+    }
+
+    @Throws(NotFoundException::class)
+    private fun shareTorrent(uri: Uri) {
+        println("Trying to share torrent $uri")
+        val input = applicationContext.contentResolver.openInputStream(uri);
+
+        //TODO generate a suitable signature for this torrent
+        val hash = Random().nextInt().toString() + ".mp3"
+        if (input != null) {
+            val tempFileLocation = "$cacheDir/$hash"
+
+            //TODO currently creates temp copies before seeding, but should not be necessary
+            Files.copy(input, Paths.get(tempFileLocation))
+            val file = File(tempFileLocation)
+
+            //Create a torrent file for the audio file
+            //TODO createdBy
+            val torrent = SharedTorrent.create(file, URI(file.absolutePath), "createdBy")
+            val torrentFile = "$tempFileLocation.torrent"
+            torrent.save(FileOutputStream(torrentFile))
+            val sharedTorrent = SharedTorrent.fromFile(File(torrentFile), cacheDir)
+
+            //Start seeding the torrent off the main thread
+            val thread = Thread(Runnable {
+                try {
+                    val torrentClient = Client(InetAddress.getLocalHost(), sharedTorrent)
+                    torrentClient.share()
+                    Timer().scheduleAtFixedRate(
+                        object : TimerTask() {
+                            override fun run() {
+                                if (torrentClient.torrent.isInitialized) {
+                                    torrentClient.info()
+                                } else {
+                                    println("Initializing torrent")
+                                }
+                            }
+                        }, 0, 5000
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+            thread.start()
+        }
+    }
+
+    //TODO this function should be removed completely and decoupled into separate functions
     private fun publishRandomTrack(peer: Peer) {
         val trackId = Random().nextInt()
         val myPeer = IPv8Android.getInstance().myPeer
 
-        val transaction = mapOf("trackId" to trackId, "author" to myPeer.mid, "magnet" to "magnet:?xt=urn:btih:e825e94efe8a5a88c98bd7e0c6b9f1ae6b8d522b")
+        val transaction = mapOf(
+            "trackId" to trackId,
+            "author" to myPeer.mid,
+            "magnet" to "magnet:?xt=urn:btih:e825e94efe8a5a88c98bd7e0c6b9f1ae6b8d522b"
+        )
         val publicKey = peer.publicKey.keyToBin()
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
         items.add("Creating proposal block")

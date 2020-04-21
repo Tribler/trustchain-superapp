@@ -16,11 +16,31 @@
             android:layout_height="wrap_content"
             android:text="Send proposal block" />
 
+        <Button
+            android:id="@+id/torrentButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Download tr" />
+
+        <Button
+            android:id="@+id/shareTrackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Share track" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_items"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+            android:scrollbars="vertical" >
+
+        </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>
 
 </FrameLayout>
