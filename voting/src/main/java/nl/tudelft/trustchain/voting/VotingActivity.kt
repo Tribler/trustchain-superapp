@@ -23,6 +23,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import nl.tudelft.trustchain.common.util.VotingMode
 import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
@@ -36,6 +37,8 @@ class VotingActivity : AppCompatActivity() {
 
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
     private var displayAllVotes: Boolean = true
+
+    private val threshold = 1
 
     /**
      * Setup method, binds functionality
@@ -104,10 +107,12 @@ class VotingActivity : AppCompatActivity() {
         val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
-        var votingMode: VotingMode
+
+        var votingMode = VotingMode.THRESHOLD
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                // TODO: Switch these texts around? It's very vague now.
                 switchLabel.text = getString(R.string.threshold_mode)
                 votingMode = VotingMode.YESNO
             } else {
@@ -127,7 +132,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers, null)
+            vh.startVote(proposal, peers, votingMode)
             printShortToast("Proposal has been created")
         }
 
@@ -140,7 +145,7 @@ class VotingActivity : AppCompatActivity() {
     }
 
     private fun checkVoteCompleteness(block: TrustChainBlock) {
-        printShortToast(vh.votingIsComplete(block, 1).toString())
+        printShortToast(vh.votingIsComplete(block, threshold).toString())
     }
 
     /**
