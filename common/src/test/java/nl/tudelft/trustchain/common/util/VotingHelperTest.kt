@@ -21,6 +21,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import java.lang.Exception
 
 class VotingHelperTest {
 
@@ -413,6 +414,35 @@ class VotingHelperTest {
         Assert.assertFalse(votingHelper.votingIsComplete(propBlock))
     }
 
+    @Test
+    fun testInvalidBlockType() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+
+        // Create dummy block
+        val voteSubject = "There should be a threshold"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "not_voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        var exceptionCaught = false
+        try {
+            votingHelper.votingIsComplete(propBlock, 10)
+        } catch (e: Exception) {
+            exceptionCaught = true
+        }
+
+        Assert.assertTrue(exceptionCaught)
+    }
 
 
 }
