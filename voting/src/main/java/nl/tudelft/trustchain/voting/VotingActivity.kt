@@ -112,14 +112,12 @@ class VotingActivity : AppCompatActivity() {
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                // TODO: Switch these texts around? It's very vague now.
                 switchLabel.text = getString(R.string.threshold_mode)
-                votingMode = VotingMode.YESNO
+                votingMode = VotingMode.THRESHOLD
             } else {
                 switchLabel.text = getString(R.string.yes_no_mode)
-                votingMode = VotingMode.THRESHOLD
+                votingMode = VotingMode.YESNO
             }
-            printShortToast(votingMode.toString())
         }
 
         builder.setPositiveButton("Create") { _, _ ->
