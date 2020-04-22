@@ -28,9 +28,13 @@ class PayloadCreateFragment : BaseFragment() {
 
         askBidSwitch.setOnClickListener {
             if (isAsk) {
-                txtExplanationAsk.text = "I have BTC, I want Dymbe $"
+                txtExplanationAsk.text = "ASK: I have Dymbe $, I want BTC"
+                editTextAmount.hint = "Enter Amount of Dymbe $ Available"
+                editTextPrice.hint = "Enter Price in Bitcoin"
             } else {
-                txtExplanationAsk.text = "I have Dymbe $, I want BTC"
+                txtExplanationAsk.text = "BID: I have BTC, I want Dymbe $"
+                editTextAmount.hint = "Enter Amount of Bitcoin Available"
+                editTextPrice.hint = "Enter Price in Dymbe $"
             }
             isAsk = !isAsk
         }

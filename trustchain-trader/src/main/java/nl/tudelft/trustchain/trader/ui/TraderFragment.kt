@@ -99,10 +99,16 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         declinedPayloads.layoutManager!!.smoothScrollToPosition(declinedPayloads, RecyclerView.State(), 0)
                     }
                 }
-
-                binding.imgEmpty.isVisible = items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
-
-                delay(1000)
+                if (isTrading) {
+                    binding.imgEmpty.isVisible = false
+                    binding.loadingLayout.isVisible =
+                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                } else {
+                    binding.loadingLayout.isVisible = false
+                    binding.imgEmpty.isVisible =
+                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                    delay(1000)
+                }
             }
         }
     }
@@ -112,21 +118,23 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
+        val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
+            payload.primaryCurrency, payload.price, payload.amount, payload.type)
         if (isTrading) {
             val type = ai.predict(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
-            if (type == 1) {
-                accept(payload, type)
+            if (type == 0) {
+                accept(receivedPayload, type)
             } else if (type == 2) {
                 val price = round(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
-                if (ai.predict(price) == 1) {
+                if (ai.predict(price) == 0) {
                     Log.d(
                         "PayloadFragment::onViewCreated",
                         "Accepted!"
                     )
-                    accept(payload, 1)
+                    accept(receivedPayload, 0)
                 }
             } else {
-                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, payload)
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
             }
         }
     }
@@ -136,17 +144,19 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
+        val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
+            payload.primaryCurrency, payload.price, payload.amount, payload.type)
         if (isTrading) {
             val type = ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
-            if (type == 0) {
-                accept(payload, type)
+            if (type == 1) {
+                accept(receivedPayload, type)
             } else if (type == 2) {
                 val price = round(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
-                if (ai.predict(price) == 0) {
-                    accept(payload, 0)
+                if (ai.predict(price) == 1) {
+                    accept(receivedPayload, 1)
                 }
             } else {
-                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, payload)
+                (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
             }
         }
     }
@@ -171,19 +181,19 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(0, payload)
 
-        if (type == 0) {
-            updateWallet(payload.amount!!, payload.price!!, type)
-        } else if (type == 1) {
+        if (type == 1) {
             updateWallet(payload.price!!, payload.amount!!, type)
+        } else if (type == 0) {
+            updateWallet(payload.amount!!, payload.price!!, type)
         }
     }
     private fun updateWallet(DD: Double, BTC: Double, type: Int) {
         if (type == 0) {
-            amountDD += DD
-            amountBTC -= BTC
-        } else if (type == 1) {
             amountDD -= DD
             amountBTC += BTC
+        } else if (type == 1) {
+            amountDD += DD
+            amountBTC -= BTC
         }
         amountDD = String.format("%.2f", amountDD).toDouble()
         amountBTC = String.format("%.2f", amountBTC).toDouble()
