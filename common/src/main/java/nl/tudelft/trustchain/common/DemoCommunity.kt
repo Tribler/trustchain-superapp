@@ -36,10 +36,6 @@ class DemoCommunity : Community() {
     }
 
     object MessageId {
-        const val PUNCTURE_REQUEST = 250
-        const val PUNCTURE = 249
-        const val INTRODUCTION_REQUEST = 246
-        const val INTRODUCTION_RESPONSE = 245
         const val THALIS_MESSAGE = 222
         const val TORRENT_MESSAGE = 223
     }
@@ -53,9 +49,15 @@ class DemoCommunity : Community() {
     }
 
     fun informAboutTorrent(torrentName : String) {
-        for (peer in getPeers()) {
-            val packet = serializePacket(MessageId.TORRENT_MESSAGE, MyMessage("FOC:" + torrentName), true)
-            send(peer.address, packet)
+        if (torrentName != "") {
+            for (peer in getPeers()) {
+                val packet = serializePacket(
+                    MessageId.TORRENT_MESSAGE,
+                    MyMessage("FOC:" + torrentName),
+                    true
+                )
+                send(peer.address, packet)
+            }
         }
     }
 

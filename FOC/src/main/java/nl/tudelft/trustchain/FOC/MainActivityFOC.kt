@@ -40,7 +40,7 @@ class MainActivityFOC : AppCompatActivity() {
 
     private lateinit var adapterLV : ArrayAdapter<String>
 
-    private var uploadingTorrent = "greatBigTorrent"
+    private var uploadingTorrent = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
