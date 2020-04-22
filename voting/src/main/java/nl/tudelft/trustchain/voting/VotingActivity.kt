@@ -203,7 +203,7 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
-                    "<small><b>Current tally</b>:" +
+                    "<small><b>"+ (if (vh.votingIsComplete(block, threshold)) "Final result" else "Current tally") +"</b>:" +
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
