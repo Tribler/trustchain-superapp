@@ -99,7 +99,7 @@
                 android:layout_height="105dp"
                 android:layout_alignRight="@id/enterTorrent"
                 android:layout_marginTop="210dp"
-                android:text="EXECUTE CODE FROM JAR" />
+                android:text="EXECUTE MODULE (APK)" />
 
             <Button
                 android:id="@+id/downloadTorrentButton"
