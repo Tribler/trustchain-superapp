@@ -99,10 +99,16 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         declinedPayloads.layoutManager!!.smoothScrollToPosition(declinedPayloads, RecyclerView.State(), 0)
                     }
                 }
-
-                binding.imgEmpty.isVisible = items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
-
-                delay(1000)
+                if (isTrading) {
+                    binding.imgEmpty.isVisible = false
+                    binding.loadingLayout.isVisible =
+                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                } else {
+                    binding.loadingLayout.isVisible = false
+                    binding.imgEmpty.isVisible =
+                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                    delay(1000)
+                }
             }
         }
     }
