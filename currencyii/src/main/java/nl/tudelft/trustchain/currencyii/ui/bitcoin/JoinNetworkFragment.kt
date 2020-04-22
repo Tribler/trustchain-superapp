@@ -167,7 +167,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
         // Add a proposal to trust chain to join a shared wallet
         val proposeBlockData = try {
             getCoinCommunity().proposeJoinWallet(
-                mostRecentSWBlock.transaction
+                mostRecentSWBlock
             ).getData()
         } catch (t: Throwable) {
             Log.i("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")

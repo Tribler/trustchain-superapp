@@ -9,7 +9,7 @@ data class SWSignatureAskBlockTD(
     var SW_UNIQUE_ID: String,
     var SW_UNIQUE_PROPOSAL_ID: String,
     var SW_TRANSACTION_SERIALIZED: String,
-    var SW_TRANSACTION_SERIALIZED_OLD: String,
+    var SW_PREVIOUS_BLOCK_HASH: String,
     var SW_SIGNATURES_REQUIRED: Int,
     var SW_RECEIVER_PK: String
 )
@@ -24,7 +24,7 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
     constructor(
         uniqueId: String,
         transactionSerialized: String,
-        oldTransactionSerialized: String,
+        previousBlockHash: String,
         requiredSignatures: Int,
         receiverPk: String,
         uniqueProposalId: String = SWUtil.randomUUID()
@@ -34,7 +34,7 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
                 uniqueId,
                 uniqueProposalId,
                 transactionSerialized,
-                oldTransactionSerialized,
+                previousBlockHash,
                 requiredSignatures,
                 receiverPk
             )

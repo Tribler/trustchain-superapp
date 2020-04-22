@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 data class SWTransferFundsAskBlockTD(
     var SW_UNIQUE_ID: String,
     var SW_UNIQUE_PROPOSAL_ID: String,
-    var SW_TRANSACTION_SERIALIZED_OLD: String,
+    var SW_PREVIOUS_BLOCK_HASH: String,
     var SW_BITCOIN_PKS: List<String>,
     var SW_SIGNATURES_REQUIRED: Int,
     var SW_TRANSFER_FUNDS_AMOUNT: Long,
@@ -25,7 +25,7 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
 
     constructor(
         uniqueId: String,
-        oldTransactionSerialized: String,
+        previousWalletBlockHash: String,
         requiredSignatures: Int,
         satoshiAmount: Long,
         bitcoinPks: List<String>,
@@ -37,7 +37,7 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
             SWTransferFundsAskBlockTD(
                 uniqueId,
                 uniqueProposalId,
-                oldTransactionSerialized,
+                previousWalletBlockHash,
                 bitcoinPks,
                 requiredSignatures,
                 satoshiAmount,
