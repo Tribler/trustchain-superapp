@@ -269,7 +269,7 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "There should be a threshold"
-        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
         val voteJSON = JSONObject()
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
@@ -300,7 +300,7 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "There should be a threshold"
-        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
         val voteJSON = JSONObject()
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
@@ -331,7 +331,7 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "There should be a threshold"
-        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
         val voteJSON = JSONObject()
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
@@ -392,7 +392,7 @@ class VotingHelperTest {
 
         // Launch proposition
         val voteSubject = "There should be a threshold"
-        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
         val voteJSON = JSONObject()
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
@@ -443,6 +443,4 @@ class VotingHelperTest {
 
         Assert.assertTrue(exceptionCaught)
     }
-
-
 }

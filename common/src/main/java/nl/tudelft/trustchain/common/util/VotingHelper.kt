@@ -34,7 +34,7 @@ class VotingHelper(
     fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
-        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex()})
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
         val voteJSON = JSONObject()
@@ -136,7 +136,7 @@ class VotingHelper(
                     noCount++
                     votes.add(it.publicKey.contentToString())
                 }
-                else -> handleInvalidVote(it,"Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(it, "VOTE_REPLY")}'.")
+                else -> handleInvalidVote(it, "Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(it, "VOTE_REPLY")}'.")
             }
         }
 
@@ -154,7 +154,7 @@ class VotingHelper(
     /**
      * Return a list of voters' public keys parsed from the block.
      */
-    private fun getVoters(block: TrustChainBlock) : List<PublicKey> {
+    private fun getVoters(block: TrustChainBlock): List<PublicKey> {
 
         val jsonKeys = try {
             JSONArray(getVoteBlockAttributesByKey(block, "VOTE_LIST"))
@@ -163,7 +163,7 @@ class VotingHelper(
         }
 
         val publicKeys: MutableList<PublicKey> = ArrayList()
-        for (i in 0 until jsonKeys.length()){
+        for (i in 0 until jsonKeys.length()) {
             val string = try {
                 jsonKeys.get(i)
             } catch (e: JSONException) {
@@ -186,9 +186,9 @@ class VotingHelper(
      * Return true when the voting is complete, meaning a threshold vote has reached its
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
-    fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1) : Boolean {
+    fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
         val voters = getVoters(block)
-        val voteSubject = getVoteBlockAttributesByKey(block,"VOTE_SUBJECT")
+        val voteSubject = getVoteBlockAttributesByKey(block, "VOTE_SUBJECT")
         val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
         val voteMode = getVoteBlockAttributesByKey(block, "VOTE_MODE")
 
@@ -223,7 +223,7 @@ class VotingHelper(
     /**
      * Return the string value for a JSON tag in a voting block.
      */
-    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String) : String {
+    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
