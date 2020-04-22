@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Html
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.widget.EditText
+import android.widget.Switch
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +25,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
@@ -97,6 +101,22 @@ class VotingActivity : AppCompatActivity() {
             .setView(dialogView)
             .setTitle("Initiate vote on proposal")
 
+        val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
+        val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
+        switchLabel.text = getString(R.string.yes_no_mode)
+        var votingMode: VotingMode
+
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                switchLabel.text = getString(R.string.threshold_mode)
+                votingMode = VotingMode.YESNO
+            } else {
+                switchLabel.text = getString(R.string.yes_no_mode)
+                votingMode = VotingMode.THRESHOLD
+            }
+            printShortToast(votingMode.toString())
+        }
+
         builder.setPositiveButton("Create") { _, _ ->
 
             val proposal = dialogView.findViewById<EditText>(R.id.proposalInput).text.toString()
@@ -139,10 +159,8 @@ class VotingActivity : AppCompatActivity() {
                 "proper JSON in its message field: ${block.transaction["message"]}."
         }
 
-        // Parse date field
-        val regex = Regex("^(.*?)GMT")
-        var strippedDate = regex.find(block.timestamp.toString())?.value.toString()
-        strippedDate = strippedDate.substring(0, strippedDate.length - 3)
+        // Convert block date to simpler format
+        val date = DateFormat.format("EEE MMM d HH:mm", block.timestamp).toString()
 
         val previouslyCastedVotes = vh.castedByPeer(block, community.myPeer.publicKey)
         val hasCasted = when {
@@ -179,7 +197,7 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + defaultCryptoProvider.keyFromPublicBin(block.publicKey) + "</i></small>" +
                     "<br><br>" +
                     "<small><b>Date</b>: " +
-                    "<i>" + strippedDate + "</i></small>" +
+                    "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
                     "<small><b>Current tally</b>:" +
