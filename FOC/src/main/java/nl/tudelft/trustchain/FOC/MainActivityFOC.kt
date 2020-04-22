@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.FOC
 
 import android.Manifest
-import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
@@ -20,7 +20,6 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
-import dalvik.system.DexClassLoader
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import nl.tudelft.ipv8.android.IPv8Android
@@ -103,12 +102,13 @@ class MainActivityFOC : AppCompatActivity() {
 
     val MY_PERMISSIONS_REQUEST = 0
 
+    //change if you want to write to the actual phone storage (needs "write" permission)
     fun requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) //READ_EXTERNAL_STORAGE
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), //READ_EXTERNAL_STORAGE
                 MY_PERMISSIONS_REQUEST
             )
         }
@@ -160,6 +160,7 @@ class MainActivityFOC : AppCompatActivity() {
     /**
      * Download a torrent through a magnet link
      */
+    @Suppress("deprecation")
     fun getMagnetLink() {
         //Handling of the case where the user is already downloading the
         //same or another torrent
@@ -217,7 +218,10 @@ class MainActivityFOC : AppCompatActivity() {
             val ti = TorrentInfo.bdecode(data)
             sessionActive = true
             downloadMagnetButton.setText("STOP")
-            s.download(ti, File("/storage/emulated/0"))
+            //val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
+            //uncomment if you want to write to the actual phone storage (needs "write" permission)
+            val savePath = Environment.getExternalStorageDirectory().absolutePath
+            s.download(ti, File(savePath))
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
             printToast("Something went wrong, check logs")
@@ -247,8 +251,14 @@ class MainActivityFOC : AppCompatActivity() {
             printToast("No torrent name given, using default")
             torrentName = "sintel.torrent"
         } else torrentName = inputText
-        val torrent =
-            Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
+
+        //uncomment if you want to read from the actual phone storage (needs "write" permission)
+        var torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
+        //if (uploadHappening) {
+            //val torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
+            //torrent =
+            //    applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName
+        //}
         try {
             if (!readTorrentSuccesfully(torrent)) {
                 //printToast("Something went wrong, check logs")
@@ -264,7 +274,9 @@ class MainActivityFOC : AppCompatActivity() {
             SessionParams(sp)
         s.start(params)
 
-        printToast("Starting download, please wait...")
+        if (uploadHappening)
+            printToast("Starting upload, please wait...")
+        else printToast("Starting download, please wait...")
 
         val torrentFile = File(torrent)
         val ti = TorrentInfo(torrentFile)
@@ -274,7 +286,10 @@ class MainActivityFOC : AppCompatActivity() {
         sessionActive = true
         if (!uploadHappening)
             downloadTorrentButton.setText("STOP")
+        //uncomment if you want to write to the actual phone storage (needs "write" permission)
         s.download(ti, torrentFile.parentFile)
+        //val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
+        //s.download(ti, File(savePath))
 
     }
 
@@ -324,38 +339,20 @@ class MainActivityFOC : AppCompatActivity() {
      * The name of the class to be loaded, and the name of the
      * function to execute, have to be known beforehand
      */
-    @Suppress("deprecation", "unchecked_cast")
+    @Suppress("deprecation")
     fun loadDynamicCode() {
+        val apkName: String?
+        val inputText = enterJar.text.toString()
+        if (inputText == "") {
+            printToast("No apk/jar name given, using default")
+            apkName = "demoboi.apk"
+        } else apkName = inputText
         try {
-            val jarName: String?
-            val inputText = enterJar.text.toString()
-            if (inputText == "") {
-                printToast("No jar/apk given, using default")
-                jarName = "Injected.jar"
-            } else jarName = inputText
-            val libPath =
-                Environment.getExternalStorageDirectory().absolutePath + "/" + jarName
-            val dexOutputDir = getDir("dex", Context.MODE_PRIVATE)
-            val tmpDir = File(libPath)
-            val exists = tmpDir.exists()
-            val extStore =
-                Environment.MEDIA_MOUNTED == Environment.getExternalStorageState()
-            if (exists && extStore) Log.i("personal", "exists")
-            else {
-                printToast("Something went wrong, check logs")
-                return
-            }
-            val classloader = DexClassLoader(
-                libPath, dexOutputDir.absolutePath, null,
-                this.javaClass.classLoader
-            )
-            val classToLoad =
-                classloader.loadClass("com.example.injected.Injected") as Class<Any>
-            // final Class<Object> classToLoad = (Class<Object>) classloader.loadClass("p000.Example");
-            val myInstance = classToLoad.newInstance()
-            val printStuff = classToLoad.getMethod("printStuff")
-            printStuff.invoke(myInstance)
-            printToast("Check your logs for interdimensional message!")
+            val intent = Intent(this, ExecutionActivity::class.java)
+            //uncomment if you want to read from the actual phone storage (needs "write" permission)
+            intent.putExtra("fileName", Environment.getExternalStorageDirectory().absolutePath + "/" + apkName);
+            //intent.putExtra("fileName", apkName);
+            startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -397,13 +394,16 @@ class MainActivityFOC : AppCompatActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
+
         var torrentName = fileName.substringBeforeLast('.') + ".torrent"
 
         var os: OutputStream? = null
         try {
-            os =
-                FileOutputStream(File(
-                    Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
+            //uncomment if you want to write to the actual phone storage (needs "write" permission)
+            os = FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
+
+            //os = FileOutputStream(File(applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName))
+
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -414,6 +414,9 @@ class MainActivityFOC : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
+
+
+
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
         val magnet_link = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
         uploadingTorrent = magnet_link
