@@ -135,6 +135,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
+                if((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex>25){
+                    (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
+                }
             }
         }
     }
@@ -157,6 +160,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
+                if((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex>25){
+                    (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
+                }
             }
         }
     }
@@ -180,6 +186,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 //            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(0, payload)
+        if((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex>25){
+            (TrustChainTraderActivity.PayloadsList).acceptedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex)
+        }
 
         if (type == 1) {
             updateWallet(payload.price!!, payload.amount!!, type)
