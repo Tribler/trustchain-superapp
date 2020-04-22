@@ -39,7 +39,6 @@ class DAOTransferFundsHelper {
         val walletData = SWJoinBlockTransactionData(mostRecentWallet.transaction).getData()
         val walletHash = mostRecentWallet.calculateHash().toHex()
 
-        val oldTransactionSerialized = walletData.SW_TRANSACTION_SERIALIZED
         val total = walletData.SW_BITCOIN_PKS.size
         val requiredSignatures =
             SWUtil.percentageToIntThreshold(total, walletData.SW_VOTING_THRESHOLD)
