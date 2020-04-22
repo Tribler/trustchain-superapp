@@ -31,7 +31,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     private val adapterAccepted = ItemAdapter()
     private val adapterDeclined = ItemAdapter()
     private var isTrading = true
-    private lateinit var ai: NaiveBayes
+    lateinit var ai: NaiveBayes
 
     private val binding by viewBinding(FragmentTraderBinding::bind)
 
@@ -113,7 +113,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         }
     }
 
-    private fun askListener(payload: TradePayload) {
+    fun askListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
@@ -139,7 +139,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         }
     }
 
-    private fun bidListener(payload: TradePayload) {
+    fun bidListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
