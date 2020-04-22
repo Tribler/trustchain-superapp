@@ -1,5 +1,5 @@
 # TrustChain Voter
-This submodule of the TrustChain Super App enables a front-end for using the functionality that is provided in the `common/util/Votinghelper` API. For documentation on the API itself, please see 
+This submodule of the TrustChain Super App enables a front-end for using the functionality that is provided in the `common/util/Votinghelper` API. For documentation on the API itself, please see [this page](../common/README.md).
 
 This module currently contains the following functionality:
 - Retrieve and show list of current proposals including tally
@@ -7,7 +7,7 @@ This module currently contains the following functionality:
 - Create a new proposal based in Yes / No voting mode or threshold voting mode
 
 ## Context
-*TODO: In what setting this module is used*
+<!-- TODO: In what setting this module is used -->
 
 ## Proposal list
 When entering the submodule, the user sees the proposal list at first. Using the toggle, the user can switch between a list of all proposals (left) and a list of new proposals (right), which contains proposals on which the user has not casted a vote yet.
