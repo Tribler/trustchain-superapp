@@ -79,7 +79,7 @@ class VotingHelperTest {
         val peers = getPeers()
 
         val voteSubject = "There should be tests"
-        votingHelper.startVote(voteSubject, peers, null)
+        votingHelper.startVote(voteSubject, peers, VotingMode.YESNO)
 
         // Verify that the proposal block has been casted
         assert(
@@ -273,6 +273,7 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
 
         val transaction = voteJSON.toString()
 
@@ -303,6 +304,7 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
 
         val transaction = voteJSON.toString()
 
@@ -333,6 +335,7 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
 
         val transaction = voteJSON.toString()
 
@@ -362,6 +365,7 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
 
         val transaction = voteJSON.toString()
 
@@ -392,6 +396,7 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
 
         val transaction = voteJSON.toString()
 
