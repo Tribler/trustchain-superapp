@@ -23,6 +23,7 @@ import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amo
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amountDD
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItem
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItemRenderer
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 @ExperimentalUnsignedTypes
@@ -74,40 +75,48 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     ) {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val items = withContext(Dispatchers.IO) {
-                    payloads.map {
-                        PayloadItem(
-                            it.publicKey,
-                            it.primaryCurrency,
-                            it.secondaryCurrency,
-                            it.amount,
-                            it.price,
-                            it.type
-                        )
+                try {
+                    val items = withContext(Dispatchers.IO) {
+                        payloads.map {
+                            PayloadItem(
+                                it.publicKey,
+                                it.primaryCurrency,
+                                it.secondaryCurrency,
+                                it.amount,
+                                it.price,
+                                it.type
+                            )
+                        }
                     }
-                }
-                if (adapterString == "accepted") {
-                    val adapterCount = adapterAccepted.itemCount
-                    adapterAccepted.updateItems(items)
-                    if (adapterCount != adapterAccepted.itemCount) {
-                        acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
+                    if (adapterString == "accepted") {
+                        val adapterCount = adapterAccepted.itemCount
+                        adapterAccepted.updateItems(items)
+                        if (adapterCount != adapterAccepted.itemCount) {
+                            acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
+                        }
+                    } else if (adapterString == "declined") {
+                        val adapterCount = adapterDeclined.itemCount
+                        adapterDeclined.updateItems(items)
+                        if (adapterCount != adapterDeclined.itemCount) {
+                            declinedPayloads.layoutManager!!.smoothScrollToPosition(
+                                declinedPayloads,
+                                RecyclerView.State(),
+                                0
+                            )
+                        }
                     }
-                } else if (adapterString == "declined") {
-                    val adapterCount = adapterDeclined.itemCount
-                    adapterDeclined.updateItems(items)
-                    if (adapterCount != adapterDeclined.itemCount) {
-                        declinedPayloads.layoutManager!!.smoothScrollToPosition(declinedPayloads, RecyclerView.State(), 0)
+                    if (isTrading) {
+                        binding.imgEmpty.isVisible = false
+                        binding.loadingLayout.isVisible =
+                            items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                    } else {
+                        binding.loadingLayout.isVisible = false
+                        binding.imgEmpty.isVisible =
+                            items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                        delay(1000)
                     }
-                }
-                if (isTrading) {
-                    binding.imgEmpty.isVisible = false
-                    binding.loadingLayout.isVisible =
-                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
-                } else {
-                    binding.loadingLayout.isVisible = false
-                    binding.imgEmpty.isVisible =
-                        items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
-                    delay(1000)
+                }catch (e: Exception) {
+                    Log.d("LoadCurrentPayloads exception", e.toString())
                 }
             }
         }
