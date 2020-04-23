@@ -115,7 +115,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                             items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
                         delay(1000)
                     }
-                }catch (e: Exception) {
+                } catch (e: Exception) {
                     Log.d("LoadCurrentPayloads exception", e.toString())
                 }
             }
@@ -144,7 +144,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
-                if((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex>25){
+                if ((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex > 25) {
                     (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
                 }
             }
@@ -169,7 +169,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
-                if((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex>25){
+                if ((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex > 25) {
                     (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
                 }
             }
@@ -195,7 +195,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 //            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(0, payload)
-        if((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex>25){
+        if ((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex > 25) {
             (TrustChainTraderActivity.PayloadsList).acceptedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex)
         }
 
