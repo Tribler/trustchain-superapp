@@ -76,8 +76,12 @@ class VotingActivity : AppCompatActivity() {
         adapter = blockListAdapter(voteProposals)
 
         adapter.onItemClick = {
-            showNewCastVoteDialog(it)
-            showVoteCompletenessToast(it)
+            try {
+                showNewCastVoteDialog(it)
+                showVoteCompletenessToast(it)
+            } catch (e: Exception) {
+                printShortToast(e.message.toString())
+            }
         }
 
         blockList.adapter = adapter
