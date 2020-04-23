@@ -8,7 +8,6 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import org.json.JSONObject
-import java.util.*
 
 class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
 
@@ -16,15 +15,15 @@ class blockListAdapter(private val myDataset: List<TrustChainBlock>) :
 
     var onItemClick: ((TrustChainBlock) -> Unit)? = null
 
-    inner class MyViewHolder(val cardView: CardView) : RecyclerView.ViewHolder(cardView) {
+    inner class MyViewHolder(cardView: CardView) : RecyclerView.ViewHolder(cardView) {
         init {
             itemView.setOnClickListener {
                 onItemClick?.invoke(myDataset[adapterPosition])
             }
         }
 
-        val propTitle = cardView.findViewById<TextView>(R.id.propTitle)
-        val propDate = cardView.findViewById<TextView>(R.id.propDate)
+        val propTitle: TextView = cardView.findViewById(R.id.propTitle)
+        val propDate: TextView = cardView.findViewById(R.id.propDate)
     }
 
     // Create new views (invoked by the layout manager)
