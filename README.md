@@ -27,6 +27,34 @@ This repository contains a collection of Android apps built on top of [IPv8](htt
 
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
 
+### AI trading bot
+
+**AI trading bot** consist of two parts.
+1. An AI trading bot using a Naive Bayes Classifier which buys or sells Bitcoins in a decentralized market.
+2. Sending and receiving money to and from other peers.
+
+**Trading**
+The AI trading bot app is visible upon opening the superapp. It receives bids and asks from other peers that want to buy or sell Bitcoins for Dymbe Dollars.
+Upon receiving a bid or ask, it decides to either execute the offer or not.
+The bot can be toggled on and off using the toggle on the home screen.
+
+**Send/Receive**
+In the sending/receiving money tab one can send money to, or receive money from a different peer.
+There are two ways to find a public key:
+1. The receiving peer presses the send/receive toggle. His public key will be shown as a QR-code. Now pressing the "scan" button on the sender's device allows you can scan the QR code of the receiver.
+2. As a sender, go to the "Peers" fragment in the app, and press the public key of the receiver.
+
+<img src="trustchain-trader/TraderImages/live_trading.gif" width="180"><br />
+[More about AI trading bot](trustchain-trader/readme.md)
+
+### Market Bot
+
+The market bot app can generate bids and asks which are received by the peers in the market community.
+The bid and asks can either be generated automatically or manually. Those bids and asks will be sent as IPv8 messages.
+
+<img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
+[More about Market Bot](trustchain-payloadgenerator/readme.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)

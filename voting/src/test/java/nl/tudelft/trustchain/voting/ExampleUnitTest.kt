@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.common
+package nl.tudelft.trustchain.voting
 
 import org.junit.Test
 
