@@ -42,13 +42,8 @@ class BlankFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         _binding = BlankFragmentBinding.inflate(inflater, container, false)
-        val view = binding.root
 
-        return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        return binding.root
     }
 
     companion object {
