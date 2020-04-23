@@ -39,7 +39,7 @@ class DemoCommunity : Community() {
 
     private var torrentMessagesList = ArrayList<Packet>()
 
-    public fun getTorrentMessages() : ArrayList<Packet> {
+    public fun getTorrentMessages(): ArrayList<Packet> {
         return torrentMessagesList
     }
 
@@ -56,7 +56,7 @@ class DemoCommunity : Community() {
         }
     }
 
-    fun informAboutTorrent(torrentName : String) {
+    fun informAboutTorrent(torrentName: String) {
         if (torrentName != "") {
             for (peer in getPeers()) {
                 val packet = serializePacket(

@@ -28,17 +28,15 @@ import nl.tudelft.trustchain.common.MyMessage
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
-import java.util.concurrent.CountDownLatch
-
 
 class MainActivityFOC : AppCompatActivity() {
 
     val s = SessionManager()
     var sessionActive = false
 
-    private var torrentList = ArrayList<String>()//Creating an empty arraylist
+    private var torrentList = ArrayList<String>() // Creating an empty arraylist
 
-    private lateinit var adapterLV : ArrayAdapter<String>
+    private lateinit var adapterLV: ArrayAdapter<String>
 
     private var uploadingTorrent = ""
 
@@ -49,22 +47,19 @@ class MainActivityFOC : AppCompatActivity() {
 
         initializeTorrentSession()
 
-        //create a list view for any incoming torrents
-        //that are seeded
+        // create a list view for any incoming torrents
+        // that are seeded
         val listView = myListView as ListView
         listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
-        adapterLV = ArrayAdapter<String>(
-            this,
-             android.R.layout.simple_list_item_1, torrentList
-        )
+        adapterLV = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, torrentList)
         listView.setAdapter(adapterLV)
 
-        //whenever an available torrent is seeded, clicking on it
-        //inserts it into the input for torrent names/magnet links
+        // whenever an available torrent is seeded, clicking on it
+        // inserts it into the input for torrent names/magnet links
         listView.setOnItemClickListener { parent, _, position, _ ->
-            var item = parent.getItemAtPosition(position);
+            var item = parent.getItemAtPosition(position)
             enterTorrent.setText(item.toString().substringAfter(" - "))
-        };
+        }
 
         printToast("STARTED")
 
@@ -79,9 +74,7 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         // option 3: Send a message to every other peer using the superapp
-        informPeersButton.setOnClickListener { _ ->
-           informPeersAboutSeeding()
-        }
+        informPeersButton.setOnClickListener { _ -> informPeersAboutSeeding() }
 
         // option 4: dynamically load and execute code from a jar/apk file
         executeCodeButton.setOnClickListener { _ ->
@@ -102,13 +95,13 @@ class MainActivityFOC : AppCompatActivity() {
 
     val MY_PERMISSIONS_REQUEST = 0
 
-    //change if you want to write to the actual phone storage (needs "write" permission)
+    // change if you want to write to the actual phone storage (needs "write" permission)
     fun requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) //READ_EXTERNAL_STORAGE
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) // READ_EXTERNAL_STORAGE
             != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), //READ_EXTERNAL_STORAGE
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
                 MY_PERMISSIONS_REQUEST
             )
         }
@@ -121,7 +114,7 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun initializeTorrentSession(){
+    fun initializeTorrentSession() {
         s.addListener(object : AlertListener {
             override fun types(): IntArray? {
                 return null
@@ -144,13 +137,12 @@ class MainActivityFOC : AppCompatActivity() {
                     }
                     AlertType.TORRENT_FINISHED -> {
                         progressBar.setProgress(100, true)
-                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)");
-                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)");
+                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                     }
                     else -> {
-
                     }
                 }
             }
@@ -162,13 +154,13 @@ class MainActivityFOC : AppCompatActivity() {
      */
     @Suppress("deprecation")
     fun getMagnetLink() {
-        //Handling of the case where the user is already downloading the
-        //same or another torrent
-        if (sessionActive){
+        // Handling of the case where the user is already downloading the
+        // same or another torrent
+        if (sessionActive) {
             s.stop()
             sessionActive = false
-            downloadTorrentButton.setText("DOWNLOAD (TORRENT)");
-            if (downloadMagnetButton.text.equals("STOP")){
+            downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+            if (downloadMagnetButton.text.equals("STOP")) {
                 downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
                 return
             } else progressBar.setProgress(0, true)
@@ -184,7 +176,6 @@ class MainActivityFOC : AppCompatActivity() {
             magnetLink = "magnet:?xt=urn:btih:209c8226b299b308beaf2b9cd3fb49212dbd13ec&dn=Tears+of+Steel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Ftears-of-steel.torrent"
             // magnetLink = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent";
         } else magnetLink = inputText
-
 
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
@@ -218,8 +209,8 @@ class MainActivityFOC : AppCompatActivity() {
             val ti = TorrentInfo.bdecode(data)
             sessionActive = true
             downloadMagnetButton.setText("STOP")
-            //val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-            //uncomment if you want to write to the actual phone storage (needs "write" permission)
+            // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
+            // uncomment if you want to write to the actual phone storage (needs "write" permission)
             val savePath = Environment.getExternalStorageDirectory().absolutePath
             s.download(ti, File(savePath))
         } else {
@@ -232,14 +223,14 @@ class MainActivityFOC : AppCompatActivity() {
      *  Download a torrent through a .torrent file on your phone
      */
     @Suppress("deprecation")
-    fun getTorrent(uploadHappening : Boolean) {
-        //Handling of the case where the user is already downloading the
-        //same or another torrent
-        if (sessionActive){
+    fun getTorrent(uploadHappening: Boolean) {
+        // Handling of the case where the user is already downloading the
+        // same or another torrent
+        if (sessionActive) {
             s.stop()
             sessionActive = false
-            downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)");
-            if (downloadTorrentButton.text.equals("STOP")){
+            downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+            if (downloadTorrentButton.text.equals("STOP")) {
                 downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
                 return
             } else progressBar.setProgress(0, true)
@@ -252,16 +243,16 @@ class MainActivityFOC : AppCompatActivity() {
             torrentName = "sintel.torrent"
         } else torrentName = inputText
 
-        //uncomment if you want to read from the actual phone storage (needs "write" permission)
+        // uncomment if you want to read from the actual phone storage (needs "write" permission)
         var torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-        //if (uploadHappening) {
-            //val torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-            //torrent =
+        // if (uploadHappening) {
+            // val torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
+            // torrent =
             //    applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName
-        //}
+        // }
         try {
             if (!readTorrentSuccesfully(torrent)) {
-                //printToast("Something went wrong, check logs")
+                // printToast("Something went wrong, check logs")
                 return
             }
         } catch (e: IOException) {
@@ -286,11 +277,10 @@ class MainActivityFOC : AppCompatActivity() {
         sessionActive = true
         if (!uploadHappening)
             downloadTorrentButton.setText("STOP")
-        //uncomment if you want to write to the actual phone storage (needs "write" permission)
+        // uncomment if you want to write to the actual phone storage (needs "write" permission)
         s.download(ti, torrentFile.parentFile)
-        //val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-        //s.download(ti, File(savePath))
-
+        // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
+        // s.download(ti, File(savePath))
     }
 
     /**
@@ -321,7 +311,7 @@ class MainActivityFOC : AppCompatActivity() {
     /* Let others peers know of the torrent you are seeding,
     by sending the magnet link
      */
-    fun informPeersAboutSeeding(){
+    fun informPeersAboutSeeding() {
         val ipv8 = IPv8Android.getInstance()
         val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
         val peers = demoCommunity.getPeers()
@@ -349,9 +339,9 @@ class MainActivityFOC : AppCompatActivity() {
         } else apkName = inputText
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
-            //uncomment if you want to read from the actual phone storage (needs "write" permission)
-            intent.putExtra("fileName", Environment.getExternalStorageDirectory().absolutePath + "/" + apkName);
-            //intent.putExtra("fileName", apkName);
+            // uncomment if you want to read from the actual phone storage (needs "write" permission)
+            intent.putExtra("fileName", Environment.getExternalStorageDirectory().absolutePath + "/" + apkName)
+            // intent.putExtra("fileName", apkName);
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -363,7 +353,7 @@ class MainActivityFOC : AppCompatActivity() {
     The extension of the file must be included (for example, .png)
      */
     @Suppress("deprecation")
-    fun createTorrent(){
+    fun createTorrent() {
         val fileName: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
@@ -394,15 +384,14 @@ class MainActivityFOC : AppCompatActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
-
         var torrentName = fileName.substringBeforeLast('.') + ".torrent"
 
         var os: OutputStream? = null
         try {
-            //uncomment if you want to write to the actual phone storage (needs "write" permission)
+            // uncomment if you want to write to the actual phone storage (needs "write" permission)
             os = FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
 
-            //os = FileOutputStream(File(applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName))
+            // os = FileOutputStream(File(applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName))
 
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
@@ -414,8 +403,6 @@ class MainActivityFOC : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-
-
 
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
         val magnet_link = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
@@ -430,51 +417,47 @@ class MainActivityFOC : AppCompatActivity() {
     Displays the list of all the torrents being seeded at the moment,
     based on the messages received from those peers that seed
      */
-    fun retrieveListOfAvailableTorrents(){
+    fun retrieveListOfAvailableTorrents() {
         val ipv8 = IPv8Android.getInstance()
         val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
         var torrentListMessages = demoCommunity.getTorrentMessages()
-        for (packet in torrentListMessages){
+        for (packet in torrentListMessages) {
             val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
             Log.i("personal", peer.mid + ": " + payload.message)
             var magnetLink = payload.message.substringAfter("FOC:")
-            var torrentName = payload.message.substringAfter("&dn=").
-                substringBefore('&')
-            var containsItem = false;
-            for (i in 0..adapterLV.count-1){
-                if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!.startsWith(torrentName)){
+            var torrentName = payload.message.substringAfter("&dn=")
+                .substringBefore('&')
+            var containsItem = false
+            for (i in 0..adapterLV.count - 1) {
+                if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!.startsWith(torrentName)) {
                     containsItem = true
                     break
                 }
             }
             if (!containsItem) {
-                adapterLV.add(torrentName + " - " + magnetLink);
+                adapterLV.add(torrentName + " - " + magnetLink)
                 setListViewHeightBasedOnChildren(myListView)
             }
-
         }
-
     }
 
     /*
     Handles correct viewing of our list of torrents, since it is within a ScrollView
      */
-    fun setListViewHeightBasedOnChildren(listView : ListView) {
+    fun setListViewHeightBasedOnChildren(listView: ListView) {
         var listAdapter: ListAdapter = listView.getAdapter()
 
-        var totalHeight = 0;
-        var desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
-        for (i in 0..listAdapter.getCount()-1) {
-            var listItem = listAdapter.getView(i, null, listView);
-            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
-            totalHeight += listItem.getMeasuredHeight();
+        var totalHeight = 0
+        var desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST)
+        for (i in 0..listAdapter.getCount() - 1) {
+            var listItem = listAdapter.getView(i, null, listView)
+            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED)
+            totalHeight += listItem.getMeasuredHeight()
         }
 
-        var params = listView.getLayoutParams();
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
-        listView.setLayoutParams(params);
-        listView.requestLayout();
+        var params = listView.getLayoutParams()
+        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1))
+        listView.setLayoutParams(params)
+        listView.requestLayout()
     }
 }
-
-
