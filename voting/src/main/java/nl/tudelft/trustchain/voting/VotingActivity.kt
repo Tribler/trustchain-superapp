@@ -77,7 +77,7 @@ class VotingActivity : AppCompatActivity() {
 
         adapter.onItemClick = {
             showNewCastVoteDialog(it)
-            checkVoteCompleteness(it)
+            showVoteCompletenessToast(it)
         }
 
         blockList.adapter = adapter
@@ -145,7 +145,7 @@ class VotingActivity : AppCompatActivity() {
     /**
      * Make user aware of proposal status through toast message.
      */
-    private fun checkVoteCompleteness(block: TrustChainBlock) {
+    private fun showVoteCompletenessToast(block: TrustChainBlock) {
         val completed = vh.votingIsComplete(block, threshold)
         if (completed) {
             printShortToast("Voting has been completed.")
