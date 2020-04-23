@@ -167,6 +167,30 @@
         app:layout_constraintTop_toTopOf="@id/titlePayloadList"
         app:layout_constraintBottom_toBottomOf="parent" />
 
+    <LinearLayout
+        android:id="@+id/loadingLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="@id/titlePayloadList"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="vertical">
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/textViewHorizontalProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scanning payloads, please wait"/>
+    </LinearLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

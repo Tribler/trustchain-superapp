@@ -117,7 +117,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 Log.d("TrustChainPayloadGeneratorActivity::sendAutoMessages", "message send!")
                 (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
                 recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
-                Thread.sleep(3000)
+                Thread.sleep(1000)
             }
         }
     }

@@ -23,6 +23,7 @@ import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amo
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amountDD
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItem
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItemRenderer
+import java.lang.Exception
 import kotlin.math.roundToInt
 
 @ExperimentalUnsignedTypes
@@ -31,7 +32,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     private val adapterAccepted = ItemAdapter()
     private val adapterDeclined = ItemAdapter()
     private var isTrading = true
-    private lateinit var ai: NaiveBayes
+    lateinit var ai: NaiveBayes
 
     private val binding by viewBinding(FragmentTraderBinding::bind)
 
@@ -74,40 +75,54 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     ) {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val items = withContext(Dispatchers.IO) {
-                    payloads.map {
-                        PayloadItem(
-                            it.publicKey,
-                            it.primaryCurrency,
-                            it.secondaryCurrency,
-                            it.amount,
-                            it.price,
-                            it.type
-                        )
+                try {
+                    val items = withContext(Dispatchers.IO) {
+                        payloads.map {
+                            PayloadItem(
+                                it.publicKey,
+                                it.primaryCurrency,
+                                it.secondaryCurrency,
+                                it.amount,
+                                it.price,
+                                it.type
+                            )
+                        }
                     }
+                    if (adapterString == "accepted") {
+                        val adapterCount = adapterAccepted.itemCount
+                        adapterAccepted.updateItems(items)
+                        if (adapterCount != adapterAccepted.itemCount) {
+                            acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
+                        }
+                    } else if (adapterString == "declined") {
+                        val adapterCount = adapterDeclined.itemCount
+                        adapterDeclined.updateItems(items)
+                        if (adapterCount != adapterDeclined.itemCount) {
+                            declinedPayloads.layoutManager!!.smoothScrollToPosition(
+                                declinedPayloads,
+                                RecyclerView.State(),
+                                0
+                            )
+                        }
+                    }
+                    if (isTrading) {
+                        binding.imgEmpty.isVisible = false
+                        binding.loadingLayout.isVisible =
+                            items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                    } else {
+                        binding.loadingLayout.isVisible = false
+                        binding.imgEmpty.isVisible =
+                            items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
+                        delay(1000)
+                    }
+                } catch (e: Exception) {
+                    Log.d("LoadCurrentPayloads exception", e.toString())
                 }
-                if (adapterString == "accepted") {
-                    val adapterCount = adapterAccepted.itemCount
-                    adapterAccepted.updateItems(items)
-                    if (adapterCount != adapterAccepted.itemCount) {
-                        acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
-                    }
-                } else if (adapterString == "declined") {
-                    val adapterCount = adapterDeclined.itemCount
-                    adapterDeclined.updateItems(items)
-                    if (adapterCount != adapterDeclined.itemCount) {
-                        declinedPayloads.layoutManager!!.smoothScrollToPosition(declinedPayloads, RecyclerView.State(), 0)
-                    }
-                }
-
-                binding.imgEmpty.isVisible = items.isEmpty() && (TrustChainTraderActivity.acceptedPayloads).isEmpty() && (TrustChainTraderActivity.declinedPayloads).isEmpty()
-
-                delay(1000)
             }
         }
     }
 
-    private fun askListener(payload: TradePayload) {
+    fun askListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
@@ -129,11 +144,14 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
+                if ((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex > 25) {
+                    (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
+                }
             }
         }
     }
 
-    private fun bidListener(payload: TradePayload) {
+    fun bidListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment::onViewCreated",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
@@ -151,6 +169,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 }
             } else {
                 (TrustChainTraderActivity.PayloadsList).declinedPayloads.add(0, receivedPayload)
+                if ((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex > 25) {
+                    (TrustChainTraderActivity.PayloadsList).declinedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).declinedPayloads.lastIndex)
+                }
             }
         }
     }
@@ -174,6 +195,9 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 //            payload.amount?.toFloat(),payload.price?.toFloat(),payload.type, payload.publicKey)
 
         (TrustChainTraderActivity.PayloadsList).acceptedPayloads.add(0, payload)
+        if ((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex > 25) {
+            (TrustChainTraderActivity.PayloadsList).acceptedPayloads.removeAt((TrustChainTraderActivity.PayloadsList).acceptedPayloads.lastIndex)
+        }
 
         if (type == 1) {
             updateWallet(payload.price!!, payload.amount!!, type)
