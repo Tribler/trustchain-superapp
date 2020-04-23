@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.common
+package nl.tudelft.trustchain.currencyii
 
 import org.junit.Test
 

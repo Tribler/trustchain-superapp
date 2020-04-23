@@ -13,7 +13,7 @@ ktlint {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
@@ -48,10 +48,20 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url = 'https://raw.githubusercontent.com/blockchain/api-v1-client-java/mvn-repo/'
+    }
+}
+
 dependencies {
     implementation project(':common')
+    implementation project(':voting')
     implementation project(':trustchain-explorer')
+    implementation project(':trustchain-trader')
+    implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
+    implementation project(':currencyii')
     implementation project(':FOC')
 
     // AndroidX
