@@ -12,7 +12,7 @@ ktlint {
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.2"
+    buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 24
@@ -59,7 +59,7 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    implementation "androidx.fragment:fragment-ktx:$fragment_version"
+    implementation "androidx.fragment:fragment-ktx:${fragment_version}"
     implementation "androidx.preference:preference:1.1.0"
     implementation "androidx.lifecycle:lifecycle-runtime:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
@@ -81,6 +81,7 @@ dependencies {
 
     implementation 'com.mattskala:itemadapter:0.3'
 
+
     // Testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -90,5 +91,4 @@ dependencies {
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
-
 }
