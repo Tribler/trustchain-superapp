@@ -142,8 +142,16 @@ class VotingActivity : AppCompatActivity() {
         builder.show()
     }
 
+    /**
+     * Make user aware of proposal status through toast message.
+     */
     private fun checkVoteCompleteness(block: TrustChainBlock) {
-        printShortToast(vh.votingIsComplete(block, threshold).toString())
+        val completed = vh.votingIsComplete(block, threshold)
+        if (completed) {
+            printShortToast("Voting has been completed.")
+        } else {
+            printShortToast("Voting still open.")
+        }
     }
 
     /**
