@@ -30,7 +30,7 @@ import kotlin.collections.ArrayList
 class VotingActivity : AppCompatActivity() {
 
     private lateinit var vh: VotingHelper
-    private lateinit var community: TrustChainCommunity
+    private lateinit var community: VotingCommunity
     private lateinit var adapter: blockListAdapter
     private lateinit var tch: TrustChainHelper
 
