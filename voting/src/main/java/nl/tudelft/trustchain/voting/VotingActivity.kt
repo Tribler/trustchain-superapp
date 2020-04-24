@@ -23,6 +23,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import nl.tudelft.trustchain.common.util.VotingMode
 import org.json.JSONException
 import org.json.JSONObject
 import kotlin.collections.ArrayList
@@ -36,6 +37,8 @@ class VotingActivity : AppCompatActivity() {
 
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
     private var displayAllVotes: Boolean = true
+
+    private val threshold = 1
 
     /**
      * Setup method, binds functionality
@@ -73,7 +76,12 @@ class VotingActivity : AppCompatActivity() {
         adapter = blockListAdapter(voteProposals)
 
         adapter.onItemClick = {
-            showNewCastVoteDialog(it)
+            try {
+                showNewCastVoteDialog(it)
+                showVoteCompletenessToast(it)
+            } catch (e: Exception) {
+                printShortToast(e.message.toString())
+            }
         }
 
         blockList.adapter = adapter
@@ -103,17 +111,17 @@ class VotingActivity : AppCompatActivity() {
         val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
-        var votingMode: VotingMode
+
+        var votingMode = VotingMode.THRESHOLD
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 switchLabel.text = getString(R.string.threshold_mode)
-                votingMode = VotingMode.YESNO
+                votingMode = VotingMode.THRESHOLD
             } else {
                 switchLabel.text = getString(R.string.yes_no_mode)
-                votingMode = VotingMode.THRESHOLD
+                votingMode = VotingMode.YESNO
             }
-            printShortToast(votingMode.toString())
         }
 
         builder.setPositiveButton("Create") { _, _ ->
@@ -126,7 +134,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers) // TODO make use of votingMode variable
+            vh.startVote(proposal, peers, votingMode)
             printShortToast("Proposal has been created")
         }
 
@@ -136,6 +144,18 @@ class VotingActivity : AppCompatActivity() {
         }
 
         builder.show()
+    }
+
+    /**
+     * Make user aware of proposal status through toast message.
+     */
+    private fun showVoteCompletenessToast(block: TrustChainBlock) {
+        val completed = vh.votingIsComplete(block, threshold)
+        if (completed) {
+            printShortToast("Voting has been completed.")
+        } else {
+            printShortToast("Voting still open.")
+        }
     }
 
     /**
@@ -195,7 +215,7 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
-                    "<small><b>Current tally</b>:" +
+                    "<small><b>" + (if (vh.votingIsComplete(block, threshold)) "Final result" else "Current tally") + "</b>:" +
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
