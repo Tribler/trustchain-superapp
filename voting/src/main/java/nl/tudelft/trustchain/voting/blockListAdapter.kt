@@ -60,11 +60,10 @@ class blockListAdapter(
             bar.progress = vh.votingPercentage(myDataset[position], 1)
 
             if (bar.progress == 100) {
-               bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
+                bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
             } else {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
             }
-
         } catch (e: Exception) {
             holder.progressBar.progress = 0
         }
