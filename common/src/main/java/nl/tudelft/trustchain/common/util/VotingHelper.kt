@@ -12,8 +12,8 @@ import nl.tudelft.ipv8.util.toHex
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.IllegalArgumentException
 import java.util.*
+import kotlin.math.roundToInt
 
 /**
  * Helper class for creating votes proposals, casting and counting.
@@ -187,6 +187,18 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
+        return votingPercentage(block, threshold) == 100
+    }
+
+    fun votingPercentage(block: TrustChainBlock, threshold: Int = -1): Int {
+        fun percentage(a: Int, b: Int): Int {
+            if (b == 0) {
+                return 0
+            }
+
+            return ((a.toDouble() / b) * 100).roundToInt()
+        }
+
         val voters = getVoters(block)
         val voteSubject = getVoteBlockAttributesByKey(block, "VOTE_SUBJECT")
         val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
@@ -213,10 +225,9 @@ class VotingHelper(
             if (threshold == -1) {
                 throw IllegalArgumentException("VotingMode was set to THRESHOLD but threshold was not specified as function argument.")
             }
-
-            yescount >= threshold
+            percentage(yescount, threshold)
         } else {
-            yescount + nocount == voters.size
+            percentage(yescount + nocount, voters.size)
         }
     }
 

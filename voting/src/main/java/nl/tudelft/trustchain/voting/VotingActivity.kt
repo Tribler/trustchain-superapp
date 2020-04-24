@@ -26,7 +26,6 @@ import nl.tudelft.trustchain.common.util.VotingHelper
 import nl.tudelft.trustchain.common.util.VotingMode
 import org.json.JSONException
 import org.json.JSONObject
-import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
@@ -73,12 +72,12 @@ class VotingActivity : AppCompatActivity() {
 
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals)
+        adapter = blockListAdapter(voteProposals, vh)
 
-        adapter.onItemClick = {
+        adapter.onItemClick = { block ->
             try {
-                showNewCastVoteDialog(it)
-                showVoteCompletenessToast(it)
+                showNewCastVoteDialog(block)
+                showVoteCompletenessToast(block)
             } catch (e: Exception) {
                 printShortToast(e.message.toString())
             }
