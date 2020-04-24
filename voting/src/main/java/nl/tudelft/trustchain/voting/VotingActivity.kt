@@ -18,7 +18,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.util.TrustChainHelper
@@ -30,7 +29,7 @@ import org.json.JSONObject
 class VotingActivity : AppCompatActivity() {
 
     private lateinit var vh: VotingHelper
-    private lateinit var community: TrustChainCommunity
+    private lateinit var community: VotingCommunity
     private lateinit var adapter: blockListAdapter
     private lateinit var tch: TrustChainHelper
 
