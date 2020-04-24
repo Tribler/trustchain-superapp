@@ -443,4 +443,66 @@ class VotingHelperTest {
 
         Assert.assertTrue(exceptionCaught)
     }
+
+    @Test
+    fun testVoteHalfCompleteWithThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToVote(true, propBlock)
+
+        Assert.assertEquals(50, votingHelper.votingPercentage(propBlock, 2))
+    }
+
+    @Test
+    fun testVoteHalfCompleteWithoutThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToVote(false, propBlock)
+
+        Assert.assertEquals(25, votingHelper.votingPercentage(propBlock))
+    }
 }
