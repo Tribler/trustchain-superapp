@@ -281,8 +281,9 @@ class VotingActivity : AppCompatActivity() {
                 if (voteProposals != currentProposals) {
                     voteProposals.clear()
                     voteProposals.addAll(currentProposals)
-                    adapter.notifyDataSetChanged()
                 }
+
+                adapter.notifyDataSetChanged()
 
                 delay(1000)
             }

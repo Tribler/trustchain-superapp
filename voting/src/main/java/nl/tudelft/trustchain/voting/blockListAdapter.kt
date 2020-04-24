@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.voting
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -53,7 +55,19 @@ class blockListAdapter(
 
         holder.propDate.text = DateFormat.format("EEE MMM d HH:mm", myDataset[position].timestamp).toString()
 
-        holder.progressBar.progress = vh.votingPercentage(myDataset[position], 1)
+        try {
+            val bar = holder.progressBar
+            bar.progress = vh.votingPercentage(myDataset[position], 1)
+
+            if (bar.progress == 100) {
+               bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
+            } else {
+                bar.progressTintList = ColorStateList.valueOf(Color.RED)
+            }
+
+        } catch (e: Exception) {
+            holder.progressBar.progress = 0
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
