@@ -29,30 +29,8 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        handleWalletNavigation()
         val navController = findNavController()
-        val vWalletFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.wallet"
-        )
-        val vWalletFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.wallet"
-        )
-        if ((vWalletFileMainNet.exists() && vWalletFileMainNet.exists()) && !WalletManagerAndroid.isInitialized()) {
-            navController.navigate(R.id.daoLoginChoice)
-        } else if ((vWalletFileMainNet.exists() || vWalletFileTestNet.exists()) && !WalletManagerAndroid.isInitialized()) {
-            val params = when (vWalletFileTestNet.exists()) {
-                true -> BitcoinNetworkOptions.TEST_NET
-                false -> BitcoinNetworkOptions.PRODUCTION
-            }
-            val config = WalletManagerConfiguration(params)
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config).init()
-            navController.navigate(R.id.blockchainDownloadFragment)
-        } else if (!vWalletFileMainNet.exists() && !vWalletFileTestNet.exists()) {
-            navController.navigate(R.id.daoLoginChoice)
-        }
-
         val args = BitcoinFragmentArgs.fromBundle(requireArguments())
         if (args.showDownload) {
             navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
@@ -113,6 +91,35 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun handleWalletNavigation() {
+        val navController = findNavController()
+
+        val vWalletFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.wallet"
+        )
+
+        val vWalletFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.wallet"
+        )
+
+        if ((vWalletFileMainNet.exists() && vWalletFileMainNet.exists()) && !WalletManagerAndroid.isInitialized()) {
+            navController.navigate(R.id.daoLoginChoice)
+        } else if ((vWalletFileMainNet.exists() || vWalletFileTestNet.exists()) && !WalletManagerAndroid.isInitialized()) {
+            val params = when (vWalletFileTestNet.exists()) {
+                true -> BitcoinNetworkOptions.TEST_NET
+                false -> BitcoinNetworkOptions.PRODUCTION
+            }
+            val config = WalletManagerConfiguration(params)
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config).init()
+            navController.navigate(R.id.blockchainDownloadFragment)
+        } else if (!vWalletFileMainNet.exists() && !vWalletFileTestNet.exists()) {
+            navController.navigate(R.id.daoLoginChoice)
         }
     }
 
