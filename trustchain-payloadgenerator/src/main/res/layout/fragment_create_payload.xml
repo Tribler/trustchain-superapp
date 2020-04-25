@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="5dp"
@@ -36,7 +35,7 @@
             android:id="@+id/txtExplanationAsk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="I have BTC, I want Dymbe $"
+            android:text="ASK: I have Dymbe $, I want BTC"
             android:paddingHorizontal="3dp" />
 
     </LinearLayout>
@@ -63,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:hint="Enter Amount Available" />
+            android:hint="Enter Amount of Dymbe $ Available" />
 
         <TextView
             android:id="@+id/txtPrice"
@@ -79,7 +78,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:singleLine="true"
-            android:hint="Price" />
+            android:hint="Enter Price in Bitcoin" />
 
         <Button
             android:id="@+id/btnCreatePayload"

@@ -19,7 +19,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="monospace"
                 android:lineSpacingExtra="24sp"
-                android:text="Balance: 12.0 BTC"
+                android:text="Balance: N/A BTC"
                 android:textAlignment="center"
                 android:textSize="36sp" />
 
@@ -186,7 +186,7 @@
                         android:id="@+id/entrance_fee_proposal"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="12.0 BTC" />
+                        android:text="N/A BTC" />
 
                     <TextView
                         android:id="@+id/voting_threshold_proposal"

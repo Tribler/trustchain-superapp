@@ -1,17 +1,23 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.*
+import android.widget.Toast
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
+import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.Address
-import org.bitcoinj.script.Script
+import org.bitcoinj.core.NetworkParameters
 
 /**
  * A simple [Fragment] subclass.
@@ -29,7 +35,13 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         if (!WalletManagerAndroid.isInitialized()) {
             navController.navigate(R.id.daoLoginChoice)
         }
+
+        val args = BitcoinFragmentArgs.fromBundle(requireArguments())
+        if (args.showDownload) {
+            navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+        }
     }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
@@ -60,12 +72,12 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.item_blockchain_download_progress -> {
+            R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
                 true
             }
-            R.id.item_blockchain_refresh -> {
+            R.id.item_dao_overview_refresh -> {
                 this.refresh(true)
                 Log.i(
                     "Coin",
@@ -78,36 +90,34 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 )
                 true
             }
+            R.id.item_dao_logout -> {
+                Log.i("Coin", "Logging out of current DAO user")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoLoginChoice())
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun initClickListeners() {
-        show_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to MySharedWalletsFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToMySharedWalletsFragment())
+        button_copy_public_address.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            copyToClipboard(walletManager.protocolAddress().toString())
         }
 
-        create_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to CreateSWFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToCreateSWFragment())
-        }
-
-        search_wallet_button.setOnClickListener {
-            Log.i("Coin", "Navigating from BitcoinFragment to JoinNetworkFragment")
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToJoinNetworkFragment())
-        }
-
-        import_custom_keys.setOnClickListener {
-            val dialog = ImportKeyDialog()
-            dialog.setTargetFragment(this, 0)
-            dialog.show(parentFragmentManager, "Import Key")
+        button_copy_wallet_seed.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            val seed = walletManager.toSeed()
+            copyToClipboard("${seed.seed}, ${seed.creationTime}")
         }
 
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
             }, 1500)
         }
     }
@@ -116,7 +126,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         if (animation!!) {
             bitcoin_refresh_swiper.isRefreshing = true
             Handler().postDelayed({
-                bitcoin_refresh_swiper.isRefreshing = false
+                try {
+                    bitcoin_refresh_swiper.isRefreshing = false
+                } catch (e: IllegalStateException) {
+                }
             }, 1500)
         }
 
@@ -126,20 +139,17 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
         var walletManager = WalletManagerAndroid.getInstance()
 
-        walletStatus.text = "Status: ${walletManager.kit.state()}"
         walletBalance.text =
-            "Bitcoin available: ${walletManager.kit.wallet().balance.toFriendlyString()}"
-        chosenNetwork.text = "Network: ${walletManager.params.id}"
+            "${walletManager.kit.wallet().balance.toFriendlyString()}"
+        if (walletManager.params.id === NetworkParameters.ID_MAINNET) {
+            chosenNetwork.text = "Production Network"
+        } else {
+            chosenNetwork.text = "Test Network"
+        }
         val seed = walletManager.toSeed()
-        walletSeed.setText("${seed.seed}, ${seed.creationTime}")
-        yourPublicHex.text = "Public (Protocol) Key: ${walletManager.networkPublicECKeyHex()}"
-        protocolKey.setText(
-            Address.fromKey(
-                walletManager.params,
-                walletManager.protocolECKey(),
-                Script.ScriptType.P2PKH
-            ).toString()
-        )
+        walletSeed.text = "${seed.seed}, ${seed.creationTime}"
+        yourPublicHex.text = walletManager.networkPublicECKeyHex()
+        protocolKey.text = walletManager.protocolAddress().toString()
 
         requireActivity().invalidateOptionsMenu()
     }
@@ -150,6 +160,7 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        showNavBar()
         return inflater.inflate(R.layout.fragment_bitcoin, container, false)
     }
 
@@ -172,9 +183,18 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 AddressPrivateKeyPair(address, privateKey)
             )
 
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
+            try {
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                    .setConfiguration(config)
+                    .init()
+            } catch (t: Throwable) {
+                Toast.makeText(
+                    this.requireContext(),
+                    "Something went wrong while initializing the new wallet. ${t.message ?: "No further information"}.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
         } else {
             WalletManagerAndroid.getInstance().addKey(privateKey)
         }
@@ -185,5 +205,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         Handler().postDelayed({
             findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
         }, 1500)
+    }
+
+    fun copyToClipboard(text: String) {
+        val clipboard = getSystemService(this.requireContext(), ClipboardManager::class.java)!!
+        val clip = ClipData.newPlainText(text, text)
+        clipboard.setPrimaryClip(clip)
     }
 }
