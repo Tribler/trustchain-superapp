@@ -5,7 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.currencyii.MainActivity
+import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -30,6 +30,12 @@ enum class AppDefinition(
         R.color.dark_gray,
         DebugActivity::class.java
     ),
+    CURRENCY_II(
+        R.drawable.ic_bitcoin,
+        "Currency II",
+        R.color.metallic_gold,
+        CurrencyIIMainActivity::class.java
+    ),
     TRUSTCHAIN_TRADER(
         R.drawable.ic_device_hub_black_24dp,
         "AI trading bot",
@@ -41,12 +47,6 @@ enum class AppDefinition(
         "Market Bot",
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
-    ),
-    CURRENCYII(
-        R.drawable.ic_attach_money_black_24dp,
-        "Currency",
-        R.color.blue,
-        MainActivity::class.java
     ),
     FOC(
         R.drawable.ic_naruto,

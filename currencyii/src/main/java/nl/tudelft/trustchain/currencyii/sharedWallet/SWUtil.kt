@@ -1,16 +1,20 @@
 package nl.tudelft.trustchain.currencyii.sharedWallet
 
 import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.min
 
 object SWUtil {
+
+    /**
+     * The minimal tx amount defined for creating transactions to avoid dusty transactions
+     */
+    const val MINIMAL_TRANSACTION_AMOUNT: Int = 5000
+
     /**
      * Generate a random 128 bit string
      * From: https://sakthipriyan.com/2017/04/02/creating-base64-uuid-in-java.html
@@ -28,13 +32,6 @@ object SWUtil {
     @JvmStatic
     fun parseTransaction(transaction: TrustChainTransaction): JsonObject {
         return stringToJsonObject(transaction["message"].toString())
-    }
-
-    @JvmStatic
-    fun parseJSONArray(jsonArray: JsonArray): ArrayList<String> {
-        return Array(jsonArray.size()) {
-            jsonArray.get(it).asString
-        }.toCollection(ArrayList())
     }
 
     @JvmStatic

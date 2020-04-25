@@ -49,7 +49,7 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.currencyii.MainActivity"
+            android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity

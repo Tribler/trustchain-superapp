@@ -36,23 +36,30 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
     ): View? {
         // Inflate the layout for this fragment
         val fragment = inflater.inflate(R.layout.fragment_blockchain_download, container, false)
-        fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
-            "${WalletManagerAndroid.getInstance().progress}%"
-        fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
-            WalletManagerAndroid.getInstance().progress
-        thread {
-            while (WalletManagerAndroid.getInstance().progress < 100) {
-                Thread.sleep(500)
-                fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
-                    "${WalletManagerAndroid.getInstance().progress}%"
-                fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
-                    WalletManagerAndroid.getInstance().progress
-            }
+        if (WalletManagerAndroid.isInitialized()) {
             fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
-                "Fully Synced!"
-            fragment.findViewById<Button>(R.id.bitcoin_progress_continue).text =
-                "Continue"
+                "${WalletManagerAndroid.getInstance().progress}%"
+            fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
+                WalletManagerAndroid.getInstance().progress
+            thread {
+                // TODO: find a better way of handling uninitialized wallet managers while not stopping the while loop
+                while (WalletManagerAndroid.getInstance().progress < 100) {
+                    Thread.sleep(500)
+                    if (!WalletManagerAndroid.isInitialized()) {
+                        break
+                    }
+                    fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
+                        "${WalletManagerAndroid.getInstance().progress}%"
+                    fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
+                        WalletManagerAndroid.getInstance().progress
+                }
+                fragment.findViewById<TextView>(R.id.bitcoin_download_percentage).text =
+                    "Fully Synced!"
+                fragment.findViewById<Button>(R.id.bitcoin_progress_continue).text =
+                    "Continue"
+            }
         }
+        hideNavBar()
         return fragment
     }
 
