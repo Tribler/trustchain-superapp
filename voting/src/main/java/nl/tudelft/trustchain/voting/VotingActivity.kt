@@ -25,7 +25,6 @@ import nl.tudelft.trustchain.common.util.VotingHelper
 import nl.tudelft.trustchain.common.util.VotingMode
 import org.json.JSONException
 import org.json.JSONObject
-import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
@@ -72,12 +71,12 @@ class VotingActivity : AppCompatActivity() {
 
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals)
+        adapter = blockListAdapter(voteProposals, vh)
 
-        adapter.onItemClick = {
+        adapter.onItemClick = { block ->
             try {
-                showNewCastVoteDialog(it)
-                showVoteCompletenessToast(it)
+                showNewCastVoteDialog(block)
+                showVoteCompletenessToast(block)
             } catch (e: Exception) {
                 printShortToast(e.message.toString())
             }
@@ -111,7 +110,7 @@ class VotingActivity : AppCompatActivity() {
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
 
-        var votingMode = VotingMode.THRESHOLD
+        var votingMode = VotingMode.YESNO
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
@@ -282,8 +281,9 @@ class VotingActivity : AppCompatActivity() {
                 if (voteProposals != currentProposals) {
                     voteProposals.clear()
                     voteProposals.addAll(currentProposals)
-                    adapter.notifyDataSetChanged()
                 }
+
+                adapter.notifyDataSetChanged()
 
                 delay(1000)
             }
