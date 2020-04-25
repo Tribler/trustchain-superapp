@@ -165,7 +165,6 @@ class DAOCreateFragment : Fragment() {
             Log.w("Coin", "Renamed TestNet chain file")
         }
 
-
         // Close the current wallet manager if there is one running, blocks thread until it is closed
         if (WalletManagerAndroid.isInitialized()) {
             WalletManagerAndroid.close()
