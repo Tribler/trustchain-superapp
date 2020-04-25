@@ -32,29 +32,13 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         return inflater.inflate(R.layout.fragment_my_daos, container, false)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.dao_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.my_daos_plus_btn -> {
-                Log.i("Coin", "Opened DAO plus modal")
-                val dialog = MyDAOsAddDialog()
-                dialog.setTargetFragment(this, 0)
-                dialog.show(parentFragmentManager, "Add DAO")
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
-        }
-    }
-
     private fun initMyDAOsView() {
+        join_dao_fab.setOnClickListener {
+            Log.i("Coin", "Opened DAO plus modal")
+            val dialog = MyDAOsAddDialog()
+            dialog.setTargetFragment(this, 0)
+            dialog.show(parentFragmentManager, "Add DAO")
+        }
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
         val adaptor =

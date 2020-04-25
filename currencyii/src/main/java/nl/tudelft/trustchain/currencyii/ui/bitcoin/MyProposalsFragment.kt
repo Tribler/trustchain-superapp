@@ -93,7 +93,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
 
         for (peer in allUsers) {
             try {
-                withTimeout(JoinNetworkFragment.SW_CRAWLING_TIMEOUT_MILLI) {
+                withTimeout(JoinDAOFragment.SW_CRAWLING_TIMEOUT_MILLI) {
                     trustchain.crawlChain(peer)
                     val crawlResult = trustchain
                         .getChainByUser(peer.publicKey.keyToBin())
