@@ -22,7 +22,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
+class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
@@ -113,7 +113,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
             // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
-                this@JoinNetworkFragment,
+                this@JoinDAOFragment,
                 fetchedWallets,
                 publicKey,
                 "Click to join",
@@ -258,7 +258,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
     companion object {
         @JvmStatic
-        fun newInstance() = JoinNetworkFragment()
+        fun newInstance() = JoinDAOFragment()
 
         public const val SW_CRAWLING_TIMEOUT_MILLI: Long = 1_000 * 10
     }
