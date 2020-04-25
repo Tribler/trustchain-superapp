@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 import org.bitcoinj.crypto.MnemonicCode
 import org.bitcoinj.crypto.MnemonicException
+import java.io.File
 
 /**
  * A simple [Fragment] subclass.
@@ -74,7 +76,8 @@ class DAOCreateFragment : Fragment() {
         } catch (e: MnemonicException) {
             Toast.makeText(
                 this.requireContext(),
-                "The mnemonic seed provided is not correct. ${e.message ?: "No further information"}.",
+                "The mnemonic seed provided is not correct. ${e.message
+                    ?: "No further information"}.",
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -103,6 +106,65 @@ class DAOCreateFragment : Fragment() {
                 AddressPrivateKeyPair("", privateKeys[0])
             )
         }
+        val vWalletFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.wallet"
+        )
+        val vChainFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.spvchain"
+        )
+        val vWalletFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.wallet"
+        )
+        val vChainFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.spvchain"
+        )
+
+        var fileTrailer = System.currentTimeMillis()
+        if (vWalletFileMainNet.exists()) {
+            vWalletFileMainNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "_backup_main_net_wallet_$fileTrailer"
+                )
+            )
+            Log.w("Coin", "Renamed MainNet wallet file")
+        }
+
+        if (vChainFileMainNet.exists()) {
+            vChainFileMainNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "_backup_main_net_spvchain_$fileTrailer"
+                )
+            )
+            Log.w("Coin", "Renamed MainNet chain file")
+        }
+
+        fileTrailer = System.currentTimeMillis()
+        if (vWalletFileTestNet.exists()) {
+            vWalletFileTestNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "_backup_test_net_wallet_$fileTrailer"
+                )
+            )
+            Log.w("Coin", "Renamed TestNet wallet file")
+        }
+
+        if (vChainFileTestNet.exists()) {
+            vChainFileTestNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "_backup_test_net_spvchain_$fileTrailer"
+                )
+            )
+            Log.w("Coin", "Renamed TestNet chain file")
+        }
+
 
         // Close the current wallet manager if there is one running, blocks thread until it is closed
         if (WalletManagerAndroid.isInitialized()) {
@@ -116,7 +178,8 @@ class DAOCreateFragment : Fragment() {
         } catch (t: Throwable) {
             Toast.makeText(
                 this.requireContext(),
-                "Something went wrong while initializing the wallet. ${t.message ?: "No further information"}.",
+                "Something went wrong while initializing the wallet. ${t.message
+                    ?: "No further information"}.",
                 Toast.LENGTH_SHORT
             ).show()
             return

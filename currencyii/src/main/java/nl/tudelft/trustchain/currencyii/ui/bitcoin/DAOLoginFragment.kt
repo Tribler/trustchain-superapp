@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_login_choice.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import java.io.File
 
 /**
  * A simple [Fragment] subclass.
@@ -33,6 +33,58 @@ class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
                 true -> BitcoinNetworkOptions.TEST_NET
                 false -> BitcoinNetworkOptions.PRODUCTION
             }
+
+            val vWalletFileMainNet = File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.wallet"
+            )
+            val vChainFileMainNet = File(
+                this.requireContext().applicationContext.filesDir,
+                "$MAIN_NET_WALLET_NAME.spvchain"
+            )
+            val vWalletFileTestNet = File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.wallet"
+            )
+            val vChainFileTestNet = File(
+                this.requireContext().applicationContext.filesDir,
+                "$TEST_NET_WALLET_NAME.spvchain"
+            )
+
+            if (vWalletFileMainNet.exists() && vWalletFileTestNet.exists()) {
+                if (production_testnet_input_load_existing.isChecked) {
+                    val fileTrailer = System.currentTimeMillis()
+                    vWalletFileMainNet.renameTo(
+                        File(
+                            this.requireContext().applicationContext.filesDir,
+                            "_backup_main_net_wallet_$fileTrailer"
+                        )
+                    )
+                    vChainFileMainNet.renameTo(
+                        File(
+                            this.requireContext().applicationContext.filesDir,
+                            "_backup_main_net_spvchain_$fileTrailer"
+                        )
+                    )
+                    Log.w("Coin", "Renamed MainNet file")
+                } else {
+                    val fileTrailer = System.currentTimeMillis()
+                    vWalletFileTestNet.renameTo(
+                        File(
+                            this.requireContext().applicationContext.filesDir,
+                            "_backup_test_net_wallet_$fileTrailer"
+                        )
+                    )
+                    vChainFileTestNet.renameTo(
+                        File(
+                            this.requireContext().applicationContext.filesDir,
+                            "_backup_test_net_spvchain_$fileTrailer"
+                        )
+                    )
+                    Log.w("Coin", "Renamed TestNet file")
+                }
+            }
+
             val config = WalletManagerConfiguration(params)
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config).init()

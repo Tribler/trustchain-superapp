@@ -12,12 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
-import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.NetworkParameters
+import java.io.File
 
 /**
  * A simple [Fragment] subclass.
@@ -32,7 +30,26 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         super.onViewCreated(view, savedInstanceState)
 
         val navController = findNavController()
-        if (!WalletManagerAndroid.isInitialized()) {
+        val vWalletFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.wallet"
+        )
+        val vWalletFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.wallet"
+        )
+        if ((vWalletFileMainNet.exists() && vWalletFileMainNet.exists()) && !WalletManagerAndroid.isInitialized()) {
+            navController.navigate(R.id.daoLoginChoice)
+        } else if ((vWalletFileMainNet.exists() || vWalletFileTestNet.exists()) && !WalletManagerAndroid.isInitialized()) {
+            val params = when (vWalletFileTestNet.exists()) {
+                true -> BitcoinNetworkOptions.TEST_NET
+                false -> BitcoinNetworkOptions.PRODUCTION
+            }
+            val config = WalletManagerConfiguration(params)
+            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                .setConfiguration(config).init()
+            navController.navigate(R.id.blockchainDownloadFragment)
+        } else if (!vWalletFileMainNet.exists() && !vWalletFileTestNet.exists()) {
             navController.navigate(R.id.daoLoginChoice)
         }
 
@@ -190,7 +207,8 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             } catch (t: Throwable) {
                 Toast.makeText(
                     this.requireContext(),
-                    "Something went wrong while initializing the new wallet. ${t.message ?: "No further information"}.",
+                    "Something went wrong while initializing the new wallet. ${t.message
+                        ?: "No further information"}.",
                     Toast.LENGTH_SHORT
                 ).show()
                 return
