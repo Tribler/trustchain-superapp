@@ -32,7 +32,7 @@ enum class AppDefinition(
     ),
     TRUSTCHAIN_TRADER(
         R.drawable.ic_device_hub_black_24dp,
-        "Trader",
+        "AI trading bot",
         R.color.blue,
         TrustChainTraderActivity::class.java
     ),
