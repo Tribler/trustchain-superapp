@@ -57,10 +57,20 @@ class blockListAdapter(
 
         try {
             val bar = holder.progressBar
-            bar.progress = vh.votingPercentage(myDataset[position], 1)
+            var thresholdNotMade = false
+            var progressValue = vh.getVoteProgressStatus(myDataset[position], 1)
 
-            if (bar.progress == 100) {
+            if (progressValue == -1) {
+                bar.progress = 100
+                thresholdNotMade = true
+            } else {
+                bar.progress = vh.getVoteProgressStatus(myDataset[position], 1)
+            }
+
+            if (bar.progress == 100 && !thresholdNotMade) {
                 bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
+            } else if (bar.progress == 100 && thresholdNotMade) {
+                bar.progressTintList = ColorStateList.valueOf(Color.RED)
             } else {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
             }

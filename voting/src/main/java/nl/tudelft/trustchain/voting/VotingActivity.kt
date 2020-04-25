@@ -110,7 +110,7 @@ class VotingActivity : AppCompatActivity() {
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
 
-        var votingMode = VotingMode.THRESHOLD
+        var votingMode = VotingMode.YESNO
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
