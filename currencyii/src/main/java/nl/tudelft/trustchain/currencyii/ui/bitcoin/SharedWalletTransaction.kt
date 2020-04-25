@@ -9,10 +9,15 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_shared_wallet_transaction.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.WalletManager
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -27,7 +32,11 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         super.onActivityCreated(savedInstanceState)
 
         button.setOnClickListener {
-            transferFundsClicked()
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    transferFundsClicked()
+                }
+            }
         }
     }
 
@@ -54,80 +63,81 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     }
 
     private fun transferFundsClicked() {
-        Log.i("Coin", "Transfer funds clicked !!!!")
-        if (validateCreationInput()) {
-            val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
-            val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
+        if (!validateTransferInput()) {
+            activity?.runOnUiThread {
+                alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}"
+            }
+        }
+        val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
+        val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
+        val swJoinBlock: TrustChainBlock = getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
+            ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
+        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
 
-            val transferFundsData = getCoinCommunity().askForTransferFundsSignatures(
-                blockHash!!,
+        val transferFundsData = try {
+            getCoinCommunity().proposeTransferFunds(
+                swJoinBlock,
                 bitcoinPublicKey,
                 satoshiTransferAmount
             )
-
-            lifecycleScope.launchWhenStarted {
-                fetchCurrentTransactionStatusLoop(
-                    transferFundsData,
-                    bitcoinPublicKey,
-                    satoshiTransferAmount
-                )
+        } catch (t: Throwable) {
+            Log.i("Coin", "Proposing transfer funds failed. ${t.message ?: "No further information"}.")
+            activity?.runOnUiThread {
+                alert_view.text = t.message ?: "Unexpected error occurred. Try again"
             }
-        } else {
-            alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: 5000"
+            return
+        }
+
+        val signatures = collectSignatures(transferFundsData)
+        try {
+            getCoinCommunity().transferFunds(
+                transferFundsData,
+                walletData,
+                signatures,
+                bitcoinPublicKey,
+                satoshiTransferAmount,
+                ::updateAlertLabel
+            )
+            activity?.runOnUiThread {
+                alert_view.text = "Funds transfered!"
+            }
+        } catch (t: Throwable) {
+            Log.i("Coin", "Transferring funds failed. ${t.message ?: "No further information"}.")
+            resetWalletInitializationValues()
+            activity?.runOnUiThread {
+                alert_view.text = t.message ?: "Unexpected error occurred. Try again"
+            }
         }
     }
 
-    private fun fetchCurrentTransactionStatusLoop(
-        data: SWTransferFundsAskTransactionData,
-        bitcoinPublicKey: String,
-        satoshiAmount: Long
-    ) {
+    private fun updateAlertLabel(progress: Double) {
+        Log.i("Coin", "Coin: broadcast of transfer funds transaction progress: $progress.")
 
-        var finished = false
-        alert_view.text = "Loading... This might take some time."
+        activity?.runOnUiThread {
+            if (progress >= 1) {
+                alert_view?.text = "Transfer funds progress: completed!"
+            } else {
+                val progressString = "%.0f".format(progress * 100)
+                alert_view.text = "Transfer funds progress: $progressString%..."
+            }
+        }
+    }
 
-        while (!finished) {
-            val signatures =
+    private fun collectSignatures(data: SWTransferFundsAskTransactionData): List<String> {
+        var signatures: List<String>? = null
+        activity?.runOnUiThread {
+            alert_view.text = "Loading... This might take some time."
+        }
+
+        while (signatures == null) {
+            signatures =
                 checkSufficientWalletSignatures(data, data.getData().SW_SIGNATURES_REQUIRED)
             if (signatures == null) {
                 Thread.sleep(1_000)
-                continue
             }
-
-            val transactionData = getCoinCommunity().transferFunds(
-                signatures,
-                blockHash!!,
-                bitcoinPublicKey,
-                satoshiAmount
-            )
-
-            fetchCurrentSharedWalletStatusLoop(transactionData, data)
-
-            finished = true
         }
 
-        resetWalletInitializationValues()
-    }
-
-    private fun fetchCurrentSharedWalletStatusLoop(
-        transactionData: WalletManager.TransactionPackage,
-        data: SWTransferFundsAskTransactionData
-    ) {
-        var finished = false
-
-        while (!finished) {
-            val serializedTransaction =
-                getCoinCommunity().fetchBitcoinTransaction(transactionData.transactionId)
-            if (serializedTransaction == null) {
-                Thread.sleep(1_000)
-                continue
-            }
-
-            getCoinCommunity().postTransactionSucceededOnTrustChain(data, serializedTransaction)
-            finished = true
-        }
-
-        resetWalletInitializationValues()
+        return signatures
     }
 
     private fun checkSufficientWalletSignatures(
@@ -144,6 +154,12 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             "Coin",
             "Signatures for ${blockData.SW_UNIQUE_ID}.${blockData.SW_UNIQUE_PROPOSAL_ID}: ${signatures.size}/$requiredSignatures"
         )
+
+        activity?.runOnUiThread {
+            alert_view?.text =
+                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+        }
+
         if (signatures.size >= requiredSignatures) {
             return signatures
         }
@@ -151,13 +167,15 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     }
 
     private fun resetWalletInitializationValues() {
-        alert_view.text = ""
+        activity?.runOnUiThread {
+            alert_view.text = ""
+        }
     }
 
-    private fun validateCreationInput(): Boolean {
+    private fun validateTransferInput(): Boolean {
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
-        return bitcoinPublicKey != "" && satoshiTransferAmount >= 5000 && blockHash != null
+        return bitcoinPublicKey != "" && satoshiTransferAmount >= SWUtil.MINIMAL_TRANSACTION_AMOUNT && blockHash != null
     }
 
     companion object {

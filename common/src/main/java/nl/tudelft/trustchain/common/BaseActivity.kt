@@ -15,7 +15,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 abstract class BaseActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityBaseBinding::inflate)
 
-    private val appBarConfiguration: AppBarConfiguration by lazy {
+    protected open val appBarConfiguration: AppBarConfiguration by lazy {
         AppBarConfiguration(setOf())
     }
 
