@@ -271,27 +271,10 @@ class VotingHelper(
      * Return the string value for a JSON tag in a voting block.
      */
     private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
-
-        // Skip all blocks which are not voting blocks
-        // and don't have a 'message' field in their transaction.
-        if (block.type != votingBlock || !block.transaction.containsKey("message")) {
-            handleInvalidVote(
-                block,
-                "Block was not a voting block or did not contain a 'message' field in its transaction."
-            )
+        if (hasVoteBlockAttributeByKey(block, key)) {
+            return JSONObject(block.transaction["message"].toString()).get(key).toString()
         }
-
-        val voteJSON = try {
-            JSONObject(block.transaction["message"].toString())
-        } catch (e: JSONException) {
-            handleInvalidVote(block, "Voting block did not contain proper JSON.")
-        }
-
-        try {
-            return voteJSON.get(key).toString()
-        } catch (e: JSONException) {
-            handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
-        }
+        handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
     }
 
     /**
