@@ -1,14 +1,11 @@
 package nl.tudelft.trustchain.voting
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.text.SpannableString
 import android.text.format.DateFormat
-import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -53,6 +50,7 @@ class blockListAdapter(
     }
 
     // Display vote proposition
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val proposalBlock = myDataset[position]
 
@@ -60,13 +58,15 @@ class blockListAdapter(
             JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
 
-        holder.propDate.text = DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
+        holder.propDate.text =
+            DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
 
-        holder.propTitle.text = JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
-            .toString()
+        holder.propTitle.text =
+            JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
+                .toString()
 
         if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
-            holder.newIndicator.text = "New"
+            holder.newIndicator.text = "new"
         }
 
         try {
