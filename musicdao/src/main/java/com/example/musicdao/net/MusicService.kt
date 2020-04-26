@@ -1,18 +1,20 @@
 package com.example.musicdao.net
 
 import android.content.Intent
-import android.content.res.Resources.NotFoundException
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.preference.PreferenceManager
 import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicdao.R
 import com.example.musicdao.databinding.FragmentBlankBinding
+import com.frostwire.jlibtorrent.TorrentHandle
+import com.github.se_bastiaan.torrentstream.TorrentOptions
+import com.github.se_bastiaan.torrentstream.TorrentStream
+import com.github.se_bastiaan.torrentstream.listeners.TorrentAddedAlertListener
 import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.turn.ttorrent.client.Client
-import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.android.synthetic.main.fragment_blank.*
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
@@ -29,13 +31,8 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
-import java.io.File
-import java.io.FileOutputStream
-import java.net.InetAddress
-import java.net.URI
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.*
+import kotlin.reflect.typeOf
 
 
 class MusicService : BaseActivity() {
@@ -44,6 +41,7 @@ class MusicService : BaseActivity() {
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
     private var items: MutableList<String> = mutableListOf()
+    private val trackLibrary: TrackLibrary = TrackLibrary()
 
     private var peers: List<Peer> = listOf()
     override val navigationGraph = R.navigation.musicdao_navgraph
@@ -73,50 +71,55 @@ class MusicService : BaseActivity() {
             adapter = viewAdapter
         }
 
-        val community = OverlayConfiguration(
-            Overlay.Factory(MusicDemoCommunity::class.java),
-            listOf(RandomWalk.Factory())
-        )
+//        val community = OverlayConfiguration(
+//            Overlay.Factory(MusicDemoCommunity::class.java),
+//            listOf(RandomWalk.Factory())
+//        )
+//
+//        val settings = TrustChainSettings()
+//        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+//        val store = TrustChainSQLiteStore(Database(driver))
+//        val randomWalk = RandomWalk.Factory()
+//        val trustChainCommunity = OverlayConfiguration(
+//            TrustChainCommunity.Factory(settings, store),
+//            listOf(randomWalk)
+//        )
 
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        val trustChainCommunity = OverlayConfiguration(
-            TrustChainCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
+//        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
+//
+//        IPv8Android.Factory(application)
+//            .setConfiguration(config)
+//            .setPrivateKey(getPrivateKey())
+//            .init()
 
-        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
-
-        IPv8Android.Factory(application)
-            .setConfiguration(config)
-            .setPrivateKey(getPrivateKey())
-            .init()
-
-        items.add("I am " + IPv8Android.getInstance().myPeer.mid)
+//        items.add("I am " + IPv8Android.getInstance().myPeer.mid)
         viewAdapter.notifyDataSetChanged()
 
-        val overlay = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
         registerBlockListener()
         registerBlockSigner()
 
-        sendProposalButton.setOnClickListener {
-            peers = overlay.getPeers()
-            if (peers.isNotEmpty()) {
-                for (peer in peers) {
-                    items.add("Sending to peer ${peer.mid}")
-                    publishRandomTrack(peer)
-                }
-            } else {
-                items.add("No peers found")
-            }
-            viewAdapter.notifyDataSetChanged()
+        torrentButton.setOnClickListener {
+            startStreamingTorrent("magnet:?xt=urn:btih:33B95A7645EE7BD3F7F6F318EE02F19B425EB5EC&dn=Hans+Zimmer+-+The+Lion+King+OST+2019+%5B24Bit%5D+%5BFLAC%5D+vtwin88cube&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2710%2Fannounce&tr=udp%3A%2F%2Fopentor.org%3A2710&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce")
         }
 
         shareTrackButton.setOnClickListener {
             selectLocalTrackFile()
         }
+
+        Thread(Runnable {
+            trackLibrary.startDHT()
+        }).start()
+        updateTorrentClientInfo(1000)
+    }
+
+    private fun updateTorrentClientInfo(period: Long) {
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                val text =
+                    "Torrent client info: UP:${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT NODES: ${trackLibrary.getDhtNodes()}"
+                torrentClientInfo.text = text
+            }
+        }, 0, period)
     }
 
     private fun selectLocalTrackFile() {
@@ -139,92 +142,61 @@ class MusicService : BaseActivity() {
         if (uri != null) {
             //This should be reached when the chooseFile intent is completed and the user selected
             //an audio file
-            shareTorrent(uri)
-        }
-    }
 
-    @Throws(NotFoundException::class)
-    private fun shareTorrent(uri: Uri) {
-        println("Trying to share torrent $uri")
-        val input = applicationContext.contentResolver.openInputStream(uri);
-
-        //TODO generate a suitable signature for this torrent
-        val hash = Random().nextInt().toString() + ".mp3"
-        if (input != null) {
-            val tempFileLocation = "$cacheDir/$hash"
-
-            //TODO currently creates temp copies before seeding, but should not be necessary
-            Files.copy(input, Paths.get(tempFileLocation))
-            val file = File(tempFileLocation)
-
-            //Create a torrent file for the audio file
-            //TODO createdBy
-            val torrent = SharedTorrent.create(file, URI(file.absolutePath), "createdBy")
-            val torrentFile = "$tempFileLocation.torrent"
-            torrent.save(FileOutputStream(torrentFile))
-            val sharedTorrent = SharedTorrent.fromFile(File(torrentFile), cacheDir)
-
-            //Start seeding the torrent off the main thread
-            val thread = Thread(Runnable {
-                try {
-                    val torrentClient = Client(InetAddress.getLocalHost(), sharedTorrent)
-                    torrentClient.share()
-                    Timer().scheduleAtFixedRate(
-                        object : TimerTask() {
-                            override fun run() {
-                                if (torrentClient.torrent.isInitialized) {
-                                    torrentClient.info()
-                                } else {
-                                    println("Initializing torrent")
-                                }
-                            }
-                        }, 0, 5000
-                    )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            })
-            thread.start()
+            val magnet = trackLibrary.seedFile(applicationContext, uri)
+            publishTrack(magnet)
         }
     }
 
     //TODO this function should be removed completely and decoupled into separate functions
-    private fun publishRandomTrack(peer: Peer) {
+    private fun publishTrack(magnet: String) {
         val trackId = Random().nextInt()
         val myPeer = IPv8Android.getInstance().myPeer
 
         val transaction = mapOf(
             "trackId" to trackId,
-            "author" to myPeer.mid,
-            "magnet" to "magnet:?xt=urn:btih:e825e94efe8a5a88c98bd7e0c6b9f1ae6b8d522b"
+            "author" to myPeer.address.toString(),
+            "magnet" to magnet
         )
-        val publicKey = peer.publicKey.keyToBin()
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
         items.add("Creating proposal block")
         viewAdapter.notifyDataSetChanged()
-        trustchain.createProposalBlock("publish_track", transaction, publicKey)
+        trustchain.createProposalBlock("publish_track", transaction, myPeer.publicKey.keyToBin())
     }
 
     private fun registerBlockSigner() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                items.add("Signing block ${block.blockId}")
-                viewAdapter.notifyDataSetChanged()
-                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-            }
-        })
+//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+//        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
+//            override fun onSignatureRequest(block: TrustChainBlock) {
+//                items.add("Signing block ${block.blockId}")
+//                viewAdapter.notifyDataSetChanged()
+//                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+//            }
+//        })
     }
 
     private fun registerBlockListener() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.addListener("publish_track", object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                items.add("BLOCK: ${block.transaction}")
-                viewAdapter.notifyDataSetChanged()
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
+//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+//        trustchain.addListener("publish_track", object : BlockListener {
+//            override fun onBlockReceived(block: TrustChainBlock) {
+//                items.add("SONG: ${block.transaction}")
+//                val magnet = block.transaction["magnet"]
+//                if (magnet != null && magnet is String) startStreamingTorrent(magnet.toString())
+//                viewAdapter.notifyDataSetChanged()
+//                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+//            }
+//        })
+    }
+
+    private fun startStreamingTorrent(magnet: String) {
+        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
+            .saveLocation(applicationContext.cacheDir)
+            .autoDownload(false)
+            .build()
+
+        val torrentStream: TorrentStream = TorrentStream.init(torrentOptions)
+        torrentStream.startStream(magnet)
+        torrentStream.addListener(AudioTorrentStreamHandler(progressBar, applicationContext))
     }
 
     private fun onMessage(packet: Packet) {
