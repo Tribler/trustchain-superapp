@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/fab_margin"
     tools:context=".BlankFragment">
 
     <LinearLayout
@@ -20,19 +22,28 @@
             android:id="@+id/sendProposalButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send proposal block" />
+            android:text="Send proposal block"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/torrentButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test Torrent stream" />
+            android:text="Test Torrent stream"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/shareTrackButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Share track" />
+            android:text="Share track"
+            android:visibility="visible"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/bufferInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -40,13 +51,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <ImageButton
+            android:id="@+id/playButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:src="@android:drawable/ic_media_play"
+            android:visibility="visible"
+            tools:visibility="visible" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_items"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical" >
-
-        </androidx.recyclerview.widget.RecyclerView>
+            android:scrollbars="vertical" />
     </LinearLayout>
 
 </FrameLayout>

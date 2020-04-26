@@ -32,7 +32,7 @@ class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-//        initIPv8()TODO !!!!!!
+        initIPv8()
     }
 
     private fun initIPv8() {

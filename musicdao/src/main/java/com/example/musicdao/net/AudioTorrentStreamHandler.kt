@@ -1,25 +1,40 @@
 package com.example.musicdao.net
 
 import android.content.Context
-import android.media.AudioManager
+import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.net.Uri
-import android.util.Log
+import android.opengl.Visibility
+import android.os.Bundle
+import android.os.PersistableBundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.View.VISIBLE
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import com.example.musicdao.R
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
-import java.io.File
-import java.lang.Exception
 
-class AudioTorrentStreamHandler(private val progressBar: ProgressBar, val context: Context): TorrentListener, MediaPlayer.OnPreparedListener {
+
+class AudioTorrentStreamHandler(
+    private val progressBar: ProgressBar,
+    val context: Context, val bufferInfo: TextView, val torrentButton: ImageButton
+) : TorrentListener, MediaPlayer.OnPreparedListener {
     private var playingAudio = false
+    private val BUFFER_PIECES = 3
     private var timerStart: Long = 0
 
     override fun onStreamReady(torrent: Torrent) {
+        this.bufferInfo.text = "Downloading torrent: ${torrent.videoFile.name}\n Torrent state: ${torrent.state}"
         println("Stream completed! ${torrent.videoFile}")
+        this.progressBar.progress = 100
 
         val ms = System.currentTimeMillis() - timerStart
         println("Took $ms ms")
@@ -31,6 +46,7 @@ class AudioTorrentStreamHandler(private val progressBar: ProgressBar, val contex
         torrent.startDownload()
         timerStart = System.currentTimeMillis()
 
+        this.bufferInfo.text = "Downloading torrent: ${torrent.videoFile.name}\n Torrent state: ${torrent.state}"
         println("Prepared: " + torrent.videoFile)
     }
 
@@ -43,17 +59,29 @@ class AudioTorrentStreamHandler(private val progressBar: ProgressBar, val contex
     }
 
     override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
-        if (!playingAudio && status.bufferProgress == 100) {
+        println("BufferProgress: ${status.bufferProgress}, progress: ${status.progress}, done: ${torrent.hasInterestedBytes()}")
+        this.progressBar.progress = status.progress.toInt()
+
+        if (status.bufferProgress <= BUFFER_PIECES) {
+            this.bufferInfo.text = "Downloading torrent: ${torrent.videoFile.name}\n Torrent state: BUFFERING\n ${(status.bufferProgress / BUFFER_PIECES) * 100}%"
+        } else {
+            this.bufferInfo.text =
+                "Downloading torrent: ${torrent.videoFile.name}\n Torrent state: STREAMING\n Total file progress: ${((status.progress / 100) * 100).toInt()}%"
+        }
+
+        if (!playingAudio && status.bufferProgress >= BUFFER_PIECES) {
             MediaPlayer().apply {
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
                 setDataSource(context, torrent.videoFile.toUri())
                 setOnPreparedListener(this@AudioTorrentStreamHandler)
                 prepareAsync()
             }
             playingAudio = true
         }
-
-        println("BufferProgress: ${status.bufferProgress}, progress: ${status.progress}")
-        this.progressBar.progress = status.bufferProgress
     }
 
     override fun onStreamError(torrent: Torrent, e: Exception) {
@@ -61,7 +89,16 @@ class AudioTorrentStreamHandler(private val progressBar: ProgressBar, val contex
     }
 
     override fun onPrepared(mp: MediaPlayer) {
-        mp.start()
+        this.torrentButton.isClickable = true
+        this.torrentButton.setOnClickListener {
+            if (mp.isPlaying) {
+                this.torrentButton.setImageResource(android.R.drawable.ic_media_play)
+                mp.pause()
+            } else {
+                this.torrentButton.setImageResource(android.R.drawable.ic_media_pause)
+                mp.start()
+            }
+        }
     }
 
 }
