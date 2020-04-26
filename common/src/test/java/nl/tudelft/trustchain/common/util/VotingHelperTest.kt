@@ -53,7 +53,6 @@ class VotingHelperTest {
         community.endpoint = getEndpoint()
         community.network = Network()
         community.maxPeers = 20
-        community.cryptoProvider = JavaCryptoProvider
         return community
     }
 
