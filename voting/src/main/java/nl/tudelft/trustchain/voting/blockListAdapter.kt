@@ -2,9 +2,13 @@ package nl.tudelft.trustchain.voting
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.text.SpannableString
 import android.text.format.DateFormat
+import android.text.style.RelativeSizeSpan
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -32,6 +36,7 @@ class blockListAdapter(
         val progressBar: ProgressBar = cardView.findViewById(R.id.progressBar3)
         val propTitle: TextView = cardView.findViewById(R.id.propTitle)
         val propDate: TextView = cardView.findViewById(R.id.propDate)
+        val newIndicator: TextView = cardView.findViewById(R.id.newIndicator)
     }
 
     // Create new views (invoked by the layout manager)
@@ -49,22 +54,31 @@ class blockListAdapter(
 
     // Display vote proposition
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        val proposalBlock = myDataset[position]
+
         holder.propTitle.text =
-            JSONObject(myDataset[position].transaction["message"].toString()).get("VOTE_SUBJECT")
+            JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
                 .toString()
 
-        holder.propDate.text = DateFormat.format("EEE MMM d HH:mm", myDataset[position].timestamp).toString()
+        holder.propDate.text = DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
+
+        holder.propTitle.text = JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
+            .toString()
+
+        if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
+            holder.newIndicator.text = "New"
+        }
 
         try {
             val bar = holder.progressBar
             var thresholdNotMade = false
-            var progressValue = vh.getVoteProgressStatus(myDataset[position], 1)
+            val progressValue = vh.getVoteProgressStatus(proposalBlock, 1)
 
             if (progressValue == -1) {
                 bar.progress = 100
                 thresholdNotMade = true
             } else {
-                bar.progress = vh.getVoteProgressStatus(myDataset[position], 1)
+                bar.progress = vh.getVoteProgressStatus(proposalBlock, 1)
             }
 
             if (bar.progress == 100 && !thresholdNotMade) {

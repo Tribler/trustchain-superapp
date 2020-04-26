@@ -271,23 +271,29 @@ class VotingActivity : AppCompatActivity() {
     private fun periodicUpdate() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
-                        it
-                    )
-                }.asReversed()
-
-                // Update vote proposal set
-                if (voteProposals != currentProposals) {
-                    voteProposals.clear()
-                    voteProposals.addAll(currentProposals)
-                }
-
-                adapter.notifyDataSetChanged()
-
+                proposalListUpdate()
                 delay(1000)
             }
         }
+    }
+
+    /**
+     * Update the list of proposals
+     */
+    private fun proposalListUpdate() {
+        val currentProposals = tch.getBlocksByType("voting_block").filter {
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
+                it
+            )
+        }.asReversed()
+
+        // Update vote proposal set
+        if (voteProposals != currentProposals) {
+            voteProposals.clear()
+            voteProposals.addAll(currentProposals)
+        }
+
+        adapter.notifyDataSetChanged()
     }
 
     /**
