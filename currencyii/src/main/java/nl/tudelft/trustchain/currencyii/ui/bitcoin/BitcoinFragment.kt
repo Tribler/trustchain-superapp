@@ -107,10 +107,19 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             "$TEST_NET_WALLET_NAME.wallet"
         )
 
-        if ((vWalletFileMainNet.exists() && vWalletFileMainNet.exists()) && !WalletManagerAndroid.isInitialized()) {
+        val mainNetWalletExists = vWalletFileMainNet.exists()
+        val testNetWalletExists = vWalletFileTestNet.exists()
+        val hasTwoWalletFiles = mainNetWalletExists && testNetWalletExists
+        val hasOneWalletFile = mainNetWalletExists xor testNetWalletExists
+        val hasNoWalletFiles = !mainNetWalletExists && !testNetWalletExists
+
+        if (hasTwoWalletFiles && !WalletManagerAndroid.isInitialized()) {
+            // Go to login, user has 2 wallet files and wallet manager is not initialized
+            // TODO: go to screen to choose between main net and test net wallet
             navController.navigate(R.id.daoLoginChoice)
-        } else if ((vWalletFileMainNet.exists() || vWalletFileTestNet.exists()) && !WalletManagerAndroid.isInitialized()) {
-            val params = when (vWalletFileTestNet.exists()) {
+        } else if (hasOneWalletFile && !WalletManagerAndroid.isInitialized()) {
+            // Initialize wallet with the single wallet file that the user has stored
+            val params = when (testNetWalletExists) {
                 true -> BitcoinNetworkOptions.TEST_NET
                 false -> BitcoinNetworkOptions.PRODUCTION
             }
@@ -118,7 +127,9 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             WalletManagerAndroid.Factory(this.requireContext().applicationContext)
                 .setConfiguration(config).init()
             navController.navigate(R.id.blockchainDownloadFragment)
-        } else if (!vWalletFileMainNet.exists() && !vWalletFileTestNet.exists()) {
+        } else if (hasNoWalletFiles) {
+            // Go to login to create/import a bitcoin wallet, user has no wallet files
+            // TODO: directly go to create/import wallet screen
             navController.navigate(R.id.daoLoginChoice)
         }
     }
