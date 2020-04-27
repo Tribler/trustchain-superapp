@@ -17,11 +17,12 @@
 
             <TextView
                 android:id="@+id/propTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_weight="2"/>
+                android:layout_marginEnd="10dp"
+                android:layout_weight="1"/>
 
             <TextView
                 android:id="@+id/newIndicator"
@@ -29,8 +30,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="right"
-                android:textColor="#BDBDBD"
-                android:layout_weight="1"/>
+                android:textColor="#BDBDBD"/>
 
         </LinearLayout>
 
