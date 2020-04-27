@@ -164,9 +164,12 @@ class VotingActivity : AppCompatActivity() {
 
         // Parse the 'message' field as JSON.
         var voteSubject = ""
+        var votingMode = VotingMode.YESNO
         try {
             val voteJSON = JSONObject(block.transaction["message"].toString())
             voteSubject = voteJSON.get("VOTE_SUBJECT").toString()
+            votingMode = VotingMode.valueOf(voteJSON.get("VOTE_MODE").toString())
+
         } catch (e: JSONException) {
             "Block was a voting block but did not contain " +
                 "proper JSON in its message field: ${block.transaction["message"]}."
@@ -189,10 +192,17 @@ class VotingActivity : AppCompatActivity() {
         }
 
         val castedString = if (hasCasted != null) {
-            "<br><br>" +
-                "<small><b>You have voted</b>: <i>" +
-                hasCasted +
-                "</i></small>"
+            when (votingMode) {
+                VotingMode.YESNO -> {
+                    "<br><br>" +
+                        "<small><b>You have voted</b>: <i>" +
+                        hasCasted +
+                        "</i></small>"
+                }
+                VotingMode.THRESHOLD -> {
+                    "<br><br><small><b>You have voted</b>: <i>Agree</i></small>"
+                }
+            }
         } else {
             ""
         }
@@ -213,7 +223,11 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
-                    "<small><b>" + (if (vh.votingIsComplete(block, threshold)) "Final result" else "Current tally") + "</b>:" +
+                    "<small><b>" + (if (vh.votingIsComplete(
+                        block,
+                        threshold
+                    )
+                ) "Final result" else "Current tally") + "</b>:" +
                     "<br>" +
                     "Yes votes: " + tally.first +
                     " | No votes: " + tally.second + "</small></i>",
@@ -225,17 +239,27 @@ class VotingActivity : AppCompatActivity() {
         if (hasCasted == null) {
             builder.setTitle("Cast vote on proposal:")
 
-            // PositiveButton is always the rightmost button
-            builder.setPositiveButton("YES") { _, _ ->
-                vh.respondToVote(true, block)
-                printShortToast("You voted: YES")
+            when (votingMode) {
+                VotingMode.YESNO -> {
+                    builder.setPositiveButton("YES") { _, _ ->
+                        vh.respondToVote(true, block)
+                        printShortToast("You voted: YES")
+                    }
+
+                    builder.setNegativeButton("NO") { _, _ ->
+                        vh.respondToVote(false, block)
+                        printShortToast("You voted: NO")
+                    }
+                }
+
+                VotingMode.THRESHOLD -> {
+                    builder.setPositiveButton("AGREE") { _, _ ->
+                        vh.respondToVote(true, block)
+                        printShortToast("You voted: AGREE")
+                    }
+                }
             }
 
-            // NegativeButton is always second-from-right button
-            builder.setNegativeButton("NO") { _, _ ->
-                vh.respondToVote(false, block)
-                printShortToast("You voted: NO")
-            }
 
             // NeutralButton is always the leftmost button
             builder.setNeutralButton("CANCEL") { dialog, _ ->

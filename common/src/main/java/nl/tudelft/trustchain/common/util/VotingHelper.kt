@@ -32,8 +32,6 @@ class VotingHelper(
      * @param peers list of the public keys of those eligible to vote.
      */
     fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
-        // TODO: Add vote ID to increase probability of uniqueness.
-
         val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
