@@ -119,6 +119,19 @@ class VotingActivity : AppCompatActivity() {
             }
         }
 
+        val focPropCheckBox = dialogView.findViewById<CheckBox>(R.id.FOCProp)
+        var focProp = false
+        focPropCheckBox.setOnCheckedChangeListener{ _, isChecked ->
+            if (isChecked) {
+                focProp = true
+                switch.isChecked = true
+                switchLabel.text = getString(R.string.threshold_mode)
+                votingMode = VotingMode.THRESHOLD
+            } else {
+                focProp = false
+            }
+        }
+
         builder.setPositiveButton("Create") { _, _ ->
 
             val proposal = dialogView.findViewById<EditText>(R.id.proposalInput).text.toString()
@@ -129,7 +142,6 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            val focProp = dialogView.findViewById<CheckBox>(R.id.FOCProp).isChecked
             vh.startVote(proposal, peers, votingMode, focProp)
             printShortToast("Proposal has been created")
         }
