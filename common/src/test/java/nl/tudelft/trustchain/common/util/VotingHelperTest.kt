@@ -535,4 +535,36 @@ class VotingHelperTest {
         Assert.assertEquals(-1, votingHelper.getVoteProgressStatus(propBlock, 1))
         Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 1))
     }
+
+    @Test
+    fun testProposeFOCFile() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "path/to/file.txt"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "foc_voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToVote(true, propBlock)
+
+        // Verify that the proposal block has been casted
+        Assert.assertTrue(votingHelper.successfulFileProposals().contains(voteSubject))
+    }
 }

@@ -298,13 +298,13 @@ class VotingHelper(
      * Completed and accepted FOC upload proposals
      * returns the filepaths that you successful proposed.
      */
-    private fun successfulFileProposals(): List<String> {
+    fun successfulFileProposals(): List<String> {
 
         // All proposal blocks by the user that have been completed
         val successFileProps = trustChainHelper.getBlocksByType(FOCVotingBlock)
             .filter {
                 it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
-                    it
+                    it, 1 //TODO really don't like this hardcoded threshold, but this should only be in threshold mode
                 )
             }
 
