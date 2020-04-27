@@ -169,7 +169,6 @@ class VotingActivity : AppCompatActivity() {
             val voteJSON = JSONObject(block.transaction["message"].toString())
             voteSubject = voteJSON.get("VOTE_SUBJECT").toString()
             votingMode = VotingMode.valueOf(voteJSON.get("VOTE_MODE").toString())
-
         } catch (e: JSONException) {
             "Block was a voting block but did not contain " +
                 "proper JSON in its message field: ${block.transaction["message"]}."
@@ -237,8 +236,7 @@ class VotingActivity : AppCompatActivity() {
                         VotingMode.THRESHOLD -> {
                             tally.first.toString() + " in favour"
                         }
-                    }
- + "</small></i>",
+                    } + "</small></i>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         )
@@ -267,7 +265,6 @@ class VotingActivity : AppCompatActivity() {
                     }
                 }
             }
-
 
             // NeutralButton is always the leftmost button
             builder.setNeutralButton("CANCEL") { dialog, _ ->
