@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/bitcoinFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.BitcoinFragment"
-        android:label="Home"
+        android:label="Bitcoin Wallet"
         tools:layout="@layout/fragment_bitcoin">
         <action
             android:id="@+id/action_bitcoinFragment_to_blockchainDownloadFragment"
@@ -32,7 +32,7 @@
     <fragment
         android:id="@+id/daoLoginChoice"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOLoginFragment"
-        android:label="Welcome">
+        android:label="Setup Bitcoin Wallet">
         <action
             android:id="@+id/action_daoLoginChoice_to_daoImportOrCreate"
             app:destination="@id/daoImportOrCreate"

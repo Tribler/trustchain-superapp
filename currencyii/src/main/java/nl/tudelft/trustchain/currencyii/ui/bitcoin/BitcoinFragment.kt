@@ -146,6 +146,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             copyToClipboard("${seed.seed}, ${seed.creationTime}")
         }
 
+        button_copy_bitcoin_public_key.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            copyToClipboard(walletManager.networkPublicECKeyHex())
+        }
+
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
             Handler().postDelayed({
