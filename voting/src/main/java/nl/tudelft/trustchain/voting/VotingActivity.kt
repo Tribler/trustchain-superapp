@@ -30,7 +30,7 @@ class VotingActivity : AppCompatActivity() {
 
     private lateinit var vh: VotingHelper
     private lateinit var community: VotingCommunity
-    private lateinit var adapter: blockListAdapter
+    private lateinit var adapter: BlockListAdapter
     private lateinit var tch: TrustChainHelper
 
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
@@ -71,7 +71,7 @@ class VotingActivity : AppCompatActivity() {
 
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals, vh)
+        adapter = BlockListAdapter(voteProposals, vh)
 
         adapter.onItemClick = { block ->
             try {
@@ -300,23 +300,29 @@ class VotingActivity : AppCompatActivity() {
     private fun periodicUpdate() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
-                        it
-                    )
-                }.asReversed()
-
-                // Update vote proposal set
-                if (voteProposals != currentProposals) {
-                    voteProposals.clear()
-                    voteProposals.addAll(currentProposals)
-                }
-
-                adapter.notifyDataSetChanged()
-
+                proposalListUpdate()
                 delay(1000)
             }
         }
+    }
+
+    /**
+     * Update the list of proposals
+     */
+    private fun proposalListUpdate() {
+        val currentProposals = tch.getBlocksByType("voting_block").filter {
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
+                it
+            )
+        }.asReversed()
+
+        // Update vote proposal set
+        if (voteProposals != currentProposals) {
+            voteProposals.clear()
+            voteProposals.addAll(currentProposals)
+        }
+
+        adapter.notifyDataSetChanged()
     }
 
     /**
