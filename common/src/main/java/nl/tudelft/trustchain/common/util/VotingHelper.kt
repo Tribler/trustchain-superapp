@@ -23,6 +23,7 @@ class VotingHelper(
     trustChainCommunity: TrustChainCommunity
 ) {
     private val votingBlock = "voting_block"
+    private val FOCVotingBlock = "foc_voting_block"
     private val myPublicKey = trustChainCommunity.myPeer.publicKey
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
 
@@ -31,7 +32,7 @@ class VotingHelper(
      * @param voteSubject the matter to be voted upon.
      * @param peers list of the public keys of those eligible to vote.
      */
-    fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
+    fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode, FOCProp: Boolean) {
         // TODO: Add vote ID to increase probability of uniqueness.
 
         val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
@@ -46,7 +47,11 @@ class VotingHelper(
         val transaction = voteJSON.toString()
 
         // Create any-counterparty block for the transaction
-        trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
+        if (FOCProp) {
+            trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
+        } else {
+            trustChainHelper.createProposalBlock(transaction, EMPTY_PK, FOCVotingBlock)
+        }
     }
 
     /**
@@ -296,7 +301,7 @@ class VotingHelper(
     private fun successfulFileProposals(): List<String> {
 
         // All proposal blocks by the user that have been completed
-        val successFileProps = trustChainHelper.getBlocksByType("foc_voting_block")
+        val successFileProps = trustChainHelper.getBlocksByType(FOCVotingBlock)
             .filter {
                 it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
                     it

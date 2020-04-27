@@ -79,7 +79,7 @@ class VotingHelperTest {
         val peers = getPeers()
 
         val voteSubject = "There should be tests"
-        votingHelper.startVote(voteSubject, peers, VotingMode.YESNO)
+        votingHelper.startVote(voteSubject, peers, VotingMode.YESNO, false)
 
         // Verify that the proposal block has been casted
         assert(

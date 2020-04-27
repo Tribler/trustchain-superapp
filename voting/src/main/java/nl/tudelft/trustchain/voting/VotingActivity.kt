@@ -6,10 +6,7 @@ import android.os.Bundle
 import android.text.Html
 import android.text.format.DateFormat
 import android.view.LayoutInflater
-import android.widget.EditText
-import android.widget.Switch
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -132,7 +129,8 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers, votingMode)
+            val focProp = dialogView.findViewById<CheckBox>(R.id.FOCProp).isChecked
+            vh.startVote(proposal, peers, votingMode, focProp)
             printShortToast("Proposal has been created")
         }
 
