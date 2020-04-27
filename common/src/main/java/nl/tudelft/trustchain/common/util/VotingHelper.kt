@@ -183,7 +183,7 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(block, threshold) == -1
+        return getVoteProgressStatus(block, threshold) >= 100 || getVoteProgressStatus(block, threshold) == -1
     }
 
     /**
