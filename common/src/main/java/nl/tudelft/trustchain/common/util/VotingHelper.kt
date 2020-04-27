@@ -263,7 +263,7 @@ class VotingHelper(
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
-        if ((block.type != votingBlock  && block.type != FOCVotingBlock)|| !block.transaction.containsKey("message")) {
+        if ((block.type != votingBlock && block.type != FOCVotingBlock) || !block.transaction.containsKey("message")) {
             handleInvalidVote(
                 block,
                 "Block was not a voting block or did not contain a 'message' field in its transaction."
@@ -304,7 +304,7 @@ class VotingHelper(
         val successFileProps = trustChainHelper.getBlocksByType(FOCVotingBlock)
             .filter {
                 it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
-                    it, 1 //TODO really don't like this hardcoded threshold, but this should only be in threshold mode
+                    it, 1 // TODO really don't like this hardcoded threshold, but this should only be in threshold mode
                 )
             }
 

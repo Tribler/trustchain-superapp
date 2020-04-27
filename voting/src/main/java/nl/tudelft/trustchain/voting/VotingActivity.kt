@@ -121,7 +121,7 @@ class VotingActivity : AppCompatActivity() {
 
         val focPropCheckBox = dialogView.findViewById<CheckBox>(R.id.FOCProp)
         var focProp = false
-        focPropCheckBox.setOnCheckedChangeListener{ _, isChecked ->
+        focPropCheckBox.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 focProp = true
                 switch.isChecked = true
