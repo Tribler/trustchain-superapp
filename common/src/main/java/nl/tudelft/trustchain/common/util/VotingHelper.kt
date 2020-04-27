@@ -105,7 +105,7 @@ class VotingHelper(
             }
 
             // Skip all blocks which are not voting blocks.
-            if (it.type != votingBlock) {
+            if (it.type != votingBlock && it.type != FOCVotingBlock) {
                 continue
             }
 
@@ -263,7 +263,7 @@ class VotingHelper(
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
-        if (block.type != votingBlock || !block.transaction.containsKey("message")) {
+        if ((block.type != votingBlock  && block.type != FOCVotingBlock)|| !block.transaction.containsKey("message")) {
             handleInvalidVote(
                 block,
                 "Block was not a voting block or did not contain a 'message' field in its transaction."
