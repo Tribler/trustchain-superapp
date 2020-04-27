@@ -229,8 +229,16 @@ class VotingActivity : AppCompatActivity() {
                     )
                 ) "Final result" else "Current tally") + "</b>:" +
                     "<br>" +
-                    "Yes votes: " + tally.first +
-                    " | No votes: " + tally.second + "</small></i>",
+                    when (votingMode) {
+                        VotingMode.YESNO -> {
+                            "Yes votes: " + tally.first +
+                                " | No votes: " + tally.second
+                        }
+                        VotingMode.THRESHOLD -> {
+                            tally.first.toString() + " in favour"
+                        }
+                    }
+ + "</small></i>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         )
