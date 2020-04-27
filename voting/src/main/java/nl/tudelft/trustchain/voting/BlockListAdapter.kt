@@ -13,12 +13,12 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONObject
 
-class blockListAdapter(
+class BlockListAdapter(
     private val myDataset: List<TrustChainBlock>,
     private val vh: VotingHelper
 ) :
 
-    RecyclerView.Adapter<blockListAdapter.MyViewHolder>() {
+    RecyclerView.Adapter<BlockListAdapter.MyViewHolder>() {
 
     var onItemClick: ((TrustChainBlock) -> Unit)? = null
 
@@ -58,7 +58,7 @@ class blockListAdapter(
         try {
             val bar = holder.progressBar
             var thresholdNotMade = false
-            var progressValue = vh.getVoteProgressStatus(myDataset[position], 1)
+            val progressValue = vh.getVoteProgressStatus(myDataset[position], 1)
 
             if (progressValue == -1) {
                 bar.progress = 100
