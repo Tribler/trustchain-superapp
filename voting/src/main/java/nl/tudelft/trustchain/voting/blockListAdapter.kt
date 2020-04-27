@@ -62,7 +62,11 @@ class blockListAdapter(
             DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
 
         if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
-            holder.newIndicator.text = "new"
+            holder.newIndicator.text = "NEW"
+        } else if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(1, 0) ||
+            vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 1))
+        {
+            holder.newIndicator.text = "VOTED"
         }
 
         try {
@@ -79,8 +83,10 @@ class blockListAdapter(
 
             if (bar.progress == 100 && !thresholdNotMade) {
                 bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
+                holder.newIndicator.text = "COMPLETED"
             } else if (bar.progress == 100 && thresholdNotMade) {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
+                holder.newIndicator.text = "COMPLETED"
             } else {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
             }
