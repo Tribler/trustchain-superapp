@@ -136,7 +136,13 @@ class VotingHelper(
                     noCount++
                     votes.add(it.publicKey.contentToString())
                 }
-                else -> handleInvalidVote(it, "Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(it, "VOTE_REPLY")}'.")
+                else -> handleInvalidVote(
+                    it,
+                    "Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(
+                        it,
+                        "VOTE_REPLY"
+                    )}'."
+                )
             }
         }
 
@@ -172,7 +178,10 @@ class VotingHelper(
 
             val hexKey = string.toString().hexToBytes()
             if (!defaultCryptoProvider.isValidPublicBin(hexKey)) {
-                handleInvalidVote(block, "A public key in the voter list was not valid. Its value was: $string.")
+                handleInvalidVote(
+                    block,
+                    "A public key in the voter list was not valid. Its value was: $string."
+                )
             }
 
             val key = defaultCryptoProvider.keyFromPublicBin(hexKey)
@@ -187,7 +196,10 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(block, threshold) == -1
+        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(
+            block,
+            threshold
+        ) == -1
     }
 
     /**
@@ -209,7 +221,10 @@ class VotingHelper(
 
         val hexKey = proposerKey.hexToBytes()
         if (!defaultCryptoProvider.isValidPublicBin(hexKey)) {
-            handleInvalidVote(block, "The proposer key from the block was not valid. Its value was: $proposerKey.")
+            handleInvalidVote(
+                block,
+                "The proposer key from the block was not valid. Its value was: $proposerKey."
+            )
         }
 
         val key = defaultCryptoProvider.keyFromPublicBin(hexKey)
@@ -244,7 +259,10 @@ class VotingHelper(
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
         if (block.type != votingBlock || !block.transaction.containsKey("message")) {
-            handleInvalidVote(block, "Block was not a voting block or did not contain a 'message' field in its transaction.")
+            handleInvalidVote(
+                block,
+                "Block was not a voting block or did not contain a 'message' field in its transaction."
+            )
         }
 
         val voteJSON = try {
@@ -264,9 +282,28 @@ class VotingHelper(
      * Throw an exception when an invalid vote is encountered.
      */
     private fun handleInvalidVote(block: TrustChainBlock, errorType: String): Nothing {
-        Log.e("vote_debug", "Encountered an invalid voting block with ID ${block.blockId}." +
-            "The reason for invalidity was: $errorType")
+        Log.e(
+            "vote_debug", "Encountered an invalid voting block with ID ${block.blockId}." +
+                "The reason for invalidity was: $errorType"
+        )
         throw Exception(errorType)
+    }
+
+    /**
+     * Completed and accepted FOC upload proposals
+     * returns the filepaths that you successful proposed.
+     */
+    private fun successfulFileProposals(): List<String> {
+
+        // All proposal blocks by the user that have been completed
+        val successFileProps = trustChainHelper.getBlocksByType("foc_voting_block")
+            .filter {
+                it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
+                    it
+                )
+            }
+
+        return successFileProps.map { getVoteBlockAttributesByKey(it, "VOTE_SUBJECT") }
     }
 }
 
