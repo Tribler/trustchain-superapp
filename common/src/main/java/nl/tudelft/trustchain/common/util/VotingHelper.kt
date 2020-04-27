@@ -245,7 +245,7 @@ class VotingHelper(
     }
 
     /**
-     * Checks if a block possesses a specific attribute, without retiring it explicitly
+     * Checks if a block possesses a specific attribute, without retrieving it explicitly
      */
     private fun hasVoteBlockAttributeByKey(block: TrustChainBlock, key: String): Boolean {
 
