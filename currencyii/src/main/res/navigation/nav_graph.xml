@@ -28,6 +28,9 @@
             android:name="showDownload"
             android:defaultValue="false"
             app:argType="boolean" />
+        <action
+            android:id="@+id/action_bitcoinFragment_to_daoImportOrCreate"
+            app:destination="@id/daoImportOrCreate" />
     </fragment>
     <fragment
         android:id="@+id/daoLoginChoice"
@@ -59,7 +62,9 @@
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/bitcoinFragment"
+            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/joinNetworkFragment"

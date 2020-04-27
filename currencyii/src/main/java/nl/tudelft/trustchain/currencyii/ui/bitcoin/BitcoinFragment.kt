@@ -72,22 +72,9 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
                 true
             }
-            R.id.item_dao_overview_refresh -> {
-                this.refresh(true)
-                Log.i(
-                    "Coin",
-                    WalletManagerAndroid.getInstance().kit.wallet().toString(
-                        true,
-                        false,
-                        false,
-                        null
-                    )
-                )
-                true
-            }
-            R.id.item_dao_logout -> {
-                Log.i("Coin", "Logging out of current DAO user")
-                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoLoginChoice())
+            R.id.item_bitcoin_wallet_settings -> {
+                Log.i("Coin", "Navigating from BitcoinFragment to DaoImportOrCreate")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoImportOrCreate())
                 true
             }
             else -> super.onOptionsItemSelected(item)
