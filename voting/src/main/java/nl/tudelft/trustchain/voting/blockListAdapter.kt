@@ -61,10 +61,6 @@ class blockListAdapter(
         holder.propDate.text =
             DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
 
-        holder.propTitle.text =
-            JSONObject(proposalBlock.transaction["message"].toString()).get("VOTE_SUBJECT")
-                .toString()
-
         if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
             holder.newIndicator.text = "new"
         }
