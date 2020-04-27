@@ -14,12 +14,12 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.util.VotingHelper
 import org.json.JSONObject
 
-class blockListAdapter(
+class BlockListAdapter(
     private val myDataset: List<TrustChainBlock>,
     private val vh: VotingHelper
 ) :
 
-    RecyclerView.Adapter<blockListAdapter.MyViewHolder>() {
+    RecyclerView.Adapter<BlockListAdapter.MyViewHolder>() {
 
     var onItemClick: ((TrustChainBlock) -> Unit)? = null
 

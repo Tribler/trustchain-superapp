@@ -30,7 +30,7 @@ class VotingActivity : AppCompatActivity() {
 
     private lateinit var vh: VotingHelper
     private lateinit var community: VotingCommunity
-    private lateinit var adapter: blockListAdapter
+    private lateinit var adapter: BlockListAdapter
     private lateinit var tch: TrustChainHelper
 
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
@@ -71,7 +71,7 @@ class VotingActivity : AppCompatActivity() {
 
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals, vh)
+        adapter = BlockListAdapter(voteProposals, vh)
 
         adapter.onItemClick = { block ->
             try {

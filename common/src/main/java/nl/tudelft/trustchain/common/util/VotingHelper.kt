@@ -110,12 +110,8 @@ class VotingHelper(
                 continue
             }
 
-            try {
-                getVoteBlockAttributesByKey(it, "VOTE_REPLY")
-            } catch (e: Exception) {
-                // Block is the initial vote proposal because it does not have a VOTE_REPLY field.
-                continue
-            }
+            // If no vote_reply present, we are dealing with the proposal block
+            if (!hasVoteBlockAttributeByKey(it, "VOTE_REPLY")) continue
 
             // Check whether the voter is in voting list.
             @SuppressLint
@@ -127,7 +123,7 @@ class VotingHelper(
             }
 
             // Add the votes, or assume a malicious vote if it is not YES or NO.
-            when (getVoteBlockAttributesByKey(it, "VOTE_REPLY")) {
+            when (val voteReply = getVoteBlockAttributesByKey(it, "VOTE_REPLY")) {
                 "YES" -> {
                     yesCount++
                     votes.add(it.publicKey.contentToString())
@@ -136,7 +132,10 @@ class VotingHelper(
                     noCount++
                     votes.add(it.publicKey.contentToString())
                 }
-                else -> handleInvalidVote(it, "Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(it, "VOTE_REPLY")}'.")
+                else -> handleInvalidVote(
+                    it,
+                    "Vote was not 'YES' or 'NO' but: '$voteReply}'."
+                )
             }
         }
 
@@ -172,7 +171,10 @@ class VotingHelper(
 
             val hexKey = string.toString().hexToBytes()
             if (!defaultCryptoProvider.isValidPublicBin(hexKey)) {
-                handleInvalidVote(block, "A public key in the voter list was not valid. Its value was: $string.")
+                handleInvalidVote(
+                    block,
+                    "A public key in the voter list was not valid. Its value was: $string."
+                )
             }
 
             val key = defaultCryptoProvider.keyFromPublicBin(hexKey)
@@ -187,7 +189,10 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(block, threshold) == -1
+        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(
+            block,
+            threshold
+        ) == -1
     }
 
     /**
@@ -209,7 +214,10 @@ class VotingHelper(
 
         val hexKey = proposerKey.hexToBytes()
         if (!defaultCryptoProvider.isValidPublicBin(hexKey)) {
-            handleInvalidVote(block, "The proposer key from the block was not valid. Its value was: $proposerKey.")
+            handleInvalidVote(
+                block,
+                "The proposer key from the block was not valid. Its value was: $proposerKey."
+            )
         }
 
         val key = defaultCryptoProvider.keyFromPublicBin(hexKey)
@@ -237,14 +245,17 @@ class VotingHelper(
     }
 
     /**
-     * Return the string value for a JSON tag in a voting block.
+     * Checks if a block possesses a specific attribute, without retrieving it explicitly
      */
-    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
+    private fun hasVoteBlockAttributeByKey(block: TrustChainBlock, key: String): Boolean {
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
         if (block.type != votingBlock || !block.transaction.containsKey("message")) {
-            handleInvalidVote(block, "Block was not a voting block or did not contain a 'message' field in its transaction.")
+            handleInvalidVote(
+                block,
+                "Block was not a voting block or did not contain a 'message' field in its transaction."
+            )
         }
 
         val voteJSON = try {
@@ -253,19 +264,27 @@ class VotingHelper(
             handleInvalidVote(block, "Voting block did not contain proper JSON.")
         }
 
-        try {
-            return voteJSON.get(key).toString()
-        } catch (e: JSONException) {
-            handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
+        return voteJSON.has(key)
+    }
+
+    /**
+     * Return the string value for a JSON tag in a voting block.
+     */
+    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
+        if (hasVoteBlockAttributeByKey(block, key)) {
+            return JSONObject(block.transaction["message"].toString()).get(key).toString()
         }
+        handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
     }
 
     /**
      * Throw an exception when an invalid vote is encountered.
      */
     private fun handleInvalidVote(block: TrustChainBlock, errorType: String): Nothing {
-        Log.e("vote_debug", "Encountered an invalid voting block with ID ${block.blockId}." +
-            "The reason for invalidity was: $errorType")
+        Log.e(
+            "vote_debug", "Encountered an invalid voting block with ID ${block.blockId}." +
+                "The reason for invalidity was: $errorType"
+        )
         throw Exception(errorType)
     }
 }
