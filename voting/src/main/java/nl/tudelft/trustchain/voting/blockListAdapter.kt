@@ -33,7 +33,7 @@ class blockListAdapter(
         val progressBar: ProgressBar = cardView.findViewById(R.id.progressBar3)
         val propTitle: TextView = cardView.findViewById(R.id.propTitle)
         val propDate: TextView = cardView.findViewById(R.id.propDate)
-        val newIndicator: TextView = cardView.findViewById(R.id.newIndicator)
+        val propIndicator: TextView = cardView.findViewById(R.id.propIndicator)
     }
 
     // Create new views (invoked by the layout manager)
@@ -62,11 +62,11 @@ class blockListAdapter(
             DateFormat.format("EEE MMM d HH:mm", proposalBlock.timestamp).toString()
 
         if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
-            holder.newIndicator.text = "NEW"
+            holder.propIndicator.text = "NEW"
         } else if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(1, 0) ||
             vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 1))
         {
-            holder.newIndicator.text = "VOTED"
+            holder.propIndicator.text = "VOTED"
         }
 
         try {
@@ -83,10 +83,10 @@ class blockListAdapter(
 
             if (bar.progress == 100 && !thresholdNotMade) {
                 bar.progressTintList = ColorStateList.valueOf(Color.GREEN)
-                holder.newIndicator.text = "COMPLETED"
+                holder.propIndicator.text = "COMPLETED"
             } else if (bar.progress == 100 && thresholdNotMade) {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
-                holder.newIndicator.text = "COMPLETED"
+                holder.propIndicator.text = "COMPLETED"
             } else {
                 bar.progressTintList = ColorStateList.valueOf(Color.RED)
             }

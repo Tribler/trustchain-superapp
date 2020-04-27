@@ -25,7 +25,7 @@
                 android:layout_weight="1"/>
 
             <TextView
-                android:id="@+id/newIndicator"
+                android:id="@+id/propIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
