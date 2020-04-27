@@ -63,8 +63,8 @@
     </fragment>
     <fragment
         android:id="@+id/joinNetworkFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.JoinNetworkFragment"
-        android:label="Join Shared Wallet"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.JoinDAOFragment"
+        android:label="Join DAO"
         tools:layout="@layout/fragment_join_network" />
     <fragment
         android:id="@+id/createSWFragment"
@@ -144,7 +144,10 @@
             app:enterAnim="@anim/fragment_fade_enter"
             app:exitAnim="@anim/fragment_fade_exit"
             app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@+id/bitcoinFragment"
+            app:popUpToInclusive="true" />
+        />
         <action
             android:id="@+id/action_myDAOsFragment_to_mySharedWalletsFragment"
             app:destination="@id/mySharedWalletsFragment"

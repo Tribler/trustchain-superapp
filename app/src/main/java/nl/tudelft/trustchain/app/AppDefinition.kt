@@ -32,7 +32,7 @@ enum class AppDefinition(
     ),
     CURRENCY_II(
         R.drawable.ic_bitcoin,
-        "Currency II",
+        "Luxury Communism",
         R.color.metallic_gold,
         CurrencyIIMainActivity::class.java
     ),
