@@ -5,7 +5,7 @@ This module contains functionality and resources that are used by multiple other
 Under `src/main/java/nl/tudelft/trustchain/common` multiple folders and files can be found that contain functionalities or constants.
 
 ### VotingHelper
-This file contains the functions that form the voting API, which is used in the TrustChain Voter submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
+This file contains the functions that form the Voting API, which is used in the TrustChain Voter submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the [`VotingActivity.kt`](../trustchain-voter/src/main/java/nl/tudelft/trustchain/voting/VotingActivity.kt) file within the TrustChain Voter submodule.
 
 Below, short descriptions of the available functions in VotingHelper are given.
 
