@@ -99,7 +99,7 @@ class MainActivityFOC : AppCompatActivity() {
             val spinner = dialogView.findViewById<Spinner>(R.id.spinner)
             val noFileMessage = dialogView.findViewById<TextView>(R.id.noFilesMessage)
             val availableProps = vh.successfulFileProposals()
-
+            printToast(availableProps.toString())
             if (availableProps.isEmpty()) {
                 noFileMessage.visibility = View.VISIBLE
                 spinner.visibility = View.GONE

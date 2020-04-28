@@ -550,13 +550,14 @@ class VotingHelperTest {
             .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
             .put("VOTE_SUBJECT", voteSubject)
             .put("VOTE_LIST", voteList)
+            .put("FOC_FILE", true)
             .put("VOTE_MODE", VotingMode.THRESHOLD)
 
         val transaction = voteJSON.toString()
 
         // Start the vote.
         val propBlock = community.createProposalBlock(
-            "foc_voting_block",
+            "voting_block",
             mapOf("message" to transaction),
             EMPTY_PK
         )

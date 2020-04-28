@@ -18,7 +18,7 @@
         android:gravity="center_horizontal"
         android:text="No file proposals have passed"
         android:textColor="#8A8A8A"
-        android:textSize="24sp" />
+        android:textSize="18sp" />
 
     <Button
         android:id="@+id/button"
