@@ -15,27 +15,14 @@ import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.NetworkParameters
-import java.io.File
 
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-@Suppress("DEPRECATION")
 class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        handleWalletNavigation()
-        val navController = findNavController()
-        val args = BitcoinFragmentArgs.fromBundle(requireArguments())
-        if (args.showDownload) {
-            navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -69,7 +56,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         return when (item.itemId) {
             R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+                findNavController().navigate(
+                    BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment(
+                        R.id.bitcoinFragment
+                    )
+                )
                 true
             }
             R.id.item_bitcoin_wallet_settings -> {
@@ -78,46 +69,6 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    private fun handleWalletNavigation() {
-        val navController = findNavController()
-
-        val vWalletFileMainNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$MAIN_NET_WALLET_NAME.wallet"
-        )
-
-        val vWalletFileTestNet = File(
-            this.requireContext().applicationContext.filesDir,
-            "$TEST_NET_WALLET_NAME.wallet"
-        )
-
-        val mainNetWalletExists = vWalletFileMainNet.exists()
-        val testNetWalletExists = vWalletFileTestNet.exists()
-        val hasTwoWalletFiles = mainNetWalletExists && testNetWalletExists
-        val hasOneWalletFile = mainNetWalletExists xor testNetWalletExists
-        val hasNoWalletFiles = !mainNetWalletExists && !testNetWalletExists
-
-        if (hasTwoWalletFiles && !WalletManagerAndroid.isInitialized()) {
-            // Go to login, user has 2 wallet files and wallet manager is not initialized
-            // TODO: go to screen to choose between main net and test net wallet
-            navController.navigate(R.id.daoLoginChoice)
-        } else if (hasOneWalletFile && !WalletManagerAndroid.isInitialized()) {
-            // Initialize wallet with the single wallet file that the user has stored
-            val params = when (testNetWalletExists) {
-                true -> BitcoinNetworkOptions.TEST_NET
-                false -> BitcoinNetworkOptions.PRODUCTION
-            }
-            val config = WalletManagerConfiguration(params)
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config).init()
-            navController.navigate(R.id.blockchainDownloadFragment)
-        } else if (hasNoWalletFiles) {
-            // Go to login to create/import a bitcoin wallet, user has no wallet files
-            // TODO: directly go to create/import wallet screen
-            navController.navigate(R.id.daoLoginChoice)
         }
     }
 

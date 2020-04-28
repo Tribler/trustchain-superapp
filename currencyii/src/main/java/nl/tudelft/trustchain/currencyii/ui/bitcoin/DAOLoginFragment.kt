@@ -46,7 +46,7 @@ class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
                 .setConfiguration(config).init()
 
             findNavController().navigate(
-                DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment(
+                DAOLoginFragmentDirections.actionDaoLoginChoiceToMyDAOsFragment(
                     true
                 )
             )
