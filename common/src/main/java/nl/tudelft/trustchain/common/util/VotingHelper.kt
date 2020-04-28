@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.common.util
 
-import android.annotation.SuppressLint
 import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -23,8 +22,7 @@ class VotingHelper(
     trustChainCommunity: TrustChainCommunity
 ) {
     private val votingBlock = "voting_block"
-    private val FOCVotingBlock = "foc_voting_block"
-    private val myPublicKey = trustChainCommunity.myPeer.publicKey
+    val myPublicKey = trustChainCommunity.myPeer.publicKey
     private val trustChainHelper: TrustChainHelper = TrustChainHelper(trustChainCommunity)
 
     /**
@@ -32,9 +30,7 @@ class VotingHelper(
      * @param voteSubject the matter to be voted upon.
      * @param peers list of the public keys of those eligible to vote.
      */
-    fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode, FOCProp: Boolean) {
-        // TODO: Add vote ID to increase probability of uniqueness.
-
+    fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
         val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
@@ -47,11 +43,7 @@ class VotingHelper(
         val transaction = voteJSON.toString()
 
         // Create any-counterparty block for the transaction
-        if (FOCProp) {
-            trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
-        } else {
-            trustChainHelper.createProposalBlock(transaction, EMPTY_PK, FOCVotingBlock)
-        }
+        trustChainHelper.createProposalBlock(transaction, EMPTY_PK, votingBlock)
     }
 
     /**
@@ -105,7 +97,7 @@ class VotingHelper(
             }
 
             // Skip all blocks which are not voting blocks.
-            if (it.type != votingBlock && it.type != FOCVotingBlock) {
+            if (it.type != votingBlock) {
                 continue
             }
 
@@ -115,15 +107,10 @@ class VotingHelper(
                 continue
             }
 
-            try {
-                getVoteBlockAttributesByKey(it, "VOTE_REPLY")
-            } catch (e: Exception) {
-                // Block is the initial vote proposal because it does not have a VOTE_REPLY field.
-                continue
-            }
+            // If no vote_reply present, we are dealing with the proposal block
+            if (!hasVoteBlockAttributeByKey(it, "VOTE_REPLY")) continue
 
             // Check whether the voter is in voting list.
-            @SuppressLint
             if (!voters.any { v ->
                     val voteString = v.keyToBin()
                     voteString.contentEquals(blockPublicKey.keyToBin())
@@ -132,7 +119,7 @@ class VotingHelper(
             }
 
             // Add the votes, or assume a malicious vote if it is not YES or NO.
-            when (getVoteBlockAttributesByKey(it, "VOTE_REPLY")) {
+            when (val voteReply = getVoteBlockAttributesByKey(it, "VOTE_REPLY")) {
                 "YES" -> {
                     yesCount++
                     votes.add(it.publicKey.contentToString())
@@ -143,10 +130,7 @@ class VotingHelper(
                 }
                 else -> handleInvalidVote(
                     it,
-                    "Vote was not 'YES' or 'NO' but: '${getVoteBlockAttributesByKey(
-                        it,
-                        "VOTE_REPLY"
-                    )}'."
+                    "Vote was not 'YES' or 'NO' but: '$voteReply}'."
                 )
             }
         }
@@ -201,7 +185,7 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(
+        return getVoteProgressStatus(block, threshold) >= 100 || getVoteProgressStatus(
             block,
             threshold
         ) == -1
@@ -257,13 +241,13 @@ class VotingHelper(
     }
 
     /**
-     * Return the string value for a JSON tag in a voting block.
+     * Checks if a block possesses a specific attribute, without retrieving it explicitly
      */
-    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
+    private fun hasVoteBlockAttributeByKey(block: TrustChainBlock, key: String): Boolean {
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
-        if ((block.type != votingBlock && block.type != FOCVotingBlock) || !block.transaction.containsKey("message")) {
+        if (block.type != votingBlock || !block.transaction.containsKey("message")) {
             handleInvalidVote(
                 block,
                 "Block was not a voting block or did not contain a 'message' field in its transaction."
@@ -276,11 +260,17 @@ class VotingHelper(
             handleInvalidVote(block, "Voting block did not contain proper JSON.")
         }
 
-        try {
-            return voteJSON.get(key).toString()
-        } catch (e: JSONException) {
-            handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
+        return voteJSON.has(key)
+    }
+
+    /**
+     * Return the string value for a JSON tag in a voting block.
+     */
+    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
+        if (hasVoteBlockAttributeByKey(block, key)) {
+            return JSONObject(block.transaction["message"].toString()).get(key).toString()
         }
+        handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
     }
 
     /**
@@ -292,23 +282,6 @@ class VotingHelper(
                 "The reason for invalidity was: $errorType"
         )
         throw Exception(errorType)
-    }
-
-    /**
-     * Completed and accepted FOC upload proposals
-     * returns the filepaths that you successful proposed.
-     */
-    fun successfulFileProposals(): List<String> {
-
-        // All proposal blocks by the user that have been completed
-        val successFileProps = trustChainHelper.getBlocksByType(FOCVotingBlock)
-            .filter {
-                it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
-                    it, 1 // TODO really don't like this hardcoded threshold, but this should only be in threshold mode
-                )
-            }
-
-        return successFileProps.map { getVoteBlockAttributesByKey(it, "VOTE_SUBJECT") }
     }
 }
 

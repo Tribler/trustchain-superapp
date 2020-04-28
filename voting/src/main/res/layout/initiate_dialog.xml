@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:hint="@string/p_np" />
+        android:hint="@string/p_np"
+        android:maxLength="50" />
 
     <LinearLayout
         android:layout_width="match_parent"
