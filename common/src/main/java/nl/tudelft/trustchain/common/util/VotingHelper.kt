@@ -52,7 +52,7 @@ class VotingHelper(
      * @param vote boolean value indicating the decision.
      * @param proposalBlock TrustChainBlock of the proposalblock.
      */
-    fun respondToVote(vote: Boolean, proposalBlock: TrustChainBlock) {
+    fun respondToProposal(vote: Boolean, proposalBlock: TrustChainBlock) {
         val proposalSubject = getVoteBlockAttributesByKey(proposalBlock, "VOTE_SUBJECT")
 
         // Reply to the vote with YES or NO.

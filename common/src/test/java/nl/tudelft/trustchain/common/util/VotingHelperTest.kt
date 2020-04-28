@@ -90,7 +90,7 @@ class VotingHelperTest {
     }
 
     @Test
-    fun respondToVote() {
+    fun respondToProposal() {
         val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
         val peers = getPeers()
@@ -110,7 +110,7 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val helper = TrustChainHelper(community)
         assert(
@@ -141,7 +141,7 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
@@ -170,9 +170,9 @@ class VotingHelperTest {
         )
 
         // Create some reply agreement blocks
-        votingHelper.respondToVote(true, propBlock)
-        votingHelper.respondToVote(false, propBlock)
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
@@ -201,7 +201,7 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
@@ -231,7 +231,7 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(1, 0))
     }
@@ -285,7 +285,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 25))
     }
@@ -316,7 +316,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(false, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
 
         Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 25))
     }
@@ -347,7 +347,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 30))
     }
@@ -377,7 +377,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(false, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
 
         Assert.assertTrue(votingHelper.votingIsComplete(propBlock))
     }
@@ -408,7 +408,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         Assert.assertFalse(votingHelper.votingIsComplete(propBlock))
     }
@@ -469,7 +469,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         Assert.assertEquals(50, votingHelper.getVoteProgressStatus(propBlock, 50))
     }
@@ -500,7 +500,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(false, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
 
         Assert.assertEquals(25, votingHelper.getVoteProgressStatus(propBlock))
     }
@@ -530,7 +530,7 @@ class VotingHelperTest {
         )
 
         // Vote and thus make the threshold.
-        votingHelper.respondToVote(false, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
 
         Assert.assertEquals(-1, votingHelper.getVoteProgressStatus(propBlock, 25))
         Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 25))

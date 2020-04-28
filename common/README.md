@@ -18,9 +18,9 @@ A proposal is created using the`createProposal` method. This method requires a n
 
 #### Casting a vote
 ```
-respondToVote(vote: Boolean, proposalBlock: TrustChainBlock)
+respondToProposal(vote: Boolean, proposalBlock: TrustChainBlock)
 ```
-A vote is cast using the `respondToVote` method. This method requires the vote as a Boolean (True = Yes, False = No) and the TrustChainBlock which contains the initial proposal block.
+A vote is cast using the `respondToProposal` method. This method requires the vote as a Boolean (True = Yes, False = No) and the TrustChainBlock which contains the initial proposal block.
 
 #### Counting votes
 ```

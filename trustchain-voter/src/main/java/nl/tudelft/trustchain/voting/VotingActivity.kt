@@ -246,19 +246,19 @@ class VotingActivity : AppCompatActivity() {
             when (votingMode) {
                 VotingMode.YESNO -> {
                     builder.setPositiveButton("YES") { _, _ ->
-                        vh.respondToVote(true, block)
+                        vh.respondToProposal(true, block)
                         printShortToast("You voted: YES")
                     }
 
                     builder.setNegativeButton("NO") { _, _ ->
-                        vh.respondToVote(false, block)
+                        vh.respondToProposal(false, block)
                         printShortToast("You voted: NO")
                     }
                 }
 
                 VotingMode.THRESHOLD -> {
                     builder.setPositiveButton("AGREE") { _, _ ->
-                        vh.respondToVote(true, block)
+                        vh.respondToProposal(true, block)
                         printShortToast("You voted: AGREE")
                     }
                 }
