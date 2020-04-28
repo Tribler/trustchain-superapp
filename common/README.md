@@ -5,22 +5,22 @@ This module contains functionality and resources that are used by multiple other
 Under `src/main/java/nl/tudelft/trustchain/common` multiple folders and files can be found that contain functionalities or constants.
 
 ### VotingHelper
-This file contains the functions that form the voting API, which is used in the TrustChain Voting submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
+This file contains the functions that form the voting API, which is used in the TrustChain Voter submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
 
 Below, short descriptions of the available functions in VotingHelper are given.
 
 #### Creating a proposal
 ```
-startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode)
+createProposal(voteSubject: String, peers: List<PublicKey>, mode: VotingMode)
 ```
-A proposal is created using the`startVote` method. This method requires a name for the proposal and a list of peers that are allowed to vote on the proposal. Usually, all the peers which are currently in the community should be in this list. Finally, a `VotingMode` can be specified, indicating a threshold vote (`VotingMode.THRESHOLD`) or a yes/no vote (`VotingMode.YESNO`). A threshold vote is a vote where voters can only vote 'yes'; the vote is passed when enough people have voted. Note that in this case, not voting is different from voting 'NO'. More on the technical and security implications of voting in the section 'security'.
+A proposal is created using the`createProposal` method. This method requires a name for the proposal and a list of peers that are allowed to vote on the proposal. Usually, all the peers which are currently in the community should be in this list. Finally, a `VotingMode` can be specified, indicating a threshold vote (`VotingMode.THRESHOLD`) or a yes/no vote (`VotingMode.YESNO`). A threshold vote is a vote where voters can only vote 'yes'; the vote is passed when enough people have voted. Note that in this case, not voting is different from voting 'NO'. More on the technical and security implications of voting in the section 'security'.
 
 
 #### Casting a vote
 ```
-respondToVote(vote: Boolean, proposalBlock: TrustChainBlock)
+respondToProposal(vote: Boolean, proposalBlock: TrustChainBlock)
 ```
-A vote is cast using the `respondToVote` method. This method requires the vote as a Boolean (True = Yes, False = No) and the TrustChainBlock which contains the initial proposal block.
+A vote is cast using the `respondToProposal` method. This method requires the vote as a Boolean (True = Yes, False = No) and the TrustChainBlock which contains the initial proposal block.
 
 #### Counting votes
 ```
@@ -38,7 +38,7 @@ To check whether a vote is complete you can call the `votingIsComplete` function
 
 #### Checking vote progress
 ```
-getVoteProgressStatus(block: TrustChainBlock, threshold: Int = -1): Int
+getVotingProgressStatus(block: TrustChainBlock, threshold: Int = -1): Int
 ```
 To check the progress of a vote you can call the `getVotingProgressStatus` function. It takes as argument the proposalblock of the vote and a threshold and the function returns an integer. This integer is a percentage of the required votes or -1 in the case of a thresholdvote that received votes from all participants but of which the threshold was not met.
 
@@ -58,7 +58,7 @@ When starting a vote, a list of public keys is used to determine what peers are 
 
 The multi-signature block is sent to all participants in a community. Voters can vote by responding to the proposer's half-block with another half-block containing a 'YES' or a 'NO'. There are a couple of problems with this implementation.
 
-First of all, the proposer would be able to hide the entire vote if the outcome is not in its favour. This block-hiding could be detected by crawling the chains of the elligible voters, but the current implementation does not do so. Secondly, voters' voters are only stored on the proposer's and the voter's chain. This means that if both were to remove their chains, the outcome of the vote cannot be retrieved. Finally, it is assumed that the proposer stays available during the voting process.
+First of all, the proposer would be able to hide the entire vote if the outcome is not in its favour. This block-hiding could be detected by crawling the chains of the eligible voters, but the current implementation does not do so. Secondly, voters' voters are only stored on the proposer's and the voter's chain. This means that if both were to remove their chains, the outcome of the vote cannot be retrieved. Finally, it is assumed that the proposer stays available during the voting process.
 
 In short, yes/no voting should really only be used, if ever, in case of a trusted proposer.
 

@@ -1,4 +1,4 @@
-# TrustChain Voting
+# TrustChain Voter
 This submodule of the TrustChain Super App enables a demo front-end for using the functionality that is provided in the `common/util/Votinghelper` API. For documentation on the API itself, please see [this page](../common/README.md). 
 
 This module currently contains the following functionality:
