@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -96,8 +97,17 @@ class MainActivityFOC : AppCompatActivity() {
                 .setTitle("Initiate vote on proposal")
 
             val spinner = dialogView.findViewById<Spinner>(R.id.spinner)
-
+            val noFileMessage = dialogView.findViewById<TextView>(R.id.noFilesMessage)
             val availableProps = vh.successfulFileProposals()
+
+            if (availableProps.isEmpty()) {
+                noFileMessage.visibility = View.VISIBLE
+                spinner.visibility = View.GONE
+            } else {
+                noFileMessage.visibility = View.GONE
+                spinner.visibility = View.VISIBLE
+            }
+
             var selectedProp = ""
 
             if (spinner != null) {

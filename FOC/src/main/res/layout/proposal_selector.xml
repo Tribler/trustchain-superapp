@@ -11,6 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <TextView
+        android:id="@+id/noFilesMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="No file proposals have passed"
+        android:textColor="#8A8A8A"
+        android:textSize="24sp" />
+
     <Button
         android:id="@+id/button"
         android:layout_width="102dp"
