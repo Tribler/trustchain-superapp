@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.common.util
 
-import android.annotation.SuppressLint
 import android.util.Log
 import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -32,8 +31,6 @@ class VotingHelper(
      * @param peers list of the public keys of those eligible to vote.
      */
     fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
-        // TODO: Add vote ID to increase probability of uniqueness.
-
         val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
@@ -114,7 +111,6 @@ class VotingHelper(
             if (!hasVoteBlockAttributeByKey(it, "VOTE_REPLY")) continue
 
             // Check whether the voter is in voting list.
-            @SuppressLint
             if (!voters.any { v ->
                     val voteString = v.keyToBin()
                     voteString.contentEquals(blockPublicKey.keyToBin())
@@ -189,7 +185,7 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) == 100 || getVoteProgressStatus(
+        return getVoteProgressStatus(block, threshold) >= 100 || getVoteProgressStatus(
             block,
             threshold
         ) == -1
