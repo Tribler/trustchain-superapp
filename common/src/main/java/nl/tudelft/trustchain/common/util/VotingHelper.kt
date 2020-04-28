@@ -13,6 +13,7 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.util.*
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 /**
@@ -198,7 +199,7 @@ class VotingHelper(
     /**
      * Return the percentage of required votes or -1 when a threshold is not made but all votes are received.
      */
-    fun getVoteProgressStatus(block: TrustChainBlock, threshold: Int = -1): Int {
+    fun getVoteProgressStatus(block: TrustChainBlock, thresholdPercentage: Int = -1): Int {
         fun percentage(a: Int, b: Int): Int {
             if (b == 0) {
                 return 0
@@ -208,6 +209,7 @@ class VotingHelper(
         }
 
         val voters = getVoters(block)
+        val threshold = ceil((thresholdPercentage / 100.0) * voters.size).toInt()
         val voteSubject = getVoteBlockAttributesByKey(block, "VOTE_SUBJECT")
         val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
         val voteMode = getVoteBlockAttributesByKey(block, "VOTE_MODE")
@@ -233,7 +235,7 @@ class VotingHelper(
         }
 
         return if (mode == VotingMode.THRESHOLD) {
-            if (threshold == -1) {
+            if (thresholdPercentage == -1) {
                 throw IllegalArgumentException("VotingMode was set to THRESHOLD but threshold was not specified as function argument.")
             } else if (yescount + nocount == voters.size && yescount < threshold) {
                 return -1

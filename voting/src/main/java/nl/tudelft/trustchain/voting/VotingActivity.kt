@@ -36,7 +36,9 @@ class VotingActivity : AppCompatActivity() {
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
     private var displayAllVotes: Boolean = true
 
-    private val threshold = 1
+    companion object {
+        val threshold = 75
+    }
 
     /**
      * Setup method, binds functionality

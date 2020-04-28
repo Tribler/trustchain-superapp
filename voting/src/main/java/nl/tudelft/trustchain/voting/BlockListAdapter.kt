@@ -70,13 +70,13 @@ class BlockListAdapter(
         try {
             val bar = holder.progressBar
             var thresholdNotMade = false
-            val progressValue = vh.getVoteProgressStatus(proposalBlock, 1)
+            val progressValue = vh.getVoteProgressStatus(proposalBlock, VotingActivity.threshold)
 
             if (progressValue == -1) {
                 bar.progress = 100
                 thresholdNotMade = true
             } else {
-                bar.progress = vh.getVoteProgressStatus(proposalBlock, 1)
+                bar.progress = vh.getVoteProgressStatus(proposalBlock, VotingActivity.threshold)
             }
 
             if (bar.progress == 100 && !thresholdNotMade) {
