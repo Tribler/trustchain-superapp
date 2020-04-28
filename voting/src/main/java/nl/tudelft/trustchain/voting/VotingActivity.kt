@@ -43,7 +43,7 @@ class VotingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_voting)
-        title = "TrustChain Voter"
+        title = "TrustChain Voting"
 
         initiateButton.setOnClickListener {
             showNewVoteDialog()

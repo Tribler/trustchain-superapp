@@ -7,6 +7,7 @@
     <color name="text_primary">#000000</color>
     <color name="blue">#2962FF</color>
     <color name="green">#558B2F</color>
+    <color name="android_green">#3DDB86</color>
     <color name="red">#EE3B00</color>
     <color name="purple">#AA00FF</color>
     <color name="light_gray">#EEEEEE</color>
