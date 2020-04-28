@@ -92,7 +92,7 @@
                         android:id="@+id/input_bitcoin_public_key"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Bitcoin Address" />
+                        android:hint="Bitcoin Address (as Base58)" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
