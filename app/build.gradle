@@ -56,7 +56,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
-    implementation project(':voting')
+    implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')
     implementation project(':trustchain-trader')
     implementation project(':trustchain-payloadgenerator')
