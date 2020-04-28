@@ -1,16 +1,15 @@
 package nl.tudelft.trustchain.FOC
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,9 +21,12 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
+import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
+import nl.tudelft.trustchain.common.util.VotingHelper
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
@@ -39,8 +41,12 @@ class MainActivityFOC : AppCompatActivity() {
     private lateinit var adapterLV: ArrayAdapter<String>
 
     private var uploadingTorrent = ""
+    private lateinit var vh: VotingHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val ipv8 = IPv8Android.getInstance()
+        vh = VotingHelper(ipv8.getOverlay()!!)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
@@ -82,7 +88,45 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         uploadTorrentButton.setOnClickListener { _ ->
-            createTorrent()
+
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.proposal_selector, null)
+
+            val builder = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setTitle("Initiate vote on proposal")
+
+            val spinner = dialogView.findViewById<Spinner>(R.id.spinner)
+
+            val availableProps = vh.successfulFileProposals()
+            var selectedProp = ""
+
+            if (spinner != null) {
+                val adapter = ArrayAdapter(this,
+                    android.R.layout.simple_spinner_item, availableProps)
+                spinner.adapter = adapter
+
+                spinner.onItemSelectedListener = object :
+                    AdapterView.OnItemSelectedListener {
+                    override fun onNothingSelected(parent: AdapterView<*>?) {
+                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    }
+
+                    override fun onItemSelected(parent: AdapterView<*>,
+                                                view: View, position: Int, id: Long) {
+                        selectedProp = availableProps[position]
+                    }
+                }
+            }
+
+            val button = dialogView.findViewById<Button>(R.id.button)
+            button.setOnClickListener { _ ->
+                createTorrent(selectedProp)
+            }
+
+            builder.show()
+
+
+
         }
 
         retrieveListButton.setOnClickListener { _ ->
@@ -353,13 +397,13 @@ class MainActivityFOC : AppCompatActivity() {
     The extension of the file must be included (for example, .png)
      */
     @Suppress("deprecation")
-    fun createTorrent() {
-        val fileName: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No torrent name given, using default")
-            fileName = "image.png"
-        } else fileName = inputText
+    fun createTorrent(fileName: String) {
+//        val fileName: String?
+//        val inputText = enterTorrent.text.toString()
+//        if (inputText == "") {
+//            printToast("No torrent name given, using default")
+//            fileName = "image.png"
+//        } else fileName = inputText
 
         val file =
             File(Environment.getExternalStorageDirectory().absolutePath + "/" + fileName)
