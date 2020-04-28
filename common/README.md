@@ -5,7 +5,7 @@ This module contains functionality and resources that are used by multiple other
 Under `src/main/java/nl/tudelft/trustchain/common` multiple folders and files can be found that contain functionalities or constants.
 
 ### VotingHelper
-This file contains the functions that form the voting API, which is used in the TrustChain Voting submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
+This file contains the functions that form the voting API, which is used in the TrustChain Voter submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
 
 Below, short descriptions of the available functions in VotingHelper are given.
 
@@ -58,7 +58,7 @@ When starting a vote, a list of public keys is used to determine what peers are 
 
 The multi-signature block is sent to all participants in a community. Voters can vote by responding to the proposer's half-block with another half-block containing a 'YES' or a 'NO'. There are a couple of problems with this implementation.
 
-First of all, the proposer would be able to hide the entire vote if the outcome is not in its favour. This block-hiding could be detected by crawling the chains of the elligible voters, but the current implementation does not do so. Secondly, voters' voters are only stored on the proposer's and the voter's chain. This means that if both were to remove their chains, the outcome of the vote cannot be retrieved. Finally, it is assumed that the proposer stays available during the voting process.
+First of all, the proposer would be able to hide the entire vote if the outcome is not in its favour. This block-hiding could be detected by crawling the chains of the eligible voters, but the current implementation does not do so. Secondly, voters' voters are only stored on the proposer's and the voter's chain. This means that if both were to remove their chains, the outcome of the vote cannot be retrieved. Finally, it is assumed that the proposer stays available during the voting process.
 
 In short, yes/no voting should really only be used, if ever, in case of a trusted proposer.
 
