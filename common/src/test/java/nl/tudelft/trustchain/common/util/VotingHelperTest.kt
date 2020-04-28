@@ -71,7 +71,7 @@ class VotingHelperTest {
     }
 
     @Test
-    fun startVote() {
+    fun createProposal() {
         val community = spyk(getCommunity())
 
         val helper = TrustChainHelper(community)
@@ -79,7 +79,7 @@ class VotingHelperTest {
         val peers = getPeers()
 
         val voteSubject = "There should be tests"
-        votingHelper.startVote(voteSubject, peers, VotingMode.YESNO)
+        votingHelper.createProposal(voteSubject, peers, VotingMode.YESNO)
 
         // Verify that the proposal block has been casted
         assert(

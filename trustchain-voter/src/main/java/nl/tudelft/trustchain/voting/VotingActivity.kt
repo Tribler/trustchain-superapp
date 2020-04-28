@@ -130,7 +130,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers, votingMode)
+            vh.createProposal(proposal, peers, votingMode)
             printShortToast("Proposal has been created")
         }
 

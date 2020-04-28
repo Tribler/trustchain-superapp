@@ -11,9 +11,9 @@ Below, short descriptions of the available functions in VotingHelper are given.
 
 #### Creating a proposal
 ```
-startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode)
+createProposal(voteSubject: String, peers: List<PublicKey>, mode: VotingMode)
 ```
-A proposal is created using the`startVote` method. This method requires a name for the proposal and a list of peers that are allowed to vote on the proposal. Usually, all the peers which are currently in the community should be in this list. Finally, a `VotingMode` can be specified, indicating a threshold vote (`VotingMode.THRESHOLD`) or a yes/no vote (`VotingMode.YESNO`). A threshold vote is a vote where voters can only vote 'yes'; the vote is passed when enough people have voted. Note that in this case, not voting is different from voting 'NO'. More on the technical and security implications of voting in the section 'security'.
+A proposal is created using the`createProposal` method. This method requires a name for the proposal and a list of peers that are allowed to vote on the proposal. Usually, all the peers which are currently in the community should be in this list. Finally, a `VotingMode` can be specified, indicating a threshold vote (`VotingMode.THRESHOLD`) or a yes/no vote (`VotingMode.YESNO`). A threshold vote is a vote where voters can only vote 'yes'; the vote is passed when enough people have voted. Note that in this case, not voting is different from voting 'NO'. More on the technical and security implications of voting in the section 'security'.
 
 
 #### Casting a vote

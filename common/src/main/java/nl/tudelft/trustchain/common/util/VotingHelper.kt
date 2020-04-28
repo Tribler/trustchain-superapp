@@ -31,7 +31,7 @@ class VotingHelper(
      * @param voteSubject the matter to be voted upon.
      * @param peers list of the public keys of those eligible to vote.
      */
-    fun startVote(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
+    fun createProposal(voteSubject: String, peers: List<PublicKey>, mode: VotingMode) {
         val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
 
         // Create a JSON object containing the vote subject, as well as a log of the eligible voters
