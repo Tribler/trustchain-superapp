@@ -13,6 +13,10 @@ class VotingCommunity(
 ) : TrustChainCommunity(settings, database, crawler) {
     override val serviceId = "5ad767b05ae592a02488272ca2a86b847d456176"
 
+    companion object {
+        val threshold = 75
+    }
+
     class Factory(
         private val settings: TrustChainSettings,
         private val database: TrustChainStore,
