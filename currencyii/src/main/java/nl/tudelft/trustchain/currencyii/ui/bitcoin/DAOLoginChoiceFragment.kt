@@ -15,48 +15,48 @@ import java.io.File
 
 /**
  * A simple [Fragment] subclass.
- * Use the [DAOLoginFragment.newInstance] factory method to
+ * Use the [DAOLoginChoiceFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
+class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        load_existing_button.setOnClickListener {
-            // Close the current wallet manager if there is one running, blocks thread until it is closed
-            if (WalletManagerAndroid.isInitialized()) {
-                WalletManagerAndroid.close()
-            }
+        load_production_wallet.setOnClickListener {
+            loadWallet(BitcoinNetworkOptions.PRODUCTION)
+        }
 
-            val params = when (production_testnet_input_load_existing.isChecked) {
-                true -> BitcoinNetworkOptions.TEST_NET
-                false -> BitcoinNetworkOptions.PRODUCTION
-            }
+        load_testnet_wallet.setOnClickListener {
+            loadWallet(BitcoinNetworkOptions.TEST_NET)
+        }
+    }
 
-            // Make sure to hide any other wallets that exists, when creating a new wallet
-            val walletToHide = when (params) {
-                BitcoinNetworkOptions.PRODUCTION -> BitcoinNetworkOptions.TEST_NET
-                BitcoinNetworkOptions.TEST_NET -> BitcoinNetworkOptions.PRODUCTION
-            }
-            hideWalletFiles(walletToHide)
+    private fun loadWallet(params: BitcoinNetworkOptions) {
+        // Close the current wallet manager if there is one running, blocks thread until it is closed
+        if (WalletManagerAndroid.isInitialized()) {
+            WalletManagerAndroid.close()
+        }
 
-            val config = WalletManagerConfiguration(params)
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config).init()
+        // Make sure to hide any other wallets that exists, when creating a new wallet
+        val walletToHide = when (params) {
+            BitcoinNetworkOptions.PRODUCTION -> BitcoinNetworkOptions.TEST_NET
+            BitcoinNetworkOptions.TEST_NET -> BitcoinNetworkOptions.PRODUCTION
+        }
+        hideWalletFiles(walletToHide)
 
-            findNavController().navigate(
-                DAOLoginFragmentDirections.actionDaoLoginChoiceToBitcoinFragment(
-                    true
-                )
+        // Initialize wallet manager
+        val config = WalletManagerConfiguration(params)
+        WalletManagerAndroid
+            .Factory(this.requireContext().applicationContext)
+            .setConfiguration(config)
+            .init()
+
+        findNavController().navigate(
+            DAOLoginChoiceFragmentDirections.actionDaoLoginChoiceToMyDAOsFragment(
+                true
             )
-        }
-
-        import_create_button.setOnClickListener {
-            findNavController().navigate(DAOLoginFragmentDirections.actionDaoLoginChoiceToDaoImportOrCreate())
-        }
-
-        super.onActivityCreated(savedInstanceState)
+        )
     }
 
     override fun onCreateView(
@@ -72,7 +72,7 @@ class DAOLoginFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
 
     companion object {
         @JvmStatic
-        fun newInstance() = DAOLoginFragment()
+        fun newInstance() = DAOLoginChoiceFragment()
     }
 
     /**

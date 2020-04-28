@@ -52,6 +52,20 @@
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Signatures required:" />
+
+                <TextView
+                    android:id="@+id/transfer_amount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Transfer amount:" />
+
+                <TextView
+                    android:id="@+id/transfer_target"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Transfer address:" />
             </LinearLayout>
 
             <LinearLayout
@@ -94,6 +108,19 @@
                     android:gravity="center_vertical"
                     android:text="text" />
 
+                <TextView
+                    android:id="@+id/transfer_amount_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="-" />
+
+                <TextView
+                    android:id="@+id/transfer_target_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="-" />
             </LinearLayout>
 
         </LinearLayout>
@@ -103,6 +130,8 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
+            android:clickable="false"
+            android:enabled="false"
             android:focusable="false"
             android:text="vote yes"
             android:textColor="@color/colorAccent" />
