@@ -42,7 +42,8 @@ When clicking on a proposal, the user will see a new dialog pop up which he/she 
 In the case that the user has already cast a vote on the selected proposal, an overview of the proposal and the user's vote will be shown.
 
 <img src="https://user-images.githubusercontent.com/17474698/80523868-08d92a80-898f-11ea-8b39-4967a5915a27.gif" width="280"> 
-__User going through the process of casting a vote__
+
+*User going through the process of casting a vote*
 
 ## `EXPERIMENTAL` Freedom of Computing file proposal
 Mostly as a proof of concept, and a demonstration of another actual use case, one can propose a file to be uploaded using the functionality of the Freedom of Computing group. This can be done through proposing the filepath of the relevant file in the TrustChain Voter. Only when the proposal has been accepted by the community or DAO, this will be available for uploading. As this is experimental, and a proof of concept, this functionality has not been included in the main development branch. For those interested, the implementation can be found [here](https://github.com/emieldesmidt/trustchain-superapp/tree/FOC-Integration)
