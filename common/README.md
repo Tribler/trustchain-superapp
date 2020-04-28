@@ -48,7 +48,7 @@ fun castedByPeer(block: TrustChainBlock, publicKey: PublicKey): Pair<Int, Int>
 ```
 To check whether a certain peer has already voted `YES` or `NO` for  a certain vote, call `castedByPeer` with the proposalblock of the vote and the peer's public key. The function returns a Pair<int,int> representing the numbers of `yes-votes` and `no-votes`.
 
-#### Some note on security
+#### Some notes on security
 The voting API currently allows for two types of voting; threshold and yes/no.
 
 - Yes/No:
@@ -70,6 +70,5 @@ Stalling is also not relevant anymore, because the vote is finished after a cert
 
 ## Resources
 The `src/main/res` folder contains resources which are used for the front-end of the different submodules. 
-
 ## Tests
 The `src/test` folder currently only contains tests for the `VotingHelper`.
