@@ -12,11 +12,35 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/enrolled_text"
+            android:id="@+id/not_enrolled_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="You are currently enrolled in the following DAOs." />
+            android:text="You are currently not enrolled in any DAOs. Create or join a DAO here." />
+
+        <LinearLayout
+            android:id="@+id/onboarding_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/button_create_dao"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:height="80dp"
+                android:text="Create DAO" />
+
+            <Button
+                android:id="@+id/button_join_daos"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:height="80dp"
+                android:text="Join DAO" />
+        </LinearLayout>
 
         <ListView
             android:id="@+id/my_daos_list_view"

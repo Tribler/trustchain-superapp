@@ -58,9 +58,33 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             )
             Log.i("Coin", "Clicked: $view, $position, $id")
         }
-        if (sharedWalletBlocks.isEmpty()) {
-            enrolled_text.text =
-                "You are currently not enrolled in any DAOs. Press the + button to join or create one."
+
+        button_create_dao.setOnClickListener {
+            findNavController().navigate(R.id.createSWFragment)
+        }
+        button_join_daos.setOnClickListener {
+            findNavController().navigate(R.id.joinNetworkFragment)
+        }
+
+        // Hide/show onboard depending on whether the user has joined shared wallets blocks
+        handleOnboardingVisibility(sharedWalletBlocks.isEmpty())
+    }
+
+    private fun handleOnboardingVisibility(isOnboarding: Boolean) {
+        if (isOnboarding) {
+            // Show onboarding components
+            not_enrolled_text.visibility = View.VISIBLE
+            onboarding_buttons.visibility = View.VISIBLE
+
+            // Hide create DAO button
+            join_dao_fab.visibility = View.GONE
+        } else {
+            // Hide onboarding components
+            not_enrolled_text.visibility = View.GONE
+            onboarding_buttons.visibility = View.GONE
+
+            // Show create DAO button
+            join_dao_fab.visibility = View.VISIBLE
         }
     }
 }
