@@ -58,8 +58,9 @@ The bid and asks can either be generated automatically or manually. Those bids a
 ### TrustChain Voter
 The TrustChain Voter can be used to create a proposal on which the community can vote. The functionality has been split up in two parts: a Voting API, which provides the core voting functionality, and a TrustChain Voter submodule, which serves to demonstrate the capabilities of the voting API. Below, the process of creating a proposal (left) and casting a vote (right) can be seen.
 
-[More about the Voting API](common/README.md#votinghelper)
-[More about the TrustChain Voter submodule](trustchain-voter/README.md)
+- [More about the Voting API](common/README.md#votinghelper)
+- [More about the TrustChain Voter submodule](trustchain-voter/README.md)
+
 <img src="https://user-images.githubusercontent.com/17474698/80522657-37560600-898d-11ea-9dbb-eeff8eec9ea2.gif" width="280"> <img src="https://user-images.githubusercontent.com/17474698/80523868-08d92a80-898f-11ea-8b39-4967a5915a27.gif" width="280"> 
 
 ### Do you want to add your own app?
