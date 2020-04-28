@@ -131,7 +131,7 @@ class DAOCreateFragment : Fragment() {
         }
 
         findNavController().navigate(
-            DAOCreateFragmentDirections.actionDaoImportOrCreateToBitcoinFragment(
+            DAOCreateFragmentDirections.actionDaoImportOrCreateToMyDAOsFragment(
                 showDownload = true
             )
         )
