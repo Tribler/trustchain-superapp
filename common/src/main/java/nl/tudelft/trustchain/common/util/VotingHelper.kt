@@ -53,7 +53,7 @@ class VotingHelper(
      * @param proposalBlock TrustChainBlock of the proposalblock.
      */
     fun respondToProposal(vote: Boolean, proposalBlock: TrustChainBlock) {
-        val proposalSubject = getVoteBlockAttributesByKey(proposalBlock, "VOTE_SUBJECT")
+        val proposalSubject = getVotingBlockAttributesByKey(proposalBlock, "VOTE_SUBJECT")
 
         // Reply to the vote with YES or NO.
         val voteReply = if (vote) "YES" else "NO"
@@ -103,13 +103,13 @@ class VotingHelper(
             }
 
             // A block with another VOTE_SUBJECT belongs to another vote.
-            if (getVoteBlockAttributesByKey(it, "VOTE_SUBJECT") != voteSubject) {
+            if (getVotingBlockAttributesByKey(it, "VOTE_SUBJECT") != voteSubject) {
                 // Block belongs to another vote.
                 continue
             }
 
             // If no vote_reply present, we are dealing with the proposal block
-            if (!hasVoteBlockAttributeByKey(it, "VOTE_REPLY")) continue
+            if (!hasVotingBlockAttributeByKey(it, "VOTE_REPLY")) continue
 
             // Check whether the voter is in voting list.
             if (!voters.any { v ->
@@ -120,7 +120,7 @@ class VotingHelper(
             }
 
             // Add the votes, or assume a malicious vote if it is not YES or NO.
-            when (val voteReply = getVoteBlockAttributesByKey(it, "VOTE_REPLY")) {
+            when (val voteReply = getVotingBlockAttributesByKey(it, "VOTE_REPLY")) {
                 "YES" -> {
                     yesCount++
                     votes.add(it.publicKey.contentToString())
@@ -143,7 +143,7 @@ class VotingHelper(
      * Check if the user has casted a vote upon a proposal already.
      */
     fun castedByPeer(block: TrustChainBlock, publicKey: PublicKey): Pair<Int, Int> {
-        val subject = getVoteBlockAttributesByKey(block, "VOTE_SUBJECT")
+        val subject = getVotingBlockAttributesByKey(block, "VOTE_SUBJECT")
         return countVotes(listOf(publicKey), subject, block.publicKey)
     }
 
@@ -153,7 +153,7 @@ class VotingHelper(
     private fun getVoters(block: TrustChainBlock): List<PublicKey> {
 
         val jsonKeys = try {
-            JSONArray(getVoteBlockAttributesByKey(block, "VOTE_LIST"))
+            JSONArray(getVotingBlockAttributesByKey(block, "VOTE_LIST"))
         } catch (e: JSONException) {
             handleInvalidVote(block, "Voting block did not contain proper JSON for a voter list.")
         }
@@ -206,9 +206,9 @@ class VotingHelper(
 
         val voters = getVoters(block)
         val threshold = ceil((thresholdPercentage / 100.0) * voters.size).toInt()
-        val voteSubject = getVoteBlockAttributesByKey(block, "VOTE_SUBJECT")
-        val proposerKey = getVoteBlockAttributesByKey(block, "VOTE_PROPOSER")
-        val voteMode = getVoteBlockAttributesByKey(block, "VOTE_MODE")
+        val voteSubject = getVotingBlockAttributesByKey(block, "VOTE_SUBJECT")
+        val proposerKey = getVotingBlockAttributesByKey(block, "VOTE_PROPOSER")
+        val voteMode = getVotingBlockAttributesByKey(block, "VOTE_MODE")
 
         val hexKey = proposerKey.hexToBytes()
         if (!defaultCryptoProvider.isValidPublicBin(hexKey)) {
@@ -245,7 +245,7 @@ class VotingHelper(
     /**
      * Checks if a block possesses a specific attribute, without retrieving it explicitly
      */
-    private fun hasVoteBlockAttributeByKey(block: TrustChainBlock, key: String): Boolean {
+    private fun hasVotingBlockAttributeByKey(block: TrustChainBlock, key: String): Boolean {
 
         // Skip all blocks which are not voting blocks
         // and don't have a 'message' field in their transaction.
@@ -268,8 +268,8 @@ class VotingHelper(
     /**
      * Return the string value for a JSON tag in a voting block.
      */
-    private fun getVoteBlockAttributesByKey(block: TrustChainBlock, key: String): String {
-        if (hasVoteBlockAttributeByKey(block, key)) {
+    private fun getVotingBlockAttributesByKey(block: TrustChainBlock, key: String): String {
+        if (hasVotingBlockAttributeByKey(block, key)) {
             return JSONObject(block.transaction["message"].toString()).get(key).toString()
         }
         handleInvalidVote(block, "Voting JSON did not have a value for key '$key'.")
