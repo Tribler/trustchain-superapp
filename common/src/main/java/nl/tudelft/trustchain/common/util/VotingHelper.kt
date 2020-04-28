@@ -297,9 +297,17 @@ class VotingHelper(
         // All proposal blocks by the user that have been completed
         val successFileProps = trustChainHelper.getBlocksByType(votingBlock)
             .filter {
-                it.isProposal && it.publicKey.contentEquals(myPublicKey.keyToBin()) && votingIsComplete(
-                    it, 1 // TODO really don't like this hardcoded threshold, but this should only be in threshold mode
-                ) && hasVoteBlockAttributeByKey(it, "FOC_FILE") && getVoteBlockAttributesByKey(it, "FOC_FILE") == "true"
+                // Proposal blocks
+                it.isProposal &&
+
+                    // Is a FOC file proposal
+                    hasVoteBlockAttributeByKey(it, "FOC_FILE") && getVoteBlockAttributesByKey(it, "FOC_FILE") == "true" &&
+
+                    // You have proposed this file
+                    it.publicKey.contentEquals(myPublicKey.keyToBin()) &&
+
+                    // The proposal has been accepted
+                    votingIsComplete(it, 1 ) //TODO fix this treshold thing
             }
 
         return successFileProps.map { getVoteBlockAttributesByKey(it, "VOTE_SUBJECT") }
