@@ -33,11 +33,9 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
     }
 
     private fun initMyDAOsView() {
-        join_dao_fab.setOnClickListener {
-            Log.i("Coin", "Opened DAO plus modal")
-            val dialog = MyDAOsAddDialog()
-            dialog.setTargetFragment(this, 0)
-            dialog.show(parentFragmentManager, "Add DAO")
+        create_dao_fab.setOnClickListener {
+            Log.i("Coin", "Go to create DAO from My DAOs")
+            findNavController().navigate(R.id.createSWFragment)
         }
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
@@ -60,9 +58,11 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         }
 
         button_create_dao.setOnClickListener {
+            Log.i("Coin", "Onboarding go to create DAO")
             findNavController().navigate(R.id.createSWFragment)
         }
         button_join_daos.setOnClickListener {
+            Log.i("Coin", "Onboarding go to join DAO")
             findNavController().navigate(R.id.joinNetworkFragment)
         }
 
@@ -77,14 +77,14 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             onboarding_buttons.visibility = View.VISIBLE
 
             // Hide create DAO button
-            join_dao_fab.visibility = View.GONE
+            create_dao_fab.visibility = View.GONE
         } else {
             // Hide onboarding components
             not_enrolled_text.visibility = View.GONE
             onboarding_buttons.visibility = View.GONE
 
             // Show create DAO button
-            join_dao_fab.visibility = View.VISIBLE
+            create_dao_fab.visibility = View.VISIBLE
         }
     }
 }
