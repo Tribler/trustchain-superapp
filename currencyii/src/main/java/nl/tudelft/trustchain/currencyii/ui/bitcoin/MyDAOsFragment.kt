@@ -41,9 +41,9 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         }
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-        val adaptor =
+        val adapter =
             SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to enter DAO")
-        my_daos_list_view.adapter = adaptor
+        my_daos_list_view.adapter = adapter
         my_daos_list_view.setOnItemClickListener { _, view, position, id ->
             val block = sharedWalletBlocks[position]
             val blockData = SWJoinBlockTransactionData(block.transaction).getData()

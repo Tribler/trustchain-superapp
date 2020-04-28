@@ -72,11 +72,19 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun fetchSharedWalletsAndUpdateUI() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
+                alert_tf?.text = "Crawling blocks for DAOs..."
+
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
                 updateSharedWallets(discoveredWallets)
                 updateSharedWalletsUI()
                 crawlAvailableSharedWallets()
                 updateSharedWalletsUI()
+
+                if (fetchedWallets.isEmpty()) {
+                    alert_tf?.text = "No DAOs found."
+                } else {
+                    alert_tf?.text = ""
+                }
             }
         }
     }
@@ -128,6 +136,10 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
                         Log.i("Coin", "Clicked: $view, $position, $id")
                     }
                 }
+            }
+
+            if (fetchedWallets.isEmpty()) {
+                alert_tf?.text = "No DAOs found."
             }
         }
     }
