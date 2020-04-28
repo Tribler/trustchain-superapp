@@ -5,7 +5,7 @@ This module contains functionality and resources that are used by multiple other
 Under `src/main/java/nl/tudelft/trustchain/common` multiple folders and files can be found that contain functionalities or constants.
 
 ### VotingHelper
-This file contains the functions that form the voting API, which is used in the TrustChain Voter submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
+This file contains the functions that form the voting API, which is used in the TrustChain Voting submodule. These functions can be accessed by first instantiating the VotingHelper with a community e.g. `val vh: = VotingHelper(community)`. It is recommended to instantiate the VotingHelper as a global variable in your class so that its functions can be accessed throughout the class. An example of its use can be found in the `VotingActivity.kt` file within the TrustChain Voter submodule.
 
 Below, short descriptions of the available functions in VotingHelper are given.
 
@@ -52,7 +52,7 @@ To check whether a certain peer has alreay voted `YES` or `NO` for  a certain vo
 The voting API currently allows for two types of voting; threshold and yes/no.
 
 ##### Yes/no:
-The process of creating a vote on the trustchain is rather primitive. One proposer creates a multi-signature block with a subject, a type, and a list of elligible voters.
+The process of creating a vote on the trustchain is rather primitive. One proposer creates a multi-signature block with a subject, a type, and a list of eligible voters.
 
 When starting a vote, a list of public keys is used to determine what peers are entitled to participate in the vote. This list is used to determine the outcome of the vote, so when a peer that was not included in the vote still votes for some reason, its vote is not accounted for in the result. This mechanism ensures for example that peers that join the dao after a vote was proposed, are not able to vote.
 
