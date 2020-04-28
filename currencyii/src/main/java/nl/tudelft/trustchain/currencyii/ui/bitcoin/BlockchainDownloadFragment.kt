@@ -26,6 +26,7 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        // TODO: The routing is cleaner to do via the previously displayed fragment.
         bitcoin_progress_continue.setOnClickListener {
             val navController = findNavController()
             val args = BlockchainDownloadFragmentArgs.fromBundle(requireArguments())
