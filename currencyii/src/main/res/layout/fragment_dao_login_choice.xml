@@ -5,76 +5,53 @@
     android:orientation="vertical"
     android:padding="16dp"
     android:label="DAO Login Screen"
-    tools:context=".ui.bitcoin.DAOLoginFragment">
-
-    <TextView
-        android:id="@+id/textView15"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Choose one of the following options to enter your account." />
+    tools:context=".ui.bitcoin.DAOLoginChoiceFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginBottom="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <TextView
             android:id="@+id/textView119"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Load Existing"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:layout_marginTop="32dp"
+            android:text="Choose Wallet"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/textView20"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="If you previously created/imported and want to enter again, use this option." />
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="It seems like you have a wallet file stored for both the Bitcoin Production and TestNet network. Please choose what wallet you want to use." />
 
-        <Switch
-            android:id="@+id/production_testnet_input_load_existing"
-            style="@style/TextAppearance.AppCompat.Small"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Production / TestNet" />
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/load_existing_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Load Existing" />
+            <Button
+                android:id="@+id/load_production_wallet"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="Production" />
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/load_testnet_wallet"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:text="TestNet" />
+        </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/textView21"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Import or Create new Account"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-        <TextView
-            android:id="@+id/textView22"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="If you are a new user or have a bitcoin mnemonic seed/private keys you want to import, use this option. Note that this will take some time." />
-
-        <Button
-            android:id="@+id/import_create_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Import/Create" />
 
     </LinearLayout>
 

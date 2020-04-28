@@ -123,7 +123,6 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
 
         if (hasTwoWalletFiles && !WalletManagerAndroid.isInitialized()) {
             // Go to login, user has 2 wallet files and wallet manager is not initialized
-            // TODO: go to screen to choose between main net and test net wallet
             Log.i("Coin", "Two wallet files exist, navigation to choice screen.")
             navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoLoginChoice())
         } else if (hasOneWalletFile && !WalletManagerAndroid.isInitialized()) {
@@ -139,9 +138,8 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToBlockchainDownloadFragment())
         } else if (hasNoWalletFiles) {
             // Go to login to create/import a bitcoin wallet, user has no wallet files
-            // TODO: directly go to create/import wallet screen
             Log.i("Coin", "No wallet file exists, navigation to create screen.")
-            navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoLoginChoice())
+            navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoImportOrCreate())
         }
     }
 }
