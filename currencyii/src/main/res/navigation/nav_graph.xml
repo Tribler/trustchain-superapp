@@ -74,7 +74,7 @@
     <fragment
         android:id="@+id/createSWFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.CreateSWFragment"
-        android:label="Create New Shared Wallet"
+        android:label="Create DAO"
         tools:layout="@layout/fragment_create_sw" />
     <fragment
         android:id="@+id/blockchainDownloadFragment"
