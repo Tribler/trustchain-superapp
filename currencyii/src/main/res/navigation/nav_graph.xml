@@ -108,7 +108,7 @@
     <fragment
         android:id="@+id/sharedWalletTransaction"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.SharedWalletTransaction"
-        android:label="Start New Shared Wallet Transaction"
+        android:label="New Proposal"
         tools:layout="@layout/fragment_shared_wallet_transaction">
         <argument
             android:name="publicKey"
