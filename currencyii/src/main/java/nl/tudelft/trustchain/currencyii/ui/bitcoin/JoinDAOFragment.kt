@@ -72,7 +72,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun fetchSharedWalletsAndUpdateUI() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
-                alert_tf?.text = "Crawling blocks for DAOs..."
+                setAlertText("Crawling blocks for DAOs...")
 
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
                 updateSharedWallets(discoveredWallets)
@@ -81,9 +81,11 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
                 updateSharedWalletsUI()
 
                 if (fetchedWallets.isEmpty()) {
-                    alert_tf?.text = "No DAOs found."
+                    setAlertText("No DAOs found.")
                 } else {
-                    alert_tf?.text = ""
+                    activity?.runOnUiThread {
+                        alert_tf.visibility = View.GONE
+                    }
                 }
             }
         }
@@ -139,7 +141,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
             }
 
             if (fetchedWallets.isEmpty()) {
-                alert_tf?.text = "No DAOs found."
+                setAlertText("No DAOs found.")
             }
         }
     }
@@ -183,9 +185,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
             ).getData()
         } catch (t: Throwable) {
             Log.i("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
-            activity?.runOnUiThread {
-                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
-            }
+            setAlertText(t.message ?: "Unexpected error occurred. Try again")
             return
         }
 
@@ -207,28 +207,22 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
             )
         } catch (t: Throwable) {
             Log.i("Coin", "Joining failed. ${t.message ?: "No further information"}.")
-            activity?.runOnUiThread {
-                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
-            }
+            setAlertText(t.message ?: "Unexpected error occurred. Try again")
         }
 
         // Update wallets UI list
         fetchSharedWalletsAndUpdateUI()
-        activity?.runOnUiThread {
-            alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
-        }
+        setAlertText("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
     }
 
     private fun updateAlertLabel(progress: Double) {
         Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
 
-        activity?.runOnUiThread {
-            if (progress >= 1) {
-                alert_tf?.text = "Join wallet progress: completed!"
-            } else {
-                val progressString = "%.0f".format(progress * 100)
-                alert_tf.text = "Join wallet progress: $progressString%..."
-            }
+        if (progress >= 1) {
+            setAlertText("Join wallet progress: completed!")
+        } else {
+            val progressString = "%.0f".format(progress * 100)
+            setAlertText("Join wallet progress: $progressString%...")
         }
     }
 
@@ -248,15 +242,21 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
             "Waiting for signatures. ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
 
-        activity?.runOnUiThread {
-            alert_tf?.text =
-                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
-        }
+        setAlertText(
+            "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+        )
 
         if (signatures.size >= blockData.SW_SIGNATURES_REQUIRED) {
             return signatures
         }
         return null
+    }
+
+    private fun setAlertText(text: String) {
+        activity?.runOnUiThread {
+            alert_tf?.visibility = View.VISIBLE
+            alert_tf?.text = text
+        }
     }
 
     override fun onCreateView(
