@@ -8,7 +8,7 @@ This module currently contains the following functionality:
 - `EXPERIMENTAL` Freedom of Computing file proposal
 
 ## Context
-As mentioned before, this module's sole purpose is to demonstrate the usage of the [Voting API](../common/README.md). The Voting API should be used within the context of a Community or even DAO. Within this community, peers will have the possibility to create proposals, cast votes and see the results of the voting. Below, we will elaborate on the different capabilities of the TrustChain Voter. Furthermore, a proof of concept which combines the TrustChain Voter functionality with FOC can be found at the end.
+As mentioned before, this module's sole purpose is to demonstrate the usage of the [Voting API](../common/README.md#votinghelper). The Voting API should be used within the context of a Community or even DAO. Within this community, peers will have the possibility to create proposals, cast votes and see the results of the voting. Below, we will elaborate on the different capabilities of the TrustChain Voter. Furthermore, a proof of concept which combines the TrustChain Voter functionality with FOC can be found at the end.
 
 ## Proposal list
 When entering the submodule, the user sees the proposal list at first. Using the toggle, the user can switch between a list of all proposals and a list of new proposals, which contains proposals on which the user has not casted a vote yet. The purpose of this is to allow the user for a clear view of which proposals are still waiting to have a vote cast upon.
@@ -16,7 +16,7 @@ When entering the submodule, the user sees the proposal list at first. Using the
 Every proposal in the list has a progress bar which indicates how many votes have been cast in total (Yes/No proposal) or how many Yes votes have been cast (threshold proposal). There is also an indicator which indicates whether the user has not cast a vote yet (`NEW`), has cast a voted (`VOTED`) or when the voting has been completed (`COMPLETED`).
 
 <img src="https://user-images.githubusercontent.com/17474698/80521306-1b516500-898b-11ea-9f02-f982db4c3cde.gif" width="280"> 
-*User toggling between the two modes*
+_User toggling between the two modes_
 
 ## Creating a new proposal
 A user can create a new proposal by clicking on the `create proposal` button in the bottom right corner. A dialog will pop up in which the user can enter a name for the proposal and switch between Yes/No voting and threshold voting. Once the proposal has been created, it directly pops up in the proposal list of peers that are in the community.
