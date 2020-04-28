@@ -471,7 +471,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToProposal(true, propBlock)
 
-        Assert.assertEquals(50, votingHelper.getVoteProgressStatus(propBlock, 50))
+        Assert.assertEquals(50, votingHelper.getVotingProgressStatus(propBlock, 50))
     }
 
     @Test
@@ -502,7 +502,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToProposal(false, propBlock)
 
-        Assert.assertEquals(25, votingHelper.getVoteProgressStatus(propBlock))
+        Assert.assertEquals(25, votingHelper.getVotingProgressStatus(propBlock))
     }
 
     @Test
@@ -532,7 +532,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToProposal(false, propBlock)
 
-        Assert.assertEquals(-1, votingHelper.getVoteProgressStatus(propBlock, 25))
+        Assert.assertEquals(-1, votingHelper.getVotingProgressStatus(propBlock, 25))
         Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 25))
     }
 }

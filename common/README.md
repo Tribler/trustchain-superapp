@@ -38,7 +38,7 @@ To check whether a vote is complete you can call the `votingIsComplete` function
 
 #### Checking vote progress
 ```
-getVoteProgressStatus(block: TrustChainBlock, threshold: Int = -1): Int
+getVotingProgressStatus(block: TrustChainBlock, threshold: Int = -1): Int
 ```
 To check the progress of a vote you can call the `getVotingProgressStatus` function. It takes as argument the proposalblock of the vote and a threshold and the function returns an integer. This integer is a percentage of the required votes or -1 in the case of a thresholdvote that received votes from all participants but of which the threshold was not met.
 

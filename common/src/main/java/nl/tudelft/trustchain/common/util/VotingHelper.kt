@@ -186,7 +186,7 @@ class VotingHelper(
      * threshold, or a yes/no vote has received votes from all eligible voters.
      */
     fun votingIsComplete(block: TrustChainBlock, threshold: Int = -1): Boolean {
-        return getVoteProgressStatus(block, threshold) >= 100 || getVoteProgressStatus(
+        return getVotingProgressStatus(block, threshold) >= 100 || getVotingProgressStatus(
             block,
             threshold
         ) == -1
@@ -195,7 +195,7 @@ class VotingHelper(
     /**
      * Return the percentage of required votes or -1 when a threshold is not made but all votes are received.
      */
-    fun getVoteProgressStatus(block: TrustChainBlock, thresholdPercentage: Int = -1): Int {
+    fun getVotingProgressStatus(block: TrustChainBlock, thresholdPercentage: Int = -1): Int {
         fun percentage(a: Int, b: Int): Int {
             if (b == 0) {
                 return 0
