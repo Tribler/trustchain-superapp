@@ -31,7 +31,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingBottom="20dp"
-                        android:text="Please create or import your Bitcoin wallet now."
+                        android:text="Create or import your Bitcoin wallet here."
                         android:textSize="16sp" />
 
                     <TextView
