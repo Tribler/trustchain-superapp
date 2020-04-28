@@ -565,7 +565,7 @@ class VotingHelperTest {
         // Vote and thus make the threshold.
         votingHelper.respondToVote(true, propBlock)
 
-        // Verify that the proposal block has been casted
+        // Verify that the proposal file has been accepted
         Assert.assertTrue(votingHelper.successfulFileProposals().contains(voteSubject))
     }
 }
