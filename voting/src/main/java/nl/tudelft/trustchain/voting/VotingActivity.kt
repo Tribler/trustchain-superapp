@@ -126,9 +126,11 @@ class VotingActivity : AppCompatActivity() {
                 focProp = true
                 switch.isChecked = true
                 switchLabel.text = getString(R.string.threshold_mode)
+                switch.isEnabled = false
                 votingMode = VotingMode.THRESHOLD
             } else {
                 focProp = false
+                switch.isEnabled = true
             }
         }
 
