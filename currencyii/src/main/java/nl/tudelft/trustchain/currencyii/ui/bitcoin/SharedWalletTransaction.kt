@@ -49,13 +49,15 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         val fragment =
             inflater.inflate(R.layout.fragment_shared_wallet_transaction, container, false)
         val args = SharedWalletTransactionArgs.fromBundle(requireArguments())
-        fragment.findViewById<TextView>(R.id.public_key_proposal).text = args.publicKey
-        fragment.findViewById<TextView>(R.id.voting_threshold_proposal).text =
-            "${args.votingThreshold} %"
 
-        fragment.findViewById<TextView>(R.id.entrance_fee_proposal).text = "${args.entranceFee} BTC"
         fragment.findViewById<TextView>(R.id.users_proposal).text =
             "${args.users} user(s) in this shared wallet"
+        fragment.findViewById<TextView>(R.id.public_key_proposal).text =
+            "Wallet ID: ${args.publicKey}"
+        fragment.findViewById<TextView>(R.id.entrance_fee_proposal).text =
+            "Entrance fee: ${args.entranceFee} Satoshi"
+        fragment.findViewById<TextView>(R.id.voting_threshold_proposal).text =
+            "Voting threshold: ${args.votingThreshold}%"
 
         blockHash = args.trustChainBlockHash.hexToBytes()
 
