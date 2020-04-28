@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -22,12 +21,11 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
-import nl.tudelft.ipv8.IPv8
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import nl.tudelft.trustchain.common.util.VotingHelper
+import nl.tudelft.trustchain.voting.VotingCommunity
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
