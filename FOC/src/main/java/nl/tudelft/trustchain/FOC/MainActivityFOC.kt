@@ -46,7 +46,8 @@ class MainActivityFOC : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val ipv8 = IPv8Android.getInstance()
-        vh = VotingHelper(ipv8.getOverlay()!!) // TODO make this the votingcommunity
+        val community: VotingCommunity = ipv8.getOverlay()!!
+        vh = VotingHelper(community)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
