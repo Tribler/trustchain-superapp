@@ -7,12 +7,14 @@
     <color name="text_primary">#000000</color>
     <color name="blue">#2962FF</color>
     <color name="green">#558B2F</color>
+    <color name="android_green">#3DDB86</color>
     <color name="red">#EE3B00</color>
     <color name="purple">#AA00FF</color>
     <color name="light_gray">#EEEEEE</color>
     <color name="mild_gray">#CCCCCC</color>
     <color name="gray">#a9a9a9</color>
     <color name="dark_gray">#444444</color>
+    <color name="metallic_gold">#D4AF37</color>
     <color name="black">#000000</color>
     <color name="white">#ffffff</color>
 

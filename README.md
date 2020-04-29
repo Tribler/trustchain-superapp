@@ -9,7 +9,7 @@ This repository contains a collection of Android apps built on top of [IPv8](htt
 **TrustChain Explorer** allows to browse the TrustChain blocks stored locally on the device and crawl chains of other connected peers. It also demonstrates how to interact with `TrustChainCommunity`. It defines its own `DemoCommunity` to ensure that all users using the app are able to discover each other easily. The content of the app is split into several tabs:
 
 - **Peers:** A list of discovered peers in `DemoCommunity`. For each peer, there is a time since the last sent and received message, and an average ping latency. After clicking on the peer item, a list of mutual blocks in TrustChain is shown. It is possible to create and send a new proposal block by clicking on the plus icon. A crawl request send be sent by clicking on the refresh button.
-- **Chains:** A list of discovered chains in `TrustChainComunity`, ordered by their length. After clicking on the item, the list of stored blocks is shown.
+- **Chains:** A list of discovered chains in `TrustChainCommunity`, ordered by their length. After clicking on the item, the list of stored blocks is shown.
 - **All Blocks:** A stream of all received blocks, updated in real-time as new blocks are received from the network.
 - **My Chain:** A list of blocks in which the current user is participating either as a sender or a receiver. It is possible to create a new self-signed block by clicking on the plus icon. It is posible to sign received blocks if they are not defined to be signed automatically.
 
@@ -54,6 +54,14 @@ The bid and asks can either be generated automatically or manually. Those bids a
 
 <img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
 [More about Market Bot](trustchain-payloadgenerator/readme.md)
+
+### TrustChain Voter
+The TrustChain Voter can be used to create a proposal on which the community can vote. The functionality has been split up in two parts: a Voting API, which provides the core voting functionality, and a TrustChain Voter submodule, which serves to demonstrate the capabilities of the voting API. Below, the process of creating a proposal (left) and casting a vote (right) can be seen.
+
+- [More about the Voting API](common/README.md#votinghelper)
+- [More about the TrustChain Voter submodule](trustchain-voter/README.md)
+
+<img src="doc/trustchain-voter/create-proposal.gif" width="280"> <img src="doc/trustchain-voter/cast-vote-process.gif" width="280"> 
 
 ### Do you want to add your own app?
 

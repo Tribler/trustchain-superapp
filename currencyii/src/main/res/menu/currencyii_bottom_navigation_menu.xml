@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+    android:id="@+id/myDAOsFragment"
+    android:title="@string/my_daos"
+    android:icon="@drawable/ic_group_work_black_24dp" />
+
+    <item
+        android:id="@+id/joinNetworkFragment"
+        android:title="@string/all_daos"
+        android:icon="@drawable/ic_search_black_24dp" />
+
+    <item
+        android:id="@+id/myProposals"
+        android:title="@string/proposals"
+        android:icon="@drawable/ic_whatshot_black_24dp" />
+
+    <item
+        android:id="@+id/bitcoinFragment"
+        android:title="@string/my_wallet"
+        android:icon="@drawable/ic_account_balance_wallet_black_24dp" />
+
+</menu>
