@@ -22,6 +22,7 @@
     <string name="enter_private_key">Enter Private Key</string>
     <string name="bitcoin">Bitcoin</string>
     <string name="dao_overview">Home</string>
+    <string name="all_daos">All DAOs</string>
     <string name="my_wallet">My Wallet</string>
     <string name="my_daos">My DAOs</string>
 

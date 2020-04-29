@@ -12,10 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
-import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.NetworkParameters
 
@@ -24,23 +21,8 @@ import org.bitcoinj.core.NetworkParameters
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-@Suppress("DEPRECATION")
 class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val navController = findNavController()
-        if (!WalletManagerAndroid.isInitialized()) {
-            navController.navigate(R.id.daoLoginChoice)
-        }
-
-        val args = BitcoinFragmentArgs.fromBundle(requireArguments())
-        if (args.showDownload) {
-            navController.navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }
-    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -74,25 +56,16 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         return when (item.itemId) {
             R.id.item_bitcoin_blockchain_download -> {
                 Log.i("Coin", "Navigating from BitcoinFragment to BlockchainDownloadFragment")
-                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-                true
-            }
-            R.id.item_dao_overview_refresh -> {
-                this.refresh(true)
-                Log.i(
-                    "Coin",
-                    WalletManagerAndroid.getInstance().kit.wallet().toString(
-                        true,
-                        false,
-                        false,
-                        null
+                findNavController().navigate(
+                    BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment(
+                        R.id.bitcoinFragment
                     )
                 )
                 true
             }
-            R.id.item_dao_logout -> {
-                Log.i("Coin", "Logging out of current DAO user")
-                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoLoginChoice())
+            R.id.item_bitcoin_wallet_settings -> {
+                Log.i("Coin", "Navigating from BitcoinFragment to DaoImportOrCreate")
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToDaoImportOrCreate())
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -109,6 +82,11 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             val walletManager = WalletManagerAndroid.getInstance()
             val seed = walletManager.toSeed()
             copyToClipboard("${seed.seed}, ${seed.creationTime}")
+        }
+
+        button_copy_bitcoin_public_key.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            copyToClipboard(walletManager.networkPublicECKeyHex())
         }
 
         bitcoin_refresh_swiper.setOnRefreshListener {
@@ -190,7 +168,8 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             } catch (t: Throwable) {
                 Toast.makeText(
                     this.requireContext(),
-                    "Something went wrong while initializing the new wallet. ${t.message ?: "No further information"}.",
+                    "Something went wrong while initializing the new wallet. ${t.message
+                        ?: "No further information"}.",
                     Toast.LENGTH_SHORT
                 ).show()
                 return

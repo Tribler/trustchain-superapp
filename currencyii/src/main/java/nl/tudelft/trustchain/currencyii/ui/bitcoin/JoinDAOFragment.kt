@@ -22,7 +22,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
+class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
@@ -72,11 +72,21 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun fetchSharedWalletsAndUpdateUI() {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
+                setAlertText("Crawling blocks for DAOs...")
+
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
                 updateSharedWallets(discoveredWallets)
                 updateSharedWalletsUI()
                 crawlAvailableSharedWallets()
                 updateSharedWalletsUI()
+
+                if (fetchedWallets.isEmpty()) {
+                    setAlertText("No DAOs found.")
+                } else {
+                    activity?.runOnUiThread {
+                        alert_tf.visibility = View.GONE
+                    }
+                }
             }
         }
     }
@@ -113,7 +123,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
             // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
-                this@JoinNetworkFragment,
+                this@JoinDAOFragment,
                 fetchedWallets,
                 publicKey,
                 "Click to join",
@@ -128,6 +138,10 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
                         Log.i("Coin", "Clicked: $view, $position, $id")
                     }
                 }
+            }
+
+            if (fetchedWallets.isEmpty()) {
+                setAlertText("No DAOs found.")
             }
         }
     }
@@ -171,9 +185,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             ).getData()
         } catch (t: Throwable) {
             Log.i("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
-            activity?.runOnUiThread {
-                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
-            }
+            setAlertText(t.message ?: "Unexpected error occurred. Try again")
             return
         }
 
@@ -195,28 +207,22 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             )
         } catch (t: Throwable) {
             Log.i("Coin", "Joining failed. ${t.message ?: "No further information"}.")
-            activity?.runOnUiThread {
-                alert_tf.text = t.message ?: "Unexpected error occurred. Try again"
-            }
+            setAlertText(t.message ?: "Unexpected error occurred. Try again")
         }
 
         // Update wallets UI list
         fetchSharedWalletsAndUpdateUI()
-        activity?.runOnUiThread {
-            alert_tf.text = "You joined ${proposeBlockData.SW_UNIQUE_ID}!"
-        }
+        setAlertText("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
     }
 
     private fun updateAlertLabel(progress: Double) {
         Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
 
-        activity?.runOnUiThread {
-            if (progress >= 1) {
-                alert_tf?.text = "Join wallet progress: completed!"
-            } else {
-                val progressString = "%.0f".format(progress * 100)
-                alert_tf.text = "Join wallet progress: $progressString%..."
-            }
+        if (progress >= 1) {
+            setAlertText("Join wallet progress: completed!")
+        } else {
+            val progressString = "%.0f".format(progress * 100)
+            setAlertText("Join wallet progress: $progressString%...")
         }
     }
 
@@ -236,15 +242,21 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
             "Waiting for signatures. ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         )
 
-        activity?.runOnUiThread {
-            alert_tf?.text =
-                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
-        }
+        setAlertText(
+            "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+        )
 
         if (signatures.size >= blockData.SW_SIGNATURES_REQUIRED) {
             return signatures
         }
         return null
+    }
+
+    private fun setAlertText(text: String) {
+        activity?.runOnUiThread {
+            alert_tf?.visibility = View.VISIBLE
+            alert_tf?.text = text
+        }
     }
 
     override fun onCreateView(
@@ -258,7 +270,7 @@ class JoinNetworkFragment() : BaseFragment(R.layout.fragment_join_network) {
 
     companion object {
         @JvmStatic
-        fun newInstance() = JoinNetworkFragment()
+        fun newInstance() = JoinDAOFragment()
 
         public const val SW_CRAWLING_TIMEOUT_MILLI: Long = 1_000 * 10
     }

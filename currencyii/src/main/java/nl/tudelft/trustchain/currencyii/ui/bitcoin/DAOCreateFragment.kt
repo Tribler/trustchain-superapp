@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
 import org.bitcoinj.crypto.MnemonicCode
 import org.bitcoinj.crypto.MnemonicException
+import java.io.File
 
 /**
  * A simple [Fragment] subclass.
@@ -74,7 +76,8 @@ class DAOCreateFragment : Fragment() {
         } catch (e: MnemonicException) {
             Toast.makeText(
                 this.requireContext(),
-                "The mnemonic seed provided is not correct. ${e.message ?: "No further information"}.",
+                "The mnemonic seed provided is not correct. ${e.message
+                    ?: "No further information"}.",
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -104,6 +107,10 @@ class DAOCreateFragment : Fragment() {
             )
         }
 
+        // Rename all stored wallet files that are currently stored on the device
+        // Effectively the same as deleting, but safer as they are not lost
+        hideStoredWallets()
+
         // Close the current wallet manager if there is one running, blocks thread until it is closed
         if (WalletManagerAndroid.isInitialized()) {
             WalletManagerAndroid.close()
@@ -116,14 +123,15 @@ class DAOCreateFragment : Fragment() {
         } catch (t: Throwable) {
             Toast.makeText(
                 this.requireContext(),
-                "Something went wrong while initializing the wallet. ${t.message ?: "No further information"}.",
+                "Something went wrong while initializing the wallet. ${t.message
+                    ?: "No further information"}.",
                 Toast.LENGTH_SHORT
             ).show()
             return
         }
 
         findNavController().navigate(
-            DAOCreateFragmentDirections.actionDaoImportOrCreateToBitcoinFragment(
+            DAOCreateFragmentDirections.actionDaoImportOrCreateToMyDAOsFragment(
                 showDownload = true
             )
         )
@@ -143,6 +151,70 @@ class DAOCreateFragment : Fragment() {
 
         fun isPrivateKeyValid(privateKey: String): Boolean {
             return privateKey.length in 51..52 || privateKey.length == 64
+        }
+    }
+
+    /**
+     * This function "hides" stored wallets by renaming them.
+     */
+    private fun hideStoredWallets() {
+        val vWalletFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.wallet"
+        )
+        val vChainFileMainNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$MAIN_NET_WALLET_NAME.spvchain"
+        )
+        val vWalletFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.wallet"
+        )
+        val vChainFileTestNet = File(
+            this.requireContext().applicationContext.filesDir,
+            "$TEST_NET_WALLET_NAME.spvchain"
+        )
+
+        val fileSuffix = System.currentTimeMillis()
+
+        if (vWalletFileMainNet.exists()) {
+            vWalletFileMainNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${MAIN_NET_WALLET_NAME}_backup_main_net_wallet_$fileSuffix.wallet"
+                )
+            )
+            Log.w("Coin", "Renamed MainNet wallet file")
+        }
+
+        if (vChainFileMainNet.exists()) {
+            vChainFileMainNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${MAIN_NET_WALLET_NAME}_backup_main_net_spvchain_$fileSuffix.spvchain"
+                )
+            )
+            Log.w("Coin", "Renamed MainNet chain file")
+        }
+
+        if (vWalletFileTestNet.exists()) {
+            vWalletFileTestNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${TEST_NET_WALLET_NAME}_backup_test_net_wallet_$fileSuffix.wallet"
+                )
+            )
+            Log.w("Coin", "Renamed TestNet wallet file")
+        }
+
+        if (vChainFileTestNet.exists()) {
+            vChainFileTestNet.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${TEST_NET_WALLET_NAME}_backup_test_net_spvchain_$fileSuffix.spvchain"
+                )
+            )
+            Log.w("Coin", "Renamed TestNet chain file")
         }
     }
 }

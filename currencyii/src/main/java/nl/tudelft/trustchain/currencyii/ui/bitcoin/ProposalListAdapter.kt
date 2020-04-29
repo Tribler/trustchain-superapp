@@ -28,6 +28,8 @@ class ProposalListAdapter(
         val doaId = view.findViewById<TextView>(R.id.dao_id_tv)
         val proposalId = view.findViewById<TextView>(R.id.proposal_id_tv)
         val signaturesRequired = view.findViewById<TextView>(R.id.signatures_required_tv)
+        val transferReceiver = view.findViewById<TextView>(R.id.transfer_target_tv)
+        val transferAmount = view.findViewById<TextView>(R.id.transfer_amount_tv)
 
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
@@ -35,7 +37,9 @@ class ProposalListAdapter(
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = "${data.SW_SIGNATURES_REQUIRED}"
+            signaturesRequired.text = data.SW_SIGNATURES_REQUIRED.toString()
+            transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
+            transferAmount.text = "${data.SW_TRANSFER_FUNDS_AMOUNT} Satoshi"
         }
 
         if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
@@ -45,9 +49,23 @@ class ProposalListAdapter(
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
             signaturesRequired.text = "${data.SW_SIGNATURES_REQUIRED}"
+
+            // Hide the components only used for transfer funds
+            hideTransferProposalComponents(view)
         }
 
         return view
+    }
+
+    private fun hideTransferProposalComponents(view: View) {
+        val transferReceiverLabel = view.findViewById<TextView>(R.id.transfer_target)
+        val transferAmountLabel = view.findViewById<TextView>(R.id.transfer_amount)
+        val transferReceiver = view.findViewById<TextView>(R.id.transfer_target_tv)
+        val transferAmount = view.findViewById<TextView>(R.id.transfer_amount_tv)
+        transferReceiverLabel?.visibility = View.GONE
+        transferAmountLabel?.visibility = View.GONE
+        transferReceiver?.visibility = View.GONE
+        transferAmount?.visibility = View.GONE
     }
 
     override fun getItem(p0: Int): Any {
