@@ -41,6 +41,7 @@ class DAOCreateFragment : BaseFragment() {
             val activity = requireActivity() as AppCompatActivity
             activity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
             activity.supportActionBar?.setHomeButtonEnabled(false)
+            activity.supportActionBar?.title = "First Time Setup"
         }
     }
 
