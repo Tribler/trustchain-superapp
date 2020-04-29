@@ -5,7 +5,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import nl.tudelft.trustchain.common.BaseActivity
 
-
 class CurrencyIIMainActivity : BaseActivity() {
     private var topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)
 
@@ -26,5 +25,4 @@ class CurrencyIIMainActivity : BaseActivity() {
             super.onBackPressed()
         }
     }
-
 }
