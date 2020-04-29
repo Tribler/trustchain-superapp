@@ -67,6 +67,8 @@ The TrustChain Voter can be used to create a proposal on which the community can
 
 Freedom-of-Computing is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "DemoCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, needs to have a specific format for its execution to work, the requirements/constraints are listed below.
 
+The left demo shows the upload procedure, while the right demo shows the download and code execution procedure.
+
 <img src="doc/freedomOfComputing/demo1.gif" width="280"> <img src="doc/freedomOfComputing/demo2.gif" width="280">
 
 [More about Freedom-of-Computing App](freedomOfComputing/README.md)
