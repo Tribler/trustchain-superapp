@@ -102,8 +102,11 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
             R.id.item_crawl -> {
                 lifecycleScope.launch {
                     Toast.makeText(requireContext(), "Crawl started", Toast.LENGTH_SHORT).show()
-                    crawlChain()
-                    Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+                    if (crawlChain()) {
+                        Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Crawl failed", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 true
             }
@@ -184,12 +187,15 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
         builder.show()
     }
 
-    private suspend fun crawlChain() {
+    private suspend fun crawlChain(): Boolean {
         val peer = trustchain.getPeerByPublicKeyBin(publicKey)
-        if (peer != null) {
+        return if (peer != null) {
             trustchain.crawlChain(peer)
             refreshBlocks()
             updateView()
+            true
+        } else {
+            false
         }
     }
 
