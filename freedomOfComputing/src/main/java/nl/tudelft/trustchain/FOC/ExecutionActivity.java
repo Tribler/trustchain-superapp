@@ -56,6 +56,7 @@ public class ExecutionActivity extends AppCompatActivity {
         }
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
         final String apkPath = apkName;
+        String appName = apkName.substring(apkName.lastIndexOf("/")+1, apkName.lastIndexOf("."));
         //final String apkPath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + apkName;
         final ClassLoader classLoader = new DexClassLoader(apkPath, context.getCacheDir().getAbsolutePath(), null, this.getClass().getClassLoader());
 
@@ -63,7 +64,7 @@ public class ExecutionActivity extends AppCompatActivity {
 
         try {
 
-            fragmentClass = classLoader.loadClass("com.example.demoboi.MainFragment");
+            fragmentClass = classLoader.loadClass("com.execmodule." + appName + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
 
             tmpLayout = new LinearLayout(getApplicationContext());

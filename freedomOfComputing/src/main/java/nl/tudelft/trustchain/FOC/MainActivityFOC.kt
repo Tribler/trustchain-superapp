@@ -368,7 +368,7 @@ class MainActivityFOC : AppCompatActivity() {
         val inputText = enterJar.text.toString()
         if (inputText == "") {
             printToast("No apk/jar name given, using default")
-            apkName = "demoboi.apk"
+            apkName = "helloworld.apk"
         } else apkName = inputText
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
