@@ -22,22 +22,22 @@ The user can press the “Execute code from jar” button to execute the file sp
 ## User Guide
 
 ### Upload
-Enter the apk name in the upper text box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder. 
+Enter the apk name in the upper input box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder. 
 Press "Inform peers about seeding" to let the other connected peers know about the file you are uploading (seeding).
 
 ### Download/Execute
-1. Retrieve Torrents
-click Retrieve list of torrents and press on one of the available options.
+1. Retrieve the list of currently seeded torrents by clicking the "Retrieve list of torrents" buttons. Press on one of the available options.
 
 <img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
 
-2. Download This should auto fill in the first text box. Then proceed with the download by pressing download magnet.
+2. Download 
+The corresponding magnet link should auto-fill in the first input box. Proceed with the download by pressing "Download magnet link".
 
 <img src="https://i.imgur.com/qJj4Edv.jpg" width="180">
 
 3. Execute apk
-This should result in the information to be displayed such that you are able to enter the apk name into the lower text box and hit execute.
-Once the button has been pressed the application should launch.
+This should result in the torrent information being displayed and in the apk name auto-filling up the lower text box. You can press "Execute module (apk)" once the download has finished, indicated by a full progress bar.
+Once the button has been pressed the downloaded application should launch.
 
 <img src="https://i.imgur.com/0rAe9Q3.jpg" width="180">
 
