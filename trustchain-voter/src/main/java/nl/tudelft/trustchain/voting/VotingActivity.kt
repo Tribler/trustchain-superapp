@@ -309,7 +309,10 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun proposalListUpdate() {
         val currentProposals = tch.getBlocksByType("voting_block").filter {
-            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && vh.getVoters(it).contains(
+                community.myPeer.publicKey
+            ) &&
+            displayBlock(
                 it
             )
         }.asReversed()
