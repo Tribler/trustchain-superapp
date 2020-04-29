@@ -1,4 +1,8 @@
 # Freedom-of-Computing App
+
+## Overview
+
+Freedom-of-Computing is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "DemoCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, needs to have a specific format for its execution to work, the requirements/constraints are listed below.
  
 ## Describing the main use case of our app
 We present the main use case of our app, step by step, through which our contributions to the whole “superapp” project become visible.
@@ -15,26 +19,27 @@ The recipient can press on any of the list entries, which represent a seeded tor
 ### Executing the downloaded apk/jar
 The user can press the “Execute code from jar” button to execute the file specified in the apk inputBox, which should also be stored in the main storage directory of the phone.
 
-## Guide
+## User Guide
 
 ### Upload
-Enter file location in the upper text box and press "upload torrent". Press "inform peers".
+Enter the apk name in the upper text box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder. 
+Press "Inform peers about seeding" to let the other connected peers know about the file you are uploading (seeding).
 
 ### Download/Execute
 1. Retrieve Torrents
 click Retrieve list of torrents and press on one of the available options.
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="190">
+<img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
 
 2. Download This should auto fill in the first text box. Then proceed with the download by pressing download magnet.
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.15.png" width="190">
+<img src="https://i.imgur.com/qJj4Edv.jpg" width="180">
 
 3. Execute apk
 This should result in the information to be displayed such that you are able to enter the apk name into the lower text box and hit execute.
 Once the button has been pressed the application should launch.
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.40.png" width="190">
+<img src="https://i.imgur.com/0rAe9Q3.jpg" width="180">
 
 ## How to develop a module for execution in our app
 
@@ -97,9 +102,7 @@ public class MainFragment extends Fragment {
 }
 ```
 
-Here is a screenshot of the hello-world app executing on our platform:
-
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="190">
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
 
 ## Extra info
 
