@@ -24,17 +24,17 @@ Enter file location in the upper text box and press "upload torrent". Press "inf
 1. Retrieve Torrents
 click Retrieve list of torrents and press on one of the available options.
 
-<img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="190">
 
 2. Download This should auto fill in the first text box. Then proceed with the download by pressing download magnet.
 
-<img src="https://i.imgur.com/qJj4Edv.jpg" width="180">
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.15.png" width="190">
 
 3. Execute apk
 This should result in the information to be displayed such that you are able to enter the apk name into the lower text box and hit execute.
 Once the button has been pressed the application should launch.
 
-<img src="https://i.imgur.com/0rAe9Q3.jpg" width="180">
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.40.png" width="190">
 
 ## How to develop a module for execution in our app
 
@@ -97,7 +97,8 @@ public class MainFragment extends Fragment {
 }
 ```
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
+Here is a screenshot of the hello-world app executing on our platform:
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="190">
 
 ## Extra info
 
