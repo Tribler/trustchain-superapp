@@ -88,7 +88,6 @@ public class MainFragment extends Fragment {
         Button mybutton = new Button(container.getContext());
         mybutton.setText("hello world");
         mybutton.setId(2);
-        mybutton.setOnClickListener(buttOnClickListener);
         mybutton.setLayoutParams(lp);
         mylayout.addView(mybutton);
 
@@ -97,6 +96,8 @@ public class MainFragment extends Fragment {
     }
 }
 ```
+
+<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
 
 ## Extra info
 
