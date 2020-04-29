@@ -6,7 +6,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import nl.tudelft.trustchain.common.BaseActivity
 
 class CurrencyIIMainActivity : BaseActivity() {
-    private val topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)
+    private var topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)
 
     override val navigationGraph = R.navigation.nav_graph
     override val bottomNavigationMenu = R.menu.currencyii_bottom_navigation_menu
@@ -23,6 +23,22 @@ class CurrencyIIMainActivity : BaseActivity() {
             Log.i("Coin", "Hardware back press not allowed on top level destinations.")
         } else {
             super.onBackPressed()
+        }
+    }
+
+    fun addTopLevelDestinationId(id: Int) {
+        val topLevelDestinationIdsList = topLevelDestinationIds.toMutableList()
+        if (!topLevelDestinationIdsList.contains(id)) {
+            topLevelDestinationIdsList.add(id)
+            topLevelDestinationIds = topLevelDestinationIdsList.toSet()
+        }
+    }
+
+    fun removeTopLevelDestinationId(id: Int) {
+        val topLevelDestinationIdsList = topLevelDestinationIds.toMutableList()
+        if (topLevelDestinationIdsList.contains(id)) {
+            topLevelDestinationIdsList.remove(id)
+            topLevelDestinationIds = topLevelDestinationIdsList.toSet()
         }
     }
 }
