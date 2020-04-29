@@ -26,7 +26,7 @@ Enter the apk name in the upper input box and press "Upload torrent". The name n
 Press "Inform peers about seeding" to let the other connected peers know about the file you are uploading (seeding).
 
 ### Download/Execute
-1. Retrieve the list of currently seeded torrents by clicking the "Retrieve list of torrents" buttons. Press on one of the available options.
+1. Retrieve the list of currently seeded torrents by clicking the "Retrieve list of torrents" button. Press on one of the available options.
 
 <img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
 
