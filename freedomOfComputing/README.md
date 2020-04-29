@@ -38,9 +38,65 @@ Once the button has been pressed the application should launch.
 
 ## How to develop a module for execution in our app
 
-Code and layout constraints
-A "Hello World!" example
-Extra functionalities
+### Code and layout constraints
+Our execution platform is currently only able to load fragments from an Android Package Kit(APK). Our platform loads one fixed fragment class from the APK to run inside of our platform's activity. The fragment that is loaded can still depend on other classes in different files inside of the APK.
+
+Here are the constraints a developer needs to strictly follow to develop an app for execution in the Freedom of Computing execution platform:
+
+* Our platform starts executing from the class named "com.execmodule._name of the APK_.MainFragment" so it is necessary to have this fragment as the entry point for the module
+
+* As our platform internally uses DexClassLoader in order to load classes from an APK, it is really difficult to load precompiled layout resources from the APK. Therefore the developer needs to programatically build the layout instead of using XML files or pre compiled resources to build a UI.
+
+Other then these constraints, a developer can follow the normal android development procedures for further functionalities.
+
+_**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states can be found on: https://developer.android.com/topic/libraries/architecture/saving-states._ 
+
+### A "Hello World!" example
+```java
+package com.execmodule.helloworld;
+
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+
+public class MainFragment extends Fragment {
+
+    public MainFragment() {
+        // Required empty public constructor
+    }
+    public static MainFragment newInstance(String param1, String param2) {
+        MainFragment fragment = new MainFragment();
+        return fragment;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        LinearLayout mylayout = new LinearLayout(container.getContext());
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+
+        Button mybutton = new Button(container.getContext());
+        mybutton.setText("hello world");
+        mybutton.setId(2);
+        mybutton.setOnClickListener(buttOnClickListener);
+        mybutton.setLayoutParams(lp);
+        mylayout.addView(mybutton);
+
+        View view = mylayout;
+        return view;
+    }
+}
+```
 
 ## Extra info
 
