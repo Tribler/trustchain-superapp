@@ -63,6 +63,9 @@ The TrustChain Voter can be used to create a proposal on which the community can
 
 <img src="doc/trustchain-voter/create-proposal.gif" width="280"> <img src="doc/trustchain-voter/cast-vote-process.gif" width="280"> 
 
+### Freedom-of-Computing App
+[More about Freedom-of-Computing App](freedomOfComputing/README.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
