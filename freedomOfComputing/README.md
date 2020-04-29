@@ -98,6 +98,7 @@ public class MainFragment extends Fragment {
 ```
 
 Here is a screenshot of the hello-world app executing on our platform:
+
 <img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="190">
 
 ## Extra info
