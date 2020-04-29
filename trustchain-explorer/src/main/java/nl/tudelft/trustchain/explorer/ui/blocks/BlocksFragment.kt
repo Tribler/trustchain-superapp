@@ -19,6 +19,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
@@ -115,9 +116,8 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     }
 
     protected open fun getPublicKey(): ByteArray {
-//        val args = BlocksFragmentArgs.fromBundle(requireArguments())
-//        return args.publicKey.hexToBytes()
-        return getTrustChainCommunity().myPeer.publicKey.keyToBin()
+        val args = BlocksFragmentArgs.fromBundle(requireArguments())
+        return args.publicKey.hexToBytes()
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {

@@ -19,6 +19,7 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
@@ -44,6 +45,7 @@ class TrustChainApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
+            createTFTPCommunity(),
             createDemoCommunity(),
             createMarketCommunity(),
             createCoinCommunity()
@@ -126,6 +128,13 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
             listOf(randomWalk)
+        )
+    }
+
+    private fun createTFTPCommunity(): OverlayConfiguration<TFTPCommunity> {
+        return OverlayConfiguration(
+            Overlay.Factory(TFTPCommunity::class.java),
+            listOf()
         )
     }
 

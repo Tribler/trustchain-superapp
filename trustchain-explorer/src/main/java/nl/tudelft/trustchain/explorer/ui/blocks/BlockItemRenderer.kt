@@ -27,6 +27,7 @@ class BlockItemRenderer(
         txtType.text = block.type
         txtTransaction.text = block.transaction.toString()
         txtExpandedTransaction.text = block.transaction.toString()
+        txtTransactionSize.text = view.resources.getString(R.string.x_bytes, block.rawTransaction.size)
         txtTimestamp.text = block.timestamp.toString()
         txtInsertTime.text = block.insertTime?.toString()
         txtBlockHash.text = block.calculateHash().toHex()
