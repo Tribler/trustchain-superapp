@@ -18,6 +18,7 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
@@ -33,6 +34,8 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        defaultCryptoProvider = AndroidCryptoProvider
 
         initIPv8()
     }
