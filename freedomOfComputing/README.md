@@ -1,21 +1,21 @@
 # Freedom-of-Computing App
  
-### Describing the main use case of our app
+## Describing the main use case of our app
 We present the main use case of our app, step by step, through which our contributions to the whole “superapp” project become visible.
 
-## Creating a torrent out of any file
+### Creating a torrent out of any file
 The user has a file he wants to distribute to the rest of the peers in the superapp’s network, say “image.png”. Suppose this file resides in the main directory of his Android phone’s storage (the root directory of Internal Storage). The user writes the name of the file in the torrent inputBox, including the extension (i.e. image.png). He presses on the “Upload torrent” button, which causes both a torrent file and a magnet link to be created, both representing the given file. The file then begins to be seeded by the user.
 
-## Informing the other peers about the seeding torrent
+### Informing the other peers about the seeding torrent
 The user presses the “Inform peers about seeding” button, which sends the magnet link to every other peer in the network. Every recipient can now check his incoming magnet links / messages by pressing the “Retrieve list of torrents” button. Upon pressing that button, a list of the available torrents appears at the bottom of the scrollable screen.
 
-## Downloading the seeding torrent, as a recipient
+### Downloading the seeding torrent, as a recipient
 The recipient can press on any of the list entries, which represent a seeded torrent each. The magnet link of that torrent will then fill up the torrent inputBox. Finally, by pressing the “Download (magnet link)” button, and since the corresponding inputBox is filled up, the seeded torrent will begin downloading for the recipient. The download might take some time to actually start, especially when the only seeder is the creator of the torrent. The downloaded file will also be placed in the main storage directory of the phone.
 
-## Executing the downloaded apk/jar
+### Executing the downloaded apk/jar
 The user can press the “Execute code from jar” button to execute the file specified in the apk inputBox, which should also be stored in the main storage directory of the phone.
 
-### Guide
+## Guide
 
 ## Upload
 Enter file location in the upper text box and press "upload torrent". Press "inform peers".
