@@ -17,10 +17,10 @@ The user can press the “Execute code from jar” button to execute the file sp
 
 ## Guide
 
-## Upload
+### Upload
 Enter file location in the upper text box and press "upload torrent". Press "inform peers".
 
-## Download/Execute
+### Download/Execute
 1. Retrieve Torrents
 click Retrieve list of torrents and press on one of the available options.
 
@@ -31,13 +31,13 @@ This should result in the information to be displayed such that you are able to 
 Once the button has been pressed the application should launch.
 
 
-### How to develop a module for execution in our app
+## How to develop a module for execution in our app
 
 Code and layout constraints
 A "Hello World!" example
 Extra functionalities
 
-### Extra info
+## Extra info
 
 At any point, a download can be stopped by pressing at the stop button. Additionally, initializing a different download will cause the last download to stop, but the progress remains until the next time.
 
