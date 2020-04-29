@@ -61,7 +61,7 @@ The TrustChain Voter can be used to create a proposal on which the community can
 - [More about the Voting API](common/README.md#votinghelper)
 - [More about the TrustChain Voter submodule](trustchain-voter/README.md)
 
-<img src="https://user-images.githubusercontent.com/17474698/80522657-37560600-898d-11ea-9dbb-eeff8eec9ea2.gif" width="280"> <img src="https://user-images.githubusercontent.com/17474698/80523868-08d92a80-898f-11ea-8b39-4967a5915a27.gif" width="280"> 
+<img src="doc/trustchain-voter/create-proposal.gif" width="280"> <img src="doc/trustchain-voter/cast-vote-process.gif" width="280"> 
 
 ### Do you want to add your own app?
 
