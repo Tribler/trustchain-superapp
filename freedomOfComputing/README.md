@@ -20,6 +20,8 @@ The user can press the “Execute code from jar” button to execute the file sp
 ### Upload
 Enter file location in the upper text box and press "upload torrent". Press "inform peers".
 
+<img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
+
 ### Download/Execute
 1. Retrieve Torrents
 click Retrieve list of torrents and press on one of the available options.
