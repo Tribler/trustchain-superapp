@@ -7,6 +7,7 @@ Luxury communism is an Android application built on top of [IPv8](https://github
 * **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
 * **Proposals**: A list of all proposals that the user can vote on. This can either be join proposals or proposals from someone else to transfer funds from one of the DAO's.
 * **My Wallet**: Overview of the used Bitcoin wallet and the ability to chane this to another.
+* **Duplicate Wallet**: In case the user has wallet files for both TestNet and Production, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
 
 **First Time Launch Screens**
 <br />
@@ -27,6 +28,10 @@ Luxury communism is an Android application built on top of [IPv8](https://github
 **My Wallet Screens**
 <br />
 <img src="docs/images/screenshot_11.png" width="200px"> <img src="docs/images/screenshot_12.png" width="200px">
+
+**Duplicate Wallet screen**
+<br />
+<img src="docs/images/duplicate_wallet.png" width="200px">
 
 This document contains the project structure, underlying protocol, and known issues and limitations.
 
