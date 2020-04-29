@@ -9,18 +9,23 @@ Luxury communism is an Android application built on top of [IPv8](https://github
 * **My Wallet**: Overview of the used Bitcoin wallet and the ability to chane this to another.
 
 **First Time Launch Screens**
+<br />
 <img src="docs/images/screenshot_1.png" width="200px"> <img src="docs/images/screenshot_2.png" width="200px"> <img src="docs/images/screenshot_3.png" width="200px"> <img src="docs/images/screenshot_4.png" width="200px"> <img src="docs/images/screenshot_5.png" width="200px">
 
 **My DAO Screens**
+<br />
 <img src="docs/images/screenshot_6.png" width="200px"> <img src="docs/images/screenshot_7.png" width="200px"> <img src="docs/images/screenshot_8.png" width="200px">
 
 **All DAOs Screens**
+<br />
 <img src="docs/images/screenshot_9.png" width="200px">
 
 **Proposals Screens**
+<br />
 <img src="docs/images/screenshot_10.png" width="200px">
 
 **My Wallet Screens**
+<br />
 <img src="docs/images/screenshot_11.png" width="200px"> <img src="docs/images/screenshot_12.png" width="200px">
 
 This document contains the project structure, underlying protocol, and known issues and limitations.
