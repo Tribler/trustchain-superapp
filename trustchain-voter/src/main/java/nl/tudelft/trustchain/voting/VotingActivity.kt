@@ -309,9 +309,20 @@ class VotingActivity : AppCompatActivity() {
      */
     private fun proposalListUpdate() {
         val currentProposals = tch.getBlocksByType("voting_block").filter {
-            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
-                it
-            )
+
+            // Only the original proposal blocks.
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") &&
+
+                // Only those that you are eligible for
+                vh.getVoters(it).any { key ->
+                    key.pub().keyToBin()
+                        .contentEquals(community.myPeer.publicKey.keyToBin())
+                } &&
+
+                // Take display mode into consideration
+                displayBlock(
+                    it
+                )
         }.asReversed()
 
         // Update vote proposal set

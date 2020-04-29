@@ -20,6 +20,6 @@ Shared wallet and transfer funds proposals are identified with a unique identifi
 
 We discuss some of the improvements that came to light during the development process.
 
-- The genesis shared wallet block is the only block that needs to store the transaction fee and voting threshold, since we do not allow the DAO users to change those values. 
+- The genesis shared wallet block is the only block that needs to store the transaction fee and voting threshold, since we do not allow the DAO users to change those values.
 - Each block that indicates that a new user joined the shared wallet (after paying the fees and possible other requirements) only needs to contain the public bitcoin and trustchain key of the new user. The other keys can be derived from the previous shared wallet blocks, based on the unique trustchain shared wallet ID.
 - ... much more probably

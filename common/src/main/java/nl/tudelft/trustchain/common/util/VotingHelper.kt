@@ -150,7 +150,7 @@ class VotingHelper(
     /**
      * Return a list of voters' public keys parsed from the block.
      */
-    private fun getVoters(block: TrustChainBlock): List<PublicKey> {
+    fun getVoters(block: TrustChainBlock): List<PublicKey> {
 
         val jsonKeys = try {
             JSONArray(getVotingBlockAttributesByKey(block, "VOTE_LIST"))

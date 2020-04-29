@@ -202,6 +202,17 @@
             <TextView
                 android:textSize="13sp"
                 android:textStyle="bold"
+                android:text="Transaction Size"/>
+
+            <TextView
+                android:id="@+id/txtTransactionSize"
+                android:textSize="13sp"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:textSize="13sp"
+                android:textStyle="bold"
                 android:text="Timestamp"/>
 
             <TextView
