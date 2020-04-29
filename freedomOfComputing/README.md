@@ -31,11 +31,13 @@ Press "Inform peers about seeding" to let the other connected peers know about t
 <img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
 
 2. Download 
+
 The corresponding magnet link should auto-fill in the first input box. Proceed with the download by pressing "Download magnet link".
 
 <img src="https://i.imgur.com/qJj4Edv.jpg" width="180">
 
 3. Execute apk
+
 This should result in the torrent information being displayed and in the apk name auto-filling up the lower text box. You can press "Execute module (apk)" once the download has finished, indicated by a full progress bar.
 Once the button has been pressed the downloaded application should launch.
 
