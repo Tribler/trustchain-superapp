@@ -77,53 +77,69 @@
 
             <Button
                 android:id="@+id/downloadMagnetButton"
-                android:layout_width="129dp"
+                android:layout_width="168dp"
                 android:layout_height="105dp"
                 android:layout_alignLeft="@id/enterTorrent"
                 android:layout_centerVertical="false"
                 android:layout_marginTop="100dp"
-                android:text="DOWNLOAD (MAGNET LINK)" />
+                android:background="#036BFC"
+                android:text="DOWNLOAD (MAGNET LINK)"
+                android:textColor="#FFFFFF" />
 
-            <Button
-                android:id="@+id/uploadTorrentButton"
-                android:layout_width="129dp"
-                android:layout_height="105dp"
-                android:layout_alignLeft="@id/enterTorrent"
-                android:layout_centerVertical="false"
-                android:layout_marginTop="320dp"
-                android:text="UPLOAD TORRENT" />
-
-            <Button
-                android:id="@+id/executeCodeButton"
-                android:layout_width="129dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="210dp"
-                android:text="EXECUTE MODULE (APK)" />
-
-            <Button
-                android:id="@+id/downloadTorrentButton"
-                android:layout_width="129dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="100dp"
-                android:text="DOWNLOAD (TORRENT)" />
-
-            <Button
-                android:id="@+id/retrieveListButton"
-                android:layout_width="129dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="320dp"
-                android:text="RETRIEVE LIST OF TORRENTS" />
 
             <Button
                 android:id="@+id/informPeersButton"
-                android:layout_width="129dp"
+                android:layout_width="168dp"
                 android:layout_height="105dp"
                 android:layout_alignLeft="@id/enterTorrent"
+                android:layout_centerVertical="false"
                 android:layout_marginTop="210dp"
-                android:text="INFORM PEERS ABOUT SEEDING" />
+                android:background="#036BFC"
+                android:text="INFORM PEERS ABOUT SEEDING"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/uploadTorrentButton"
+                android:layout_width="168dp"
+                android:layout_height="105dp"
+                android:layout_alignLeft="@id/enterTorrent"
+                android:layout_centerVertical="false"
+                android:layout_marginTop="320dp"
+                android:background="#036BFC"
+                android:text="UPLOAD TORRENT"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/executeCodeButton"
+                android:layout_width="168dp"
+                android:layout_height="105dp"
+                android:layout_alignRight="@id/enterTorrent"
+                android:layout_marginTop="210dp"
+                android:background="#036BFC"
+                android:text="EXECUTE MODULE (APK)"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/downloadTorrentButton"
+                android:layout_width="168dp"
+                android:layout_height="105dp"
+                android:layout_alignRight="@id/enterTorrent"
+                android:layout_marginTop="100dp"
+                android:background="#036BFC"
+                android:text="DOWNLOAD (TORRENT)"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/retrieveListButton"
+                android:layout_width="168dp"
+                android:layout_height="105dp"
+                android:layout_alignRight="@id/enterTorrent"
+                android:layout_marginTop="320dp"
+                android:background="#036BFC"
+                android:text="RETRIEVE LIST OF TORRENTS"
+                android:textColor="#FFFFFF" />
+
+
         </RelativeLayout>
     </ScrollView>
 
