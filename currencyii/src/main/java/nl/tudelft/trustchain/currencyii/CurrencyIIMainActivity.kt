@@ -5,8 +5,9 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import nl.tudelft.trustchain.common.BaseActivity
 
+
 class CurrencyIIMainActivity : BaseActivity() {
-    private val topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)
+    private var topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)
 
     override val navigationGraph = R.navigation.nav_graph
     override val bottomNavigationMenu = R.menu.currencyii_bottom_navigation_menu
@@ -25,4 +26,5 @@ class CurrencyIIMainActivity : BaseActivity() {
             super.onBackPressed()
         }
     }
+
 }

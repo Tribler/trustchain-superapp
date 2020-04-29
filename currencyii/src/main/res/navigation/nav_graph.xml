@@ -48,6 +48,7 @@
     </fragment>
     <fragment
         android:id="@+id/daoImportOrCreate"
+        android:label="Bitcoin Wallet Settings"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.DAOCreateFragment">
         <action
             android:id="@+id/action_daoImportOrCreate_to_myDAOsFragment"
@@ -58,6 +59,10 @@
             app:popExitAnim="@anim/fragment_fade_exit"
             app:popUpTo="@id/myDAOsFragment"
             app:popUpToInclusive="true" />
+        <argument
+            android:name="firstTime"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
     <fragment
         android:id="@+id/joinNetworkFragment"
