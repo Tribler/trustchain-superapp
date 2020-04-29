@@ -56,8 +56,8 @@ enum class AppDefinition(
     ),
     VOTING(
         R.drawable.abc_ic_voice_search_api_material,
-        "Voting",
-        R.color.purple,
+        "Voter",
+        R.color.android_green,
         VotingActivity::class.java
     )
 }

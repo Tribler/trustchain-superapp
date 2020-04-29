@@ -16,4 +16,6 @@
 
     <string name="discovered"><![CDATA[<b>Discovered:</b> %s]]></string>
     <string name="stored"><![CDATA[<b>Stored:</b> %s]]></string>
+
+    <string name="x_bytes">%d B</string>
 </resources>
