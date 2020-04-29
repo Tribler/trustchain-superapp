@@ -6,11 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
+import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.crypto.MnemonicCode
 import org.bitcoinj.crypto.MnemonicException
 import java.io.File
@@ -20,10 +23,33 @@ import java.io.File
  * Use the [DAOCreateFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DAOCreateFragment : Fragment() {
+class DAOCreateFragment : BaseFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
 
+        handleFirstTimeUsage()
+        initListeners()
+
+        super.onActivityCreated(savedInstanceState)
+    }
+
+    private fun handleFirstTimeUsage() {
+        val args = DAOCreateFragmentArgs.fromBundle(requireArguments())
+        if (args.firstTime) {
+            // If this is the fist time we launch the app
+            // Hide nav bar & disable back button
+            hideNavBar()
+            val appCompatActivity = requireActivity() as AppCompatActivity
+            appCompatActivity.supportActionBar?.setDisplayHomeAsUpEnabled(false)
+            appCompatActivity.supportActionBar?.setHomeButtonEnabled(false)
+            appCompatActivity.supportActionBar?.title = "First Time Setup"
+
+            val currencyIIMainActivity = requireActivity() as CurrencyIIMainActivity
+            currencyIIMainActivity.addTopLevelDestinationId(R.id.daoImportOrCreate)
+        }
+    }
+
+    private fun initListeners() {
         load_wallet_button.setOnClickListener {
             loadWalletButton()
         }
@@ -46,8 +72,6 @@ class DAOCreateFragment : Fragment() {
             seed_word_input.setText(seed.seed)
             seed_number_input.setText(seed.creationTime.toString())
         }
-
-        super.onActivityCreated(savedInstanceState)
     }
 
     private fun loadWalletButton() {
@@ -130,6 +154,8 @@ class DAOCreateFragment : Fragment() {
             return
         }
 
+        val currencyIIMainActivity = requireActivity() as CurrencyIIMainActivity
+        currencyIIMainActivity.removeTopLevelDestinationId(R.id.daoImportOrCreate)
         findNavController().navigate(
             DAOCreateFragmentDirections.actionDaoImportOrCreateToMyDAOsFragment(
                 showDownload = true

@@ -45,7 +45,12 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()
         val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
         val adapter =
-            SharedWalletListAdapter(this, sharedWalletBlocks, publicKey, "Click to propose transfer")
+            SharedWalletListAdapter(
+                this,
+                sharedWalletBlocks,
+                publicKey,
+                "Click to propose transfer"
+            )
         my_daos_list_view.adapter = adapter
         my_daos_list_view.setOnItemClickListener { _, view, position, id ->
             val block = sharedWalletBlocks[position]
@@ -139,7 +144,11 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         } else if (hasNoWalletFiles) {
             // Go to login to create/import a bitcoin wallet, user has no wallet files
             Log.i("Coin", "No wallet file exists, navigation to create screen.")
-            navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoImportOrCreate())
+            navController.navigate(
+                MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoImportOrCreate(
+                    firstTime = true
+                )
+            )
         }
     }
 }
