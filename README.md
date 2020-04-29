@@ -64,8 +64,9 @@ Luxury communism is an Android application built on top of [IPv8](https://github
 * **My Wallet**: Overview of the used Bitcoin wallet and the ability to chane this to another.
 * **Duplicate Wallet**: In case the user has wallet files for both TestNet and Production, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
 
+<img src="currencyii/docs/images/screenshot_7.png" width="200px"> <img src="currencyii/docs/images/screenshot_6.png" width="200px"> <img src="currencyii/docs/images/screenshot_10.png" width="200px">
 <br />
-<img src="currencyii/docs/images/screenshot_7.png" width="200px">
+
 
 [More about Luxury Communism](currencyii/README.md)
 
