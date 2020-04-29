@@ -55,6 +55,20 @@ The bid and asks can either be generated automatically or manually. Those bids a
 <img src="trustchain-payloadgenerator/GeneratorImages/PayloadFragment.png" width="180"><br />
 [More about Market Bot](trustchain-payloadgenerator/readme.md)
 
+### Luxury Communism
+Luxury communism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
+* **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
+* **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
+* **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
+* **Proposals**: A list of all proposals that the user can vote on. This can either be join proposals or proposals from someone else to transfer funds from one of the DAO's.
+* **My Wallet**: Overview of the used Bitcoin wallet and the ability to chane this to another.
+* **Duplicate Wallet**: In case the user has wallet files for both TestNet and Production, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
+
+<br />
+<img src="docs/images/screenshot_6.png" width="200px"> <img src="docs/images/screenshot_7.png" width="200px"> <img src="docs/images/screenshot_8.png" width="200px">
+<br />
+[More about Luxury Communism](currencyii/README.md)
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
