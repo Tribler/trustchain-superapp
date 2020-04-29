@@ -28,13 +28,13 @@ Press "Inform peers about seeding" to let the other connected peers know about t
 ### Download/Execute
 1. Retrieve the list of currently seeded torrents by clicking the "Retrieve list of torrents" button. Press on one of the available options.
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="180">
+<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="180">
 
 2. Download 
 
 The corresponding magnet link should auto-fill in the first input box. Proceed with the download by pressing "Download magnet link".
 
-<img src="https://github.com/tpapak01/trustchain-superapp/blob/master/doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.15.png" width="180">
+<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.15.png" width="180">
 
 3. Execute apk
 
