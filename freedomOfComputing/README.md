@@ -20,18 +20,21 @@ The user can press the “Execute code from jar” button to execute the file sp
 ### Upload
 Enter file location in the upper text box and press "upload torrent". Press "inform peers".
 
-<img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
-
 ### Download/Execute
 1. Retrieve Torrents
 click Retrieve list of torrents and press on one of the available options.
 
+<img src="https://i.imgur.com/JVNw9U5.jpg" width="180">
+
 2. Download This should auto fill in the first text box. Then proceed with the download by pressing download magnet.
+
+<img src="https://i.imgur.com/qJj4Edv.jpg" width="180">
 
 3. Execute apk
 This should result in the information to be displayed such that you are able to enter the apk name into the lower text box and hit execute.
 Once the button has been pressed the application should launch.
 
+<img src="https://i.imgur.com/0rAe9Q3.jpg" width="180">
 
 ## How to develop a module for execution in our app
 
