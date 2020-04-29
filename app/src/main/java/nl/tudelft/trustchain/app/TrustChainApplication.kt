@@ -29,6 +29,7 @@ import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.voting.VotingCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {
@@ -43,7 +44,8 @@ class TrustChainApplication : Application() {
             createTrustChainCommunity(),
             createDemoCommunity(),
             createMarketCommunity(),
-            createCoinCommunity()
+            createCoinCommunity(),
+            createVotingCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -149,6 +151,17 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(CoinCommunity::class.java),
             listOf(randomWalk, nsd)
+        )
+    }
+
+    private fun createVotingCommunity(): OverlayConfiguration<VotingCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "voting.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            VotingCommunity.Factory(settings, store),
+            listOf(randomWalk)
         )
     }
 

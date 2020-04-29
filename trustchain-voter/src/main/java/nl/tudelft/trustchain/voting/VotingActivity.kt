@@ -18,20 +18,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.VotingHelper
+import nl.tudelft.trustchain.common.util.VotingMode
 import org.json.JSONException
 import org.json.JSONObject
-import kotlin.collections.ArrayList
 
 class VotingActivity : AppCompatActivity() {
 
     private lateinit var vh: VotingHelper
-    private lateinit var community: TrustChainCommunity
-    private lateinit var adapter: blockListAdapter
+    private lateinit var community: VotingCommunity
+    private lateinit var adapter: BlockListAdapter
     private lateinit var tch: TrustChainHelper
 
     private var voteProposals: MutableList<TrustChainBlock> = mutableListOf()
@@ -70,10 +69,15 @@ class VotingActivity : AppCompatActivity() {
 
         blockList.layoutManager = LinearLayoutManager(this)
 
-        adapter = blockListAdapter(voteProposals)
+        adapter = BlockListAdapter(voteProposals, vh)
 
-        adapter.onItemClick = {
-            showNewCastVoteDialog(it)
+        adapter.onItemClick = { block ->
+            try {
+                showNewCastVoteDialog(block)
+                showVoteCompletenessToast(block)
+            } catch (e: Exception) {
+                printShortToast(e.message.toString())
+            }
         }
 
         blockList.adapter = adapter
@@ -103,17 +107,17 @@ class VotingActivity : AppCompatActivity() {
         val switch = dialogView.findViewById<Switch>(R.id.votingModeToggle)
         val switchLabel = dialogView.findViewById<TextView>(R.id.votingMode)
         switchLabel.text = getString(R.string.yes_no_mode)
-        var votingMode: VotingMode
+
+        var votingMode = VotingMode.YESNO
 
         switch.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 switchLabel.text = getString(R.string.threshold_mode)
-                votingMode = VotingMode.YESNO
+                votingMode = VotingMode.THRESHOLD
             } else {
                 switchLabel.text = getString(R.string.yes_no_mode)
-                votingMode = VotingMode.THRESHOLD
+                votingMode = VotingMode.YESNO
             }
-            printShortToast(votingMode.toString())
         }
 
         builder.setPositiveButton("Create") { _, _ ->
@@ -126,7 +130,7 @@ class VotingActivity : AppCompatActivity() {
             peers.add(community.myPeer.publicKey)
 
             // Start voting procedure
-            vh.startVote(proposal, peers) // TODO make use of votingMode variable
+            vh.createProposal(proposal, peers, votingMode)
             printShortToast("Proposal has been created")
         }
 
@@ -139,6 +143,18 @@ class VotingActivity : AppCompatActivity() {
     }
 
     /**
+     * Make user aware of proposal status through toast message.
+     */
+    private fun showVoteCompletenessToast(block: TrustChainBlock) {
+        val completed = vh.votingIsComplete(block, VotingCommunity.threshold)
+        if (completed) {
+            printShortToast("Voting has been completed.")
+        } else {
+            printShortToast("Voting still open.")
+        }
+    }
+
+    /**
      * Show dialog from which the user can propose a vote
      */
     private fun showNewCastVoteDialog(block: TrustChainBlock) {
@@ -146,9 +162,11 @@ class VotingActivity : AppCompatActivity() {
 
         // Parse the 'message' field as JSON.
         var voteSubject = ""
+        var votingMode = VotingMode.YESNO
         try {
             val voteJSON = JSONObject(block.transaction["message"].toString())
             voteSubject = voteJSON.get("VOTE_SUBJECT").toString()
+            votingMode = VotingMode.valueOf(voteJSON.get("VOTE_MODE").toString())
         } catch (e: JSONException) {
             "Block was a voting block but did not contain " +
                 "proper JSON in its message field: ${block.transaction["message"]}."
@@ -171,10 +189,17 @@ class VotingActivity : AppCompatActivity() {
         }
 
         val castedString = if (hasCasted != null) {
-            "<br><br>" +
-                "<small><b>You have voted</b>: <i>" +
-                hasCasted +
-                "</i></small>"
+            when (votingMode) {
+                VotingMode.YESNO -> {
+                    "<br><br>" +
+                        "<small><b>You have voted</b>: <i>" +
+                        hasCasted +
+                        "</i></small>"
+                }
+                VotingMode.THRESHOLD -> {
+                    "<br><br><small><b>You have voted</b>: <i>Agree</i></small>"
+                }
+            }
         } else {
             ""
         }
@@ -195,10 +220,21 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
-                    "<small><b>Current tally</b>:" +
+                    "<small><b>" + (if (vh.votingIsComplete(
+                        block,
+                        VotingCommunity.threshold
+                    )
+                ) "Final result" else "Current tally") + "</b>:" +
                     "<br>" +
-                    "Yes votes: " + tally.first +
-                    " | No votes: " + tally.second + "</small></i>",
+                    when (votingMode) {
+                        VotingMode.YESNO -> {
+                            "Yes votes: " + tally.first +
+                                " | No votes: " + tally.second
+                        }
+                        VotingMode.THRESHOLD -> {
+                            tally.first.toString() + " in favour"
+                        }
+                    } + "</small></i>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         )
@@ -207,16 +243,25 @@ class VotingActivity : AppCompatActivity() {
         if (hasCasted == null) {
             builder.setTitle("Cast vote on proposal:")
 
-            // PositiveButton is always the rightmost button
-            builder.setPositiveButton("YES") { _, _ ->
-                vh.respondToVote(true, block)
-                printShortToast("You voted: YES")
-            }
+            when (votingMode) {
+                VotingMode.YESNO -> {
+                    builder.setPositiveButton("YES") { _, _ ->
+                        vh.respondToProposal(true, block)
+                        printShortToast("You voted: YES")
+                    }
 
-            // NegativeButton is always second-from-right button
-            builder.setNegativeButton("NO") { _, _ ->
-                vh.respondToVote(false, block)
-                printShortToast("You voted: NO")
+                    builder.setNegativeButton("NO") { _, _ ->
+                        vh.respondToProposal(false, block)
+                        printShortToast("You voted: NO")
+                    }
+                }
+
+                VotingMode.THRESHOLD -> {
+                    builder.setPositiveButton("AGREE") { _, _ ->
+                        vh.respondToProposal(true, block)
+                        printShortToast("You voted: AGREE")
+                    }
+                }
             }
 
             // NeutralButton is always the leftmost button
@@ -253,22 +298,29 @@ class VotingActivity : AppCompatActivity() {
     private fun periodicUpdate() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val currentProposals = tch.getBlocksByType("voting_block").filter {
-                    !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
-                        it
-                    )
-                }.asReversed()
-
-                // Update vote proposal set
-                if (voteProposals != currentProposals) {
-                    voteProposals.clear()
-                    voteProposals.addAll(currentProposals)
-                    adapter.notifyDataSetChanged()
-                }
-
+                proposalListUpdate()
                 delay(1000)
             }
         }
+    }
+
+    /**
+     * Update the list of proposals
+     */
+    private fun proposalListUpdate() {
+        val currentProposals = tch.getBlocksByType("voting_block").filter {
+            !JSONObject(it.transaction["message"].toString()).has("VOTE_REPLY") && displayBlock(
+                it
+            )
+        }.asReversed()
+
+        // Update vote proposal set
+        if (voteProposals != currentProposals) {
+            voteProposals.clear()
+            voteProposals.addAll(currentProposals)
+        }
+
+        adapter.notifyDataSetChanged()
     }
 
     /**
