@@ -56,7 +56,7 @@ Here are the constraints a developer needs to strictly follow to develop an app 
 
 Other then these constraints, a developer can follow the normal android development procedures for further functionalities.
 
-_**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states temporarily/persistantly can be found on: https://developer.android.com/topic/libraries/architecture/saving-states and https://developer.android.com/training/data-storage/shared-preferences 
+**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states temporarily/persistantly can be found on: https://developer.android.com/topic/libraries/architecture/saving-states and https://developer.android.com/training/data-storage/shared-preferences 
 
 ### A "Hello World!" example
 ```java
@@ -106,7 +106,7 @@ public class MainFragment extends Fragment {
 
 <img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
 
-_**NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp _
+**NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp
 
 ## Extra info
 
