@@ -3,6 +3,17 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
+buildscript {
+    repositories {
+        google()
+    }
+    dependencies {
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.0.0'
+    }
+}
 
 ktlint {
     version = "$ktlint_version"
@@ -77,6 +88,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-analytics:17.4.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
 
     // Material
     implementation 'com.google.android.material:material:1.1.0'
