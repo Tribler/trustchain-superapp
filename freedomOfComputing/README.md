@@ -106,7 +106,7 @@ public class MainFragment extends Fragment {
 
 <img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
 
-_**NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp
+_**NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp _
 
 ## Extra info
 
