@@ -48,7 +48,7 @@ enum class AppDefinition(
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
-    FREEDOM_OF_COMPUTING (
+    FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
         "Freedom of Computing",
         R.color.blue,
