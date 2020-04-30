@@ -34,7 +34,7 @@ public class ExecutionActivity extends AppCompatActivity {
         FragmentTransaction transaction = manager.beginTransaction();
 
         transaction.remove(mainFragment);
-        transaction.commit();
+        try { transaction.commit(); } catch(Exception e) {e.printStackTrace();}
 
         mainLayoutContainer.removeView(tmpLayout);
 
