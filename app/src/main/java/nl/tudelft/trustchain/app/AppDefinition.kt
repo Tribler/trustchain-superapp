@@ -48,9 +48,9 @@ enum class AppDefinition(
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
-    FOC(
+    FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
-        "FOC",
+        "Freedom of Computing",
         R.color.blue,
         MainActivityFOC::class.java
     ),

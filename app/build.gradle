@@ -62,7 +62,7 @@ dependencies {
     implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
     implementation project(':currencyii')
-    implementation project(':FOC')
+    implementation project(':freedomOfComputing')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
