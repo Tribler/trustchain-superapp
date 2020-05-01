@@ -1,5 +1,14 @@
 # AI trading bot
 
+The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
+Built on top of Trustchain, the app provides a small decentralized market for trading,
+providing safe and verifiable transaction for any arbitrary change of goods.
+This clearly states the potential of Trustchain for building a better alternative to old fashioned banks for trading stocks/currencies or any financial transaction.
+
+The AI bot in this implementation is simple and only trades two currencies.
+For programming purposes one of these currencies is our self-made, self-minted Dymbe Dollar, which can be traded for Bitcoins.
+Again, this can be any two pair of currency or financial goods. Below, a clear explanation of how the trading app works.
+
 The AI trading bot app consist of two parts.
 1. An AI trading bot using a Naive Bayes Classifier which buys or sells Bitcoins in a decentralized market.
 2. Sending and receiving money to and from other peers.

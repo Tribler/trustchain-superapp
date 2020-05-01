@@ -224,5 +224,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
         val marketCommunity = getMarketCommunity()
         marketCommunity.removeListener(TradePayload.Type.ASK, ::askListener)
         marketCommunity.removeListener(TradePayload.Type.BID, ::bidListener)
+        isTrading = true
     }
 }

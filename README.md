@@ -28,6 +28,8 @@ This repository contains a collection of Android apps built on top of [IPv8](htt
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
 
 ### AI trading bot
+The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
+Built on top of Trustchain, the app provides a small decentralized market for trading, providing safe and verifiable transaction for any arbitrary change of goods.
 
 **AI trading bot** consist of two parts.
 1. An AI trading bot using a Naive Bayes Classifier which buys or sells Bitcoins in a decentralized market.
