@@ -53,7 +53,7 @@ jobs:
           java-version: 11
 
       - name: Build debug APK
-        run: bash ./gradlew assembleDebug
+        run: bash ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v1
