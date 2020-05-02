@@ -30,7 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Test Torrent stream"
-            android:visibility="gone" />
+            android:visibility="visible" />
 
         <Button
             android:id="@+id/shareTrackButton"

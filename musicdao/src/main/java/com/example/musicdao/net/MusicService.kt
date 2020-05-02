@@ -31,6 +31,8 @@ import java.util.*
 
 
 class MusicService : BaseActivity() {
+    private val default_torrent =
+        "magnet:?xt=urn:btih:9316f06e8572ed5cb6f5aa602d019cb9c1a5e40c&dn=gd1990-12-12.149736.UltraMatrix.sbd.cm.miller.flac16"
     private lateinit var binding: MusicAppMainBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -93,8 +95,9 @@ class MusicService : BaseActivity() {
         registerBlockListener()
         registerBlockSigner()
 
+        playButton.isEnabled = false
         torrentButton.setOnClickListener {
-            startStreamingTorrent("magnet:?xt=urn:btih:23176D77FC9227FA0811E8796B2B9ACCC02C01BF&dn=VA+-+NOW+Reggae+Classics+%282020%29+Mp3+320kbps+%5BPMEDIA%5D+%E2%AD%90%EF%B8%8F&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fretracker.netbynet.ru%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.nyaa.uk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Fopentor.org%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2750%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=http%3A%2F%2Fseed.datascene.net%2F5e9d12bf35cad25402848253da9adf2a%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce")
+            startStreamingTorrent(default_torrent)
         }
 
         shareTrackButton.setOnClickListener {
@@ -108,15 +111,22 @@ class MusicService : BaseActivity() {
     }
 
     private fun updateTorrentClientInfo(period: Long) {
-        Thread(Runnable {
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    val text =
-                        "Torrent client info: UP: ${trackLibrary.getUploadRate()}MB DOWN: ${trackLibrary.getDownloadRate()}MB DHT NODES: ${trackLibrary.getDhtNodes()}"
-                    torrentClientInfo.text = text
+        val thread: Thread = object : Thread() {
+            override fun run() {
+                try {
+                    while (!this.isInterrupted) {
+                        sleep(period)
+                        runOnUiThread {
+                            val text =
+                                "Torrent client info: UP: ${trackLibrary.getUploadRate()}MB DOWN: ${trackLibrary.getDownloadRate()}MB DHT NODES: ${trackLibrary.getDhtNodes()}"
+                            torrentClientInfo.text = text
+                        }
+                    }
+                } catch (e: InterruptedException) {
                 }
-            }, 0, period)
-        }).start()
+            }
+        }
+        thread.start()
     }
 
     private fun selectLocalTrackFile() {
@@ -179,7 +189,7 @@ class MusicService : BaseActivity() {
                 items.add("Self-signed block on trustchain: ${block.blockId}")
                 items.add("Song metadata: ${block.transaction}")
                 val magnet = block.transaction["magnet"]
-                if (magnet != null && magnet is String) startStreamingTorrent("magnet:?xt=urn:btih:23176D77FC9227FA0811E8796B2B9ACCC02C01BF&dn=VA+-+NOW+Reggae+Classics+%282020%29+Mp3+320kbps+%5BPMEDIA%5D+%E2%AD%90%EF%B8%8F&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fretracker.netbynet.ru%3A2710%2Fannounce&tr=udp%3A%2F%2Ftracker.nyaa.uk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Fopentor.org%3A2710%2Fannounce&tr=udp%3A%2F%2F9.rarbg.me%3A2750%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce&tr=udp%3A%2F%2Fp4p.arenabg.com%3A1337%2Fannounce&tr=http%3A%2F%2Fseed.datascene.net%2F5e9d12bf35cad25402848253da9adf2a%2Fannounce&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fcoppersurfer.tk%3A6969%2Fannounce")
+                if (magnet != null && magnet is String) startStreamingTorrent(default_torrent)
                 viewAdapter.notifyDataSetChanged()
                 Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
@@ -195,7 +205,14 @@ class MusicService : BaseActivity() {
 
         val torrentStream: TorrentStream = TorrentStream.init(torrentOptions)
         torrentStream.startStream(magnet)
-        torrentStream.addListener(AudioTorrentStreamHandler(progressBar, applicationContext, bufferInfo, playButton))
+        torrentStream.addListener(
+            AudioTorrentStreamHandler(
+                progressBar,
+                applicationContext,
+                bufferInfo,
+                playButton
+            )
+        )
     }
 
     private fun onMessage(packet: Packet) {
