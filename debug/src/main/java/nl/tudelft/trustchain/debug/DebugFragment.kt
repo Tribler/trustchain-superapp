@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.debug
 
+import android.annotation.SuppressLint
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -13,11 +16,12 @@ import androidx.core.text.inSpans
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentDebugBinding
 import java.util.*
+
 
 class DebugFragment : BaseFragment(R.layout.fragment_debug) {
     private val binding by viewBinding(FragmentDebugBinding::bind)
@@ -33,6 +37,7 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updateView() {
         val ipv8 = getIpv8()
         val demo = getDemoCommunity()
@@ -89,6 +94,15 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 getTrustChainCommunity().getChainLength()
             }
             binding.txtChainLength.text = chainLength.toString()
+        }
+
+        try {
+            val pInfo: PackageInfo =
+                requireContext().packageManager.getPackageInfo(requireContext().packageName, 0)
+            @Suppress("DEPRECATION")
+            binding.txtAppVersion.text = pInfo.versionName + " (Build " + pInfo.versionCode + ")"
+        } catch (e: PackageManager.NameNotFoundException) {
+            e.printStackTrace()
         }
     }
 
