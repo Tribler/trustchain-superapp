@@ -3,10 +3,10 @@ package com.example.musicdao.net
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.musicdao.R
+import com.example.musicdao.Release
 import com.example.musicdao.databinding.MusicAppMainBinding
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
@@ -27,8 +26,9 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
+import java.lang.Exception
 import java.util.*
-
+const val PREPARE_SIZE_KB: Long = 2 * 512L
 
 class MusicService : BaseActivity() {
     private val default_torrent =
@@ -39,11 +39,13 @@ class MusicService : BaseActivity() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private var items: MutableList<String> = mutableListOf()
     private val trackLibrary: TrackLibrary = TrackLibrary()
+    public var torrentStream: TorrentStream? = null
+        get() = field
 
-    private var peers: List<Peer> = listOf()
     override val navigationGraph = R.navigation.musicdao_navgraph
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        torrentStream = initTorrentStreamService()
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
 
@@ -84,12 +86,12 @@ class MusicService : BaseActivity() {
 
         val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
 
-        IPv8Android.Factory(application)
-            .setConfiguration(config)
-            .setPrivateKey(getPrivateKey())
-            .init()
+//        IPv8Android.Factory(application)
+//            .setConfiguration(config)
+//            .setPrivateKey(getPrivateKey())
+//            .init()
 
-        items.add("I am " + IPv8Android.getInstance().myPeer.mid)
+//        items.add("I am " + IPv8Android.getInstance().myPeer.mid)
         viewAdapter.notifyDataSetChanged()
 
         registerBlockListener()
@@ -97,7 +99,7 @@ class MusicService : BaseActivity() {
 
         playButton.isEnabled = false
         torrentButton.setOnClickListener {
-            startStreamingTorrent(default_torrent)
+            displayTracks(default_torrent)
         }
 
         shareTrackButton.setOnClickListener {
@@ -110,19 +112,33 @@ class MusicService : BaseActivity() {
         updateTorrentClientInfo(1000)
     }
 
+    public fun initTorrentStreamService(): TorrentStream {
+        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
+        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
+            .saveLocation(applicationContext.cacheDir)
+            .autoDownload(false)
+            //PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
+            //Requires testing and tweaking to find the best number
+            .prepareSize(prepareSize)
+            .removeFilesAfterStop(true)
+            .build()
+
+        return TorrentStream.init(torrentOptions)
+    }
+
     private fun updateTorrentClientInfo(period: Long) {
         val thread: Thread = object : Thread() {
             override fun run() {
                 try {
-                    while (!this.isInterrupted) {
+                    while (!this.isInterrupted && torrentStream != null) {
                         sleep(period)
                         runOnUiThread {
                             val text =
-                                "Torrent client info: UP: ${trackLibrary.getUploadRate()}MB DOWN: ${trackLibrary.getDownloadRate()}MB DHT NODES: ${trackLibrary.getDhtNodes()}"
+                                "Torrent client info: UP: ${trackLibrary.getUploadRate()}KB DOWN: ${trackLibrary.getDownloadRate()}KB DHT NODES: ${trackLibrary.getDhtNodes()}"
                             torrentClientInfo.text = text
                         }
                     }
-                } catch (e: InterruptedException) {
+                } catch (e: Exception) {
                 }
             }
         }
@@ -172,46 +188,37 @@ class MusicService : BaseActivity() {
     }
 
     private fun registerBlockSigner() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                items.add("Signing block ${block.blockId}")
-                viewAdapter.notifyDataSetChanged()
-                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-            }
-        })
+//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+//        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
+//            override fun onSignatureRequest(block: TrustChainBlock) {
+//                items.add("Signing block ${block.blockId}")
+//                viewAdapter.notifyDataSetChanged()
+//                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+//            }
+//        })
     }
 
     private fun registerBlockListener() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.addListener("publish_track", object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                items.add("Self-signed block on trustchain: ${block.blockId}")
-                items.add("Song metadata: ${block.transaction}")
-                val magnet = block.transaction["magnet"]
-                if (magnet != null && magnet is String) startStreamingTorrent(default_torrent)
-                viewAdapter.notifyDataSetChanged()
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
+//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+//        trustchain.addListener("publish_track", object : BlockListener {
+//            override fun onBlockReceived(block: TrustChainBlock) {
+//                items.add("Self-signed block on trustchain: ${block.blockId}")
+//                items.add("Song metadata: ${block.transaction}")
+//                val magnet = block.transaction["magnet"]
+//                if (magnet != null && magnet is String) startStreamingTorrent(default_torrent)
+//                viewAdapter.notifyDataSetChanged()
+//                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+//            }
+//        })
     }
 
-    private fun startStreamingTorrent(magnet: String) {
-        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
-            .saveLocation(applicationContext.cacheDir)
-            .autoDownload(false)
-            .removeFilesAfterStop(true)
-            .build()
-
-        val torrentStream: TorrentStream = TorrentStream.init(torrentOptions)
-        torrentStream.startStream(magnet)
-        torrentStream.addListener(
-            AudioTorrentStreamHandler(
-                progressBar,
-                applicationContext,
-                bufferInfo,
-                playButton
-            )
+    /**
+     * Creates a table showing all tracks of 1 release
+     * @param magnet the Magnet link of the release, all files are assumed to be tracks (todo?)
+     */
+    private fun displayTracks(magnet: String) {
+        trackListLinearLayout.addView(
+            Release(applicationContext, magnet,this),0
         )
     }
 
