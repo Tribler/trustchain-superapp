@@ -1,5 +1,6 @@
 package com.example.musicdao.net
 
+import android.app.Activity
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -8,43 +9,43 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.core.net.toUri
+import kotlinx.android.synthetic.main.music_app_main.*
 import java.io.File
 
 lateinit var instance: AudioPlayer
 
-class AudioPlayer(context: Context) : LinearLayout(context), MediaPlayer.OnPreparedListener,
+class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(context), MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener {
     private val mediaPlayer: MediaPlayer = MediaPlayer()
     private var timerStart: Long = 0
     private var interestedFraction: Float = 0F
     private var piecesInfoLog = ""
-    private var seekProgress = SeekProgress(context)
-    private val bufferInfo = TextView(context)
-    private val progressBar = ProgressBar(context)
-    private val seekBar = SeekBar(context)
-    private val playButton = ImageButton(context)
+//    public var seekProgress = (context as Activity).seek
+    private val bufferInfo = musicService.bufferInfo
+    private val progressBar = musicService.progressBar
+    private val seekBar = musicService.seekBar
+    private val playButton = musicService.playButtonAudioPlayer
 
     init {
-        val linearLayoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        this.addView(seekProgress, linearLayoutParams)
-        this.addView(bufferInfo, linearLayoutParams)
-        this.addView(progressBar, linearLayoutParams)
-        this.addView(seekBar, linearLayoutParams)
-        this.addView(playButton, linearLayoutParams)
+        progressBar.max = 100
+        progressBar.progress = 0
+//        bufferInfo.layoutParams = linearLayoutParams
+        bufferInfo.text = "No track currently playing"
+//        this.addView(bufferInfo)
         seekBar.setOnSeekBarChangeListener(this)
     }
 
     companion object {
-        fun getInstance(context: Context) : AudioPlayer {
+        fun getInstance(context: Context, musicService: MusicService) : AudioPlayer {
             if (!::instance.isInitialized) {
-                createInstance(context)
+                createInstance(context, musicService)
             }
             return instance
         }
 
         @Synchronized
-        private fun createInstance(context: Context) {
-            instance = AudioPlayer(context)
+        private fun createInstance(context: Context, musicService: MusicService) {
+            instance = AudioPlayer(context, musicService)
         }
     }
 
@@ -65,7 +66,7 @@ class AudioPlayer(context: Context) : LinearLayout(context), MediaPlayer.OnPrepa
     override fun onError(mp: MediaPlayer?, what: Int, extra: Int): Boolean {
         mp?.reset()
         var message = ""
-        when (extra) {
+        when (what) {
             MediaPlayer.MEDIA_ERROR_IO -> {
                 message = "Media error: IO"
             }
@@ -126,6 +127,10 @@ class AudioPlayer(context: Context) : LinearLayout(context), MediaPlayer.OnPrepa
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
 
+    }
+
+    public fun setInfo(text: String) {
+        bufferInfo.text = text
     }
 
 }

@@ -97,7 +97,8 @@ class MusicService : BaseActivity() {
         registerBlockListener()
         registerBlockSigner()
 
-        playButton.isEnabled = false
+        mainLinearLayout.addView(AudioPlayer.getInstance(applicationContext, this), 0)
+
         torrentButton.setOnClickListener {
             displayTracks(default_torrent)
         }

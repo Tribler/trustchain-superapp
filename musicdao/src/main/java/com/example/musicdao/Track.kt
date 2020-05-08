@@ -4,14 +4,19 @@ import android.content.Context
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.FragmentActivity
+import com.example.musicdao.net.AudioPlayer
+import com.example.musicdao.net.MusicService
 import com.example.musicdao.net.SeekProgress
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
+import kotlinx.android.synthetic.main.music_app_main.*
+import kotlinx.android.synthetic.main.music_app_main.view.*
+import kotlinx.android.synthetic.main.music_app_main.view.bufferInfo
 
 //The size of each block of the file to show progress
 const val BLOCK_SIZE = 4 * 256L * 1024L
 
-class Track(context: Context, magnet: String, name: String, private val index: Int, release: Release) : TableRow(context) {
+class Track(context: Context, magnet: String, name: String, private val index: Int, release: Release, private val musicService: MusicService) : TableRow(context) {
     private val bufferInfo: TextView = TextView(context)
 //    public val progressBar: ProgressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal)
 //        get() = field
@@ -59,26 +64,26 @@ class Track(context: Context, magnet: String, name: String, private val index: I
 
     public fun selectToPlay(torrent: Torrent) {
         var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
+        musicService.bufferInfo.text = "Playing: ${torrent.videoFile.nameWithoutExtension}"
         finalFileSize -= (finalFileSize % BLOCK_SIZE)
         val blockAmount = finalFileSize / BLOCK_SIZE
         seekProgress.createSquares(blockAmount.toInt())
     }
 
-    public fun handleDownloadProgress(torrent: Torrent) {
-//        this.progressBar.progress = status.progress.toInt()
-//        this.progressBar.secondaryProgress = status.bufferProgress
-//        this.seekBar.secondaryProgress = status.bufferProgress
+    public fun handleDownloadProgress(torrent: Torrent, status: StreamStatus) {
+        musicService.progressBar.progress = status.progress.toInt()
+        musicService.progressBar.secondaryProgress = status.bufferProgress
         var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
         var intermediateSize = finalFileSize
         finalFileSize -= (finalFileSize % BLOCK_SIZE)
         var index = 0
-        while (intermediateSize - BLOCK_SIZE >= 0) {
-            index++
-            intermediateSize -= BLOCK_SIZE
-            if (torrent.hasBytes(intermediateSize)) {
-                seekProgress.setSquareDownloaded(index)
-            }
-        }
+//        while (intermediateSize - BLOCK_SIZE >= 0) {TODO
+//            index++
+//            intermediateSize -= BLOCK_SIZE
+//            if (torrent.hasBytes(intermediateSize)) {
+//                this.seekProgress.setSquareDownloaded(index)
+//            }
+//        }
 //        torrent.setInterestedBytes((interestedFraction * finalFileSize).toLong())TODO future work: set interested fraction. Needs testing
 //        if (status.bufferProgress < 100) {
 //            this.bufferInfo.text =
