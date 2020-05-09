@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Checkout submodules
         shell: bash
@@ -52,7 +54,7 @@ jobs:
         with:
           java-version: 8
 
-      - name: Build debug APK
+      - name: Build release APK
         run: bash ./gradlew assembleRelease
 
       - name: Upload APK
