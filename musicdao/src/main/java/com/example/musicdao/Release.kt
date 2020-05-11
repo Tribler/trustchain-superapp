@@ -1,27 +1,29 @@
 package com.example.musicdao
 
 import android.content.Context
-import android.widget.*
+import android.widget.LinearLayout
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
 import com.example.musicdao.net.AudioPlayer
 import com.example.musicdao.net.MusicService
-import com.example.musicdao.net.PREPARE_SIZE_KB
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
-import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.music_app_main.*
-import kotlinx.android.synthetic.main.music_app_main.view.*
-import kotlinx.android.synthetic.main.music_app_main.view.bufferInfo
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 
 class Release(
     context: Context,
     private val magnet: String,
-    private val musicService: MusicService
+    private val musicService: MusicService,
+    private val transaction: TrustChainTransaction
 ) : TableLayout(context),
     TorrentListener {
     private var tracks: MutableList<Track> = mutableListOf<Track>()
     private var currentFileIndex = -1
     private var fetchingMetadataRow = TableRow(context)
+    private var metadataRow = TableRow(context)
     private lateinit var torrent: Torrent
 
     init {
@@ -29,8 +31,19 @@ class Release(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+        val blockMetadata = TextView(context)
+        blockMetadata.text = "Signed block with release:\n$transaction"
+        blockMetadata.layoutParams = TableRow.LayoutParams(
+            TableRow.LayoutParams.WRAP_CONTENT,
+            TableRow.LayoutParams.WRAP_CONTENT
+        )
+        val params = blockMetadata.getLayoutParams() as TableRow.LayoutParams
+        params.span = 3
+        blockMetadata.layoutParams = params
+        metadataRow.addView(blockMetadata)
+        this.addView(metadataRow)
         val magnetTextView = TextView(context)
-        magnetTextView.text = "Fetching metadata for torrent magnet link \nMagnet: $magnet"
+        magnetTextView.text = "Fetching metadata for magnet link..."
         magnetTextView.layoutParams = TableRow.LayoutParams(
             TableRow.LayoutParams.WRAP_CONTENT,
             TableRow.LayoutParams.WRAP_CONTENT
@@ -88,7 +101,6 @@ class Release(
         this.removeView(fetchingMetadataRow)
         this.torrent = torrent
         torrent?.fileNames?.forEachIndexed { index, fileName ->
-            val track = Track(context, magnet, fileName, index, this, musicService)
             val allowedExtensions = listOf<String>("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
             var found = false
             for (s in allowedExtensions) {
@@ -97,6 +109,7 @@ class Release(
                 }
             }
             if (found) {
+                val track = Track(context, magnet, fileName, index, this, musicService)
                 this.addView(track)
                 tracks.add(track)
             }

@@ -3,10 +3,12 @@ package com.example.musicdao.net
 import android.content.Intent
 import android.os.Bundle
 import android.preference.PreferenceManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import android.text.Editable
+import android.util.Log
+import android.widget.Toast
 import com.example.musicdao.R
 import com.example.musicdao.Release
+import com.example.musicdao.SubmitReleaseDialog
 import com.example.musicdao.databinding.MusicAppMainBinding
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
@@ -20,27 +22,22 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import java.lang.Exception
-import java.util.*
+
 const val PREPARE_SIZE_KB: Long = 10 * 512L
 
 class MusicService : BaseActivity() {
-    private val default_torrent =
+    private var currentMagnetLoading: String? = null
+    private val defaultTorrent =
         "magnet:?xt=urn:btih:88b17043ee77a31feef3b55a8ebe120b045fa577&dn=tru1991-05-27sbd"
     private lateinit var binding: MusicAppMainBinding
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: RecyclerView.Adapter<*>
-    private lateinit var viewManager: RecyclerView.LayoutManager
-    private var items: MutableList<String> = mutableListOf()
     private val trackLibrary: TrackLibrary = TrackLibrary()
-    public var torrentStream: TorrentStream? = null
-        get() = field
+    var torrentStream: TorrentStream? = null
 
     override val navigationGraph = R.navigation.musicdao_navgraph
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,25 +48,6 @@ class MusicService : BaseActivity() {
         supportActionBar?.title = "Music app"
 
         binding = MusicAppMainBinding.inflate(layoutInflater)
-
-        viewManager = LinearLayoutManager(this)
-        items.add("Listening for peers...")
-
-        viewAdapter = MusicListAdapter(items)
-
-        viewAdapter.notifyDataSetChanged()
-
-        recyclerView = findViewById<RecyclerView>(R.id.recycler_view_items).apply {
-            // use this setting to improve performance if you know that changes
-            // in content do not change the layout size of the RecyclerView
-            setHasFixedSize(false)
-
-            // use a linear layout manager
-            layoutManager = viewManager
-
-            // specify an viewAdapter (see also next example)
-            adapter = viewAdapter
-        }
 
         val community = OverlayConfiguration(
             Overlay.Factory(MusicDemoCommunity::class.java),
@@ -87,13 +65,13 @@ class MusicService : BaseActivity() {
 
         val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
 
-//        IPv8Android.Factory(application)
-//            .setConfiguration(config)
-//            .setPrivateKey(getPrivateKey())
-//            .init()
+        IPv8Android.Factory(application)
+            .setConfiguration(config)
+            .setPrivateKey(getPrivateKey())
+            .init()
 
-//        items.add("I am " + IPv8Android.getInstance().myPeer.mid)
-        viewAdapter.notifyDataSetChanged()
+        Toast.makeText(applicationContext, "Initialized IPv8", Toast.LENGTH_SHORT).show()
+        mid.text = ("My trustchain member ID: " + IPv8Android.getInstance().myPeer.mid)
 
         registerBlockListener()
         registerBlockSigner()
@@ -101,7 +79,7 @@ class MusicService : BaseActivity() {
         mainLinearLayout.addView(AudioPlayer.getInstance(applicationContext, this), 0)
 
         torrentButton.setOnClickListener {
-            displayTracks(default_torrent)
+            createDefaultBlock()
         }
 
         shareTrackButton.setOnClickListener {
@@ -121,7 +99,7 @@ class MusicService : BaseActivity() {
             .autoDownload(false)
             //PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
             //Requires testing and tweaking to find the best number
-//            .prepareSize(prepareSize)
+            .prepareSize(prepareSize)
             .removeFilesAfterStop(true)
             .build()
 
@@ -182,55 +160,76 @@ class MusicService : BaseActivity() {
         }
     }
 
-    //TODO this function should be removed completely and decoupled into separate functions
     private fun publishTrack(magnet: String) {
-        val trackId = Random().nextInt()
-        val myPeer = IPv8Android.getInstance().myPeer
-
-        val transaction = mapOf(
-            "trackId" to trackId,
-            "author" to myPeer.mid,
-            "magnet" to magnet
-        )
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        items.add("Creating proposal block")
-        viewAdapter.notifyDataSetChanged()
-        trustchain.createProposalBlock("publish_track", transaction, myPeer.publicKey.keyToBin())
-    }
-
-    private fun registerBlockSigner() {
-//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-//        trustchain.registerBlockSigner("publish_track", object : BlockSigner {
-//            override fun onSignatureRequest(block: TrustChainBlock) {
-//                items.add("Signing block ${block.blockId}")
-//                viewAdapter.notifyDataSetChanged()
-//                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-//            }
-//        })
-    }
-
-    private fun registerBlockListener() {
-//        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-//        trustchain.addListener("publish_track", object : BlockListener {
-//            override fun onBlockReceived(block: TrustChainBlock) {
-//                items.add("Self-signed block on trustchain: ${block.blockId}")
-//                items.add("Song metadata: ${block.transaction}")
-//                val magnet = block.transaction["magnet"]
-//                if (magnet != null && magnet is String) startStreamingTorrent(default_torrent)
-//                viewAdapter.notifyDataSetChanged()
-//                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-//            }
-//        })
+        this.currentMagnetLoading = magnet
+        SubmitReleaseDialog(this).show(supportFragmentManager, "Release metadata")
     }
 
     /**
-     * Creates a table showing all tracks of 1 release
-     * @param magnet the Magnet link of the release, all files are assumed to be tracks (todo?)
+     * After the user inserts some metadata for the release to be published, this function is called
+     * to create the proposal block
      */
-    private fun displayTracks(magnet: String) {
-        trackListLinearLayout.addView(
-            Release(applicationContext, magnet,this),0
+    fun finishPublishing(title: Editable?, artists: Editable?, releaseDate: Editable?) {
+        val myPeer = IPv8Android.getInstance().myPeer
+
+        val transaction = mapOf(
+            "publisher" to myPeer.mid,
+            "magnet" to currentMagnetLoading,
+            "title" to title.toString(),
+            "artists" to artists.toString(),
+            "date" to releaseDate.toString()
         )
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        Toast.makeText(applicationContext, "Creating proposal block", Toast.LENGTH_SHORT).show()
+        trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
+    }
+
+    private fun registerBlockSigner() {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        trustchain.registerBlockSigner("publish_release", object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                Toast.makeText(
+                    applicationContext,
+                    "Signing block ${block.blockId}",
+                    Toast.LENGTH_LONG
+                ).show()
+                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+            }
+        })
+    }
+
+    private fun registerBlockListener() {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        val musicService = this
+        trustchain.addListener("publish_release", object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Toast.makeText(
+                    applicationContext,
+                    "Discovered signed block ${block.blockId}",
+                    Toast.LENGTH_LONG
+                ).show()
+                val magnet = block.transaction["magnet"]
+                if (magnet != null && magnet is String) {
+                    trackListLinearLayout.addView(
+                        Release(
+                            applicationContext,
+                            magnet,
+                            musicService,
+                            block.transaction
+                        ), 0
+                    )
+                }
+                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+    }
+
+    /**
+     * Creates a trustchain block which uses the example creative commons release magnet
+     * This is useful for testing the download speed of tracks over libtorrent
+     */
+    private fun createDefaultBlock() {
+        publishTrack(defaultTorrent)
     }
 
     fun fillProgressBar() {
@@ -241,11 +240,6 @@ class MusicService : BaseActivity() {
     fun resetProgressBar() {
         progressBar.progress = 0
         progressBar.secondaryProgress = 0
-    }
-
-    private fun onMessage(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(SongMessage.Deserializer)
-        items.add("Song from " + peer.mid + " : " + payload.message)
     }
 
     companion object {

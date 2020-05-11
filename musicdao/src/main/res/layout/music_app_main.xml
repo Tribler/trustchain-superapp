@@ -26,11 +26,17 @@
             android:text="Send proposal block"
             android:visibility="gone" />
 
+        <TextView
+            android:id="@+id/mid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
         <Button
             android:id="@+id/torrentButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Test Torrent stream"
+            android:text="Load example"
             android:visibility="visible" />
 
         <Button
