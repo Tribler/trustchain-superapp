@@ -21,7 +21,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v1
       with:
-        java-version: 11
+        java-version: 8
 
     - name: Run tests
       uses: eskatos/gradle-command-action@v1
@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Checkout submodules
         shell: bash
@@ -50,13 +52,13 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
-          java-version: 11
+          java-version: 8
 
-      - name: Build debug APK
-        run: bash ./gradlew assembleDebug
+      - name: Build release APK
+        run: bash ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: app
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/release/app-release.apk
