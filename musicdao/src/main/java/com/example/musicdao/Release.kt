@@ -4,10 +4,14 @@ import android.content.Context
 import android.widget.*
 import com.example.musicdao.net.AudioPlayer
 import com.example.musicdao.net.MusicService
+import com.example.musicdao.net.PREPARE_SIZE_KB
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
+import kotlinx.android.synthetic.main.music_app_main.*
+import kotlinx.android.synthetic.main.music_app_main.view.*
+import kotlinx.android.synthetic.main.music_app_main.view.bufferInfo
 
 class Release(context: Context, private val magnet: String, private val musicService: MusicService) : TableLayout(context),
     TorrentListener {
@@ -48,14 +52,17 @@ class Release(context: Context, private val magnet: String, private val musicSer
         if (this::torrent.isInitialized) {
             currentFileIndex = index
             torrent.setSelectedFileIndex(currentFileIndex)
-            //If the file does not exist, we need to download it
-            if (torrent.videoFile.isFile) {
-                AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
-            } else {
-                torrent.startDownload()
-            }
             val track = tracks[currentFileIndex]
             track.selectToPlay(torrent)
+            //TODO needs to have a solid check whether the file was already downloaded before
+            if (torrent.videoFile.isFile && torrent.videoFile.length() == torrent.torrentHandle.torrentFile().files().fileSize(index)) {
+                musicService.fillProgressBar()
+                musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: 100%"
+                AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
+            } else {
+                musicService.resetProgressBar()
+                torrent.startDownload()
+            }
         }
     }
 
@@ -74,11 +81,6 @@ class Release(context: Context, private val magnet: String, private val musicSer
     override fun onStreamPrepared(torrent: Torrent) {
         //TODO add a check here for whether this torrent is the torrent of this Release
         println("Stream prepared")
-//        torrent.setSelectedFileIndex(currentFileIndex)
-//        if (torrent.videoFile.length() < 1) {
-//            torrent.startDownload()
-//        }
-
         this.torrent = torrent
         torrent?.fileNames?.forEachIndexed { index, fileName ->
             val track = Track(context, magnet, fileName, index, this, musicService)
@@ -96,7 +98,7 @@ class Release(context: Context, private val magnet: String, private val musicSer
     }
 
     override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
-        println("Stream progress: Buffer: ${status.bufferProgress} Track: ${status.progress}")
+//        println("Stream progress: Buffer: ${status.bufferProgress} Track: ${status.progress}")
         if (currentFileIndex == -1) return
         val track = tracks[currentFileIndex]
         track.handleDownloadProgress(torrent, status)

@@ -23,7 +23,7 @@ class Track(context: Context, magnet: String, name: String, private val index: I
     private val nameView: TextView = TextView(context)
     private val indexView: TextView = TextView(context)
     private val playButton: ImageButton = ImageButton(context)
-    private val seekProgress: SeekProgress = SeekProgress(context)
+//    private val seekProgress: SeekProgress = SeekProgress(context)
 
     //Initialize all UI elements
     init {
@@ -53,7 +53,7 @@ class Track(context: Context, magnet: String, name: String, private val index: I
         val seekProgressTableLayout = TableLayout(context)
         seekProgressTableLayout.layoutParams = TableRow.LayoutParams(200, TableRow.LayoutParams.WRAP_CONTENT)
 
-        seekProgressTableLayout.addView(seekProgress)
+//        seekProgressTableLayout.addView(seekProgress)
 
         this.addView(seekProgressTableLayout)
 
@@ -63,20 +63,24 @@ class Track(context: Context, magnet: String, name: String, private val index: I
     }
 
     public fun selectToPlay(torrent: Torrent) {
-        var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
-        musicService.bufferInfo.text = "Playing: ${torrent.videoFile.nameWithoutExtension}"
-        finalFileSize -= (finalFileSize % BLOCK_SIZE)
-        val blockAmount = finalFileSize / BLOCK_SIZE
-        seekProgress.createSquares(blockAmount.toInt())
+        AudioPlayer.getInstance(context, musicService).prepareNextTrack()
+        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, searching for peers"
+//        var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
+//        finalFileSize -= (finalFileSize % BLOCK_SIZE)
+//        val blockAmount = finalFileSize / BLOCK_SIZE
+//        seekProgress.createSquares(blockAmount.toInt())
     }
 
     public fun handleDownloadProgress(torrent: Torrent, status: StreamStatus) {
         musicService.progressBar.progress = status.progress.toInt()
-        musicService.progressBar.secondaryProgress = status.bufferProgress
-        var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
-        var intermediateSize = finalFileSize
-        finalFileSize -= (finalFileSize % BLOCK_SIZE)
-        var index = 0
+        var bufferProgress = (status.bufferProgress.toFloat() / torrent.piecesToPrepare.toFloat()) * 100f
+        if (bufferProgress > 100) bufferProgress = 100f
+        musicService.progressBar.secondaryProgress = bufferProgress.toInt()
+        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${bufferProgress.toInt()}%"
+//        var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
+//        var intermediateSize = finalFileSize
+//        finalFileSize -= (finalFileSize % BLOCK_SIZE)
+//        var index = 0
 //        while (intermediateSize - BLOCK_SIZE >= 0) {TODO
 //            index++
 //            intermediateSize -= BLOCK_SIZE

@@ -33,6 +33,15 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         bufferInfo.text = "No track currently playing"
 //        this.addView(bufferInfo)
         seekBar.setOnSeekBarChangeListener(this)
+        this.playButton.setOnClickListener {
+            if (mediaPlayer.isPlaying) {
+                this.playButton.setImageResource(android.R.drawable.ic_media_play)
+                mediaPlayer.pause()
+            } else {
+                this.playButton.setImageResource(android.R.drawable.ic_media_pause)
+                mediaPlayer.start()
+            }
+        }
     }
 
     companion object {
@@ -49,8 +58,20 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         }
     }
 
+    public fun prepareNextTrack() {
+        if (mediaPlayer.isPlaying) mediaPlayer.stop()
+        this.playButton.setImageResource(android.R.drawable.ic_media_play)
+        this.playButton.isClickable = false
+        this.playButton.isActivated = false
+        this.playButton.isEnabled = false
+    }
+
     public fun setAudioResource(file: File) {
+        prepareNextTrack()
+        mediaPlayer.reset()
         mediaPlayer.apply {
+            setOnPreparedListener(this@AudioPlayer)
+            setOnErrorListener(this@AudioPlayer)
             setAudioAttributes(
                 AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -58,8 +79,6 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
             )
             setDataSource(context, file.toUri())
             prepareAsync()
-            setOnPreparedListener(this@AudioPlayer)
-            setOnErrorListener(this@AudioPlayer)
         }
     }
 
@@ -98,15 +117,6 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         this.playButton.isClickable = true
         this.playButton.isActivated = true
         this.playButton.isEnabled = true
-        this.playButton.setOnClickListener {
-            if (mp.isPlaying) {
-                this.playButton.setImageResource(android.R.drawable.ic_media_play)
-                mp.pause()
-            } else {
-                this.playButton.setImageResource(android.R.drawable.ic_media_pause)
-                mp.start()
-            }
-        }
         //Directly play the track when it is prepared
         this.playButton.callOnClick()
     }

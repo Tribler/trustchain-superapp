@@ -28,7 +28,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import java.lang.Exception
 import java.util.*
-const val PREPARE_SIZE_KB: Long = 2 * 512L
+const val PREPARE_SIZE_KB: Long = 10 * 512L
 
 class MusicService : BaseActivity() {
     private val default_torrent =
@@ -45,6 +45,7 @@ class MusicService : BaseActivity() {
     override val navigationGraph = R.navigation.musicdao_navgraph
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        clearCache()
         torrentStream = initTorrentStreamService()
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
@@ -113,18 +114,27 @@ class MusicService : BaseActivity() {
         updateTorrentClientInfo(1000)
     }
 
-    public fun initTorrentStreamService(): TorrentStream {
+    private fun initTorrentStreamService(): TorrentStream {
         val prepareSize: Long = PREPARE_SIZE_KB * 1024L
         val torrentOptions: TorrentOptions = TorrentOptions.Builder()
             .saveLocation(applicationContext.cacheDir)
             .autoDownload(false)
             //PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
             //Requires testing and tweaking to find the best number
-            .prepareSize(prepareSize)
+//            .prepareSize(prepareSize)
             .removeFilesAfterStop(true)
             .build()
 
         return TorrentStream.init(torrentOptions)
+    }
+
+    private fun clearCache() {
+        if (cacheDir.isDirectory && cacheDir.listFiles() != null) {
+            val files = cacheDir.listFiles()
+            files?.forEach {
+                it.delete()
+            }
+        }
     }
 
     private fun updateTorrentClientInfo(period: Long) {
@@ -221,6 +231,16 @@ class MusicService : BaseActivity() {
         trackListLinearLayout.addView(
             Release(applicationContext, magnet,this),0
         )
+    }
+
+    fun fillProgressBar() {
+        progressBar.progress = 100
+        progressBar.secondaryProgress = 100
+    }
+
+    fun resetProgressBar() {
+        progressBar.progress = 0
+        progressBar.secondaryProgress = 0
     }
 
     private fun onMessage(packet: Packet) {
