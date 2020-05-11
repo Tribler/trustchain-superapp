@@ -1,4 +1,4 @@
-package com.example.musicdao.net
+package com.example.musicdao
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,8 @@ import android.preference.PreferenceManager
 import android.text.Editable
 import android.util.Log
 import android.widget.Toast
-import com.example.musicdao.R
-import com.example.musicdao.Release
-import com.example.musicdao.SubmitReleaseDialog
+import com.example.musicdao.ipv8.MusicDemoCommunity
+import com.example.musicdao.ui.SubmitReleaseDialog
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -34,7 +33,8 @@ class MusicService : BaseActivity() {
     private var currentMagnetLoading: String? = null
     private val defaultTorrent =
         "magnet:?xt=urn:btih:88b17043ee77a31feef3b55a8ebe120b045fa577&dn=tru1991-05-27sbd"
-    private val trackLibrary: TrackLibrary = TrackLibrary()
+    private val trackLibrary: TrackLibrary =
+        TrackLibrary()
     var torrentStream: TorrentStream? = null
 
     override val navigationGraph = R.navigation.musicdao_navgraph
@@ -175,7 +175,8 @@ class MusicService : BaseActivity() {
      */
     private fun publishTrack(magnet: String) {
         this.currentMagnetLoading = magnet
-        SubmitReleaseDialog(this).show(supportFragmentManager, "Submit metadata")
+        SubmitReleaseDialog(this)
+            .show(supportFragmentManager, "Submit metadata")
     }
 
     /**

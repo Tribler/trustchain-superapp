@@ -1,4 +1,4 @@
-package com.example.musicdao.net
+package com.example.musicdao.ipv8
 
 import nl.tudelft.ipv8.Community
 

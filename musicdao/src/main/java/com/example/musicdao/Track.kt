@@ -2,8 +2,6 @@ package com.example.musicdao
 
 import android.content.Context
 import android.widget.*
-import com.example.musicdao.net.AudioPlayer
-import com.example.musicdao.net.MusicService
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import kotlinx.android.synthetic.main.music_app_main.*

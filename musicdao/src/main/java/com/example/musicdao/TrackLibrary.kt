@@ -1,4 +1,4 @@
-package com.example.musicdao.net
+package com.example.musicdao
 
 import android.content.Context
 import android.content.res.Resources

@@ -1,5 +1,6 @@
-package com.example.musicdao.net
+package com.example.musicdao
 
+import android.R
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -31,10 +32,10 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         //Handle playing and pausing tracks
         this.playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {
-                this.playButton.setImageResource(android.R.drawable.ic_media_play)
+                this.playButton.setImageResource(R.drawable.ic_media_play)
                 mediaPlayer.pause()
             } else {
-                this.playButton.setImageResource(android.R.drawable.ic_media_pause)
+                this.playButton.setImageResource(R.drawable.ic_media_pause)
                 mediaPlayer.start()
             }
         }
@@ -43,14 +44,18 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
     companion object {
         fun getInstance(context: Context, musicService: MusicService) : AudioPlayer {
             if (!::instance.isInitialized) {
-                createInstance(context, musicService)
+                createInstance(
+                    context,
+                    musicService
+                )
             }
             return instance
         }
 
         @Synchronized
         private fun createInstance(context: Context, musicService: MusicService) {
-            instance = AudioPlayer(context, musicService)
+            instance =
+                AudioPlayer(context, musicService)
         }
     }
 
@@ -59,7 +64,7 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
      */
     fun prepareNextTrack() {
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
-        this.playButton.setImageResource(android.R.drawable.ic_media_play)
+        this.playButton.setImageResource(R.drawable.ic_media_play)
         this.playButton.isClickable = false
         this.playButton.isActivated = false
         this.playButton.isEnabled = false

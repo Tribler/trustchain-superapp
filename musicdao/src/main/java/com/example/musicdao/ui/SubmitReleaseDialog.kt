@@ -1,4 +1,4 @@
-package com.example.musicdao
+package com.example.musicdao.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,7 +6,8 @@ import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
-import com.example.musicdao.net.MusicService
+import com.example.musicdao.MusicService
+import com.example.musicdao.R
 
 class SubmitReleaseDialog(private val musicService: MusicService) : DialogFragment() {
     private lateinit var title: EditText

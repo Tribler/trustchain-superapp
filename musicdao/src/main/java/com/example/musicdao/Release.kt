@@ -5,8 +5,6 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import com.example.musicdao.net.AudioPlayer
-import com.example.musicdao.net.MusicService
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
