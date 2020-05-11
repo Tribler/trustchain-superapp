@@ -11,7 +11,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 24
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -61,6 +61,8 @@ dependencies {
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent:ttorrent-2.0'
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent-tracker:ttorrent-2.0'
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent-client:ttorrent-2.0'
-    implementation 'com.github.TorrentStream:TorrentStream-Android:2.5.0'
+    implementation('com.github.TorrentStream:TorrentStream-Android:2.5.0') {
+        exclude group: 'com.frostwire'
+    }
     //    implementation 'com.github.atomashpolskiy:bt-upnp:1.9'
 }
