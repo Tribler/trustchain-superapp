@@ -32,7 +32,7 @@ const val PREPARE_SIZE_KB: Long = 10 * 512L
 
 class MusicService : BaseActivity() {
     private val default_torrent =
-        "magnet:?xt=urn:btih:9316f06e8572ed5cb6f5aa602d019cb9c1a5e40c&dn=gd1990-12-12.149736.UltraMatrix.sbd.cm.miller.flac16"
+        "magnet:?xt=urn:btih:88b17043ee77a31feef3b55a8ebe120b045fa577&dn=tru1991-05-27sbd"
     private lateinit var binding: MusicAppMainBinding
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -132,7 +132,7 @@ class MusicService : BaseActivity() {
         if (cacheDir.isDirectory && cacheDir.listFiles() != null) {
             val files = cacheDir.listFiles()
             files?.forEach {
-                it.delete()
+                it.deleteRecursively()
             }
         }
     }

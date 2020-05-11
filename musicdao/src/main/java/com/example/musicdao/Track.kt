@@ -50,12 +50,12 @@ class Track(context: Context, magnet: String, name: String, private val index: I
 //        progressBar.layoutParams = rowParams
 //        this.addView(progressBar)
 
-        val seekProgressTableLayout = TableLayout(context)
-        seekProgressTableLayout.layoutParams = TableRow.LayoutParams(200, TableRow.LayoutParams.WRAP_CONTENT)
+//        val seekProgressTableLayout = TableLayout(context)
+//        seekProgressTableLayout.layoutParams = TableRow.LayoutParams(200, TableRow.LayoutParams.WRAP_CONTENT)
 
 //        seekProgressTableLayout.addView(seekProgress)
 
-        this.addView(seekProgressTableLayout)
+//        this.addView(seekProgressTableLayout)
 
         playButton.setOnClickListener {
             release.selectTrackAndDownload(index)
@@ -73,10 +73,7 @@ class Track(context: Context, magnet: String, name: String, private val index: I
 
     public fun handleDownloadProgress(torrent: Torrent, status: StreamStatus) {
         musicService.progressBar.progress = status.progress.toInt()
-        var bufferProgress = (status.bufferProgress.toFloat() / torrent.piecesToPrepare.toFloat()) * 100f
-        if (bufferProgress > 100) bufferProgress = 100f
-        musicService.progressBar.secondaryProgress = bufferProgress.toInt()
-        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${bufferProgress.toInt()}%"
+        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${status.bufferProgress}%"
 //        var finalFileSize = torrent.torrentHandle.torrentFile().files().fileSize(index)
 //        var intermediateSize = finalFileSize
 //        finalFileSize -= (finalFileSize % BLOCK_SIZE)

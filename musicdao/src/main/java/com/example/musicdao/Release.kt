@@ -13,10 +13,15 @@ import kotlinx.android.synthetic.main.music_app_main.*
 import kotlinx.android.synthetic.main.music_app_main.view.*
 import kotlinx.android.synthetic.main.music_app_main.view.bufferInfo
 
-class Release(context: Context, private val magnet: String, private val musicService: MusicService) : TableLayout(context),
+class Release(
+    context: Context,
+    private val magnet: String,
+    private val musicService: MusicService
+) : TableLayout(context),
     TorrentListener {
     private var tracks: MutableList<Track> = mutableListOf<Track>()
     private var currentFileIndex = -1
+    private var fetchingMetadataRow = TableRow(context)
     private lateinit var torrent: Torrent
 
     init {
@@ -24,18 +29,14 @@ class Release(context: Context, private val magnet: String, private val musicSer
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        val tableRow = TableRow(context)
-        tableRow.layoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        )
         val magnetTextView = TextView(context)
-        magnetTextView.text = "Release: ${magnet.substring(0, 10)}"
+        magnetTextView.text = "Fetching metadata for torrent magnet link \nMagnet: $magnet"
         magnetTextView.layoutParams = TableRow.LayoutParams(
             TableRow.LayoutParams.WRAP_CONTENT,
             TableRow.LayoutParams.WRAP_CONTENT
         )
-        this.addView(tableRow)
+        fetchingMetadataRow.addView(magnetTextView)
+        this.addView(fetchingMetadataRow)
 
         try {
             musicService.torrentStream?.startStream(magnet)
@@ -55,9 +56,12 @@ class Release(context: Context, private val magnet: String, private val musicSer
             val track = tracks[currentFileIndex]
             track.selectToPlay(torrent)
             //TODO needs to have a solid check whether the file was already downloaded before
-            if (torrent.videoFile.isFile && torrent.videoFile.length() == torrent.torrentHandle.torrentFile().files().fileSize(index)) {
+            if (torrent.videoFile.isFile && torrent.videoFile.length() == torrent.torrentHandle.torrentFile()
+                    .files().fileSize(index)
+            ) {
                 musicService.fillProgressBar()
-                musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: 100%"
+                musicService.bufferInfo.text =
+                    "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: 100%"
                 AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
             } else {
                 musicService.resetProgressBar()
@@ -81,11 +85,21 @@ class Release(context: Context, private val magnet: String, private val musicSer
     override fun onStreamPrepared(torrent: Torrent) {
         //TODO add a check here for whether this torrent is the torrent of this Release
         println("Stream prepared")
+        this.removeView(fetchingMetadataRow)
         this.torrent = torrent
         torrent?.fileNames?.forEachIndexed { index, fileName ->
             val track = Track(context, magnet, fileName, index, this, musicService)
-            this.addView(track)
-            tracks.add(track)
+            val allowedExtensions = listOf<String>("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
+            var found = false
+            for (s in allowedExtensions) {
+                if (fileName.endsWith(s)) {
+                    found = true
+                }
+            }
+            if (found) {
+                this.addView(track)
+                tracks.add(track)
+            }
         }
     }
 
