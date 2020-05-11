@@ -20,7 +20,6 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
     private var timerStart: Long = 0
     private var interestedFraction: Float = 0F
     private var piecesInfoLog = ""
-//    public var seekProgress = (context as Activity).seek
     private val bufferInfo = musicService.bufferInfo
     private val progressBar = musicService.progressBar
     private val seekBar = musicService.seekBar
@@ -29,9 +28,7 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
     init {
         progressBar.max = 100
         progressBar.progress = 0
-//        bufferInfo.layoutParams = linearLayoutParams
         bufferInfo.text = "No track currently playing"
-//        this.addView(bufferInfo)
         seekBar.setOnSeekBarChangeListener(this)
         this.playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {

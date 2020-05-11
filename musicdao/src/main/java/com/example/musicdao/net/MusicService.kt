@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.example.musicdao.R
 import com.example.musicdao.Release
 import com.example.musicdao.SubmitReleaseDialog
-import com.example.musicdao.databinding.MusicAppMainBinding
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.squareup.sqldelight.android.AndroidSqliteDriver
@@ -35,7 +34,6 @@ class MusicService : BaseActivity() {
     private var currentMagnetLoading: String? = null
     private val defaultTorrent =
         "magnet:?xt=urn:btih:88b17043ee77a31feef3b55a8ebe120b045fa577&dn=tru1991-05-27sbd"
-    private lateinit var binding: MusicAppMainBinding
     private val trackLibrary: TrackLibrary = TrackLibrary()
     var torrentStream: TorrentStream? = null
 
@@ -47,28 +45,7 @@ class MusicService : BaseActivity() {
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
 
-        binding = MusicAppMainBinding.inflate(layoutInflater)
-
-        val community = OverlayConfiguration(
-            Overlay.Factory(MusicDemoCommunity::class.java),
-            listOf(RandomWalk.Factory())
-        )
-
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        val trustChainCommunity = OverlayConfiguration(
-            TrustChainCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
-
-        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
-
-        IPv8Android.Factory(application)
-            .setConfiguration(config)
-            .setPrivateKey(getPrivateKey())
-            .init()
+        initTrustChain()
 
         Toast.makeText(applicationContext, "Initialized IPv8", Toast.LENGTH_SHORT).show()
         mid.text = ("My trustchain member ID: " + IPv8Android.getInstance().myPeer.mid)
@@ -89,7 +66,30 @@ class MusicService : BaseActivity() {
         Thread(Runnable {
             trackLibrary.startDHT()
         }).start()
-        updateTorrentClientInfo(1000)
+        iterateClientConnectivity()
+    }
+
+    private fun initTrustChain() {
+        val community = OverlayConfiguration(
+            Overlay.Factory(MusicDemoCommunity::class.java),
+            listOf(RandomWalk.Factory())
+        )
+
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        val trustChainCommunity = OverlayConfiguration(
+            TrustChainCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+
+        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
+
+        IPv8Android.Factory(application)
+            .setConfiguration(config)
+            .setPrivateKey(getPrivateKey())
+            .init()
     }
 
     private fun initTorrentStreamService(): TorrentStream {
@@ -106,6 +106,10 @@ class MusicService : BaseActivity() {
         return TorrentStream.init(torrentOptions)
     }
 
+    /**
+     * Clear cache on every run (for testing, and audio files may be large 15MB+). May be removed
+     * in the future
+     */
     private fun clearCache() {
         if (cacheDir.isDirectory && cacheDir.listFiles() != null) {
             val files = cacheDir.listFiles()
@@ -115,12 +119,15 @@ class MusicService : BaseActivity() {
         }
     }
 
-    private fun updateTorrentClientInfo(period: Long) {
+    /**
+     * Iteratively update and show torrent client connectivity
+     */
+    private fun iterateClientConnectivity() {
         val thread: Thread = object : Thread() {
             override fun run() {
                 try {
                     while (!this.isInterrupted && torrentStream != null) {
-                        sleep(period)
+                        sleep(1000)
                         runOnUiThread {
                             val text =
                                 "Torrent client info: UP: ${trackLibrary.getUploadRate()}KB DOWN: ${trackLibrary.getDownloadRate()}KB DHT NODES: ${trackLibrary.getDhtNodes()}"
@@ -134,6 +141,9 @@ class MusicService : BaseActivity() {
         thread.start()
     }
 
+    /**
+     * Select an audio file from local disk
+     */
     private fun selectLocalTrackFile() {
         val chooseFile = Intent(Intent.ACTION_GET_CONTENT)
         chooseFile.type = "audio/*"
@@ -154,15 +164,18 @@ class MusicService : BaseActivity() {
         if (uri != null) {
             //This should be reached when the chooseFile intent is completed and the user selected
             //an audio file
-
             val magnet = trackLibrary.seedFile(applicationContext, uri)
             publishTrack(magnet)
         }
     }
 
+    /**
+     * Once a magnet link to publish is chosen, show an alert dialog which asks to add metadata for
+     * the Release (album title, release date etc)
+     */
     private fun publishTrack(magnet: String) {
         this.currentMagnetLoading = magnet
-        SubmitReleaseDialog(this).show(supportFragmentManager, "Release metadata")
+        SubmitReleaseDialog(this).show(supportFragmentManager, "Submit metadata")
     }
 
     /**
@@ -198,6 +211,10 @@ class MusicService : BaseActivity() {
         })
     }
 
+    /**
+     * Once blocks on the trustchain arrive, which are audio release blocks, try to fetch and render
+     * its metadata from its torrent file structure.
+     */
     private fun registerBlockListener() {
         val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
         val musicService = this
@@ -244,7 +261,6 @@ class MusicService : BaseActivity() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
-        private const val MESSAGE_ID = 1
     }
 
     private fun getPrivateKey(): PrivateKey {

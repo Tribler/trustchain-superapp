@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="@dimen/fab_margin"
-    tools:context=".BlankFragment">
+    tools:context=".MainFragment">
 
     <LinearLayout
         android:id="@+id/mainLinearLayout"

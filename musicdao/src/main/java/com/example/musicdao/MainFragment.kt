@@ -5,8 +5,8 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 
 /**
  * A simple [Fragment] subclass.
- * Use the [BlankFragment.newInstance] factory method to
+ * Use the [MainFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BlankFragment : BaseFragment(R.layout.music_app_main) {
+class MainFragment : BaseFragment(R.layout.music_app_main) {
 }
