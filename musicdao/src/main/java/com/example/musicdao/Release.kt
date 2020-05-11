@@ -116,7 +116,7 @@ class Release(
                 }
             }
             if (found) {
-                val track = Track(context, magnet, fileName, index, this, musicService)
+                val track = Track(context, fileName, index, this, musicService)
                 this.addView(track)
                 tracks.add(track)
             }

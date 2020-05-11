@@ -1,12 +1,8 @@
 package com.example.musicdao.net
 
-import android.app.Activity
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.*
 import androidx.core.net.toUri
 import kotlinx.android.synthetic.main.music_app_main.*
@@ -14,12 +10,13 @@ import java.io.File
 
 lateinit var instance: AudioPlayer
 
+/**
+ * Implements an Android MediaPlayer. Is a singleton.
+ */
 class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(context), MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener {
     private val mediaPlayer: MediaPlayer = MediaPlayer()
-    private var timerStart: Long = 0
     private var interestedFraction: Float = 0F
-    private var piecesInfoLog = ""
     private val bufferInfo = musicService.bufferInfo
     private val progressBar = musicService.progressBar
     private val seekBar = musicService.seekBar
@@ -30,6 +27,8 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         progressBar.progress = 0
         bufferInfo.text = "No track currently playing"
         seekBar.setOnSeekBarChangeListener(this)
+
+        //Handle playing and pausing tracks
         this.playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {
                 this.playButton.setImageResource(android.R.drawable.ic_media_play)
@@ -55,7 +54,10 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         }
     }
 
-    public fun prepareNextTrack() {
+    /**
+     * Reset internal state to prepare for playing a track
+     */
+    fun prepareNextTrack() {
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
         this.playButton.setImageResource(android.R.drawable.ic_media_play)
         this.playButton.isClickable = false
@@ -63,7 +65,7 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         this.playButton.isEnabled = false
     }
 
-    public fun setAudioResource(file: File) {
+    fun setAudioResource(file: File) {
         prepareNextTrack()
         mediaPlayer.reset()
         mediaPlayer.apply {
@@ -118,14 +120,15 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
         this.playButton.callOnClick()
     }
 
+    /**
+     * This enables seeking through the track
+     */
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (!fromUser) return
         interestedFraction = (progress.toFloat() / 100.toFloat())
-        val duration = mediaPlayer?.duration
-        if (duration != null) {
-            val seekMs: Int = (duration * interestedFraction).toInt()
-            mediaPlayer?.seekTo(seekMs)
-        }
+        val duration = mediaPlayer.duration
+        val seekMs: Int = (duration * interestedFraction).toInt()
+        mediaPlayer.seekTo(seekMs)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -134,10 +137,6 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
 
-    }
-
-    public fun setInfo(text: String) {
-        bufferInfo.text = text
     }
 
 }
