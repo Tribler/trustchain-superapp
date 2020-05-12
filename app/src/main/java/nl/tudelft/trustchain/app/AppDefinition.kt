@@ -62,9 +62,9 @@ enum class AppDefinition(
         VotingActivity::class.java
     ),
     MUSIC_DAO(
-        R.drawable.notification_template_icon_bg,
+        android.R.drawable.ic_media_play,
         "MusicDAO",
-        R.color.material_blue_grey_800,
+        R.color.black,
         MusicService::class.java
     )
 }
