@@ -9,10 +9,7 @@ import com.frostwire.jlibtorrent.SettingsPack
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.swig.settings_pack
 import com.turn.ttorrent.client.SharedTorrent
-import java.io.File
-import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.io.*
 import java.util.*
 
 
@@ -82,12 +79,36 @@ class TrackLibrary {
         val tempFileLocation = "${context.cacheDir}/$hash"
 
         //TODO currently creates temp copies before seeding, but should not be necessary
-        Files.copy(input, Paths.get(tempFileLocation))
+        copyInputStreamToFile(input, File(tempFileLocation))
         val file = File(tempFileLocation)
         val torrent = SharedTorrent.create(file, 65535, listOf(), "")
         val torrentFile = "$tempFileLocation.torrent"
         torrent.save(FileOutputStream(torrentFile))
         return File(torrentFile)
+    }
+
+    /**
+     * (External) helper method
+     */
+    private fun copyInputStreamToFile(inputStream: InputStream, file: File) {
+        var out: OutputStream? = null
+        try {
+            out = FileOutputStream(file)
+            val buf = ByteArray(1024)
+            var len = 0
+            while (inputStream.read(buf).also { len = it } > 0) {
+                out.write(buf, 0, len)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                out?.close()
+                inputStream.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
     }
 
 }
