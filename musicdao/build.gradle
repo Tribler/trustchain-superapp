@@ -58,6 +58,11 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui-ktx:2.2.2'
 //    implementation 'com.frostwire:jlibtorrent-android-arm64:1.2.0.18'
     implementation 'com.turn:ttorrent-core:1.5'
+    implementation files('libs/jlibtorrent-1.2.5.0.jar')
+    implementation files('libs/jlibtorrent-android-arm64-1.2.5.0.jar')
+    implementation files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
+    implementation files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
+    implementation files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent:ttorrent-2.0'
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent-tracker:ttorrent-2.0'
 //    implementation 'com.github.mpetazzoni.ttorrent:ttorrent-client:ttorrent-2.0'

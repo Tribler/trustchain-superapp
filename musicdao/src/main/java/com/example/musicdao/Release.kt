@@ -1,6 +1,7 @@
 package com.example.musicdao
 
 import android.content.Context
+import android.text.Html
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -29,15 +30,23 @@ class Release(
 
     init {
         //Generate the UI
+        this.setColumnStretchable(2, true)
         this.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
         val blockMetadata = TextView(context)
-        blockMetadata.text = "Signed block with release:\n$transaction"
+        blockMetadata.text =
+            Html.fromHtml("Signed block with release:<br>$transaction\n<br><b>" +
+                "${transaction["artists"]} - ${transaction["title"]}<br>" +
+                "Released at ${transaction["date"]}</b>")
         blockMetadata.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.WRAP_CONTENT,
+            TableRow.LayoutParams.MATCH_PARENT,
             TableRow.LayoutParams.WRAP_CONTENT
+        )
+        metadataRow.layoutParams = TableLayout.LayoutParams(
+            TableLayout.LayoutParams.MATCH_PARENT,
+            TableLayout.LayoutParams.WRAP_CONTENT
         )
         val params = blockMetadata.layoutParams as TableRow.LayoutParams
         params.span = 3
@@ -65,7 +74,7 @@ class Release(
     /**
      * Select a track from the Release and start downloading and seeding it
      */
-     fun selectTrackAndDownload(index: Int) {
+    fun selectTrackAndDownload(index: Int) {
         if (this::torrent.isInitialized) {
             currentFileIndex = index
             torrent.setSelectedFileIndex(currentFileIndex)

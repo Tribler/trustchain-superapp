@@ -4,7 +4,10 @@ import android.R
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
-import android.widget.*
+import android.os.Handler
+import android.widget.LinearLayout
+import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.net.toUri
 import kotlinx.android.synthetic.main.music_app_main.*
 import java.io.File
@@ -14,7 +17,8 @@ lateinit var instance: AudioPlayer
 /**
  * Implements an Android MediaPlayer. Is a singleton.
  */
-class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(context), MediaPlayer.OnPreparedListener,
+class AudioPlayer(context: Context, private val musicService: MusicService) : LinearLayout(context),
+    MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener {
     private val mediaPlayer: MediaPlayer = MediaPlayer()
     private var interestedFraction: Float = 0F
@@ -39,10 +43,26 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
                 mediaPlayer.start()
             }
         }
+
+        followSeekBarWithTrack()
+    }
+
+    /**
+     * This function updates the seek bar location every second with the playing position
+     */
+    private fun followSeekBarWithTrack() {
+        val mHandler = Handler()
+        musicService.runOnUiThread(object : Runnable {
+            override fun run() {
+                val mCurrentPosition: Int = mediaPlayer.currentPosition / 1000
+                seekBar.progress = mCurrentPosition
+                mHandler.postDelayed(this, 1000)
+            }
+        })
     }
 
     companion object {
-        fun getInstance(context: Context, musicService: MusicService) : AudioPlayer {
+        fun getInstance(context: Context, musicService: MusicService): AudioPlayer {
             if (!::instance.isInitialized) {
                 createInstance(
                     context,
@@ -64,10 +84,11 @@ class AudioPlayer(context: Context, musicService: MusicService) : LinearLayout(c
      */
     fun prepareNextTrack() {
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
-        this.playButton.setImageResource(R.drawable.ic_media_play)
-        this.playButton.isClickable = false
-        this.playButton.isActivated = false
-        this.playButton.isEnabled = false
+        seekBar.progress = 0
+        playButton.setImageResource(R.drawable.ic_media_play)
+        playButton.isClickable = false
+        playButton.isActivated = false
+        playButton.isEnabled = false
     }
 
     fun setAudioResource(file: File) {

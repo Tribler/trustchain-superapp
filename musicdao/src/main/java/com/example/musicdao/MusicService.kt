@@ -32,7 +32,7 @@ const val PREPARE_SIZE_KB: Long = 10 * 512L
 class MusicService : BaseActivity() {
     private var currentMagnetLoading: String? = null
     private val defaultTorrent =
-        "magnet:?xt=urn:btih:88b17043ee77a31feef3b55a8ebe120b045fa577&dn=tru1991-05-27sbd"
+        "magnet:?xt=urn:btih:OEQQUW5KRJO5PBS3DUUTBOI5SANHM572&dn=ChuckBerry1995-05-29.dsbd.miller.flac16&tr=http%3A%2F%2Ftracker.etree.org%3A6969%2Fannounce"
     private val trackLibrary: TrackLibrary =
         TrackLibrary()
     var torrentStream: TorrentStream? = null
@@ -98,8 +98,8 @@ class MusicService : BaseActivity() {
             .saveLocation(applicationContext.cacheDir)
             .autoDownload(false)
             //PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
-            //Requires testing and tweaking to find the best number
-            .prepareSize(prepareSize)
+            //TODO Requires testing and tweaking to find the best number
+//            .prepareSize(prepareSize)
             .removeFilesAfterStop(true)
             .build()
 
