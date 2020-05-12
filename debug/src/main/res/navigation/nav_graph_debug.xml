@@ -6,5 +6,20 @@
     <fragment
         android:id="@+id/debugFragment"
         android:name="nl.tudelft.trustchain.debug.DebugFragment"
-        android:label="Debug" />
+        android:label="Debug" >
+        <action
+            android:id="@+id/action_debugFragment_to_wanLogFragment"
+            app:destination="@id/wanLogFragment" />
+        <action
+            android:id="@+id/action_debugFragment_to_punctureFragment"
+            app:destination="@id/punctureFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/wanLogFragment"
+        android:name="nl.tudelft.trustchain.debug.WanLogFragment"
+        android:label="WAN Log" />
+    <fragment
+        android:id="@+id/punctureFragment"
+        android:name="nl.tudelft.trustchain.debug.PunctureFragment"
+        android:label="PunctureFragment" />
 </navigation>

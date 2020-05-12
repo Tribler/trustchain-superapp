@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.common
 
 import android.util.Log
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
@@ -8,6 +11,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.messaging.*
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import nl.tudelft.ipv8.messaging.payload.PuncturePayload
 import java.util.*
 
 class DemoCommunity : Community() {
@@ -16,6 +20,9 @@ class DemoCommunity : Community() {
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
 
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
+
+    @ExperimentalCoroutinesApi
+    val punctureChannel = BroadcastChannel<Pair<Address, PuncturePayload>>(10000)
 
     // Retrieve the trustchain community
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -46,6 +53,7 @@ class DemoCommunity : Community() {
     object MessageId {
         const val THALIS_MESSAGE = 222
         const val TORRENT_MESSAGE = 223
+        const val PUNCTURE_TEST = 251
     }
 
     // SEND MESSAGE
@@ -69,10 +77,17 @@ class DemoCommunity : Community() {
         }
     }
 
+    fun sendPuncture(address: IPv4Address, id: Int) {
+        val payload = PuncturePayload(myEstimatedLan, myEstimatedWan, id)
+        val packet = serializePacket(MessageId.PUNCTURE_TEST, payload, sign = false)
+        endpoint.send(address, packet)
+    }
+
     // RECEIVE MESSAGE
     init {
         messageHandlers[MessageId.THALIS_MESSAGE] = ::onMessage
         messageHandlers[MessageId.TORRENT_MESSAGE] = ::onTorrentMessage
+        messageHandlers[MessageId.PUNCTURE_TEST] = ::onPunctureTest
     }
 
     private fun onMessage(packet: Packet) {
@@ -84,6 +99,12 @@ class DemoCommunity : Community() {
         torrentMessagesList.add(packet)
         val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
         Log.i("personal", peer.mid + ": " + payload.message)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun onPunctureTest(packet: Packet) {
+        val payload = packet.getPayload(PuncturePayload.Deserializer)
+        punctureChannel.offer(Pair(packet.source, payload))
     }
 }
 

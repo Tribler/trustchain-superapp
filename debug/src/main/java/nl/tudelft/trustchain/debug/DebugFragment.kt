@@ -7,24 +7,55 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentDebugBinding
+import java.text.SimpleDateFormat
 import java.util.*
 
 
 class DebugFragment : BaseFragment(R.layout.fragment_debug) {
     private val binding by viewBinding(FragmentDebugBinding::bind)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.debug_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.wanLog -> {
+                findNavController().navigate(R.id.wanLogFragment)
+                true
+            }
+            R.id.multiPunch -> {
+                findNavController().navigate(R.id.punctureFragment)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -56,7 +87,7 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 append(overlay.javaClass.simpleName)
                 append(" (")
                 val textColorResId = if (overlay.getPeers().isNotEmpty()) R.color.green else R.color.red
-                val textColor = resources.getColor(textColorResId, null)
+                val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 inSpans(ForegroundColorSpan(textColor)) {
                     val peers = overlay.getPeers()
                     val peersCountStr = resources.getQuantityString(
@@ -74,7 +105,7 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
             }
             val totalPeersCount = ipv8.network.verifiedPeers.size
             val textColorResId = if (totalPeersCount > 0) R.color.green else R.color.red
-            val textColor = resources.getColor(textColorResId, null)
+            val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
             inSpans(ForegroundColorSpan(textColor)) {
                 append(resources.getQuantityString(R.plurals.x_peers, totalPeersCount, totalPeersCount))
             }
@@ -82,14 +113,14 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
 
         updateBootstrapList()
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             val blockCount = withContext(Dispatchers.IO) {
                 getTrustChainCommunity().database.getBlockCount(null)
             }
             binding.txtBlockCount.text = blockCount.toString()
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenCreated {
             val chainLength = withContext(Dispatchers.IO) {
                 getTrustChainCommunity().getChainLength()
             }
