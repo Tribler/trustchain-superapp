@@ -75,10 +75,11 @@ public class Entity {
         System.out.println("BEST FIT LINE error:" + LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()));
 
         System.out.println("OUR LINE error:" + LSQRS(x,y,average.X(),average.Y()));
+        double perfectError_maybeNan = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept());
+        double perfect_error = Double.isNaN(perfectError_maybeNan) ? 0.01 : perfectError_maybeNan;
+        System.out.println("RELATIVE ERROR: " + perfect_error / LSQRS(x,y,average.X(),average.Y()));
 
-        System.out.println("RELATIVE ERROR: " + LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y()));
-
-        double relative_error = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / LSQRS(x,y,average.X(),average.Y());
+        double relative_error = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / Double.max(0.001,LSQRS(x,y,average.X(),average.Y()));
     }
 
 
@@ -106,7 +107,7 @@ public class Entity {
 
 
         int it = N;
-        int div = N/10;
+        int div = Integer.max(1,N/10);
 
         ArrayList<Double> xAxis = new ArrayList<>();
         ArrayList<Double> yAxis = new ArrayList<>();
@@ -123,7 +124,10 @@ public class Entity {
             if (it % div == 0) {
                 xAxis.add((double) N - it);
 
-                yAxis.add(LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept())/LSQRS(x, y, average.X(), average.Y()));
+                double perfectError_maybeNan = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept());
+                double perfect_error = Double.isNaN(perfectError_maybeNan) ? 0.00001 : perfectError_maybeNan;
+
+                yAxis.add(perfect_error/LSQRS(x, y, average.X(), average.Y()));
 
             }
 

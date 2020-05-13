@@ -89,6 +89,14 @@ The left demo shows the upload procedure, while the right demo shows the downloa
 
 [More about Freedom-of-Computing App](freedomOfComputing/README.md)
 
+### Distributed AI app
+The distributed AI app is a proof-of-concept of distributed, server less, machine learning.
+
+- [More about the Distributed AI app](distributedai/docs/README.md)
+
+<img src="distributedai/docs/data_picture.png" width="280">
+
+
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)
