@@ -20,7 +20,7 @@ being server less.
 
 **First Time Launch Screens**
 <br />
-<img src="docs/menu_picture.png" width="200px"> <img src="docs/empty_picture.png" width="200px"> <img src="docs/data_picture.png" width="200px">
+<img src="menu_picture.png" width="200px"> <img src="empty_picture.png" width="200px"> <img src="data_picture.png" width="200px">
 
 
 
