@@ -4,7 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicDemoCommunity
 import com.example.musicdao.ui.SubmitReleaseDialog
@@ -25,7 +27,7 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
-import java.lang.Exception
+
 
 const val PREPARE_SIZE_KB: Long = 10 * 512L
 
@@ -38,6 +40,17 @@ class MusicService : BaseActivity() {
     var torrentStream: TorrentStream? = null
 
     override val navigationGraph = R.navigation.musicdao_navgraph
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                NavUtils.navigateUpFromSameTask(this)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         clearCache()
@@ -53,7 +66,10 @@ class MusicService : BaseActivity() {
         registerBlockListener()
         registerBlockSigner()
 
-        mainLinearLayout.addView(AudioPlayer.getInstance(applicationContext, this), 0)
+        val audioPlayer = AudioPlayer.getInstance(applicationContext, this)
+        if (audioPlayer.parent == null) {
+            mainLinearLayout.addView(AudioPlayer.getInstance(applicationContext, this), 0)
+        }
 
         torrentButton.setOnClickListener {
             createDefaultBlock()
