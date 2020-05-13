@@ -24,11 +24,11 @@ class SubmitReleaseDialog(private val musicService: MusicService) : DialogFragme
             builder.setView(inflater.inflate(R.layout.dialog_submit_release, null))
                 // Add action buttons
                 .setPositiveButton("Submit",
-                    DialogInterface.OnClickListener { dialog, id ->
-                        val titleEditText = getDialog()?.findViewById<EditText>(R.id.title)
-                        val artistEditText = getDialog()?.findViewById<EditText>(R.id.artists)
+                    DialogInterface.OnClickListener { _, _ ->
+                        val titleEditText = dialog?.findViewById<EditText>(R.id.title)
+                        val artistEditText = dialog?.findViewById<EditText>(R.id.artists)
                         val releaseDateEditText =
-                            getDialog()?.findViewById<EditText>(R.id.release_date)
+                            dialog?.findViewById<EditText>(R.id.release_date)
                         musicService.finishPublishing(
                             titleEditText?.text,
                             artistEditText?.text,
@@ -36,8 +36,8 @@ class SubmitReleaseDialog(private val musicService: MusicService) : DialogFragme
                         )
                     })
                 .setNegativeButton("Cancel",
-                    DialogInterface.OnClickListener { dialog, id ->
-                        getDialog()?.cancel()
+                    DialogInterface.OnClickListener { _, _ ->
+                        dialog?.cancel()
                     })
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")

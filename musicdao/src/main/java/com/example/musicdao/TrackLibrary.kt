@@ -95,7 +95,7 @@ class TrackLibrary {
         try {
             out = FileOutputStream(file)
             val buf = ByteArray(1024)
-            var len = 0
+            var len: Int
             while (inputStream.read(buf).also { len = it } > 0) {
                 out.write(buf, 0, len)
             }

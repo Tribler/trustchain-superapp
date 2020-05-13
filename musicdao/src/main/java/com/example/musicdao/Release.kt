@@ -39,7 +39,7 @@ class Release(
         blockMetadata.text =
             Html.fromHtml("Signed block with release:<br>$transaction\n<br><b>" +
                 "${transaction["artists"]} - ${transaction["title"]}<br>" +
-                "Released at ${transaction["date"]}</b>")
+                "Released at ${transaction["date"]}</b>", 0)
         blockMetadata.layoutParams = TableRow.LayoutParams(
             TableRow.LayoutParams.MATCH_PARENT,
             TableRow.LayoutParams.WRAP_CONTENT
@@ -113,7 +113,7 @@ class Release(
         println("Stream prepared")
         this.removeView(fetchingMetadataRow)
         this.torrent = torrent
-        torrent?.fileNames?.forEachIndexed { index, fileName ->
+        torrent.fileNames?.forEachIndexed { index, fileName ->
             val allowedExtensions =
                 listOf<String>("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
             var found = false

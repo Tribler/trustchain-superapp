@@ -2,10 +2,10 @@ package com.example.musicdao
 
 import android.content.Intent
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.text.Editable
 import android.util.Log
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicDemoCommunity
 import com.example.musicdao.ui.SubmitReleaseDialog
 import com.github.se_bastiaan.torrentstream.TorrentOptions
@@ -93,7 +93,7 @@ class MusicService : BaseActivity() {
     }
 
     private fun initTorrentStreamService(): TorrentStream {
-        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
+//        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
         val torrentOptions: TorrentOptions = TorrentOptions.Builder()
             .saveLocation(applicationContext.cacheDir)
             .autoDownload(false)
