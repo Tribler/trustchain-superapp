@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.app
 import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import com.example.musicdao.MusicService
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
@@ -66,5 +67,11 @@ enum class AppDefinition(
         "Voter",
         R.color.android_green,
         VotingActivity::class.java
+    ),
+    MUSIC_DAO(
+        android.R.drawable.ic_media_play,
+        "MusicDAO",
+        R.color.black,
+        MusicService::class.java
     )
 }
