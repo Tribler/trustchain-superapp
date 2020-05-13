@@ -1,6 +1,6 @@
 # Distributed-AI
 
-Luxury communism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8)
+Distributed-AI is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8)
 and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md),
  and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp).
 
