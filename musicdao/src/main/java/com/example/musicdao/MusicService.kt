@@ -28,7 +28,6 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 
-
 const val PREPARE_SIZE_KB: Long = 10 * 512L
 
 class MusicService : BaseActivity() {
