@@ -91,6 +91,7 @@ dependencies {
     implementation project(':debug')
     implementation project(':currencyii')
     implementation project(':freedomOfComputing')
+    implementation project(':musicdao')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
