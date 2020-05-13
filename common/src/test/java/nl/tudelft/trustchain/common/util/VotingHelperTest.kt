@@ -16,9 +16,12 @@ import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
+import java.lang.Exception
 
 class VotingHelperTest {
 
@@ -31,13 +34,14 @@ class VotingHelperTest {
         return TrustChainSQLiteStore(database)
     }
 
-    private fun getPeers(): List<PublicKey> {
+    private fun getPeers(excludeSelf: Boolean = false): MutableList<PublicKey> {
         val peers: MutableList<PublicKey> = ArrayList()
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
         peers.add(defaultCryptoProvider.generateKey().pub())
-        peers.add(getMyPeer().publicKey)
-
+        if (!excludeSelf) {
+            peers.add(getMyPeer().publicKey)
+        }
         return peers
     }
 
@@ -49,7 +53,6 @@ class VotingHelperTest {
         community.endpoint = getEndpoint()
         community.network = Network()
         community.maxPeers = 20
-        community.cryptoProvider = JavaCryptoProvider
         return community
     }
 
@@ -68,7 +71,7 @@ class VotingHelperTest {
     }
 
     @Test
-    fun startVote() {
+    fun createProposal() {
         val community = spyk(getCommunity())
 
         val helper = TrustChainHelper(community)
@@ -76,7 +79,7 @@ class VotingHelperTest {
         val peers = getPeers()
 
         val voteSubject = "There should be tests"
-        votingHelper.startVote(voteSubject, peers)
+        votingHelper.createProposal(voteSubject, peers, VotingMode.YESNO)
 
         // Verify that the proposal block has been casted
         assert(
@@ -87,7 +90,7 @@ class VotingHelperTest {
     }
 
     @Test
-    fun respondToVote() {
+    fun respondToProposal() {
         val community = spyk(getCommunity())
         val votingHelper = VotingHelper(community)
         val peers = getPeers()
@@ -107,7 +110,7 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val helper = TrustChainHelper(community)
         assert(
@@ -138,11 +141,398 @@ class VotingHelperTest {
         )
 
         // Create a reply agreement block
-        votingHelper.respondToVote(true, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
 
         val count =
             votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
 
         Assert.assertEquals(Pair(1, 0), count)
+    }
+
+    @Test
+    fun preventDoubleVoteCount() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create some reply agreement blocks
+        votingHelper.respondToProposal(true, propBlock)
+        votingHelper.respondToProposal(false, propBlock)
+        votingHelper.respondToProposal(true, propBlock)
+
+        val count =
+            votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
+
+        Assert.assertEquals(Pair(1, 0), count)
+    }
+
+    @Test
+    fun countEligibleVotes() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create a reply agreement block
+        votingHelper.respondToProposal(true, propBlock)
+
+        val count =
+            votingHelper.countVotes(peers, voteSubject, community.myPeer.publicKey.keyToBin())
+
+        // verify my own vote has not been counted
+        Assert.assertEquals(Pair(0, 0), count)
+    }
+
+    @Test
+    fun checkIfCastedTrue() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Create a reply agreement block
+        votingHelper.respondToProposal(true, propBlock)
+
+        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(1, 0))
+    }
+
+    @Test
+    fun checkIfCastedFalse() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers(excludeSelf = true)
+
+        // Launch proposition
+        val voteSubject = "A vote should be counted"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", peers)
+
+        val transaction = voteJSON.toString()
+
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(0, 0))
+    }
+
+    @Test
+    fun testVoteThresholdPass() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(true, propBlock)
+
+        Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 25))
+    }
+
+    @Test
+    fun testVoteThresholdNoPass() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(false, propBlock)
+
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 25))
+    }
+
+    @Test
+    fun testVoteThresholdNoPassThresholdHigher() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(true, propBlock)
+
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock, 30))
+    }
+
+    @Test
+    fun testVoteCompleteWithoutThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(listOf(community.myPeer.publicKey.keyToBin().toHex()))
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(false, propBlock)
+
+        Assert.assertTrue(votingHelper.votingIsComplete(propBlock))
+    }
+
+    @Test
+    fun testVoteNotCompleteWithoutThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(true, propBlock)
+
+        Assert.assertFalse(votingHelper.votingIsComplete(propBlock))
+    }
+
+    @Test
+    fun testInvalidBlockType() {
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+
+        // Create dummy block
+        val voteSubject = "There should be a threshold"
+        val voteJSON = JSONObject()
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "not_voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        var exceptionCaught = false
+        try {
+            votingHelper.votingIsComplete(propBlock, 10)
+        } catch (e: Exception) {
+            exceptionCaught = true
+        }
+
+        Assert.assertTrue(exceptionCaught)
+    }
+
+    @Test
+    fun testVoteHalfCompleteWithThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(true, propBlock)
+
+        Assert.assertEquals(50, votingHelper.getVotingProgressStatus(propBlock, 50))
+    }
+
+    @Test
+    fun testVoteHalfCompleteWithoutThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+        val peers = getPeers()
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(peers.map { i -> i.keyToBin().toHex() })
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.YESNO)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(false, propBlock)
+
+        Assert.assertEquals(25, votingHelper.getVotingProgressStatus(propBlock))
+    }
+
+    @Test
+    fun testVoteCompleteNotPassedThreshold() {
+
+        val community = spyk(getCommunity())
+        val votingHelper = VotingHelper(community)
+
+        // Launch proposition
+        val voteSubject = "There should be a threshold"
+        val voteList = JSONArray(listOf(community.myPeer.publicKey.keyToBin().toHex()))
+        val voteJSON = JSONObject()
+            .put("VOTE_PROPOSER", community.myPeer.publicKey.keyToBin().toHex())
+            .put("VOTE_SUBJECT", voteSubject)
+            .put("VOTE_LIST", voteList)
+            .put("VOTE_MODE", VotingMode.THRESHOLD)
+
+        val transaction = voteJSON.toString()
+
+        // Start the vote.
+        val propBlock = community.createProposalBlock(
+            "voting_block",
+            mapOf("message" to transaction),
+            EMPTY_PK
+        )
+
+        // Vote and thus make the threshold.
+        votingHelper.respondToProposal(false, propBlock)
+
+        Assert.assertEquals(-1, votingHelper.getVotingProgressStatus(propBlock, 25))
+        Assert.assertTrue(votingHelper.votingIsComplete(propBlock, 25))
     }
 }

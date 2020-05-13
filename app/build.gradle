@@ -3,12 +3,30 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "androidx.navigation.safeargs"
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
+
+buildscript {
+    repositories {
+        google()
+    }
+    dependencies {
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.0.0'
+    }
+}
 
 ktlint {
     version = "$ktlint_version"
     android = true
     outputToConsole = true
     ignoreFailures = false
+}
+
+// Generate a version code from git commit count
+static def generateVersionCode() {
+    int versionCode = "git rev-list HEAD --count".execute().text.trim().toInteger()
+    print("Version code: $versionCode")
+    return versionCode
 }
 
 android {
@@ -19,16 +37,26 @@ android {
         applicationId "nl.tudelft.trustchain"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode generateVersionCode()
+        versionName "0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            keyAlias "trustchain"
+            keyPassword "ageoftrust"
+            storeFile file("trustchain-superapp.jks")
+            storePassword "ageoftrust"
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 
@@ -56,13 +84,14 @@ repositories {
 
 dependencies {
     implementation project(':common')
+    implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')
     implementation project(':trustchain-trader')
     implementation project(':trustchain-payloadgenerator')
     implementation project(':debug')
     implementation project(':distributedai')
     implementation project(':currencyii')
-    implementation project(':FOC')
+    implementation project(':freedomOfComputing')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -77,6 +106,10 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-analytics:17.4.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
 
     // Material
     implementation 'com.google.android.material:material:1.1.0'

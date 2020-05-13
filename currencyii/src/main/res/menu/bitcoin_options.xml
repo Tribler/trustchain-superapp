@@ -2,14 +2,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/item_blockchain_refresh"
-        android:title="Refresh"
-        android:icon="@drawable/ic_loop_black_24dp"
+        android:id="@+id/item_bitcoin_blockchain_download"
+        android:enabled="true"
+        android:icon="@drawable/ic_cloud_download_white_24dp"
+        android:title="Download Progress"
         app:showAsAction="always" />
     <item
-        android:id="@+id/item_blockchain_download_progress"
+        android:id="@+id/item_bitcoin_wallet_settings"
         android:enabled="true"
-        android:icon="@drawable/ic_cloud_download_black_24dp"
-        android:title="Download Progress"
+        android:icon="@drawable/ic_settings_white_24dp"
+        android:title="DAO Logout"
         app:showAsAction="always" />
 </menu>

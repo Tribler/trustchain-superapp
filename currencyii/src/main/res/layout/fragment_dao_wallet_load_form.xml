@@ -2,100 +2,146 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.bitcoin.DaoImportOrCreate">
+    tools:context=".ui.bitcoin.DAOCreateFragment">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:orientation="vertical"
-        android:padding="16dp">
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <TextView
-                android:id="@+id/textView5"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Create or Import Wallet"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textView9"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textView9"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="20dp"
+                        android:text="Create or import your Bitcoin wallet here."
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Wallet seed"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/seed_word_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="Mnemonic seed (required)"
+                    android:inputType="textVisiblePassword"
+                    android:textSize="14sp" />
+
+                <EditText
+                    android:id="@+id/seed_number_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="Creation number (required)"
+                    android:inputType="number"
+                    android:textSize="14sp" />
+
+                <Button
+                    android:id="@+id/generate_new_seed"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Generate New Seed" />
+
+                <Button
+                    android:id="@+id/load_debug_seed"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24sp"
+                    android:minHeight="20dp"
+                    android:text="Load Debug Seed"
+                    android:textSize="8dp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24sp"
+                    android:text="Private key (optional)"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/private_keys_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24sp"
+                    android:ems="10"
+                    android:gravity="start|top"
+                    android:hint="Your Bitcoin wallet private key as Base58"
+                    android:inputType="textMultiLine"
+                    android:lines="1"
+                    android:textSize="14sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_gray" />
+
+                <TextView
+                    android:id="@+id/textView6"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24sp"
+                    android:text="Bitcoin network"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <Switch
+                    android:id="@+id/production_testnet_input"
+                    style="@style/TextAppearance.AppCompat.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:gravity="center|left"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:switchPadding="20dp"
+                    android:text="TestNet" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/load_wallet_button"
+                style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Fill in your details here to create/import a wallet" />
+                android:layout_marginTop="30dp"
+                android:text="Load Wallet" />
 
         </LinearLayout>
 
-        <EditText
-            android:id="@+id/seed_word_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Mnemonic Seed"
-            android:inputType="textVisiblePassword"
-            android:textSize="14sp" />
+    </ScrollView>
 
-        <EditText
-            android:id="@+id/seed_number_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Creation Number"
-            android:inputType="number"
-            android:textSize="14sp" />
-
-        <EditText
-            android:id="@+id/private_keys_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:gravity="start|top"
-            android:hint="Additional Private Key (optional)"
-            android:inputType="textMultiLine"
-            android:lines="1"
-            android:textSize="14sp" />
-
-        <Switch
-            android:id="@+id/production_testnet_input"
-            style="@style/TextAppearance.AppCompat.Small"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Production / TestNet"
-            android:checked="true" />
-
-        <Button
-            android:id="@+id/load_wallet_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Load Wallet" />
-
-        <Button
-            android:id="@+id/generate_new_seed"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Generate New Seed" />
-
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Generating a seed will overwrite the current filled in seed"
-            android:textAlignment="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
-
-        <Button
-            android:id="@+id/load_debug_seed"
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Load Debug Seed" />
-
-    </LinearLayout>
 </LinearLayout>

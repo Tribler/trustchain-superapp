@@ -16,8 +16,8 @@ class MarketCommunity : Community() {
     override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fc"
 
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
+    val listenersMap: MutableMap<TradePayload.Type?, MutableList<(TradePayload) -> Unit>> = mutableMapOf()
     private val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
-    private val listenersMap: MutableMap<TradePayload.Type?, MutableList<(TradePayload) -> Unit>> = mutableMapOf()
 
     init {
         messageHandlers[MessageId.TRADE.index] = ::onTradePacket

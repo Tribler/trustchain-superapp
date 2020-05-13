@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_import_keys.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
@@ -30,9 +31,18 @@ class ImportKeysFragment : Fragment() {
                 AddressPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
             )
 
-            WalletManagerAndroid.Factory(this.requireContext().applicationContext)
-                .setConfiguration(config)
-                .init()
+            try {
+                WalletManagerAndroid.Factory(this.requireContext().applicationContext)
+                    .setConfiguration(config)
+                    .init()
+            } catch (t: Throwable) {
+                Toast.makeText(
+                    this.requireContext(),
+                    "Something went wrong while initializing the new wallet. ${t.message ?: "No further information"}.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
 
             pk_input.setText("")
             sk_input.setText("")

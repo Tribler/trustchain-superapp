@@ -19,11 +19,12 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding
 
-@UseExperimental(ExperimentalUnsignedTypes::class)
+@OptIn(ExperimentalUnsignedTypes::class)
 open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     private val adapter = ItemAdapter()
 
@@ -102,8 +103,11 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
             R.id.item_crawl -> {
                 lifecycleScope.launch {
                     Toast.makeText(requireContext(), "Crawl started", Toast.LENGTH_SHORT).show()
-                    crawlChain()
-                    Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+                    if (crawlChain()) {
+                        Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(requireContext(), "Crawl failed", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 true
             }
@@ -112,9 +116,8 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
     }
 
     protected open fun getPublicKey(): ByteArray {
-//        val args = BlocksFragmentArgs.fromBundle(requireArguments())
-//        return args.publicKey.hexToBytes()
-        return getTrustChainCommunity().myPeer.publicKey.keyToBin()
+        val args = BlocksFragmentArgs.fromBundle(requireArguments())
+        return args.publicKey.hexToBytes()
     }
 
     protected open fun getBlocks(): List<TrustChainBlock> {
@@ -184,12 +187,15 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
         builder.show()
     }
 
-    private suspend fun crawlChain() {
+    private suspend fun crawlChain(): Boolean {
         val peer = trustchain.getPeerByPublicKeyBin(publicKey)
-        if (peer != null) {
+        return if (peer != null) {
             trustchain.crawlChain(peer)
             refreshBlocks()
             updateView()
+            true
+        } else {
+            false
         }
     }
 

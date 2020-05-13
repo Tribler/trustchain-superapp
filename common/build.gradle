@@ -17,8 +17,6 @@ android {
     defaultConfig {
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -66,6 +64,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
+
     // Material
     implementation 'com.google.android.material:material:1.1.0'
 
@@ -81,6 +80,7 @@ dependencies {
 
     implementation 'com.mattskala:itemadapter:0.3'
 
+
     // Testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
@@ -90,5 +90,4 @@ dependencies {
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
-
 }

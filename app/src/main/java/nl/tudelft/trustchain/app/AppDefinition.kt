@@ -5,12 +5,13 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
-import nl.tudelft.trustchain.currencyii.MainActivity
+import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
+import nl.tudelft.trustchain.voting.VotingActivity
 
 enum class AppDefinition(
     @DrawableRes val icon: Int,
@@ -30,10 +31,15 @@ enum class AppDefinition(
         R.color.dark_gray,
         DebugActivity::class.java
     ),
-
+    CURRENCY_II(
+        R.drawable.ic_bitcoin,
+        "Luxury Communism",
+        R.color.metallic_gold,
+        CurrencyIIMainActivity::class.java
+    ),
     TRUSTCHAIN_TRADER(
         R.drawable.ic_device_hub_black_24dp,
-        "Trader",
+        "AI trading bot",
         R.color.blue,
         TrustChainTraderActivity::class.java
     ),
@@ -43,22 +49,22 @@ enum class AppDefinition(
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
-    CURRENCYII(
-        R.drawable.ic_attach_money_black_24dp,
-        "Currency",
-        R.color.blue,
-        MainActivity::class.java
-    ),
-    FOC(
+    FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
-        "FOC",
+        "Freedom of Computing",
         R.color.blue,
         MainActivityFOC::class.java
     ),
     DNA(
-    R.drawable.ic_bug_report_black_24dp,
-    "Distributed AI",
-    R.color.red,
-    DistributedActivity::class.java
+        R.drawable.ic_bug_report_black_24dp,
+        "Distributed AI",
+        R.color.red,
+        DistributedActivity::class.java
+    ),
+    VOTING(
+        R.drawable.abc_ic_voice_search_api_material,
+        "Voter",
+        R.color.android_green,
+        VotingActivity::class.java
     )
 }

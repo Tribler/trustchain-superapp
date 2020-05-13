@@ -52,13 +52,17 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="nl.tudelft.trustchain.currencyii.MainActivity"
+            android:name="nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             tools:ignore="InnerclassSeparator" />
+
+        <activity
+            android:name="nl.tudelft.trustchain.voting.VotingActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>

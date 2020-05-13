@@ -18,6 +18,8 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
@@ -29,10 +31,13 @@ import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.voting.VotingCommunity
 
 class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+
+        defaultCryptoProvider = AndroidCryptoProvider
 
         initIPv8()
     }
@@ -41,9 +46,11 @@ class TrustChainApplication : Application() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
+            createTFTPCommunity(),
             createDemoCommunity(),
             createMarketCommunity(),
-            createCoinCommunity()
+            createCoinCommunity(),
+            createVotingCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -80,7 +87,7 @@ class TrustChainApplication : Application() {
             }
         })
 
-        trustchain.addListener(CoinCommunity.SHARED_WALLET_BLOCK, object : BlockListener {
+        trustchain.addListener(CoinCommunity.JOIN_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
@@ -89,20 +96,6 @@ class TrustChainApplication : Application() {
         trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
-
-        trustchain.addListener(CoinCommunity.SIGNATURE_ASK_BLOCK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("Coin", "signature request received: ${block.blockId} ${block.transaction}")
-                CoinCommunity.joinAskBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
-            }
-        })
-
-        trustchain.addListener(CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.i("Coin", "block received for signature request: ${block.blockId} ${block.transaction}")
-                CoinCommunity.transferFundsBlockReceived(block, trustchain.myPeer.publicKey.keyToBin())
             }
         })
     }
@@ -140,6 +133,13 @@ class TrustChainApplication : Application() {
         )
     }
 
+    private fun createTFTPCommunity(): OverlayConfiguration<TFTPCommunity> {
+        return OverlayConfiguration(
+            Overlay.Factory(TFTPCommunity::class.java),
+            listOf()
+        )
+    }
+
     private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
@@ -163,6 +163,17 @@ class TrustChainApplication : Application() {
         return OverlayConfiguration(
             Overlay.Factory(CoinCommunity::class.java),
             listOf(randomWalk, nsd)
+        )
+    }
+
+    private fun createVotingCommunity(): OverlayConfiguration<VotingCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "voting.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            VotingCommunity.Factory(settings, store),
+            listOf(randomWalk)
         )
     }
 
