@@ -1,74 +1,34 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: "androidx.navigation.safeargs"
-apply plugin: 'org.jlleitschuh.gradle.ktlint'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-
-buildscript {
-    repositories {
-        google()
-    }
-    dependencies {
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.0.0'
-    }
-}
-
-ktlint {
-    version = "$ktlint_version"
-    android = true
-    outputToConsole = true
-    ignoreFailures = false
-}
-
-// Generate a version code from git commit count
-static def generateVersionCode() {
-    int versionCode = "git rev-list HEAD --count".execute().text.trim().toInteger()
-    print("Version code: $versionCode")
-    return versionCode
-}
 
 android {
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    buildToolsVersion "29.0.2"
 
     defaultConfig {
-        applicationId "nl.tudelft.trustchain"
         minSdkVersion 24
         targetSdkVersion 29
-        versionCode generateVersionCode()
-        versionName "0.1"
+        versionCode 1
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    signingConfigs {
-        release {
-            keyAlias "trustchain"
-            keyPassword "ageoftrust"
-            storeFile file("trustchain-superapp.jks")
-            storePassword "ageoftrust"
-        }
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
 
-    // To inline the bytecode built with JVM target 1.8 into
-    // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
-        allWarningsAsErrors = true
     }
 
     viewBinding {
@@ -76,23 +36,8 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url = 'https://raw.githubusercontent.com/blockchain/api-v1-client-java/mvn-repo/'
-    }
-}
-
 dependencies {
     implementation project(':common')
-    implementation project(':trustchain-voter')
-    implementation project(':trustchain-explorer')
-    implementation project(':trustchain-trader')
-    implementation project(':trustchain-payloadgenerator')
-    implementation project(':debug')
-    implementation project(':distributedai')
-    implementation project(':currencyii')
-    implementation project(':freedomOfComputing')
-    implementation project(':musicdao')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
@@ -107,10 +52,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-
-    // Firebase
-    implementation 'com.google.firebase:firebase-analytics:17.4.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
 
     // Material
     implementation 'com.google.android.material:material:1.1.0'
@@ -127,14 +68,11 @@ dependencies {
 
     implementation 'com.mattskala:itemadapter:0.3'
 
+
+    implementation "com.androidplot:androidplot-core:1.5.7"
+
     // Testing
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-}
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes"
-    ]
 }
