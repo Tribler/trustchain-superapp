@@ -19,12 +19,12 @@ class Track(
     private val playButton: ImageButton = ImageButton(context)
 
     init {
-        //Initialize all UI elements
+        // Initialize all UI elements
         val tableLayoutParams = TableLayout.LayoutParams(
             TableLayout.LayoutParams.MATCH_PARENT,
             TableLayout.LayoutParams.WRAP_CONTENT
         )
-        tableLayoutParams.setMargins(5,5,5,5)
+        tableLayoutParams.setMargins(5, 5, 5, 5)
         this.layoutParams = tableLayoutParams
         val rowParams = TableRow.LayoutParams(
             TableRow.LayoutParams.WRAP_CONTENT,

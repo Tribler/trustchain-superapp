@@ -8,5 +8,4 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
  * Use the [MainFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MainFragment : BaseFragment(R.layout.music_app_main) {
-}
+class MainFragment : BaseFragment(R.layout.music_app_main)

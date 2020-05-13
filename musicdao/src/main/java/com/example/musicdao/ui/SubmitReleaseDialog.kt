@@ -17,7 +17,7 @@ class SubmitReleaseDialog(private val musicService: MusicService) : DialogFragme
         return activity?.let {
             val builder = AlertDialog.Builder(activity)
             // Get the layout inflater
-            val inflater = requireActivity().layoutInflater;
+            val inflater = requireActivity().layoutInflater
 
             // Inflate and set the layout for the dialog
             // Pass null as the parent view because its going in the dialog layout

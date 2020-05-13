@@ -29,7 +29,7 @@ class Release(
     private lateinit var torrent: Torrent
 
     init {
-        //Generate the UI
+        // Generate the UI
         this.setColumnStretchable(2, true)
         this.layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -62,7 +62,7 @@ class Release(
         fetchingMetadataRow.addView(magnetTextView)
         this.addView(fetchingMetadataRow)
 
-        //When the Release is added, it will try to fetch the metadata for the corresponding magnet
+        // When the Release is added, it will try to fetch the metadata for the corresponding magnet
         try {
             musicService.torrentStream?.startStream(magnet)
             musicService.torrentStream?.addListener(this)
@@ -80,7 +80,7 @@ class Release(
             torrent.setSelectedFileIndex(currentFileIndex)
             val track = tracks[currentFileIndex]
             track.selectToPlay(torrent)
-            //TODO needs to have a solid check whether the file was already downloaded before
+            // TODO needs to have a solid check whether the file was already downloaded before
             if (torrent.videoFile.isFile && torrent.videoFile.length() == torrent.torrentHandle.torrentFile()
                     .files().fileSize(index)
             ) {
@@ -109,7 +109,7 @@ class Release(
      * of the songs
      */
     override fun onStreamPrepared(torrent: Torrent) {
-        //TODO add a check here for whether this torrent is the torrent of this Release
+        // TODO add a check here for whether this torrent is the torrent of this Release
         println("Stream prepared")
         this.removeView(fetchingMetadataRow)
         this.torrent = torrent

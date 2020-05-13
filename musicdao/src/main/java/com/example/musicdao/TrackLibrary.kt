@@ -12,7 +12,6 @@ import com.turn.ttorrent.client.SharedTorrent
 import java.io.*
 import java.util.*
 
-
 class TrackLibrary {
     private val torrentSessionManager = SessionManager()
     private val torrentSettingsPack = SettingsPack()
@@ -30,19 +29,19 @@ class TrackLibrary {
     }
 
     fun startDHT() {
-        //TODO remove hardcoded udp DHT routers
+        // TODO remove hardcoded udp DHT routers
         torrentSettingsPack.setString(
             settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
             "router.silotis.us:6881"
-        );
+        )
         torrentSettingsPack.setString(
             settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
             "router.bittorrent.com:6881"
-        );
+        )
         torrentSettingsPack.setString(
             settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
             "dht.transmissionbt.com:6881"
-        );
+        )
         torrentSettingsPack.enableDht()
         torrentSettingsPack.seedingOutgoingConnections(true)
         val params = SessionParams(torrentSettingsPack)
@@ -58,7 +57,7 @@ class TrackLibrary {
      */
     fun seedFile(context: Context, uri: Uri): String {
         val torrentFile = generateTorrent(context, uri)
-        //'Downloading' the file while already having it locally should start seeding it
+        // 'Downloading' the file while already having it locally should start seeding it
         val torrentInfo = TorrentInfo(torrentFile)
         torrentSessionManager.download(torrentInfo, context.cacheDir)
         return torrentInfo.makeMagnetUri()
@@ -71,14 +70,14 @@ class TrackLibrary {
     @Throws(Resources.NotFoundException::class)
     private fun generateTorrent(context: Context, uri: Uri): File {
         println("Trying to share torrent $uri")
-        val input = context.contentResolver.openInputStream(uri);
+        val input = context.contentResolver.openInputStream(uri)
 
-        //TODO generate a suitable signature for this torrent
+        // TODO generate a suitable signature for this torrent
         val hash = Random().nextInt().toString() + ".mp3"
         if (input == null) throw Resources.NotFoundException()
         val tempFileLocation = "${context.cacheDir}/$hash"
 
-        //TODO currently creates temp copies before seeding, but should not be necessary
+        // TODO currently creates temp copies before seeding, but should not be necessary
         copyInputStreamToFile(input, File(tempFileLocation))
         val file = File(tempFileLocation)
         val torrent = SharedTorrent.create(file, 65535, listOf(), "")
@@ -110,5 +109,4 @@ class TrackLibrary {
             }
         }
     }
-
 }

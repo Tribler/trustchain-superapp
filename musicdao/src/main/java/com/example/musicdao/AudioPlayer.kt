@@ -33,7 +33,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         bufferInfo.text = "No track currently playing"
         seekBar.setOnSeekBarChangeListener(this)
 
-        //Handle playing and pausing tracks
+        // Handle playing and pausing tracks
         this.playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {
                 this.playButton.setImageResource(R.drawable.ic_media_play)
@@ -142,7 +142,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         this.playButton.isClickable = true
         this.playButton.isActivated = true
         this.playButton.isEnabled = true
-        //Directly play the track when it is prepared
+        // Directly play the track when it is prepared
         this.playButton.callOnClick()
     }
 
@@ -157,12 +157,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         mediaPlayer.seekTo(seekMs)
     }
 
-    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
-    }
-
-    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
-    }
-
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 }
