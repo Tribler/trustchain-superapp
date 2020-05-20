@@ -1,6 +1,6 @@
 package com.example.musicdao
 
-import android.R
+import android.R.drawable
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
@@ -19,27 +19,24 @@ lateinit var instance: AudioPlayer
  */
 class AudioPlayer(context: Context, private val musicService: MusicService) : LinearLayout(context),
     MediaPlayer.OnPreparedListener,
-    MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener {
+    MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
     private val mediaPlayer: MediaPlayer = MediaPlayer()
     private var interestedFraction: Float = 0F
     private val bufferInfo = musicService.bufferInfo
-    private val progressBar = musicService.progressBar
     private val seekBar = musicService.seekBar
     private val playButton = musicService.playButtonAudioPlayer
 
     init {
-        progressBar.max = 100
-        progressBar.progress = 0
         bufferInfo.text = "No track currently playing"
         seekBar.setOnSeekBarChangeListener(this)
 
         // Handle playing and pausing tracks
         this.playButton.setOnClickListener {
             if (mediaPlayer.isPlaying) {
-                this.playButton.setImageResource(R.drawable.ic_media_play)
+                this.playButton.setImageResource(drawable.ic_media_play)
                 mediaPlayer.pause()
             } else {
-                this.playButton.setImageResource(R.drawable.ic_media_pause)
+                this.playButton.setImageResource(drawable.ic_media_pause)
                 mediaPlayer.start()
             }
         }
@@ -47,19 +44,6 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         followSeekBarWithTrack()
     }
 
-    /**
-     * This function updates the seek bar location every second with the playing position
-     */
-    private fun followSeekBarWithTrack() {
-        val mHandler = Handler()
-        musicService.runOnUiThread(object : Runnable {
-            override fun run() {
-                val mCurrentPosition: Int = mediaPlayer.currentPosition / 1000
-                seekBar.progress = mCurrentPosition
-                mHandler.postDelayed(this, 1000)
-            }
-        })
-    }
 
     companion object {
         fun getInstance(context: Context, musicService: MusicService): AudioPlayer {
@@ -80,20 +64,34 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     }
 
     /**
+     * This function updates the seek bar location every second with the playing position
+     */
+    private fun followSeekBarWithTrack() {
+        val mHandler = Handler()
+        musicService.runOnUiThread(object : Runnable {
+            override fun run() {
+                val mCurrentPosition: Int = mediaPlayer.currentPosition / 1000
+                seekBar.progress = mCurrentPosition
+                mHandler.postDelayed(this, 1000)
+            }
+        })
+    }
+
+    /**
      * Reset internal state to prepare for playing a track
      */
     fun prepareNextTrack() {
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
         seekBar.progress = 0
-        playButton.setImageResource(R.drawable.ic_media_play)
+        playButton.setImageResource(drawable.ic_media_play)
         playButton.isClickable = false
         playButton.isActivated = false
         playButton.isEnabled = false
+        mediaPlayer.reset()
     }
 
     fun setAudioResource(file: File) {
         prepareNextTrack()
-        mediaPlayer.reset()
         mediaPlayer.apply {
             setOnPreparedListener(this@AudioPlayer)
             setOnErrorListener(this@AudioPlayer)
@@ -142,8 +140,14 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         this.playButton.isClickable = true
         this.playButton.isActivated = true
         this.playButton.isEnabled = true
+        // Sync the seek bar horizontal location with track duration
+        seekBar.max = mediaPlayer.duration / 1000
         // Directly play the track when it is prepared
         this.playButton.callOnClick()
+    }
+
+    override fun onCompletion(mp: MediaPlayer?) {
+        prepareNextTrack()
     }
 
     /**
@@ -151,10 +155,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
      */
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         if (!fromUser) return
-        interestedFraction = (progress.toFloat() / 100.toFloat())
-        val duration = mediaPlayer.duration
-        val seekMs: Int = (duration * interestedFraction).toInt()
-        mediaPlayer.seekTo(seekMs)
+        mediaPlayer.seekTo(progress * 1000)
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}

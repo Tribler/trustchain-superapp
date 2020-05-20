@@ -10,8 +10,6 @@ import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicDemoCommunity
 import com.example.musicdao.ui.SubmitReleaseDialog
-//import com.github.se_bastiaan.torrentstream.TorrentOptions
-//import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.IPv8Configuration
@@ -264,23 +262,6 @@ class MusicService : BaseActivity() {
      */
     private fun createDefaultBlock() {
         publishTrack(defaultTorrent)
-    }
-
-    fun setProgressBarProgress(progress: Int, secondaryProgress: Int?) {
-        progressBar.progress = progress
-        if (secondaryProgress != null) {
-            progressBar.secondaryProgress = secondaryProgress
-        }
-    }
-
-    fun fillProgressBar() {
-        progressBar.progress = 100
-        progressBar.secondaryProgress = 100
-    }
-
-    fun resetProgressBar() {
-        progressBar.progress = 0
-        progressBar.secondaryProgress = 0
     }
 
     companion object {

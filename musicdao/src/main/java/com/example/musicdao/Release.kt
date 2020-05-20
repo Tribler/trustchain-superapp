@@ -1,7 +1,6 @@
 package com.example.musicdao
 
 import android.content.Context
-import android.net.Uri
 import android.text.Html
 import android.widget.*
 import com.frostwire.jlibtorrent.AlertListener
@@ -125,11 +124,8 @@ class Release(
             }
             AlertType.BLOCK_FINISHED -> {
                 val handle = (alert as BlockFinishedAlert).handle()
+                updateFileProgress(handle.fileProgress())
                 // Set the currently selected file (if any) to the highest priority
-                handle.fileProgress().forEachIndexed { index, fileProgress ->
-                    tracks[index]?.setDownloadProgress(fileProgress,
-                        metadata?.files()?.fileSize(index))
-                }
                 if (currentFileIndex != -1) {
                     if (handle.filePriority(currentFileIndex) != Priority.SEVEN) {
                         handle.filePriority(currentFileIndex, Priority.SEVEN)
@@ -148,11 +144,9 @@ class Release(
                     .show()
             }
             AlertType.FILE_COMPLETED -> {
-                alert as FileCompletedAlert
+                val handle = (alert as FileCompletedAlert).handle()
                 // The file completed is the one we were focusing on; let's play it
-                musicService.runOnUiThread {
-                    musicService.fillProgressBar()
-                }
+                updateFileProgress(handle.fileProgress())
                 if (alert.index() == currentFileIndex) {
                     val filePath = alert.handle().torrentFile().files().filePath(
                         currentFileIndex,
@@ -166,10 +160,20 @@ class Release(
         }
     }
 
+    /**
+     * For each track in the list, try to update its progress bar UI state which corresponds to the
+     * percentage of downloaded pieces from that track
+     */
+    private fun updateFileProgress(fileProgressArray: LongArray) {
+        fileProgressArray.forEachIndexed { index, fileProgress ->
+            tracks[index]?.setDownloadProgress(fileProgress,
+                metadata?.files()?.fileSize(index))
+        }
+    }
+
     @Synchronized
     private fun startPlaying(file: File) {
         musicService.runOnUiThread {
-            musicService.fillProgressBar()
             musicService.bufferInfo.text =
                 "Selected: ${file.nameWithoutExtension}"
         }
