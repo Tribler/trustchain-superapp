@@ -146,6 +146,9 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
         this.playButton.callOnClick()
     }
 
+    /**
+     * For now simply reset the state of the media player when we reach the end of a track
+     */
     override fun onCompletion(mp: MediaPlayer?) {
         prepareNextTrack()
     }

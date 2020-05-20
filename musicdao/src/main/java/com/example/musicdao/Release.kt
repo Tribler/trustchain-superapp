@@ -144,10 +144,10 @@ class Release(
                     .show()
             }
             AlertType.FILE_COMPLETED -> {
-                val handle = (alert as FileCompletedAlert).handle()
-                // The file completed is the one we were focusing on; let's play it
-                updateFileProgress(handle.fileProgress())
+                alert as FileCompletedAlert
+                tracks[alert.index()]?.setCompleted()
                 if (alert.index() == currentFileIndex) {
+                    // The file completed is the one we were focusing on; let's play it
                     val filePath = alert.handle().torrentFile().files().filePath(
                         currentFileIndex,
                         context.cacheDir.absolutePath

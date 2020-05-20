@@ -53,29 +53,14 @@ class Track(
         }
     }
 
-    /**
-     * Load the song into the AudiPlayer to prepare it for playback
-     */
-    fun selectToPlay() {
-//        AudioPlayer.getInstance(context, musicService).prepareNextTrack()
-//        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, searching for peers"
-    }
-
-    /**
-     * Update the progressBar once a torrent piece is downloaded.
-     * BufferProgress is from 0-100 and is 100 when the initial pieces for streaming are downloaded
-     * (see interestedPieces in Android Streaming library).
-     * status.progress is from 0-100 and is the overall file progress.
-     */
-    fun handleDownloadProgress() {
-//        musicService.progressBar.progress = status.progress.toInt()
-//        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${status.bufferProgress}%"
-    }
-
     fun setDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
         val size = fullSize ?: Long.MAX_VALUE
         val progress: Float = (fileProgress / size) * 100.0f
-        progressBar.progress = progress.toInt()
+        progressBar.secondaryProgress = progress.toInt()
         return progress.toInt()
+    }
+
+    fun setCompleted() {
+        progressBar.progress = 100
     }
 }
