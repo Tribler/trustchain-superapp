@@ -127,8 +127,8 @@ class Release(
                 updateFileProgress(handle.fileProgress())
                 // Set the currently selected file (if any) to the highest priority
                 if (currentFileIndex != -1) {
-                    if (handle.filePriority(currentFileIndex) != Priority.SEVEN) {
-                        handle.filePriority(currentFileIndex, Priority.SEVEN)
+                    if (handle.filePriority(currentFileIndex) != Priority.SIX) {
+                        handle.filePriority(currentFileIndex, Priority.SIX)
                     }
                 }
             }
