@@ -2,9 +2,8 @@ package com.example.musicdao
 
 import android.content.Context
 import android.widget.*
-import com.github.se_bastiaan.torrentstream.StreamStatus
-import com.github.se_bastiaan.torrentstream.Torrent
 import kotlinx.android.synthetic.main.music_app_main.*
+
 
 class Track(
     context: Context,
@@ -17,6 +16,11 @@ class Track(
     private val nameView: TextView = TextView(context)
     private val indexView: TextView = TextView(context)
     private val playButton: ImageButton = ImageButton(context)
+    private val progressBar: ProgressBar = ProgressBar(
+        context,
+        null,
+        android.R.attr.progressBarStyleHorizontal
+    )
 
     init {
         // Initialize all UI elements
@@ -39,6 +43,10 @@ class Track(
         nameView.layoutParams = rowParams
         nameView.text = name
         this.addView(nameView)
+        progressBar.layoutParams = rowParams
+        progressBar.max = 100
+        progressBar.progress = 0
+        this.addView(progressBar)
 
         playButton.setOnClickListener {
             release.selectTrackAndDownload(index)
@@ -48,9 +56,9 @@ class Track(
     /**
      * Load the song into the AudiPlayer to prepare it for playback
      */
-    fun selectToPlay(torrent: Torrent) {
-        AudioPlayer.getInstance(context, musicService).prepareNextTrack()
-        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, searching for peers"
+    fun selectToPlay() {
+//        AudioPlayer.getInstance(context, musicService).prepareNextTrack()
+//        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, searching for peers"
     }
 
     /**
@@ -59,8 +67,15 @@ class Track(
      * (see interestedPieces in Android Streaming library).
      * status.progress is from 0-100 and is the overall file progress.
      */
-    fun handleDownloadProgress(torrent: Torrent, status: StreamStatus) {
-        musicService.progressBar.progress = status.progress.toInt()
-        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${status.bufferProgress}%"
+    fun handleDownloadProgress() {
+//        musicService.progressBar.progress = status.progress.toInt()
+//        musicService.bufferInfo.text = "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: ${status.bufferProgress}%"
+    }
+
+    fun setDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
+        val size = fullSize ?: Long.MAX_VALUE
+        val progress: Float = (fileProgress / size) * 100.0f
+        progressBar.progress = progress.toInt()
+        return progress.toInt()
     }
 }

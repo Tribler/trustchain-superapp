@@ -3,16 +3,15 @@ package com.example.musicdao
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
-import com.frostwire.jlibtorrent.SessionManager
-import com.frostwire.jlibtorrent.SessionParams
-import com.frostwire.jlibtorrent.SettingsPack
-import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.*
+import com.frostwire.jlibtorrent.alerts.*
 import com.frostwire.jlibtorrent.swig.settings_pack
 import com.turn.ttorrent.client.SharedTorrent
 import java.io.*
 import java.util.*
 
-class TrackLibrary {
+
+class TrackLibrary(private val musicService: MusicService) {
     private val torrentSessionManager = SessionManager()
     private val torrentSettingsPack = SettingsPack()
 
@@ -26,6 +25,15 @@ class TrackLibrary {
 
     fun getDhtNodes(): Long {
         return torrentSessionManager.dhtNodes()
+    }
+
+    fun downloadMagnet(release: Release, magnet: String, saveDir: File) {
+        torrentSessionManager.addListener(release)
+        torrentSessionManager.download(magnet, saveDir)
+    }
+
+    fun fetchMetadata(magnet: String): ByteArray? {
+        return torrentSessionManager.fetchMagnet(magnet, 1000)
     }
 
     fun startDHT() {

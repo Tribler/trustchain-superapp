@@ -10,8 +10,8 @@ import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicDemoCommunity
 import com.example.musicdao.ui.SubmitReleaseDialog
-import com.github.se_bastiaan.torrentstream.TorrentOptions
-import com.github.se_bastiaan.torrentstream.TorrentStream
+//import com.github.se_bastiaan.torrentstream.TorrentOptions
+//import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.IPv8Configuration
@@ -35,8 +35,8 @@ class MusicService : BaseActivity() {
     private val defaultTorrent =
         "magnet:?xt=urn:btih:9316f06e8572ed5cb6f5aa602d019cb9c1a5e40c&dn=gd1990-12-12.149736.UltraMatrix.sbd.cm.miller.flac16"
     private val trackLibrary: TrackLibrary =
-        TrackLibrary()
-    var torrentStream: TorrentStream? = null
+        TrackLibrary(this)
+//    var torrentStream: TorrentStream? = null
 
     override val navigationGraph = R.navigation.musicdao_navgraph
 
@@ -53,7 +53,7 @@ class MusicService : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         clearCache()
-        torrentStream = initTorrentStreamService()
+//        torrentStream = initTorrentStreamService()
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
 
@@ -107,19 +107,19 @@ class MusicService : BaseActivity() {
             .init()
     }
 
-    private fun initTorrentStreamService(): TorrentStream {
-//        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
-        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
-            .saveLocation(applicationContext.cacheDir)
-            .autoDownload(false)
-            // PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
-            // TODO Requires testing and tweaking to find the best number
-//            .prepareSize(prepareSize)
-            .removeFilesAfterStop(true)
-            .build()
-
-        return TorrentStream.init(torrentOptions)
-    }
+//    private fun initTorrentStreamService(): TorrentStream {
+////        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
+//        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
+//            .saveLocation(applicationContext.cacheDir)
+//            .autoDownload(false)
+//            // PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
+//            // TODO Requires testing and tweaking to find the best number
+////            .prepareSize(prepareSize)
+//            .removeFilesAfterStop(true)
+//            .build()
+//
+//        return TorrentStream.init(torrentOptions)
+//    }
 
     /**
      * Clear cache on every run (for testing, and audio files may be large 15MB+). May be removed
@@ -141,7 +141,7 @@ class MusicService : BaseActivity() {
         val thread: Thread = object : Thread() {
             override fun run() {
                 try {
-                    while (!this.isInterrupted && torrentStream != null) {
+                    while (!this.isInterrupted) {
                         sleep(1000)
                         runOnUiThread {
                             val text =
@@ -247,6 +247,7 @@ class MusicService : BaseActivity() {
                         Release(
                             applicationContext,
                             magnet,
+                            trackLibrary,
                             musicService,
                             block.transaction
                         ), 0
@@ -263,6 +264,13 @@ class MusicService : BaseActivity() {
      */
     private fun createDefaultBlock() {
         publishTrack(defaultTorrent)
+    }
+
+    fun setProgressBarProgress(progress: Int, secondaryProgress: Int?) {
+        progressBar.progress = progress
+        if (secondaryProgress != null) {
+            progressBar.secondaryProgress = secondaryProgress
+        }
     }
 
     fun fillProgressBar() {

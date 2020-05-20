@@ -65,7 +65,5 @@ dependencies {
     implementation files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
     implementation files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
     implementation files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
-    implementation('com.github.TorrentStream:TorrentStream-Android:2.5.0') {
-        exclude group: 'com.frostwire'
-    }
+
 }
