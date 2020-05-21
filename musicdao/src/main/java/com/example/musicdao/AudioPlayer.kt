@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import kotlinx.android.synthetic.main.music_app_main.*
 import java.io.File
+import java.io.FileInputStream
 
 lateinit var instance: AudioPlayer
 
@@ -91,6 +92,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     }
 
     fun setAudioResource(file: File) {
+        val fis = FileInputStream(file)
         prepareNextTrack()
         mediaPlayer.apply {
             setOnPreparedListener(this@AudioPlayer)
@@ -100,7 +102,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build()
             )
-            setDataSource(context, file.toUri())
+            setDataSource(fis.fd)
             prepareAsync()
         }
     }
