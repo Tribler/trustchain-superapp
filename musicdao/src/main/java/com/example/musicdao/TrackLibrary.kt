@@ -17,7 +17,7 @@ class TrackLibrary(private val musicService: MusicService) {
 
     private fun toByteRate(rate: Long): String {
         if (rate > 1024) return "${(rate / 1024)}Kb"
-        if (rate > 1024 * 1024) return "${(rate / (1024 * 1024))}Mb"
+        if (rate > (1024 * 1024)) return "${(rate / (1024 * 1024))}Mb"
         return "${rate}B"
     }
 
