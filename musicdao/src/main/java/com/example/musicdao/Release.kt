@@ -97,6 +97,7 @@ class Release(
         currentFileIndex = index
         val fileName =
             this.metadata?.files()?.fileName(index) ?: throw Error("Unknown file being played")
+
         AudioPlayer.getInstance(context, musicService).prepareNextTrack()
         musicService.runOnUiThread {
             musicService.bufferInfo.text = "Selected: ${fileName}, searching for peers"
@@ -131,9 +132,6 @@ class Release(
                         handle.filePriority(currentFileIndex, Priority.SIX)
                     }
                 }
-            }
-            AlertType.PIECE_FINISHED -> {
-
             }
             AlertType.METADATA_RECEIVED -> {
                 val handle = (alert as MetadataReceivedAlert).handle()

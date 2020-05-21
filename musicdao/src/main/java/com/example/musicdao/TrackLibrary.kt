@@ -15,12 +15,18 @@ class TrackLibrary(private val musicService: MusicService) {
     private val torrentSessionManager = SessionManager()
     private val torrentSettingsPack = SettingsPack()
 
-    fun getUploadRate(): Long {
-        return torrentSessionManager.uploadRate()
+    private fun toByteRate(rate: Long): String {
+        if (rate > 1024) return "${(rate / 1024)}Kb"
+        if (rate > 1024 * 1024) return "${(rate / (1024 * 1024))}Mb"
+        return "${rate}B"
     }
 
-    fun getDownloadRate(): Long {
-        return torrentSessionManager.downloadRate()
+    fun getUploadRate(): String {
+        return toByteRate(torrentSessionManager.uploadRate())
+    }
+
+    fun getDownloadRate(): String {
+        return toByteRate(torrentSessionManager.downloadRate())
     }
 
     fun getDhtNodes(): Long {

@@ -41,6 +41,7 @@ class Track(
         indexView.text = index.toString()
         this.addView(indexView)
         nameView.layoutParams = rowParams
+        nameView.maxWidth = 300
         nameView.text = name
         this.addView(nameView)
         progressBar.layoutParams = rowParams

@@ -31,7 +31,7 @@ const val PREPARE_SIZE_KB: Long = 10 * 512L
 class MusicService : BaseActivity() {
     private var currentMagnetLoading: String? = null
     private val defaultTorrent =
-        "magnet:?xt=urn:btih:9316f06e8572ed5cb6f5aa602d019cb9c1a5e40c&dn=gd1990-12-12.149736.UltraMatrix.sbd.cm.miller.flac16"
+        "magnet:?xt=urn:btih:1C44EB4A1EC00D6C35D89F43BCA6F8FD115A4197&dn=VA%20-%20Top%20100%20Running%20Songs%20(2019)%20Mp3%20(320kbps)%20%5BHunter%5D%20&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce"
     private val trackLibrary: TrackLibrary =
         TrackLibrary(this)
 //    var torrentStream: TorrentStream? = null
@@ -105,20 +105,6 @@ class MusicService : BaseActivity() {
             .init()
     }
 
-//    private fun initTorrentStreamService(): TorrentStream {
-////        val prepareSize: Long = PREPARE_SIZE_KB * 1024L
-//        val torrentOptions: TorrentOptions = TorrentOptions.Builder()
-//            .saveLocation(applicationContext.cacheDir)
-//            .autoDownload(false)
-//            // PrepareSize: Starts playing the song after PREPARE_SIZE_MB megabytes are buffered.
-//            // TODO Requires testing and tweaking to find the best number
-////            .prepareSize(prepareSize)
-//            .removeFilesAfterStop(true)
-//            .build()
-//
-//        return TorrentStream.init(torrentOptions)
-//    }
-
     /**
      * Clear cache on every run (for testing, and audio files may be large 15MB+). May be removed
      * in the future
@@ -143,7 +129,7 @@ class MusicService : BaseActivity() {
                         sleep(1000)
                         runOnUiThread {
                             val text =
-                                "Torrent client info: UP: ${trackLibrary.getUploadRate()}KB DOWN: ${trackLibrary.getDownloadRate()}KB DHT NODES: ${trackLibrary.getDhtNodes()}"
+                                "Torrent client info: UP: ${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT NODES: ${trackLibrary.getDhtNodes()}"
                             torrentClientInfo.text = text
                         }
                     }
