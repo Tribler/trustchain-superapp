@@ -57,7 +57,7 @@ class Track(
     fun setDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
         val size = fullSize ?: Long.MAX_VALUE
         val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
-        progressBar.secondaryProgress = progress.toInt()
+        progressBar.progress = progress.toInt()
         return progress.toInt()
     }
 

@@ -31,7 +31,7 @@ const val PREPARE_SIZE_KB: Long = 10 * 512L
 class MusicService : BaseActivity() {
     private var currentMagnetLoading: String? = null
     private val defaultTorrent =
-        "magnet:?xt=urn:btih:1C44EB4A1EC00D6C35D89F43BCA6F8FD115A4197&dn=VA%20-%20Top%20100%20Running%20Songs%20(2019)%20Mp3%20(320kbps)%20%5BHunter%5D%20&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce"
+        "magnet:?xt=urn:btih:2803173609ad794d2789da6a6852fc1dbda7b7bf&dn=tru1992-07-23"
     private val trackLibrary: TrackLibrary =
         TrackLibrary(this)
 //    var torrentStream: TorrentStream? = null
