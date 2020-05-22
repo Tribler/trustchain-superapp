@@ -79,7 +79,7 @@ public class Entity {
         double perfect_error = Double.isNaN(perfectError_maybeNan) ? 0.01 : perfectError_maybeNan;
         System.out.println("RELATIVE ERROR: " + perfect_error / LSQRS(x,y,average.X(),average.Y()));
 
-        double relative_error = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / Double.max(0.001,LSQRS(x,y,average.X(),average.Y()));
+        double relative_error = LSQRS(x,y,new LinearRegression(x,y).slope(),new LinearRegression(x,y).intercept()) / Math.max(0.001,LSQRS(x,y,average.X(),average.Y()));
     }
 
 
@@ -107,7 +107,7 @@ public class Entity {
 
 
         int it = N;
-        int div = Integer.max(1,N/10);
+        int div = Math.max(1,N/10);
 
         ArrayList<Double> xAxis = new ArrayList<>();
         ArrayList<Double> yAxis = new ArrayList<>();

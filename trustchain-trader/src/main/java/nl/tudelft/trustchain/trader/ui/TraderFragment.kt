@@ -116,7 +116,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         delay(1000)
                     }
                 } catch (e: Exception) {
-                    Log.d("LoadCurrentPayloads exception", e.toString())
+                    Log.d("LoadCurrentPayloads", e.toString())
                 }
             }
         }
@@ -124,7 +124,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
     fun askListener(payload: TradePayload) {
         Log.d(
-            "PayloadFragment::onViewCreated",
+            "PayloadFragment",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
@@ -137,7 +137,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                 val price = round(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
                 if (ai.predict(price) == 0) {
                     Log.d(
-                        "PayloadFragment::onViewCreated",
+                        "PayloadFragment",
                         "Accepted!"
                     )
                     accept(receivedPayload, 0)
@@ -153,7 +153,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
     fun bidListener(payload: TradePayload) {
         Log.d(
-            "PayloadFragment::onViewCreated",
+            "PayloadFragment",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
