@@ -37,10 +37,6 @@ class TrackLibrary(private val musicService: MusicService) {
         torrentSessionManager.download(magnet, saveDir)
     }
 
-    fun fetchMetadata(magnet: String): ByteArray? {
-        return torrentSessionManager.fetchMagnet(magnet, 1000)
-    }
-
     fun startDHT() {
         // TODO remove hardcoded udp DHT routers
         torrentSettingsPack.setString(
