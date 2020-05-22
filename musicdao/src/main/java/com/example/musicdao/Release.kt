@@ -1,11 +1,11 @@
 package com.example.musicdao
 
 import android.content.Context
-import android.text.Html
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
@@ -37,7 +37,7 @@ class Release(
         )
         val blockMetadata = TextView(context)
         blockMetadata.text =
-            Html.fromHtml("Signed block with release:<br>$transaction\n<br><b>" +
+            HtmlCompat.fromHtml("Signed block with release:<br>$transaction\n<br><b>" +
                 "${transaction["artists"]} - ${transaction["title"]}<br>" +
                 "Released at ${transaction["date"]}</b>", 0)
         blockMetadata.layoutParams = TableRow.LayoutParams(

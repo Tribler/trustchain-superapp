@@ -14,6 +14,8 @@
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
         android:typeface="monospace"
+        android:ellipsize="end"
+        android:lines="1"
         tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
     <TextView

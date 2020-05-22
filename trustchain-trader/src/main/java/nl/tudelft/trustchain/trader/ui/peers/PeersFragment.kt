@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.trader.ui.peers
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -54,9 +55,6 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 val discoveredAddresses = marketCommunity.network
                     .getWalkableAddresses(marketCommunity.serviceId)
 
-                val discoveredBluetoothAddresses = marketCommunity.network
-                    .getConnectableBluetoothAddresses()
-
                 val peerItems = peers.map {
                     PeerItem(
                         it
@@ -72,15 +70,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     )
                 }
 
-                val bluetoothAddressItems = discoveredBluetoothAddresses.map { address ->
-                    AddressItem(
-                        address,
-                        null,
-                        null
-                    )
-                }
-
-                val items = peerItems + bluetoothAddressItems + addressItems
+                val items = peerItems + addressItems
 
                 adapter.updateItems(items)
                 binding.txtCommunityName.text = marketCommunity.javaClass.simpleName
@@ -89,7 +79,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     peers.size
                 )
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
-                val textColor = resources.getColor(textColorResId, null)
+                val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 binding.txtPeerCount.setTextColor(textColor)
                 binding.imgEmpty.isVisible = items.isEmpty()
 

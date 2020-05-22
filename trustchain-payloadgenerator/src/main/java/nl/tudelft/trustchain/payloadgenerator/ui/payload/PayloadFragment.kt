@@ -40,7 +40,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         adapter.registerRenderer(PayloadItemRenderer {
 
             trustchain.createAcceptTxProposalBlock(it.primaryCurrency, it.secondaryCurrency, it.amount?.toFloat(), it.price?.toFloat(), it.type, it.publicKey)
-            Log.d("PayloadFragment::onCreate", "TX block send to: ${it.publicKey}!")
+            Log.d("PayloadFragment", "TX block send to: ${it.publicKey}!")
         })
     }
 
@@ -114,7 +114,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                     createPayloadSerializable(amount, price, type)
                 val payload = createPayload(amount, price, type)
                 marketCommunity.broadcast(payloadSerializable)
-                Log.d("TrustChainPayloadGeneratorActivity::sendAutoMessages", "message send!")
+                Log.d("PayloadFragment", "message send!")
                 (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
                 recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
                 Thread.sleep(1000)
@@ -178,7 +178,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
     private fun askListener(payload: TradePayload) {
         Log.d(
-            "PayloadFragment::onViewCreated",
+            "PayloadFragment",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
@@ -188,7 +188,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
     }
     private fun bidListener(payload: TradePayload) {
         Log.d(
-            "PayloadFragment::onViewCreated",
+            "PayloadFragment",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {

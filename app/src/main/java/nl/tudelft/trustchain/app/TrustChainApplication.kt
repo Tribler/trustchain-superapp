@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.app
 
 import android.app.Application
 import android.bluetooth.BluetoothManager
+import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
@@ -111,8 +112,8 @@ class TrustChainApplication : Application() {
         val strategies = mutableListOf(
             randomWalk, randomChurn, periodicSimilarity, nsd
         )
-        if (bluetoothManager.adapter != null) {
-            val ble = BluetoothLeDiscovery.Factory(this, bluetoothManager)
+        if (bluetoothManager.adapter != null && Build.VERSION.SDK_INT >= 24) {
+            val ble = BluetoothLeDiscovery.Factory()
             strategies += ble
         }
 
