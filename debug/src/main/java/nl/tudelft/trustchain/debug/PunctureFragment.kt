@@ -34,6 +34,12 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                updateView()
+                delay(100)
+            }
+        }
+        lifecycleScope.launchWhenCreated {
             getDemoCommunity().punctureChannel.asFlow().collect { (peer, payload) ->
                 Log.i("PunctureFragment", "Received puncture from ${peer} on port ${payload.identifier}")
                 received++
@@ -41,7 +47,6 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
                 if (firstMessageTimestamps[peer.toString()] == null) {
                     firstMessageTimestamps[peer.toString()] = Date()
                 }
-                updateView()
             }
         }
 
@@ -54,7 +59,9 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
                 lifecycleScope.launchWhenCreated {
                     firstSentMessageTimestamp = Date()
                     if (binding.sweep.isChecked) {
-                        punctureAll(ip)
+                        punctureAll(ip, false)
+                        delay(30000)
+                        punctureAll(ip, true)
                     } else {
                         punctureSingle(ip, port)
                     }
@@ -81,20 +88,14 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     }
     */
 
-    private suspend fun punctureAll(ip: String) {
-        while (true) {
-            for (i in MIN_PORT..MAX_PORT) {
-                val ipv4 = IPv4Address(ip, i)
-                getDemoCommunity().sendPuncture(ipv4, i)
-                sent++
-                updateView()
+    private suspend fun punctureAll(ip: String, slow: Boolean) = with(Dispatchers.Default) {
+        for (i in MIN_PORT..MAX_PORT) {
+            val ipv4 = IPv4Address(ip, i)
+            getDemoCommunity().sendPuncture(ipv4, i)
+            sent++
 
-                if (i % 10 == 0) {
-                    delay(40)
-                }
-                if (i % 1000 == 0) {
-                    delay(1000)
-                }
+            if (i % 1000 == 0) {
+                delay(if (slow) 30000L else 1L)
             }
         }
     }
@@ -105,7 +106,6 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             val ipv4 = IPv4Address(ip, port)
             getDemoCommunity().sendPuncture(ipv4, port)
             sent++
-            updateView()
 
             delay(1000)
         }

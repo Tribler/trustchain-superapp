@@ -117,15 +117,22 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
             val blockCount = withContext(Dispatchers.IO) {
                 getTrustChainCommunity().database.getBlockCount(null)
             }
-            binding.txtBlockCount.text = blockCount.toString()
+            if (view != null) {
+                binding.txtBlockCount.text = blockCount.toString()
+            }
         }
 
         lifecycleScope.launchWhenCreated {
             val chainLength = withContext(Dispatchers.IO) {
                 getTrustChainCommunity().getChainLength()
             }
-            binding.txtChainLength.text = chainLength.toString()
+            if (view != null) {
+                binding.txtChainLength.text = chainLength.toString()
+            }
         }
+
+        binding.txtConnectionType.text = getDemoCommunity().network.wanLog
+            .estimateConnectionType().value
 
         try {
             val pInfo: PackageInfo =

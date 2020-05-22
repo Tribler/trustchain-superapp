@@ -55,9 +55,6 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                 val discoveredAddresses = marketCommunity.network
                     .getWalkableAddresses(marketCommunity.serviceId)
 
-                val discoveredBluetoothAddresses = marketCommunity.network
-                    .getConnectableBluetoothAddresses()
-
                 val peerItems = peers.map {
                     PeerItem(
                         it
@@ -73,15 +70,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     )
                 }
 
-                val bluetoothAddressItems = discoveredBluetoothAddresses.map { address ->
-                    AddressItem(
-                        address,
-                        null,
-                        null
-                    )
-                }
-
-                val items = peerItems + bluetoothAddressItems + addressItems
+                val items = peerItems + addressItems
 
                 adapter.updateItems(items)
                 binding.txtCommunityName.text = marketCommunity.javaClass.simpleName

@@ -58,7 +58,8 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     .getWalkableAddresses(demoCommunity.serviceId)
 
                 val discoveredBluetoothAddresses = demoCommunity.network
-                    .getConnectableBluetoothAddresses()
+                    .getNewBluetoothPeerCandidates()
+                    .map { it.address }
 
                 val peerItems = peers.map {
                     PeerItem(

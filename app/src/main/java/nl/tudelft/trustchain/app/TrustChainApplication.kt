@@ -113,7 +113,7 @@ class TrustChainApplication : Application() {
             randomWalk, randomChurn, periodicSimilarity, nsd
         )
         if (bluetoothManager.adapter != null && Build.VERSION.SDK_INT >= 24) {
-            val ble = BluetoothLeDiscovery.Factory(this, bluetoothManager)
+            val ble = BluetoothLeDiscovery.Factory()
             strategies += ble
         }
 
