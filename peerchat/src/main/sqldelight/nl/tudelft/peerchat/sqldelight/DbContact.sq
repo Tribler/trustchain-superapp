@@ -1,0 +1,12 @@
+CREATE TABLE contacts (
+    name TEXT NOT NULL,
+    public_key BLOB NOT NULL,
+    PRIMARY KEY (public_key)
+);
+
+addContact:
+REPLACE INTO contacts (name, public_key)
+VALUES(?, ?);
+
+getAll:
+SELECT * FROM contacts;

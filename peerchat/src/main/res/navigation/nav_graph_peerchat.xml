@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/contactsFragment">
+
+    <fragment
+        android:id="@+id/contactsFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ContactsFragment"
+        android:label="PeerChat">
+        <action
+            android:id="@+id/action_contactsFragment_to_addRemoteFragment"
+            app:destination="@id/addRemoteFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/addRemoteFragment"
+        android:name="nl.tudelft.trustchain.peerchat.AddRemoteFragment"
+        android:label="Add Remote Contact" >
+        <action
+            android:id="@+id/action_addRemoteFragment_to_addContactFragment"
+            app:destination="@id/addContactFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/addContactFragment"
+        android:name="nl.tudelft.trustchain.peerchat.AddContactFragment"
+        android:label="Add Contact" >
+        <argument android:name="public_key" />
+    </fragment>
+</navigation>
