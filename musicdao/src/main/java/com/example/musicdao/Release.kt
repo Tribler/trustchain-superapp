@@ -1,14 +1,12 @@
 package com.example.musicdao
 
 import android.content.Context
-import android.text.Html
-import android.widget.LinearLayout
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
-import com.github.se_bastiaan.torrentstream.StreamStatus
-import com.github.se_bastiaan.torrentstream.Torrent
-import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
+import android.widget.*
+import androidx.core.text.HtmlCompat
+import com.frostwire.jlibtorrent.AlertListener
+import com.frostwire.jlibtorrent.Priority
+import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.alerts.*
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
@@ -183,46 +181,5 @@ class Release(
     override fun types(): IntArray? {
         return null
     }
-
-    /**
-     * When the track is buffered, this is called.
-     * Then set the audio resource on the audioplayer.
-     */
-//    override fun onStreamReady(torrent: Torrent) {
-//        println("Stream ready")
-//        AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
-//    }
-//
-//    /**
-//     * This is called when the metadata is fetched. Then we can render a table with all
-//     * of the songs
-//     */
-//    override fun onStreamPrepared(torrent: Torrent) {
-//        // TODO add a check here for whether this torrent is the torrent of this Release
-//        println("Stream prepared")
-//        this.removeView(fetchingMetadataRow)
-//        this.torrent = torrent
-//    }
-//
-//    override fun onStreamStopped() {
-//        println("Stream stopped")
-//    }
-//
-//    override fun onStreamStarted(torrent: Torrent) {
-//        println("Stream started: " + torrent.videoFile)
-//    }
-//
-//    /**
-//     * This is called when the torrent client downloaded a torrent piece.
-//     */
-//    override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
-//        if (currentFileIndex == -1) return
-//        val track = tracks[currentFileIndex]
-//        track.handleDownloadProgress(torrent, status)
-//    }
-//
-//    override fun onStreamError(torrent: Torrent, e: Exception) {
-//        e.printStackTrace()
-//    }
 
 }
