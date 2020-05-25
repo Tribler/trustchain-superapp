@@ -94,6 +94,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:text="Connection Type"
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+
+            <TextView
+                android:id="@+id/txtConnectionType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                app:fontFamily="monospace"
+                style="@style/TextAppearance.MaterialComponents.Body2"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Member ID"
                 style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
 

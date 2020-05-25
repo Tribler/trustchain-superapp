@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.explorer.ui.blocks
 
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_block.view.*
@@ -63,15 +64,15 @@ class BlockItemRenderer(
         when (item.status) {
             BlockItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
                 txtBlockStatus.text = context.getString(R.string.block_status, "Waiting for Signature")
-                txtBlockStatus.setBackgroundColor(context.getColor(R.color.red))
+                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.red, null))
             }
             BlockItem.BlockStatus.SELF_SIGNED -> {
                 txtBlockStatus.text = context.getString(R.string.block_status, "Self-signed")
-                txtBlockStatus.setBackgroundColor(context.getColor(R.color.green))
+                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.green, null))
             }
             BlockItem.BlockStatus.SIGNED -> {
                 txtBlockStatus.text = context.getString(R.string.block_status, "Signed")
-                txtBlockStatus.setBackgroundColor(context.getColor(R.color.green))
+                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.green, null))
             }
         }
     }

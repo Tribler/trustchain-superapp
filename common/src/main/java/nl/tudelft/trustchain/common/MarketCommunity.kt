@@ -1,3 +1,4 @@
+
 package nl.tudelft.trustchain.common
 
 import android.util.Log
@@ -47,7 +48,7 @@ class MarketCommunity : Community() {
     private fun onTradePacket(packet: Packet) {
         val payload = packet.getAuthPayload(TradePayload.Deserializer).second
         notifyListeners(payload)
-        Log.d("MarketCommunity::onTradePacket", "Received packet:{${payload.primaryCurrency}, ${payload.secondaryCurrency}, ${payload.amount}, ${payload.price}, ${payload.type}}")
+        Log.d("MarketCommunity", "Received packet:{${payload.primaryCurrency}, ${payload.secondaryCurrency}, ${payload.amount}, ${payload.price}, ${payload.type}}")
     }
 
     fun addListener(type: TradePayload.Type?, listener: (TradePayload) -> Unit) {

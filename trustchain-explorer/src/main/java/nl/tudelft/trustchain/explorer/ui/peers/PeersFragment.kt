@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.explorer.ui.peers
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -57,7 +58,8 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     .getWalkableAddresses(demoCommunity.serviceId)
 
                 val discoveredBluetoothAddresses = demoCommunity.network
-                    .getConnectableBluetoothAddresses()
+                    .getNewBluetoothPeerCandidates()
+                    .map { it.address }
 
                 val peerItems = peers.map {
                     PeerItem(
@@ -91,7 +93,7 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
                     peers.size
                 )
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
-                val textColor = resources.getColor(textColorResId, null)
+                val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 binding.txtPeerCount.setTextColor(textColor)
                 binding.imgEmpty.isVisible = items.isEmpty()
 

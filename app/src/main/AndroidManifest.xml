@@ -39,6 +39,9 @@
         <activity
             android:name="nl.tudelft.trustchain.debug.DebugActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
+	<activity
+            android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
             android:name="nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity"

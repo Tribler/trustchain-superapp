@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.app.ui.dashboard
 
 import android.content.res.ColorStateList
+import androidx.core.content.res.ResourcesCompat
 import com.mattskala.itemadapter.BindingItemRenderer
 import nl.tudelft.trustchain.app.databinding.ItemDashboardBinding
 
@@ -12,7 +13,7 @@ class DashboardItemRenderer(
 ) {
     override fun bindView(item: DashboardItem, binding: ItemDashboardBinding) {
         val context = binding.root.context
-        val color = context.getColor(item.app.color)
+        val color = ResourcesCompat.getColor(context.resources, item.app.color, null)
         binding.imgIcon.setImageResource(item.app.icon)
         binding.imgIcon.imageTintList = ColorStateList.valueOf(color)
         binding.txtAppName.text = item.app.appName

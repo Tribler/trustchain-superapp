@@ -8,6 +8,7 @@ import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
+import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
@@ -54,6 +55,12 @@ enum class AppDefinition(
         "Freedom of Computing",
         R.color.blue,
         MainActivityFOC::class.java
+    ),
+    DNA(
+        R.drawable.ic_bug_report_black_24dp,
+        "Distributed AI",
+        R.color.red,
+        DistributedActivity::class.java
     ),
     VOTING(
         R.drawable.abc_ic_voice_search_api_material,

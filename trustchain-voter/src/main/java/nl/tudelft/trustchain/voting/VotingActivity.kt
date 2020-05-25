@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.voting
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
-import android.text.Html
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.widget.EditText
@@ -11,6 +10,7 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.HtmlCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main_voting.*
@@ -209,7 +209,7 @@ class VotingActivity : AppCompatActivity() {
 
         // Show vote subject, proposer and current tally
         builder.setMessage(
-            Html.fromHtml(
+            HtmlCompat.fromHtml(
                 "<big>\"" + voteSubject + "\"</big>" +
                     "<br><br>" +
                     "<small><b>Proposed by</b>:" +
@@ -235,7 +235,7 @@ class VotingActivity : AppCompatActivity() {
                             tally.first.toString() + " in favour"
                         }
                     } + "</small></i>",
-                Html.FROM_HTML_MODE_LEGACY
+                HtmlCompat.FROM_HTML_MODE_LEGACY
             )
         )
 

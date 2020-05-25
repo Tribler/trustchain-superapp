@@ -2,11 +2,13 @@ package com.example.musicdao
 
 import android.content.Context
 import android.text.Html
-import android.widget.*
-import com.frostwire.jlibtorrent.AlertListener
-import com.frostwire.jlibtorrent.Priority
-import com.frostwire.jlibtorrent.TorrentInfo
-import com.frostwire.jlibtorrent.alerts.*
+import android.widget.LinearLayout
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
+import com.github.se_bastiaan.torrentstream.StreamStatus
+import com.github.se_bastiaan.torrentstream.Torrent
+import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
@@ -39,7 +41,7 @@ class Release(
         )
         val blockMetadata = TextView(context)
         blockMetadata.text =
-            Html.fromHtml(
+            HtmlCompat.fromHtml(
                 "Signed block with release:<br>$transaction\n<br><b>" +
                     "${transaction["artists"]} - ${transaction["title"]}<br>" +
                     "Released at ${transaction["date"]}</b>", 0
