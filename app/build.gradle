@@ -74,6 +74,10 @@ android {
     viewBinding {
         enabled = true
     }
+
+    packagingOptions {
+        exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+    }
 }
 
 repositories {

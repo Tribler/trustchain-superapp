@@ -1,27 +1,20 @@
-package nl.tudelft.trustchain.peerchat
+package nl.tudelft.trustchain.peerchat.ui.addcontact
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.fragment_add_contact.*
-import kotlinx.android.synthetic.main.fragment_add_remote.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.peerchat.R
 import nl.tudelft.trustchain.peerchat.databinding.FragmentAddContactBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 

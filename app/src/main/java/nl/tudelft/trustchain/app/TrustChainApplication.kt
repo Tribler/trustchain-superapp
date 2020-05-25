@@ -32,7 +32,8 @@ import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.peerchat.PeerChatCommunity
+import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
+import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 
 class TrustChainApplication : Application() {
@@ -138,8 +139,9 @@ class TrustChainApplication : Application() {
 
     private fun createPeerChatCommunity(): OverlayConfiguration<PeerChatCommunity> {
         val randomWalk = RandomWalk.Factory()
+        val store = PeerChatStore.getInstance(this)
         return OverlayConfiguration(
-            Overlay.Factory(PeerChatCommunity::class.java),
+            PeerChatCommunity.Factory(store),
             listOf(randomWalk)
         )
     }

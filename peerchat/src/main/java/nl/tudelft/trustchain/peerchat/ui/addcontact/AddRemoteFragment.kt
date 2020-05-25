@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.peerchat
+package nl.tudelft.trustchain.peerchat.ui.addcontact
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -12,8 +12,8 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.peerchat.R
 import nl.tudelft.trustchain.peerchat.databinding.FragmentAddRemoteBinding
 
 class AddRemoteFragment : BaseFragment(R.layout.fragment_add_remote) {

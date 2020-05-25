@@ -9,17 +9,51 @@
     android:padding="16dp"
     android:background="?selectableItemBackground">
 
-    <TextView
-        android:id="@+id/txtName"
+    <nl.tudelft.trustchain.peerchat.ui.contacts.AvatarView
+        android:id="@+id/avatar"
+        android:layout_width="@dimen/avatar_size"
+        android:layout_height="@dimen/avatar_size"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/nameContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/text_primary"
-        android:textStyle="bold"
-        android:ellipsize="end"
-        android:lines="1"
+        android:layout_marginStart="16dp"
+        android:orientation="horizontal"
+        android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="Matt" />
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintBottom_toTopOf="@id/txtPeerId"
+        app:layout_constraintVertical_chainStyle="packed">
+
+        <TextView
+            android:id="@+id/txtName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:lines="1"
+            android:paddingEnd="8dp"
+            tools:text="Matt" />
+
+        <ImageView
+            android:id="@+id/imgWifi"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_wifi_black_24dp"
+            android:tint="@color/green" />
+
+        <ImageView
+            android:id="@+id/imgBluetooth"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_bluetooth_black_24dp"
+            android:tint="@color/green" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/txtDate"
@@ -27,31 +61,36 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textColor="#AAAAAA"
-        app:layout_constraintTop_toTopOf="@id/txtName"
+        app:layout_constraintTop_toTopOf="@id/nameContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/txtName"
+        app:layout_constraintBottom_toBottomOf="@id/nameContainer"
         tools:text="10:00" />
 
     <TextView
         android:id="@+id/txtPeerId"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
         android:typeface="monospace"
         android:ellipsize="end"
         android:lines="1"
-        app:layout_constraintTop_toBottomOf="@id/txtName"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/nameContainer"
+        app:layout_constraintStart_toStartOf="@id/nameContainer"
+        app:layout_constraintBottom_toTopOf="@id/txtMessage"
         tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
     <TextView
         android:id="@+id/txtMessage"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textColor="@color/text_secondary"
+        android:ellipsize="end"
+        android:lines="1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/txtPeerId"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@id/nameContainer"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:text="Hello World!" />
 </androidx.constraintlayout.widget.ConstraintLayout>

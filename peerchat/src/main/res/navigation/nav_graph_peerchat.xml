@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/contactsFragment"
-        android:name="nl.tudelft.trustchain.peerchat.ContactsFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.contacts.ContactsFragment"
         android:label="PeerChat">
         <action
             android:id="@+id/action_contactsFragment_to_addRemoteFragment"
@@ -15,10 +15,17 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_contactsFragment_to_conversationFragment"
+            app:destination="@id/conversationFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/addRemoteFragment"
-        android:name="nl.tudelft.trustchain.peerchat.AddRemoteFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.addcontact.AddRemoteFragment"
         android:label="Add Remote Contact" >
         <action
             android:id="@+id/action_addRemoteFragment_to_addContactFragment"
@@ -30,8 +37,15 @@
     </fragment>
     <fragment
         android:id="@+id/addContactFragment"
-        android:name="nl.tudelft.trustchain.peerchat.AddContactFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.addcontact.AddContactFragment"
         android:label="Add Contact" >
+        <argument android:name="public_key" />
+    </fragment>
+    <fragment
+        android:id="@+id/conversationFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment"
+        android:label="{name}">
+        <argument android:name="name" />
         <argument android:name="public_key" />
     </fragment>
 </navigation>
