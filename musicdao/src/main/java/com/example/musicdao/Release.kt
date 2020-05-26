@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
 
-
 /**
  * A release is an audio album, EP, single, etc.
  */
@@ -28,7 +27,6 @@ class Release(
     private var currentFile: File? = null
     private var fetchingMetadataRow = TableRow(context)
     private var metadataRow = TableRow(context)
-//    private lateinit var torrent: Torrent
 
     init {
         // Generate the UI
@@ -164,8 +162,10 @@ class Release(
      */
     private fun updateFileProgress(fileProgressArray: LongArray) {
         fileProgressArray.forEachIndexed { index, fileProgress ->
-            tracks[index]?.setDownloadProgress(fileProgress,
-                metadata?.files()?.fileSize(index))
+            tracks[index]?.setDownloadProgress(
+                fileProgress,
+                metadata?.files()?.fileSize(index)
+            )
         }
     }
 

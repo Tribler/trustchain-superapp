@@ -8,20 +8,12 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
-import com.example.musicdao.ipv8.MusicDemoCommunity
 import com.example.musicdao.ui.SubmitReleaseDialog
-import com.squareup.sqldelight.android.AndroidSqliteDriver
 import kotlinx.android.synthetic.main.music_app_main.*
-import nl.tudelft.ipv8.IPv8Configuration
-import nl.tudelft.ipv8.Overlay
-import nl.tudelft.ipv8.OverlayConfiguration
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.*
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
-import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
@@ -51,13 +43,9 @@ class MusicService : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         clearCache()
-//        torrentStream = initTorrentStreamService()
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
 
-        initTrustChain()
-
-        Toast.makeText(applicationContext, "Initialized IPv8", Toast.LENGTH_SHORT).show()
         mid.text = ("My trustchain member ID: " + IPv8Android.getInstance().myPeer.mid)
 
         registerBlockListener()
@@ -80,29 +68,6 @@ class MusicService : BaseActivity() {
             trackLibrary.startDHT()
         }).start()
         iterateClientConnectivity()
-    }
-
-    private fun initTrustChain() {
-        val community = OverlayConfiguration(
-            Overlay.Factory(MusicDemoCommunity::class.java),
-            listOf(RandomWalk.Factory())
-        )
-
-        val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
-        val store = TrustChainSQLiteStore(Database(driver))
-        val randomWalk = RandomWalk.Factory()
-        val trustChainCommunity = OverlayConfiguration(
-            TrustChainCommunity.Factory(settings, store),
-            listOf(randomWalk)
-        )
-
-        val config = IPv8Configuration(overlays = listOf(community, trustChainCommunity))
-
-        IPv8Android.Factory(application)
-            .setConfiguration(config)
-            .setPrivateKey(getPrivateKey())
-            .init()
     }
 
     /**
