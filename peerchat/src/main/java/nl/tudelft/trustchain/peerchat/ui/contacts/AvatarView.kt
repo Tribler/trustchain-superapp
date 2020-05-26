@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.peerchat.ui.contacts
 
 import android.content.Context
-import android.graphics.Color
 import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -9,9 +8,12 @@ import android.widget.FrameLayout
 import kotlinx.android.synthetic.main.view_avatar.view.*
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
-import kotlin.math.abs
 
-class AvatarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) :
+class AvatarView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) :
     FrameLayout(context, attrs, defStyleAttr) {
 
     init {

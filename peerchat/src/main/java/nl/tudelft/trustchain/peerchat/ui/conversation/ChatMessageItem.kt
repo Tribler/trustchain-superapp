@@ -8,7 +8,7 @@ data class ChatMessageItem(
     val shouldShowAvatar: Boolean,
     val shouldShowDate: Boolean,
     val participantName: String
-): Item() {
+) : Item() {
     override fun areItemsTheSame(other: Item): Boolean {
         return other is ChatMessageItem && other.chatMessage.id == chatMessage.id
     }

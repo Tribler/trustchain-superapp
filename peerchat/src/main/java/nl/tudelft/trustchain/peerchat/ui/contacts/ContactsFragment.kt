@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.peerchat.ui.contacts
 
 import android.bluetooth.BluetoothManager
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
@@ -38,7 +37,6 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.entity.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
-
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {

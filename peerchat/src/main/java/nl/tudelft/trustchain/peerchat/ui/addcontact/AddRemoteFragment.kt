@@ -23,7 +23,7 @@ class AddRemoteFragment : BaseFragment(R.layout.fragment_add_remote) {
         super.onViewCreated(view, savedInstanceState)
 
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
-        binding.txtMyPublicKey.text  = myPublicKey
+        binding.txtMyPublicKey.text = myPublicKey
 
         btnCopy.setOnClickListener {
             val clipboard =

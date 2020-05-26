@@ -1,14 +1,9 @@
 package nl.tudelft.trustchain.peerchat.ui.addcontact
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -38,7 +33,7 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
         super.onViewCreated(view, savedInstanceState)
 
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
-        binding.txtMyPublicKey.text  = myPublicKey
+        binding.txtMyPublicKey.text = myPublicKey
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
                 qrCodeUtils.createQR(myPublicKey)

@@ -14,7 +14,6 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import java.sql.SQLException
 import java.util.*
 
 private val logger = KotlinLogging.logger {}

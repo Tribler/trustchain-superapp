@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.peerchat.ui.conversation
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
@@ -11,7 +10,6 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
-import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
