@@ -15,4 +15,3 @@ data class ContactItem(
         return other is ContactItem && contact.mid == other.contact.mid
     }
 }
-

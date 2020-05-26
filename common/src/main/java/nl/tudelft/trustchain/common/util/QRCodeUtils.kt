@@ -1,19 +1,39 @@
 package nl.tudelft.trustchain.common.util
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
+import androidx.navigation.findNavController
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
+import com.google.zxing.integration.android.IntentIntegrator
+import com.google.zxing.integration.android.IntentResult
 import nl.tudelft.trustchain.common.R
 
 /**
  * Helper class for creating
  */
 class QRCodeUtils(private val context: Context) {
+
+    /**
+     * Start the QR scanner, which if successful, calls onActivityResult() on the fragment
+     */
+    fun startQRScanner(fragment: Fragment) {
+        run {
+            FragmentIntentIntegrator(fragment).initiateScan()
+        }
+    }
+
+    fun parseActivityResult(requestCode: Int, resultCode: Int, data: Intent?): String? {
+        return IntentIntegrator.parseActivityResult(requestCode, resultCode, data)?.contents
+    }
 
     /**
      * from: https://demonuts.com/kotlin-generate-qr-code/

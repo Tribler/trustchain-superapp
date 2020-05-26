@@ -1,10 +1,21 @@
 package nl.tudelft.trustchain.peerchat.ui.contacts
 
+import android.bluetooth.BluetoothManager
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat.getColor
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,11 +25,8 @@ import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -64,10 +72,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
             findNavController().navigate(R.id.action_contactsFragment_to_conversationFragment, args)
         })
 
-        lifecycleScope.launch {
+        lifecycleScope.launchWhenResumed {
             while (isActive) {
                 // Refresh peer status periodically
                 peers.value = getPeerChatCommunity().getPeers()
+                updateConnectivityStatus()
                 delay(1000L)
             }
         }
@@ -81,7 +90,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
 
         binding.btnAddNearby.setOnClickListener {
-            // TODO
+            findNavController().navigate(R.id.action_contactsFragment_to_addNearbyFragment)
             fab.collapse()
         }
 
@@ -106,6 +115,45 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
                 peer != null && !peer.address.isEmpty(),
                 peer?.bluetoothAddress != null
             )
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getConnectivityStatus(): Pair<String, Boolean> {
+        val cm = getSystemService(requireContext(), ConnectivityManager::class.java)
+        val activeNetwork = cm!!.activeNetworkInfo
+        return if (activeNetwork != null) { // connected to the internet
+            val type = if (activeNetwork.subtypeName.isNotBlank())
+                activeNetwork.subtypeName else activeNetwork.typeName
+            Pair(type, activeNetwork.isConnected)
+        } else {
+            Pair("Internet", false)
+        }
+    }
+
+    private fun getBluetoothStatus(): Boolean {
+        val bluetoothManager = requireContext().getSystemService<BluetoothManager>()
+            ?: throw IllegalStateException("BluetoothManager not found")
+        val bluetoothAdapter = bluetoothManager.adapter
+        return bluetoothAdapter.isEnabled
+    }
+
+    private fun updateConnectivityStatus() {
+        val (networkType, isConnected) = getConnectivityStatus()
+        binding.btnInternet.text = when (networkType) {
+            "WIFI" -> "Wi-Fi"
+            else -> networkType
+        }
+        val green = getColor(requireContext(), R.color.green)
+        val red = getColor(requireContext(), R.color.red)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val color = if (isConnected) green else red
+            binding.btnInternet.compoundDrawableTintList = ColorStateList.valueOf(color)
+        }
+        val bluetoothStatus = getBluetoothStatus()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val color = if (bluetoothStatus) green else red
+            binding.btnBluetooth.compoundDrawableTintList = ColorStateList.valueOf(color)
         }
     }
 }

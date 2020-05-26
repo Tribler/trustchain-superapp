@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -37,9 +38,15 @@ class AddContactFragment : BaseFragment(R.layout.fragment_add_contact) {
             val name = edtName.text.toString()
             if (name.isNotEmpty()) {
                 val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-                PeerChatStore.getInstance(requireContext())
-                    .addContact(publicKey, name)
-                findNavController().popBackStack(R.id.contactsFragment, false)
+
+                val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
+                if (publicKeyBin != myPublicKey) {
+                    PeerChatStore.getInstance(requireContext())
+                        .addContact(publicKey, name)
+                    findNavController().popBackStack(R.id.contactsFragment, false)
+                } else {
+                    Toast.makeText(requireContext(), "You cannot add yourself", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(requireContext(), "Name is empty", Toast.LENGTH_SHORT).show()
             }

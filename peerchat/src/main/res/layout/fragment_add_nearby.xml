@@ -20,17 +20,25 @@
             android:clipToPadding="false">
 
             <TextView
+                android:id="@+id/txtIntro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="To add a person who is nearby, you have to scan each other’s public key encoded as a QR code." />
+
+            <TextView
                 android:id="@+id/txtTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                android:text="Your Contact's Key" />
+                app:layout_constraintTop_toBottomOf="@id/txtIntro"
+                android:text="Your Key" />
 
             <TextView
-                android:id="@+id/txtPublicKey"
+                android:id="@+id/txtMyPublicKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
@@ -42,46 +50,59 @@
                 android:id="@+id/qr"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                app:layout_constraintTop_toBottomOf="@id/txtPublicKey"
+                app:layout_constraintTop_toBottomOf="@id/txtMyPublicKey"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
-                android:id="@+id/txtDescription"
+                android:id="@+id/txtContactTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Assign a name to this public key:"
-                app:layout_constraintTop_toBottomOf="@id/qr" />
-
-            <EditText
-                android:id="@+id/edtName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_field"
-                android:paddingStart="14dp"
-                android:paddingEnd="48dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
-                android:ellipsize="end"
-                android:gravity="center_vertical"
-                android:textSize="14sp"
+                android:gravity="center_horizontal"
                 android:textColor="@color/text_primary"
-                android:textColorHint="@color/text_tertiary"
-                android:inputType="textPersonName|textCapWords"
-                app:layout_constraintTop_toBottomOf="@id/txtDescription"
-                android:hint="Enter a name..."
-                tools:text="Matt" />
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/qr"
+                android:text="Your Contact's Key" />
+
+            <TextView
+                android:id="@+id/txtContactPublicKey"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                app:layout_constraintTop_toBottomOf="@id/txtContactTitle"
+                android:fontFamily="monospace"
+                android:text="" />
+
+            <ImageView
+                android:id="@+id/contactQrPlaceholder"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="16dp"
+                android:src="@drawable/ic_camera_alt_black_24dp"
+                android:scaleType="center"
+                android:background="@color/light_gray"
+                app:layout_constraintTop_toTopOf="@id/contactQr"
+                app:layout_constraintBottom_toBottomOf="@id/contactQr"
+                app:layout_constraintStart_toStartOf="@id/contactQr"
+                app:layout_constraintEnd_toEndOf="@id/contactQr" />
+
+            <ImageView
+                android:id="@+id/contactQr"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                app:layout_constraintTop_toBottomOf="@id/txtContactPublicKey"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSave"
+        android:id="@+id/btnContinue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Save"
+        android:text="Continue"
         style="@style/Button"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

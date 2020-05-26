@@ -22,6 +22,13 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_contactsFragment_to_addNearbyFragment"
+            app:destination="@id/addNearbyFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/addRemoteFragment"
@@ -47,5 +54,17 @@
         android:label="{name}">
         <argument android:name="name" />
         <argument android:name="public_key" />
+    </fragment>
+    <fragment
+        android:id="@+id/addNearbyFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.addcontact.AddNearbyFragment"
+        android:label="Add Nearby Contact">
+        <action
+            android:id="@+id/action_addNearbyFragment_to_addContactFragment"
+            app:destination="@id/addContactFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
 </navigation>
