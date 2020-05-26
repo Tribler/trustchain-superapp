@@ -10,3 +10,6 @@ VALUES(?, ?);
 
 getAll:
 SELECT * FROM contacts;
+
+deleteContact:
+DELETE FROM contacts WHERE public_key = ?;

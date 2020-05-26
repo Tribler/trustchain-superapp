@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.getSystemService
@@ -63,12 +64,14 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(ContactItemRenderer {
+        adapter.registerRenderer(ContactItemRenderer({
             val args = Bundle()
             args.putString(ConversationFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
             args.putString(ConversationFragment.ARG_NAME, it.name)
             findNavController().navigate(R.id.action_contactsFragment_to_conversationFragment, args)
-        })
+        }, {
+            showOptions(it)
+        }))
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
@@ -153,5 +156,20 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
             val color = if (bluetoothStatus) green else red
             binding.btnBluetooth.compoundDrawableTintList = ColorStateList.valueOf(color)
         }
+    }
+
+    private fun showOptions(contact: Contact) {
+        val items = arrayOf("Delete")
+        AlertDialog.Builder(requireContext())
+            .setItems(items) { _, which ->
+                when (which) {
+                    0 -> deleteContact(contact)
+                }
+            }
+            .show()
+    }
+
+    private fun deleteContact(contact: Contact) {
+        store.deleteContact(contact)
     }
 }

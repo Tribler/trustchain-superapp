@@ -103,6 +103,10 @@ class PeerChatStore(context: Context) {
             .asFlow().mapToList()
     }
 
+    fun deleteContact(contact: Contact) {
+        database.dbContactQueries.deleteContact(contact.publicKey.keyToBin())
+    }
+
     companion object {
         private lateinit var instance: PeerChatStore
         fun getInstance(context: Context): PeerChatStore {

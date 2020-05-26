@@ -10,7 +10,8 @@ import nl.tudelft.trustchain.peerchat.R
 import java.text.SimpleDateFormat
 
 class ContactItemRenderer(
-    private val onItemClick: (Contact) -> Unit
+    private val onItemClick: (Contact) -> Unit,
+    private val onItemLongClick: (Contact) -> Unit
 ) : ItemLayoutRenderer<ContactItem, View>(
     ContactItem::class.java) {
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
@@ -32,6 +33,10 @@ class ContactItemRenderer(
         imgWifi.isVisible = item.isOnline
         imgBluetooth.isVisible = item.isBluetooth
         avatar.setUser(item.contact.mid, item.contact.name)
+        setOnLongClickListener {
+            onItemLongClick(item.contact)
+            true
+        }
     }
 
     override fun getLayoutResourceId(): Int {
