@@ -3,6 +3,7 @@ package com.example.musicdao
 import android.content.Context
 import android.widget.*
 import androidx.core.text.HtmlCompat
+import com.example.musicdao.util.TorrentUtil
 import com.frostwire.jlibtorrent.AlertListener
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -121,13 +122,32 @@ class Release(
                 (alert as AddTorrentAlert).handle().resume()
                 println("Torrent added")
             }
-            AlertType.BLOCK_FINISHED -> {
-                val handle = (alert as BlockFinishedAlert).handle()
+            AlertType.PIECE_FINISHED -> {
+                val handle = (alert as PieceFinishedAlert).handle()
                 updateFileProgress(handle.fileProgress())
+                val wantedPiece = TorrentUtil.calculatePieceIndex(
+                    currentFileIndex,
+                    handle.torrentFile()
+                )
                 // Set the currently selected file (if any) to the highest priority
+                // Also, we want the first couple of pieces of a file to have high priority so we
+                // can start playing the audio early
                 if (currentFileIndex != -1) {
                     if (handle.filePriority(currentFileIndex) != Priority.SIX) {
                         handle.filePriority(currentFileIndex, Priority.SIX)
+                    }
+                    if (handle.piecePriority(wantedPiece) != Priority.SIX) {
+                        handle.piecePriority(wantedPiece, Priority.SIX)
+                    }
+                }
+                if (handle.fileProgress()[currentFileIndex] > 1024 * 1024 * 2) {
+                    if (handle.havePiece(wantedPiece)) {
+                        // The file completed is the one we were focusing on; let's play it
+                        val filePath = alert.handle().torrentFile().files().filePath(
+                            currentFileIndex,
+                            context.cacheDir.absolutePath
+                        )
+                        startPlaying(File(filePath))
                     }
                 }
             }
@@ -171,10 +191,6 @@ class Release(
 
     @Synchronized
     private fun startPlaying(file: File) {
-        musicService.runOnUiThread {
-            musicService.bufferInfo.text =
-                "Selected: ${file.nameWithoutExtension}"
-        }
         AudioPlayer.getInstance(context, musicService).setAudioResource(file)
     }
 

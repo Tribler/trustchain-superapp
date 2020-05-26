@@ -26,7 +26,6 @@ class MusicService : BaseActivity() {
         "magnet:?xt=urn:btih:2803173609ad794d2789da6a6852fc1dbda7b7bf&dn=tru1992-07-23"
     private val trackLibrary: TrackLibrary =
         TrackLibrary(this)
-//    var torrentStream: TorrentStream? = null
 
     override val navigationGraph = R.navigation.musicdao_navgraph
 

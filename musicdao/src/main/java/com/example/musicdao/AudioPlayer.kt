@@ -26,6 +26,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     private val bufferInfo = musicService.bufferInfo
     private val seekBar = musicService.seekBar
     private val playButton = musicService.playButtonAudioPlayer
+    private var previousFile: File? = null
 
     init {
         bufferInfo.text = "No track currently playing"
@@ -92,6 +93,12 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     }
 
     fun setAudioResource(file: File) {
+        if (previousFile == file) return;
+        previousFile = file
+        musicService.runOnUiThread {
+            musicService.bufferInfo.text =
+                "Selected: ${file.nameWithoutExtension}"
+        }
         val fis = FileInputStream(file)
         prepareNextTrack()
         mediaPlayer.apply {
@@ -133,7 +140,7 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
                 message = "Media error: unsupported"
             }
         }
-        val toast = Toast.makeText(context, message, Toast.LENGTH_SHORT)
+        val toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
         toast.show()
         return true
     }
