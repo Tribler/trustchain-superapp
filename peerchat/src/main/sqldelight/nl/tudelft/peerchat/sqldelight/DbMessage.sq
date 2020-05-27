@@ -1,0 +1,35 @@
+CREATE TABLE messages (
+    id TEXT NOT NULL,
+    message TEXT NOT NULL,
+    sender_public_key BLOB NOT NULL,
+    recipient_public_key BLOB NOT NULL,
+    outgoing INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    ack INTEGER NOT NULL,
+    read INTEGER NOT NULL,
+    PRIMARY KEY (id)
+);
+
+addMessage:
+INSERT INTO messages (id, message, sender_public_key, recipient_public_key, outgoing, timestamp, ack, read)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?);
+
+ackMessage:
+UPDATE messages SET ack = 1 WHERE id = ?;
+
+getAll:
+SELECT * FROM messages ORDER BY timestamp ASC;
+
+getAllByPublicKey:
+SELECT * FROM messages WHERE sender_public_key = ? OR recipient_public_key = ?
+ORDER BY timestamp ASC;
+
+getUnacknowledgedMessages:
+SELECT * FROM messages WHERE ack = 0 AND outgoing = 1;
+
+ack:
+UPDATE messages SET ack = 1 WHERE id = ?;
+
+getLastByPublicKey:
+SELECT * FROM messages WHERE sender_public_key = ? OR recipient_public_key = ?
+ORDER BY timestamp DESC LIMIT 1;

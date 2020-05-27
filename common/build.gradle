@@ -64,6 +64,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
+    // QR
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
 
     // Material
     implementation 'com.google.android.material:material:1.1.0'
@@ -80,6 +82,12 @@ dependencies {
 
     implementation 'com.mattskala:itemadapter:0.3'
 
+    // BitTorrent
+    api files('libs/jlibtorrent-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-arm64-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
 
     // Testing
     testImplementation 'junit:junit:4.12'
