@@ -4,7 +4,7 @@ import android.app.Activity
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.example.musicdao.MusicService
-// import nl.tudelft.trustchain.FOC.MainActivityFOC
+import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
@@ -57,14 +57,12 @@ enum class AppDefinition(
         R.color.black,
         TrustChainPayloadGeneratorActivity::class.java
     ),
-    /*
     FREEDOM_OF_COMPUTING(
         R.drawable.ic_naruto,
         "Freedom of Computing",
         R.color.blue,
         MainActivityFOC::class.java
     ),
-    */
     DNA(
         R.drawable.ic_bug_report_black_24dp,
         "Distributed AI",

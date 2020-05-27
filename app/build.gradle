@@ -95,7 +95,7 @@ dependencies {
     implementation project(':debug')
     implementation project(':distributedai')
     implementation project(':currencyii')
-    // implementation project(':freedomOfComputing')
+    implementation project(':freedomOfComputing')
     implementation project(':musicdao')
     implementation project(':peerchat')
 
