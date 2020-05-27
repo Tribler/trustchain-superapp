@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
@@ -23,10 +25,15 @@ import nl.tudelft.trustchain.peerchat.databinding.FragmentAddNearbyBinding
 class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
     private val binding by viewBinding(FragmentAddNearbyBinding::bind)
 
-    private var publicKeyBin: String? = null
+    private var publicKeyBin = MutableLiveData<String>()
 
     private val qrCodeUtils by lazy {
         QRCodeUtils(requireContext())
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        publicKeyBin.value = savedInstanceState?.getString(KEY_PUBLIC_KEY)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -48,7 +55,7 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
         binding.btnContinue.setOnClickListener {
             val args = Bundle()
 
-            val publicKeyBin = publicKeyBin
+            val publicKeyBin = publicKeyBin.value
             if (publicKeyBin != null) {
                 try {
                     defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
@@ -65,6 +72,17 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
                 Toast.makeText(requireContext(), "Scan the QR code", Toast.LENGTH_LONG).show()
             }
         }
+
+        publicKeyBin.observe(viewLifecycleOwner, Observer { publicKeyBin ->
+            binding.txtContactPublicKey.text = publicKeyBin
+
+            lifecycleScope.launch {
+                val bitmap = if (publicKeyBin != null) withContext(Dispatchers.Default) {
+                    qrCodeUtils.createQR(publicKeyBin)
+                } else null
+                binding.contactQr.setImageBitmap(bitmap)
+            }
+        })
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -72,7 +90,7 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
         if (publicKeyBin != null) {
             try {
                 defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-                setPublicKey(publicKeyBin)
+                this.publicKeyBin.value = publicKeyBin
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid public key", Toast.LENGTH_LONG).show()
@@ -82,15 +100,12 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
         }
     }
 
-    private fun setPublicKey(publicKeyBin: String) {
-        this.publicKeyBin = publicKeyBin
-        binding.txtContactPublicKey.text = publicKeyBin
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KEY_PUBLIC_KEY, publicKeyBin.value)
+    }
 
-        lifecycleScope.launch {
-            val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(publicKeyBin)
-            }
-            binding.contactQr.setImageBitmap(bitmap)
-        }
+    companion object {
+        private const val KEY_PUBLIC_KEY = "public_key"
     }
 }
