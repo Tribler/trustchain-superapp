@@ -8,5 +8,11 @@
     <fragment
         android:id="@+id/blankFragment"
         android:name="com.example.musicdao.MainFragment"
-        android:label="fragment_blank" />
+        android:label="fragment_blank"/>
+
+
+<!--    <fragment-->
+<!--        android:id="@+id/releaseOverviewFragment"-->
+<!--        android:name="com.example.musicdao.ReleaseOverviewFragment"-->
+<!--        android:label="release_overview" />-->
 </navigation>

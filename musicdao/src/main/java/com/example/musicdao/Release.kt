@@ -5,10 +5,11 @@ import android.widget.*
 import androidx.core.text.HtmlCompat
 import com.example.musicdao.util.TorrentUtil
 import com.frostwire.jlibtorrent.AlertListener
+import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.alerts.*
-import kotlinx.android.synthetic.main.music_app_main.*
+import kotlinx.android.synthetic.main.fragment_trackplaying.view.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
 
@@ -94,25 +95,24 @@ class Release(
      */
     fun selectTrackAndDownload(index: Int) {
         currentFileIndex = index
-        val fileName =
-            this.metadata?.files()?.fileName(index) ?: throw Error("Unknown file being played")
 
-        AudioPlayer.getInstance(context, musicService).prepareNextTrack()
-        musicService.runOnUiThread {
-            musicService.bufferInfo.text = "Selected: ${fileName}, searching for peers"
-        }
+        val files = this.metadata?.files() ?: return
+        val fileName = files.fileName(index) ?: throw Error("Unknown file being played")
 
-        val filePath = this.metadata?.files()?.filePath(
+        musicService.prepareNextTrack()
+
+        musicService.setSongArtistText("Selected: ${fileName}, searching for peers")
+
+        val filePath = files.filePath(
             currentFileIndex,
             context.cacheDir.absolutePath
         )
         val audioFile = File(filePath ?: "")
 
         // TODO needs to have a solid check whether the file was already downloaded before
-        if (audioFile.isFile && audioFile.length() == this.metadata?.files()
-                ?.fileSize(currentFileIndex)
+        if (audioFile.isFile && audioFile.length() == files.fileSize(currentFileIndex)
         ) {
-            startPlaying(audioFile)
+            startPlaying(audioFile, index, files)
         }
     }
 
@@ -143,11 +143,12 @@ class Release(
                 if (handle.fileProgress()[currentFileIndex] > 1024 * 1024 * 2) {
                     if (handle.havePiece(wantedPiece)) {
                         // The file completed is the one we were focusing on; let's play it
-                        val filePath = alert.handle().torrentFile().files().filePath(
+                        val files = alert.handle().torrentFile().files()
+                        val filePath = files.filePath(
                             currentFileIndex,
                             context.cacheDir.absolutePath
                         )
-                        startPlaying(File(filePath))
+                        startPlaying(File(filePath), currentFileIndex, files)
                     }
                 }
             }
@@ -168,7 +169,7 @@ class Release(
                         currentFileIndex,
                         context.cacheDir.absolutePath
                     )
-                    startPlaying(File(filePath))
+                    startPlaying(File(filePath), currentFileIndex, alert.handle().torrentFile().files())
                 }
             }
             else -> {
@@ -190,8 +191,8 @@ class Release(
     }
 
     @Synchronized
-    private fun startPlaying(file: File) {
-        AudioPlayer.getInstance(context, musicService).setAudioResource(file)
+    private fun startPlaying(file: File, index: Int, files: FileStorage) {
+        musicService.startPlaying(file, index, files)
     }
 
     override fun types(): IntArray? {

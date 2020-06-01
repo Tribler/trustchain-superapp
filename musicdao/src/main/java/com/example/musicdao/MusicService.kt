@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ui.SubmitReleaseDialog
+import com.frostwire.jlibtorrent.FileStorage
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
@@ -17,6 +18,7 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
+import java.io.File
 
 const val PREPARE_SIZE_KB: Long = 10 * 512L
 
@@ -45,15 +47,13 @@ class MusicService : BaseActivity() {
         setContentView(R.layout.music_app_main)
         supportActionBar?.title = "Music app"
 
-        mid.text = ("My trustchain member ID: " + IPv8Android.getInstance().myPeer.mid)
-
         registerBlockListener()
         registerBlockSigner()
 
-        val audioPlayer = AudioPlayer.getInstance(applicationContext, this)
-        if (audioPlayer.parent == null) {
-            mainLinearLayout.addView(AudioPlayer.getInstance(applicationContext, this), 0)
-        }
+//        val audioPlayer = AudioPlayer.getInstance(this)
+//        if (audioPlayer.parent == null) {
+//            mainLinearLayout.addView(AudioPlayer.getInstance(this), 0)
+//        }
 
         torrentButton.setOnClickListener {
             createDefaultBlock()
@@ -67,6 +67,13 @@ class MusicService : BaseActivity() {
             trackLibrary.startDHT()
         }).start()
         iterateClientConnectivity()
+    }
+
+    fun prepareNextTrack() {
+//        val trackPlayerFragment: AudioPlayer? = supportFragmentManager.findFragmentById(R.id.track_player_fragment)
+//        trackPlayerFragment?.prepareNextTrack()
+        val audioPlayer = supportFragmentManager.findFragmentById(R.id.track_player_fragment) as AudioPlayer
+        audioPlayer.prepareNextTrack()
     }
 
     /**
@@ -93,7 +100,7 @@ class MusicService : BaseActivity() {
                         sleep(1000)
                         runOnUiThread {
                             val text =
-                                "Torrent client info: UP: ${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT NODES: ${trackLibrary.getDhtNodes()}"
+                                "UP: ${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT NODES: ${trackLibrary.getDhtNodes()}"
                             torrentClientInfo.text = text
                         }
                     }
@@ -232,5 +239,15 @@ class MusicService : BaseActivity() {
         } else {
             AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
+    }
+
+    fun setSongArtistText(s: String) {
+        val audioPlayer = supportFragmentManager.findFragmentById(R.id.track_player_fragment) as AudioPlayer
+        audioPlayer.setSongArtistText(s)
+    }
+
+    fun startPlaying(file: File, index: Int, files: FileStorage) {
+        val audioPlayer = supportFragmentManager.findFragmentById(R.id.track_player_fragment) as AudioPlayer
+        audioPlayer.setAudioResource(file, index, files)
     }
 }

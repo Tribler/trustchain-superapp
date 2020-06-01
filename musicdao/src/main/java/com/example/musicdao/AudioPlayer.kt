@@ -1,15 +1,17 @@
 package com.example.musicdao
 
 import android.R.drawable
-import android.content.Context
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.os.Bundle
 import android.os.Handler
-import android.widget.LinearLayout
-import android.widget.SeekBar
-import android.widget.Toast
-import androidx.core.net.toUri
-import kotlinx.android.synthetic.main.music_app_main.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.*
+import androidx.fragment.app.Fragment
+import com.frostwire.jlibtorrent.FileStorage
+import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import java.io.File
 import java.io.FileInputStream
 
@@ -18,50 +20,84 @@ lateinit var instance: AudioPlayer
 /**
  * Implements an Android MediaPlayer. Is a singleton.
  */
-class AudioPlayer(context: Context, private val musicService: MusicService) : LinearLayout(context),
+class AudioPlayer : Fragment(),
     MediaPlayer.OnPreparedListener,
     MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
     private val mediaPlayer: MediaPlayer = MediaPlayer()
     private var interestedFraction: Float = 0F
-    private val bufferInfo = musicService.bufferInfo
-    private val seekBar = musicService.seekBar
-    private val playButton = musicService.playButtonAudioPlayer
     private var previousFile: File? = null
+    private var currentReleaseFiles: FileStorage? = null
+    private var currentFileIndex: Int = 0
 
-    init {
-        bufferInfo.text = "No track currently playing"
-        seekBar.setOnSeekBarChangeListener(this)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_trackplaying, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        songArtist.text = "No track currently playing"
+        seekBarAudioPlayer.setOnSeekBarChangeListener(this)
 
         // Handle playing and pausing tracks
-        this.playButton.setOnClickListener {
+        playButtonAudioPlayer.setOnClickListener {
             if (mediaPlayer.isPlaying) {
-                this.playButton.setImageResource(drawable.ic_media_play)
+                playButtonAudioPlayer.setImageResource(android.R.drawable.ic_media_play)
                 mediaPlayer.pause()
             } else {
-                this.playButton.setImageResource(drawable.ic_media_pause)
+                playButtonAudioPlayer.setImageResource(android.R.drawable.ic_media_pause)
                 mediaPlayer.start()
+            }
+        }
+
+        // Fast forward: go to the next track in the playlist
+        fastforwardButton.setOnClickListener {
+            goToTrack(currentFileIndex + 1)
+        }
+
+        // Rewind: if playing, go to the start of the track.
+        // If at the start of a track, go to the previous track
+        rewindButton.setOnClickListener {
+            if (mediaPlayer.currentPosition < 2000) {
+                goToTrack(currentFileIndex - 1)
+            } else {
+                mediaPlayer.seekTo(0)
             }
         }
 
         followSeekBarWithTrack()
     }
 
+    /**
+     * Fast forward to another track in the playlist
+     * Playlist is currentReleaseFiles var
+     * @param index the index of the track in the current playlist
+     */
+    private fun goToTrack(index: Int) {
+        val files = currentReleaseFiles
+        if (files is FileStorage) {
+            val nextFile = File(files.filePath(index,
+                context?.cacheDir?.absolutePath) ?: "")
+            if (nextFile.isFile) {
+                setAudioResource(nextFile, index, files)
+            }
+        }
+    }
 
     companion object {
-        fun getInstance(context: Context, musicService: MusicService): AudioPlayer {
+        fun getInstance(): AudioPlayer {
             if (!::instance.isInitialized) {
-                createInstance(
-                    context,
-                    musicService
-                )
+                createInstance()
             }
             return instance
         }
 
         @Synchronized
-        private fun createInstance(context: Context, musicService: MusicService) {
+        private fun createInstance() {
             instance =
-                AudioPlayer(context, musicService)
+                AudioPlayer()
         }
     }
 
@@ -70,13 +106,14 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
      */
     private fun followSeekBarWithTrack() {
         val mHandler = Handler()
-        musicService.runOnUiThread(object : Runnable {
+        val thread: Thread = object : Thread() {
             override fun run() {
                 val mCurrentPosition: Int = mediaPlayer.currentPosition / 1000
-                seekBar.progress = mCurrentPosition
+                seekBarAudioPlayer.progress = mCurrentPosition
                 mHandler.postDelayed(this, 1000)
             }
-        })
+        }
+        thread.start()
     }
 
     /**
@@ -84,21 +121,25 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
      */
     fun prepareNextTrack() {
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
-        seekBar.progress = 0
-        playButton.setImageResource(drawable.ic_media_play)
-        playButton.isClickable = false
-        playButton.isActivated = false
-        playButton.isEnabled = false
+        seekBarAudioPlayer.progress = 0
+        playButtonAudioPlayer.setImageResource(drawable.ic_media_play)
+        playButtonAudioPlayer.isClickable = false
+        playButtonAudioPlayer.isActivated = false
+        playButtonAudioPlayer.isEnabled = false
         mediaPlayer.reset()
     }
 
-    fun setAudioResource(file: File) {
-        if (previousFile == file) return;
+    /**
+     * Select file to play and prepare the mediaPlayer to play it.
+     * Also present the user with some information on this file.
+     */
+    fun setAudioResource(file: File, index: Int, files: FileStorage) {
+        if (previousFile == file) return
+        currentReleaseFiles = files
+        currentFileIndex = index
         previousFile = file
-        musicService.runOnUiThread {
-            musicService.bufferInfo.text =
-                "Selected: ${file.nameWithoutExtension}"
-        }
+        songArtist.text =
+            "${file.nameWithoutExtension}"
         val fis = FileInputStream(file)
         prepareNextTrack()
         mediaPlayer.apply {
@@ -146,20 +187,17 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     }
 
     override fun onPrepared(mp: MediaPlayer) {
-        this.playButton.isClickable = true
-        this.playButton.isActivated = true
-        this.playButton.isEnabled = true
         // Sync the seek bar horizontal location with track duration
-        seekBar.max = mediaPlayer.duration / 1000
+        seekBarAudioPlayer.max = mediaPlayer.duration / 1000
         // Directly play the track when it is prepared
-        this.playButton.callOnClick()
+        playButtonAudioPlayer.callOnClick()
     }
 
     /**
      * For now simply reset the state of the media player when we reach the end of a track
      */
     override fun onCompletion(mp: MediaPlayer?) {
-        prepareNextTrack()
+        goToTrack(currentFileIndex + 1)
     }
 
     /**
@@ -173,4 +211,10 @@ class AudioPlayer(context: Context, private val musicService: MusicService) : Li
     override fun onStartTrackingTouch(seekBar: SeekBar?) {}
 
     override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+    //TODO this should probably be replaced by a nicer solution in the future
+    // (see Release->MusicService->AudioPlayer calling this)
+    fun setSongArtistText(s: String) {
+        songArtist.text = s
+    }
 }
