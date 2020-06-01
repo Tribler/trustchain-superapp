@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainFragment"
+    android:background="#303030"
     android:orientation="vertical">
 
     <LinearLayout
@@ -19,6 +20,7 @@
             android:id="@+id/torrentClientInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:text="TextView" />
 
         <Button
@@ -57,12 +59,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view_items"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scrollbars="vertical" />
                 </LinearLayout>
             </ScrollView>
 

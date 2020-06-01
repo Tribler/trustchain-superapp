@@ -123,9 +123,6 @@ class AudioPlayer : Fragment(),
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
         seekBarAudioPlayer.progress = 0
         playButtonAudioPlayer.setImageResource(drawable.ic_media_play)
-        playButtonAudioPlayer.isClickable = false
-        playButtonAudioPlayer.isActivated = false
-        playButtonAudioPlayer.isEnabled = false
         mediaPlayer.reset()
     }
 
@@ -138,8 +135,7 @@ class AudioPlayer : Fragment(),
         currentReleaseFiles = files
         currentFileIndex = index
         previousFile = file
-        songArtist.text =
-            "${file.nameWithoutExtension}"
+        songArtist.text = file.nameWithoutExtension
         val fis = FileInputStream(file)
         prepareNextTrack()
         mediaPlayer.apply {

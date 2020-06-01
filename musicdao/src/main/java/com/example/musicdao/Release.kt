@@ -1,15 +1,20 @@
 package com.example.musicdao
 
-import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.core.text.HtmlCompat
+import androidx.fragment.app.Fragment
 import com.example.musicdao.util.TorrentUtil
 import com.frostwire.jlibtorrent.AlertListener
 import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.alerts.*
-import kotlinx.android.synthetic.main.fragment_trackplaying.view.*
+import kotlinx.android.synthetic.main.fragment_release.*
+import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
 
@@ -17,49 +22,35 @@ import java.io.File
  * A release is an audio album, EP, single, etc.
  */
 class Release(
-    context: Context,
-    magnet: String,
-    trackLibrary: TrackLibrary,
+    private val magnet: String,
+    private val trackLibrary: TrackLibrary,
     private val musicService: MusicService,
-    transaction: TrustChainTransaction
-) : TableLayout(context), AlertListener {
+    private val transaction: TrustChainTransaction
+) : Fragment(), AlertListener {
     private var metadata: TorrentInfo? = null
     private var tracks: MutableMap<Int, Track> = hashMapOf()
     private var currentFileIndex = -1
-    private var currentFile: File? = null
-    private var fetchingMetadataRow = TableRow(context)
-    private var metadataRow = TableRow(context)
 
-    init {
-        // Generate the UI
-        this.setColumnStretchable(2, true)
-        this.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        val blockMetadata = TextView(context)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_release, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         blockMetadata.text =
             HtmlCompat.fromHtml(
-                "Signed block with release:<br>$transaction\n<br><b>" +
-                    "${transaction["artists"]} - ${transaction["title"]}<br>" +
+                "<b>${transaction["artists"]} - ${transaction["title"]}<br>" +
                     "Released at ${transaction["date"]}</b>", 0
             )
-        blockMetadata.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.MATCH_PARENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        metadataRow.layoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        )
-        val params = blockMetadata.layoutParams as TableRow.LayoutParams
-        params.span = 4
-        blockMetadata.layoutParams = params
-        metadataRow.addView(blockMetadata)
-        this.addView(metadataRow)
 
+        // Generate the UI
+        val localContext = context ?: throw Error("Unobtainable context")
         // When the Release is added, it will try to fetch the metadata for the corresponding magnet
-        trackLibrary.downloadMagnet(this, magnet, context.cacheDir)
+        trackLibrary.downloadMagnet(this, magnet, localContext.cacheDir)
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
@@ -69,7 +60,7 @@ class Release(
         val filestorage = metadata.files()
 
         val allowedExtensions =
-            listOf<String>("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
+            listOf("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
 
         for (index in 0 until num) {
             val fileName = filestorage.fileName(index)
@@ -81,9 +72,10 @@ class Release(
                 }
             }
             if (found) {
-                val track = Track(context, fileName, index, this, musicService)
+                val localContext = context ?: throw Error("Unobtainable context")
+                val track = Track(localContext, fileName, index, this, musicService)
                 musicService.runOnUiThread {
-                    this.addView(track)
+                    release_table_layout.addView(track)
                 }
                 tracks[index] = track
             }
@@ -103,9 +95,11 @@ class Release(
 
         musicService.setSongArtistText("Selected: ${fileName}, searching for peers")
 
+        val localContext = context ?: throw Error("Unobtainable context")
+
         val filePath = files.filePath(
             currentFileIndex,
-            context.cacheDir.absolutePath
+            localContext.cacheDir.absolutePath
         )
         val audioFile = File(filePath ?: "")
 
@@ -144,9 +138,10 @@ class Release(
                     if (handle.havePiece(wantedPiece)) {
                         // The file completed is the one we were focusing on; let's play it
                         val files = alert.handle().torrentFile().files()
+                        val localContext = context ?: throw Error("Unobtainable context")
                         val filePath = files.filePath(
                             currentFileIndex,
-                            context.cacheDir.absolutePath
+                            localContext.cacheDir.absolutePath
                         )
                         startPlaying(File(filePath), currentFileIndex, files)
                     }
@@ -164,12 +159,17 @@ class Release(
                 alert as FileCompletedAlert
                 tracks[alert.index()]?.setCompleted()
                 if (alert.index() == currentFileIndex) {
+                    val localContext = context ?: throw Error("Unobtainable context")
                     // The file completed is the one we were focusing on; let's play it
                     val filePath = alert.handle().torrentFile().files().filePath(
                         currentFileIndex,
-                        context.cacheDir.absolutePath
+                        localContext.cacheDir.absolutePath
                     )
-                    startPlaying(File(filePath), currentFileIndex, alert.handle().torrentFile().files())
+                    startPlaying(
+                        File(filePath),
+                        currentFileIndex,
+                        alert.handle().torrentFile().files()
+                    )
                 }
             }
             else -> {

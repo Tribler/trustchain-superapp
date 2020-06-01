@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:stretchColumns="1"
+    android:id="@+id/release_table_layout"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <TableRow android:id="@+id/metadataRow" android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/blockMetadata"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textStyle=""
+            android:layout_span="4"/>
+    </TableRow>
+
+</TableLayout>

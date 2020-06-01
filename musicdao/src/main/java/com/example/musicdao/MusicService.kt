@@ -10,6 +10,7 @@ import androidx.core.app.NavUtils
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ui.SubmitReleaseDialog
 import com.frostwire.jlibtorrent.FileStorage
+import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
@@ -100,7 +101,7 @@ class MusicService : BaseActivity() {
                         sleep(1000)
                         runOnUiThread {
                             val text =
-                                "UP: ${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT NODES: ${trackLibrary.getDhtNodes()}"
+                                "UP: ${trackLibrary.getUploadRate()} DOWN: ${trackLibrary.getDownloadRate()} DHT: ${trackLibrary.getDhtNodes()}"
                             torrentClientInfo.text = text
                         }
                     }
@@ -198,15 +199,15 @@ class MusicService : BaseActivity() {
                 ).show()
                 val magnet = block.transaction["magnet"]
                 if (magnet != null && magnet is String) {
-                    trackListLinearLayout.addView(
-                        Release(
-                            applicationContext,
-                            magnet,
-                            trackLibrary,
-                            musicService,
-                            block.transaction
-                        ), 0
+                    val release = Release(
+                        magnet,
+                        trackLibrary,
+                        musicService,
+                        block.transaction
                     )
+                    val transaction = supportFragmentManager.beginTransaction()
+                    transaction.add(R.id.trackListLinearLayout, release, "releaseTag")
+                    transaction.commit()
                 }
                 Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }

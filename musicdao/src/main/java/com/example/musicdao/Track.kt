@@ -1,7 +1,9 @@
 package com.example.musicdao
 
 import android.content.Context
+import android.graphics.Color
 import android.widget.*
+import androidx.core.view.marginLeft
 import kotlinx.android.synthetic.main.music_app_main.*
 
 
@@ -12,9 +14,7 @@ class Track(
     release: Release,
     private val musicService: MusicService
 ) : TableRow(context) {
-    private val bufferInfo: TextView = TextView(context)
     private val nameView: TextView = TextView(context)
-    private val indexView: TextView = TextView(context)
     private val playButton: ImageButton = ImageButton(context)
     private val progressBar: ProgressBar = ProgressBar(
         context,
@@ -37,11 +37,9 @@ class Track(
         playButton.layoutParams = rowParams
         playButton.setImageResource(android.R.drawable.ic_media_play)
         this.addView(playButton)
-        indexView.layoutParams = rowParams
-        indexView.text = index.toString()
-        this.addView(indexView)
         nameView.layoutParams = rowParams
         nameView.maxWidth = 300
+        nameView.setTextColor(Color.WHITE)
         nameView.text = name
         this.addView(nameView)
         progressBar.layoutParams = rowParams
