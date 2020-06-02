@@ -109,7 +109,9 @@ class AudioPlayer : Fragment(),
         val thread: Thread = object : Thread() {
             override fun run() {
                 val mCurrentPosition: Int = mediaPlayer.currentPosition / 1000
-                seekBarAudioPlayer.progress = mCurrentPosition
+                if (seekBarAudioPlayer != null) {
+                    seekBarAudioPlayer.progress = mCurrentPosition
+                }
                 mHandler.postDelayed(this, 1000)
             }
         }

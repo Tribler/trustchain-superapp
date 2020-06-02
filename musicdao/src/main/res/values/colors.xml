@@ -2,6 +2,7 @@
 <resources>
     <color name="colorPrimaryPlayer">#232323</color>
     <color name="colorPrimaryDarkPlayer">#1a1a1a</color>
+    <color name="musicColorAccent">#6aefae</color>
     <color name="colorAccent">#6aefae</color>
     <color name="bgColor">#303030</color>
     <color name="line">#4d4d4d</color>

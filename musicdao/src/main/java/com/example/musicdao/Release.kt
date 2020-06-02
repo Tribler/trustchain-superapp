@@ -7,14 +7,13 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
-import com.example.musicdao.util.TorrentUtil
+import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.AlertListener
 import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.alerts.*
 import kotlinx.android.synthetic.main.fragment_release.*
-import kotlinx.android.synthetic.main.music_app_main.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import java.io.File
 
@@ -43,8 +42,8 @@ class Release(
         super.onViewCreated(view, savedInstanceState)
         blockMetadata.text =
             HtmlCompat.fromHtml(
-                "<b>${transaction["artists"]} - ${transaction["title"]}<br>" +
-                    "Released at ${transaction["date"]}</b>", 0
+                "<b>${transaction["artists"]} - ${transaction["title"]}<br></b>" +
+                    "${transaction["date"]}", 0
             )
 
         // Generate the UI
@@ -72,11 +71,18 @@ class Release(
                 }
             }
             if (found) {
-                val localContext = context ?: throw Error("Unobtainable context")
-                val track = Track(localContext, fileName, index, this, musicService)
-                musicService.runOnUiThread {
-                    release_table_layout.addView(track)
-                }
+                val track = Track(
+                    fileName,
+                    index,
+                    this,
+                    Util.readableBytes(filestorage.fileSize(index)),
+                    musicService
+                )
+
+                // Add a table row (Track) to the table (Release)
+                val transaction = requireActivity().supportFragmentManager.beginTransaction()
+                transaction.add(R.id.release_table_layout, track, "track$index")
+                transaction.commit()
                 tracks[index] = track
             }
         }
@@ -119,7 +125,7 @@ class Release(
             AlertType.PIECE_FINISHED -> {
                 val handle = (alert as PieceFinishedAlert).handle()
                 updateFileProgress(handle.fileProgress())
-                val wantedPiece = TorrentUtil.calculatePieceIndex(
+                val wantedPiece = Util.calculatePieceIndex(
                     currentFileIndex,
                     handle.torrentFile()
                 )

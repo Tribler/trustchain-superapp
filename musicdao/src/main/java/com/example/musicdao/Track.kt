@@ -1,51 +1,34 @@
 package com.example.musicdao
 
-import android.content.Context
-import android.graphics.Color
-import android.widget.*
-import androidx.core.view.marginLeft
-import kotlinx.android.synthetic.main.music_app_main.*
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.track_row.trackTitle
+import kotlinx.android.synthetic.main.track_table_row.*
 
 
 class Track(
-    context: Context,
-    name: String,
+    private val name: String,
     private val index: Int,
-    release: Release,
+    private val release: Release,
+    private val size: String,
     private val musicService: MusicService
-) : TableRow(context) {
-    private val nameView: TextView = TextView(context)
-    private val playButton: ImageButton = ImageButton(context)
-    private val progressBar: ProgressBar = ProgressBar(
-        context,
-        null,
-        android.R.attr.progressBarStyleHorizontal
-    )
+) : Fragment() {
 
-    init {
-        // Initialize all UI elements
-        val tableLayoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        )
-        tableLayoutParams.setMargins(5, 5, 5, 5)
-        this.layoutParams = tableLayoutParams
-        val rowParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.WRAP_CONTENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        playButton.layoutParams = rowParams
-        playButton.setImageResource(android.R.drawable.ic_media_play)
-        this.addView(playButton)
-        nameView.layoutParams = rowParams
-        nameView.maxWidth = 300
-        nameView.setTextColor(Color.WHITE)
-        nameView.text = name
-        this.addView(nameView)
-        progressBar.layoutParams = rowParams
-        progressBar.max = 100
-        progressBar.progress = 0
-        this.addView(progressBar)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.track_table_row, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        trackTitle.text = name
+        trackArtist.text = size
 
         playButton.setOnClickListener {
             release.selectTrackAndDownload(index)

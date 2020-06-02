@@ -2,7 +2,7 @@ package com.example.musicdao.util
 
 import com.frostwire.jlibtorrent.TorrentInfo
 
-object TorrentUtil {
+object Util {
     fun calculatePieceIndex(fileIndex: Int, torrentInfo: TorrentInfo): Int {
         var pieceIndex = 0
         for (i in 0..fileIndex) {
@@ -13,5 +13,11 @@ object TorrentUtil {
             }
         }
         return pieceIndex
+    }
+
+    fun readableBytes(bytes: Long): String {
+        if (bytes > 1024 && bytes <= (1024 * 1024)) return "${(bytes / 1024)}Kb"
+        if (bytes > (1024 * 1024)) return "${(bytes / (1024 * 1024))}Mb"
+        return "${bytes}B"
     }
 }
