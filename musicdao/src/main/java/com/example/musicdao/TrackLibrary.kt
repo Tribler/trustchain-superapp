@@ -5,13 +5,12 @@ import android.content.res.Resources
 import android.net.Uri
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.*
 import com.frostwire.jlibtorrent.swig.settings_pack
 import com.turn.ttorrent.client.SharedTorrent
 import java.io.*
 import java.util.*
 
-class TrackLibrary(private val musicService: MusicService) {
+class TrackLibrary {
     private val torrentSessionManager = SessionManager()
     private val torrentSettingsPack = SettingsPack()
 

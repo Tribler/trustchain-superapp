@@ -3,16 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/musicdao_navgraph"
-    app:startDestination="@id/blankFragment">
+    app:startDestination="@id/releaseOverviewFragment">
 
     <fragment
-        android:id="@+id/blankFragment"
-        android:name="com.example.musicdao.MainFragment"
-        android:label="fragment_blank"/>
+        android:id="@+id/releaseOverviewFragment"
+        android:name="com.example.musicdao.ReleaseOverviewFragment"
+        android:label="Music app">
 
+        <action
+            android:id="@+id/action_releaseOverviewFragment_to_musicServiceFragment"
+            app:destination="@id/playlistFragment" />
+    </fragment>
 
-<!--    <fragment-->
-<!--        android:id="@+id/releaseOverviewFragment"-->
-<!--        android:name="com.example.musicdao.ReleaseOverviewFragment"-->
-<!--        android:label="release_overview" />-->
+    <fragment
+        android:id="@+id/playlistFragment"
+        android:name="com.example.musicdao.PlaylistFragment"
+        android:label="Playlist"/>
 </navigation>
