@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.common
 import io.mockk.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.EndpointAggregator
-import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.trustchain.common.messaging.TradePayload
 import org.junit.Assert.assertEquals
@@ -20,12 +19,14 @@ class MarketCommunityTest {
     fun broadcast_callsSendOneTimePerPeer() {
         val payload = mockk<TradePayload>()
         every {
-            marketCommunity["serializePacket"](
-                any<Int>(),
-                any<Serializable>(),
-                any<Boolean>(),
-                any<Peer>(),
-                any<ByteArray>()
+            marketCommunity.serializePacket(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
             )
         } returns byteArrayOf(0x00)
         every { marketCommunity.getPeers() } returns getFakePeers()

@@ -1,14 +1,20 @@
 package nl.tudelft.trustchain.peerchat.ui.conversation
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import androidx.lifecycle.*
+import androidx.core.view.inputmethod.InputConnectionCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_add_contact.*
 import kotlinx.android.synthetic.main.fragment_conversation.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -19,6 +25,7 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.FragmentConversationBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.util.saveFile
 
 class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
     private val binding by viewBinding(FragmentConversationBinding::bind)
@@ -42,6 +49,25 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
     private val name by lazy {
         requireArguments().getString(ARG_NAME)!!
+    }
+
+    private val onCommitContentListener = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
+        val lacksPermission = (flags and
+            InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+            try {
+                inputContentInfo.requestPermission()
+            } catch (e: Exception) {
+                return@OnCommitContentListener false // return false if failed
+            }
+        }
+
+        val uri = inputContentInfo.contentUri
+        Log.d("ConversationFragment", "uri: $uri")
+
+        sendImageFromUri(uri)
+
+        true
     }
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
@@ -69,12 +95,33 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
 
+        binding.edtMessage.onCommitContentListener = onCommitContentListener
+
         btnSend.setOnClickListener {
             val message = binding.edtMessage.text.toString()
             if (message.isNotEmpty()) {
                 getPeerChatCommunity().sendMessage(message, publicKey)
                 binding.edtMessage.text = null
             }
+        }
+
+        btnAddImage.setOnClickListener {
+            val intent = Intent()
+            intent.type = "image/*"
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            PICK_IMAGE -> if (resultCode == Activity.RESULT_OK && data != null) {
+                val uri = data.data
+                if (uri != null) {
+                    sendImageFromUri(uri)
+                }
+            }
+            else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
@@ -93,10 +140,16 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         }
     }
 
+    private fun sendImageFromUri(uri: Uri) {
+        val file = saveFile(requireContext(), uri)
+        getPeerChatCommunity().sendImage(file, publicKey)
+    }
+
     companion object {
         const val ARG_PUBLIC_KEY = "public_key"
         const val ARG_NAME = "name"
 
         private const val GROUP_TIME_LIMIT = 60 * 1000
+        private const val PICK_IMAGE = 10
     }
 }
