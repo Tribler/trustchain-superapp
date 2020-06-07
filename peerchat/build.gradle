@@ -48,8 +48,8 @@ android {
         allWarningsAsErrors = true
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -85,6 +85,8 @@ dependencies {
     implementation 'com.github.tony19:logback-android:2.0.0'
 
     implementation 'com.mattskala:itemadapter:0.3'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Testing
     testImplementation 'junit:junit:4.12'

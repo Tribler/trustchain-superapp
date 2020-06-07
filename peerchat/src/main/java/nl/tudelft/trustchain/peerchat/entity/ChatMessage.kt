@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.entity
 
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
 data class ChatMessage(
@@ -13,6 +14,11 @@ data class ChatMessage(
      * The message content.
      */
     val message: String,
+
+    /**
+     * An optional message attachment.
+     */
+    val attachment: MessageAttachment?,
 
     /**
      * The public key of the message sender.
@@ -40,7 +46,12 @@ data class ChatMessage(
     val ack: Boolean,
 
     /**
-     * True if the message has been read.
+     * True if the message has been read (for incoming messages).
      */
-    val read: Boolean
+    val read: Boolean,
+
+    /**
+     * True if the attachment has been fetched and stored locally (for incoming messages).
+     */
+    val attachmentFetched: Boolean
 )

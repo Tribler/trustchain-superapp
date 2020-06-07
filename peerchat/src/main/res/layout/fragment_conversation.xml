@@ -19,17 +19,31 @@
         android:layout_height="wrap_content"
         android:padding="8dp">
 
-        <EditText
+        <ImageButton
+            android:id="@+id/btnAddImage"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_baseline_add_photo_alternate_24"
+            android:background="@drawable/circle_step"
+            android:tint="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <nl.tudelft.trustchain.peerchat.ui.conversation.RichEditText
             android:id="@+id/edtMessage"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:textSize="14sp"
             android:padding="16dp"
             android:background="@drawable/bg_field"
-            android:inputType="textCapSentences|text"
+            android:inputType="textCapSentences|textMultiLine"
             android:hint="Write a message..."
             android:paddingEnd="56dp"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnAddImage"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <ImageButton
             android:id="@+id/btnSend"

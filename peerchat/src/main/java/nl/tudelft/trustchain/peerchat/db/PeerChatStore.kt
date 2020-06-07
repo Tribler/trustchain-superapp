@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.peerchat.db
 
 import android.content.Context
-import android.util.Log
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -10,9 +9,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.peerchat.sqldelight.Database
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.entity.Contact
+import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
 class PeerChatStore(context: Context) {
@@ -27,21 +28,30 @@ class PeerChatStore(context: Context) {
             outgoing: Long,
             timestamp: Long,
             ack: Long,
-            read: Long ->
+            read: Long,
+            attachmentType: String?,
+            attachmentSize: Long?,
+            attachmentContent: ByteArray?,
+            attachmentFetched: Long ->
         ChatMessage(
             id,
             message,
+            if (attachmentType != null && attachmentSize != null && attachmentContent != null)
+                MessageAttachment(attachmentType,
+                    attachmentSize,
+                    attachmentContent
+                ) else null,
             defaultCryptoProvider.keyFromPublicBin(senderPk),
             defaultCryptoProvider.keyFromPublicBin(receipientPk),
             outgoing == 1L,
             Date(timestamp),
             ack == 1L,
-            read == 1L
+            read == 1L,
+            attachmentFetched == 1L
         )
     }
 
     fun addContact(publicKey: PublicKey, name: String) {
-        Log.d("AddContact", "save contact $name $publicKey")
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
@@ -59,6 +69,14 @@ class PeerChatStore(context: Context) {
 
     fun getUnacknowledgedMessages(): List<ChatMessage> {
         return database.dbMessageQueries.getUnacknowledgedMessages(messageMapper).executeAsList()
+    }
+
+    fun getUnfetchedAttachments(): List<ChatMessage> {
+        return database.dbMessageQueries.getUnfetchedAttachments(messageMapper).executeAsList()
+    }
+
+    fun setAttachmentFetched(id: String) {
+        database.dbMessageQueries.setAttachmentFetched(id.hexToBytes())
     }
 
     fun getContactsWithLastMessages(): Flow<List<Pair<Contact, ChatMessage?>>> {
@@ -89,7 +107,11 @@ class PeerChatStore(context: Context) {
             if (message.outgoing) 1L else 0L,
             message.timestamp.time,
             if (message.ack) 1L else 0L,
-            if (message.read) 1L else 0L
+            if (message.read) 1L else 0L,
+            message.attachment?.type,
+            message.attachment?.size,
+            message.attachment?.content,
+            if (message.attachmentFetched) 1L else 0L
         )
     }
 

@@ -6,6 +6,7 @@ import android.text.format.DateUtils
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
 import nl.tudelft.trustchain.common.util.getColorByHash
@@ -32,11 +33,30 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
         avatar.isVisible = item.shouldShowAvatar
         imgDelivered.isVisible = item.chatMessage.outgoing && item.chatMessage.ack
         constraintSet.clone(constraintLayout)
-        constraintSet.removeFromHorizontalChain(txtMessage.id)
+        constraintSet.removeFromHorizontalChain(content.id)
         constraintSet.removeFromHorizontalChain(bottomContainer.id)
+
+        val attachment = item.chatMessage.attachment
+        if (attachment != null && attachment.type == MessageAttachment.TYPE_IMAGE) {
+            val file = attachment.getFile(view.context)
+            if (file.exists()) {
+                Glide.with(view).load(file).into(image)
+                progress.isVisible = false
+            } else {
+                image.setImageBitmap(null)
+                progress.isVisible = true
+            }
+            image.isVisible = true
+            txtMessage.isVisible = false
+        } else {
+            image.isVisible = false
+            txtMessage.isVisible = true
+            progress.isVisible = false
+        }
+
         if (item.chatMessage.outgoing) {
             constraintSet.connect(
-                txtMessage.id,
+                content.id,
                 ConstraintSet.END,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.END
@@ -51,7 +71,7 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             val avatarMargin = resources.getDimensionPixelSize(R.dimen.avatar_size) +
                 resources.getDimensionPixelSize(R.dimen.avatar_margin)
             constraintSet.connect(
-                txtMessage.id,
+                content.id,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
