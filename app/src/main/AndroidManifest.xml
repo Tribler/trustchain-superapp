@@ -39,7 +39,13 @@
         <activity
             android:name="nl.tudelft.trustchain.debug.DebugActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
-	<activity
+
+        <activity
+            android:name="nl.tudelft.trustchain.peerchat.PeerChatActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:theme="@style/Theme.PeerChat" />
+
+	    <activity
             android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 

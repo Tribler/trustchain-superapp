@@ -71,8 +71,12 @@ android {
         allWarningsAsErrors = true
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
     }
 }
 
@@ -93,6 +97,7 @@ dependencies {
     implementation project(':currencyii')
     implementation project(':freedomOfComputing')
     implementation project(':musicdao')
+    implementation project(':peerchat')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

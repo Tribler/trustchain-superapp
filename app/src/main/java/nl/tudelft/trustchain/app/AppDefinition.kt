@@ -12,6 +12,7 @@ import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
+import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 
 enum class AppDefinition(
@@ -20,6 +21,12 @@ enum class AppDefinition(
     @ColorRes val color: Int,
     val activity: Class<out Activity>
 ) {
+    PEERCHAT(
+        R.drawable.ic_chat_black_24dp,
+        "PeerChat",
+        R.color.purple,
+        PeerChatActivity::class.java
+    ),
     TRUSTCHAIN_EXPLORER(
         R.drawable.ic_device_hub_black_24dp,
         "TrustChain Explorer",
