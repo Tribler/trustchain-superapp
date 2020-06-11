@@ -15,14 +15,10 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
-const val defaultBlockId =
-    "4c69624e61434c504b3a084222f8a6f7e59db1dfbe88086da69e91e87295dc544d11e680875e0ed9d2097739668d469dac06f95482810bff7ed4ef66c2b7392e8065762145cbb0c3fde4"
-const val defaultBlockHash = "dec73b6cf5b708404d47d6d878ab49116588dec30d1b6024214fdd2f721dd23e"
-
 class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
     private var currentMagnetLoading: String? = null
     private val defaultMagnet =
-        "magnet:?xt=urn:btih:30894385d7a3288cb6073055b6c743d2d977806c&dn=gd77-06-08.mtx.seamons.ht32.95361.t-flac16"
+        "magnet:?xt=urn:btih:45e4170514ee0ce20abacf1fe256f9c73f95ef47&dn=Royalty%20Free%20Background%20Music%20Pack&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
