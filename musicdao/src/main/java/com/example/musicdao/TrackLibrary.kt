@@ -3,6 +3,7 @@ package com.example.musicdao
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
+import android.provider.Settings
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.swig.settings_pack
@@ -26,10 +27,10 @@ class TrackLibrary {
         return torrentSessionManager.dhtNodes()
     }
 
-    fun downloadMagnet(release: Release, magnet: String, saveDir: File) {
-        torrentSessionManager.addListener(release)
-        torrentSessionManager.download(magnet, saveDir)
-    }
+//    fun downloadMagnet(release: Release, magnet: String, saveDir: File) {
+//        torrentSessionManager.addListener(release)
+//        torrentSessionManager.download(magnet, saveDir)
+//    }
 
     fun startDHT() {
         // TODO remove hardcoded udp DHT routers

@@ -11,12 +11,29 @@
         android:label="Music app">
 
         <action
-            android:id="@+id/action_releaseOverviewFragment_to_musicServiceFragment"
-            app:destination="@id/playlistFragment" />
+            android:id="@+id/action_releaseOverviewFragment_to_playlistFragment"
+            app:destination="@id/playlistFragment">
+            <argument
+                android:name="publisher"
+                app:argType="string" />
+            <argument
+                android:name="magnet"
+                app:argType="string" />
+            <argument
+                android:name="title"
+                app:argType="string" />
+            <argument
+                android:name="artists"
+                app:argType="string" />
+            <argument
+                android:name="date"
+                app:argType="string" />
+        </action>
     </fragment>
 
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.example.musicdao.PlaylistFragment"
-        android:label="Playlist"/>
+        android:label="Playlist">
+    </fragment>
 </navigation>

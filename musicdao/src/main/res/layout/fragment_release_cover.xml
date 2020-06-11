@@ -4,9 +4,9 @@
     android:id="@+id/coverCard"
     android:layout_width="150dp"
     android:layout_height="150dp"
-    android:layout_margin="@dimen/fab_margin"
     android:foreground="?android:attr/selectableItemBackground"
     android:clickable="true"
+    android:layout_margin="@dimen/fab_margin"
     android:focusable="true"
     android:elevation="3dp"
     app:cardBackgroundColor="@color/dark_gray">
@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:layout_margin="@dimen/fab_margin"
             android:orientation="vertical">
 
             <TextView

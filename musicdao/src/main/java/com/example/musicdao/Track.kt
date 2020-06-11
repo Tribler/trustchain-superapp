@@ -13,8 +13,7 @@ class Track(
     private val name: String,
     private val index: Int,
     private val release: Release,
-    private val size: String,
-    private val musicService: MusicService
+    private val size: String
 ) : Fragment() {
 
     override fun onCreateView(

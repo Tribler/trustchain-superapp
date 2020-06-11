@@ -79,8 +79,12 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         val dividerItemDecoration = DividerItemDecoration(context, LinearLayout.VERTICAL)
-        dividerItemDecoration.setDrawable(ResourcesCompat.getDrawable(resources,
-            R.drawable.list_divider, null)!!)
+        dividerItemDecoration.setDrawable(
+            ResourcesCompat.getDrawable(
+                resources,
+                R.drawable.list_divider, null
+            )!!
+        )
         binding.recyclerView.addItemDecoration(dividerItemDecoration)
     }
 
@@ -104,7 +108,8 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
                 lifecycleScope.launch {
                     Toast.makeText(requireContext(), "Crawl started", Toast.LENGTH_SHORT).show()
                     if (crawlChain()) {
-                        Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Crawl finished", Toast.LENGTH_SHORT)
+                            .show()
                     } else {
                         Toast.makeText(requireContext(), "Crawl failed", Toast.LENGTH_SHORT).show()
                     }

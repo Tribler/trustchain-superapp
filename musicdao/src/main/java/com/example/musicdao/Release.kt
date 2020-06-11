@@ -1,6 +1,7 @@
 package com.example.musicdao
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,27 +9,38 @@ import android.widget.*
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import com.example.musicdao.util.Util
-import com.frostwire.jlibtorrent.AlertListener
-import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.alerts.*
+import com.github.se_bastiaan.torrentstream.StreamStatus
+import com.github.se_bastiaan.torrentstream.Torrent
+import com.github.se_bastiaan.torrentstream.TorrentOptions
+import com.github.se_bastiaan.torrentstream.TorrentStream
+import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
+import java.lang.Exception
 
 /**
  * A release is an audio album, EP, single, etc.
  */
 class Release(
     private val magnet: String,
-    private val trackLibrary: TrackLibrary,
-    private val musicService: MusicService,
-    private val transaction: TrustChainTransaction
-) : Fragment(), AlertListener {
+    private val artists: String,
+    private val title: String,
+    private val date: String,
+    private val publisher: String
+) : Fragment(), TorrentListener {
     private var metadata: TorrentInfo? = null
     private var tracks: MutableMap<Int, Track> = hashMapOf()
     private var currentFileIndex = -1
+    private var enqueuedFileIndex = -1
+    private var prevFileIndex = -1
+    private var prevProgress = -1.0f
+    private var torrentStream: TorrentStream? = null
+    private var localTorrent: Torrent? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,19 +54,32 @@ class Release(
         super.onViewCreated(view, savedInstanceState)
         blockMetadata.text =
             HtmlCompat.fromHtml(
-                "<b>${transaction["artists"]} - ${transaction["title"]}<br></b>" +
-                    "${transaction["date"]}", 0
+                "<b>$artists - $title<br></b>" +
+                    date, 0
             )
 
         // Generate the UI
-        val localContext = context ?: throw Error("Unobtainable context")
         // When the Release is added, it will try to fetch the metadata for the corresponding magnet
-        trackLibrary.downloadMagnet(this, magnet, localContext.cacheDir)
+//        trackLibrary.downloadMagnet(this, magnet, localContext.cacheDir)
+
+        val torrentOptions = TorrentOptions.Builder()
+            .saveLocation(context?.cacheDir)
+            .removeFilesAfterStop(true)
+            .autoDownload(false)
+            .build()
+        torrentStream = TorrentStream.init(torrentOptions)
+        torrentStream?.addListener(this)
+        torrentStream?.startStream(magnet)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        torrentStream?.stopStream()
+        torrentStream = null
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
         this.metadata = metadata
-        println("Metadata: $metadata")
         val num = metadata.numFiles()
         val filestorage = metadata.files()
 
@@ -63,7 +88,6 @@ class Release(
 
         for (index in 0 until num) {
             val fileName = filestorage.fileName(index)
-            println("Discovered track $fileName")
             var found = false
             for (s in allowedExtensions) {
                 if (fileName.endsWith(s)) {
@@ -75,12 +99,11 @@ class Release(
                     fileName,
                     index,
                     this,
-                    Util.readableBytes(filestorage.fileSize(index)),
-                    musicService
+                    Util.readableBytes(filestorage.fileSize(index))
                 )
 
                 // Add a table row (Track) to the table (Release)
-                val transaction = requireActivity().supportFragmentManager.beginTransaction()
+                val transaction = childFragmentManager.beginTransaction()
                 transaction.add(R.id.release_table_layout, track, "track$index")
                 transaction.commit()
                 tracks[index] = track
@@ -94,91 +117,19 @@ class Release(
     fun selectTrackAndDownload(index: Int) {
         currentFileIndex = index
 
-        val files = this.metadata?.files() ?: return
-        val fileName = files.fileName(index) ?: throw Error("Unknown file being played")
+        val audioPlayer = AudioPlayer.getInstance()
+        audioPlayer.prepareNextTrack()
 
-        musicService.prepareNextTrack()
+        val tor = localTorrent
+        if (tor != null) {
+            torrentStream?.removeListener(this)
+            tor.setSelectedFileIndex(currentFileIndex)
+            Util.setSequentialPriorities(tor)
+            torrentStream?.addListener(this)
 
-        musicService.setSongArtistText("Selected: ${fileName}, searching for peers")
-
-        val localContext = context ?: throw Error("Unobtainable context")
-
-        val filePath = files.filePath(
-            currentFileIndex,
-            localContext.cacheDir.absolutePath
-        )
-        val audioFile = File(filePath ?: "")
-
-        // TODO needs to have a solid check whether the file was already downloaded before
-        if (audioFile.isFile && audioFile.length() == files.fileSize(currentFileIndex)
-        ) {
-            startPlaying(audioFile, index, files)
-        }
-    }
-
-    override fun alert(alert: Alert<*>) {
-        when (alert.type()) {
-            AlertType.ADD_TORRENT -> {
-                (alert as AddTorrentAlert).handle().resume()
-                println("Torrent added")
-            }
-            AlertType.PIECE_FINISHED -> {
-                val handle = (alert as PieceFinishedAlert).handle()
-                updateFileProgress(handle.fileProgress())
-                val wantedPiece = Util.calculatePieceIndex(
-                    currentFileIndex,
-                    handle.torrentFile()
-                )
-                // Set the currently selected file (if any) to the highest priority
-                // Also, we want the first couple of pieces of a file to have high priority so we
-                // can start playing the audio early
-                if (currentFileIndex != -1) {
-                    if (handle.filePriority(currentFileIndex) != Priority.SIX) {
-                        handle.filePriority(currentFileIndex, Priority.SIX)
-                    }
-                    if (handle.piecePriority(wantedPiece) != Priority.SIX) {
-                        handle.piecePriority(wantedPiece, Priority.SIX)
-                    }
-                }
-                if (handle.fileProgress()[currentFileIndex] > 1024 * 1024 * 2) {
-                    if (handle.havePiece(wantedPiece)) {
-                        // The file completed is the one we were focusing on; let's play it
-                        val files = alert.handle().torrentFile().files()
-                        val localContext = context ?: throw Error("Unobtainable context")
-                        val filePath = files.filePath(
-                            currentFileIndex,
-                            localContext.cacheDir.absolutePath
-                        )
-                        startPlaying(File(filePath), currentFileIndex, files)
-                    }
-                }
-            }
-            AlertType.METADATA_RECEIVED -> {
-                val handle = (alert as MetadataReceivedAlert).handle()
-                setMetadata(handle.torrentFile())
-            }
-            AlertType.METADATA_FAILED -> {
-                Toast.makeText(context, "Error fetching torrent metadata", Toast.LENGTH_SHORT)
-                    .show()
-            }
-            AlertType.FILE_COMPLETED -> {
-                alert as FileCompletedAlert
-                tracks[alert.index()]?.setCompleted()
-                if (alert.index() == currentFileIndex) {
-                    val localContext = context ?: throw Error("Unobtainable context")
-                    // The file completed is the one we were focusing on; let's play it
-                    val filePath = alert.handle().torrentFile().files().filePath(
-                        currentFileIndex,
-                        localContext.cacheDir.absolutePath
-                    )
-                    startPlaying(
-                        File(filePath),
-                        currentFileIndex,
-                        alert.handle().torrentFile().files()
-                    )
-                }
-            }
-            else -> {
+            // TODO needs to have a solid check whether the file was already downloaded before
+            if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
+                startPlaying(tor.videoFile, currentFileIndex)
             }
         }
     }
@@ -196,13 +147,56 @@ class Release(
         }
     }
 
-    @Synchronized
-    private fun startPlaying(file: File, index: Int, files: FileStorage) {
-        musicService.startPlaying(file, index, files)
+    private fun startPlaying(file: File, index: Int) {
+        val audioPlayer = AudioPlayer.getInstance()
+        audioPlayer.setAudioResource(file, index)
     }
 
-    override fun types(): IntArray? {
-        return null
+    override fun onStreamReady(torrent: Torrent) {
+        if (!AudioPlayer.getInstance().isPlaying()) {
+            startPlaying(
+                torrent.videoFile,
+                currentFileIndex
+            )
+        }
+    }
+
+    override fun onStreamPrepared(torrent: Torrent) {
+        localTorrent = torrent
+        torrent.setSelectedFileIndex(0)
+        torrent.startDownload()
+        Util.setSequentialPriorities(torrent)
+        val torrentFile = torrent.torrentHandle?.torrentFile()
+            ?: throw Error("Unknown torrent file metadata")
+        setMetadata(torrentFile)
+    }
+
+    override fun onStreamStopped() {}
+
+    override fun onStreamStarted(torrent: Torrent) {}
+
+    override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
+        val fileProgress = torrent.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+        val progress = status.progress
+        if (progress > 30 && !AudioPlayer.getInstance().isPlaying()) {
+            startPlaying(
+                torrent.videoFile,
+                currentFileIndex
+            )
+        }
+        if (progress != prevProgress) {
+            AudioPlayer.getInstance().retry()
+            println("Buffer: ${status.bufferProgress}, progress: $progress")
+        }
+        prevProgress = progress
+        prevFileIndex = currentFileIndex
+    }
+
+    override fun onStreamError(torrent: Torrent, e: Exception) {
+        Log.e("TorrentStream", "Torrent stream error")
+        Toast.makeText(context, "Torrent stream error: ${e.message}", Toast.LENGTH_LONG).show()
+        e.printStackTrace()
     }
 
 }

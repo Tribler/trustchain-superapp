@@ -7,10 +7,10 @@ import android.os.Bundle
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
-import com.example.musicdao.PlaylistFragment
 import com.example.musicdao.R
+import com.example.musicdao.ReleaseOverviewFragment
 
-class SubmitReleaseDialog(private val playlistFragment: PlaylistFragment) : DialogFragment() {
+class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : DialogFragment() {
     private lateinit var title: EditText
     private lateinit var artists: EditText
     private lateinit var releaseDate: EditText
@@ -30,7 +30,7 @@ class SubmitReleaseDialog(private val playlistFragment: PlaylistFragment) : Dial
                         val artistEditText = dialog?.findViewById<EditText>(R.id.artists)
                         val releaseDateEditText =
                             dialog?.findViewById<EditText>(R.id.release_date)
-                        playlistFragment.finishPublishing(
+                        musicService.finishPublishing(
                             titleEditText?.text,
                             artistEditText?.text,
                             releaseDateEditText?.text
