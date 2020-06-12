@@ -33,6 +33,7 @@ class Release(
     private var enqueuedFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
+    private var setTorrentMetadata: TorrentInfo? = null
     private var localTorrent: Torrent? = null
 
     override fun onCreateView(
@@ -51,13 +52,18 @@ class Release(
                     date, 0
             )
 
+        // The metadata may already be loaded before the view is created
+        val metadata = setTorrentMetadata
+        if (metadata != null) {
+            setMetadata(metadata)
+        }
         (activity as MusicService).torrentStream.addListener(this)
         (activity as MusicService).torrentStream.startStream(magnet)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        (activity as MusicService).torrentStream.stopStream()
+        (activity as MusicService).torrentStream.pauseSession()
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
@@ -121,11 +127,13 @@ class Release(
      * percentage of downloaded pieces from that track
      */
     private fun updateFileProgress(fileProgressArray: LongArray) {
-        fileProgressArray.forEachIndexed { index, fileProgress ->
-            tracks[index]?.setDownloadProgress(
-                fileProgress,
-                metadata?.files()?.fileSize(index)
-            )
+        if (this.isAdded) {
+            fileProgressArray.forEachIndexed { index, fileProgress ->
+                tracks[index]?.setDownloadProgress(
+                    fileProgress,
+                    metadata?.files()?.fileSize(index)
+                )
+            }
         }
     }
 
@@ -134,8 +142,8 @@ class Release(
         audioPlayer.setAudioResource(file, index)
     }
 
-    override fun onStreamReady(torrent: Torrent) {
-        if (!AudioPlayer.getInstance().isPlaying()) {
+    override fun onStreamReady(torrent: Torrent?) {
+        if (!AudioPlayer.getInstance().isPlaying() && torrent != null) {
             startPlaying(
                 torrent.videoFile,
                 currentFileIndex
@@ -143,25 +151,30 @@ class Release(
         }
     }
 
-    override fun onStreamPrepared(torrent: Torrent) {
+    override fun onStreamPrepared(torrent: Torrent?) {
         localTorrent = torrent
+        if (torrent == null) return
         torrent.setSelectedFileIndex(0)
         torrent.startDownload()
         Util.setSequentialPriorities(torrent)
         val torrentFile = torrent.torrentHandle?.torrentFile()
             ?: throw Error("Unknown torrent file metadata")
-        setMetadata(torrentFile)
+        if (this.isAdded) {
+            setMetadata(torrentFile)
+        } else {
+            setTorrentMetadata = torrentFile
+        }
     }
 
     override fun onStreamStopped() {}
 
-    override fun onStreamStarted(torrent: Torrent) {}
+    override fun onStreamStarted(torrent: Torrent?) {}
 
-    override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
-        val fileProgress = torrent.torrentHandle?.fileProgress()
+    override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
-        if (progress > 30 && !AudioPlayer.getInstance().isPlaying()) {
+        if (progress > 30 && !AudioPlayer.getInstance().isPlaying() && torrent != null) {
             startPlaying(
                 torrent.videoFile,
                 currentFileIndex
@@ -175,10 +188,10 @@ class Release(
         prevFileIndex = currentFileIndex
     }
 
-    override fun onStreamError(torrent: Torrent, e: Exception) {
+    override fun onStreamError(torrent: Torrent?, e: Exception?) {
         Log.e("TorrentStream", "Torrent stream error")
-        Toast.makeText(context, "Torrent stream error: ${e.message}", Toast.LENGTH_LONG).show()
-        e.printStackTrace()
+        Toast.makeText(context, "Torrent stream error: ${e?.message}", Toast.LENGTH_LONG).show()
+        e?.printStackTrace()
     }
 
 }
