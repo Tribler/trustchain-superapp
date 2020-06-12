@@ -104,7 +104,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
             // an audio file
             val localContext = context
             if (localContext != null) {
-                val magnet = (activity as MusicService).trackLibrary.seedFile(localContext, uri)
+                val magnet = (activity as MusicService).seedFile(localContext, uri)
                 publishTrack(magnet)
             }
         }
@@ -133,7 +133,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
                 try {
                     while (!this.isInterrupted) {
                         val text =
-                            "UP: ${(activity as MusicService).trackLibrary.getUploadRate()} DOWN: ${(activity as MusicService).trackLibrary.getDownloadRate()} DHT: ${(activity as MusicService).trackLibrary.getDhtNodes()}"
+                            "DHT: ${(activity as MusicService).getDhtNodes()}"
                         torrentClientInfo.text = text
                         sleep(1000)
                     }

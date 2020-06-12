@@ -34,12 +34,6 @@ object Util {
             if (piecePriority == Priority.SEVEN) {
                 torrent.torrentHandle.piecePriority(index, Priority.NORMAL)
             }
-//            if (piecePriority == Priority.NORMAL) {
-//                torrent.torrentHandle.piecePriority(index, Priority.SIX)
-//            }
-//            if (piecePriority == Priority.IGNORE) {
-//                torrent.torrentHandle.piecePriority(index, Priority.NORMAL)
-//            }
         }
         for (i in torrent.interestedPieceIndex until torrent.interestedPieceIndex + torrent.piecesToPrepare) {
             torrent.torrentHandle.piecePriority(i, Priority.SEVEN)

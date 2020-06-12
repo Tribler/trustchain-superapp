@@ -9,17 +9,11 @@ import android.widget.*
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import com.example.musicdao.util.Util
-import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
-import com.frostwire.jlibtorrent.alerts.*
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
-import com.github.se_bastiaan.torrentstream.TorrentOptions
-import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 import java.lang.Exception
 
@@ -39,7 +33,6 @@ class Release(
     private var enqueuedFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
-    private var torrentStream: TorrentStream? = null
     private var localTorrent: Torrent? = null
 
     override fun onCreateView(
@@ -58,24 +51,13 @@ class Release(
                     date, 0
             )
 
-        // Generate the UI
-        // When the Release is added, it will try to fetch the metadata for the corresponding magnet
-//        trackLibrary.downloadMagnet(this, magnet, localContext.cacheDir)
-
-        val torrentOptions = TorrentOptions.Builder()
-            .saveLocation(context?.cacheDir)
-            .removeFilesAfterStop(true)
-            .autoDownload(false)
-            .build()
-        torrentStream = TorrentStream.init(torrentOptions)
-        torrentStream?.addListener(this)
-        torrentStream?.startStream(magnet)
+        (activity as MusicService).torrentStream.addListener(this)
+        (activity as MusicService).torrentStream.startStream(magnet)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        torrentStream?.stopStream()
-        torrentStream = null
+        (activity as MusicService).torrentStream.stopStream()
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
@@ -122,10 +104,10 @@ class Release(
 
         val tor = localTorrent
         if (tor != null) {
-            torrentStream?.removeListener(this)
+            (activity as MusicService).torrentStream.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
             Util.setSequentialPriorities(tor)
-            torrentStream?.addListener(this)
+            (activity as MusicService).torrentStream.addListener(this)
 
             // TODO needs to have a solid check whether the file was already downloaded before
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
