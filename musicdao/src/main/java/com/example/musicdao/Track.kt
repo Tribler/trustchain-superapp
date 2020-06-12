@@ -14,16 +14,7 @@ class Track(
     private val index: Int,
     private val release: Release,
     private val size: String
-) : Fragment() {
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.track_table_row, container, false)
-    }
-
+) : Fragment(R.layout.track_table_row) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         trackTitle.text = name
@@ -39,9 +30,5 @@ class Track(
         val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
         progressBar.progress = progress.toInt()
         return progress.toInt()
-    }
-
-    fun setCompleted() {
-        progressBar.progress = 100
     }
 }

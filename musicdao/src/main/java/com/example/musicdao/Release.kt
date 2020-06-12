@@ -26,23 +26,14 @@ class Release(
     private val title: String,
     private val date: String,
     private val publisher: String
-) : Fragment(), TorrentListener {
+) : Fragment(R.layout.fragment_release), TorrentListener {
     private var metadata: TorrentInfo? = null
     private var tracks: MutableMap<Int, Track> = hashMapOf()
     private var currentFileIndex = -1
-    private var enqueuedFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
     private var setTorrentMetadata: TorrentInfo? = null
     private var localTorrent: Torrent? = null
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_release, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,18 +43,20 @@ class Release(
                     date, 0
             )
 
-        // The metadata may already be loaded before the view is created
-        val metadata = setTorrentMetadata
-        if (metadata != null) {
-            setMetadata(metadata)
+        (activity as MusicService).torrentStream.resumeSession()
+        if ((activity as MusicService).torrentStream.isStreaming) {
+            (activity as MusicService).torrentStream.stopStream()
         }
-        (activity as MusicService).torrentStream.addListener(this)
         (activity as MusicService).torrentStream.startStream(magnet)
+        (activity as MusicService).torrentStream.addListener(this)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        (activity as MusicService).torrentStream.pauseSession()
+        (activity as MusicService).torrentStream.removeListener(this)
+        if ((activity as MusicService).torrentStream.isStreaming) {
+            (activity as MusicService).torrentStream.stopStream()
+        }
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
@@ -161,8 +154,6 @@ class Release(
             ?: throw Error("Unknown torrent file metadata")
         if (this.isAdded) {
             setMetadata(torrentFile)
-        } else {
-            setTorrentMetadata = torrentFile
         }
     }
 
