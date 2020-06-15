@@ -9,12 +9,13 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/trackInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:layout_margin="4dp"
         android:textColor="@color/white"
-        android:id="@+id/trackInfo"
+        android:visibility="gone"
         android:text=""/>
 
     <com.google.android.exoplayer2.ui.PlayerView
@@ -24,7 +25,7 @@
         app:auto_show="true"
         app:show_timeout="0"
         android:layout_width="wrap_content"
-        android:layout_height="70dp"
+        android:layout_height="100dp"
         app:show_buffering="always" />
 
 <!--    <LinearLayout-->

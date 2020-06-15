@@ -7,6 +7,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
+import android.view.ContextMenu
+import android.view.View
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ui.SubmitReleaseDialog
@@ -50,6 +52,15 @@ class MusicService : BaseActivity() {
                 .build())
 
         registerBlockSigner()
+    }
+
+    override fun onCreateContextMenu(
+        menu: ContextMenu?,
+        v: View?,
+        menuInfo: ContextMenu.ContextMenuInfo?
+    ) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        menuInflater.inflate(R.menu.menu_add_playlist, menu)
     }
 
     fun getDhtNodes(): Int {
