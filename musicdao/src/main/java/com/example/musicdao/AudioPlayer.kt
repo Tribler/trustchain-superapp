@@ -133,4 +133,13 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
         }
     }
 
+    fun setTrackInfo(trackName: String) {
+        trackInfo.text = trackName
+        trackInfo.visibility = View.VISIBLE
+    }
+
+    fun hideTrackInfo() {
+        trackInfo.visibility = View.GONE
+    }
+
 }

@@ -1,9 +1,7 @@
 package com.example.musicdao
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.track_row.trackTitle
 import kotlinx.android.synthetic.main.track_table_row.*
@@ -21,7 +19,7 @@ class Track(
         trackArtist.text = size
 
         playButton.setOnClickListener {
-            release.selectTrackAndDownload(index)
+            release.selectTrackAndPlay(index)
         }
     }
 

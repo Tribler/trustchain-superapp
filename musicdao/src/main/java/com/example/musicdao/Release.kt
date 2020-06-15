@@ -1,5 +1,6 @@
 package com.example.musicdao
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +15,7 @@ import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
+import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import java.io.File
 import java.lang.Exception
 
@@ -49,6 +51,7 @@ class Release(
         }
         (activity as MusicService).torrentStream.startStream(magnet)
         (activity as MusicService).torrentStream.addListener(this)
+        AudioPlayer.getInstance().hideTrackInfo()
     }
 
     override fun onDestroy() {
@@ -95,7 +98,7 @@ class Release(
     /**
      * Select a track from the Release and start downloading and seeding it
      */
-    fun selectTrackAndDownload(index: Int) {
+    fun selectTrackAndPlay(index: Int) {
         currentFileIndex = index
 
         val audioPlayer = AudioPlayer.getInstance()
@@ -105,6 +108,9 @@ class Release(
         if (tor != null) {
             (activity as MusicService).torrentStream.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
+            trackInfo?.text = tor.videoFile.nameWithoutExtension
+            trackInfo?.visibility = View.VISIBLE
+            AudioPlayer.getInstance().setTrackInfo(tor.videoFile.nameWithoutExtension)
             Util.setSequentialPriorities(tor)
             (activity as MusicService).torrentStream.addListener(this)
 
