@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/contactsFragment"
         android:name="nl.tudelft.trustchain.peerchat.ui.contacts.ContactsFragment"
-        android:label="PeerChat">
+        android:label="Contacts">
         <action
             android:id="@+id/action_contactsFragment_to_addRemoteFragment"
             app:destination="@id/addRemoteFragment"
@@ -66,5 +66,24 @@
             app:exitAnim="@anim/fragment_open_exit"
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/feedFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.feed.FeedFragment"
+        android:label="Friend Feed">
+
+        <action
+            android:id="@+id/action_feedFragment_to_newPostFragment"
+            app:destination="@id/newPostFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPostFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.feed.NewPostFragment"
+        android:label="New Post">
+        <argument android:name="hash" />
     </fragment>
 </navigation>
