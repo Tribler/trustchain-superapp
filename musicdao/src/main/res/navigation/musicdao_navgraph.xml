@@ -28,6 +28,10 @@
             <argument
                 android:name="date"
                 app:argType="string" />
+            <argument
+                android:name="torrentInfoName"
+                app:argType="string"
+                />
         </action>
     </fragment>
 

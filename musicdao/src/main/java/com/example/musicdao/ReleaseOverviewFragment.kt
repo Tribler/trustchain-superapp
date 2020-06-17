@@ -1,16 +1,12 @@
 package com.example.musicdao
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
-import android.view.ContextMenu
-import android.view.Menu
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import com.example.musicdao.ui.SubmitReleaseDialog
-import kotlinx.android.synthetic.main.dialog_submit_release.*
+import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
@@ -19,10 +15,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
-    private var currentMagnetLoading: String? = null
-//    private val defaultMagnet =
-//        "magnet:?xt=urn:btih:45e4170514ee0ce20abacf1fe256f9c73f95ef47&dn=Royalty%20Free%20Background%20Music%20Pack&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2F9.rarbg.to%3A2920%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.pirateparty.gr%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.cyberia.is%3A6969%2Fannounce"
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         registerBlockListener()
@@ -73,7 +65,13 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
      * After the user inserts some metadata for the release to be published, this function is called
      * to create the proposal block
      */
-    fun finishPublishing(title: Editable?, artists: Editable?, releaseDate: Editable?, magnet: Editable?) {
+    fun finishPublishing(
+        title: Editable?,
+        artists: Editable?,
+        releaseDate: Editable?,
+        magnet: Editable?,
+        torrentInfo: TorrentInfo
+    ) {
         val myPeer = IPv8Android.getInstance().myPeer
 
         val transaction = mapOf(
@@ -81,9 +79,10 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
             "magnet" to magnet.toString(),
             "title" to title.toString(),
             "artists" to artists.toString(),
-            "date" to releaseDate.toString()
+            "date" to releaseDate.toString(),
+            "torrentInfoName" to torrentInfo.name()
         )
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        val trustchain = getTrustChainCommunity()
         Toast.makeText(context, "Creating proposal block", Toast.LENGTH_SHORT).show()
         trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
     }
@@ -93,7 +92,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
      * its metadata from its torrent file structure.
      */
     private fun registerBlockListener() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        val trustchain = getTrustChainCommunity()
         trustchain.addListener("publish_release", object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
                 Toast.makeText(

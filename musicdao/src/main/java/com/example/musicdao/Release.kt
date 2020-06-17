@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import com.example.musicdao.util.Util
@@ -27,7 +28,8 @@ class Release(
     private val artists: String,
     private val title: String,
     private val date: String,
-    private val publisher: String
+    private val publisher: String,
+    private val torrentInfoName: String?
 ) : Fragment(R.layout.fragment_release), TorrentListener {
     private var metadata: TorrentInfo? = null
     private var tracks: MutableMap<Int, Track> = hashMapOf()
@@ -45,12 +47,24 @@ class Release(
                     date, 0
             )
 
+        var torrentUrl = magnet
+        if (torrentInfoName != null) {
+            val torrentFileName = "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFile = File(torrentFileName)
+            if (torrentFile.isFile) {
+                // This means we have the torrent file already locally and we can skip the step of
+                // obtaining the TorrentInfo from magnet link
+                torrentUrl = torrentFile.toUri().toString()
+            }
+        }
+
         (activity as MusicService).torrentStream.resumeSession()
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
-        (activity as MusicService).torrentStream.startStream(magnet)
+        (activity as MusicService).torrentStream.startStream(torrentUrl)
         (activity as MusicService).torrentStream.addListener(this)
+
         AudioPlayer.getInstance().hideTrackInfo()
     }
 
@@ -142,7 +156,8 @@ class Release(
     }
 
     override fun onStreamReady(torrent: Torrent?) {
-        if (!AudioPlayer.getInstance().isPlaying() && torrent != null) {
+        if (!AudioPlayer.getInstance().isPlaying() && torrent != null
+            && currentFileIndex != -1) {
             startPlaying(
                 torrent.videoFile,
                 currentFileIndex

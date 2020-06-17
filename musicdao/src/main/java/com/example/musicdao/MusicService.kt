@@ -1,37 +1,23 @@
 package com.example.musicdao
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
+import android.provider.MediaStore
 import android.view.ContextMenu
 import android.view.View
 import android.widget.Toast
-import androidx.preference.PreferenceManager
-import com.example.musicdao.ui.SubmitReleaseDialog
-import com.example.musicdao.util.Util
-import com.frostwire.jlibtorrent.FileStorage
-import com.frostwire.jlibtorrent.SessionParams
-import com.frostwire.jlibtorrent.SettingsPack
+import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.TorrentInfo
-import com.frostwire.jlibtorrent.swig.settings_pack
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
-import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import com.turn.ttorrent.client.SharedTorrent
-import kotlinx.android.synthetic.main.fragment_release_overview.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import java.io.*
 import java.util.*
@@ -42,12 +28,12 @@ class MusicService : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        clearCache()
+//        clearCache() TODO re-enable
 
         torrentStream = TorrentStream.init(
             TorrentOptions.Builder()
                 .saveLocation(applicationContext.cacheDir)
-                .removeFilesAfterStop(true)
+                .removeFilesAfterStop(false)
                 .autoDownload(false)
                 .build())
 
@@ -104,12 +90,11 @@ class MusicService : BaseActivity() {
      * and start seeding the torrent.
      * @return magnet link for the torrent
      */
-    fun seedFile(context: Context, uri: Uri): String {
+    fun seedFile(context: Context, uri: Uri): TorrentInfo {
         val torrentFile = generateTorrent(context, uri)
         // 'Downloading' the file while already having it locally should start seeding it
         val torrentInfo = TorrentInfo(torrentFile)
-        torrentStream.startStream(torrentFile.absolutePath)
-        return torrentInfo.makeMagnetUri()
+        return torrentInfo
     }
 
     /**
@@ -119,12 +104,24 @@ class MusicService : BaseActivity() {
     @Throws(Resources.NotFoundException::class)
     private fun generateTorrent(context: Context, uri: Uri): File {
         println("Trying to share torrent $uri")
-        val input = context.contentResolver.openInputStream(uri)
+        val contentResolver = context.contentResolver
+        val projection =
+            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+        var fileName = ""
+        if (cursor != null) {
+            try {
+                if (cursor.moveToFirst()) {
+                    fileName = cursor.getString(0)
+                }
+            } finally {
+                cursor.close()
+            }
+        }
 
-        // TODO generate a suitable signature for this torrent
-        val hash = Random().nextInt().toString() + ".mp3"
-        if (input == null) throw Resources.NotFoundException()
-        val tempFileLocation = "${context.cacheDir}/$hash"
+        if (fileName == "") throw Error("Source file name for creating torrent not found")
+        val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+        val tempFileLocation = "${context.cacheDir}/$fileName"
 
         // TODO currently creates temp copies before seeding, but should not be necessary
         copyInputStreamToFile(input, File(tempFileLocation))

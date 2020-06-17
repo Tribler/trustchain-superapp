@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.ReleaseOverviewFragment
+import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.android.synthetic.main.dialog_submit_release.*
 
 /**
@@ -22,6 +23,7 @@ import kotlinx.android.synthetic.main.dialog_submit_release.*
  */
 class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : DialogFragment() {
     private var dialogView: View? = null
+    private var localTorrentInfo: TorrentInfo? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
         // Get the layout inflater
@@ -45,8 +47,10 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
                         dialog?.findViewById<EditText>(R.id.release_date)
                     val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
 
+                    val torrentInfo = localTorrentInfo
                     if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
-                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()
+                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty() ||
+                        torrentInfo == null
                     ) {
                         Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
                     } else {
@@ -54,7 +58,8 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
                             titleEditText.text,
                             artistEditText.text,
                             releaseDateEditText.text,
-                            magnetEditText.text
+                            magnetEditText.text,
+                            torrentInfo
                         )
                     }
                 })
@@ -76,8 +81,9 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
             // an audio file
             val localContext = context
             if (localContext != null) {
-                val magnet = (activity as MusicService).seedFile(localContext, uri)
-                dialogView?.findViewById<EditText>(R.id.release_magnet)?.setText(magnet, TextView.BufferType.EDITABLE)
+                val torrentInfo = (activity as MusicService).seedFile(localContext, uri)
+                localTorrentInfo = torrentInfo
+                dialogView?.findViewById<EditText>(R.id.release_magnet)?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
             }
         }
     }

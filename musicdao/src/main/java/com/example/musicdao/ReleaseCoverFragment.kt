@@ -1,18 +1,12 @@
 package com.example.musicdao
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_base.*
+import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.android.synthetic.main.fragment_release_cover.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
-import nl.tudelft.trustchain.common.ui.BaseFragment
 
 /**
  * An album cover that can be clicked to view its contents
@@ -26,13 +20,17 @@ class ReleaseCoverFragment(private val trustChainBlock: TrustChainBlock) :
         val title = transaction["title"].toString()
         val artists = transaction["artists"].toString()
         val date = transaction["date"].toString()
+        var torrentInfoName = ""
+        if (transaction.containsKey("torrentInfoName")) {
+            torrentInfoName = transaction["torrentInfoName"].toString()
+        }
 
         coverTitle.text = title
         coverArtists.text = artists
 
         coverCard.setOnClickListener {
             val action =
-                ReleaseOverviewFragmentDirections.actionReleaseOverviewFragmentToPlaylistFragment(publisher, magnet, title, artists, date)
+                ReleaseOverviewFragmentDirections.actionReleaseOverviewFragmentToPlaylistFragment(publisher, magnet, title, artists, date, torrentInfoName)
             findNavController().navigate(action)
         }
     }

@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import java.lang.Error
+import java.lang.Exception
 
 class PlaylistFragment : BaseFragment(R.layout.fragment_playlist) {
 
@@ -17,11 +20,12 @@ class PlaylistFragment : BaseFragment(R.layout.fragment_playlist) {
             val title = localArgs.getString("title", "Title not found")
             val date = localArgs.getString("date", "Date not found")
             val publisher = localArgs.getString("publisher", "Publisher not found")
+            val torrentInfoName = localArgs.getString("torrentInfoName")
 
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
                 val release = Release(
-                    magnet, artists, title, date, publisher
+                    magnet, artists, title, date, publisher, torrentInfoName
                 )
                 transaction.add(R.id.trackListLinearLayout, release, "release")
                 transaction.commit()
