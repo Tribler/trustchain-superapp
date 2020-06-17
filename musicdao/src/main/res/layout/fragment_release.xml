@@ -2,7 +2,8 @@
 <TableLayout android:layout_width="match_parent" android:layout_height="wrap_content"
     android:stretchColumns="1"
     android:id="@+id/release_table_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:paddingHorizontal="@dimen/fab_margin">
 
     <TableRow android:id="@+id/metadataRow" android:layout_width="match_parent" android:layout_height="wrap_content">
 
