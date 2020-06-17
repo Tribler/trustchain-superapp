@@ -2,14 +2,13 @@ package com.example.musicdao
 
 import android.content.Context
 import android.content.res.Resources
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.ContextMenu
 import android.view.View
 import android.widget.Toast
-import androidx.core.net.toUri
+import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
@@ -19,16 +18,16 @@ import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.BaseActivity
+import org.apache.commons.io.FileUtils
 import java.io.*
-import java.util.*
 
 class MusicService : BaseActivity() {
     lateinit var torrentStream : TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
+    lateinit var contentSeeder: ContentSeeder
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        clearCache() TODO re-enable
 
         torrentStream = TorrentStream.init(
             TorrentOptions.Builder()
@@ -38,6 +37,9 @@ class MusicService : BaseActivity() {
                 .build())
 
         registerBlockSigner()
+
+        contentSeeder = ContentSeeder(SessionManager(), applicationContext.cacheDir)
+        contentSeeder.start()
     }
 
     override fun onCreateContextMenu(
@@ -93,8 +95,7 @@ class MusicService : BaseActivity() {
     fun seedFile(context: Context, uri: Uri): TorrentInfo {
         val torrentFile = generateTorrent(context, uri)
         // 'Downloading' the file while already having it locally should start seeding it
-        val torrentInfo = TorrentInfo(torrentFile)
-        return torrentInfo
+        return TorrentInfo(torrentFile)
     }
 
     /**
@@ -124,7 +125,7 @@ class MusicService : BaseActivity() {
         val tempFileLocation = "${context.cacheDir}/$fileName"
 
         // TODO currently creates temp copies before seeding, but should not be necessary
-        copyInputStreamToFile(input, File(tempFileLocation))
+        FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
         val file = File(tempFileLocation)
         val torrent = SharedTorrent.create(file, 65535, listOf(), "")
         val torrentFile = "$tempFileLocation.torrent"

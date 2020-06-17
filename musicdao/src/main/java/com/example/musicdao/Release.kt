@@ -157,7 +157,8 @@ class Release(
 
     override fun onStreamReady(torrent: Torrent?) {
         if (!AudioPlayer.getInstance().isPlaying() && torrent != null
-            && currentFileIndex != -1) {
+            && currentFileIndex != -1
+        ) {
             startPlaying(
                 torrent.videoFile,
                 currentFileIndex
@@ -176,6 +177,8 @@ class Release(
         if (this.isAdded) {
             setMetadata(torrentFile)
         }
+        // Keep seeding the torrent, also after start-up or after browsing to a different Release
+        (requireActivity() as MusicService).contentSeeder.add(torrentFile)
     }
 
     override fun onStreamStopped() {}
@@ -186,7 +189,9 @@ class Release(
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
-        if (progress > 30 && !AudioPlayer.getInstance().isPlaying() && torrent != null) {
+        if (progress > 30 && !AudioPlayer.getInstance()
+                .isPlaying() && torrent != null && currentFileIndex != -1
+        ) {
             startPlaying(
                 torrent.videoFile,
                 currentFileIndex
