@@ -152,6 +152,8 @@ class Release(
     }
 
     override fun onStreamReady(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
         if (!AudioPlayer.getInstance().isPlaying() &&
             torrent != null &&
             currentFileIndex != -1
@@ -164,6 +166,8 @@ class Release(
     }
 
     override fun onStreamPrepared(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
         localTorrent = torrent
         if (torrent == null) return
         torrent.setSelectedFileIndex(0)
@@ -180,7 +184,10 @@ class Release(
 
     override fun onStreamStopped() {}
 
-    override fun onStreamStarted(torrent: Torrent?) {}
+    override fun onStreamStarted(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+    }
 
     override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
         val fileProgress = torrent?.torrentHandle?.fileProgress()
