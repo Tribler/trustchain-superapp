@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.example.musicdao.ui.SubmitReleaseDialog
-import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
