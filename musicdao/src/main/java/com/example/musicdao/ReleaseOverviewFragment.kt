@@ -3,7 +3,9 @@ package com.example.musicdao
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import com.example.musicdao.ui.SubmitReleaseDialog
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -14,15 +16,21 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         registerBlockListener()
 
+        showAllReleases()
+        return super.onCreateView(inflater, container, savedInstanceState)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         addPlaylistFab.setOnClickListener {
             showCreateReleaseDialog()
         }
-
-        showAllReleases()
     }
 
     /**
@@ -33,7 +41,9 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         for (block in releaseBlocks) {
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
-            if (magnet is String && magnet.length > 0 && title is String && title.length > 0) {
+            val torrentInfoName = block.transaction["torrentInfoName"]
+            if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
+                torrentInfoName is String && torrentInfoName.length > 0) {
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
                 transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
@@ -68,7 +78,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         artists: Editable?,
         releaseDate: Editable?,
         magnet: Editable?,
-        torrentInfo: TorrentInfo
+        torrentInfoName: String
     ) {
         val myPeer = IPv8Android.getInstance().myPeer
 
@@ -78,7 +88,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
             "title" to title.toString(),
             "artists" to artists.toString(),
             "date" to releaseDate.toString(),
-            "torrentInfoName" to torrentInfo.name()
+            "torrentInfoName" to torrentInfoName
         )
         val trustchain = getTrustChainCommunity()
         Toast.makeText(context, "Creating proposal block", Toast.LENGTH_SHORT).show()

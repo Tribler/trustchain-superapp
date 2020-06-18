@@ -5,6 +5,15 @@ import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
 
 object Util {
+
+    /**
+     * Obtains the Display Name from a magnet link
+     */
+    fun extractNameFromMagnet(magnetLink: String): String {
+        val substring = magnetLink.substringAfter("&dn=")
+        return substring.substringBefore("&")
+    }
+
     fun calculatePieceIndex(fileIndex: Int, torrentInfo: TorrentInfo): Int {
         var pieceIndex = 0
         for (i in 0..fileIndex) {
@@ -32,6 +41,12 @@ object Util {
             torrent.torrentHandle.piecePriorities()
         for ((index, piecePriority) in piecePriorities.withIndex()) {
             if (piecePriority == Priority.SEVEN) {
+                torrent.torrentHandle.piecePriority(index, Priority.SIX)
+            }
+            if (piecePriority == Priority.NORMAL) {
+                torrent.torrentHandle.piecePriority(index, Priority.FIVE)
+            }
+            if (piecePriority == Priority.IGNORE) {
                 torrent.torrentHandle.piecePriority(index, Priority.NORMAL)
             }
         }

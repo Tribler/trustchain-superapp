@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.ReleaseOverviewFragment
+import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 
 /**
@@ -46,19 +47,26 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
                         dialog?.findViewById<EditText>(R.id.release_date)
                     val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
 
-                    val torrentInfo = localTorrentInfo
                     if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
-                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty() ||
-                        torrentInfo == null
-                    ) {
+                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()) {
                         Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
                     } else {
+                        val torrentInfo = localTorrentInfo
+                        val torrentInfoName = if (torrentInfo == null) {
+                            // If we only have a magnet link, extract the name from it to use for the
+                            // .torrent
+                            val magnetLink = magnetEditText.text.toString()
+                            Util.extractNameFromMagnet(magnetLink)
+                        } else {
+                            torrentInfo.name()
+                        }
+
                         musicService.finishPublishing(
                             titleEditText.text,
                             artistEditText.text,
                             releaseDateEditText.text,
                             magnetEditText.text,
-                            torrentInfo
+                            torrentInfoName
                         )
                     }
                 })

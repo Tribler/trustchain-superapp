@@ -80,7 +80,7 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
     }
 
     fun retry() {
-        val player = testExoPlayer ?: throw Error("ExoPlayer is null")
+        val player = testExoPlayer ?: return
         println("buff%: ${player.bufferedPercentage}, buff pos: ${player.bufferedPosition}, total buff: ${player.totalBufferedDuration}")
         // Try to load more of the audio track
         if (playingFile != null && player.totalBufferedDuration < 10000) {
