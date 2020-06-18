@@ -22,7 +22,7 @@ import org.apache.commons.io.FileUtils
 import java.io.*
 
 class MusicService : BaseActivity() {
-    lateinit var torrentStream : TorrentStream
+    lateinit var torrentStream: TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
     lateinit var contentSeeder: ContentSeeder
 

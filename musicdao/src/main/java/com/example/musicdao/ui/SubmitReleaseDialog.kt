@@ -15,7 +15,6 @@ import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.ReleaseOverviewFragment
 import com.frostwire.jlibtorrent.TorrentInfo
-import kotlinx.android.synthetic.main.dialog_submit_release.*
 
 /**
  * A form within a dialog which allows the user to submit a Release and publish it, by either

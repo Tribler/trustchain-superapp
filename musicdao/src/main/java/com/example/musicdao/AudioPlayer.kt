@@ -1,11 +1,8 @@
 package com.example.musicdao
 
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.SeekBar
-import android.widget.Toast
 import com.frostwire.jlibtorrent.FileStorage
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -17,14 +14,12 @@ import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 
-
 lateinit var instance: AudioPlayer
 
 /**
  * Implements an Android MediaPlayer. Is a singleton.
  */
 class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
-    //TODO most of the code down below should be removed or adapted in order to migrate to ExoPlayer
     private var interestedFraction: Float = 0F
     private var playingFile: File? = null
     private var currentReleaseFiles: FileStorage? = null
@@ -34,21 +29,6 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setInstance(this)
-
-//        songArtist.text = "No track currently playing"
-//        seekBarAudioPlayer.setOnSeekBarChangeListener(this)
-
-        // Handle playing and pausing tracks
-//        playButtonAudioPlayer.setOnClickListener {
-////            if (mediaPlayer.isPlaying) {
-////                playButtonAudioPlayer.setImageResource(android.R.drawable.ic_media_play)
-////                mediaPlayer.pause()
-////            } else {
-////                playButtonAudioPlayer.setImageResource(android.R.drawable.ic_media_pause)
-////                mediaPlayer.start()
-////            }
-//        }
-
         initExoPlayer()
     }
 
@@ -62,7 +42,7 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
         playerView.player = testExoPlayer
     }
 
-    fun release() {
+    private fun release() {
         testExoPlayer?.release()
         testExoPlayer = null
     }
@@ -97,21 +77,16 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
     fun prepareNextTrack() {
         testExoPlayer?.stop()
         testExoPlayer?.seekTo(0)
-//        if (mediaPlayer.isPlaying) mediaPlayer.stop()
-//        seekBarAudioPlayer.progress = 0
-//        playButtonAudioPlayer.setImageResource(drawable.ic_media_play)
-//        mediaPlayer.reset()
     }
 
     fun retry() {
         val player = testExoPlayer ?: throw Error("ExoPlayer is null")
         println("buff%: ${player.bufferedPercentage}, buff pos: ${player.bufferedPosition}, total buff: ${player.totalBufferedDuration}")
-        //Try to load more of the audio track
+        // Try to load more of the audio track
         if (playingFile != null && player.totalBufferedDuration < 10000) {
             val mediaSource = buildMediaSource(Uri.fromFile(playingFile))
             requireActivity().runOnUiThread {
                 player.prepare(mediaSource, false, false)
-//                player.retry()
             }
         }
     }
@@ -141,5 +116,4 @@ class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
     fun hideTrackInfo() {
         trackInfo.visibility = View.GONE
     }
-
 }

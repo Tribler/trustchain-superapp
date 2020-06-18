@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.android.synthetic.main.fragment_release_cover.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 

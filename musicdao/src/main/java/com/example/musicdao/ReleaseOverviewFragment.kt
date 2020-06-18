@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.fragment_release_overview.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
@@ -59,7 +58,6 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         SubmitReleaseDialog(this)
             .show(childFragmentManager, "Submit metadata")
     }
-
 
     /**
      * After the user inserts some metadata for the release to be published, this function is called

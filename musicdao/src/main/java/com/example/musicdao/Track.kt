@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import kotlinx.android.synthetic.main.track_row.trackTitle
 import kotlinx.android.synthetic.main.track_table_row.*
 
-
 class Track(
     private val name: String,
     private val index: Int,

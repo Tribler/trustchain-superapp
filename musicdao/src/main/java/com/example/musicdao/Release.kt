@@ -1,12 +1,9 @@
 package com.example.musicdao
 
-import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.*
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
@@ -18,7 +15,6 @@ import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import java.io.File
-import java.lang.Exception
 
 /**
  * A release is an audio album, EP, single, etc.
@@ -156,8 +152,9 @@ class Release(
     }
 
     override fun onStreamReady(torrent: Torrent?) {
-        if (!AudioPlayer.getInstance().isPlaying() && torrent != null
-            && currentFileIndex != -1
+        if (!AudioPlayer.getInstance().isPlaying() &&
+            torrent != null &&
+            currentFileIndex != -1
         ) {
             startPlaying(
                 torrent.videoFile,
@@ -210,5 +207,4 @@ class Release(
         Toast.makeText(context, "Torrent stream error: ${e?.message}", Toast.LENGTH_LONG).show()
         e?.printStackTrace()
     }
-
 }

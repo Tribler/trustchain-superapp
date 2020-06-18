@@ -39,5 +39,4 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
             sessionManager.download(torrentInfo, saveDir)
         }
     }
-
 }

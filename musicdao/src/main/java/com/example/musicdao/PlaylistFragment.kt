@@ -1,14 +1,8 @@
 package com.example.musicdao
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import com.frostwire.jlibtorrent.TorrentInfo
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import java.lang.Error
-import java.lang.Exception
 
 class PlaylistFragment : BaseFragment(R.layout.fragment_playlist) {
 
