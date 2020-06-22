@@ -72,7 +72,8 @@
 
         <activity
             android:name="com.example.musicdao.MusicService"
-            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:screenOrientation="portrait"/>
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>

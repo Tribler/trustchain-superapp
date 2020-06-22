@@ -1,121 +1,87 @@
 package com.example.musicdao
 
-import android.content.Context
-import android.widget.LinearLayout
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
+import androidx.fragment.app.Fragment
+import com.example.musicdao.util.Util
+import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
-import kotlinx.android.synthetic.main.music_app_main.*
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import kotlinx.android.synthetic.main.fragment_release.*
+import kotlinx.android.synthetic.main.fragment_trackplaying.*
+import java.io.File
 
 /**
  * A release is an audio album, EP, single, etc.
  */
 class Release(
-    context: Context,
     private val magnet: String,
-    private val musicService: MusicService,
-    transaction: TrustChainTransaction
-) : TableLayout(context),
-    TorrentListener {
-    private var tracks: MutableList<Track> = mutableListOf<Track>()
+    private val artists: String,
+    private val title: String,
+    private val date: String,
+    private val publisher: String,
+    private val torrentInfoName: String?
+) : Fragment(R.layout.fragment_release), TorrentListener {
+    private var metadata: TorrentInfo? = null
+    private var tracks: MutableMap<Int, Track> = hashMapOf()
     private var currentFileIndex = -1
-    private var fetchingMetadataRow = TableRow(context)
-    private var metadataRow = TableRow(context)
-    private lateinit var torrent: Torrent
+    private var prevFileIndex = -1
+    private var prevProgress = -1.0f
+    private var setTorrentMetadata: TorrentInfo? = null
+    private var localTorrent: Torrent? = null
 
-    init {
-        // Generate the UI
-        this.setColumnStretchable(2, true)
-        this.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        val blockMetadata = TextView(context)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         blockMetadata.text =
-            HtmlCompat.fromHtml("Signed block with release:<br>$transaction\n<br><b>" +
-                "${transaction["artists"]} - ${transaction["title"]}<br>" +
-                "Released at ${transaction["date"]}</b>", 0)
-        blockMetadata.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.MATCH_PARENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        metadataRow.layoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        )
-        val params = blockMetadata.layoutParams as TableRow.LayoutParams
-        params.span = 3
-        blockMetadata.layoutParams = params
-        metadataRow.addView(blockMetadata)
-        this.addView(metadataRow)
-        val magnetTextView = TextView(context)
-        magnetTextView.text = "Fetching metadata for magnet link..."
-        magnetTextView.layoutParams = TableRow.LayoutParams(
-            TableRow.LayoutParams.WRAP_CONTENT,
-            TableRow.LayoutParams.WRAP_CONTENT
-        )
-        fetchingMetadataRow.addView(magnetTextView)
-        this.addView(fetchingMetadataRow)
+            HtmlCompat.fromHtml(
+                "<b>$artists - $title<br></b>" +
+                    date, 0
+            )
 
-        // When the Release is added, it will try to fetch the metadata for the corresponding magnet
-        try {
-            musicService.torrentStream?.startStream(magnet)
-            musicService.torrentStream?.addListener(this)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    /**
-     * Select a track from the Release and start downloading and seeding it
-     */
-    fun selectTrackAndDownload(index: Int) {
-        if (this::torrent.isInitialized) {
-            currentFileIndex = index
-            torrent.setSelectedFileIndex(currentFileIndex)
-            val track = tracks[currentFileIndex]
-            track.selectToPlay(torrent)
-            // TODO needs to have a solid check whether the file was already downloaded before
-            if (torrent.videoFile.isFile && torrent.videoFile.length() == torrent.torrentHandle.torrentFile()
-                    .files().fileSize(index)
-            ) {
-                musicService.fillProgressBar()
-                musicService.bufferInfo.text =
-                    "Selected: ${torrent.videoFile.nameWithoutExtension}, buffer progress: 100%"
-                AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
-            } else {
-                musicService.resetProgressBar()
-                torrent.startDownload()
+        var torrentUrl = magnet
+        if (torrentInfoName != null) {
+            val torrentFileName = "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFile = File(torrentFileName)
+            if (torrentFile.isFile) {
+                // This means we have the torrent file already locally and we can skip the step of
+                // obtaining the TorrentInfo from magnet link
+                torrentUrl = torrentFile.toUri().toString()
             }
         }
+
+        (activity as MusicService).torrentStream.resumeSession()
+        if ((activity as MusicService).torrentStream.isStreaming) {
+            (activity as MusicService).torrentStream.stopStream()
+        }
+        (activity as MusicService).torrentStream.startStream(torrentUrl)
+        (activity as MusicService).torrentStream.addListener(this)
+
+        AudioPlayer.getInstance().hideTrackInfo()
     }
 
-    /**
-     * When the track is buffered, this is called.
-     * Then set the audio resource on the audioplayer.
-     */
-    override fun onStreamReady(torrent: Torrent) {
-        println("Stream ready")
-        AudioPlayer.getInstance(context, musicService).setAudioResource(torrent.videoFile)
+    override fun onDestroy() {
+        super.onDestroy()
+        (activity as MusicService).torrentStream.removeListener(this)
+        if ((activity as MusicService).torrentStream.isStreaming) {
+            (activity as MusicService).torrentStream.stopStream()
+        }
     }
 
-    /**
-     * This is called when the metadata is fetched. Then we can render a table with all
-     * of the songs
-     */
-    override fun onStreamPrepared(torrent: Torrent) {
-        // TODO add a check here for whether this torrent is the torrent of this Release
-        println("Stream prepared")
-        this.removeView(fetchingMetadataRow)
-        this.torrent = torrent
-        torrent.fileNames?.forEachIndexed { index, fileName ->
-            val allowedExtensions =
-                listOf<String>("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
+    private fun setMetadata(metadata: TorrentInfo) {
+        this.metadata = metadata
+        val num = metadata.numFiles()
+        val filestorage = metadata.files()
+
+        val allowedExtensions =
+            listOf("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
+
+        for (index in 0 until num) {
+            val fileName = filestorage.fileName(index)
             var found = false
             for (s in allowedExtensions) {
                 if (fileName.endsWith(s)) {
@@ -123,31 +89,129 @@ class Release(
                 }
             }
             if (found) {
-                val track = Track(context, fileName, index, this, musicService)
-                this.addView(track)
-                tracks.add(track)
+                val track = Track(
+                    fileName,
+                    index,
+                    this,
+                    Util.readableBytes(filestorage.fileSize(index))
+                )
+
+                // Add a table row (Track) to the table (Release)
+                val transaction = childFragmentManager.beginTransaction()
+                transaction.add(R.id.release_table_layout, track, "track$index")
+                transaction.commit()
+                tracks[index] = track
             }
         }
     }
 
-    override fun onStreamStopped() {
-        println("Stream stopped")
-    }
+    /**
+     * Select a track from the Release and start downloading and seeding it
+     */
+    fun selectTrackAndPlay(index: Int) {
+        currentFileIndex = index
 
-    override fun onStreamStarted(torrent: Torrent) {
-        println("Stream started: " + torrent.videoFile)
+        val audioPlayer = AudioPlayer.getInstance()
+        audioPlayer.prepareNextTrack()
+
+        val tor = localTorrent
+        if (tor != null) {
+            (activity as MusicService).torrentStream.removeListener(this)
+            tor.setSelectedFileIndex(currentFileIndex)
+            trackInfo?.text = tor.videoFile.nameWithoutExtension
+            trackInfo?.visibility = View.VISIBLE
+            AudioPlayer.getInstance().setTrackInfo(tor.videoFile.nameWithoutExtension)
+            Util.setSequentialPriorities(tor)
+            (activity as MusicService).torrentStream.addListener(this)
+
+            // TODO needs to have a solid check whether the file was already downloaded before
+            if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
+                startPlaying(tor.videoFile, currentFileIndex)
+            }
+        }
     }
 
     /**
-     * This is called when the torrent client downloaded a torrent piece.
+     * For each track in the list, try to update its progress bar UI state which corresponds to the
+     * percentage of downloaded pieces from that track
      */
-    override fun onStreamProgress(torrent: Torrent, status: StreamStatus) {
-        if (currentFileIndex == -1) return
-        val track = tracks[currentFileIndex]
-        track.handleDownloadProgress(torrent, status)
+    private fun updateFileProgress(fileProgressArray: LongArray) {
+        if (this.isAdded) {
+            fileProgressArray.forEachIndexed { index, fileProgress ->
+                tracks[index]?.setDownloadProgress(
+                    fileProgress,
+                    metadata?.files()?.fileSize(index)
+                )
+            }
+        }
     }
 
-    override fun onStreamError(torrent: Torrent, e: Exception) {
-        e.printStackTrace()
+    private fun startPlaying(file: File, index: Int) {
+        val audioPlayer = AudioPlayer.getInstance()
+        audioPlayer.setAudioResource(file, index)
+    }
+
+    override fun onStreamReady(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+        if (!AudioPlayer.getInstance().isPlaying() &&
+            torrent != null &&
+            currentFileIndex != -1
+        ) {
+            startPlaying(
+                torrent.videoFile,
+                currentFileIndex
+            )
+        }
+    }
+
+    override fun onStreamPrepared(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+        localTorrent = torrent
+        if (torrent == null) return
+        torrent.setSelectedFileIndex(0)
+        torrent.startDownload()
+        Util.setSequentialPriorities(torrent)
+        val torrentFile = torrent.torrentHandle?.torrentFile()
+            ?: throw Error("Unknown torrent file metadata")
+        if (this.isAdded) {
+            setMetadata(torrentFile)
+        }
+        // Keep seeding the torrent, also after start-up or after browsing to a different Release
+        (requireActivity() as MusicService).contentSeeder.add(torrentFile)
+    }
+
+    override fun onStreamStopped() {}
+
+    override fun onStreamStarted(torrent: Torrent?) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+    }
+
+    override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
+        val fileProgress = torrent?.torrentHandle?.fileProgress()
+        if (fileProgress != null) updateFileProgress(fileProgress)
+        val progress = status.progress
+        if (progress > 30 && !AudioPlayer.getInstance()
+                .isPlaying() && torrent != null && currentFileIndex != -1
+        ) {
+            startPlaying(
+                torrent.videoFile,
+                currentFileIndex
+            )
+        }
+        if (progress != prevProgress) {
+            AudioPlayer.getInstance().retry()
+            println("Buffer: ${status.bufferProgress}, progress: $progress")
+        }
+        prevProgress = progress
+        prevFileIndex = currentFileIndex
+    }
+
+    override fun onStreamError(torrent: Torrent?, e: Exception?) {
+        Log.e("TorrentStream", "Torrent stream error")
+        Toast.makeText(context, "Torrent stream error: ${e?.message}", Toast.LENGTH_LONG).show()
+        e?.printStackTrace()
     }
 }

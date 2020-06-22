@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coverCard"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:layout_margin="@dimen/fab_margin"
+    android:focusable="true"
+    android:elevation="3dp"
+    app:cardBackgroundColor="@color/dark_gray">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="@dimen/fab_margin"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/coverTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Album title"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:id="@+id/coverArtists"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Artist1, artist2"
+                android:textColor="@color/mild_gray" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</androidx.cardview.widget.CardView>
