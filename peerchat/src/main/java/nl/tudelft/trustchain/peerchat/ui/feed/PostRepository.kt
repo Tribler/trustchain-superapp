@@ -32,26 +32,61 @@ class PostRepository(
         }
     }
 
-    fun likePost(block: TrustChainBlock) {
-        val likeBlock = LikeBlockBuilder(trustChainCommunity.myPeer,
-            trustChainCommunity.database, block).sign()
-        trustChainCommunity.onBlockCreated(likeBlock)
+    fun likePost(block: TrustChainBlock): Boolean {
+        return if (!hasLikedPost(block)) {
+            val likeBlock = LikeBlockBuilder(
+                trustChainCommunity.myPeer,
+                trustChainCommunity.database, block
+            ).sign()
+            trustChainCommunity.onBlockCreated(likeBlock)
+            true
+        } else {
+            false
+        }
+    }
+
+    /**
+     * Returns true if the current user has liked the post.
+     */
+    fun hasLikedPost(block: TrustChainBlock): Boolean {
+        val myPeer = IPv8Android.getInstance().myPeer
+        val linkedBlocks = trustChainCommunity.database
+            .getAllLinked(block)
+        return linkedBlocks.find {
+            it.type == BLOCK_TYPE_LIKE &&
+            it.publicKey.contentEquals(myPeer.publicKey.keyToBin())
+        } != null
+    }
+
+    private fun findContactByPublicKey(contacts: List<Contact>, publicKeyBin: ByteArray): Contact? {
+        val myPeer = IPv8Android.getInstance().myPeer
+        val myContact = Contact("You", myPeer.publicKey)
+        return if (publicKeyBin.contentEquals(myPeer.publicKey.keyToBin()))
+            myContact
+        else contacts.find {
+            it.publicKey.keyToBin().contentEquals(publicKeyBin)
+        }
     }
 
     suspend fun getPostsByFriends(): List<PostItem> {
         val myPeer = IPv8Android.getInstance().myPeer
-        val myContact = Contact("You", myPeer.publicKey)
         val contacts = peerChatStore.getContacts().first()
-        val blocks = trustChainCommunity.database
+        val posts = trustChainCommunity.database
             .getBlocksWithType(BLOCK_TYPE_POST)
             .sortedByDescending { it.insertTime }
-        return blocks.map { block ->
-            val contact = if (block.publicKey.contentEquals(myPeer.publicKey.keyToBin()))
-                myContact
-            else contacts.find {
-                it.publicKey.keyToBin().contentEquals(block.publicKey)
-            }
-            PostItem(block, contact)
+        val likes = trustChainCommunity.database
+            .getBlocksWithType(BLOCK_TYPE_LIKE)
+            .sortedByDescending { it.insertTime }
+        return posts.map { post ->
+            val contact = findContactByPublicKey(contacts, post.publicKey)
+            val replies = posts.filter { it.linkedBlockId == post.blockId }
+            val postLikes = likes.filter { it.linkedBlockId == post.blockId }
+            val liked = postLikes.find {
+                it.publicKey.contentEquals(myPeer.publicKey.keyToBin())
+            } != null
+            val linkedBlock = posts.find { it.blockId == post.linkedBlockId }
+            val linkedContact = findContactByPublicKey(contacts, post.linkPublicKey)
+            PostItem(post, contact, linkedBlock, linkedContact, replies, postLikes, liked)
         }
     }
 

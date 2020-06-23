@@ -1,6 +1,10 @@
 package nl.tudelft.trustchain.peerchat.ui.feed
 
+import android.graphics.Color
 import android.view.View
+import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_post.view.*
 import nl.tudelft.trustchain.peerchat.R
@@ -14,8 +18,9 @@ class PostItemRenderer(
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
 
     override fun bindView(item: PostItem, view: View) = with(view) {
-        val text = item.block.transaction[PostRepository.KEY_TEXT]
-        txtMessage.text = text as? String
+        val prefix = if (item.linkedContact != null) "@" + item.linkedContact.name + ": " else ""
+        val text = item.block.transaction[PostRepository.KEY_TEXT] as? String
+        txtMessage.text = prefix + text
 
         val lastMessageDate = item.block.timestamp
         txtDate.text = dateFormat.format(lastMessageDate)
@@ -35,6 +40,19 @@ class PostItemRenderer(
         btnComment.setOnClickListener {
             onComment(item)
         }
+
+        txtCommentCount.text = item.replies.size.toString()
+        txtLikeCount.text = item.likes.size.toString()
+
+        val likeColor = if (item.liked)
+            ResourcesCompat.getColor(view.resources, R.color.colorPrimary, null) else
+            ResourcesCompat.getColor(view.resources, R.color.text_secondary, null)
+
+        btnLike.setColorFilter(likeColor)
+        txtLikeCount.setTextColor(likeColor)
+
+        btnComment.isVisible = item.block.isProposal
+        txtCommentCount.isVisible = item.block.isProposal
 
         /*
         // txtName.isVisible = item.contact.name.isNotEmpty()

@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.content.ContextCompat.getSystemService
@@ -59,7 +60,9 @@ class FeedFragment : BaseFragment(R.layout.fragment_feed) {
         super.onCreate(savedInstanceState)
 
         adapter.registerRenderer(PostItemRenderer({
-            postRepository.likePost(it.block)
+            if (!postRepository.likePost(it.block)) {
+                Toast.makeText(requireContext(), "You already liked this post", Toast.LENGTH_SHORT).show()
+            }
         }, {
             val args = Bundle()
             args.putString(NewPostFragment.ARG_HASH, it.block.calculateHash().toHex())

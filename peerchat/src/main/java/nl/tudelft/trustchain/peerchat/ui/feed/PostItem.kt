@@ -8,5 +8,13 @@ import java.util.*
 
 data class PostItem(
     val block: TrustChainBlock,
-    val contact: Contact?
+    val contact: Contact?,
+    val linkedBlock: TrustChainBlock?,
+    val linkedContact: Contact?,
+    val replies: List<TrustChainBlock>,
+    val likes: List<TrustChainBlock>,
+    /**
+     * True if I liked this post.
+     */
+    val liked: Boolean
 ) : Item()

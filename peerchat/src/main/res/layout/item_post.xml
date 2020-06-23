@@ -100,6 +100,7 @@
             android:background="?selectableItemBackgroundBorderless"/>
 
         <TextView
+            android:id="@+id/txtLikeCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
@@ -119,6 +120,7 @@
             android:background="?selectableItemBackgroundBorderless"/>
 
         <TextView
+            android:id="@+id/txtCommentCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
