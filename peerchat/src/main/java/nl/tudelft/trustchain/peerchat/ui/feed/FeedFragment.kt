@@ -1,17 +1,9 @@
 package nl.tudelft.trustchain.peerchat.ui.feed
 
-import android.bluetooth.BluetoothManager
-import android.content.res.ColorStateList
-import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.getColor
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
@@ -22,21 +14,13 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.databinding.FragmentContactsBinding
 import nl.tudelft.trustchain.peerchat.databinding.FragmentFeedBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.Contact
-import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FeedFragment : BaseFragment(R.layout.fragment_feed) {

@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.peerchat.ui.feed
 
-import android.graphics.Color
 import android.view.View
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import androidx.core.view.updatePadding
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_post.view.*
 import nl.tudelft.trustchain.peerchat.R
@@ -72,7 +70,6 @@ class PostItemRenderer(
             true
         }
          */
-
     }
 
     override fun getLayoutResourceId(): Int {
