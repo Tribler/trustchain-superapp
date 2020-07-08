@@ -7,14 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
+    private var lastReleaseBlocksSize = -1
+    private val maxReleases = 10
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -22,7 +28,15 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
     ): View? {
         registerBlockListener()
 
-        showAllReleases()
+        lastReleaseBlocksSize = -1
+
+        lifecycleScope.launchWhenCreated {
+            while(isActive) {
+                showAllReleases()
+                delay(3000)
+            }
+        }
+
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -37,18 +51,25 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
      */
     private fun showAllReleases() {
         val releaseBlocks = getTrustChainCommunity().database.getBlocksWithType("publish_release")
+        if (releaseBlocks.size == lastReleaseBlocksSize) {
+            return
+        }
+        var count = 0
         for (block in releaseBlocks) {
+            if (count == maxReleases) return
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
+                count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
                 transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
                 transaction.commit()
             }
         }
+        lastReleaseBlocksSize = releaseBlocks.size
     }
 
     /**
@@ -82,7 +103,6 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         val myPeer = IPv8Android.getInstance().myPeer
 
         val transaction = mapOf(
-            "publisher" to myPeer.mid,
             "magnet" to magnet.toString(),
             "title" to title.toString(),
             "artists" to artists.toString(),

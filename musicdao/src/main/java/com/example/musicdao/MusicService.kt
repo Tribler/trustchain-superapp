@@ -8,11 +8,14 @@ import android.provider.MediaStore
 import android.view.ContextMenu
 import android.view.View
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -38,6 +41,8 @@ class MusicService : BaseActivity() {
 
         registerBlockSigner()
 
+        iterativelyCrawlTrustChains()
+
         contentSeeder = ContentSeeder(SessionManager(), applicationContext.cacheDir)
         contentSeeder.start()
     }
@@ -49,6 +54,21 @@ class MusicService : BaseActivity() {
     ) {
         super.onCreateContextMenu(menu, v, menuInfo)
         menuInflater.inflate(R.menu.menu_add_playlist, menu)
+    }
+
+    /**
+     * This is a very simplistic way to crawl all chains from the peers you know
+     */
+    private fun iterativelyCrawlTrustChains() {
+        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                for (peer in trustchain.getPeers()) {
+                    trustchain.crawlChain(peer)
+                }
+                delay(1000)
+            }
+        }
     }
 
     fun getDhtNodes(): Int {
