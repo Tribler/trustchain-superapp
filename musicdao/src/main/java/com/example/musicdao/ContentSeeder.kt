@@ -7,11 +7,15 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import java.util.*
 
+lateinit var contentSeederInstance: ContentSeeder
 
 class ContentSeeder(private val sessionManager: SessionManager, private val saveDir: File) {
     private val maxTorrentThreads = 10
+    private var started = false
 
     fun start() {
+        if (started) return
+        started = true
         if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
         saveDir.listFiles()?.forEachIndexed { index, file ->
             if (index >= maxTorrentThreads) return
@@ -39,6 +43,15 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
                 FileUtils.copyInputStreamToFile(torrentInfo.bencode().inputStream(), torrentFile)
             }
             sessionManager.download(torrentInfo, saveDir)
+        }
+    }
+
+    companion object {
+        fun getInstance(sessionManager: SessionManager, cacheDir: File): ContentSeeder {
+            if (!::contentSeederInstance.isInitialized) {
+                contentSeederInstance = ContentSeeder(sessionManager, cacheDir)
+            }
+            return contentSeederInstance
         }
     }
 }

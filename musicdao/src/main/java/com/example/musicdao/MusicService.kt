@@ -1,12 +1,14 @@
 package com.example.musicdao
 
+import android.app.SearchManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.ContextMenu
-import android.view.View
+import android.view.*
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.frostwire.jlibtorrent.SessionManager
@@ -24,36 +26,73 @@ import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
 import java.io.*
 
-class MusicService : BaseActivity() {
+open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
     lateinit var contentSeeder: ContentSeeder
+    var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        torrentStream = TorrentStream.init(
-            TorrentOptions.Builder()
-                .saveLocation(applicationContext.cacheDir)
-                .removeFilesAfterStop(false)
-                .autoDownload(false)
-                .build())
+        torrentStream = try {
+            TorrentStream.getInstance()
+        } catch (e: Exception) {
+            TorrentStream.init(
+                TorrentOptions.Builder()
+                    .saveLocation(applicationContext.cacheDir)
+                    .removeFilesAfterStop(false)
+                    .autoDownload(false)
+                    .build())
+        }
 
         registerBlockSigner()
 
         iterativelyCrawlTrustChains()
 
-        contentSeeder = ContentSeeder(SessionManager(), applicationContext.cacheDir)
+        contentSeeder = ContentSeeder.getInstance(SessionManager(), applicationContext.cacheDir)
         contentSeeder.start()
+
+        handleIntent(intent)
     }
 
-    override fun onCreateContextMenu(
-        menu: ContextMenu?,
-        v: View?,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        menuInflater.inflate(R.menu.menu_add_playlist, menu)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        if (Intent.ACTION_SEARCH == intent.action) {
+            intent.getStringExtra(SearchManager.QUERY)?.also { query ->
+                filter = query
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (menu == null) return false
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_searchable, menu)
+//
+//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+//        (menu.findItem(R.id.action_search).actionView as SearchView).apply {
+//            // Assumes current activity is the menu_searchable activity
+//            setSearchableInfo(searchManager.getSearchableInfo(componentName))
+//            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
+//        }
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_search -> {
+                onSearchRequested()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     /**

@@ -60,12 +60,18 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
+            var query = ""
+            if (requireActivity() is MusicService) {
+                query = (requireActivity() as MusicService).filter
+            }
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
                 count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
-                transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                if (coverFragment.filter(query)) {
+                    transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                }
                 transaction.commit()
             }
         }
