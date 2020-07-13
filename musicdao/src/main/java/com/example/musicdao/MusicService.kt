@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
-import android.widget.SearchView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.frostwire.jlibtorrent.SessionManager

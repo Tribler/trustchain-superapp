@@ -1,16 +1,10 @@
 package com.example.musicdao
 
-import android.app.Activity
-import android.app.ListActivity
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import androidx.fragment.app.FragmentActivity
-import androidx.media.session.MediaButtonReceiver.handleIntent
-import nl.tudelft.trustchain.common.BaseActivity
 
-class SearchableActivity: MusicService() {
+class SearchableActivity : MusicService() {
     override val navigationGraph = R.navigation.musicdao_navgraph
 
     override fun onCreate(savedInstanceState: Bundle?) {

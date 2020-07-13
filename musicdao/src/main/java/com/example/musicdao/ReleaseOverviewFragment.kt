@@ -31,7 +31,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         lastReleaseBlocksSize = -1
 
         lifecycleScope.launchWhenCreated {
-            while(isActive) {
+            while (isActive) {
                 showAllReleases()
                 delay(3000)
             }
