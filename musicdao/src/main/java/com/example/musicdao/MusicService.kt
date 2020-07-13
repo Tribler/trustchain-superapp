@@ -74,14 +74,6 @@ open class MusicService : BaseActivity() {
         if (menu == null) return false
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.menu_searchable, menu)
-//
-//        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-//        (menu.findItem(R.id.action_search).actionView as SearchView).apply {
-//            // Assumes current activity is the menu_searchable activity
-//            setSearchableInfo(searchManager.getSearchableInfo(componentName))
-//            setIconifiedByDefault(false) // Do not iconify the widget; expand it by default
-//        }
-
         return true
     }
 

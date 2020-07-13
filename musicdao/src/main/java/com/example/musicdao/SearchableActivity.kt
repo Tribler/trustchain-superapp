@@ -15,11 +15,6 @@ class SearchableActivity: MusicService() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.view_results)
-
-//        val transaction = supportFragmentManager.beginTransaction()
-//        transaction.add(R.id.baseFrameLayout, ReleaseOverviewFragment(), "releaseOverviewSearchResults")
-//        transaction.commit()
 
         handleIntent(intent)
     }

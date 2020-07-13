@@ -40,5 +40,4 @@
         android:name="com.example.musicdao.PlaylistFragment"
         android:label="Playlist">
     </fragment>
-
 </navigation>
