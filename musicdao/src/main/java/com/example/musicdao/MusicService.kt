@@ -104,8 +104,9 @@ open class MusicService : BaseActivity() {
             while (isActive) {
                 for (peer in trustchain.getPeers()) {
                     trustchain.crawlChain(peer)
+                    delay(1000)
                 }
-                delay(1000)
+                delay(5000)
             }
         }
     }
