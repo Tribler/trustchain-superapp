@@ -2,7 +2,6 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +11,11 @@ import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
     private val maxReleases = 10
-    private val standardReleases: List<TrustChainBlock> = listOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
