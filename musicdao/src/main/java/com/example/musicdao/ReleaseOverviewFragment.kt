@@ -11,7 +11,6 @@ import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
