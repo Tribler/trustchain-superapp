@@ -17,9 +17,10 @@ import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
-class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
+class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
     private val maxReleases = 10
+    private val standardReleases: List<TrustChainBlock> = listOf()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -50,7 +51,7 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
      * List all the releases that are currently loaded in the local trustchain database
      */
     private fun showAllReleases() {
-        val releaseBlocks = getTrustChainCommunity().database.getBlocksWithType("publish_release")
+        val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
         if (releaseBlocks.size == lastReleaseBlocksSize) {
             return
         }
@@ -75,8 +76,20 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
                 transaction.commit()
             }
         }
+
+//        if (count == 0) generateStandardReleases()
+
         lastReleaseBlocksSize = releaseBlocks.size
     }
+
+    /**
+     * When no releases from peers are found, use this to add some default, hardcoded Releases
+     */
+//    private fun generateStandardReleases() {
+//        for (release in standardReleases) {
+//            publish(release.magnet, release.title, release.artists, release.releaseData, release.torrentInfoName)
+//        }
+//    }
 
     /**
      * Creates a trustchain block which uses the example creative commons release magnet
@@ -106,17 +119,19 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         magnet: Editable?,
         torrentInfoName: String
     ) {
-        val myPeer = IPv8Android.getInstance().myPeer
+        publish(magnet.toString(), title.toString(), artists.toString(), releaseDate.toString(), torrentInfoName)
+    }
 
+    private fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
+        val myPeer = IPv8Android.getInstance().myPeer
         val transaction = mapOf(
-            "magnet" to magnet.toString(),
-            "title" to title.toString(),
-            "artists" to artists.toString(),
-            "date" to releaseDate.toString(),
+            "magnet" to magnet,
+            "title" to title,
+            "artists" to artists,
+            "date" to releaseDate,
             "torrentInfoName" to torrentInfoName
         )
-        val trustchain = getTrustChainCommunity()
-        Toast.makeText(context, "Creating proposal block", Toast.LENGTH_SHORT).show()
+        val trustchain = getMusicCommunity()
         trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
     }
 
@@ -125,14 +140,9 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
      * its metadata from its torrent file structure.
      */
     private fun registerBlockListener() {
-        val trustchain = getTrustChainCommunity()
+        val trustchain = getMusicCommunity()
         trustchain.addListener("publish_release", object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Toast.makeText(
-                    context,
-                    "Discovered signed block ${block.blockId}",
-                    Toast.LENGTH_LONG
-                ).show()
                 val magnet = block.transaction["magnet"]
                 if (magnet != null && magnet is String) {
                     val transaction = requireActivity().supportFragmentManager.beginTransaction()

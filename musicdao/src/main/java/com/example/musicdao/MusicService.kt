@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.view.*
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import com.example.musicdao.ipv8.MusicCommunity
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
@@ -90,11 +91,11 @@ open class MusicService : BaseActivity() {
      * This is a very simplistic way to crawl all chains from the peers you know
      */
     private fun iterativelyCrawlTrustChains() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                for (peer in trustchain.getPeers()) {
-                    trustchain.crawlChain(peer)
+                for (peer in musicCommunity.getPeers()) {
+                    musicCommunity.crawlChain(peer)
                     delay(1000)
                 }
                 delay(5000)
@@ -125,15 +126,15 @@ open class MusicService : BaseActivity() {
      * artist/label (artist passport).
      */
     private fun registerBlockSigner() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.registerBlockSigner("publish_release", object : BlockSigner {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+        musicCommunity.registerBlockSigner("publish_release", object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 Toast.makeText(
                     applicationContext,
                     "Signing block ${block.blockId}",
                     Toast.LENGTH_LONG
                 ).show()
-                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+                musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
     }

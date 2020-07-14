@@ -19,7 +19,7 @@ lateinit var instance: AudioPlayer
 /**
  * Implements an Android MediaPlayer. Is a singleton.
  */
-class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
+class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     private var interestedFraction: Float = 0F
     private var playingFile: File? = null
     private var currentReleaseFiles: FileStorage? = null

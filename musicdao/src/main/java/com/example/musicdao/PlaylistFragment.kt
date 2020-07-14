@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import nl.tudelft.trustchain.common.ui.BaseFragment
 
-class PlaylistFragment : BaseFragment(R.layout.fragment_playlist) {
+class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val localArgs = arguments
