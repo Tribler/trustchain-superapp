@@ -25,8 +25,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        registerBlockListener()
-
         lastReleaseBlocksSize = -1
 
         lifecycleScope.launchWhenCreated {
@@ -56,6 +54,9 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         }
         lastReleaseBlocksSize = releaseBlocks.size
         var count = 0
+        if (release_overview_layout is ViewGroup) {
+            release_overview_layout.removeAllViews()
+        }
         for (block in releaseBlocks) {
             if (count == maxReleases) return
             val magnet = block.transaction["magnet"]
@@ -77,15 +78,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
             }
         }
     }
-
-    /**
-     * When no releases from peers are found, use this to add some default, hardcoded Releases
-     */
-//    private fun generateStandardReleases() {
-//        for (release in standardReleases) {
-//            publish(release.magnet, release.title, release.artists, release.releaseData, release.torrentInfoName)
-//        }
-//    }
 
     /**
      * Creates a trustchain block which uses the example creative commons release magnet
@@ -129,25 +121,5 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         )
         val trustchain = getMusicCommunity()
         trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
-    }
-
-    /**
-     * Once blocks on the trustchain arrive, which are audio release blocks, try to fetch and render
-     * its metadata from its torrent file structure.
-     */
-    private fun registerBlockListener() {
-        val trustchain = getMusicCommunity()
-        trustchain.addListener("publish_release", object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                val magnet = block.transaction["magnet"]
-                if (magnet != null && magnet is String) {
-                    val transaction = requireActivity().supportFragmentManager.beginTransaction()
-                    val coverFragment = ReleaseCoverFragment(block)
-                    transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
-                    transaction.commit()
-                }
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
     }
 }
