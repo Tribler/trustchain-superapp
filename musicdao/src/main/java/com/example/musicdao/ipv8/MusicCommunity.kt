@@ -36,6 +36,7 @@ class MusicCommunity(settings: TrustChainSettings,
     companion object {
         // These are initial addresses for some peers that have initial content,
         // in the case that no content can be found on the first run of the app.
+        // TODO set-up an actual initial address that has 99% uptime
         val INITIAL_ADDRESSES: List<IPv4Address> = listOf(
             IPv4Address("143.179.42.88", 13079)
         )

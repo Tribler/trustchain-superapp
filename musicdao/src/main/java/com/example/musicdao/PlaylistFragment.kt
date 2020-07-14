@@ -2,7 +2,6 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.view.View
-import nl.tudelft.trustchain.common.ui.BaseFragment
 
 class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
 

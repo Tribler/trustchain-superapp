@@ -11,7 +11,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 
 lateinit var instance: AudioPlayer
