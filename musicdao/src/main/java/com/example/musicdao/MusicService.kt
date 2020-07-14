@@ -99,7 +99,7 @@ open class MusicService : BaseActivity() {
                     musicCommunity.crawlChain(peer)
                     delay(1000)
                 }
-                delay(5000)
+                delay(3000)
             }
         }
     }

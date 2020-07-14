@@ -27,8 +27,7 @@ class MusicCommunity(
     override fun bootstrap() {
         super.bootstrap()
 
-        // TODO requires testing
-        // Discovering should produce a handshake
+        // Connect to some initial addresses to reduce 'empty content' page
         for (address in INITIAL_ADDRESSES) {
             walkTo(address)
         }
@@ -37,9 +36,8 @@ class MusicCommunity(
     companion object {
         // These are initial addresses for some peers that have initial content,
         // in the case that no content can be found on the first run of the app.
-        // TODO set-up an actual initial address that has 99% uptime
         val INITIAL_ADDRESSES: List<IPv4Address> = listOf(
-            IPv4Address("143.179.42.88", 13079)
+            IPv4Address("83.84.32.175", 33884)
         )
     }
 }

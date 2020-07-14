@@ -32,7 +32,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         lifecycleScope.launchWhenCreated {
             while (isActive) {
                 showAllReleases()
-                delay(3000)
+                delay(1000)
             }
         }
 
@@ -48,11 +48,13 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     /**
      * List all the releases that are currently loaded in the local trustchain database
      */
+    @Synchronized
     private fun showAllReleases() {
         val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
         if (releaseBlocks.size == lastReleaseBlocksSize) {
             return
         }
+        lastReleaseBlocksSize = releaseBlocks.size
         var count = 0
         for (block in releaseBlocks) {
             if (count == maxReleases) return
@@ -74,10 +76,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 transaction.commit()
             }
         }
-
-//        if (count == 0) generateStandardReleases()
-
-        lastReleaseBlocksSize = releaseBlocks.size
     }
 
     /**
