@@ -7,9 +7,10 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 
-class MusicCommunity(settings: TrustChainSettings,
-                     database: TrustChainStore,
-                     crawler: TrustChainCrawler = TrustChainCrawler()
+class MusicCommunity(
+    settings: TrustChainSettings,
+    database: TrustChainStore,
+    crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
     override val serviceId = "29384902d2938f34872398758cf7ca9238ccc333"
 
