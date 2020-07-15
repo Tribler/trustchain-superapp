@@ -11,7 +11,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import java.io.File
 
 lateinit var instance: AudioPlayer
@@ -19,7 +18,7 @@ lateinit var instance: AudioPlayer
 /**
  * Implements an Android MediaPlayer. Is a singleton.
  */
-class AudioPlayer : BaseFragment(R.layout.fragment_trackplaying) {
+class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     private var interestedFraction: Float = 0F
     private var playingFile: File? = null
     private var currentReleaseFiles: FileStorage? = null

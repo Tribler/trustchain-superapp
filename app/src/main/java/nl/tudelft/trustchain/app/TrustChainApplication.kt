@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
+import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
@@ -54,7 +55,8 @@ class TrustChainApplication : Application() {
             createDemoCommunity(),
             createMarketCommunity(),
             createCoinCommunity(),
-            createVotingCommunity()
+            createVotingCommunity(),
+            createMusicCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -186,6 +188,17 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             VotingCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createMusicCommunity(): OverlayConfiguration<MusicCommunity> {
+        val settings = TrustChainSettings()
+        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        val store = TrustChainSQLiteStore(Database(driver))
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            MusicCommunity.Factory(settings, store),
             listOf(randomWalk)
         )
     }

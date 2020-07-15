@@ -12,5 +12,7 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="add_playlist">Add playlist</string>
+    <string name="app_label">MusicDAO</string>
+    <string name="search_hint">Search through music</string>
 
 </resources>

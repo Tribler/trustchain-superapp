@@ -45,7 +45,7 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.PeerChat" />
 
-	    <activity
+        <activity
             android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
@@ -71,9 +71,16 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:name="com.example.musicdao.MusicService"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait"/>
+            android:name="com.example.musicdao.MusicService"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
     </application>

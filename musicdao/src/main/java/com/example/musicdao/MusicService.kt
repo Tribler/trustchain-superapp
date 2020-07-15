@@ -1,54 +1,107 @@
 package com.example.musicdao
 
+import android.app.SearchManager
 import android.content.Context
+import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.view.ContextMenu
-import android.view.View
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
+import com.example.musicdao.ipv8.MusicCommunity
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
 import java.io.*
 
-class MusicService : BaseActivity() {
+open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
     lateinit var contentSeeder: ContentSeeder
+    var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        torrentStream = TorrentStream.init(
-            TorrentOptions.Builder()
-                .saveLocation(applicationContext.cacheDir)
-                .removeFilesAfterStop(false)
-                .autoDownload(false)
-                .build())
+        torrentStream = try {
+            TorrentStream.getInstance()
+        } catch (e: Exception) {
+            TorrentStream.init(
+                TorrentOptions.Builder()
+                    .saveLocation(applicationContext.cacheDir)
+                    .removeFilesAfterStop(false)
+                    .autoDownload(false)
+                    .build())
+        }
 
         registerBlockSigner()
 
-        contentSeeder = ContentSeeder(SessionManager(), applicationContext.cacheDir)
+        iterativelyCrawlTrustChains()
+
+        contentSeeder = ContentSeeder.getInstance(SessionManager(), applicationContext.cacheDir)
         contentSeeder.start()
+
+        handleIntent(intent)
     }
 
-    override fun onCreateContextMenu(
-        menu: ContextMenu?,
-        v: View?,
-        menuInfo: ContextMenu.ContextMenuInfo?
-    ) {
-        super.onCreateContextMenu(menu, v, menuInfo)
-        menuInflater.inflate(R.menu.menu_add_playlist, menu)
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        if (Intent.ACTION_SEARCH == intent.action) {
+            intent.getStringExtra(SearchManager.QUERY)?.also { query ->
+                filter = query
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        if (menu == null) return false
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu_searchable, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_search -> {
+                onSearchRequested()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
+     * This is a very simplistic way to crawl all chains from the peers you know
+     */
+    private fun iterativelyCrawlTrustChains() {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                for (peer in musicCommunity.getPeers()) {
+                    musicCommunity.crawlChain(peer)
+                    delay(1000)
+                }
+                delay(3000)
+            }
+        }
     }
 
     fun getDhtNodes(): Int {
@@ -74,15 +127,15 @@ class MusicService : BaseActivity() {
      * artist/label (artist passport).
      */
     private fun registerBlockSigner() {
-        val trustchain = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        trustchain.registerBlockSigner("publish_release", object : BlockSigner {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+        musicCommunity.registerBlockSigner("publish_release", object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
                 Toast.makeText(
                     applicationContext,
                     "Signing block ${block.blockId}",
                     Toast.LENGTH_LONG
                 ).show()
-                trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+                musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
     }

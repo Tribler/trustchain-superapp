@@ -2,27 +2,34 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.trustchain.common.ui.BaseFragment
 
-class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview) {
+class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
+    private var lastReleaseBlocksSize = -1
+    private val maxReleases = 10
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        registerBlockListener()
+        lastReleaseBlocksSize = -1
 
-        showAllReleases()
+        lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                showAllReleases()
+                delay(1000)
+            }
+        }
+
         return super.onCreateView(inflater, container, savedInstanceState)
     }
 
@@ -35,17 +42,34 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
     /**
      * List all the releases that are currently loaded in the local trustchain database
      */
+    @Synchronized
     private fun showAllReleases() {
-        val releaseBlocks = getTrustChainCommunity().database.getBlocksWithType("publish_release")
+        val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
+        if (releaseBlocks.size == lastReleaseBlocksSize) {
+            return
+        }
+        lastReleaseBlocksSize = releaseBlocks.size
+        var count = 0
+        if (release_overview_layout is ViewGroup) {
+            release_overview_layout.removeAllViews()
+        }
         for (block in releaseBlocks) {
+            if (count == maxReleases) return
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
+            var query = ""
+            if (requireActivity() is MusicService) {
+                query = (requireActivity() as MusicService).filter
+            }
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
+                count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
-                transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                if (coverFragment.filter(query)) {
+                    transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                }
                 transaction.commit()
             }
         }
@@ -79,43 +103,19 @@ class ReleaseOverviewFragment : BaseFragment(R.layout.fragment_release_overview)
         magnet: Editable?,
         torrentInfoName: String
     ) {
-        val myPeer = IPv8Android.getInstance().myPeer
-
-        val transaction = mapOf(
-            "publisher" to myPeer.mid,
-            "magnet" to magnet.toString(),
-            "title" to title.toString(),
-            "artists" to artists.toString(),
-            "date" to releaseDate.toString(),
-            "torrentInfoName" to torrentInfoName
-        )
-        val trustchain = getTrustChainCommunity()
-        Toast.makeText(context, "Creating proposal block", Toast.LENGTH_SHORT).show()
-        trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
+        publish(magnet.toString(), title.toString(), artists.toString(), releaseDate.toString(), torrentInfoName)
     }
 
-    /**
-     * Once blocks on the trustchain arrive, which are audio release blocks, try to fetch and render
-     * its metadata from its torrent file structure.
-     */
-    private fun registerBlockListener() {
-        val trustchain = getTrustChainCommunity()
-        trustchain.addListener("publish_release", object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Toast.makeText(
-                    context,
-                    "Discovered signed block ${block.blockId}",
-                    Toast.LENGTH_LONG
-                ).show()
-                val magnet = block.transaction["magnet"]
-                if (magnet != null && magnet is String) {
-                    val transaction = requireActivity().supportFragmentManager.beginTransaction()
-                    val coverFragment = ReleaseCoverFragment(block)
-                    transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
-                    transaction.commit()
-                }
-                Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
+    private fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
+        val myPeer = IPv8Android.getInstance().myPeer
+        val transaction = mapOf(
+            "magnet" to magnet,
+            "title" to title,
+            "artists" to artists,
+            "date" to releaseDate,
+            "torrentInfoName" to torrentInfoName
+        )
+        val trustchain = getMusicCommunity()
+        trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
     }
 }
