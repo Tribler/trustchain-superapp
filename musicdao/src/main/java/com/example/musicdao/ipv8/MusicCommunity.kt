@@ -37,7 +37,7 @@ class MusicCommunity(
         // These are initial addresses for some peers that have initial content,
         // in the case that no content can be found on the first run of the app.
         val INITIAL_ADDRESSES: List<IPv4Address> = listOf(
-            IPv4Address("83.84.32.175", 33884)
+            IPv4Address("83.84.32.175", 35376)
         )
     }
 }
