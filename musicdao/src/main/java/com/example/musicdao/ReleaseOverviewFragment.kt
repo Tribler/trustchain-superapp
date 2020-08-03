@@ -27,7 +27,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
                 showAllReleases()
-                delay(1000)
+                delay(3000)
             }
         }
 

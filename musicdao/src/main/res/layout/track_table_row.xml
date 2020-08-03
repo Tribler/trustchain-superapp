@@ -3,8 +3,9 @@
     android:id="@+id/contentRow"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#303030"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:clickable="true"
+    android:background="?android:selectableItemBackground">
 
     <TableLayout
         android:layout_width="wrap_content"

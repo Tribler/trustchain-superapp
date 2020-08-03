@@ -17,6 +17,10 @@ class Track(
         trackTitle.text = name
         trackArtist.text = size
 
+        contentRow.setOnClickListener {
+            release.selectTrackAndPlay(index)
+        }
+
         playButton.setOnClickListener {
             release.selectTrackAndPlay(index)
         }
