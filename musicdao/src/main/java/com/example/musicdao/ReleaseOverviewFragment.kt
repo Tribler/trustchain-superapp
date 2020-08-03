@@ -1,5 +1,6 @@
 package com.example.musicdao
 
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
@@ -16,11 +17,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     private var lastReleaseBlocksSize = -1
     private val maxReleases = 10
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lastReleaseBlocksSize = -1
 
         lifecycleScope.launchWhenCreated {
@@ -30,10 +27,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
             }
         }
 
-        return super.onCreateView(inflater, container, savedInstanceState)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         addPlaylistFab.setOnClickListener {
             showCreateReleaseDialog()
         }
@@ -48,6 +41,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         if (releaseBlocks.size == lastReleaseBlocksSize) {
             return
         }
+        loadingReleases.visibility = View.GONE
         lastReleaseBlocksSize = releaseBlocks.size
         var count = 0
         if (release_overview_layout is ViewGroup) {
