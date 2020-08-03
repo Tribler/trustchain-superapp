@@ -1,66 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/contentRow"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:clickable="true"
     android:background="?android:selectableItemBackground">
 
     <TableLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="4dp"
         android:stretchColumns="1">
 
         <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/trackId"
+                android:layout_width="25dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="1."
+                android:textColor="@color/white"
+                android:textSize="20sp" />
 
             <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
-
-                <ImageButton
-                    android:id="@+id/playButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:background="?android:selectableItemBackground"
-                    android:contentDescription="Play track"
-                    android:src="@android:drawable/ic_media_play" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true">
+                android:layout_column="1">
 
                 <TextView
                     android:id="@+id/trackTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:maxWidth="300dp"
-                    android:text="Stairway to heaven"
-                    android:textColor="#ffffff"
-                    android:textSize="17sp" />
+                    android:text="djl a n g 59_-_Odinary_People_(_Orgdinary_Mix_)_Pomber_on_vocals.mp3"
+                    android:textColor="@color/white"
+                    android:breakStrategy="simple"
+                    android:textSize="16sp" />
 
                 <TextView
                     android:id="@+id/trackArtist"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/trackTitle"
-                    android:layout_marginLeft="20dp"
                     android:text="The Smithies"
                     android:textColor="@color/musicColorAccent" />
             </RelativeLayout>
 
-
             <RelativeLayout
                 android:layout_width="60dp"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
                 <ProgressBar
                     android:id="@+id/progressBar"

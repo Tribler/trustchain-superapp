@@ -16,12 +16,9 @@ class Track(
         super.onViewCreated(view, savedInstanceState)
         trackTitle.text = name
         trackArtist.text = size
+        trackId.text = "${index + 1}."
 
         contentRow.setOnClickListener {
-            release.selectTrackAndPlay(index)
-        }
-
-        playButton.setOnClickListener {
             release.selectTrackAndPlay(index)
         }
     }
