@@ -14,6 +14,7 @@ import java.util.*
 class ReleaseCoverFragment(private val trustChainBlock: TrustChainBlock) :
     Fragment(R.layout.fragment_release_cover) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val transaction = trustChainBlock.transaction
         val publisher = transaction["publisher"].toString()
         val magnet = transaction["magnet"].toString()

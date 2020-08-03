@@ -17,6 +17,7 @@ import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
+import com.github.se_bastiaan.torrentstream.listeners.TorrentAddedAlertListener
 import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -30,7 +31,7 @@ import java.io.*
 open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
-    lateinit var contentSeeder: ContentSeeder
+    var contentSeeder: ContentSeeder? = null
     var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,17 +45,28 @@ open class MusicService : BaseActivity() {
                     .saveLocation(applicationContext.cacheDir)
                     .removeFilesAfterStop(false)
                     .autoDownload(false)
-                    .build())
+                    .build()
+            )
         }
 
         registerBlockSigner()
 
         iterativelyCrawlTrustChains()
 
-        contentSeeder = ContentSeeder.getInstance(SessionManager(), applicationContext.cacheDir)
-        contentSeeder.start()
-
         handleIntent(intent)
+
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                if (torrentStream.sessionManager != null) {
+                    val seeder =
+                        ContentSeeder.getInstance(torrentStream.sessionManager, applicationContext.cacheDir)
+                    seeder.start()
+                    contentSeeder = seeder
+                    return@launchWhenStarted
+                }
+                delay(3000)
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -104,8 +116,9 @@ open class MusicService : BaseActivity() {
         }
     }
 
-    fun getDhtNodes(): Int {
-        return torrentStream.totalDhtNodes
+    fun getStatsOverview(): String {
+        val sessionManager = torrentStream.sessionManager ?: return ""
+        return "up: ${sessionManager.uploadRate()}, down: ${sessionManager.downloadRate()}, dht: ${sessionManager.dhtNodes()}"
     }
 
     /**

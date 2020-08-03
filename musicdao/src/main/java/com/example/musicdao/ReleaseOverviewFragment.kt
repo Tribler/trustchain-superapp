@@ -19,9 +19,13 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         lastReleaseBlocksSize = -1
+//        loadingReleases.visibility = View.VISIBLE
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
+                if (activity is MusicService && debugText != null) {
+                    debugText.text = (activity as MusicService).getStatsOverview()
+                }
                 showAllReleases()
                 delay(1000)
             }

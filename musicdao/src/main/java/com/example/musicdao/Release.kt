@@ -7,13 +7,17 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
+import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.io.File
 
 /**
@@ -62,6 +66,15 @@ class Release(
         (activity as MusicService).torrentStream.addListener(this)
 
         AudioPlayer.getInstance().hideTrackInfo()
+
+        lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                if (activity is MusicService && debugTextRelease != null) {
+                    debugTextRelease.text = (activity as MusicService).getStatsOverview()
+                }
+                delay(1000)
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -179,7 +192,7 @@ class Release(
             setMetadata(torrentFile)
         }
         // Keep seeding the torrent, also after start-up or after browsing to a different Release
-        (requireActivity() as MusicService).contentSeeder.add(torrentFile)
+        (requireActivity() as MusicService).contentSeeder?.add(torrentFile)
     }
 
     override fun onStreamStopped() {}

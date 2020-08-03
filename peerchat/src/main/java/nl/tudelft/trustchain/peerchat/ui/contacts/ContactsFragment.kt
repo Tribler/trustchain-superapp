@@ -136,7 +136,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         val bluetoothManager = requireContext().getSystemService<BluetoothManager>()
             ?: throw IllegalStateException("BluetoothManager not found")
         val bluetoothAdapter = bluetoothManager.adapter
-        return bluetoothAdapter.isEnabled
+        return bluetoothAdapter?.isEnabled ?: false
     }
 
     private fun updateConnectivityStatus() {

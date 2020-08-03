@@ -9,31 +9,18 @@
     android:paddingHorizontal="@dimen/fab_margin">
 
     <TextView
+        android:id="@+id/debugText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"/>
+
+    <TextView
         android:id="@+id/loadingReleases"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="Loading content from peers..."
         android:textColor="@color/white" />
-
-    <!--    <LinearLayout-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content">-->
-
-    <!--        <Button-->
-    <!--            android:id="@+id/torrentButton"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Load example"-->
-    <!--            android:visibility="visible" />-->
-
-    <!--        <Button-->
-    <!--            android:id="@+id/shareTrackButton"-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Share track"-->
-    <!--            android:visibility="visible" />-->
-    <!--    </LinearLayout>-->
 
     <RelativeLayout
         android:layout_width="match_parent"
