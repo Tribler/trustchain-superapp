@@ -18,7 +18,7 @@ class ContactItemRenderer(
 
     override fun bindView(item: ContactItem, view: View) = with(view) {
         txtName.text = item.contact.name
-        txtName.isVisible = item.contact.name.isNotEmpty()
+        // txtName.isVisible = item.contact.name.isNotEmpty()
         txtPeerId.text = item.contact.mid
         val lastMessageDate = item.lastMessage?.timestamp
         txtDate.isVisible = lastMessageDate != null

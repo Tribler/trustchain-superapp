@@ -3,9 +3,12 @@ package nl.tudelft.trustchain.peerchat.ui.conversation
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.text.format.DateUtils
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
@@ -55,6 +58,15 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
         }
 
         if (item.chatMessage.outgoing) {
+            innerContent.updateLayoutParams<FrameLayout.LayoutParams> {
+                gravity = Gravity.END
+            }
+            constraintSet.connect(
+                content.id,
+                ConstraintSet.START,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.START
+            )
             constraintSet.connect(
                 content.id,
                 ConstraintSet.END,
@@ -70,12 +82,21 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
         } else {
             val avatarMargin = resources.getDimensionPixelSize(R.dimen.avatar_size) +
                 resources.getDimensionPixelSize(R.dimen.avatar_margin)
+            innerContent.updateLayoutParams<FrameLayout.LayoutParams> {
+                gravity = Gravity.START
+            }
             constraintSet.connect(
                 content.id,
                 ConstraintSet.START,
                 ConstraintSet.PARENT_ID,
                 ConstraintSet.START,
                 avatarMargin
+            )
+            constraintSet.connect(
+                content.id,
+                ConstraintSet.END,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.END
             )
             constraintSet.connect(
                 bottomContainer.id,
