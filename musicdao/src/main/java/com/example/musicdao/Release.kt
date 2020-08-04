@@ -15,7 +15,6 @@ import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
-import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import java.io.File
