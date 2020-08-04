@@ -3,77 +3,59 @@
     android:id="@+id/contentRow"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:background="?android:selectableItemBackground"
     android:clickable="true"
-    android:background="?android:selectableItemBackground">
+    android:orientation="vertical">
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="1">
+    <TextView
+        android:id="@+id/trackId"
+        android:layout_width="0dp"
+        android:layout_weight="5"
+        android:minWidth="25dp"
+        android:layout_margin="4dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="1."
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_weight="80"
+        android:layout_margin="4dp"
+        android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/trackId"
-                android:layout_width="25dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="1."
-                android:textColor="@color/white"
-                android:textSize="20sp" />
+        <TextView
+            android:id="@+id/trackTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="djl a n g 59_-_Odinary_People_(_Orgdinary_Mix_)_Pomber_on_vocals.mp3"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_column="1">
+        <TextView
+            android:id="@+id/trackArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/trackTitle"
+            android:text="The Smithies"
+            android:textColor="@color/musicColorAccent" />
+    </RelativeLayout>
 
-                <TextView
-                    android:id="@+id/trackTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="djl a n g 59_-_Odinary_People_(_Orgdinary_Mix_)_Pomber_on_vocals.mp3"
-                    android:textColor="@color/white"
-                    android:breakStrategy="simple"
-                    android:textSize="16sp" />
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_weight="15"
+        android:minWidth="60dp"
+        android:layout_margin="4dp"
+        android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/trackArtist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/trackTitle"
-                    android:text="The Smithies"
-                    android:textColor="@color/musicColorAccent" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="60dp"
-                android:layout_height="wrap_content">
-
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:max="100" />
-            </RelativeLayout>
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="11dp"
-                android:layout_marginRight="11dp"
-                android:layout_span="3"
-                android:background="#4d4d4d" />
-        </TableRow>
-    </TableLayout>
-
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:max="100" />
+    </RelativeLayout>
 </TableRow>
