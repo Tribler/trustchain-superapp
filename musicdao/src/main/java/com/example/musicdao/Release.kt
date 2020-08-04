@@ -233,7 +233,6 @@ class Release(
         }
         if (progress != prevProgress) {
             AudioPlayer.getInstance().retry()
-            println("Buffer: ${status.bufferProgress}, progress: $progress")
         }
         prevProgress = progress
         prevFileIndex = currentFileIndex
