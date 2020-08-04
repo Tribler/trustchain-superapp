@@ -10,15 +10,20 @@ import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.ipv8.MusicCommunity
+import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentAddedAlertListener
 import com.turn.ttorrent.client.SharedTorrent
+import kotlinx.android.synthetic.main.fragment_release.*
+import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -118,7 +123,7 @@ open class MusicService : BaseActivity() {
 
     fun getStatsOverview(): String {
         val sessionManager = torrentStream.sessionManager ?: return ""
-        return "up: ${sessionManager.uploadRate()}, down: ${sessionManager.downloadRate()}, dht: ${sessionManager.dhtNodes()}"
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(sessionManager.downloadRate())}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
     }
 
     /**

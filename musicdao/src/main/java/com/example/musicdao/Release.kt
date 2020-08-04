@@ -2,6 +2,7 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.core.net.toUri
@@ -14,7 +15,6 @@ import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
-import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -41,6 +41,7 @@ class Release(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         blockMetadata.text =
             HtmlCompat.fromHtml(
                 "<b>$artists - $title<br></b>" +
@@ -74,6 +75,23 @@ class Release(
                 }
                 delay(1000)
             }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            // Debug button is a simple toggle for a connectivity stats display
+            R.id.action_debug -> {
+                if (debugTextRelease != null) {
+                    if (debugTextRelease.visibility == View.VISIBLE) {
+                        debugTextRelease.visibility = View.GONE
+                    } else {
+                        debugTextRelease.visibility = View.VISIBLE
+                    }
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 

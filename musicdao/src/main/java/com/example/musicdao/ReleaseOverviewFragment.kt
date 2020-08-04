@@ -4,6 +4,7 @@ import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
@@ -18,8 +19,9 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     private val maxReleases = 10
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         lastReleaseBlocksSize = -1
-//        loadingReleases.visibility = View.VISIBLE
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -33,6 +35,23 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
 
         addPlaylistFab.setOnClickListener {
             showCreateReleaseDialog()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            // Debug button is a simple toggle for a connectivity stats display
+            R.id.action_debug -> {
+                if (debugText != null) {
+                    if (debugText.visibility == View.VISIBLE) {
+                        debugText.visibility = View.GONE
+                    } else {
+                        debugText.visibility = View.VISIBLE
+                    }
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
