@@ -149,15 +149,14 @@ class Release(
         if (tor != null) {
             (activity as MusicService).torrentStream.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
-            trackInfo?.text = tor.videoFile.nameWithoutExtension
-            trackInfo?.visibility = View.VISIBLE
-            AudioPlayer.getInstance().setTrackInfo(tor.videoFile.nameWithoutExtension)
             Util.setSequentialPriorities(tor)
             (activity as MusicService).torrentStream.addListener(this)
 
             // TODO needs to have a solid check whether the file was already downloaded before
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
+            } else {
+                AudioPlayer.getInstance().setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
             }
         }
     }
@@ -180,6 +179,7 @@ class Release(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer.setAudioResource(file, index)
+        AudioPlayer.getInstance().setTrackInfo(file.nameWithoutExtension)
     }
 
     override fun onStreamReady(torrent: Torrent?) {
