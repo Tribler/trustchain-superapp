@@ -83,14 +83,14 @@ dependencies {
     implementation 'com.mattskala:itemadapter:0.3'
 
     // BitTorrent
-//    api files('libs/jlibtorrent-1.2.5.0.jar')
-//    api files('libs/jlibtorrent-android-arm64-1.2.5.0.jar')
-//    api files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
-//    api files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
-//    api files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
+    api files('libs/jlibtorrent-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-arm64-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
+    api files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
 
     //This AAR dependency also contains jlibtorrent
-    api files('libs/torrenstream-android.aar')
+    api files('libs/torrentstream-android.jar')
 
     // Testing
     testImplementation 'junit:junit:4.12'
