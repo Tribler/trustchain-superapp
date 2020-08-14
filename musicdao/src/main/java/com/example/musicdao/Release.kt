@@ -131,6 +131,11 @@ class Release(
                 val transaction = childFragmentManager.beginTransaction()
                 transaction.add(R.id.release_table_layout, track, "track$index")
                 transaction.commit()
+
+                val transaction2 = childFragmentManager.beginTransaction()
+                transaction2.add(R.id.release_table_layout, Fragment(R.layout.track_table_divider), "track$index-divider")
+                transaction2.commit()
+
                 tracks[index] = track
             }
         }
