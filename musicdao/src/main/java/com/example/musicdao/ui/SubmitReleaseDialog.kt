@@ -117,7 +117,7 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
      */
     private fun selectLocalTrackFile() {
         val selectFilesIntent = Intent(Intent.ACTION_GET_CONTENT)
-        selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         selectFilesIntent.type = "audio/*"
         val chooseFileActivity = Intent.createChooser(selectFilesIntent, "Choose a file")
         startActivityForResult(chooseFileActivity, 1)

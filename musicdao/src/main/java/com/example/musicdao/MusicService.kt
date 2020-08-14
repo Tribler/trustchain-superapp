@@ -218,7 +218,7 @@ open class MusicService : BaseActivity() {
             arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
 
         val randomInt = Random.nextInt(0, Int.MAX_VALUE)
-        val parentDir ="${context.cacheDir}/$randomInt"
+        val parentDir = "${context.cacheDir}/$randomInt"
 
         for (uri in uris) {
             val cursor = contentResolver.query(uri, projection, null, null, null)
