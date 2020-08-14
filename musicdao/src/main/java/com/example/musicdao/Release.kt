@@ -103,6 +103,7 @@ class Release(
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
+        loadingTracks.visibility = View.GONE
         this.metadata = metadata
         val num = metadata.numFiles()
         val filestorage = metadata.files()
