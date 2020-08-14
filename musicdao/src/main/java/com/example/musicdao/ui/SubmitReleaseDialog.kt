@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -48,7 +49,8 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
                     val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
 
                     if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
-                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()) {
+                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()
+                    ) {
                         Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
                     } else {
                         val torrentInfo = localTorrentInfo
@@ -82,16 +84,31 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val uri = data?.data
-        if (uri != null) {
-            // This should be reached when the chooseFile intent is completed and the user selected
-            // an audio file
-            val localContext = context
-            if (localContext != null) {
-                val torrentInfo = (activity as MusicService).seedFile(localContext, uri)
-                localTorrentInfo = torrentInfo
-                dialogView?.findViewById<EditText>(R.id.release_magnet)?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
+        // This should be reached when the chooseFile intent is completed and the user selected
+        // an audio file
+        val uriList = mutableListOf<Uri>()
+        val singleFileUri = data?.data
+        if (singleFileUri != null) {
+            // Only one file is selected
+            uriList.add(singleFileUri)
+        }
+        val clipData = data?.clipData
+        if (clipData != null) {
+            // Multiple files are selected
+            val count = clipData.itemCount
+            for (i in 0 until count) {
+                val uri = clipData.getItemAt(i).uri
+                uriList.add(uri)
             }
+        }
+        if (uriList.size < 1) return
+        val localContext = context
+        if (localContext != null) {
+            val torrentFile = (activity as MusicService).generateTorrent(localContext, uriList)
+            val torrentInfo = TorrentInfo(torrentFile)
+            localTorrentInfo = torrentInfo
+            dialogView?.findViewById<EditText>(R.id.release_magnet)
+                ?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
         }
     }
 
@@ -99,9 +116,10 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
      * Select an audio file from local disk
      */
     private fun selectLocalTrackFile() {
-        val chooseFile = Intent(Intent.ACTION_GET_CONTENT)
-        chooseFile.type = "audio/*"
-        val chooseFileActivity = Intent.createChooser(chooseFile, "Choose a file")
+        val selectFilesIntent = Intent(Intent.ACTION_GET_CONTENT)
+        selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        selectFilesIntent.type = "audio/*"
+        val chooseFileActivity = Intent.createChooser(selectFilesIntent, "Choose a file")
         startActivityForResult(chooseFileActivity, 1)
     }
 }
