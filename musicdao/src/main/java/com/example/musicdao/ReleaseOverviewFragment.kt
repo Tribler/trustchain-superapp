@@ -62,7 +62,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         if (releaseBlocks.size == lastReleaseBlocksSize) {
             return
         }
-        loadingReleases.visibility = View.GONE
         lastReleaseBlocksSize = releaseBlocks.size
         var count = 0
         if (release_overview_layout is ViewGroup) {
@@ -84,6 +83,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 val coverFragment = ReleaseCoverFragment(block)
                 if (coverFragment.filter(query)) {
                     transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                    if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
                 }
                 transaction.commit()
             }
