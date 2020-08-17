@@ -6,6 +6,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
@@ -47,6 +49,10 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                         debugText.visibility = View.VISIBLE
                     }
                 }
+                true
+            }
+            R.id.action_wallet -> {
+                findNavController().navigate(R.id.walletFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)

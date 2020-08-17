@@ -12,8 +12,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
+import com.example.musicdao.wallet.MusicWallet
+import com.example.musicdao.wallet.WalletFragment
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
@@ -30,6 +33,7 @@ import kotlin.random.Random
 
 open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
+    lateinit var musicWallet: MusicWallet
     override val navigationGraph = R.navigation.musicdao_navgraph
     var contentSeeder: ContentSeeder? = null
     var filter: String = ""
@@ -48,9 +52,7 @@ open class MusicService : BaseActivity() {
                     .build()
             )
         }
-
         registerBlockSigner()
-
         iterativelyCrawlTrustChains()
 
         handleIntent(intent)
@@ -67,6 +69,9 @@ open class MusicService : BaseActivity() {
                 delay(3000)
             }
         }
+
+        musicWallet = MusicWallet(applicationContext)
+        musicWallet.startup()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -152,59 +157,6 @@ open class MusicService : BaseActivity() {
             }
         })
     }
-
-    /**
-     * Assume that the Uri given is a path to a local audio file. Create a torrent for this file
-     * and start seeding the torrent.
-     * @return magnet link for the torrent
-     */
-//    fun seedFile(context: Context, uri: Uri): TorrentInfo {
-//        // TODO this function needs a rewrite
-//        val torrentFile = generateTorrent(context, uri)
-//        // 'Downloading' the file while already having it locally should start seeding it
-//        return TorrentInfo(torrentFile)
-//    }
-//
-//    fun seedFile(context: Context, uris: Array<Uri>): TorrentInfo {
-//        // TODO this function needs a rewrite
-//        val torrentFile = generateTorrent(context, uris)
-//        // 'Downloading' the file while already having it locally should start seeding it
-//        return TorrentInfo(torrentFile)
-//    }
-
-//    fun generateTorrentFromMultipleFiles(context: Context, uris: Array<Uri>): File {
-//        val files = mutableListOf<File>()
-//        for (uri in uris) {
-//            files.add(getTempFileForTorrent(context, uri))
-//        }
-//    }
-//
-//    fun getTempFileForTorrent(context: Context, uri: Uri): File {
-//        val contentResolver = context.contentResolver
-//        val projection =
-//            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-//        val cursor = contentResolver.query(uri, projection, null, null, null)
-//        var fileName = ""
-//        if (cursor != null) {
-//            try {
-//                // TODO convert this cursor to support multifile sharing
-//                if (cursor.moveToFirst()) {
-//                    fileName = cursor.getString(0)
-//                }
-//            } finally {
-//                cursor.close()
-//            }
-//        }
-//
-//        if (fileName == "") throw Error("Source file name for creating torrent not found")
-//        val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-//        val tempFileLocation = "${context.cacheDir}/$fileName"
-//
-//        // TODO currently creates temp copies before seeding, but should not be necessary
-//        FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-//        val file = File(tempFileLocation)
-//        return file
-//    }
 
     /**
      * Generates a a .torrent File from local files
