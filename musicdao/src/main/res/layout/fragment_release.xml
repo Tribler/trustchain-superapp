@@ -19,6 +19,14 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textColor="@color/white" />
 
+    <Button
+        android:id="@+id/tipButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/musicColorAccent"
+        android:visibility="gone"
+        android:text="Tip this artist"/>
+
     <TableLayout
         android:id="@+id/release_table_layout"
         android:layout_width="match_parent"

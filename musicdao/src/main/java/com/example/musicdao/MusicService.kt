@@ -12,11 +12,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
-import com.example.musicdao.wallet.MusicWallet
-import com.example.musicdao.wallet.WalletFragment
+import com.example.musicdao.wallet.WalletService
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
@@ -33,7 +31,7 @@ import kotlin.random.Random
 
 open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
-    lateinit var musicWallet: MusicWallet
+    lateinit var walletService: WalletService
     override val navigationGraph = R.navigation.musicdao_navgraph
     var contentSeeder: ContentSeeder? = null
     var filter: String = ""
@@ -70,8 +68,8 @@ open class MusicService : BaseActivity() {
             }
         }
 
-        musicWallet = MusicWallet(applicationContext)
-        musicWallet.startup()
+        walletService = WalletService(applicationContext)
+        walletService.startup()
     }
 
     override fun onNewIntent(intent: Intent) {

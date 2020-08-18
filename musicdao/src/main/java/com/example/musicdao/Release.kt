@@ -12,6 +12,8 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.musicdao.ui.SubmitReleaseDialog
+import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
@@ -78,6 +80,14 @@ class Release(
                 delay(1000)
             }
         }
+
+//        if (publisher.length == 34) {
+            tipButton.visibility = View.VISIBLE
+            tipButton.isClickable = true
+            tipButton.setOnClickListener {
+                tipArtist()
+            }
+//        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -107,6 +117,11 @@ class Release(
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
+    }
+
+    private fun tipArtist() {
+        TipArtistDialog()
+            .show(childFragmentManager, "Tip the artist")
     }
 
     private fun setMetadata(metadata: TorrentInfo) {

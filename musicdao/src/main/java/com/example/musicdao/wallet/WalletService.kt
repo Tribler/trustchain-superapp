@@ -11,7 +11,7 @@ import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.utils.BriefLogFormatter
 import java.util.*
 
-class MusicWallet(val context: Context) {
+class WalletService(val context: Context) {
     val app: WalletAppKit
     val params = MainNetParams.get()
     val filePrefix = "forwarding-service"
@@ -59,7 +59,11 @@ class MusicWallet(val context: Context) {
         return "Current balance: " + app.wallet().balance.toFriendlyString()
     }
 
-    fun publicKey(): String {
+    fun publicKeyText(): String {
         return "Public key " + app.wallet().currentReceiveAddress().toString()
+    }
+
+    fun publicKey(): String {
+        return app.wallet().currentReceiveAddress().toString()
     }
 }

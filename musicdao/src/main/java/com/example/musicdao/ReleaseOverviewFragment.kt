@@ -6,7 +6,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
@@ -129,13 +128,17 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
 
     private fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
         val myPeer = IPv8Android.getInstance().myPeer
-        val transaction = mapOf(
+        val transaction = mutableMapOf<String, String>(
             "magnet" to magnet,
             "title" to title,
             "artists" to artists,
             "date" to releaseDate,
             "torrentInfoName" to torrentInfoName
         )
+        if (activity is MusicService) {
+            val musicWallet = (activity as MusicService).walletService
+            transaction["publisher"] = musicWallet.publicKey()
+        }
         val trustchain = getMusicCommunity()
         trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
     }
