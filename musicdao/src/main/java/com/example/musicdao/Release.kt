@@ -120,7 +120,7 @@ class Release(
     }
 
     private fun tipArtist() {
-        TipArtistDialog()
+        TipArtistDialog(publisher)
             .show(childFragmentManager, "Tip the artist")
     }
 
