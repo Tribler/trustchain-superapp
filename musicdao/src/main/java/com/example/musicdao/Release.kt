@@ -2,17 +2,14 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.musicdao.ui.SubmitReleaseDialog
 import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -76,14 +73,13 @@ class Release(
 
         AudioPlayer.getInstance().hideTrackInfo()
 
-        // TODO
-//        if (publisher.length == 34) {
-        tipButton.visibility = View.VISIBLE
-        tipButton.isClickable = true
-        tipButton.setOnClickListener {
-            tipArtist()
+        if (publisher.length == 34) {
+            tipButton.visibility = View.VISIBLE
+            tipButton.isClickable = true
+            tipButton.setOnClickListener {
+                tipArtist()
+            }
         }
-//        }
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -170,7 +166,11 @@ class Release(
                 transaction.commit()
 
                 val transaction2 = childFragmentManager.beginTransaction()
-                transaction2.add(R.id.release_table_layout, Fragment(R.layout.track_table_divider), "track$index-divider")
+                transaction2.add(
+                    R.id.release_table_layout,
+                    Fragment(R.layout.track_table_divider),
+                    "track$index-divider"
+                )
                 transaction2.commit()
 
                 tracks[index] = track
@@ -198,7 +198,8 @@ class Release(
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
-                AudioPlayer.getInstance().setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
+                AudioPlayer.getInstance()
+                    .setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
             }
         }
     }
