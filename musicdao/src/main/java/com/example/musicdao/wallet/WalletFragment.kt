@@ -1,6 +1,8 @@
 package com.example.musicdao.wallet
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.MusicService
@@ -14,7 +16,7 @@ class WalletFragment: Fragment(R.layout.fragment_wallet) {
     lateinit var walletService: WalletService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setHasOptionsMenu(false)
+        setMenuVisibility(false)
 
         walletService = (activity as MusicService).walletService
         lifecycleScope.launchWhenStarted {

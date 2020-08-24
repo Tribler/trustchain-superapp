@@ -25,7 +25,14 @@
                     android:id="@+id/trackListLinearLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"></LinearLayout>
+                    android:orientation="vertical">
+
+<!--                    <fragment-->
+<!--                        android:name="com.example.musicdao.Release"-->
+<!--                        android:id="@+id/releaseFragmentInstance"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"/>-->
+                </LinearLayout>
             </ScrollView>
 
         </LinearLayout>

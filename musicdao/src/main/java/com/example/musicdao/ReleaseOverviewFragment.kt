@@ -27,7 +27,9 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 if (activity is MusicService && debugText != null) {
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
-                showAllReleases()
+                Thread(Runnable {
+                    showAllReleases()
+                }).start()
                 delay(3000)
             }
         }
@@ -61,7 +63,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     /**
      * List all the releases that are currently loaded in the local trustchain database
      */
-    @Synchronized
     private fun showAllReleases() {
         val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
         if (releaseBlocks.size == lastReleaseBlocksSize) {

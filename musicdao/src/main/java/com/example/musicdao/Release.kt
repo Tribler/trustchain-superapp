@@ -43,14 +43,9 @@ class Release(
     private var setTorrentMetadata: TorrentInfo? = null
     private var localTorrent: Torrent? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        blockMetadata.text =
-            HtmlCompat.fromHtml(
-                "<b>$artists - $title<br></b>" +
-                    date, 0
-            )
 
         var torrentUrl = magnet
         if (torrentInfoName != null) {
@@ -69,8 +64,26 @@ class Release(
         }
         (activity as MusicService).torrentStream.startStream(torrentUrl)
         (activity as MusicService).torrentStream.addListener(this)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        blockMetadata.text =
+            HtmlCompat.fromHtml(
+                "<b>$artists - $title<br></b>" +
+                    date, 0
+            )
 
         AudioPlayer.getInstance().hideTrackInfo()
+
+        // TODO
+//        if (publisher.length == 34) {
+        tipButton.visibility = View.VISIBLE
+        tipButton.isClickable = true
+        tipButton.setOnClickListener {
+            tipArtist()
+        }
+//        }
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -80,14 +93,16 @@ class Release(
                 delay(1000)
             }
         }
+    }
 
-//        if (publisher.length == 34) {
-            tipButton.visibility = View.VISIBLE
-            tipButton.isClickable = true
-            tipButton.setOnClickListener {
-                tipArtist()
-            }
-//        }
+    override fun onResume() {
+        super.onResume()
+
+        if (release_table_layout.childCount == 0) {
+            loadingTracks.visibility = View.VISIBLE
+        } else {
+            loadingTracks.visibility = View.GONE
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
