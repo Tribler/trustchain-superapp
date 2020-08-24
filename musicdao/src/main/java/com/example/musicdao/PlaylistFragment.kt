@@ -1,9 +1,6 @@
 package com.example.musicdao
 
-import android.content.Context
 import android.os.Bundle
-import android.view.View
-import kotlinx.android.synthetic.main.fragment_playlist.*
 
 class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
 

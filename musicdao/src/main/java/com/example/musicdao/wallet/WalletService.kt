@@ -3,19 +3,16 @@ package com.example.musicdao.wallet
 import android.content.Context
 import android.widget.Toast
 import nl.tudelft.ipv8.IPv8
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.InsufficientMoneyException
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import java.util.*
-
 
 class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey: PrivateKey) {
     val app: WalletAppKit
@@ -37,7 +34,7 @@ class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey:
                     val value: Coin = tx.getValueSentToMe(w)
                     Toast.makeText(androidContext, "Received coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT).show()
                 }
-                wallet().addCoinsSentEventListener {w, tx, _, _ ->
+                wallet().addCoinsSentEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentFromMe(w)
                     Toast.makeText(androidContext, "Sent coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT).show()
                 }

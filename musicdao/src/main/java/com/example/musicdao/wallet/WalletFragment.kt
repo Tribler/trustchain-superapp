@@ -8,27 +8,20 @@ import com.example.musicdao.R
 import kotlinx.android.synthetic.main.fragment_wallet.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import org.knowm.xchange.Exchange
-import org.knowm.xchange.ExchangeFactory
-import org.knowm.xchange.binance.BinanceExchange
-import org.knowm.xchange.currency.CurrencyPair
-import org.knowm.xchange.service.marketdata.MarketDataService
-import java.math.BigDecimal
 
-
-class WalletFragment: Fragment(R.layout.fragment_wallet) {
+class WalletFragment : Fragment(R.layout.fragment_wallet) {
     lateinit var walletService: WalletService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setMenuVisibility(false)
-
         walletService = (activity as MusicService).walletService
+
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val progress = walletService.percentageSynced
                 if (progress < 100) {
                     blockchain_progress.progress = progress
-                    wallet_status.text = "Syncing chain... progress: ${progress}%"
+                    wallet_status.text = "Syncing chain... progress: $progress%"
                 }
                 if (progress == 100) {
                     blockchain_progress.progress = 100

@@ -18,7 +18,6 @@ import org.knowm.xchange.currency.CurrencyPair
 import org.knowm.xchange.service.marketdata.MarketDataService
 import java.math.BigDecimal
 
-
 /**
  * This dialog is shown when the user wants to send a tip to the publisher of a Release, using BTC
  * @param publicKey the Bitcoin wallet public key to send the tip to
@@ -101,5 +100,4 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         val MBTC_PER_BITCOIN = BigDecimal(1_000)
         val SATS_PER_BITCOIN = BigDecimal(100_000_000)
     }
-
 }
