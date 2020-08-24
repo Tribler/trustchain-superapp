@@ -1,19 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:stretchColumns="1"
-    android:id="@+id/release_table_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:paddingHorizontal="@dimen/fab_margin">
 
-    <TableRow android:id="@+id/metadataRow" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/debugTextRelease"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white" />
 
-        <TextView
-            android:id="@+id/blockMetadata"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            android:textColor="@color/white"
-            android:layout_span="4"/>
-    </TableRow>
+    <TextView
+        android:id="@+id/blockMetadata"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/white" />
 
-</TableLayout>
+    <TableLayout
+        android:id="@+id/release_table_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </TableLayout>
+
+    <TextView
+        android:id="@+id/loadingTracks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:text="Loading content..."/>
+</LinearLayout>

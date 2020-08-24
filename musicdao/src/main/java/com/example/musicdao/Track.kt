@@ -16,13 +16,15 @@ class Track(
         super.onViewCreated(view, savedInstanceState)
         trackTitle.text = name
         trackArtist.text = size
+        trackId.text = "${index + 1}."
 
-        playButton.setOnClickListener {
+        contentRow.setOnClickListener {
             release.selectTrackAndPlay(index)
         }
     }
 
     fun setDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
+        if (progressBar == null) return -1
         val size = fullSize ?: Long.MAX_VALUE
         val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
         progressBar.progress = progress.toInt()

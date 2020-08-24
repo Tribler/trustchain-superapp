@@ -80,9 +80,8 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
 
     fun retry() {
         val player = testExoPlayer ?: return
-        println("buff%: ${player.bufferedPercentage}, buff pos: ${player.bufferedPosition}, total buff: ${player.totalBufferedDuration}")
         // Try to load more of the audio track
-        if (playingFile != null && player.totalBufferedDuration < 10000) {
+        if (playingFile != null && player.totalBufferedDuration < 2000) {
             val mediaSource = buildMediaSource(Uri.fromFile(playingFile))
             requireActivity().runOnUiThread {
                 player.prepare(mediaSource, false, false)

@@ -2,18 +2,21 @@ package com.example.musicdao
 
 import android.os.Bundle
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
-import kotlinx.android.synthetic.main.fragment_trackplaying.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.io.File
 
 /**
@@ -37,6 +40,7 @@ class Release(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setHasOptionsMenu(true)
         blockMetadata.text =
             HtmlCompat.fromHtml(
                 "<b>$artists - $title<br></b>" +
@@ -62,6 +66,32 @@ class Release(
         (activity as MusicService).torrentStream.addListener(this)
 
         AudioPlayer.getInstance().hideTrackInfo()
+
+        lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                if (activity is MusicService && debugTextRelease != null) {
+                    debugTextRelease.text = (activity as MusicService).getStatsOverview()
+                }
+                delay(1000)
+            }
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            // Debug button is a simple toggle for a connectivity stats display
+            R.id.action_debug -> {
+                if (debugTextRelease != null) {
+                    if (debugTextRelease.visibility == View.VISIBLE) {
+                        debugTextRelease.visibility = View.GONE
+                    } else {
+                        debugTextRelease.visibility = View.VISIBLE
+                    }
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onDestroy() {
@@ -73,6 +103,7 @@ class Release(
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
+        loadingTracks.visibility = View.GONE
         this.metadata = metadata
         val num = metadata.numFiles()
         val filestorage = metadata.files()
@@ -100,6 +131,11 @@ class Release(
                 val transaction = childFragmentManager.beginTransaction()
                 transaction.add(R.id.release_table_layout, track, "track$index")
                 transaction.commit()
+
+                val transaction2 = childFragmentManager.beginTransaction()
+                transaction2.add(R.id.release_table_layout, Fragment(R.layout.track_table_divider), "track$index-divider")
+                transaction2.commit()
+
                 tracks[index] = track
             }
         }
@@ -118,15 +154,14 @@ class Release(
         if (tor != null) {
             (activity as MusicService).torrentStream.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
-            trackInfo?.text = tor.videoFile.nameWithoutExtension
-            trackInfo?.visibility = View.VISIBLE
-            AudioPlayer.getInstance().setTrackInfo(tor.videoFile.nameWithoutExtension)
             Util.setSequentialPriorities(tor)
             (activity as MusicService).torrentStream.addListener(this)
 
             // TODO needs to have a solid check whether the file was already downloaded before
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
+            } else {
+                AudioPlayer.getInstance().setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
             }
         }
     }
@@ -149,6 +184,7 @@ class Release(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer.setAudioResource(file, index)
+        AudioPlayer.getInstance().setTrackInfo(file.nameWithoutExtension)
     }
 
     override fun onStreamReady(torrent: Torrent?) {
@@ -179,7 +215,7 @@ class Release(
             setMetadata(torrentFile)
         }
         // Keep seeding the torrent, also after start-up or after browsing to a different Release
-        (requireActivity() as MusicService).contentSeeder.add(torrentFile)
+        (requireActivity() as MusicService).contentSeeder?.add(torrentFile)
     }
 
     override fun onStreamStopped() {}
@@ -203,7 +239,6 @@ class Release(
         }
         if (progress != prevProgress) {
             AudioPlayer.getInstance().retry()
-            println("Buffer: ${status.bufferProgress}, progress: $progress")
         }
         prevProgress = progress
         prevFileIndex = currentFileIndex

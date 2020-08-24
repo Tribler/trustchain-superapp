@@ -13,8 +13,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.ipv8.MusicCommunity
-import com.frostwire.jlibtorrent.SessionManager
-import com.frostwire.jlibtorrent.TorrentInfo
+import com.example.musicdao.util.Util
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
@@ -25,12 +24,14 @@ import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.random.Random
 
 open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
     override val navigationGraph = R.navigation.musicdao_navgraph
-    lateinit var contentSeeder: ContentSeeder
+    var contentSeeder: ContentSeeder? = null
     var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,17 +45,28 @@ open class MusicService : BaseActivity() {
                     .saveLocation(applicationContext.cacheDir)
                     .removeFilesAfterStop(false)
                     .autoDownload(false)
-                    .build())
+                    .build()
+            )
         }
 
         registerBlockSigner()
 
         iterativelyCrawlTrustChains()
 
-        contentSeeder = ContentSeeder.getInstance(SessionManager(), applicationContext.cacheDir)
-        contentSeeder.start()
-
         handleIntent(intent)
+
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                if (torrentStream.sessionManager != null) {
+                    val seeder =
+                        ContentSeeder.getInstance(torrentStream.sessionManager, applicationContext.cacheDir)
+                    seeder.start()
+                    contentSeeder = seeder
+                    return@launchWhenStarted
+                }
+                delay(3000)
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -104,8 +116,9 @@ open class MusicService : BaseActivity() {
         }
     }
 
-    fun getDhtNodes(): Int {
-        return torrentStream.totalDhtNodes
+    fun getStatsOverview(): String {
+        val sessionManager = torrentStream.sessionManager ?: return ""
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(sessionManager.downloadRate())}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
     }
 
     /**
@@ -145,68 +158,94 @@ open class MusicService : BaseActivity() {
      * and start seeding the torrent.
      * @return magnet link for the torrent
      */
-    fun seedFile(context: Context, uri: Uri): TorrentInfo {
-        val torrentFile = generateTorrent(context, uri)
-        // 'Downloading' the file while already having it locally should start seeding it
-        return TorrentInfo(torrentFile)
-    }
+//    fun seedFile(context: Context, uri: Uri): TorrentInfo {
+//        // TODO this function needs a rewrite
+//        val torrentFile = generateTorrent(context, uri)
+//        // 'Downloading' the file while already having it locally should start seeding it
+//        return TorrentInfo(torrentFile)
+//    }
+//
+//    fun seedFile(context: Context, uris: Array<Uri>): TorrentInfo {
+//        // TODO this function needs a rewrite
+//        val torrentFile = generateTorrent(context, uris)
+//        // 'Downloading' the file while already having it locally should start seeding it
+//        return TorrentInfo(torrentFile)
+//    }
+
+//    fun generateTorrentFromMultipleFiles(context: Context, uris: Array<Uri>): File {
+//        val files = mutableListOf<File>()
+//        for (uri in uris) {
+//            files.add(getTempFileForTorrent(context, uri))
+//        }
+//    }
+//
+//    fun getTempFileForTorrent(context: Context, uri: Uri): File {
+//        val contentResolver = context.contentResolver
+//        val projection =
+//            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
+//        val cursor = contentResolver.query(uri, projection, null, null, null)
+//        var fileName = ""
+//        if (cursor != null) {
+//            try {
+//                // TODO convert this cursor to support multifile sharing
+//                if (cursor.moveToFirst()) {
+//                    fileName = cursor.getString(0)
+//                }
+//            } finally {
+//                cursor.close()
+//            }
+//        }
+//
+//        if (fileName == "") throw Error("Source file name for creating torrent not found")
+//        val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+//        val tempFileLocation = "${context.cacheDir}/$fileName"
+//
+//        // TODO currently creates temp copies before seeding, but should not be necessary
+//        FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
+//        val file = File(tempFileLocation)
+//        return file
+//    }
 
     /**
-     * Generates a a .torrent File
-     * @param uri the URI of a single local source file to publish
+     * Generates a a .torrent File from local files
+     * @param uris the list of Uris pointing to local audio source files to publish
      */
     @Throws(Resources.NotFoundException::class)
-    private fun generateTorrent(context: Context, uri: Uri): File {
-        println("Trying to share torrent $uri")
+    fun generateTorrent(context: Context, uris: List<Uri>): File {
+        val fileList = mutableListOf<File>()
         val contentResolver = context.contentResolver
         val projection =
             arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-        val cursor = contentResolver.query(uri, projection, null, null, null)
-        var fileName = ""
-        if (cursor != null) {
-            try {
-                if (cursor.moveToFirst()) {
-                    fileName = cursor.getString(0)
+
+        val randomInt = Random.nextInt(0, Int.MAX_VALUE)
+        val parentDir = "${context.cacheDir}/$randomInt"
+
+        for (uri in uris) {
+            val cursor = contentResolver.query(uri, projection, null, null, null)
+            var fileName = ""
+            if (cursor != null) {
+                try {
+                    // TODO convert this cursor to support multifile sharing
+                    if (cursor.moveToFirst()) {
+                        fileName = cursor.getString(0)
+                    }
+                } finally {
+                    cursor.close()
                 }
-            } finally {
-                cursor.close()
             }
+
+            if (fileName == "") throw Error("Source file name for creating torrent not found")
+            val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+            val tempFileLocation = "$parentDir/$fileName"
+
+            // TODO currently creates temp copies before seeding, but should not be necessary
+            FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
+            fileList.add(File(tempFileLocation))
         }
 
-        if (fileName == "") throw Error("Source file name for creating torrent not found")
-        val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-        val tempFileLocation = "${context.cacheDir}/$fileName"
-
-        // TODO currently creates temp copies before seeding, but should not be necessary
-        FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-        val file = File(tempFileLocation)
-        val torrent = SharedTorrent.create(file, 65535, listOf(), "")
-        val torrentFile = "$tempFileLocation.torrent"
+        val torrent = SharedTorrent.create(File(parentDir), fileList, 65535, listOf(), "")
+        val torrentFile = "$parentDir.torrent"
         torrent.save(FileOutputStream(torrentFile))
         return File(torrentFile)
-    }
-
-    /**
-     * (External) helper method
-     */
-    private fun copyInputStreamToFile(inputStream: InputStream, file: File) {
-        var out: OutputStream? = null
-        try {
-            out = FileOutputStream(file)
-            val buf = ByteArray(1024)
-            var len: Int
-            while (inputStream.read(buf).also { len = it } > 0) {
-                out.write(buf, 0, len)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            try {
-                out?.close()
-                inputStream.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
     }
 }

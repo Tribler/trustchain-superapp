@@ -1,88 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TableRow xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/contentRow"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#303030"
+    android:background="?android:selectableItemBackground"
+    android:clickable="true"
     android:orientation="vertical">
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
-        android:stretchColumns="1">
+    <TextView
+        android:id="@+id/trackId"
+        android:layout_width="0dp"
+        android:layout_weight="5"
+        android:minWidth="25dp"
+        android:layout_margin="4dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="1."
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
-        <TableRow
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_weight="80"
+        android:layout_margin="4dp"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/trackTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp">
+            android:text="djl a n g 59_-_Odinary_People_(_Orgdinary_Mix_)_Pomber_on_vocals.mp3"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/trackArtist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/trackTitle"
+            android:text="The Smithies"
+            android:textColor="@color/musicColorAccent" />
+    </RelativeLayout>
 
-                <ImageButton
-                    android:id="@+id/playButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:background="?android:selectableItemBackground"
-                    android:contentDescription="Play track"
-                    android:src="@android:drawable/ic_media_play" />
-            </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_weight="15"
+        android:minWidth="60dp"
+        android:layout_margin="4dp"
+        android:layout_height="match_parent">
 
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true">
-
-                <TextView
-                    android:id="@+id/trackTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="20dp"
-                    android:maxWidth="300dp"
-                    android:text="Stairway to heaven"
-                    android:textColor="#ffffff"
-                    android:textSize="17sp" />
-
-                <TextView
-                    android:id="@+id/trackArtist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/trackTitle"
-                    android:layout_marginLeft="20dp"
-                    android:text="The Smithies"
-                    android:textColor="@color/musicColorAccent" />
-            </RelativeLayout>
-
-
-            <RelativeLayout
-                android:layout_width="60dp"
-                android:layout_height="match_parent">
-
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:max="100" />
-            </RelativeLayout>
-        </TableRow>
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginLeft="11dp"
-                android:layout_marginRight="11dp"
-                android:layout_span="3"
-                android:background="#4d4d4d" />
-        </TableRow>
-    </TableLayout>
-
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:max="100" />
+    </RelativeLayout>
 </TableRow>
