@@ -12,6 +12,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
@@ -21,8 +22,12 @@ import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -68,8 +73,24 @@ open class MusicService : BaseActivity() {
             }
         }
 
-        walletService = WalletService(applicationContext)
+        walletService = WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
         walletService.startup()
+    }
+
+    private fun getPrivateKey(): PrivateKey {
+        // Load a key from the shared preferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
+        return if (privateKey == null) {
+            // Generate a new key on the first launch
+            val newKey = AndroidCryptoProvider.generateKey()
+            prefs.edit()
+                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
+                .apply()
+            newKey
+        } else {
+            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -197,5 +218,9 @@ open class MusicService : BaseActivity() {
         val torrentFile = "$parentDir.torrent"
         torrent.save(FileOutputStream(torrentFile))
         return File(torrentFile)
+    }
+
+    companion object {
+        private const val PREF_PRIVATE_KEY = "private_key"
     }
 }

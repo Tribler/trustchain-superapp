@@ -2,6 +2,9 @@ package com.example.musicdao.wallet
 
 import android.content.Context
 import android.widget.Toast
+import nl.tudelft.ipv8.IPv8
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -14,7 +17,7 @@ import org.bitcoinj.wallet.SendRequest
 import java.util.*
 
 
-class WalletService(val androidContext: Context) {
+class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey: PrivateKey) {
     val app: WalletAppKit
     val params = MainNetParams.get()
     val filePrefix = "forwarding-service"
