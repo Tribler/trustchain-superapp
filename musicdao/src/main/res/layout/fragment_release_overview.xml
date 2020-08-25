@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Loading content from peers..."
+        android:text="No music playlists found from peers"
         android:textColor="@color/white" />
 
     <RelativeLayout

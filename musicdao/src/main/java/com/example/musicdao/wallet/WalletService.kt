@@ -58,9 +58,7 @@ class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey:
                 percentageSynced = 100
             }
         })
-        app.setBlockingStartup(false)
-            .startAsync()
-            .awaitRunning()
+        app.startAsync()
     }
 
     fun status(): String {

@@ -15,11 +15,20 @@ import nl.tudelft.ipv8.android.IPv8Android
 
 class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
+    private var searchQuery = ""
     private val maxReleases = 10
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+        searchQuery = arguments?.getString("filter", "") ?: ""
+        if (searchQuery != "") {
+            activity?.title = "Search results"
+            setMenuVisibility(false)
+            setHasOptionsMenu(false)
+        } else {
+            setHasOptionsMenu(true)
+        }
+
         lastReleaseBlocksSize = -1
 
         lifecycleScope.launchWhenCreated {
@@ -78,16 +87,12 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
-            var query = ""
-            if (requireActivity() is MusicService) {
-                query = (requireActivity() as MusicService).filter
-            }
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
                 count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
-                if (coverFragment.filter(query)) {
+                if (coverFragment.filter(searchQuery)) {
                     transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
                     if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
                 }

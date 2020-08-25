@@ -12,6 +12,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
@@ -39,11 +40,16 @@ open class MusicService : BaseActivity() {
     lateinit var walletService: WalletService
     override val navigationGraph = R.navigation.musicdao_navgraph
     var contentSeeder: ContentSeeder? = null
-    var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread {
+            startup()
+        }.start()
+        handleIntent(intent)
+    }
 
+    private fun startup() {
         torrentStream = try {
             TorrentStream.getInstance()
         } catch (e: Exception) {
@@ -58,13 +64,14 @@ open class MusicService : BaseActivity() {
         registerBlockSigner()
         iterativelyCrawlTrustChains()
 
-        handleIntent(intent)
-
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 if (torrentStream.sessionManager != null) {
                     val seeder =
-                        ContentSeeder.getInstance(torrentStream.sessionManager, applicationContext.cacheDir)
+                        ContentSeeder.getInstance(
+                            torrentStream.sessionManager,
+                            applicationContext.cacheDir
+                        )
                     seeder.start()
                     contentSeeder = seeder
                     return@launchWhenStarted
@@ -73,7 +80,8 @@ open class MusicService : BaseActivity() {
             }
         }
 
-        walletService = WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
+        walletService =
+            WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
         walletService.startup()
     }
 
@@ -102,7 +110,9 @@ open class MusicService : BaseActivity() {
     private fun handleIntent(intent: Intent) {
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                filter = query
+                val args = Bundle()
+                args.putString("filter", query)
+                findNavController(R.id.navHostFragment).navigate(R.id.releaseOverviewFragment, args)
             }
         }
     }
@@ -142,7 +152,9 @@ open class MusicService : BaseActivity() {
 
     fun getStatsOverview(): String {
         val sessionManager = torrentStream.sessionManager ?: return ""
-        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(sessionManager.downloadRate())}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(
+            sessionManager.downloadRate()
+        )}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
     }
 
     /**
@@ -167,11 +179,6 @@ open class MusicService : BaseActivity() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         musicCommunity.registerBlockSigner("publish_release", object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                Toast.makeText(
-                    applicationContext,
-                    "Signing block ${block.blockId}",
-                    Toast.LENGTH_LONG
-                ).show()
                 musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
