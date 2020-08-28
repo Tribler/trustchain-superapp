@@ -22,6 +22,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         super.onViewCreated(view, savedInstanceState)
         searchQuery = arguments?.getString("filter", "") ?: ""
         if (searchQuery != "") {
+            getMusicCommunity().performRemoteKeywordSearch(searchQuery)
             activity?.title = "Search results"
             setMenuVisibility(false)
             setHasOptionsMenu(false)
@@ -89,12 +90,12 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
             val torrentInfoName = block.transaction["torrentInfoName"]
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
-                count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
                 if (coverFragment.filter(searchQuery)) {
                     transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
                     if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
+                    count += 1
                 }
                 transaction.commit()
             }
