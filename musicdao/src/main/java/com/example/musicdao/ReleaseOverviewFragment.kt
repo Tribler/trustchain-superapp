@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
@@ -14,11 +15,20 @@ import nl.tudelft.ipv8.android.IPv8Android
 
 class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
+    private var searchQuery = ""
     private val maxReleases = 10
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setHasOptionsMenu(true)
+        searchQuery = arguments?.getString("filter", "") ?: ""
+        if (searchQuery != "") {
+            activity?.title = "Search results"
+            setMenuVisibility(false)
+            setHasOptionsMenu(false)
+        } else {
+            setHasOptionsMenu(true)
+        }
+
         lastReleaseBlocksSize = -1
 
         lifecycleScope.launchWhenCreated {
@@ -26,7 +36,9 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 if (activity is MusicService && debugText != null) {
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
-                showAllReleases()
+                Thread(Runnable {
+                    showAllReleases()
+                }).start()
                 delay(3000)
             }
         }
@@ -49,6 +61,10 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 }
                 true
             }
+            R.id.action_wallet -> {
+                findNavController().navigate(R.id.walletFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -56,7 +72,6 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     /**
      * List all the releases that are currently loaded in the local trustchain database
      */
-    @Synchronized
     private fun showAllReleases() {
         val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
         if (releaseBlocks.size == lastReleaseBlocksSize) {
@@ -72,16 +87,12 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
-            var query = ""
-            if (requireActivity() is MusicService) {
-                query = (requireActivity() as MusicService).filter
-            }
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
                 count += 1
                 val transaction = requireActivity().supportFragmentManager.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
-                if (coverFragment.filter(query)) {
+                if (coverFragment.filter(searchQuery)) {
                     transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
                     if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
                 }
@@ -123,13 +134,17 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
 
     private fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
         val myPeer = IPv8Android.getInstance().myPeer
-        val transaction = mapOf(
+        val transaction = mutableMapOf<String, String>(
             "magnet" to magnet,
             "title" to title,
             "artists" to artists,
             "date" to releaseDate,
             "torrentInfoName" to torrentInfoName
         )
+        if (activity is MusicService) {
+            val musicWallet = (activity as MusicService).walletService
+            transaction["publisher"] = musicWallet.publicKey()
+        }
         val trustchain = getMusicCommunity()
         trustchain.createProposalBlock("publish_release", transaction, myPeer.publicKey.keyToBin())
     }

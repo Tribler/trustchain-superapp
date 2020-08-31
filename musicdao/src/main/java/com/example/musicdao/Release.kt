@@ -9,6 +9,8 @@ import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
@@ -38,14 +40,9 @@ class Release(
     private var setTorrentMetadata: TorrentInfo? = null
     private var localTorrent: Torrent? = null
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        blockMetadata.text =
-            HtmlCompat.fromHtml(
-                "<b>$artists - $title<br></b>" +
-                    date, 0
-            )
 
         var torrentUrl = magnet
         if (torrentInfoName != null) {
@@ -64,8 +61,25 @@ class Release(
         }
         (activity as MusicService).torrentStream.startStream(torrentUrl)
         (activity as MusicService).torrentStream.addListener(this)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        blockMetadata.text =
+            HtmlCompat.fromHtml(
+                "<b>$artists - $title<br></b>" +
+                    date, 0
+            )
 
         AudioPlayer.getInstance().hideTrackInfo()
+
+        if (publisher.length == 34) {
+            tipButton.visibility = View.VISIBLE
+            tipButton.isClickable = true
+            tipButton.setOnClickListener {
+                tipArtist()
+            }
+        }
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -74,6 +88,16 @@ class Release(
                 }
                 delay(1000)
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (release_table_layout.childCount == 0) {
+            loadingTracks.visibility = View.VISIBLE
+        } else {
+            loadingTracks.visibility = View.GONE
         }
     }
 
@@ -90,6 +114,10 @@ class Release(
                 }
                 true
             }
+            R.id.action_wallet -> {
+                findNavController().navigate(R.id.walletFragment)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -100,6 +128,11 @@ class Release(
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
+    }
+
+    private fun tipArtist() {
+        TipArtistDialog(publisher)
+            .show(childFragmentManager, "Tip the artist")
     }
 
     private fun setMetadata(metadata: TorrentInfo) {
@@ -133,7 +166,11 @@ class Release(
                 transaction.commit()
 
                 val transaction2 = childFragmentManager.beginTransaction()
-                transaction2.add(R.id.release_table_layout, Fragment(R.layout.track_table_divider), "track$index-divider")
+                transaction2.add(
+                    R.id.release_table_layout,
+                    Fragment(R.layout.track_table_divider),
+                    "track$index-divider"
+                )
                 transaction2.commit()
 
                 tracks[index] = track
@@ -161,7 +198,8 @@ class Release(
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
-                AudioPlayer.getInstance().setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
+                AudioPlayer.getInstance()
+                    .setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
             }
         }
     }

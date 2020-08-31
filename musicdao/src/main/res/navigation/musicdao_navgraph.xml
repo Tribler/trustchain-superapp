@@ -29,8 +29,7 @@
                 app:argType="string" />
             <argument
                 android:name="torrentInfoName"
-                app:argType="string"
-                />
+                app:argType="string" />
         </action>
     </fragment>
 
@@ -38,5 +37,11 @@
         android:id="@+id/playlistFragment"
         android:name="com.example.musicdao.PlaylistFragment"
         android:label="Playlist">
+    </fragment>
+
+    <fragment
+        android:id="@+id/walletFragment"
+        android:name="com.example.musicdao.wallet.WalletFragment"
+        android:label="Wallet overview">
     </fragment>
 </navigation>

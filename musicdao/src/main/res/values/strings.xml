@@ -14,6 +14,7 @@
     <string name="add_playlist">Add playlist</string>
     <string name="app_label">MusicDAO</string>
     <string name="search_hint">Search through music</string>
-    <string name="debug_hint">Show connectivity stats</string>
+    <string name="debug_hint">Connectivity stats</string>
+    <string name="android_wallet">View balance</string>
 
 </resources>

@@ -1,11 +1,11 @@
 package com.example.musicdao
 
 import android.os.Bundle
-import android.view.View
 
 class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val localArgs = arguments
         if (localArgs is Bundle) {
             val magnet = localArgs.getString("magnet", "Magnet not found")
@@ -15,6 +15,8 @@ class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
             val publisher = localArgs.getString("publisher", "Publisher not found")
             val torrentInfoName = localArgs.getString("torrentInfoName")
 
+            // TODO fix: Release is currently added every single time the fragment is being attached to the view,
+            // Also the Release fragment leads to crashes
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
                 val release = Release(

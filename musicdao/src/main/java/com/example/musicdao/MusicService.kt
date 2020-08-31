@@ -10,18 +10,24 @@ import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
+import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
+import com.example.musicdao.wallet.WalletService
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -30,13 +36,19 @@ import kotlin.random.Random
 
 open class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
+    lateinit var walletService: WalletService
     override val navigationGraph = R.navigation.musicdao_navgraph
     var contentSeeder: ContentSeeder? = null
-    var filter: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Thread {
+            startup()
+        }.start()
+        handleIntent(intent)
+    }
 
+    private fun startup() {
         torrentStream = try {
             TorrentStream.getInstance()
         } catch (e: Exception) {
@@ -48,24 +60,43 @@ open class MusicService : BaseActivity() {
                     .build()
             )
         }
-
         registerBlockSigner()
-
         iterativelyCrawlTrustChains()
-
-        handleIntent(intent)
 
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 if (torrentStream.sessionManager != null) {
                     val seeder =
-                        ContentSeeder.getInstance(torrentStream.sessionManager, applicationContext.cacheDir)
+                        ContentSeeder.getInstance(
+                            torrentStream.sessionManager,
+                            applicationContext.cacheDir
+                        )
                     seeder.start()
                     contentSeeder = seeder
                     return@launchWhenStarted
                 }
                 delay(3000)
             }
+        }
+
+        walletService =
+            WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
+        walletService.startup()
+    }
+
+    private fun getPrivateKey(): PrivateKey {
+        // Load a key from the shared preferences
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
+        return if (privateKey == null) {
+            // Generate a new key on the first launch
+            val newKey = AndroidCryptoProvider.generateKey()
+            prefs.edit()
+                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
+                .apply()
+            newKey
+        } else {
+            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
 
@@ -78,7 +109,9 @@ open class MusicService : BaseActivity() {
     private fun handleIntent(intent: Intent) {
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                filter = query
+                val args = Bundle()
+                args.putString("filter", query)
+                findNavController(R.id.navHostFragment).navigate(R.id.releaseOverviewFragment, args)
             }
         }
     }
@@ -118,7 +151,9 @@ open class MusicService : BaseActivity() {
 
     fun getStatsOverview(): String {
         val sessionManager = torrentStream.sessionManager ?: return ""
-        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(sessionManager.downloadRate())}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(
+            sessionManager.downloadRate()
+        )}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
     }
 
     /**
@@ -143,68 +178,10 @@ open class MusicService : BaseActivity() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         musicCommunity.registerBlockSigner("publish_release", object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                Toast.makeText(
-                    applicationContext,
-                    "Signing block ${block.blockId}",
-                    Toast.LENGTH_LONG
-                ).show()
                 musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
             }
         })
     }
-
-    /**
-     * Assume that the Uri given is a path to a local audio file. Create a torrent for this file
-     * and start seeding the torrent.
-     * @return magnet link for the torrent
-     */
-//    fun seedFile(context: Context, uri: Uri): TorrentInfo {
-//        // TODO this function needs a rewrite
-//        val torrentFile = generateTorrent(context, uri)
-//        // 'Downloading' the file while already having it locally should start seeding it
-//        return TorrentInfo(torrentFile)
-//    }
-//
-//    fun seedFile(context: Context, uris: Array<Uri>): TorrentInfo {
-//        // TODO this function needs a rewrite
-//        val torrentFile = generateTorrent(context, uris)
-//        // 'Downloading' the file while already having it locally should start seeding it
-//        return TorrentInfo(torrentFile)
-//    }
-
-//    fun generateTorrentFromMultipleFiles(context: Context, uris: Array<Uri>): File {
-//        val files = mutableListOf<File>()
-//        for (uri in uris) {
-//            files.add(getTempFileForTorrent(context, uri))
-//        }
-//    }
-//
-//    fun getTempFileForTorrent(context: Context, uri: Uri): File {
-//        val contentResolver = context.contentResolver
-//        val projection =
-//            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-//        val cursor = contentResolver.query(uri, projection, null, null, null)
-//        var fileName = ""
-//        if (cursor != null) {
-//            try {
-//                // TODO convert this cursor to support multifile sharing
-//                if (cursor.moveToFirst()) {
-//                    fileName = cursor.getString(0)
-//                }
-//            } finally {
-//                cursor.close()
-//            }
-//        }
-//
-//        if (fileName == "") throw Error("Source file name for creating torrent not found")
-//        val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-//        val tempFileLocation = "${context.cacheDir}/$fileName"
-//
-//        // TODO currently creates temp copies before seeding, but should not be necessary
-//        FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-//        val file = File(tempFileLocation)
-//        return file
-//    }
 
     /**
      * Generates a a .torrent File from local files
@@ -247,5 +224,9 @@ open class MusicService : BaseActivity() {
         val torrentFile = "$parentDir.torrent"
         torrent.save(FileOutputStream(torrentFile))
         return File(torrentFile)
+    }
+
+    companion object {
+        private const val PREF_PRIVATE_KEY = "private_key"
     }
 }
