@@ -7,9 +7,12 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.preference.PreferenceManager
@@ -78,9 +81,8 @@ open class MusicService : BaseActivity() {
                 delay(3000)
             }
         }
-
         walletService =
-            WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
+            WalletService(this)
         walletService.startup()
     }
 
@@ -151,9 +153,11 @@ open class MusicService : BaseActivity() {
 
     fun getStatsOverview(): String {
         val sessionManager = torrentStream.sessionManager ?: return ""
-        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(
-            sessionManager.downloadRate()
-        )}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
+            Util.readableBytes(
+                sessionManager.downloadRate()
+            )
+        }, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
     }
 
     /**
@@ -224,6 +228,12 @@ open class MusicService : BaseActivity() {
         val torrentFile = "$parentDir.torrent"
         torrent.save(FileOutputStream(torrentFile))
         return File(torrentFile)
+    }
+
+    fun showToast(text: String, length: Int) {
+        runOnUiThread {
+            Toast.makeText(baseContext, text, length).show()
+        }
     }
 
     companion object {

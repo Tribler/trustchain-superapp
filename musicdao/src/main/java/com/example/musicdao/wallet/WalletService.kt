@@ -2,41 +2,45 @@ package com.example.musicdao.wallet
 
 import android.content.Context
 import android.widget.Toast
-import nl.tudelft.ipv8.IPv8
-import nl.tudelft.ipv8.keyvault.PrivateKey
+import com.example.musicdao.MusicService
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
-import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.util.*
 
-class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey: PrivateKey) {
+/**
+ * Interaction with a BitcoinJ wallet
+ */
+class WalletService(val musicService: MusicService) {
     val app: WalletAppKit
-    val params = MainNetParams.get()
-    val filePrefix = "forwarding-service"
-    val walletDir = androidContext.cacheDir
+    val params = RegTestParams.get()
+    val filePrefix = "forwarding-service-regtest"
+    val walletDir = musicService.applicationContext.cacheDir
     var percentageSynced = 0
 
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
         app = object : WalletAppKit(params, walletDir, filePrefix) {
             override fun onSetupCompleted() {
-                // Make a fresh new key if no keys in stored wallet.
                 if (wallet().keyChainGroupSize < 1) {
                     wallet().importKey(ECKey())
                 }
 
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
-                    Toast.makeText(androidContext, "Received coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT).show()
+                    musicService.showToast("Received coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT)
                 }
                 wallet().addCoinsSentEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentFromMe(w)
-                    Toast.makeText(androidContext, "Sent coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT).show()
+                    musicService.showToast("Sent coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT)
                 }
             }
         }
@@ -58,11 +62,24 @@ class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey:
                 percentageSynced = 100
             }
         })
+        if (params == RegTestParams.get()) {
+            try {
+                val localHost = InetAddress.getByName("134.122.59.107")
+                app.setPeerNodes(PeerAddress(params, localHost, params.port))
+            } catch (e: UnknownHostException) {
+                // Borked machine with no loopback adapter configured properly.
+                throw RuntimeException(e)
+            }
+        }
         app.startAsync()
     }
 
     fun status(): String {
-        return "Wallet status: " + app.state().name
+        val status = app.state().name
+        if (status == "RUNNING") {
+            percentageSynced = 100
+        }
+        return "Wallet status: $status"
     }
 
     fun balanceText(): String {
@@ -82,15 +99,15 @@ class WalletService(val androidContext: Context, val iPv8: IPv8, val privateKey:
         try {
             targetAddress = Address.fromString(params, publicKey)
         } catch (e: Exception) {
-            Toast.makeText(androidContext, "Could not resolve wallet address of peer", Toast.LENGTH_LONG).show()
+            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
             return
         }
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
         try {
             app.wallet().sendCoins(sendRequest)
-            Toast.makeText(androidContext, "Submitted transaction", Toast.LENGTH_SHORT).show()
+            musicService.showToast("Submitted transaction", Toast.LENGTH_SHORT)
         } catch (e: Exception) {
-            Toast.makeText(androidContext, "Error creating transaction (do you have sufficient funds?)", Toast.LENGTH_LONG).show()
+            musicService.showToast("Error creating transaction (do you have sufficient funds?)", Toast.LENGTH_SHORT)
         }
     }
 }
