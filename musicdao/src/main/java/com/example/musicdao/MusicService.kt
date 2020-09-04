@@ -142,11 +142,11 @@ open class MusicService : BaseActivity() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         lifecycleScope.launchWhenStarted {
             while (isActive) {
+                musicCommunity.bootstrap()
                 for (peer in musicCommunity.getPeers()) {
                     musicCommunity.crawlChain(peer)
                     delay(1000)
                 }
-                delay(3000)
             }
         }
     }

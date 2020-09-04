@@ -1,6 +1,5 @@
 package com.example.musicdao.wallet
 
-import android.content.Context
 import android.widget.Toast
 import com.example.musicdao.MusicService
 import org.bitcoinj.core.Address
@@ -21,8 +20,8 @@ import java.util.*
  */
 class WalletService(val musicService: MusicService) {
     val app: WalletAppKit
-    val params = RegTestParams.get()
-    val filePrefix = "forwarding-service-regtest"
+    val params = CryptoCurrencyConfig.networkParams
+    val filePrefix = CryptoCurrencyConfig.chainFileName
     val walletDir = musicService.applicationContext.cacheDir
     var percentageSynced = 0
 

@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
+import com.example.musicdao.wallet.CryptoCurrencyConfig
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
@@ -19,6 +20,7 @@ import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.bitcoinj.core.Address
 import java.io.File
 
 /**
@@ -73,13 +75,7 @@ class Release(
 
         AudioPlayer.getInstance().hideTrackInfo()
 
-        if (publisher.length == 34) {
-            tipButton.visibility = View.VISIBLE
-            tipButton.isClickable = true
-            tipButton.setOnClickListener {
-                tipArtist()
-            }
-        }
+        enableTipButton()
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
@@ -130,9 +126,25 @@ class Release(
         }
     }
 
-    private fun tipArtist() {
-        TipArtistDialog(publisher)
-            .show(childFragmentManager, "Tip the artist")
+    /**
+     * If the Release has a publisher, then this should point to the public key of the wallet of
+     * this publisher. This method checks whether the publisher field exists and whether it is
+     * properly formatted so money can be sent to it. If it is, a tip button is shown
+     */
+    private fun enableTipButton() {
+        if (publisher.isNotEmpty()) {
+            try {
+                Address.fromString(CryptoCurrencyConfig.networkParams, publisher)
+            } catch (e: Exception) {
+                return
+            }
+            tipButton.visibility = View.VISIBLE
+            tipButton.isClickable = true
+            tipButton.setOnClickListener {
+                TipArtistDialog(publisher)
+                    .show(childFragmentManager, "Tip the artist")
+            }
+        }
     }
 
     private fun setMetadata(metadata: TorrentInfo) {

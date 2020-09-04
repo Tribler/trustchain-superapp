@@ -59,7 +59,7 @@ class MusicCommunity(
      */
     private fun onKeywordSearch(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage.Deserializer)
-        val keyword = payload.keyword
+        val keyword = payload.keyword.toLowerCase()
         var success = false
         database.getAllBlocks().forEach {
             val transaction = it.transaction
