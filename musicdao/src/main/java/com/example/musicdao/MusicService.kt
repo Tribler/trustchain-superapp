@@ -81,9 +81,10 @@ open class MusicService : BaseActivity() {
                 delay(3000)
             }
         }
-        walletService =
-            WalletService(this)
-        walletService.startup()
+        if (!::walletService.isInitialized) {
+            walletService =
+                WalletService.getInstance(this)
+        }
     }
 
     private fun getPrivateKey(): PrivateKey {
@@ -142,11 +143,11 @@ open class MusicService : BaseActivity() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                musicCommunity.bootstrap()
                 for (peer in musicCommunity.getPeers()) {
                     musicCommunity.crawlChain(peer)
                     delay(1000)
                 }
+                delay(3000)
             }
         }
     }

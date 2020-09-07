@@ -46,6 +46,7 @@ class WalletService(val musicService: MusicService) {
     }
 
     fun startup() {
+        app.setBlockingStartup(false)
         app.setDownloadListener(object : DownloadProgressTracker() {
             override fun progress(
                 pct: Double,
@@ -63,7 +64,9 @@ class WalletService(val musicService: MusicService) {
         })
         if (params == RegTestParams.get()) {
             try {
-                val localHost = InetAddress.getByName("134.122.59.107")
+                // This is a bootstrap node (a digitalocean droplet, running a full bitcoin regtest
+                // node and a miner
+                val localHost = InetAddress.getByName("167.99.17.227")
                 app.setPeerNodes(PeerAddress(params, localHost, params.port))
             } catch (e: UnknownHostException) {
                 // Borked machine with no loopback adapter configured properly.
@@ -90,7 +93,12 @@ class WalletService(val musicService: MusicService) {
     }
 
     fun publicKey(): String {
-        return app.wallet().currentReceiveAddress().toString()
+        return try {
+            app.wallet().currentReceiveAddress().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
     }
 
     fun sendCoins(publicKey: String, satoshiAmount: Long) {
@@ -107,6 +115,22 @@ class WalletService(val musicService: MusicService) {
             musicService.showToast("Submitted transaction", Toast.LENGTH_SHORT)
         } catch (e: Exception) {
             musicService.showToast("Error creating transaction (do you have sufficient funds?)", Toast.LENGTH_SHORT)
+        }
+    }
+
+    companion object {
+        var walletService: WalletService? = null
+
+        /**
+         * Singleton pattern for WalletService
+         */
+        fun getInstance(musicService: MusicService) : WalletService {
+            val instance = walletService
+            if (instance is WalletService) return instance
+            val newInstance = WalletService(musicService)
+            newInstance.startup()
+            walletService = newInstance
+            return newInstance
         }
     }
 }

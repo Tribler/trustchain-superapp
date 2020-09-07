@@ -37,9 +37,7 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                 if (activity is MusicService && debugText != null) {
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
-                Thread(Runnable {
-                    showAllReleases()
-                }).start()
+                showAllReleases()
                 delay(3000)
             }
         }
@@ -71,7 +69,8 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
     }
 
     /**
-     * List all the releases that are currently loaded in the local trustchain database
+     * List all the releases that are currently loaded in the local trustchain database. If keyword
+     * search is enabled (searchQuery variable is set) then it also filters the database
      */
     private fun showAllReleases() {
         val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
@@ -81,7 +80,9 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
         lastReleaseBlocksSize = releaseBlocks.size
         var count = 0
         if (release_overview_layout is ViewGroup) {
-            release_overview_layout.removeAllViews()
+            activity?.runOnUiThread {
+                release_overview_layout.removeAllViews()
+            }
         }
         for (block in releaseBlocks) {
             if (count == maxReleases) return
@@ -97,24 +98,18 @@ class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview
                     if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
                     count += 1
                 }
-                transaction.commit()
+                activity?.runOnUiThread {
+                    transaction.commitAllowingStateLoss()
+                }
             }
         }
     }
 
     /**
-     * Creates a trustchain block which uses the example creative commons release magnet
-     * This is useful for testing the download speed of tracks over libtorrent
+     * Show a form dialog which asks to add metadata for a new Release (album title, release date,
+     * track files etc)
      */
     private fun showCreateReleaseDialog() {
-        publishTrack()
-    }
-
-    /**
-     * Once a magnet link to publish is chosen, show an alert dialog which asks to add metadata for
-     * the Release (album title, release date etc)
-     */
-    private fun publishTrack() {
         SubmitReleaseDialog(this)
             .show(childFragmentManager, "Submit metadata")
     }
