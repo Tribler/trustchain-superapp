@@ -1,7 +1,6 @@
 package com.example.musicdao.ipv8
 
 import android.util.Log
-import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
@@ -31,8 +30,8 @@ class MusicCommunity(
         messageHandlers[MessageId.KEYWORD_SEARCH_MESSAGE] = ::onKeywordSearch
     }
 
-    fun performRemoteKeywordSearch(keyword: String, ttl: Int = 2, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()) {
-        val maxPeersToAsk = 5 // This is a magic number, tweak during/after experiments
+    fun performRemoteKeywordSearch(keyword: String, ttl: Int = 1, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()) {
+        val maxPeersToAsk = 20 // This is a magic number, tweak during/after experiments
         for ((index, peer) in getPeers().withIndex()) {
             if (index >= maxPeersToAsk) break
             val packet = serializePacket(
