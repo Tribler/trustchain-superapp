@@ -11,6 +11,7 @@ import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
+import org.bitcoinj.wallet.Wallet
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
@@ -35,11 +36,12 @@ class WalletService(val musicService: MusicService) {
 
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
-                    musicService.showToast("Received coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT)
-                }
-                wallet().addCoinsSentEventListener { w, tx, _, _ ->
-                    val value: Coin = tx.getValueSentFromMe(w)
-                    musicService.showToast("Sent coins: ${value.toFriendlyString()}", Toast.LENGTH_SHORT)
+                    if (value != wallet().balance && value != wallet().getBalance(Wallet.BalanceType.ESTIMATED)) {
+                        musicService.showToast(
+                            "Received coins: ${value.toFriendlyString()}",
+                            Toast.LENGTH_SHORT
+                        )
+                    }
                 }
             }
         }
@@ -85,7 +87,10 @@ class WalletService(val musicService: MusicService) {
     }
 
     fun balanceText(): String {
-        return "Current balance: " + app.wallet().balance.toFriendlyString()
+        val confirmedBalance = app.wallet().balance.toFriendlyString()
+        val estimatedBalance =
+            app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+        return "Current balance: $confirmedBalance (confirmed) \nCurrent balance: $estimatedBalance (estimated)"
     }
 
     fun publicKeyText(): String {
@@ -112,9 +117,12 @@ class WalletService(val musicService: MusicService) {
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
         try {
             app.wallet().sendCoins(sendRequest)
-            musicService.showToast("Submitted transaction", Toast.LENGTH_SHORT)
+            musicService.showToast("Sending funds: ${Coin.valueOf(satoshiAmount).toFriendlyString()}", Toast.LENGTH_SHORT)
         } catch (e: Exception) {
-            musicService.showToast("Error creating transaction (do you have sufficient funds?)", Toast.LENGTH_SHORT)
+            musicService.showToast(
+                "Error creating transaction (do you have sufficient funds?)",
+                Toast.LENGTH_SHORT
+            )
         }
     }
 
@@ -124,7 +132,7 @@ class WalletService(val musicService: MusicService) {
         /**
          * Singleton pattern for WalletService
          */
-        fun getInstance(musicService: MusicService) : WalletService {
+        fun getInstance(musicService: MusicService): WalletService {
             val instance = walletService
             if (instance is WalletService) return instance
             val newInstance = WalletService(musicService)
