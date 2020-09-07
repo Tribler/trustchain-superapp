@@ -31,15 +31,6 @@ class MusicCommunity(
         messageHandlers[MessageId.KEYWORD_SEARCH_MESSAGE] = ::onKeywordSearch
     }
 
-    override fun bootstrap() {
-        super.bootstrap()
-
-        // Connect to some initial addresses to reduce 'empty content' page
-        for (address in INITIAL_ADDRESSES) {
-            walkTo(address)
-        }
-    }
-
     fun performRemoteKeywordSearch(keyword: String, ttl: Int = 2, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()) {
         val maxPeersToAsk = 5 // This is a magic number, tweak during/after experiments
         for ((index, peer) in getPeers().withIndex()) {
@@ -58,8 +49,8 @@ class MusicCommunity(
      * to the original asker. If I don't, I will ask my peers to find it
      */
     private fun onKeywordSearch(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage.Deserializer)
-        val keyword = payload.keyword.toLowerCase()
+        val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage)
+        val keyword = payload.keyword.toLowerCase(Locale.ROOT)
         var success = false
         database.getAllBlocks().forEach {
             val transaction = it.transaction
@@ -78,14 +69,6 @@ class MusicCommunity(
             performRemoteKeywordSearch(keyword, payload.ttl, payload.originPublicKey)
         }
         Log.i("KeywordSearch", peer.mid + ": " + payload.keyword)
-    }
-
-    companion object {
-        // These are initial addresses for some peers that have initial content,
-        // in the case that no content can be found on the first run of the app.
-        val INITIAL_ADDRESSES: List<IPv4Address> = listOf(
-            IPv4Address("83.84.32.175", 35376)
-        )
     }
 
     object MessageId {
