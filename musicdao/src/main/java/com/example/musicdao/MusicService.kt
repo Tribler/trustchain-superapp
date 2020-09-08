@@ -13,7 +13,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
@@ -23,19 +22,18 @@ import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.random.Random
 
-open class MusicService : BaseActivity() {
+/**
+ * This maintains the interactions between the UI and seeding/trustchain
+ */
+class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
     lateinit var walletService: WalletService
     override val navigationGraph = R.navigation.musicdao_navgraph
@@ -82,22 +80,6 @@ open class MusicService : BaseActivity() {
         if (!::walletService.isInitialized) {
             walletService =
                 WalletService.getInstance(this)
-        }
-    }
-
-    private fun getPrivateKey(): PrivateKey {
-        // Load a key from the shared preferences
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
-        return if (privateKey == null) {
-            // Generate a new key on the first launch
-            val newKey = AndroidCryptoProvider.generateKey()
-            prefs.edit()
-                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
-                .apply()
-            newKey
-        } else {
-            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
 
@@ -150,8 +132,11 @@ open class MusicService : BaseActivity() {
         }
     }
 
+    /**
+     * Show libtorrent connectivity stats
+     */
     fun getStatsOverview(): String {
-        val sessionManager = torrentStream.sessionManager ?: return ""
+        val sessionManager = torrentStream.sessionManager ?: return "Starting libtorrent session..."
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
             Util.readableBytes(
                 sessionManager.downloadRate()
@@ -201,16 +186,10 @@ open class MusicService : BaseActivity() {
         val parentDir = "${context.cacheDir}/$randomInt"
 
         for (uri in uris) {
-            val cursor = contentResolver.query(uri, projection, null, null, null)
             var fileName = ""
-            if (cursor != null) {
-                try {
-                    // TODO convert this cursor to support multifile sharing
-                    if (cursor.moveToFirst()) {
-                        fileName = cursor.getString(0)
-                    }
-                } finally {
-                    cursor.close()
+            contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    fileName = cursor.getString(0)
                 }
             }
 

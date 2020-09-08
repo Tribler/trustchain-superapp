@@ -12,6 +12,7 @@ import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
+import java.io.File
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
@@ -20,10 +21,10 @@ import java.util.*
  * Interaction with a BitcoinJ wallet
  */
 class WalletService(val musicService: MusicService) {
-    val app: WalletAppKit
-    val params = CryptoCurrencyConfig.networkParams
-    val filePrefix = CryptoCurrencyConfig.chainFileName
-    val walletDir = musicService.applicationContext.cacheDir
+    private val app: WalletAppKit
+    private val params = CryptoCurrencyConfig.networkParams
+    private val filePrefix = CryptoCurrencyConfig.chainFileName
+    private val walletDir: File = musicService.applicationContext.cacheDir
     var percentageSynced = 0
 
     init {

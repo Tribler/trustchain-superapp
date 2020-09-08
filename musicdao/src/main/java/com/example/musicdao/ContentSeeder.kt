@@ -9,6 +9,10 @@ import java.util.*
 
 lateinit var contentSeederInstance: ContentSeeder
 
+/**
+ * This maintains an implementation of a strategy of libtorrent seeding.
+ * Currently, all files in the cache directory are being seeded.
+ */
 class ContentSeeder(private val sessionManager: SessionManager, private val saveDir: File) {
     private val maxTorrentThreads = 10
     private var started = false
@@ -22,6 +26,8 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
+                    // 'Downloading' the torrent file also starts seeding it after download has
+                    // already been completed
                     sessionManager.download(torrentInfo, saveDir)
                 }
             }
@@ -36,6 +42,9 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
         timer.schedule(monitor, 1000, 5000)
     }
 
+    /**
+     * Create, save and seed a torrent file, based on a TorrentInfo object
+     */
     fun add(torrentInfo: TorrentInfo) {
         val torrentFile = File("$saveDir/${torrentInfo.name()}.torrent")
         if (torrentInfo.isValid) {

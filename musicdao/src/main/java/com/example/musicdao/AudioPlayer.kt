@@ -3,7 +3,6 @@ package com.example.musicdao
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import com.frostwire.jlibtorrent.FileStorage
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -16,12 +15,10 @@ import java.io.File
 lateinit var instance: AudioPlayer
 
 /**
- * Implements an Android MediaPlayer. Is a singleton.
+ * Implements an Android MediaPlayer, using ExoPlayer. Is a singleton
  */
 class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
-    private var interestedFraction: Float = 0F
     private var playingFile: File? = null
-    private var currentReleaseFiles: FileStorage? = null
     private var currentFileIndex: Int = 0
 
     private var testExoPlayer: SimpleExoPlayer? = null
