@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
-import androidx.core.net.toUri
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
+import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
@@ -25,22 +25,24 @@ import java.io.File
 
 /**
  * A release is an audio album, EP, single, etc.
+ * It is related to 1 trustchain block, with the tag "publish_release" and its corresponding
+ * structure (see TODO doc)
  */
 class Release(
     private val magnet: String,
     private val artists: String,
     private val title: String,
-    private val date: String,
+    private val releaseDate: String,
     private val publisher: String,
     private val torrentInfoName: String?
 ) : Fragment(R.layout.fragment_release), TorrentListener {
-    private var metadata: TorrentInfo? = null
+    private var metadata: FileStorage? = null
     private var tracks: MutableMap<Int, Track> = hashMapOf()
     private var currentFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
-    private var setTorrentMetadata: TorrentInfo? = null
     private var localTorrent: Torrent? = null
+    private var localTorrentFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,21 +50,20 @@ class Release(
 
         var torrentUrl = magnet
         if (torrentInfoName != null) {
-            val torrentFileName = "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFileName =
+                "${context?.cacheDir}/$torrentInfoName.torrent"
             val torrentFile = File(torrentFileName)
             if (torrentFile.isFile) {
                 // This means we have the torrent file already locally and we can skip the step of
                 // obtaining the TorrentInfo from magnet link
-                torrentUrl = torrentFile.toUri().toString()
+                torrentUrl = torrentFile.toURI().toURL().toString()
             }
         }
-
-        (activity as MusicService).torrentStream.resumeSession()
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
-        (activity as MusicService).torrentStream.startStream(torrentUrl)
         (activity as MusicService).torrentStream.addListener(this)
+        (activity as MusicService).torrentStream.startStream(torrentUrl)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,7 +71,7 @@ class Release(
         blockMetadata.text =
             HtmlCompat.fromHtml(
                 "<b>$artists - $title<br></b>" +
-                    date, 0
+                    releaseDate, 0
             )
 
         AudioPlayer.getInstance().hideTrackInfo()
@@ -119,11 +120,11 @@ class Release(
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         (activity as MusicService).torrentStream.removeListener(this)
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
+        super.onDestroy()
     }
 
     /**
@@ -147,21 +148,27 @@ class Release(
         }
     }
 
-    private fun setMetadata(metadata: TorrentInfo) {
+    /**
+     * This sets the metadata of the TorrentInfo in the UI, it renders the file list and other
+     * metadata
+     */
+    private fun setMetadata(metadata: FileStorage) {
         loadingTracks.visibility = View.GONE
         this.metadata = metadata
         val num = metadata.numFiles()
-        val filestorage = metadata.files()
+        val filestorage = metadata
 
         val allowedExtensions =
-            listOf("flac", "mp3", "3gp", "aac", "mkv", "wav", "ogg", "mp4", "m4a")
+            listOf(".flac", ".mp3", ".3gp", ".aac", ".mkv", ".wav", ".ogg", ".mp4", ".m4a")
 
         for (index in 0 until num) {
-            val fileName = filestorage.fileName(index)
+            var fileName = filestorage.fileName(index)
             var found = false
             for (s in allowedExtensions) {
                 if (fileName.endsWith(s)) {
                     found = true
+                    fileName = fileName.substringBefore(s)
+                    fileName = fileName.replace("_", " ")
                 }
             }
             if (found) {
@@ -183,7 +190,7 @@ class Release(
                     Fragment(R.layout.track_table_divider),
                     "track$index-divider"
                 )
-                transaction2.commit()
+                transaction2.commitAllowingStateLoss()
 
                 tracks[index] = track
             }
@@ -225,7 +232,7 @@ class Release(
             fileProgressArray.forEachIndexed { index, fileProgress ->
                 tracks[index]?.setDownloadProgress(
                     fileProgress,
-                    metadata?.files()?.fileSize(index)
+                    metadata?.fileSize(index)
                 )
             }
         }
@@ -261,14 +268,14 @@ class Release(
         Util.setSequentialPriorities(torrent)
         val torrentFile = torrent.torrentHandle?.torrentFile()
             ?: throw Error("Unknown torrent file metadata")
-        if (this.isAdded) {
-            setMetadata(torrentFile)
-        }
+        setMetadata(torrentFile.files())
         // Keep seeding the torrent, also after start-up or after browsing to a different Release
-        (requireActivity() as MusicService).contentSeeder?.add(torrentFile)
+        val infoName = torrentInfoName ?: torrent.torrentHandle.name()
+        (requireActivity() as MusicService).contentSeeder?.add(torrentFile, infoName)
     }
 
-    override fun onStreamStopped() {}
+    override fun onStreamStopped() {
+    }
 
     override fun onStreamStarted(torrent: Torrent?) {
         val fileProgress = torrent?.torrentHandle?.fileProgress()
@@ -276,6 +283,8 @@ class Release(
     }
 
     override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
+        val torrentFile: TorrentInfo? = torrent?.torrentHandle?.torrentFile()
+        if (metadata == null && torrentFile != null) setMetadata(torrentFile.files())
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress

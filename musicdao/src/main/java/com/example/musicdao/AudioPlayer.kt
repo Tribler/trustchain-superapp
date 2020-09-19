@@ -21,7 +21,7 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     private var playingFile: File? = null
     private var currentFileIndex: Int = 0
 
-    private var testExoPlayer: SimpleExoPlayer? = null
+    private var exoPlayer: SimpleExoPlayer? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setInstance(this)
@@ -34,13 +34,13 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     }
 
     private fun initExoPlayer() {
-        testExoPlayer = ExoPlayerFactory.newSimpleInstance(context)
-        playerView.player = testExoPlayer
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
+        playerView.player = exoPlayer
     }
 
     private fun release() {
-        testExoPlayer?.release()
-        testExoPlayer = null
+        exoPlayer?.release()
+        exoPlayer = null
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource? {
@@ -63,7 +63,7 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     }
 
     fun isPlaying(): Boolean {
-        val player = testExoPlayer ?: return false
+        val player = exoPlayer ?: return false
         return player.isPlaying
     }
 
@@ -71,12 +71,12 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
      * Reset internal state to prepare for playing a track
      */
     fun prepareNextTrack() {
-        testExoPlayer?.stop()
-        testExoPlayer?.seekTo(0)
+        exoPlayer?.stop()
+        exoPlayer?.seekTo(0)
     }
 
     fun retry() {
-        val player = testExoPlayer ?: return
+        val player = exoPlayer ?: return
         // Try to load more of the audio track
         if (playingFile != null && player.totalBufferedDuration < 2000) {
             val mediaSource = buildMediaSource(Uri.fromFile(playingFile))
@@ -95,7 +95,7 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
         playingFile = file
         val mediaSource = buildMediaSource(Uri.fromFile(file))
             ?: throw Error("Media source could not be instantiated")
-        val player = testExoPlayer ?: throw Error("ExoPlayer is null")
+        val player = exoPlayer ?: throw Error("ExoPlayer is null")
         requireActivity().runOnUiThread {
             player.playWhenReady = true
             player.seekTo(0, 0)

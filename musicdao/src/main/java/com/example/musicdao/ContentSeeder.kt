@@ -1,6 +1,5 @@
 package com.example.musicdao
 
-import android.util.Log
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import org.apache.commons.io.FileUtils
@@ -21,6 +20,9 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
         if (started) return
         started = true
         if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
+        val fileList = saveDir.listFiles()
+        if (fileList !is Array<File>) return
+        Arrays.sort(fileList) { a, b -> a.lastModified().compareTo(b.lastModified()) }
         saveDir.listFiles()?.forEachIndexed { index, file ->
             if (index >= maxTorrentThreads) return
             if (file.name.endsWith(".torrent")) {
@@ -28,30 +30,26 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
                 if (torrentInfo.isValid) {
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
-                    sessionManager.download(torrentInfo, saveDir)
+                    // TODO enable seeding of all files that you have locally. Currently doing this
+                    //  clashes with the TorrentStreaming library somehow
+                    // sessionManager.download(torrentInfo, saveDir)
                 }
             }
         }
-
-        val timer = Timer()
-        val monitor = object : TimerTask() {
-            override fun run() {
-                Log.d("TorrentSessionManager", "UP: ${sessionManager.uploadRate()}, DOWN: ${sessionManager.downloadRate()}, DHT: ${sessionManager.dhtNodes()}")
-            }
-        }
-        timer.schedule(monitor, 1000, 5000)
     }
 
     /**
      * Create, save and seed a torrent file, based on a TorrentInfo object
      */
-    fun add(torrentInfo: TorrentInfo) {
-        val torrentFile = File("$saveDir/${torrentInfo.name()}.torrent")
+    fun add(torrentInfo: TorrentInfo, torrentInfoName: String) {
+        val torrentFile = File("$saveDir/$torrentInfoName.torrent")
         if (torrentInfo.isValid) {
             if (!torrentFile.isFile) {
                 FileUtils.copyInputStreamToFile(torrentInfo.bencode().inputStream(), torrentFile)
             }
-            sessionManager.download(torrentInfo, saveDir)
+            // TODO enable seeding of all files that you have locally. Currently doing this
+            //  clashes with the TorrentStreaming library somehow
+            // sessionManager.download(torrentInfo, saveDir)
         }
     }
 
