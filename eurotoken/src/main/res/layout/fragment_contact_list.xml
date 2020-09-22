@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/list"
+        android:name="nl.tudelft.trustchain.eurotoken.ContactFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".ContactFragment"
+        tools:listitem="@layout/fragment_contact"
+        />
+
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        fab:fab_labelStyle="@style/MenuLabelStyle"
+        fab:fab_addButtonColorNormal="@color/purple"
+        fab:fab_addButtonColorPressed="@color/purple"
+        android:layout_gravity="bottom|end"
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnAddRemote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_title="Add remote contact"
+            fab:fab_icon="@drawable/ic_link_white_24dp"
+            fab:fab_colorNormal="@color/purple"
+            fab:fab_colorPressed="@color/purple" />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnAddNearby"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_title="Add nearby contact"
+            fab:fab_icon="@drawable/ic_photo_camera_white_24dp"
+            fab:fab_colorNormal="@color/purple"
+            fab:fab_colorPressed="@color/purple" />
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
+</FrameLayout>
+
