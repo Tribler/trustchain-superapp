@@ -40,7 +40,7 @@
 
     <fragment
         android:id="@+id/track_player_fragment"
-        class="com.example.musicdao.ui.AudioPlayer"
+        class="com.example.musicdao.AudioPlayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

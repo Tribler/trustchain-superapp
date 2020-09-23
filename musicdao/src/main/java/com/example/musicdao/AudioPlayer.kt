@@ -1,10 +1,8 @@
-package com.example.musicdao.ui
+package com.example.musicdao
 
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import com.example.musicdao.MusicBaseFragment
-import com.example.musicdao.R
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
