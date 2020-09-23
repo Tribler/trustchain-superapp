@@ -1,15 +1,16 @@
-package com.example.musicdao
+package com.example.musicdao.playlist
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import com.example.musicdao.R
 import kotlinx.android.synthetic.main.track_row.trackTitle
 import kotlinx.android.synthetic.main.track_table_row.*
 
-class Track(
+class TrackFragment(
     private val name: String,
     private val index: Int,
-    private val release: Release,
+    private val release: ReleaseFragment,
     private val size: String
 ) : Fragment(R.layout.track_table_row) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

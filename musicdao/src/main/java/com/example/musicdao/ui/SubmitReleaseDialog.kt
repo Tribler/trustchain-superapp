@@ -14,7 +14,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
-import com.example.musicdao.ReleaseOverviewFragment
+import com.example.musicdao.catalog.ReleaseOverviewFragment
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 

@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
+import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
 import com.github.se_bastiaan.torrentstream.TorrentOptions

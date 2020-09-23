@@ -1,8 +1,14 @@
-package com.example.musicdao
+package com.example.musicdao.playlist
 
 import android.os.Bundle
+import com.example.musicdao.MusicBaseFragment
+import com.example.musicdao.R
 
-class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
+/**
+ * This is currently simply a container for one ReleaseFragment. It could be in the future altered
+ * to contain tracks from different Releases
+ */
+class PlaylistFragment : MusicBaseFragment(R.layout.fragment_playlist) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +25,7 @@ class PlaylistFragment : MusicFragment(R.layout.fragment_playlist) {
             // Also the Release fragment leads to crashes
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
-                val release = Release(
+                val release = ReleaseFragment(
                     magnet, artists, title, date, publisher, torrentInfoName
                 )
                 transaction.add(R.id.trackListLinearLayout, release, "release")

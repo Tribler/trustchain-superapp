@@ -1,9 +1,10 @@
-package com.example.musicdao
+package com.example.musicdao.catalog
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.musicdao.R
 import kotlinx.android.synthetic.main.fragment_release_cover.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import java.util.*
@@ -31,7 +32,14 @@ class ReleaseCoverFragment(private val trustChainBlock: TrustChainBlock) :
 
         coverCard.setOnClickListener {
             val action =
-                ReleaseOverviewFragmentDirections.actionReleaseOverviewFragmentToPlaylistFragment(publisher, magnet, title, artists, date, torrentInfoName)
+                ReleaseOverviewFragmentDirections.actionReleaseOverviewFragmentToPlaylistFragment(
+                    publisher,
+                    magnet,
+                    title,
+                    artists,
+                    date,
+                    torrentInfoName
+                )
             findNavController().navigate(action)
         }
     }

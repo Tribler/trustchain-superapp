@@ -1,8 +1,10 @@
-package com.example.musicdao
+package com.example.musicdao.ui
 
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import com.example.musicdao.MusicBaseFragment
+import com.example.musicdao.R
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -12,12 +14,10 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.android.synthetic.main.fragment_trackplaying.*
 import java.io.File
 
-lateinit var instance: AudioPlayer
-
 /**
  * Implements an Android MediaPlayer, using ExoPlayer. Is a singleton
  */
-class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
+class AudioPlayer : MusicBaseFragment(R.layout.fragment_trackplaying) {
     private var playingFile: File? = null
     private var currentFileIndex: Int = 0
 
@@ -51,15 +51,17 @@ class AudioPlayer : MusicFragment(R.layout.fragment_trackplaying) {
     }
 
     companion object {
-        fun getInstance(): AudioPlayer {
-            return instance
+        fun getInstance(): AudioPlayer? {
+            return audioPlayerInstance
         }
 
         @Synchronized
         private fun setInstance(audioPlayer: AudioPlayer) {
-            instance =
+            audioPlayerInstance =
                 audioPlayer
         }
+
+        private var audioPlayerInstance: AudioPlayer? = null
     }
 
     fun isPlaying(): Boolean {

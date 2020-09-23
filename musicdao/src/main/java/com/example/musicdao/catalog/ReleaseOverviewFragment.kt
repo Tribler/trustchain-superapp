@@ -1,4 +1,4 @@
-package com.example.musicdao
+package com.example.musicdao.catalog
 
 import android.os.Bundle
 import android.text.Editable
@@ -7,13 +7,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.musicdao.MusicBaseFragment
+import com.example.musicdao.MusicService
+import com.example.musicdao.R
 import com.example.musicdao.ui.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 
-class ReleaseOverviewFragment : MusicFragment(R.layout.fragment_release_overview) {
+class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
     private var searchQuery = ""
     private val maxReleases = 10

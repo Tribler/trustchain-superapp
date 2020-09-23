@@ -1,4 +1,4 @@
-package com.example.musicdao
+package com.example.musicdao.net
 
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo

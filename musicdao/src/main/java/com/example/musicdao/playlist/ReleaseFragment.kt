@@ -1,4 +1,4 @@
-package com.example.musicdao
+package com.example.musicdao.playlist
 
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +9,9 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.musicdao.MusicService
+import com.example.musicdao.R
+import com.example.musicdao.ui.AudioPlayer
 import com.example.musicdao.ui.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
@@ -26,9 +29,11 @@ import java.io.File
 /**
  * A release is an audio album, EP, single, etc.
  * It is related to 1 trustchain block, with the tag "publish_release" and its corresponding
- * structure (see TODO doc)
+ * structure (see TODO doc).
+ * It also implements a TorrentListener, which allows for configuring callbacks on download progress
+ * of the magnet link that is contained in the Release TrustChain block
  */
-class Release(
+class ReleaseFragment(
     private val magnet: String,
     private val artists: String,
     private val title: String,
@@ -37,7 +42,7 @@ class Release(
     private val torrentInfoName: String?
 ) : Fragment(R.layout.fragment_release), TorrentListener {
     private var metadata: FileStorage? = null
-    private var tracks: MutableMap<Int, Track> = hashMapOf()
+    private var tracks: MutableMap<Int, TrackFragment> = hashMapOf()
     private var currentFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
@@ -74,7 +79,7 @@ class Release(
                     releaseDate, 0
             )
 
-        AudioPlayer.getInstance().hideTrackInfo()
+        AudioPlayer.getInstance()?.hideTrackInfo()
 
         enableTipButton()
 
@@ -172,7 +177,7 @@ class Release(
                 }
             }
             if (found) {
-                val track = Track(
+                val track = TrackFragment(
                     fileName,
                     index,
                     this,
@@ -204,7 +209,7 @@ class Release(
         currentFileIndex = index
 
         val audioPlayer = AudioPlayer.getInstance()
-        audioPlayer.prepareNextTrack()
+        audioPlayer?.prepareNextTrack()
 
         val tor = localTorrent
         if (tor != null) {
@@ -218,7 +223,7 @@ class Release(
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
                 AudioPlayer.getInstance()
-                    .setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
+                    ?.setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
             }
         }
     }
@@ -240,14 +245,15 @@ class Release(
 
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
-        audioPlayer.setAudioResource(file, index)
-        AudioPlayer.getInstance().setTrackInfo(file.nameWithoutExtension)
+        audioPlayer?.setAudioResource(file, index)
+        audioPlayer?.setTrackInfo(file.nameWithoutExtension)
     }
 
     override fun onStreamReady(torrent: Torrent?) {
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
-        if (!AudioPlayer.getInstance().isPlaying() &&
+        val audioPlayer = AudioPlayer.getInstance() ?: return
+        if (audioPlayer.isPlaying() &&
             torrent != null &&
             currentFileIndex != -1
         ) {
@@ -288,8 +294,8 @@ class Release(
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
-        if (progress > 30 && !AudioPlayer.getInstance()
-                .isPlaying() && torrent != null && currentFileIndex != -1
+        val audioPlayer = AudioPlayer.getInstance()
+        if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() && torrent != null && currentFileIndex != -1
         ) {
             startPlaying(
                 torrent.videoFile,
@@ -297,7 +303,7 @@ class Release(
             )
         }
         if (progress != prevProgress) {
-            AudioPlayer.getInstance().retry()
+            audioPlayer?.retry()
         }
         prevProgress = progress
         prevFileIndex = currentFileIndex

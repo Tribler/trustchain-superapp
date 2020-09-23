@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/releaseOverviewFragment"
-        android:name="com.example.musicdao.ReleaseOverviewFragment"
+        android:name="com.example.musicdao.catalog.ReleaseOverviewFragment"
         android:label="Music app">
 
         <action
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/playlistFragment"
-        android:name="com.example.musicdao.PlaylistFragment"
+        android:name="com.example.musicdao.playlist.PlaylistFragment"
         android:label="Playlist">
     </fragment>
 
