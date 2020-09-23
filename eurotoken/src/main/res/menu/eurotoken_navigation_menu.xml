@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/contactFragment"
+        android:id="@+id/contactsFragment"
         android:title="Contacts"
         android:icon="@drawable/ic_baseline_people_24" />
     <item

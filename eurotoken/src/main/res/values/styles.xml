@@ -2,7 +2,7 @@
 <resources>
     <style name="Theme" />
 
-    <style name="Theme.PeerChat" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="Theme.EuroToken" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
     </style>

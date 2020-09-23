@@ -17,12 +17,12 @@ data class Transaction(
     /**
      * The public key of the transaction sender.
      */
-    val sender: String,
+    val sender: PublicKey,
 
     /**
      * The public key of the transaction recipient.
      */
-    val recipient: String,
+    val recipient: PublicKey,
 
     /**
      * True if we are the sender, false otherwise.
@@ -35,7 +35,23 @@ data class Transaction(
     val timestamp: Date,
 
     /**
-     * True if the transaction has been confirmed yet.
+     * True if the transaction has been confirmed.
      */
-    val confirmed: Boolean
-)
+    val confirmed: Boolean,
+
+    /**
+     * True if the transaction has been delivered to the network.
+     */
+    val sent: Boolean,
+
+    /**
+     * True if the transaction has been received.
+     */
+    val received: Boolean,
+
+    /**
+     * True if the transaction has been seen.
+     */
+    val read: Boolean
+
+    )

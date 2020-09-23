@@ -5,7 +5,7 @@ import nl.tudelft.ipv8.util.toHex
 
 data class Contact(
     val name: String,
-    val publicKey: String
+    val publicKey: PublicKey
 ) {
     /*val mid = publicKey.keyToHash().toHex()
 

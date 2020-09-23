@@ -13,9 +13,9 @@ import nl.tudelft.trustchain.eurotoken.dummy.DummyContent.DummyItem
  * [RecyclerView.Adapter] that can display a [DummyItem].
  * TODO: Replace the implementation with code for your data type.
  */
-class MyContactRecyclerViewAdapter(
+class ContactsRecyclerAdapter(
     private val values: List<ContactItem>
-) : RecyclerView.Adapter<MyContactRecyclerViewAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<ContactsRecyclerAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -26,15 +26,17 @@ class MyContactRecyclerViewAdapter(
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = values[position]
-        holder.avatarView.setUser(item.contact.publicKey, item.contact.name)
-        holder.dateView.text = item.lastTransaction.timestamp.toString()
+        holder.avatarView.setUser(item.contact.publicKey.toString(), item.contact.name)
+        holder.dateView.text = item.lastTransaction?.timestamp.toString()
         holder.nameView.text = item.contact.name
-        holder.pkView.text = item.contact.publicKey
-        holder.contentView.text = (if (item.lastTransaction.outgoing) "Sent " else "Received ") +
-            item.lastTransaction.amount.toString() +
+        holder.pkView.text = item.contact.publicKey.toString()
+        item.lastTransaction?.let {
+            holder.contentView.text = (if (it.outgoing) "Sent " else "Received ") +
+            it.amount.toString() +
             " ET" +
-            (if (item.lastTransaction.outgoing) " to " else " from ") +
+            (if (it.outgoing) " to " else " from ") +
             item.contact.name
+        }
     }
 
     override fun getItemCount(): Int = values.size
