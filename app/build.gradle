@@ -98,6 +98,7 @@ dependencies {
     implementation project(':freedomOfComputing')
     implementation project(':musicdao')
     implementation project(':peerchat')
+    implementation project(':eurotoken')
 
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'

@@ -1,0 +1,46 @@
+CREATE TABLE transactions (
+    id TEXT NOT NULL,
+    amount INTEGER NOT NULL,
+    sender_public_key BLOB NOT NULL,
+    recipient_public_key BLOB NOT NULL,
+    outgoing INTEGER NOT NULL,
+    timestamp INTEGER NOT NULL,
+    confirmed INTEGER NOT NULL,
+
+    sent INTEGER NOT NULL,
+    received INTEGER NOT NULL,
+    read INTEGER NOT NULL,
+
+    PRIMARY KEY (id)
+);
+
+addTransaction:
+INSERT INTO transactions (id, amount, sender_public_key, recipient_public_key, outgoing, timestamp, confirmed, sent, received, read)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+confirmedTransaction:
+UPDATE transactions SET confirmed = 1 WHERE id = ?;
+
+sentTransaction:
+UPDATE transactions SET sent = 1 WHERE id = ?;
+
+receivedTransaction:
+UPDATE transactions SET received = 1 WHERE id = ?;
+
+readTransaction:
+UPDATE transactions SET read = 1 WHERE id = ?;
+
+getAll:
+SELECT * FROM transactions ORDER BY timestamp ASC;
+
+getAllByPublicKey:
+SELECT * FROM transactions WHERE sender_public_key = ? OR recipient_public_key = ?
+ORDER BY timestamp ASC;
+
+getUnconfirmedTransactions:
+SELECT * FROM transactions WHERE confirmed = 0 AND outgoing = 1;
+
+getLastByPublicKey:
+SELECT * FROM transactions WHERE sender_public_key = ? OR recipient_public_key = ?
+ORDER BY timestamp DESC LIMIT 1;
+
