@@ -1,4 +1,4 @@
-package com.example.musicdao.ui
+package com.example.musicdao.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog

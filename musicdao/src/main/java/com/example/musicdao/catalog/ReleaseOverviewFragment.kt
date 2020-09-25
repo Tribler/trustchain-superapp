@@ -10,7 +10,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.musicdao.MusicBaseFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
-import com.example.musicdao.ui.SubmitReleaseDialog
+import com.example.musicdao.dialog.SubmitReleaseDialog
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

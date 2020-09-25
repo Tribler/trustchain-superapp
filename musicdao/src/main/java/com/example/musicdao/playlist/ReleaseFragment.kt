@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.player.AudioPlayer
-import com.example.musicdao.ui.TipArtistDialog
+import com.example.musicdao.dialog.TipArtistDialog
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
 import com.frostwire.jlibtorrent.FileStorage
