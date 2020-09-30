@@ -12,7 +12,6 @@ sqldelight {
 }
 
 android {
-<<<<<<< HEAD
     compileSdkVersion 29
     buildToolsVersion '29.0.3'
 
@@ -66,11 +65,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
-<<<<<<< HEAD
-=======
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
->>>>>>> 470705fb072bf3a5284c8e3a59c6e4c3fd5c1012
-
 
     testImplementation 'junit:junit:4.12'
 
