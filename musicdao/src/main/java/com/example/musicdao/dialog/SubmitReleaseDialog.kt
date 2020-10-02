@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -15,6 +14,7 @@ import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.catalog.ReleaseOverviewFragment
+import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
 
@@ -42,35 +42,7 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
             // Add action buttons
             .setPositiveButton("Submit",
                 DialogInterface.OnClickListener { _, _ ->
-                    val titleEditText = dialog?.findViewById<EditText>(R.id.title)
-                    val artistEditText = dialog?.findViewById<EditText>(R.id.artists)
-                    val releaseDateEditText =
-                        dialog?.findViewById<EditText>(R.id.release_date)
-                    val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
-
-                    if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
-                        titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()
-                    ) {
-                        Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val torrentInfo = localTorrentInfo
-                        val torrentInfoName = if (torrentInfo == null) {
-                            // If we only have a magnet link, extract the name from it to use for the
-                            // .torrent
-                            val magnetLink = magnetEditText.text.toString()
-                            Util.extractNameFromMagnet(magnetLink)
-                        } else {
-                            torrentInfo.name()
-                        }
-
-                        musicService.finishPublishing(
-                            titleEditText.text,
-                            artistEditText.text,
-                            releaseDateEditText.text,
-                            magnetEditText.text,
-                            torrentInfoName
-                        )
-                    }
+                    submitRelease()
                 })
             .setNegativeButton("Cancel",
                 DialogInterface.OnClickListener { _, _ ->
@@ -84,24 +56,9 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        // This should be reached when the chooseFile intent is completed and the user selected
-        // an audio file
-        val uriList = mutableListOf<Uri>()
-        val singleFileUri = data?.data
-        if (singleFileUri != null) {
-            // Only one file is selected
-            uriList.add(singleFileUri)
-        }
-        val clipData = data?.clipData
-        if (clipData != null) {
-            // Multiple files are selected
-            val count = clipData.itemCount
-            for (i in 0 until count) {
-                val uri = clipData.getItemAt(i).uri
-                uriList.add(uri)
-            }
-        }
-        if (uriList.size < 1) return
+        if (data == null) return
+        val uriList = ReleaseFactory.uriListFromLocalFiles(data)
+        if (uriList.isEmpty()) return
         val localContext = context
         if (localContext != null) {
             val torrentFile = (activity as MusicService).generateTorrent(localContext, uriList)
@@ -109,6 +66,38 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
             localTorrentInfo = torrentInfo
             dialogView?.findViewById<EditText>(R.id.release_magnet)
                 ?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
+        }
+    }
+
+    fun submitRelease() {
+        val titleEditText = dialog?.findViewById<EditText>(R.id.title)
+        val artistEditText = dialog?.findViewById<EditText>(R.id.artists)
+        val releaseDateEditText =
+            dialog?.findViewById<EditText>(R.id.release_date)
+        val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
+
+        if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
+            titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()
+        ) {
+            Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
+        } else {
+            val torrentInfo = localTorrentInfo
+            val torrentInfoName = if (torrentInfo == null) {
+                // If we only have a magnet link, extract the name from it to use for the
+                // .torrent
+                val magnetLink = magnetEditText.text.toString()
+                Util.extractNameFromMagnet(magnetLink)
+            } else {
+                torrentInfo.name()
+            }
+
+            musicService.finishPublishing(
+                titleEditText.text,
+                artistEditText.text,
+                releaseDateEditText.text,
+                magnetEditText.text,
+                torrentInfoName
+            )
         }
     }
 

@@ -8,6 +8,9 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
+    useLibrary 'android.test.base'
+    useLibrary 'android.test.mock'
+
     viewBinding {
         enabled = true
     }
@@ -42,11 +45,26 @@ android {
         allWarningsAsErrors = true
     }
 
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude("META-INF/*.kotlin_module")
+    }
 }
 
 dependencies {
     implementation project(':common')
-    implementation project(':ipv8-android')
+    testImplementation project(':common')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.2.0'
@@ -74,4 +92,7 @@ dependencies {
     implementation 'com.google.guava:guava:29.0-android'
     implementation 'org.knowm.xchange:xchange-parent:5.0.1'
     implementation 'org.knowm.xchange:xchange-binance:5.0.1'
+
+    // Crypto library for testing
+    testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
 }

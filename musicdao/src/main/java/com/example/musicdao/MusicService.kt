@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -15,20 +14,18 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.net.ContentSeeder
+import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
-import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.common.BaseActivity
-import org.apache.commons.io.FileUtils
 import java.io.File
-import java.io.FileOutputStream
 import kotlin.random.Random
 
 /**
@@ -180,35 +177,11 @@ class MusicService : BaseActivity() {
      */
     @Throws(Resources.NotFoundException::class)
     fun generateTorrent(context: Context, uris: List<Uri>): File {
-        val fileList = mutableListOf<File>()
         val contentResolver = context.contentResolver
-        val projection =
-            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-
         val randomInt = Random.nextInt(0, Int.MAX_VALUE)
         val parentDir = "${context.cacheDir}/$randomInt"
 
-        for (uri in uris) {
-            var fileName = ""
-            contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    fileName = cursor.getString(0)
-                }
-            }
-
-            if (fileName == "") throw Error("Source file name for creating torrent not found")
-            val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-            val tempFileLocation = "$parentDir/$fileName"
-
-            // TODO currently creates temp copies before seeding, but should not be necessary
-            FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-            fileList.add(File(tempFileLocation))
-        }
-
-        val torrent = SharedTorrent.create(File(parentDir), fileList, 65535, listOf(), "")
-        val torrentFile = "$parentDir.torrent"
-        torrent.save(FileOutputStream(torrentFile))
-        return File(torrentFile)
+        return ReleaseFactory.generateTorrent(parentDir, uris, contentResolver)
     }
 
     fun showToast(text: String, length: Int) {

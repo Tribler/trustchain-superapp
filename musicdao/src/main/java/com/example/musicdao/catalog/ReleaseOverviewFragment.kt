@@ -15,6 +15,7 @@ import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_overview) {
     private var lastReleaseBlocksSize = -1
@@ -81,31 +82,38 @@ class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_over
             return
         }
         lastReleaseBlocksSize = releaseBlocks.size
-        var count = 0
         if (release_overview_layout is ViewGroup) {
             activity?.runOnUiThread {
                 release_overview_layout.removeAllViews()
             }
         }
+        refreshReleaseBlocks(releaseBlocks)
+    }
+
+    fun refreshReleaseBlocks(releaseBlocks: List<TrustChainBlock>): Int {
+        var count = 0
         for (block in releaseBlocks) {
-            if (count == maxReleases) return
+            if (count == maxReleases) return count
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0) {
-                val transaction = requireActivity().supportFragmentManager.beginTransaction()
+                val transaction = activity?.supportFragmentManager?.beginTransaction()
                 val coverFragment = ReleaseCoverFragment(block)
                 if (coverFragment.filter(searchQuery)) {
-                    transaction.add(R.id.release_overview_layout, coverFragment, "releaseCover")
-                    if (loadingReleases.visibility == View.VISIBLE) loadingReleases.visibility = View.GONE
+                    transaction?.add(R.id.release_overview_layout, coverFragment, "releaseCover")
+                    if (loadingReleases?.visibility == View.VISIBLE) {
+                        loadingReleases.visibility = View.GONE
+                    }
                     count += 1
                 }
                 activity?.runOnUiThread {
-                    transaction.commitAllowingStateLoss()
+                    transaction?.commitAllowingStateLoss()
                 }
             }
         }
+        return count
     }
 
     /**
@@ -128,6 +136,7 @@ class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_over
         magnet: Editable?,
         torrentInfoName: String
     ) {
+
         publish(magnet.toString(), title.toString(), artists.toString(), releaseDate.toString(), torrentInfoName)
     }
 
