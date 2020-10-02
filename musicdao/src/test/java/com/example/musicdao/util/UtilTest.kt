@@ -17,4 +17,22 @@ class UtilTest {
         val x = Util.calculatePieceIndex(fileIndex, torrentInfo)
         Assert.assertEquals(82, x)
     }
+
+    @Test
+    fun extractNameFromMagnet() {
+        val magnet = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c&dn=displayname"
+        val name = Util.extractNameFromMagnet(magnet)
+        Assert.assertEquals(name, "displayname")
+        Assert.assertNotEquals(name, "somethingelse")
+    }
+
+    @Test
+    fun readableBytes() {
+        val eightMbs: Long = 1024 * 1024 * 8
+        val eightKbs: Long = 1024 * 8
+        val eightBytes: Long =  8
+        Assert.assertEquals(Util.readableBytes(eightMbs), "8Mb")
+        Assert.assertEquals(Util.readableBytes(eightKbs), "8Kb")
+        Assert.assertEquals(Util.readableBytes(eightBytes), "8B")
+    }
 }

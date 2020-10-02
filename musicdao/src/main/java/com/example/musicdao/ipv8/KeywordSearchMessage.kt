@@ -7,18 +7,18 @@ import nl.tudelft.ipv8.messaging.*
  */
 class KeywordSearchMessage(
     val originPublicKey: ByteArray,
-    var ttl: Int,
+    var ttl: UInt,
     val keyword: String
 ) : Serializable {
     override fun serialize(): ByteArray {
         return originPublicKey +
-            serializeUShort(ttl) +
+            serializeUInt(ttl) +
             serializeVarLen(keyword.toByteArray(Charsets.US_ASCII))
     }
 
     fun checkTTL(): Boolean {
-        ttl -= 1
-        if (ttl < 1) return false
+        ttl -= 1u
+        if (ttl < 1u) return false
         return true
     }
 
@@ -30,8 +30,8 @@ class KeywordSearchMessage(
                 offset + localOffset + SERIALIZED_PUBLIC_KEY_SIZE
             )
             localOffset += SERIALIZED_PUBLIC_KEY_SIZE
-            val ttl = deserializeUShort(buffer, offset + localOffset)
-            localOffset += SERIALIZED_USHORT_SIZE
+            val ttl = deserializeUInt(buffer, offset + localOffset)
+            localOffset += SERIALIZED_UINT_SIZE
             val (keyword, keywordSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += keywordSize
             return Pair(

@@ -2,6 +2,7 @@ package com.example.musicdao.ipv8
 
 import android.util.Log
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
@@ -30,8 +31,9 @@ class MusicCommunity(
         messageHandlers[MessageId.KEYWORD_SEARCH_MESSAGE] = ::onKeywordSearch
     }
 
-    fun performRemoteKeywordSearch(keyword: String, ttl: Int = 1, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()) {
+    fun performRemoteKeywordSearch(keyword: String, ttl: UInt = 1u, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()): Int {
         val maxPeersToAsk = 20 // This is a magic number, tweak during/after experiments
+        var count = 0
         for ((index, peer) in getPeers().withIndex()) {
             if (index >= maxPeersToAsk) break
             val packet = serializePacket(
@@ -39,7 +41,9 @@ class MusicCommunity(
                 KeywordSearchMessage(originPublicKey, ttl, keyword)
             )
             send(peer, packet)
+            count += 1
         }
+        return count
     }
 
     /**
@@ -50,24 +54,27 @@ class MusicCommunity(
     private fun onKeywordSearch(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage)
         val keyword = payload.keyword.toLowerCase(Locale.ROOT)
-        var success = false
+        val block = localKeywordSearch(keyword)
+        if (block != null) sendBlock(block, peer)
+        if (block == null) {
+            if (!payload.checkTTL()) return
+            performRemoteKeywordSearch(keyword, payload.ttl, payload.originPublicKey)
+        }
+        Log.i("KeywordSearch", peer.mid + ": " + payload.keyword)
+    }
+
+    fun localKeywordSearch(keyword: String): TrustChainBlock? {
         database.getAllBlocks().forEach {
             val transaction = it.transaction
             val title = transaction["title"]?.toString()?.toLowerCase(Locale.ROOT)
             val artists = transaction["artists"]?.toString()?.toLowerCase(Locale.ROOT)
             if (title != null && title.contains(keyword)) {
-                sendBlock(it, peer)
-                success = true
+                return it
             } else if (artists != null && artists.contains(keyword)) {
-                sendBlock(it, peer)
-                success = true
+                return it
             }
         }
-        if (!success) {
-            if (!payload.checkTTL()) return
-            performRemoteKeywordSearch(keyword, payload.ttl, payload.originPublicKey)
-        }
-        Log.i("KeywordSearch", peer.mid + ": " + payload.keyword)
+        return null
     }
 
     object MessageId {

@@ -26,6 +26,9 @@ object Util {
         return pieceIndex
     }
 
+    /**
+     * Converts bytes into a string that shows it in a readable format
+     */
     fun readableBytes(bytes: Long): String {
         if (bytes > 1024 && bytes <= (1024 * 1024)) return "${(bytes / 1024)}Kb"
         if (bytes > (1024 * 1024)) return "${(bytes / (1024 * 1024))}Mb"
