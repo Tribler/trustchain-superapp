@@ -22,7 +22,7 @@ import com.frostwire.jlibtorrent.TorrentInfo
  * A form within a dialog which allows the user to submit a Release and publish it, by either
  * selecting local audio files or by pasting a magnet link
  */
-class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : DialogFragment() {
+class SubmitReleaseDialog(private val releaseOverviewFragment: ReleaseOverviewFragment) : DialogFragment() {
     private var dialogView: View? = null
     private var localTorrentInfo: TorrentInfo? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -69,35 +69,59 @@ class SubmitReleaseDialog(private val musicService: ReleaseOverviewFragment) : D
         }
     }
 
-    fun submitRelease() {
+    /**
+     * Perform various validations of whether the input (meta)data is properly formatted. Then
+     * create and submit a Release block or show an error to the user
+     */
+    private fun submitRelease() {
         val titleEditText = dialog?.findViewById<EditText>(R.id.title)
         val artistEditText = dialog?.findViewById<EditText>(R.id.artists)
         val releaseDateEditText =
             dialog?.findViewById<EditText>(R.id.release_date)
         val magnetEditText = dialog?.findViewById<EditText>(R.id.release_magnet)
 
-        if (titleEditText?.text == null || artistEditText?.text == null || releaseDateEditText?.text == null || magnetEditText?.text == null ||
-            titleEditText.text.isEmpty() || artistEditText.text.isEmpty() || releaseDateEditText.text.isEmpty() || magnetEditText.text.isEmpty()
-        ) {
+        val torrentInfoName = validateReleaseBlock(
+            titleEditText?.text.toString(),
+            artistEditText?.text.toString(),
+            releaseDateEditText?.text.toString(),
+            magnetEditText?.text.toString()
+        )
+        if (torrentInfoName != null) {
+            releaseOverviewFragment.publish(
+                titleEditText?.text.toString(),
+                artistEditText?.text.toString(),
+                releaseDateEditText?.text.toString(),
+                magnetEditText?.text.toString(),
+                torrentInfoName
+            )
+        } else {
             Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Validate that a new Release block has the right metadata parameters and calculate the
+     * torrentInfoName
+     */
+    fun validateReleaseBlock(
+        title: String?,
+        artist: String?,
+        releaseDate: String?,
+        magnet: String?
+    ): String? {
+        return if (title == null || artist == null || releaseDate == null || magnet == null ||
+            title.isEmpty() || artist.isEmpty() || releaseDate.isEmpty() || magnet.isEmpty()
+        ) {
+            null
         } else {
             val torrentInfo = localTorrentInfo
-            val torrentInfoName = if (torrentInfo == null) {
+            if (torrentInfo == null) {
                 // If we only have a magnet link, extract the name from it to use for the
                 // .torrent
-                val magnetLink = magnetEditText.text.toString()
-                Util.extractNameFromMagnet(magnetLink)
+                Util.extractNameFromMagnet(magnet)
             } else {
                 torrentInfo.name()
             }
-
-            musicService.finishPublishing(
-                titleEditText.text,
-                artistEditText.text,
-                releaseDateEditText.text,
-                magnetEditText.text,
-                torrentInfoName
-            )
         }
     }
 

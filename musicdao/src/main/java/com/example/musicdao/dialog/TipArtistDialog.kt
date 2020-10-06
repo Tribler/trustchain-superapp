@@ -46,10 +46,8 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
             override fun afterTextChanged(s: Editable) {
                 val amount = amountEditText.text.toString()
                 try {
-                    val value = BigDecimal(Integer.parseInt(amount))
-                    val conversionText = conversionRate * value * MBTC_PER_BITCOIN
                     activity?.runOnUiThread {
-                        amountAssistingText?.text = "USD ($conversionText mBTC)"
+                        amountAssistingText?.text = getConversionRate(amount)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -88,7 +86,18 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         return builder.create()
     }
 
-    private fun oneUSDInCrypto(): BigDecimal {
+    fun getConversionRate(amount: String): String {
+        return try {
+            val amountInt = Integer.parseInt(amount)
+            val value = BigDecimal(amountInt)
+            val rate = conversionRate * value * MBTC_PER_BITCOIN
+            "USD ($rate mBTC)"
+        } catch (e: NumberFormatException) {
+            "USD (? mBTC)"
+        }
+    }
+
+    fun oneUSDInCrypto(): BigDecimal {
         val bitstamp: Exchange =
             ExchangeFactory.INSTANCE.createExchange(BinanceExchange::class.java.name)
         val marketDataService: MarketDataService = bitstamp.marketDataService

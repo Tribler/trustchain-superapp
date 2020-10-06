@@ -21,8 +21,7 @@ class PlaylistFragment : MusicBaseFragment(R.layout.fragment_playlist) {
             val publisher = localArgs.getString("publisher", "Publisher not found")
             val torrentInfoName = localArgs.getString("torrentInfoName")
 
-            // TODO fix: Release is currently added every single time the fragment is being attached to the view,
-            // Also the Release fragment leads to crashes
+            // TODO fix: Release is currently added every single time the fragment is being attached to the view
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
                 val release = ReleaseFragment(

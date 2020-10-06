@@ -2,6 +2,8 @@ package com.example.musicdao.ipv8
 
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
+import io.mockk.every
+import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -9,6 +11,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
+import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.sqldelight.Database
 
@@ -29,7 +32,10 @@ class MusicCommunityTest {
     private fun getCommunity(): MusicCommunity {
         val settings = TrustChainSettings()
         val store = createTrustChainStore()
-        val community = MusicCommunity(settings = settings, database = store)
+        val community = MusicCommunity.Factory(settings = settings, database = store).create()
+        val newKey = JavaCryptoProvider.generateKey()
+        community.myPeer = Peer(newKey)
+        community.endpoint = spyk(EndpointAggregator(mockk(relaxed = true), null))
         community.network = Network()
         community.maxPeers = 20
         return community
@@ -78,7 +84,14 @@ class MusicCommunityTest {
     @Test
     fun performRemoteKeywordSearch() {
         val trustChainCommunity = spyk(getCommunity())
+
+        val newKey2 = JavaCryptoProvider.generateKey()
+        val neighborPeer = Peer(newKey2)
+        every {
+            trustChainCommunity.getPeers()
+        } returns listOf(neighborPeer)
+
         val count = trustChainCommunity.performRemoteKeywordSearch("keyword", 1u, ANY_COUNTERPARTY_PK)
-        Assert.assertEquals(count, 0)
+        Assert.assertEquals(count, 1)
     }
 }

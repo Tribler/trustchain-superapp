@@ -21,7 +21,7 @@ import java.util.*
  * Interaction with a BitcoinJ wallet
  */
 class WalletService(val musicService: MusicService) {
-    private val app: WalletAppKit
+    val app: WalletAppKit
     private val params = CryptoCurrencyConfig.networkParams
     private val filePrefix = CryptoCurrencyConfig.chainFileName
     private val walletDir: File = musicService.applicationContext.cacheDir

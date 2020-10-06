@@ -129,18 +129,7 @@ class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_over
      * After the user inserts some metadata for the release to be published, this function is called
      * to create the proposal block
      */
-    fun finishPublishing(
-        title: Editable?,
-        artists: Editable?,
-        releaseDate: Editable?,
-        magnet: Editable?,
-        torrentInfoName: String
-    ) {
-
-        publish(magnet.toString(), title.toString(), artists.toString(), releaseDate.toString(), torrentInfoName)
-    }
-
-    private fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
+    fun publish(magnet: String, title: String, artists: String, releaseDate: String, torrentInfoName: String) {
         val myPeer = IPv8Android.getInstance().myPeer
         val transaction = mutableMapOf<String, String>(
             "magnet" to magnet,

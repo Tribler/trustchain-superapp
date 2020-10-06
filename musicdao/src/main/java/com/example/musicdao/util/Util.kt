@@ -38,23 +38,46 @@ object Util {
     /**
      * Prefer the first pieces to be downloaded of the selected audio file over the other pieces,
      * so that the first seconds of the track can be buffered as soon as possible
+     * TODO write a test/make testable
      */
-    fun setSequentialPriorities(torrent: Torrent) {
+    fun setSequentialPriorities(torrent: Torrent, onlyCalculating: Boolean = false): Array<Priority> {
         val piecePriorities: Array<Priority> =
             torrent.torrentHandle.piecePriorities()
         for ((index, piecePriority) in piecePriorities.withIndex()) {
             if (piecePriority == Priority.SEVEN) {
-                torrent.torrentHandle.piecePriority(index, Priority.SIX)
+                piecePriorities[index] = Priority.SIX
             }
             if (piecePriority == Priority.NORMAL) {
-                torrent.torrentHandle.piecePriority(index, Priority.FIVE)
+                piecePriorities[index] = Priority.FIVE
             }
             if (piecePriority == Priority.IGNORE) {
-                torrent.torrentHandle.piecePriority(index, Priority.NORMAL)
+                piecePriorities[index] = Priority.NORMAL
             }
         }
         for (i in torrent.interestedPieceIndex until torrent.interestedPieceIndex + torrent.piecesToPrepare) {
-            torrent.torrentHandle.piecePriority(i, Priority.SEVEN)
+            piecePriorities[i] = Priority.SEVEN
         }
+        if (onlyCalculating) return piecePriorities
+        for ((index, priority) in piecePriorities.withIndex()) {
+            torrent.torrentHandle.piecePriority(index, priority)
+        }
+        return piecePriorities
+    }
+
+    /**
+     * Checks if a music file is valid, and make it more readable if it is
+     */
+    fun checkAndSanitizeTrackNames(fileName: String): String? {
+        var fileNameLocal = fileName
+        val allowedExtensions =
+            listOf(".flac", ".mp3", ".3gp", ".aac", ".mkv", ".wav", ".ogg", ".mp4", ".m4a")
+        for (s in allowedExtensions) {
+            if (fileNameLocal.endsWith(s)) {
+                fileNameLocal = fileNameLocal.substringBefore(s)
+                fileNameLocal = fileNameLocal.replace("_", " ")
+                return fileNameLocal
+            }
+        }
+        return null
     }
 }

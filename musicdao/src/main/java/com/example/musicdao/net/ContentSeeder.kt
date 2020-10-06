@@ -16,18 +16,20 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
     private val maxTorrentThreads = 10
     private var started = false
 
-    fun start() {
-        if (started) return
+    fun start(): Int {
+        var count = 0
+        if (started) return count
         started = true
         if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
         val fileList = saveDir.listFiles()
-        if (fileList !is Array<File>) return
+        if (fileList !is Array<File>) return count
         Arrays.sort(fileList) { a, b -> a.lastModified().compareTo(b.lastModified()) }
         saveDir.listFiles()?.forEachIndexed { index, file ->
-            if (index >= maxTorrentThreads) return
+            if (index >= maxTorrentThreads) return count
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
+                    count += 1
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
                     // TODO enable seeding of all files that you have locally. Currently doing this
@@ -36,12 +38,13 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
                 }
             }
         }
+        return count
     }
 
     /**
      * Create, save and seed a torrent file, based on a TorrentInfo object
      */
-    fun add(torrentInfo: TorrentInfo, torrentInfoName: String) {
+    fun add(torrentInfo: TorrentInfo, torrentInfoName: String): Boolean {
         val torrentFile = File("$saveDir/$torrentInfoName.torrent")
         if (torrentInfo.isValid) {
             if (!torrentFile.isFile) {
@@ -50,7 +53,9 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
             // TODO enable seeding of all files that you have locally. Currently doing this
             //  clashes with the TorrentStreaming library somehow
             // sessionManager.download(torrentInfo, saveDir)
+            return true
         }
+        return false
     }
 
     companion object {

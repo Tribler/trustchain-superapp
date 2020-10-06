@@ -45,7 +45,7 @@ class MusicService : BaseActivity() {
         handleIntent(intent)
     }
 
-    private fun startup() {
+    fun initTorrentStream() {
         torrentStream = try {
             TorrentStream.getInstance()
         } catch (e: Exception) {
@@ -57,6 +57,10 @@ class MusicService : BaseActivity() {
                     .build()
             )
         }
+    }
+
+    private fun startup() {
+        initTorrentStream()
         registerBlockSigner()
         iterativelyCrawlTrustChains()
 
@@ -145,19 +149,6 @@ class MusicService : BaseActivity() {
     }
 
     /**
-     * Clear cache on every run (for testing, and audio files may be large 15MB+). May be removed
-     * in the future
-     */
-    private fun clearCache() {
-        if (cacheDir.isDirectory && cacheDir.listFiles() != null) {
-            val files = cacheDir.listFiles()
-            files?.forEach {
-                it.deleteRecursively()
-            }
-        }
-    }
-
-    /**
      * On discovering a half block, with tag publish_release, agree it immediately (for now). In the
      * future there will be logic added here to determine whether an upload was done by the correct
      * artist/label (artist passport).
@@ -188,9 +179,5 @@ class MusicService : BaseActivity() {
         runOnUiThread {
             Toast.makeText(baseContext, text, length).show()
         }
-    }
-
-    companion object {
-        private const val PREF_PRIVATE_KEY = "private_key"
     }
 }

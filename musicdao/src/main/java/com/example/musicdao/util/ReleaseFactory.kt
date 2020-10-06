@@ -37,7 +37,7 @@ class ReleaseFactory {
          * Generates a a .torrent File from local files
          * @param uris the list of Uris pointing to local audio source files to publish
          */
-        fun generateTorrent(parentDirPath: String, uris: List<Uri>, contentResolver: ContentResolver): File {
+        fun generateTorrent(parentDirPath: String, uris: List<Uri>, contentResolver: ContentResolver, ioInteraction: Boolean = true): File {
             val fileList = mutableListOf<File>()
             val projection =
                 arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
@@ -54,13 +54,13 @@ class ReleaseFactory {
                 val tempFileLocation = "$parentDirPath/$fileName"
 
                 // TODO currently creates temp copies before seeding, but should not be necessary
-                FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
+                if (ioInteraction) FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
                 fileList.add(File(tempFileLocation))
             }
 
             val torrent = SharedTorrent.create(File(parentDirPath), fileList, 65535, listOf(), "")
             val torrentFile = "$parentDirPath.torrent"
-            torrent.save(FileOutputStream(torrentFile))
+            if (ioInteraction) torrent.save(FileOutputStream(torrentFile))
             return File(torrentFile)
         }
     }

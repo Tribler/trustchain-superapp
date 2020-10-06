@@ -11,8 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
-import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.dialog.TipArtistDialog
+import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
 import com.frostwire.jlibtorrent.FileStorage
@@ -47,23 +47,11 @@ class ReleaseFragment(
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
     private var localTorrent: Torrent? = null
-    private var localTorrentFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-
-        var torrentUrl = magnet
-        if (torrentInfoName != null) {
-            val torrentFileName =
-                "${context?.cacheDir}/$torrentInfoName.torrent"
-            val torrentFile = File(torrentFileName)
-            if (torrentFile.isFile) {
-                // This means we have the torrent file already locally and we can skip the step of
-                // obtaining the TorrentInfo from magnet link
-                torrentUrl = torrentFile.toURI().toURL().toString()
-            }
-        }
+        val torrentUrl = resolveTorrentUrl(magnet)
         if ((activity as MusicService).torrentStream.isStreaming) {
             (activity as MusicService).torrentStream.stopStream()
         }
@@ -163,20 +151,11 @@ class ReleaseFragment(
         val num = metadata.numFiles()
         val filestorage = metadata
 
-        val allowedExtensions =
-            listOf(".flac", ".mp3", ".3gp", ".aac", ".mkv", ".wav", ".ogg", ".mp4", ".m4a")
 
         for (index in 0 until num) {
             var fileName = filestorage.fileName(index)
-            var found = false
-            for (s in allowedExtensions) {
-                if (fileName.endsWith(s)) {
-                    found = true
-                    fileName = fileName.substringBefore(s)
-                    fileName = fileName.replace("_", " ")
-                }
-            }
-            if (found) {
+            fileName = Util.checkAndSanitizeTrackNames(fileName)
+            if (fileName != null) {
                 val track = TrackFragment(
                     fileName,
                     index,
@@ -235,10 +214,11 @@ class ReleaseFragment(
     private fun updateFileProgress(fileProgressArray: LongArray) {
         if (this.isAdded) {
             fileProgressArray.forEachIndexed { index, fileProgress ->
-                tracks[index]?.setDownloadProgress(
+                val progress = tracks[index]?.getDownloadProgress(
                     fileProgress,
                     metadata?.fileSize(index)
                 )
+                if (progress != null) tracks[index]?.setDownloadProgress(progress)
             }
         }
     }
@@ -247,6 +227,21 @@ class ReleaseFragment(
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
         audioPlayer?.setTrackInfo(file.nameWithoutExtension)
+    }
+
+    fun resolveTorrentUrl(magnet: String): String {
+        var torrentUrl = magnet
+        if (torrentInfoName != null) {
+            val torrentFileName =
+                "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFile = File(torrentFileName)
+            if (torrentFile.isFile) {
+                // This means we have the torrent file already locally and we can skip the step of
+                // obtaining the TorrentInfo from magnet link
+                torrentUrl = torrentFile.toURI().toURL().toString()
+            }
+        }
+        return torrentUrl
     }
 
     override fun onStreamReady(torrent: Torrent?) {
