@@ -3,27 +3,23 @@ package com.example.musicdao.util
 import android.content.ClipData
 import android.content.Intent
 import android.net.Uri
+import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class ReleaseFactoryTest {
-    private val mockUri = mockk<Uri>()
-
     @Test
     fun uriListFromLocalFiles() {
-        val selectFilesIntent = Intent(Intent.ACTION_GET_CONTENT)
-        selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        selectFilesIntent.data = Uri.parse("http://test/path")
-        val list = ReleaseFactory.uriListFromLocalFiles(selectFilesIntent)
+        val intent = mockk<Intent>()
+        val uri = mockk<Uri>()
+        every { intent.data } returns uri
+        every { intent.clipData } returns null
+        val list = ReleaseFactory.uriListFromLocalFiles(intent)
         Assert.assertEquals(1, list.size)
 
-        val intent2 = Intent()
-        intent2.clipData = ClipData.newRawUri("a", Uri.parse("http://test/path"))
-        val list2 = ReleaseFactory.uriListFromLocalFiles(intent2)
+        every { intent.clipData } returns ClipData.newRawUri("a", uri)
+        val list2 = ReleaseFactory.uriListFromLocalFiles(intent)
         Assert.assertEquals(1, list2.size)
     }
 }

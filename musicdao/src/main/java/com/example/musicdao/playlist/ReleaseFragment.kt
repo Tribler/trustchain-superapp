@@ -151,7 +151,6 @@ class ReleaseFragment(
         val num = metadata.numFiles()
         val filestorage = metadata
 
-
         for (index in 0 until num) {
             var fileName = filestorage.fileName(index)
             fileName = Util.checkAndSanitizeTrackNames(fileName)

@@ -19,7 +19,6 @@ import org.junit.Assert
 import org.junit.Test
 import java.util.*
 
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class MusicCommunityTest {
     private fun createTrustChainStore(): TrustChainSQLiteStore {
