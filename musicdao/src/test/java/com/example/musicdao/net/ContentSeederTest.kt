@@ -2,17 +2,18 @@ package com.example.musicdao.net
 
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
+import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import java.io.File
 
 class ContentSeederTest {
-    lateinit var contentSeeder: ContentSeeder
+    private lateinit var contentSeeder: ContentSeeder
 
     @Before
     fun init() {
-        val sessionManager = SessionManager(false)
+        val sessionManager = mockk<SessionManager>()
         val saveDir = File("./src/test/resources")
         Assert.assertTrue(saveDir.isDirectory)
         // Test whether it reads all local torrent files correctly
