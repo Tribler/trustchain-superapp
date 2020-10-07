@@ -2,14 +2,10 @@ package com.example.musicdao.net
 
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
-import io.mockk.spyk
 import org.junit.Assert
 import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
-import org.junit.rules.ExpectedException
 import java.io.File
-import kotlin.jvm.*
 
 class ContentSeederTest {
     lateinit var contentSeeder: ContentSeeder

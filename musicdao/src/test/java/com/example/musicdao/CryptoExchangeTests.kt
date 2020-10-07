@@ -1,7 +1,7 @@
 package com.example.musicdao
 
+import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.junit.Assert.*
 import org.knowm.xchange.Exchange
 import org.knowm.xchange.ExchangeFactory
 import org.knowm.xchange.binance.BinanceExchange

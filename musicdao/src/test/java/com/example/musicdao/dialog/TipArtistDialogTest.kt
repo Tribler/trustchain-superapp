@@ -2,8 +2,6 @@ package com.example.musicdao.dialog
 
 import org.junit.Assert
 import org.junit.Test
-import java.lang.NumberFormatException
-import java.math.BigDecimal
 
 class TipArtistDialogTest {
     private val errorText = "USD (? mBTC)"
