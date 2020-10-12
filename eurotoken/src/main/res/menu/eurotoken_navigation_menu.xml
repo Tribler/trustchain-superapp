@@ -9,5 +9,5 @@
     <item
         android:id="@+id/transactionFragment"
         android:title="New transaction"
-        android:icon="@drawable/ic_baseline_send_money_24" />
+        android:icon="@drawable/ic_baseline_send_money_24_old" />
 </menu>

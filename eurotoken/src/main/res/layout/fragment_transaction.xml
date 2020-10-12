@@ -43,7 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
         android:text="Send  "
-        android:drawableRight="@drawable/ic_baseline_send_money_24"
+        android:drawableRight="@drawable/ic_baseline_send_money_24_old"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputEditText" />
 

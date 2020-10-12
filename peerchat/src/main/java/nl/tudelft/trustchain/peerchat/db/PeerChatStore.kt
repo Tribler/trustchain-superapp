@@ -6,7 +6,6 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -16,7 +15,7 @@ import nl.tudelft.trustchain.peerchat.entity.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
-class PeerChatStore(context: Context) {
+class PeerChatStore( context: Context ) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "peerchat.db")
     private val database = Database(driver)
 
@@ -32,7 +31,9 @@ class PeerChatStore(context: Context) {
             attachmentType: String?,
             attachmentSize: Long?,
             attachmentContent: ByteArray?,
-            attachmentFetched: Long ->
+            attachmentFetched: Long,
+            transaction_hash: ByteArray?
+        ->
         ChatMessage(
             id,
             message,
@@ -47,7 +48,8 @@ class PeerChatStore(context: Context) {
             Date(timestamp),
             ack == 1L,
             read == 1L,
-            attachmentFetched == 1L
+            attachmentFetched == 1L,
+            transactionHash = transaction_hash
         )
     }
 
@@ -111,7 +113,8 @@ class PeerChatStore(context: Context) {
             message.attachment?.type,
             message.attachment?.size,
             message.attachment?.content,
-            if (message.attachmentFetched) 1L else 0L
+            if (message.attachmentFetched) 1L else 0L,
+            message.transactionHash
         )
     }
 

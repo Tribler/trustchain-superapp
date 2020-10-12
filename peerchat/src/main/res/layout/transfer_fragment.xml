@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="32dp"
+        tools:context=".ui.conversation.TransferFragment">
+
+        <TextView
+            android:id="@+id/txtTitleBalance"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your balance:"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/balanceLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/txtTitleBalance"
+            tools:layout_editor_absoluteX="1dp"
+            android:padding="16dp"
+            android:layout_margin="16dp"
+            android:background="#EEEEEE"
+            >
+
+
+            <LinearLayout
+                android:id="@+id/ownInfoLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/txtEuro1"
+                >
+
+                <TextView
+                    android:id="@+id/txtOwnName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="You"
+                    />
+
+                <TextView
+                    android:id="@+id/txtOwnPublicKey"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:typeface="monospace"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtEuro1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/txtBalance"
+                app:layout_constraintBottom_toBottomOf="@id/txtBalance"
+                app:layout_constraintEnd_toStartOf="@id/txtBalance"
+                android:text="@string/euro_token"
+                android:textSize="20dp"
+                />
+
+            <TextView
+                android:id="@+id/txtBalance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="20.00"
+                android:textSize="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/txtTitleAmount"
+            app:layout_constraintTop_toBottomOf="@id/balanceLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Transaction:"
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:layout_marginTop="10dp"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/amountLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtTitleAmount"
+            android:layout_margin="16dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/edtAmount"
+                app:layout_constraintBottom_toBottomOf="@id/edtAmount"
+                app:layout_constraintEnd_toStartOf="@id/edtAmount"
+                android:text="@string/euro_token"
+                android:textSize="32dp"
+                />
+
+            <EditText
+                android:id="@+id/edtAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:inputType="numberDecimal"
+                android:hint="0.00"
+                android:textSize="32dp"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <EditText
+            android:id="@+id/edtMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/amountLayout"
+            app:layout_constraintStart_toStartOf="@id/contactLayout"
+            app:layout_constraintEnd_toEndOf="@id/contactLayout"
+            android:hint="Message to receiver"
+            android:layout_margin="16dp"
+            />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contactLayout"
+            app:layout_constraintTop_toBottomOf="@id/edtMessage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btnTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:background="#EEEEEE"
+            android:layout_margin="16dp"
+            >
+
+            <nl.tudelft.trustchain.peerchat.ui.contacts.AvatarView
+                android:id="@+id/avatar"
+                android:layout_width="@dimen/avatar_size"
+                android:layout_height="@dimen/avatar_size"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <LinearLayout
+                android:id="@+id/nameContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/avatar"
+                app:layout_constraintVertical_chainStyle="packed">
+
+                <TextView
+                    android:id="@+id/txtContactName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
+                    android:ellipsize="end"
+                    android:lines="1"
+                    android:paddingEnd="8dp"
+                    tools:text="Matt" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/txtContactPublicKey"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:typeface="monospace"
+                android:ellipsize="end"
+                android:lines="1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/nameContainer"
+                app:layout_constraintStart_toStartOf="@id/nameContainer"
+                tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTransfer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="Send"
+            style="@style/Button"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

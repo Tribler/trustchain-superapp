@@ -11,6 +11,7 @@ import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -42,8 +43,15 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         PeerChatStore.getInstance(requireContext())
     }
 
+    private val transactionRepository by lazy {
+        TransactionRepository(getIpv8().getOverlay()!!)
+    }
+
+    private val publicKeyBin by lazy {
+        requireArguments().getString(ARG_PUBLIC_KEY)!!
+    }
+
     private val publicKey by lazy {
-        val publicKeyBin = requireArguments().getString(ARG_PUBLIC_KEY)!!
         defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
     }
 
@@ -97,6 +105,38 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
         binding.edtMessage.onCommitContentListener = onCommitContentListener
 
+        edtMessage.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                fab.collapse()
+            }
+        }
+
+        /*
+        btnRequestMoney.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            args.putBoolean(TransferFragment.ARG_IS_REQUEST, true)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_transferFragment,
+                args
+            )
+        }
+        */
+
+        btnSendMoney.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            args.putBoolean(TransferFragment.ARG_IS_REQUEST, false)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_transferFragment,
+                args
+            )
+        }
+
         btnSend.setOnClickListener {
             val message = binding.edtMessage.text.toString()
             if (message.isNotEmpty()) {
@@ -107,6 +147,7 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
         btnAddImage.setOnClickListener {
             val intent = Intent()
+            fab.collapse()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
@@ -136,7 +177,7 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
                 (messages[index + 1].timestamp.time - chatMessage.timestamp.time > GROUP_TIME_LIMIT))
              */
             val shouldShowDate = true
-            ChatMessageItem(chatMessage, shouldShowAvatar, shouldShowDate, name)
+            ChatMessageItem(chatMessage, transactionRepository.getTransactionWithHash(chatMessage.transactionHash), shouldShowAvatar, shouldShowDate, name)
         }
     }
 

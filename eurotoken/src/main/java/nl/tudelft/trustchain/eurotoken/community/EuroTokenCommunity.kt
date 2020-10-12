@@ -1,15 +1,12 @@
 package nl.tudelft.trustchain.eurotoken.community
 
 import android.content.Context
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.trustchain.eurotoken.ContactItem
 import nl.tudelft.trustchain.eurotoken.db.EuroTokenStore
 import nl.tudelft.trustchain.eurotoken.entity.Contact
 import nl.tudelft.trustchain.eurotoken.entity.Transaction
