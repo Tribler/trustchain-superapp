@@ -3,61 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_eurotoken"
-    app:startDestination="@id/contactsFragment">
-    <fragment
-        android:id="@+id/contactsFragment"
-        android:name="nl.tudelft.trustchain.eurotoken.ContactsFragment"
-        android:label="EuroToken - Contacts"
-        tools:layout="@layout/fragment_contact_list" >
-        <action
-            android:id="@+id/action_contactsFragment_to_addRemoteFragment"
-            app:destination="@id/addRemoteFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-        <action
-            android:id="@+id/action_contactsFragment_to_addNearbyFragment"
-            app:destination="@id/addNearbyFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-    </fragment>
+    app:startDestination="@id/transactionFragment">
     <fragment
         android:id="@+id/transactionFragment"
-        android:name="nl.tudelft.trustchain.eurotoken.TransactionFragment"
-        android:label="EuroToken - Send / Receive"
-        tools:layout="@layout/fragment_transaction"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionsFragment"
+        android:label="Transaction History"
+        tools:layout="@layout/fragment_transactions"
         />
     <fragment
-        android:id="@+id/addRemoteFragment"
-        android:name="nl.tudelft.trustchain.eurotoken.ui.addcontact.AddRemoteFragment"
-        android:label="Add Remote Contact" >
-        <action
-            android:id="@+id/action_addRemoteFragment_to_addContactFragment"
-            app:destination="@id/addContactFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-    </fragment>
-    <fragment
-        android:id="@+id/addContactFragment"
-        android:name="nl.tudelft.trustchain.eurotoken.ui.addcontact.AddContactFragment"
-        android:label="Add Contact" >
-        <argument android:name="public_key" />
-    </fragment>
-    <fragment
-        android:id="@+id/addNearbyFragment"
-        android:name="nl.tudelft.trustchain.eurotoken.ui.addcontact.AddNearbyFragment"
-        android:label="Add Nearby Contact">
-        <action
-            android:id="@+id/action_addNearbyFragment_to_addContactFragment"
-            app:destination="@id/addContactFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
-    </fragment>
+        android:id="@+id/exchangeFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.ExchangeFragment"
+        android:label="Buy / Sell"
+        tools:layout="@layout/fragment_exchange"
+        />
 </navigation>

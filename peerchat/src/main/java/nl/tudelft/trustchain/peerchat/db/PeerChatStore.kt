@@ -10,14 +10,16 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.peerchat.sqldelight.Database
+import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.Contact
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
 class PeerChatStore( context: Context ) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "peerchat.db")
     private val database = Database(driver)
+    val contactsStore = ContactStore.getInstance(context)
 
     private val messageMapper = {
             id: String,
@@ -27,8 +29,7 @@ class PeerChatStore( context: Context ) {
             outgoing: Long,
             timestamp: Long,
             ack: Long,
-            read: Long,
-            attachmentType: String?,
+            read: Long, attachmentType: String?,
             attachmentSize: Long?,
             attachmentContent: ByteArray?,
             attachmentFetched: Long,
@@ -53,17 +54,6 @@ class PeerChatStore( context: Context ) {
         )
     }
 
-    fun addContact(publicKey: PublicKey, name: String) {
-        database.dbContactQueries.addContact(name, publicKey.keyToBin())
-    }
-
-    fun getContacts(): Flow<List<Contact>> {
-        return database.dbContactQueries.getAll { name, public_key ->
-            val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
-            Contact(name, publicKey)
-        }.asFlow().mapToList()
-    }
-
     private fun getAllMessages(): Flow<List<ChatMessage>> {
         return database.dbMessageQueries.getAll(messageMapper)
             .asFlow().mapToList()
@@ -82,7 +72,7 @@ class PeerChatStore( context: Context ) {
     }
 
     fun getContactsWithLastMessages(): Flow<List<Pair<Contact, ChatMessage?>>> {
-        return combine(getContacts(), getAllMessages()) { contacts, messages ->
+        return combine(contactsStore.getContacts(), getAllMessages()) { contacts, messages ->
             val notContacts = messages
                 .asSequence()
                 .filter { !it.outgoing }
@@ -126,10 +116,6 @@ class PeerChatStore( context: Context ) {
         val publicKeyBin = publicKey.keyToBin()
         return database.dbMessageQueries.getAllByPublicKey(publicKeyBin, publicKeyBin, messageMapper)
             .asFlow().mapToList()
-    }
-
-    fun deleteContact(contact: Contact) {
-        database.dbContactQueries.deleteContact(contact.publicKey.keyToBin())
     }
 
     companion object {

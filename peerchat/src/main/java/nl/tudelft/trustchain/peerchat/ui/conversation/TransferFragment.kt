@@ -6,10 +6,10 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.item_message.view.*
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R

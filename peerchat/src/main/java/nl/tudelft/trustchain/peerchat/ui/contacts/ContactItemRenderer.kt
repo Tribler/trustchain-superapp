@@ -5,7 +5,7 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contact.view.*
-import nl.tudelft.trustchain.peerchat.entity.Contact
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.R
 import java.text.SimpleDateFormat
 

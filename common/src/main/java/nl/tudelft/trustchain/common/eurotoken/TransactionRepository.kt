@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.peerchat.ui.conversation
+package nl.tudelft.trustchain.common.eurotoken
 
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -17,19 +17,23 @@ class TransactionRepository (
         )
     }
 
+    fun getTransactions(): List<TrustChainBlock> {
+        return trustChainCommunity.database.getBlocksWithType(BLOCK_TYPE_TRANSFER)
+    }
+
     fun getTransactionWithHash(hash: ByteArray?): TrustChainBlock? {
         return hash?.let {
             trustChainCommunity.database
                 .getBlockWithHash(it)
         }
-        }
+    }
 
     companion object {
         private const val BLOCK_TYPE_TRANSFER = "transfer"
         private const val BLOCK_TYPE_CREATE   = "creation"
         private const val BLOCK_TYPE_DESTROY  = "destruction"
 
-        private const val KEY_AMOUNT = "amount"
+        const val KEY_AMOUNT = "amount"
     }
 
 }

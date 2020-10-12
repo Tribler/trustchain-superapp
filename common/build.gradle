@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.squareup.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 
 ktlint {
@@ -8,6 +9,14 @@ ktlint {
     android = true
     outputToConsole = true
     ignoreFailures = false
+}
+
+sqldelight {
+    ContactDatabase {
+        packageName = "nl.tudelft.common.sqldelight"
+        sourceFolders = ["sqldelight"]
+        schemaOutputDirectory = file("src/main/sqldelight/databases")
+    }
 }
 
 android {
@@ -91,6 +100,7 @@ dependencies {
 
     //This AAR dependency also contains jlibtorrent
     api files('libs/torrentstream-android.jar')
+    implementation 'androidx.room:room-runtime:2.2.5'
 
     // Testing
     testImplementation 'junit:junit:4.12'
@@ -101,6 +111,7 @@ dependencies {
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
     testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
+    annotationProcessor 'androidx.room:room-compiler:2.2.5'
 }
 
 

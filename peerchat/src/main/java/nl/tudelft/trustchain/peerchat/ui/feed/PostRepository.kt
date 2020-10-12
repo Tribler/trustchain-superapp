@@ -6,7 +6,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.entity.Contact
+import nl.tudelft.trustchain.common.contacts.Contact
 
 class PostRepository(
     private val trustChainCommunity: TrustChainCommunity,
@@ -70,7 +70,7 @@ class PostRepository(
 
     suspend fun getPostsByFriends(): List<PostItem> {
         val myPeer = IPv8Android.getInstance().myPeer
-        val contacts = peerChatStore.getContacts().first()
+        val contacts = peerChatStore.contactsStore.getContacts().first()
         val posts = trustChainCommunity.database
             .getBlocksWithType(BLOCK_TYPE_POST)
             .sortedByDescending { it.insertTime }

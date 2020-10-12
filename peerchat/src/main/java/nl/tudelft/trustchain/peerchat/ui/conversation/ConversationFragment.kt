@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.fragment_conversation.*
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R
