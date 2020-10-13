@@ -15,7 +15,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.TransferFragmentBinding
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 
 class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
@@ -23,10 +22,6 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
         return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
-    }
-
-    private val store by lazy {
-        PeerChatStore.getInstance(requireContext())
     }
 
     private val transactionRepository by lazy {
@@ -71,6 +66,8 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
         super.onViewCreated(view, savedInstanceState)
 
         val isRequest = requireArguments().getBoolean(ARG_IS_REQUEST)
+
+        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getBalance())
 
         if (isRequest) {
             binding.btnTransfer.text = "Request money"

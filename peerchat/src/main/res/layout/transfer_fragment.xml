@@ -43,7 +43,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/txtEuro1"
+                app:layout_constraintEnd_toStartOf="@id/txtBalance"
                 >
 
                 <TextView
@@ -65,17 +65,6 @@
                     />
 
             </LinearLayout>
-
-            <TextView
-                android:id="@+id/txtEuro1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="@id/txtBalance"
-                app:layout_constraintBottom_toBottomOf="@id/txtBalance"
-                app:layout_constraintEnd_toStartOf="@id/txtBalance"
-                android:text="@string/euro_token"
-                android:textSize="20dp"
-                />
 
             <TextView
                 android:id="@+id/txtBalance"
@@ -117,7 +106,7 @@
                 app:layout_constraintTop_toTopOf="@id/edtAmount"
                 app:layout_constraintBottom_toBottomOf="@id/edtAmount"
                 app:layout_constraintEnd_toStartOf="@id/edtAmount"
-                android:text="@string/euro_token"
+                android:text="@string/euro"
                 android:textSize="32dp"
                 />
 

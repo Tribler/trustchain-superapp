@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
 import java.math.BigInteger
@@ -20,10 +21,6 @@ import java.text.SimpleDateFormat
 
 class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
     ChatMessageItem::class.java) {
-
-    private fun prettyAmount(amount: Long): String {
-        return "€" + (amount / 100).toString() + "," + (amount % 100).toString().padStart(2, '0')
-    }
 
     private val dateTimeFormat = SimpleDateFormat.getDateTimeInstance()
     private val timeFormat = SimpleDateFormat.getTimeInstance()
@@ -37,7 +34,7 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             txtMessage.gravity = Gravity.END
         }
         item.transaction?.transaction?.let {
-            txtTransaction.text = prettyAmount(item.transaction.transaction["amount"] as Long)
+            txtTransaction.text = TransactionRepository.prettyAmount(item.transaction.transaction["amount"] as Long)
             if (item.chatMessage.message.isEmpty()) {
                 txtMessage.visibility = View.GONE
             }

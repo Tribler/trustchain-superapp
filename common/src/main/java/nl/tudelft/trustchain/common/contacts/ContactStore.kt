@@ -21,6 +21,16 @@ class ContactStore(context: Context ) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())
     }
 
+    fun getContactFromPublicKey(publicKey: PublicKey) : Contact? {
+        val contact = database.dbContactQueries.getContact(publicKey.keyToBin()).executeAsOneOrNull()
+        return if (contact != null) {
+            Contact(
+                contact.name,
+                defaultCryptoProvider.keyFromPublicBin(contact.public_key)
+            )
+        } else null
+    }
+
     fun getContacts(): Flow<List<Contact>> {
         return database.dbContactQueries.getAll { name, public_key ->
             val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
