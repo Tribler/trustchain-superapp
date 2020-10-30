@@ -21,10 +21,11 @@ class TransactionRepository (
         )
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     fun getBalance(): Long {
         return getTransactions().map { transaction ->
             (if (transaction.outgoing) -1 else 1) * transaction.amount
-        }.reduce { a, b -> a+b }
+        }.reduceOrNull { a, b -> a+b } ?: 0L
     }
 
     fun getTransactions(): List<Transaction> {
