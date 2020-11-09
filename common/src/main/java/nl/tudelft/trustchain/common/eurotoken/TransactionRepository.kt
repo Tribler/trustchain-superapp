@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import java.lang.Math.abs
+import java.math.BigInteger
 
 class TransactionRepository (
     private val trustChainCommunity: TrustChainCommunity
@@ -35,7 +36,7 @@ class TransactionRepository (
                 block,
                 sender,
                 defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey),
-                block.transaction["amount"] as Long,
+                (block.transaction["amount"] as BigInteger).toLong(),
                 "transaction",
                 sender == trustChainCommunity.myPeer.publicKey,
                 block.timestamp

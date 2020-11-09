@@ -5,10 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.exchange.ExchangeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <Button
+        android:id="@+id/btn_connect_gateway"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:text="Connect to gateway" />
 
 </FrameLayout>

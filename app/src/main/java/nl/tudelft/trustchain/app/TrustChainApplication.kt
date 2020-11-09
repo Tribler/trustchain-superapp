@@ -34,6 +34,7 @@ import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
+import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 
@@ -51,6 +52,7 @@ class TrustChainApplication : Application() {
             createDiscoveryCommunity(),
             createTrustChainCommunity(),
             createPeerChatCommunity(),
+            createEuroTokenCommunity(),
             createTFTPCommunity(),
             createDemoCommunity(),
             createMarketCommunity(),
@@ -135,6 +137,14 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             TrustChainCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            EuroTokenCommunity.Factory(this),
             listOf(randomWalk)
         )
     }

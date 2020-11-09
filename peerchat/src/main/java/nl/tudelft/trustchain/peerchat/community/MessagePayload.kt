@@ -15,7 +15,6 @@ class MessagePayload constructor(
 ) : Serializable {
     override fun serialize(): ByteArray {
         val thash = (transactionHash ?: "NONE".toByteArray())
-        logger.debug { "before serialisation: ${String(thash)}" }
         return serializeVarLen(id.toByteArray()) +
             serializeVarLen(message.toByteArray()) +
             serializeVarLen(attachmentType.toByteArray()) +
