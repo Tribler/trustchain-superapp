@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.eurotoken.ui.exchange
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -11,10 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.fragment_exchange.*
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
@@ -57,12 +52,18 @@ class ExchangeFragment : BaseFragment() {
             val public_key = this.optString("public_key")
             val ip = this.optString("ip")
             val port = this.optInt("port")
+            val amount = this.optLong("amount", -1L)
         }
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let{
-            val data = ConnectionData(it)
-            Toast.makeText(requireContext(), data.ip, Toast.LENGTH_LONG).show()
-            getEuroTokenCommunity().connectToGateway(data.payment_id, data.public_key, data.ip, data.port)
-            Toast.makeText(requireContext(), "Sending message", Toast.LENGTH_LONG).show()
+            val connectionData = ConnectionData(it)
+            Toast.makeText(requireContext(), connectionData.ip, Toast.LENGTH_LONG).show()
+            if (connectionData.amount == -1L){
+                getEuroTokenCommunity().connectToGateway(connectionData.payment_id, connectionData.public_key, connectionData.ip, connectionData.port)
+                Toast.makeText(requireContext(), "Sending message", Toast.LENGTH_LONG).show()
+            } else {
+                transactionRepository.createDestroyTransaction(connectionData.payment_id, connectionData.amount, connectionData.public_key, connectionData.ip, connectionData.port)
+                Toast.makeText(requireContext(), "Payment sent", Toast.LENGTH_LONG).show()
+            }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
     }
@@ -78,6 +79,9 @@ class ExchangeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         btn_connect_gateway.setOnClickListener {
+            qrCodeUtils.startQRScanner(this)
+        }
+        btnDestroy.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
     }

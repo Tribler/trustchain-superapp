@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import java.nio.charset.StandardCharsets.UTF_16
 import java.util.*
 
@@ -27,7 +28,6 @@ class EuroTokenCommunity(
     fun connectToGateway(payment_id: String, public_key: String, ip: String, port: Int) {
         println(public_key)
         val key = defaultCryptoProvider.keyFromPublicBin(public_key.hexToBytes())
-
         val address = IPv4Address(ip, port)
         val peer = Peer(key, address)
 

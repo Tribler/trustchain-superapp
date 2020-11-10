@@ -79,7 +79,7 @@
         tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
     <TextView
-        android:id="@+id/txtMessage"
+        android:id="@+id/txtType"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -90,6 +90,6 @@
         app:layout_constraintTop_toBottomOf="@id/txtPeerId"
         app:layout_constraintStart_toStartOf="@id/txtName"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="Hello World!" />
+        tools:text="Transfer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

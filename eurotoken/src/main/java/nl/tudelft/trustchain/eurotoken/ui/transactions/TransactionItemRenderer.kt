@@ -37,6 +37,7 @@ class TransactionItemRenderer : ItemLayoutRenderer<TransactionItem, View>(
 
         txtName.text = contact?.name ?: ""
         txtPeerId.text = peer.keyToHash().toHex()
+        txtType.text = item.transaction.type
         txtDate.text = dateFormat.format(item.transaction.timestamp)
     }
 
