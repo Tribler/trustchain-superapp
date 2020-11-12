@@ -56,7 +56,7 @@ class TransactionRepository (
             trustChainCommunity.database.getBlocksWithType(BLOCK_TYPE_TRANSFER) +
                 trustChainCommunity.database.getBlocksWithType(BLOCK_TYPE_CREATE) +
                 trustChainCommunity.database.getBlocksWithType(BLOCK_TYPE_DESTROY)
-            ).map { block ->
+            ).map { block : TrustChainBlock ->
             val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
             Transaction(
                 block,
