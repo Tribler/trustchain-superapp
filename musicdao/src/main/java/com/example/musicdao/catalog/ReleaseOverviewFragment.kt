@@ -10,6 +10,7 @@ import com.example.musicdao.MusicBaseFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.SubmitReleaseDialog
+import com.example.musicdao.wallet.WalletService
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -138,7 +139,7 @@ class ReleaseOverviewFragment : MusicBaseFragment(R.layout.fragment_release_over
             "torrentInfoName" to torrentInfoName
         )
         if (activity is MusicService) {
-            val musicWallet = (activity as MusicService).walletService
+            val musicWallet = WalletService.getInstance(activity as MusicService)
             transaction["publisher"] = musicWallet.publicKey()
         }
         val trustchain = getMusicCommunity()

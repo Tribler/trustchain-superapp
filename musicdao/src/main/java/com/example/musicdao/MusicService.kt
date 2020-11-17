@@ -16,7 +16,6 @@ import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
-import com.example.musicdao.wallet.WalletService
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import kotlinx.coroutines.delay
@@ -33,7 +32,6 @@ import kotlin.random.Random
  */
 class MusicService : BaseActivity() {
     lateinit var torrentStream: TorrentStream
-    lateinit var walletService: WalletService
     override val navigationGraph = R.navigation.musicdao_navgraph
     var contentSeeder: ContentSeeder? = null
 
@@ -78,10 +76,6 @@ class MusicService : BaseActivity() {
                 }
                 delay(3000)
             }
-        }
-        if (!::walletService.isInitialized) {
-            walletService =
-                WalletService.getInstance(this)
         }
     }
 

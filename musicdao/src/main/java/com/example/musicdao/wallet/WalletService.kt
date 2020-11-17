@@ -13,15 +13,20 @@ import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import java.io.File
+import java.io.IOException
+import java.io.InputStream
 import java.net.InetAddress
+import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
+
 
 /**
  * Interaction with a BitcoinJ wallet
  */
 class WalletService(val musicService: MusicService) {
     val app: WalletAppKit
+    private val bitcoinFaucetEndpoint = "http://134.122.59.107:3000"
     private val params = CryptoCurrencyConfig.networkParams
     private val filePrefix = CryptoCurrencyConfig.chainFileName
     private val walletDir: File = musicService.applicationContext.cacheDir
@@ -32,7 +37,14 @@ class WalletService(val musicService: MusicService) {
         app = object : WalletAppKit(params, walletDir, filePrefix) {
             override fun onSetupCompleted() {
                 if (wallet().keyChainGroupSize < 1) {
-                    wallet().importKey(ECKey())
+                    val key = ECKey()
+                    wallet().importKey(key)
+                }
+
+                if (wallet().balance.isZero) {
+                    val address = wallet().issuedReceiveAddresses[0].toString()
+                    // Ask, using REST call to faucet to get some coins to start with
+                    requestStarterCoins(address)
                 }
 
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
@@ -81,21 +93,28 @@ class WalletService(val musicService: MusicService) {
 
     fun status(): String {
         val status = app.state().name
-        if (status == "RUNNING") {
-            percentageSynced = 100
-        }
-        return "Wallet status: $status"
+        return "Status: $status"
     }
 
     fun balanceText(): String {
-        val confirmedBalance = app.wallet().balance.toFriendlyString()
-        val estimatedBalance =
-            app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
-        return "Current balance: $confirmedBalance (confirmed) \nCurrent balance: $estimatedBalance (estimated)"
+        return try {
+            val confirmedBalance = app.wallet().balance.toFriendlyString()
+            val estimatedBalance =
+                app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+            "Current balance: $confirmedBalance (confirmed) \nCurrent balance: $estimatedBalance (estimated)"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            "Current balance: "
+        }
     }
 
     fun publicKeyText(): String {
-        return "Public key " + app.wallet().currentReceiveAddress().toString()
+        return try {
+            "Wallet public key: " + app.wallet().currentReceiveAddress().toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
     }
 
     fun publicKey(): String {
@@ -124,6 +143,19 @@ class WalletService(val musicService: MusicService) {
                 "Error creating transaction (do you have sufficient funds?)",
                 Toast.LENGTH_SHORT
             )
+        }
+    }
+
+    /**
+     * Query the bitcoin faucet for some starter bitcoins
+     */
+    fun requestStarterCoins(id: String) {
+        val obj = URL("$bitcoinFaucetEndpoint?id=$id")
+        try {
+            val con: InputStream? = obj.openStream()
+            con?.close()
+        } catch (exception: IOException) {
+            exception.printStackTrace()
         }
     }
 

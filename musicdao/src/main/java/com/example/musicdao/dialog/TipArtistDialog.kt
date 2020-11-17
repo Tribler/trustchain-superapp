@@ -4,18 +4,12 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
-import org.knowm.xchange.Exchange
-import org.knowm.xchange.ExchangeFactory
-import org.knowm.xchange.binance.BinanceExchange
-import org.knowm.xchange.currency.CurrencyPair
-import org.knowm.xchange.service.marketdata.MarketDataService
+import com.example.musicdao.wallet.WalletService
 import java.math.BigDecimal
 
 /**
@@ -32,9 +26,8 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         val dialogView = inflater.inflate(R.layout.dialog_tip_artist, null)
         val amountAssistingText = dialogView?.findViewById<TextView>(R.id.amountAssistingText)
         Thread {
-            conversionRate = oneUSDInCrypto()
             activity?.runOnUiThread {
-                amountAssistingText?.text = "USD (${conversionRate * MBTC_PER_BITCOIN} mBTC)"
+                amountAssistingText?.text = "coin(s)"
             }
         }.start()
 
@@ -42,36 +35,7 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         instructionText?.text = "Sending a tip to artist(s), with public key: $publicKey"
 
         val amountEditText = dialogView?.findViewById<EditText>(R.id.amount)
-        amountEditText?.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable) {
-                val amount = amountEditText.text.toString()
-                try {
-                    activity?.runOnUiThread {
-                        amountAssistingText?.text = getConversionRate(amount)
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-
-            override fun beforeTextChanged(
-                s: CharSequence,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
-            }
-
-            override fun onTextChanged(
-                s: CharSequence,
-                start: Int,
-                before: Int,
-                count: Int
-            ) {
-            }
-        })
-
-        val walletService = (activity as MusicService).walletService
+        val walletService = WalletService.getInstance(activity as MusicService)
 
         builder.setView(dialogView)
             .setPositiveButton("Confirm", DialogInterface.OnClickListener { _, _ ->
@@ -86,27 +50,7 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         return builder.create()
     }
 
-    fun getConversionRate(amount: String): String {
-        return try {
-            val amountInt = Integer.parseInt(amount)
-            val value = BigDecimal(amountInt)
-            val rate = conversionRate * value * MBTC_PER_BITCOIN
-            "USD ($rate mBTC)"
-        } catch (e: NumberFormatException) {
-            "USD (? mBTC)"
-        }
-    }
-
-    fun oneUSDInCrypto(): BigDecimal {
-        val bitstamp: Exchange =
-            ExchangeFactory.INSTANCE.createExchange(BinanceExchange::class.java.name)
-        val marketDataService: MarketDataService = bitstamp.marketDataService
-        val ticker = marketDataService.getTicker(CurrencyPair.BTC_USDT)
-        return BigDecimal(1.0).divide(ticker.ask, 7, 0)
-    }
-
     companion object {
-        val MBTC_PER_BITCOIN = BigDecimal(1_000)
         val SATS_PER_BITCOIN = BigDecimal(100_000_000)
     }
 }

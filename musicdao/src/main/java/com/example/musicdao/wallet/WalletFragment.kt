@@ -17,10 +17,13 @@ class WalletFragment : Fragment(R.layout.fragment_wallet) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setMenuVisibility(false)
-        walletService = (activity as MusicService).walletService
+        walletService = WalletService.getInstance(activity as MusicService)
 
         lifecycleScope.launchWhenStarted {
             while (isActive) {
+                wallet_public_key.text = walletService.publicKeyText()
+                wallet_balance.text = walletService.balanceText()
+
                 val progress = walletService.percentageSynced
                 if (progress < 100) {
                     blockchain_progress.progress = progress
@@ -29,8 +32,6 @@ class WalletFragment : Fragment(R.layout.fragment_wallet) {
 
                 if (progress == 100) {
                     blockchain_progress.progress = 100
-                    wallet_public_key.text = walletService.publicKeyText()
-                    wallet_balance.text = walletService.balanceText()
                     wallet_status.text = "Finished syncing chain"
                 }
 
