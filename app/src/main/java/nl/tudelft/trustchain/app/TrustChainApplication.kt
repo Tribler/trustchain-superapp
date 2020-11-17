@@ -32,6 +32,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
@@ -73,6 +74,8 @@ class TrustChainApplication : Application() {
     private fun initTrustChain() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
+
+        TransactionRepository(trustchain).initTrustChainCommunity() // register eurotoken listners
 
         trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
             override fun validate(

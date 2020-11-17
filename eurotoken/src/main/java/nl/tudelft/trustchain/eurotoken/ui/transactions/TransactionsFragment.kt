@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.eurotoken.ui.transactions
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Context
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
@@ -11,7 +10,6 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +26,6 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
-import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransactionsBinding
 
 /**
@@ -64,7 +61,7 @@ class TransactionsFragment : BaseFragment(R.layout.fragment_transactions) {
                     block
                 ) }
                 adapter.updateItems(items)
-                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getBalance())
+                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
                 delay(1000L)
             }
         }
@@ -99,7 +96,7 @@ class TransactionsFragment : BaseFragment(R.layout.fragment_transactions) {
         items.observe(viewLifecycleOwner, Observer {
             adapter.updateItems(it)
             binding.txtBalance.text =
-                TransactionRepository.prettyAmount(transactionRepository.getBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
         })
     }
 }

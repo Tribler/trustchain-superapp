@@ -61,7 +61,7 @@ class ExchangeFragment : BaseFragment() {
                 getEuroTokenCommunity().connectToGateway(connectionData.payment_id, connectionData.public_key, connectionData.ip, connectionData.port)
                 Toast.makeText(requireContext(), "Sending message", Toast.LENGTH_LONG).show()
             } else {
-                transactionRepository.createDestroyTransaction(connectionData.payment_id, connectionData.amount, connectionData.public_key, connectionData.ip, connectionData.port)
+                transactionRepository.sendDestroyProposal(connectionData.payment_id, connectionData.amount, connectionData.public_key, connectionData.ip, connectionData.port)
                 Toast.makeText(requireContext(), "Payment sent", Toast.LENGTH_LONG).show()
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()

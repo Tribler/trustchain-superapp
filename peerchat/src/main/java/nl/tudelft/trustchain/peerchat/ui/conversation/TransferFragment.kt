@@ -49,7 +49,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     }
 
     private fun sendMoneyMessage(amount: Long, message: String) {
-        val block = transactionRepository.createSendTransaction(publicKey.keyToBin(), amount)
+        val block = transactionRepository.sendTransferProposal(publicKey.keyToBin(), amount)
         //if (message.isNotEmpty()) {
         getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)
         //}
@@ -67,7 +67,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
         val isRequest = requireArguments().getBoolean(ARG_IS_REQUEST)
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getBalance())
+        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
 
         if (isRequest) {
             binding.btnTransfer.text = "Request money"
