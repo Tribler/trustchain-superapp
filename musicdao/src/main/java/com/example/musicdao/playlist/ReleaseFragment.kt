@@ -67,8 +67,6 @@ class ReleaseFragment(
                     releaseDate, 0
             )
 
-        AudioPlayer.getInstance()?.hideTrackInfo()
-
         enableTipButton()
 
         lifecycleScope.launchWhenCreated {
@@ -247,7 +245,7 @@ class ReleaseFragment(
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val audioPlayer = AudioPlayer.getInstance() ?: return
-        if (audioPlayer.isPlaying() &&
+        if (!audioPlayer.isPlaying() &&
             torrent != null &&
             currentFileIndex != -1
         ) {

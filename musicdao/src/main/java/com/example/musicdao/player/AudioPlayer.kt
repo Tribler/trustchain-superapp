@@ -28,19 +28,9 @@ class AudioPlayer : MusicBaseFragment(R.layout.fragment_trackplaying) {
         initExoPlayer()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        this.release()
-    }
-
     private fun initExoPlayer() {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(context)
         playerView.player = exoPlayer
-    }
-
-    private fun release() {
-        exoPlayer?.release()
-        exoPlayer = null
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource? {

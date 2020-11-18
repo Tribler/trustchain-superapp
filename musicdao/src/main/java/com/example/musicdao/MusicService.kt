@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
@@ -23,20 +24,27 @@ import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.trustchain.common.BaseActivity
 import java.io.File
 import kotlin.random.Random
 
 /**
  * This maintains the interactions between the UI and seeding/trustchain
  */
-class MusicService : BaseActivity() {
+class MusicService : AppCompatActivity() {
     lateinit var torrentStream: TorrentStream
-    override val navigationGraph = R.navigation.musicdao_navgraph
+    private val navigationGraph: Int = R.navigation.musicdao_navgraph
+
     var contentSeeder: ContentSeeder? = null
+
+    private val navController by lazy {
+        findNavController(R.id.navHostFragment)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.fragment_base)
+        navController.setGraph(navigationGraph)
+
         Thread {
             startup()
         }.start()

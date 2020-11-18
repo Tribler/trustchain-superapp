@@ -88,10 +88,10 @@ class SubmitReleaseDialog(private val releaseOverviewFragment: ReleaseOverviewFr
         )
         if (torrentInfoName != null) {
             releaseOverviewFragment.publish(
+                magnetEditText?.text.toString(),
                 titleEditText?.text.toString(),
                 artistEditText?.text.toString(),
                 releaseDateEditText?.text.toString(),
-                magnetEditText?.text.toString(),
                 torrentInfoName
             )
         } else {

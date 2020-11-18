@@ -37,10 +37,4 @@
 
         </LinearLayout>
     </LinearLayout>
-
-    <fragment
-        android:id="@+id/track_player_fragment"
-        class="com.example.musicdao.player.AudioPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 </LinearLayout>
