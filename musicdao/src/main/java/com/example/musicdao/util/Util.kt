@@ -3,6 +3,8 @@ package com.example.musicdao.util
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
+import java.io.File
+
 
 object Util {
 
@@ -79,5 +81,29 @@ object Util {
             }
         }
         return null
+    }
+
+    /**
+     * Check if a torrent file has all its corresponding files downloaded
+     */
+    fun isTorrentCompleted(torrentInfo: TorrentInfo, saveDirectory: File): Boolean {
+        val dir = File(saveDirectory.path + "/" + torrentInfo.name())
+        if (!dir.isDirectory) return false
+        if (folderSize(dir) != torrentInfo.totalSize()) return false
+        return true
+    }
+
+    private fun folderSize(dir: File): Long {
+        var length = 0.toLong()
+        if (!dir.isDirectory) return 0
+        val files = dir.listFiles() ?: return 0
+        for (file in files) {
+            length += if (file.isFile) {
+                file.length()
+            } else {
+                folderSize(file)
+            }
+        }
+        return length
     }
 }

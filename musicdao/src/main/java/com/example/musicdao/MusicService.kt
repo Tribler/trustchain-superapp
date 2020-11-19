@@ -140,9 +140,10 @@ class MusicService : AppCompatActivity() {
      * Show libtorrent connectivity stats
      */
     fun getStatsOverview(): String {
-        val startingMessage = "Starting libtorrent session..."
-        if (!::torrentStream.isInitialized) return startingMessage
-        val sessionManager = torrentStream.sessionManager ?: return startingMessage
+        if (!::torrentStream.isInitialized) return "Starting up torrent client..."
+        if (torrentStream.sessionManager == null) return "Starting up torrent client..."
+        if (!torrentStream.sessionManager.isRunning) return "Starting up torrent client..."
+        val sessionManager = torrentStream.sessionManager
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
             Util.readableBytes(
                 sessionManager.downloadRate()

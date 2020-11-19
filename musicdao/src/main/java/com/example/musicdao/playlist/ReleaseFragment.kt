@@ -46,14 +46,32 @@ class ReleaseFragment(
     private var currentFileIndex = -1
     private var prevFileIndex = -1
     private var prevProgress = -1.0f
-    private var localTorrent: Torrent? = null
+    private var streamingTorrent: Torrent? = null
+    private var downloadedTorrent: TorrentInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        val torrentUrl = resolveTorrentUrl(magnet)
-        if ((activity as MusicService).torrentStream.isStreaming) {
-            (activity as MusicService).torrentStream.stopStream()
+        var torrentUrl = magnet
+        if (torrentInfoName != null) {
+            val torrentFileName =
+                "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFile = File(torrentFileName)
+            val saveDir = context?.cacheDir
+            if (torrentFile.isFile && TorrentInfo(torrentFile).isValid) {
+                // This means we have the torrent file already locally and we can skip the step of
+                // obtaining the TorrentInfo from magnet link
+                torrentUrl = torrentFile.toURI().toURL().toString()
+                if (saveDir != null &&
+                    Util.isTorrentCompleted(TorrentInfo(torrentFile), saveDir)
+                ) {
+                    // All files are already downloaded so we do not need to use TorrentStream
+                    val torrentInfo = TorrentInfo(torrentFile)
+                    setMetadata(torrentInfo.files(), preloaded = true)
+                    downloadedTorrent = torrentInfo
+                    return
+                }
+            }
         }
         (activity as MusicService).torrentStream.addListener(this)
         (activity as MusicService).torrentStream.startStream(torrentUrl)
@@ -76,16 +94,6 @@ class ReleaseFragment(
                 }
                 delay(1000)
             }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (release_table_layout.childCount == 0) {
-            loadingTracks.visibility = View.VISIBLE
-        } else {
-            loadingTracks.visibility = View.GONE
         }
     }
 
@@ -112,9 +120,6 @@ class ReleaseFragment(
 
     override fun onDestroy() {
         (activity as MusicService).torrentStream.removeListener(this)
-        if ((activity as MusicService).torrentStream.isStreaming) {
-            (activity as MusicService).torrentStream.stopStream()
-        }
         super.onDestroy()
     }
 
@@ -143,8 +148,8 @@ class ReleaseFragment(
      * This sets the metadata of the TorrentInfo in the UI, it renders the file list and other
      * metadata
      */
-    private fun setMetadata(metadata: FileStorage) {
-        loadingTracks.visibility = View.GONE
+    private fun setMetadata(metadata: FileStorage, preloaded: Boolean = false) {
+        loadingTracks?.visibility = View.GONE
         this.metadata = metadata
         val num = metadata.numFiles()
         val filestorage = metadata
@@ -152,12 +157,17 @@ class ReleaseFragment(
         for (index in 0 until num) {
             var fileName = filestorage.fileName(index)
             fileName = Util.checkAndSanitizeTrackNames(fileName)
+            var progress: Int? = null
+            if (preloaded) {
+                progress = 100
+            }
             if (fileName != null) {
                 val track = TrackFragment(
                     fileName,
                     index,
                     this,
-                    Util.readableBytes(filestorage.fileSize(index))
+                    Util.readableBytes(filestorage.fileSize(index)),
+                    progress
                 )
 
                 // Add a table row (Track) to the table (Release)
@@ -187,7 +197,8 @@ class ReleaseFragment(
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.prepareNextTrack()
 
-        val tor = localTorrent
+        val tor = streamingTorrent
+        val localTorrent = downloadedTorrent
         if (tor != null) {
             (activity as MusicService).torrentStream.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
@@ -200,6 +211,14 @@ class ReleaseFragment(
             } else {
                 AudioPlayer.getInstance()
                     ?.setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
+            }
+        } else if (localTorrent != null) {
+            val fileToPlay =
+                File("${context?.cacheDir}/${localTorrent.files().filePath(currentFileIndex)}")
+            // It is not a streaming torrent, and therefore we can conclude we already have
+            // it locally so we can just start playing it
+            if (fileToPlay.isFile && fileToPlay.length() > 1024 * 512) {
+                startPlaying(fileToPlay, currentFileIndex)
             }
         }
     }
@@ -223,7 +242,9 @@ class ReleaseFragment(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
-        audioPlayer?.setTrackInfo(file.nameWithoutExtension)
+        audioPlayer?.setTrackInfo(
+            Util.checkAndSanitizeTrackNames(file.name) ?: ""
+        )
     }
 
     fun resolveTorrentUrl(magnet: String): String {
@@ -232,7 +253,7 @@ class ReleaseFragment(
             val torrentFileName =
                 "${context?.cacheDir}/$torrentInfoName.torrent"
             val torrentFile = File(torrentFileName)
-            if (torrentFile.isFile) {
+            if (torrentFile.isFile && TorrentInfo(torrentFile).isValid) {
                 // This means we have the torrent file already locally and we can skip the step of
                 // obtaining the TorrentInfo from magnet link
                 torrentUrl = torrentFile.toURI().toURL().toString()
@@ -259,7 +280,7 @@ class ReleaseFragment(
     override fun onStreamPrepared(torrent: Torrent?) {
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
-        localTorrent = torrent
+        streamingTorrent = torrent
         if (torrent == null) return
         torrent.setSelectedFileIndex(0)
         torrent.startDownload()

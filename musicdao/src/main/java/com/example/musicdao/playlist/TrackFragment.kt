@@ -14,13 +14,15 @@ class TrackFragment(
     private val name: String,
     private val index: Int,
     private val release: ReleaseFragment,
-    private val size: String
+    private val size: String,
+    private val progress: Int?
 ) : Fragment(R.layout.track_table_row) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         trackTitle.text = name
         trackArtist.text = size
         trackId.text = "${index + 1}."
+        if (progress != null) progressBar.progress = progress
 
         contentRow.setOnClickListener {
             release.selectTrackAndPlay(index)

@@ -17,7 +17,7 @@ class ContentSeederTest {
         val saveDir = File("./src/test/resources")
         Assert.assertTrue(saveDir.isDirectory)
         // Test whether it reads all local torrent files correctly
-        contentSeeder = ContentSeeder.getInstance(sessionManager, saveDir)
+        contentSeeder = ContentSeeder.getInstance(saveDir)
         Assert.assertNotNull(contentSeeder)
     }
 

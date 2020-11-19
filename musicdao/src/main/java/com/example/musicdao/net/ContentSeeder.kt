@@ -1,5 +1,6 @@
 package com.example.musicdao.net
 
+import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import org.apache.commons.io.FileUtils
@@ -32,9 +33,11 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
                     count += 1
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
-                    // TODO enable seeding of all files that you have locally. Currently doing this
-                    //  clashes with the TorrentStreaming library somehow
-                    // sessionManager.download(torrentInfo, saveDir)
+                    // We only seed torrents that have previously already been fully downloaded,
+                    // so that this does not clash with the TorrentStream library
+                    if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
+                        sessionManager.download(torrentInfo, saveDir)
+                    }
                 }
             }
         }
@@ -52,7 +55,7 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
             }
             // TODO enable seeding of all files that you have locally. Currently doing this
             //  clashes with the TorrentStreaming library somehow
-            // sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, saveDir)
             return true
         }
         return false
