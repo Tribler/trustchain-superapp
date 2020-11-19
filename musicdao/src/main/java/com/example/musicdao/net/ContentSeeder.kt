@@ -53,9 +53,6 @@ class ContentSeeder(private val sessionManager: SessionManager, private val save
             if (!torrentFile.isFile) {
                 FileUtils.copyInputStreamToFile(torrentInfo.bencode().inputStream(), torrentFile)
             }
-            // TODO enable seeding of all files that you have locally. Currently doing this
-            //  clashes with the TorrentStreaming library somehow
-            sessionManager.download(torrentInfo, saveDir)
             return true
         }
         return false
