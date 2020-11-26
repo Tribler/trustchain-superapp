@@ -15,7 +15,7 @@ class TrackFragment(
     private val index: Int,
     private val release: ReleaseFragment,
     private val size: String,
-    private val progress: Int?
+    private val progress: Int? = 0
 ) : Fragment(R.layout.track_table_row) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

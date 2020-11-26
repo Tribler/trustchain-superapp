@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
+import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
@@ -52,33 +53,12 @@ class ReleaseFragment(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        var torrentUrl = magnet
-        if (torrentInfoName != null) {
-            val torrentFileName =
-                "${context?.cacheDir}/$torrentInfoName.torrent"
-            val torrentFile = File(torrentFileName)
-            val saveDir = context?.cacheDir
-            if (torrentFile.isFile && TorrentInfo(torrentFile).isValid) {
-                // This means we have the torrent file already locally and we can skip the step of
-                // obtaining the TorrentInfo from magnet link
-                torrentUrl = torrentFile.toURI().toURL().toString()
-                if (saveDir != null &&
-                    Util.isTorrentCompleted(TorrentInfo(torrentFile), saveDir)
-                ) {
-                    // All files are already downloaded so we do not need to use TorrentStream
-                    val torrentInfo = TorrentInfo(torrentFile)
-                    setMetadata(torrentInfo.files(), preloaded = true)
-                    downloadedTorrent = torrentInfo
-                    return
-                }
-            }
-        }
-        (activity as MusicService).torrentStream.addListener(this)
-        (activity as MusicService).torrentStream.startStream(torrentUrl)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        retrieveTorrent()
+
         blockMetadata.text =
             HtmlCompat.fromHtml(
                 "<b>$artists - $title<br></b>" +
@@ -124,6 +104,37 @@ class ReleaseFragment(
     }
 
     /**
+     * Set-up torrent connection for current magnet link; if we already have it predownloaded we
+     * will load all metadata from cache; otherwise we will use TorrentStream to stream the content
+     */
+    private fun retrieveTorrent() {
+        var torrentUrl = magnet
+        if (torrentInfoName != null) {
+            val torrentFileName =
+                "${context?.cacheDir}/$torrentInfoName.torrent"
+            val torrentFile = File(torrentFileName)
+            val saveDir = context?.cacheDir
+            if (torrentFile.isFile && TorrentInfo(torrentFile).isValid) {
+                // This means we have the torrent file already locally and we can skip the step of
+                // obtaining the TorrentInfo from magnet link
+                torrentUrl = torrentFile.toURI().toURL().toString()
+                if (saveDir != null &&
+                    Util.isTorrentCompleted(TorrentInfo(torrentFile), saveDir)
+                ) {
+                    // All files are already downloaded so we do not need to use TorrentStream
+                    val torrentInfo = TorrentInfo(torrentFile)
+//                    (activity as MusicService).torrentStream.sessionManager.download(torrentInfo, saveDir)
+                    downloadedTorrent = torrentInfo
+                    setMetadata(torrentInfo.files(), preloaded = true)
+                    return
+                }
+            }
+        }
+        (activity as MusicService).torrentStream.addListener(this)
+        (activity as MusicService).torrentStream.startStream(torrentUrl)
+    }
+
+    /**
      * If the Release has a publisher, then this should point to the public key of the wallet of
      * this publisher. This method checks whether the publisher field exists and whether it is
      * properly formatted so money can be sent to it. If it is, a tip button is shown
@@ -149,7 +160,7 @@ class ReleaseFragment(
      * metadata
      */
     private fun setMetadata(metadata: FileStorage, preloaded: Boolean = false) {
-        loadingTracks?.visibility = View.GONE
+        loadingTracks.visibility = View.GONE
         this.metadata = metadata
         val num = metadata.numFiles()
         val filestorage = metadata
@@ -290,7 +301,10 @@ class ReleaseFragment(
         setMetadata(torrentFile.files())
         // Keep seeding the torrent, also after start-up or after browsing to a different Release
         val infoName = torrentInfoName ?: torrent.torrentHandle.name()
-        (requireActivity() as MusicService).contentSeeder?.add(torrentFile, infoName)
+        val localContext = context
+        if (localContext != null) {
+            ContentSeeder.getInstance(localContext.cacheDir, localContext).add(torrentFile, infoName)
+        }
     }
 
     override fun onStreamStopped() {
@@ -308,7 +322,8 @@ class ReleaseFragment(
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
         val audioPlayer = AudioPlayer.getInstance()
-        if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() && torrent != null && currentFileIndex != -1
+        if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() && torrent != null
+            && currentFileIndex != -1
         ) {
             startPlaying(
                 torrent.videoFile,

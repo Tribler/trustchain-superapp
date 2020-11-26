@@ -10,9 +10,9 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import java.util.*
 
 /**
- * An album cover that can be clicked to view its contents
+ * An 'album cover' or other visual display of a playlist, that can be clicked to view its contents
  */
-class ReleaseCoverFragment(private val trustChainBlock: TrustChainBlock) :
+class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, private val numSeeders: Int) :
     Fragment(R.layout.fragment_release_cover) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -29,10 +29,11 @@ class ReleaseCoverFragment(private val trustChainBlock: TrustChainBlock) :
 
         coverTitle.text = title
         coverArtists.text = artists
+        seedCount.text = "Seeders: $numSeeders"
 
         coverCard.setOnClickListener {
             val action =
-                ReleaseOverviewFragmentDirections.actionReleaseOverviewFragmentToPlaylistFragment(
+                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToPlaylistFragment(
                     publisher,
                     magnet,
                     title,

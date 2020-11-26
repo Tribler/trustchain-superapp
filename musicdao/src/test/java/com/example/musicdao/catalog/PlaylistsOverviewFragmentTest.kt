@@ -7,7 +7,7 @@ import org.junit.Assert
 import org.junit.Test
 import java.util.*
 
-class ReleaseOverviewFragmentTest {
+class PlaylistsOverviewFragmentTest {
     private val privateKey =
         JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
     private val wellStructuredBlock = TrustChainBlock(
@@ -52,7 +52,7 @@ class ReleaseOverviewFragmentTest {
 
     @Test
     fun showAllReleases() {
-        val releaseOverviewFragment = ReleaseOverviewFragment()
+        val releaseOverviewFragment = PlaylistsOverviewFragment()
         val releaseBlocks = listOf(wellStructuredBlock, wrongStructuredBlock)
         Assert.assertEquals(
             1,

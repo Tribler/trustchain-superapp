@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
+apply plugin: 'kotlinx-serialization'
 
 android {
     compileSdkVersion 29
@@ -16,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 22
+        minSdkVersion 26
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -79,8 +80,19 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.0'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.0'
     implementation 'com.google.android:flexbox:2.0.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0'
 
+    // BitTorrent/Libtorrent libraries
     implementation 'com.turn:ttorrent-core:1.5'
+//    implementation('com.github.atomashpolskiy:bt-core:1.9') {
+//        exclude group: 'com.google', module: 'guice'
+//    }
+//    implementation('com.github.atomashpolskiy:bt-dht:1.9') {
+//        exclude group: 'com.google', module: 'guice'
+//    }
+//    implementation('com.google.inject:guice:4.2.3') {
+//        force = true
+//    }
 
     implementation 'com.google.android.exoplayer:exoplayer-core:2.10.5'
     implementation 'com.google.android.exoplayer:exoplayer-dash:2.10.5'

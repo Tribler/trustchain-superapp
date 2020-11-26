@@ -17,7 +17,7 @@ private val lazySodium = LazySodiumJava(SodiumJava())
  * Part of this code was ported from TrustChainBlockTest, from the
  * nl.tudelft.ipv8.attestation.trustchain package
  */
-class ReleaseCoverFragmentTest {
+class PlaylistCoverFragmentTest {
     private val privateKey =
         JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
     private val block = TrustChainBlock(
@@ -60,7 +60,7 @@ class ReleaseCoverFragmentTest {
 //            "3a02014eb9e8ba9753208481db2be600da5ff23904a565a9fe0e9e663ec6774d08ecf77b1214e0cbb58f537ed595dd5ff2bfd0208e621e83674deb8b337e5101",
 //            block.signature.toHex()
 //        )
-        val fragment = ReleaseCoverFragment(block)
+        val fragment = PlaylistCoverFragment(block)
         Assert.assertTrue(fragment.filter("title"))
         Assert.assertTrue(fragment.filter("Title"))
         Assert.assertTrue(fragment.filter("arti"))

@@ -45,6 +45,8 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force("org.objenesis:objenesis:2.6")
+            force('com.google.inject:guice:4.2.1')
+            force('com.google.inject:guice-multibindings:4.2.1')
         }
     }
 }

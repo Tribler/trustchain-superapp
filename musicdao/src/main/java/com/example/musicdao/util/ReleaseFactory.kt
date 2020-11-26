@@ -51,11 +51,10 @@ class ReleaseFactory {
 
                 if (fileName == "") throw Error("Source file name for creating torrent not found")
                 val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-                val tempFileLocation = "$parentDirPath/$fileName"
+                val fileLocation = "$parentDirPath/$fileName"
 
-                // TODO currently creates temp copies before seeding, but should not be necessary
-                if (ioInteraction) FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-                fileList.add(File(tempFileLocation))
+                if (ioInteraction) FileUtils.copyInputStreamToFile(input, File(fileLocation))
+                fileList.add(File(fileLocation))
             }
 
             val torrent = SharedTorrent.create(File(parentDirPath), fileList, 65535, listOf(), "")

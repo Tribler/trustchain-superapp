@@ -13,7 +13,7 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
-import com.example.musicdao.catalog.ReleaseOverviewFragment
+import com.example.musicdao.catalog.PlaylistsOverviewFragment
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -22,7 +22,7 @@ import com.frostwire.jlibtorrent.TorrentInfo
  * A form within a dialog which allows the user to submit a Release and publish it, by either
  * selecting local audio files or by pasting a magnet link
  */
-class SubmitReleaseDialog(private val releaseOverviewFragment: ReleaseOverviewFragment) : DialogFragment() {
+class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOverviewFragment) : DialogFragment() {
     private var dialogView: View? = null
     private var localTorrentInfo: TorrentInfo? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -87,7 +87,7 @@ class SubmitReleaseDialog(private val releaseOverviewFragment: ReleaseOverviewFr
             magnetEditText?.text.toString()
         )
         if (torrentInfoName != null) {
-            releaseOverviewFragment.publish(
+            playlistsOverviewFragment.publish(
                 magnetEditText?.text.toString(),
                 titleEditText?.text.toString(),
                 artistEditText?.text.toString(),

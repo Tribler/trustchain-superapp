@@ -1,6 +1,7 @@
 package com.example.musicdao.util
 
 import com.frostwire.jlibtorrent.Priority
+import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
 import java.io.File
@@ -14,6 +15,13 @@ object Util {
     fun extractNameFromMagnet(magnetLink: String): String {
         val substring = magnetLink.substringAfter("&dn=")
         return substring.substringBefore("&")
+    }
+
+    fun extractInfoHash(magnetLink: String): Sha1Hash? {
+        val substring = magnetLink.substringAfter("urn:btih:")
+        val infoHash = substring.substringBefore("&")
+        if (infoHash.length > 39) return Sha1Hash(infoHash)
+        return null
     }
 
     fun calculatePieceIndex(fileIndex: Int, torrentInfo: TorrentInfo): Int {

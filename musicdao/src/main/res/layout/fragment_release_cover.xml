@@ -28,6 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Album title"
+                android:textSize="18dp"
                 android:textColor="@color/white" />
 
             <TextView
@@ -36,6 +37,14 @@
                 android:layout_height="wrap_content"
                 android:text="Artist1, artist2"
                 android:textColor="@color/mild_gray" />
+
+            <TextView
+                android:layout_marginTop="@dimen/fab_margin"
+                android:id="@+id/seedCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Seeders: "
+                android:textColor="@color/musicColorAccent" />
         </LinearLayout>
 
     </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.example.musicdao.util
 
 import com.frostwire.jlibtorrent.Priority
+import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
 import io.mockk.every
@@ -20,6 +21,15 @@ class UtilTest {
         val torrentInfo = TorrentInfo(File(torrentFile))
         val x = Util.calculatePieceIndex(fileIndex, torrentInfo)
         Assert.assertEquals(82, x)
+    }
+
+    @Test
+    fun extractInfoHashFromMagnet() {
+        val magnet = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c&dn=displayname"
+        val name = Util.extractInfoHash(magnet)
+        Assert.assertEquals(name, Sha1Hash("a83cc13bf4a07e85b938dcf06aa707955687ca7c"))
+        Assert.assertEquals(name.toString(), Sha1Hash("a83cc13bf4a07e85b938dcf06aa707955687ca7c").toString())
+        Assert.assertNotEquals(name, "somethingelse")
     }
 
     @Test

@@ -14,9 +14,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
+import com.example.musicdao.ipv8.SwarmHealth
 import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
+import com.frostwire.jlibtorrent.Sha1Hash
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import kotlinx.coroutines.delay
@@ -25,6 +27,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import java.io.File
+import java.util.*
 import kotlin.random.Random
 
 /**
@@ -33,8 +36,13 @@ import kotlin.random.Random
 class MusicService : AppCompatActivity() {
     lateinit var torrentStream: TorrentStream
     private val navigationGraph: Int = R.navigation.musicdao_navgraph
+    private val popularityGossipInterval: Long = 5000
 
-    var contentSeeder: ContentSeeder? = null
+    var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
+    private val gossipTopTorrents = 5 // The amount of most popular torrents we use to gossip its
+    // swarm health with neighbours
+    private val gossipRandomTorrents = 5 // The amount of torrents we know its swarm health of
+    // to share with neighbours
 
     private val navController by lazy {
         findNavController(R.id.navHostFragment)
@@ -69,22 +77,12 @@ class MusicService : AppCompatActivity() {
         initTorrentStream()
         registerBlockSigner()
         iterativelyCrawlTrustChains()
+        iterativelyUpdateConnectivityStats()
 
-        lifecycleScope.launchWhenStarted {
-            while (isActive) {
-                if (torrentStream.sessionManager != null) {
-                    val seeder =
-                        ContentSeeder.getInstance(
-                            torrentStream.sessionManager,
-                            applicationContext.cacheDir
-                        )
-                    seeder.start()
-                    contentSeeder = seeder
-                    return@launchWhenStarted
-                }
-                delay(3000)
-            }
-        }
+        ContentSeeder.getInstance(
+            applicationContext.cacheDir,
+            applicationContext
+        ).start()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -98,7 +96,7 @@ class MusicService : AppCompatActivity() {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
                 val args = Bundle()
                 args.putString("filter", query)
-                findNavController(R.id.navHostFragment).navigate(R.id.releaseOverviewFragment, args)
+                findNavController(R.id.navHostFragment).navigate(R.id.playlistsOverviewFragment, args)
             }
         }
     }
@@ -136,19 +134,57 @@ class MusicService : AppCompatActivity() {
         }
     }
 
+    private fun iterativelyUpdateConnectivityStats() {
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                delay(popularityGossipInterval)
+                swarmHealthMap = updateLocalSwarmHealthList()
+                // Pick 5 of the most popular torrents and 5 random torrents, and send those stats to any neighbour
+                // First, we sort the map based on swarm health
+                val sortedMap = swarmHealthMap.toList()
+                    .sortedBy { (_, value) -> value }
+                    .toMap()
+                gossipSwarmHealth(sortedMap, gossipTopTorrents)
+                gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
+            }
+        }
+    }
+
+    private fun gossipSwarmHealth(map: Map<Sha1Hash, SwarmHealth>, maxInterations: Int) {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+        var count = 0
+        for (entry in map.entries) {
+            count += 1
+            if (count > maxInterations) break
+            musicCommunity.sendSwarmHealthMessage(entry.value)
+        }
+    }
+
+    private fun updateLocalSwarmHealthList(): MutableMap<Sha1Hash, SwarmHealth> {
+        val map =
+            ContentSeeder.getInstance(cacheDir, applicationContext).swarmHealthMap
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+        val map2 = musicCommunity.swarmHealthMap
+        map += map2
+        // Remove outdated swarm health data: if the data is 1 day old or older, we throw it away
+        for ((infoHash, swarmHealth) in map) {
+            val timestamp = Date(swarmHealth.timestamp.toLong())
+            if (timestamp.before(Date(swarmHealth.timestamp.toLong() - 3600 * 24 * 1000))) {
+                map.remove(infoHash)
+            }
+        }
+        return map
+    }
+
     /**
      * Show libtorrent connectivity stats
      */
     fun getStatsOverview(): String {
-        if (!::torrentStream.isInitialized) return "Starting up torrent client..."
-        if (torrentStream.sessionManager == null) return "Starting up torrent client..."
-        if (!torrentStream.sessionManager.isRunning) return "Starting up torrent client..."
-        val sessionManager = torrentStream.sessionManager
-        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
-            Util.readableBytes(
-                sessionManager.downloadRate()
-            )
-        }, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
+        val sessionManager = ContentSeeder.getInstance(cacheDir, applicationContext).torrentSession
+        if (!sessionManager.isRunning) return "Starting up torrent client..."
+        return "up: ${Util.readableBytes(sessionManager.uploadRate)}, down: ${
+            Util.readableBytes(sessionManager.downloadRate)
+        }"
     }
 
     /**

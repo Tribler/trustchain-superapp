@@ -1,6 +1,7 @@
 package com.example.musicdao.ipv8
 
 import android.util.Log
+import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -9,6 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
 import java.util.*
+import kotlin.random.Random
 
 class MusicCommunity(
     settings: TrustChainSettings,
@@ -16,6 +18,8 @@ class MusicCommunity(
     crawler: TrustChainCrawler = TrustChainCrawler()
 ) : TrustChainCommunity(settings, database, crawler) {
     override val serviceId = "29384902d2938f34872398758cf7ca9238ccc333"
+    var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>() // All recent swarm health data that
+    // has been received from peers
 
     class Factory(
         private val settings: TrustChainSettings,
@@ -29,6 +33,7 @@ class MusicCommunity(
 
     init {
         messageHandlers[MessageId.KEYWORD_SEARCH_MESSAGE] = ::onKeywordSearch
+        messageHandlers[MessageId.SWARM_HEALTH_MESSAGE] = ::onSwarmHealth
     }
 
     fun performRemoteKeywordSearch(keyword: String, ttl: UInt = 1u, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()): Int {
@@ -63,6 +68,31 @@ class MusicCommunity(
         Log.i("KeywordSearch", peer.mid + ": " + payload.keyword)
     }
 
+    /**
+     * Peers in the MusicCommunity iteratively gossip a few swarm health statistics of the torrents
+     * they are currently tracking
+     */
+    private fun onSwarmHealth(packet: Packet) {
+        val (_, payload) = packet.getAuthPayload(SwarmHealth)
+        // Update local data store with the new swarm health information
+        swarmHealthMap[Sha1Hash(payload.infoHash)] = payload
+        Log.d("SwarmHealth", "Received swarm health info for ${payload.infoHash}")
+    }
+
+    /**
+     * Send a SwarmHealth message to a random peer
+     */
+    fun sendSwarmHealthMessage(swarmHealth: SwarmHealth) {
+        val peers = getPeers()
+        if (peers.isEmpty()) return
+        var index = 0
+        // Pick a random peer if we have more than 1 connected
+        if (peers.size > 1) {
+            index = Random.nextInt(peers.size - 1)
+        }
+        send(peers[index], serializePacket(MessageId.SWARM_HEALTH_MESSAGE, swarmHealth))
+    }
+
     fun localKeywordSearch(keyword: String): TrustChainBlock? {
         database.getAllBlocks().forEach {
             val transaction = it.transaction
@@ -79,5 +109,6 @@ class MusicCommunity(
 
     object MessageId {
         const val KEYWORD_SEARCH_MESSAGE = 10
+        const val SWARM_HEALTH_MESSAGE = 11
     }
 }
