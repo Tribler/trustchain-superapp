@@ -36,9 +36,10 @@ import kotlin.random.Random
 class MusicService : AppCompatActivity() {
     lateinit var torrentStream: TorrentStream
     private val navigationGraph: Int = R.navigation.musicdao_navgraph
-    private val popularityGossipInterval: Long = 5000
 
+    // Popularity measurement by swarm health
     var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
+    private val popularityGossipInterval: Long = 5000
     private val gossipTopTorrents = 5 // The amount of most popular torrents we use to gossip its
     // swarm health with neighbours
     private val gossipRandomTorrents = 5 // The amount of torrents we know its swarm health of
