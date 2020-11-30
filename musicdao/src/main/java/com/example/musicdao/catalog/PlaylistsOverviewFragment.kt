@@ -44,7 +44,7 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
         lastSwarmHealthMapSize = -1
 
         lifecycleScope.launchWhenCreated {
-            while (isActive) {
+            while (isActive && isAdded && !isDetached) {
                 if (activity is MusicService && debugText != null) {
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
@@ -124,7 +124,6 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
      */
     fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): Int {
         var count = 0
-        // TODO display the amount of seeders
         for ((block, numSeeders) in releaseBlocks) {
             if (count == maxPlaylists) return count
             val magnet = block.transaction["magnet"]
