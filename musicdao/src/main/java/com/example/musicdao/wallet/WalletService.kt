@@ -169,7 +169,6 @@ class WalletService(val musicService: MusicService) {
             val instance = walletService
             if (instance is WalletService) return instance
             val newInstance = WalletService(musicService)
-            newInstance.startup()
             walletService = newInstance
             return newInstance
         }

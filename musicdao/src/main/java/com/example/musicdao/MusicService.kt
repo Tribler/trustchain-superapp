@@ -18,6 +18,7 @@ import com.example.musicdao.ipv8.SwarmHealth
 import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
+import com.example.musicdao.wallet.WalletService
 import com.frostwire.jlibtorrent.Sha1Hash
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
@@ -77,13 +78,17 @@ class MusicService : AppCompatActivity() {
     private fun startup() {
         initTorrentStream()
         registerBlockSigner()
-        iterativelyCrawlTrustChains()
+        iterativelySendReleaseBlocks()
         iterativelyUpdateConnectivityStats()
 
+        // Start ContentSeeder service: for serving music torrents to other devices
         ContentSeeder.getInstance(
             applicationContext.cacheDir,
             applicationContext
         ).start()
+
+        // Start WalletService, for maintaining and sending coins
+        WalletService.getInstance(this).startup()
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -122,23 +127,22 @@ class MusicService : AppCompatActivity() {
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
      */
-    private fun iterativelyCrawlTrustChains() {
+    private fun iterativelySendReleaseBlocks() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                for (peer in musicCommunity.getPeers()) {
-                    musicCommunity.crawlChain(peer)
-                    delay(1000)
-                }
+                musicCommunity.communicateReleaseBlocks()
                 delay(3000)
             }
         }
     }
 
+    /**
+     * Keep track of Swarm Health for all torrents being monitored
+     */
     private fun iterativelyUpdateConnectivityStats() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                delay(popularityGossipInterval)
                 swarmHealthMap = updateLocalSwarmHealthList()
                 // Pick 5 of the most popular torrents and 5 random torrents, and send those stats to any neighbour
                 // First, we sort the map based on swarm health
@@ -147,10 +151,14 @@ class MusicService : AppCompatActivity() {
                     .toMap()
                 gossipSwarmHealth(sortedMap, gossipTopTorrents)
                 gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
+                delay(popularityGossipInterval)
             }
         }
     }
 
+    /**
+     * Send SwarmHealth information to #maxIterations random peers
+     */
     private fun gossipSwarmHealth(map: Map<Sha1Hash, SwarmHealth>, maxInterations: Int) {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
         var count = 0
@@ -161,6 +169,9 @@ class MusicService : AppCompatActivity() {
         }
     }
 
+    /**
+     * Merge local and remote swarm health map and remove outdated data
+     */
     private fun updateLocalSwarmHealthList(): MutableMap<Sha1Hash, SwarmHealth> {
         val map =
             ContentSeeder.getInstance(cacheDir, applicationContext).swarmHealthMap

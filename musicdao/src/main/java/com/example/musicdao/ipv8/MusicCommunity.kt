@@ -3,6 +3,7 @@ package com.example.musicdao.ipv8
 import android.util.Log
 import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
@@ -83,18 +84,16 @@ class MusicCommunity(
      * Send a SwarmHealth message to a random peer
      */
     fun sendSwarmHealthMessage(swarmHealth: SwarmHealth) {
-        val peers = getPeers()
-        if (peers.isEmpty()) return
-        var index = 0
-        // Pick a random peer if we have more than 1 connected
-        if (peers.size > 1) {
-            index = Random.nextInt(peers.size - 1)
-        }
-        send(peers[index], serializePacket(MessageId.SWARM_HEALTH_MESSAGE, swarmHealth))
+        val peer= pickRandomPeer() ?: return
+        send(peer, serializePacket(MessageId.SWARM_HEALTH_MESSAGE, swarmHealth))
     }
 
+    /**
+     * Filter local databse to find a release block that matches a certain title or artist, using
+     * keyword search
+     */
     fun localKeywordSearch(keyword: String): TrustChainBlock? {
-        database.getAllBlocks().forEach {
+        database.getBlocksWithType("publish_release").forEach {
             val transaction = it.transaction
             val title = transaction["title"]?.toString()?.toLowerCase(Locale.ROOT)
             val artists = transaction["artists"]?.toString()?.toLowerCase(Locale.ROOT)
@@ -105,6 +104,30 @@ class MusicCommunity(
             }
         }
         return null
+    }
+
+    private fun pickRandomPeer(): Peer? {
+        val peers = getPeers()
+        if (peers.isEmpty()) return null
+        var index = 0
+        // Pick a random peer if we have more than 1 connected
+        if (peers.size > 1) {
+            index = Random.nextInt(peers.size - 1)
+        }
+        return peers[index]
+    }
+
+    /**
+     * Communicate a few release blocks to one or a few random peers
+     */
+    fun communicateReleaseBlocks() {
+        val peer = pickRandomPeer() ?: return
+        val releaseBlocks = database.getBlocksWithType("publish_release")
+        val maxBlocks = 10
+        releaseBlocks.asReversed().withIndex().forEach {
+            if (it.index >= maxBlocks) return
+            sendBlock(it.value, peer)
+        }
     }
 
     object MessageId {
