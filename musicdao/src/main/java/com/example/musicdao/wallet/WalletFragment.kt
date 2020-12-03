@@ -17,7 +17,8 @@ class WalletFragment : Fragment(R.layout.fragment_wallet) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setMenuVisibility(false)
-        walletService = WalletService.getInstance(activity as MusicService)
+        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
+        walletService = WalletService.getInstance(walletDir, (activity as MusicService))
 
         lifecycleScope.launchWhenStarted {
             while (isActive) {

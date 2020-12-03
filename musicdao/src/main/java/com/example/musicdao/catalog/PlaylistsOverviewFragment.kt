@@ -88,7 +88,8 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
         val releaseDataMap = mutableMapOf<TrustChainBlock, Int>()
         val releaseBlocks = getMusicCommunity().database.getBlocksWithType("publish_release")
         if (releaseBlocks.size == lastReleaseBlocksSize &&
-            swarmHealthMap.size == lastSwarmHealthMapSize) {
+            swarmHealthMap.size == lastSwarmHealthMapSize
+        ) {
             return
         }
         for (block in releaseBlocks) {
@@ -179,8 +180,9 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
             "date" to releaseDate,
             "torrentInfoName" to torrentInfoName
         )
-        if (activity is MusicService) {
-            val musicWallet = WalletService.getInstance(activity as MusicService)
+        val walletDir = context?.cacheDir
+        if (walletDir != null) {
+            val musicWallet = WalletService.getInstance(walletDir, (activity as MusicService))
             transaction["publisher"] = musicWallet.publicKey()
         }
         val trustchain = getMusicCommunity()

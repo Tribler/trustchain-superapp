@@ -75,16 +75,7 @@ class MusicCommunity(
      */
     private fun onSwarmHealth(packet: Packet) {
         val (_, swarmHealth) = packet.getAuthPayload(SwarmHealth)
-        val localSwarmHealth = swarmHealthMap[Sha1Hash(swarmHealth.infoHash)]
-        if (localSwarmHealth != null) {
-            // Only update the local information of swarm health if our knowledge of seeds/peers is
-            // lower than that of remote
-            if (localSwarmHealth.numPeers + localSwarmHealth.numSeeds <
-                swarmHealth.numSeeds + localSwarmHealth.numPeers) {
-                // Update local data store with the new swarm health information
-                swarmHealthMap[Sha1Hash(swarmHealth.infoHash)] = swarmHealth
-            }
-        }
+        swarmHealthMap[Sha1Hash(swarmHealth.infoHash)] = swarmHealth
         Log.d("SwarmHealth", "Received swarm health info for ${swarmHealth.infoHash}")
     }
 

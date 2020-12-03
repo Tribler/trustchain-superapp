@@ -24,12 +24,11 @@ import java.util.*
 /**
  * Interaction with a BitcoinJ wallet
  */
-class WalletService(val musicService: MusicService) {
+class WalletService(val walletDir: File, private val musicService: MusicService) {
     val app: WalletAppKit
     private val bitcoinFaucetEndpoint = "http://134.122.59.107:3000"
     private val params = CryptoCurrencyConfig.networkParams
     private val filePrefix = CryptoCurrencyConfig.chainFileName
-    private val walletDir: File = musicService.applicationContext.cacheDir
     private var started = false
     var percentageSynced = 0
 
@@ -61,7 +60,7 @@ class WalletService(val musicService: MusicService) {
         }
     }
 
-    fun startup() {
+    fun start() {
         if (started) return
         app.setBlockingStartup(false)
         app.setDownloadListener(object : DownloadProgressTracker() {
@@ -168,10 +167,10 @@ class WalletService(val musicService: MusicService) {
         /**
          * Singleton pattern for WalletService
          */
-        fun getInstance(musicService: MusicService): WalletService {
+        fun getInstance(walletDir: File, musicService: MusicService): WalletService {
             val instance = walletService
             if (instance is WalletService) return instance
-            val newInstance = WalletService(musicService)
+            val newInstance = WalletService(walletDir, musicService)
             walletService = newInstance
             return newInstance
         }

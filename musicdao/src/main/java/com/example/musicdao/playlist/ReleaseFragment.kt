@@ -20,6 +20,7 @@ import com.frostwire.jlibtorrent.FileStorage
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
+import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.delay
@@ -99,7 +100,7 @@ class ReleaseFragment(
     }
 
     override fun onDestroy() {
-        (activity as MusicService).torrentStream.removeListener(this)
+        TorrentStream.getInstance()?.removeListener(this)
         super.onDestroy()
     }
 
@@ -123,15 +124,15 @@ class ReleaseFragment(
                 ) {
                     // All files are already downloaded so we do not need to use TorrentStream
                     val torrentInfo = TorrentInfo(torrentFile)
-//                    (activity as MusicService).torrentStream.sessionManager.download(torrentInfo, saveDir)
+//                    TorrentStream.getInstance()?.sessionManager.download(torrentInfo, saveDir)
                     downloadedTorrent = torrentInfo
                     setMetadata(torrentInfo.files(), preloaded = true)
                     return
                 }
             }
         }
-        (activity as MusicService).torrentStream.addListener(this)
-        (activity as MusicService).torrentStream.startStream(torrentUrl)
+        TorrentStream.getInstance()?.addListener(this)
+        TorrentStream.getInstance()?.startStream(torrentUrl)
     }
 
     /**
@@ -211,10 +212,10 @@ class ReleaseFragment(
         val tor = streamingTorrent
         val localTorrent = downloadedTorrent
         if (tor != null) {
-            (activity as MusicService).torrentStream.removeListener(this)
+            TorrentStream.getInstance()?.removeListener(this)
             tor.setSelectedFileIndex(currentFileIndex)
             Util.setSequentialPriorities(tor)
-            (activity as MusicService).torrentStream.addListener(this)
+            TorrentStream.getInstance()?.addListener(this)
 
             // TODO needs to have a solid check whether the file was already downloaded before
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
@@ -303,7 +304,10 @@ class ReleaseFragment(
         val infoName = torrentInfoName ?: torrent.torrentHandle.name()
         val localContext = context
         if (localContext != null) {
-            ContentSeeder.getInstance(localContext.cacheDir, localContext).add(torrentFile, infoName)
+            val sessionManager =
+                (activity as MusicService).torrentStream?.sessionManager ?: return
+            ContentSeeder.getInstance(localContext.cacheDir, localContext, sessionManager)
+                .add(torrentFile, infoName)
         }
     }
 

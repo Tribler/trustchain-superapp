@@ -35,7 +35,10 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         instructionText?.text = "Sending a tip to artist(s), with public key: $publicKey"
 
         val amountEditText = dialogView?.findViewById<EditText>(R.id.amount)
-        val walletService = WalletService.getInstance(activity as MusicService)
+        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
+        val walletService = WalletService.getInstance(walletDir, (activity as MusicService))
+
+
 
         builder.setView(dialogView)
             .setPositiveButton("Confirm", DialogInterface.OnClickListener { _, _ ->

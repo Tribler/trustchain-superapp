@@ -20,20 +20,25 @@ lateinit var contentSeederInstance: ContentSeeder
  * This maintains an implementation of a strategy of libtorrent seeding.
  * Currently, a max. of 10 torrents, in LIFO ordering, from the cache directory, are being seeded.
  */
-class ContentSeeder(private val saveDir: File, private val context: Context) {
+class ContentSeeder(private val saveDir: File, private val context: Context, private val sessionManager: SessionManager) {
     private val maxTorrentThreads = 10
     private var started = false
 
-    val sessionManager = SessionManager() // Manages seeding torrents
+//    val sessionManager: SessionManager = TorrentStream.getInstance().sessionManager // Manages seeding torrents
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
 
+    /**
+     * Scan the saveDir directory for torrent files, and see if we can seed them. If all files have
+     * been downloaded previously, we start seeding the respective torrent; otherwise we leave it
+     */
     fun start(): Int {
         var count = 0
-        if (started) return count
-        started = true
+//        if (started) return count
+//        started = true TODO should this code stay?
         if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
         val fileList = saveDir.listFiles()
         if (fileList !is Array<File>) return count
+        // A maximum of maxTorrentThreads torrents are seeded, with LIFO ordering
         Arrays.sort(fileList) { a, b -> a.lastModified().compareTo(b.lastModified()) }
 
         sessionManager.addListener(object : AlertListener {
@@ -52,7 +57,9 @@ class ContentSeeder(private val saveDir: File, private val context: Context) {
             }
         })
 
-        sessionManager.start()
+        if (!sessionManager.isRunning) {
+            sessionManager.start()
+        }
 
         saveDir.listFiles()?.forEachIndexed { index, file ->
             if (index >= maxTorrentThreads) return count
@@ -73,6 +80,9 @@ class ContentSeeder(private val saveDir: File, private val context: Context) {
         return count
     }
 
+    /**
+     * Keep track of connected peers/seeders per torrent by using a local swarmHealthMap
+     */
     private fun updateSwarmhealth(handle: TorrentHandle) {
         val numPeers = handle.status().numPeers()
         val numSeeds = handle.status().numSeeds()
@@ -123,9 +133,9 @@ class ContentSeeder(private val saveDir: File, private val context: Context) {
     }
 
     companion object {
-        fun getInstance(cacheDir: File, context: Context): ContentSeeder {
+        fun getInstance(cacheDir: File, context: Context, sessionManager: SessionManager): ContentSeeder {
             if (!::contentSeederInstance.isInitialized) {
-                contentSeederInstance = ContentSeeder(cacheDir, context)
+                contentSeederInstance = ContentSeeder(cacheDir, context, sessionManager)
             }
             return contentSeederInstance
         }
