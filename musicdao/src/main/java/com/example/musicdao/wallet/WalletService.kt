@@ -30,6 +30,7 @@ class WalletService(val musicService: MusicService) {
     private val params = CryptoCurrencyConfig.networkParams
     private val filePrefix = CryptoCurrencyConfig.chainFileName
     private val walletDir: File = musicService.applicationContext.cacheDir
+    private var started = false
     var percentageSynced = 0
 
     init {
@@ -61,6 +62,7 @@ class WalletService(val musicService: MusicService) {
     }
 
     fun startup() {
+        if (started) return
         app.setBlockingStartup(false)
         app.setDownloadListener(object : DownloadProgressTracker() {
             override fun progress(
@@ -81,7 +83,7 @@ class WalletService(val musicService: MusicService) {
             try {
                 // This is a bootstrap node (a digitalocean droplet, running a full bitcoin regtest
                 // node and a miner
-                val localHost = InetAddress.getByName("167.99.17.227")
+                val localHost = InetAddress.getByName("134.122.59.107")
                 app.setPeerNodes(PeerAddress(params, localHost, params.port))
             } catch (e: UnknownHostException) {
                 // Borked machine with no loopback adapter configured properly.
@@ -89,6 +91,7 @@ class WalletService(val musicService: MusicService) {
             }
         }
         app.startAsync()
+        started = true
     }
 
     fun status(): String {

@@ -15,8 +15,8 @@ class SwarmHealth(
 ) :
     Comparable<SwarmHealth>, Serializable {
     override fun compareTo(other: SwarmHealth): Int {
-        if (numSeeds < other.numSeeds) return -1
-        if (numSeeds == other.numSeeds) return 0
+        if (numSeeds + numPeers < other.numSeeds + other.numPeers) return -1
+        if (numSeeds + numPeers == other.numSeeds + other.numPeers) return 0
         return 1
     }
 

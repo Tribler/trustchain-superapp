@@ -83,18 +83,17 @@ dependencies {
     implementation 'com.mattskala:itemadapter:0.3'
 
     // BitTorrent
-//    api files('libs/jlibtorrent-1.2.10.0.jar')
-//    api files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
-//    api files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
-//    api files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
-//    api files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
+    api files('libs/jlibtorrent-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
 
-    api 'com.github.masterwok:simple-torrent-android:0.5.0'
-
-
+//    api 'com.github.masterwok:simple-torrent-android:0.5.0'
 //    implementation 'com.github.TorrentStream:TorrentStream-Android:07f97b8'
 
-    //This AAR dependency also contains jlibtorrent
+    // This AAR dependency does not contain jlibtorrent, otherwise we will get conflicts with its
+    // dependency on jlibtorrent
     api files('libs/torrentstream-android.jar')
 
     // Testing

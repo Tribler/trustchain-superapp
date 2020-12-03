@@ -12,7 +12,7 @@ import java.util.*
 /**
  * An 'album cover' or other visual display of a playlist, that can be clicked to view its contents
  */
-class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, private val numSeeders: Int) :
+class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, private val connectivity: Int) :
     Fragment(R.layout.fragment_release_cover) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -29,7 +29,7 @@ class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, privat
 
         coverTitle.text = title
         coverArtists.text = artists
-        seedCount.text = "Seeders: $numSeeders"
+        seedCount.text = "Peers: $connectivity"
 
         coverCard.setOnClickListener {
             val action =

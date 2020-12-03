@@ -95,14 +95,16 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
             // If we know the amount of seeders for the corresponding block, we add it; otherwise we
             // assume the amount of seeders is 0
             var numSeeds = 0
+            var numPeers = 0
             val magnet = block.transaction["magnet"]
             if (magnet is String) {
                 val infoHash = Util.extractInfoHash(magnet)
                 if (infoHash is Sha1Hash) {
                     numSeeds = swarmHealthMap[infoHash]?.numSeeds?.toInt() ?: 0
+                    numPeers = swarmHealthMap[infoHash]?.numPeers?.toInt() ?: 0
                 }
             }
-            releaseDataMap[block] = numSeeds
+            releaseDataMap[block] = numSeeds + numPeers
         }
         val sortedMap = releaseDataMap
             .toList()
@@ -124,7 +126,7 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
      */
     fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): Int {
         var count = 0
-        for ((block, numSeeders) in releaseBlocks) {
+        for ((block, connectivity) in releaseBlocks) {
             if (count == maxPlaylists) return count
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
@@ -133,7 +135,7 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 torrentInfoName is String && torrentInfoName.length > 0
             ) {
                 val transaction = activity?.supportFragmentManager?.beginTransaction()
-                val coverFragment = PlaylistCoverFragment(block, numSeeders)
+                val coverFragment = PlaylistCoverFragment(block, connectivity)
                 if (coverFragment.filter(searchQuery)) {
                     transaction?.add(R.id.release_overview_layout, coverFragment, "releaseCover")
                     if (loadingReleases?.visibility == View.VISIBLE) {

@@ -173,16 +173,41 @@ class MusicService : AppCompatActivity() {
      * Merge local and remote swarm health map and remove outdated data
      */
     private fun updateLocalSwarmHealthList(): MutableMap<Sha1Hash, SwarmHealth> {
-        val map =
-            ContentSeeder.getInstance(cacheDir, applicationContext).swarmHealthMap
+        val contentSeeder =
+            ContentSeeder.getInstance(cacheDir, applicationContext)
+        val localMap = contentSeeder.swarmHealthMap
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
-        val map2 = musicCommunity.swarmHealthMap
-        map += map2
-        // Remove outdated swarm health data: if the data is 1 day old or older, we throw it away
+        val communityMap = musicCommunity.swarmHealthMap
+        // Keep the highest numPeers/numSeeds count of all items in both maps
+        for ((infoHash, swarmHealth) in localMap) {
+            val otherSwarmHealth = communityMap[infoHash]
+            if (otherSwarmHealth != null) {
+                if (swarmHealth.numPeers + swarmHealth.numSeeds <
+                    otherSwarmHealth.numPeers + otherSwarmHealth.numSeeds) {
+                    localMap.remove(infoHash)
+                }
+            }
+        }
+        // This map contains all the combined data, where local map data is overridden by community
+        // map data if they both exist with the same key
+        val map = (localMap + communityMap).toMutableMap()
         for ((infoHash, swarmHealth) in map) {
+            // Remove outdated swarm health data: if the data is 2 hours old or older, we throw it away
             val timestamp = Date(swarmHealth.timestamp.toLong())
-            if (timestamp.before(Date(swarmHealth.timestamp.toLong() - 3600 * 24 * 1000))) {
-                map.remove(infoHash)
+            if (timestamp.before(Date(swarmHealth.timestamp.toLong() - 3600 * 2 * 1000))) {
+                swarmHealthMap.remove(infoHash) // TODO this might be a concurrent modification exception
+            } else {
+                // Update all connectivity stats of the torrents that we are currently seeding
+                val torrentSession = contentSeeder.sessionManager
+                if (torrentSession.isRunning) {
+                    val handle = torrentSession.find(infoHash)
+                    if (handle != null) {
+                        map[infoHash] =
+                            SwarmHealth(infoHash.toString(),
+                                handle.status().numPeers().toUInt(),
+                                handle.status().numSeeds().toUInt())
+                    }
+                }
             }
         }
         return map
@@ -192,10 +217,10 @@ class MusicService : AppCompatActivity() {
      * Show libtorrent connectivity stats
      */
     fun getStatsOverview(): String {
-        val sessionManager = ContentSeeder.getInstance(cacheDir, applicationContext).torrentSession
+        val sessionManager = ContentSeeder.getInstance(cacheDir, applicationContext).sessionManager
         if (!sessionManager.isRunning) return "Starting up torrent client..."
-        return "up: ${Util.readableBytes(sessionManager.uploadRate)}, down: ${
-            Util.readableBytes(sessionManager.downloadRate)
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
+            Util.readableBytes(sessionManager.downloadRate())
         }"
     }
 
