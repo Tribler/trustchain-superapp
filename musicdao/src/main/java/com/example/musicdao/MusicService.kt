@@ -184,7 +184,7 @@ class MusicService : AppCompatActivity() {
             // Update all connectivity stats of the torrents that we are currently seeding
             if (sessionManager.isRunning) {
                 val handle = sessionManager.find(infoHash)
-                val newSwarmHealth =  SwarmHealth(
+                val newSwarmHealth = SwarmHealth(
                     infoHash.toString(),
                     handle.status().numPeers().toUInt(),
                     handle.status().numSeeds().toUInt()
