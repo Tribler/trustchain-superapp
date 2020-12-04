@@ -48,7 +48,6 @@ object Util {
     /**
      * Prefer the first pieces to be downloaded of the selected audio file over the other pieces,
      * so that the first seconds of the track can be buffered as soon as possible
-     * TODO write a test/make testable
      */
     fun setSequentialPriorities(torrent: Torrent, onlyCalculating: Boolean = false): Array<Priority> {
         val piecePriorities: Array<Priority> =
@@ -67,7 +66,7 @@ object Util {
         for (i in torrent.interestedPieceIndex until torrent.interestedPieceIndex + torrent.piecesToPrepare) {
             piecePriorities[i] = Priority.SEVEN
         }
-        if (onlyCalculating) return piecePriorities
+        if (onlyCalculating) return piecePriorities // For making unit test possible
         for ((index, priority) in piecePriorities.withIndex()) {
             torrent.torrentHandle.piecePriority(index, priority)
         }
