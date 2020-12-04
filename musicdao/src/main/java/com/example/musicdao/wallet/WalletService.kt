@@ -15,6 +15,7 @@ import org.bitcoinj.wallet.Wallet
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.math.BigDecimal
 import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
@@ -128,7 +129,19 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         }
     }
 
-    fun sendCoins(publicKey: String, satoshiAmount: Long) {
+    /**
+     * Convert an amount of coins represented by a user input string, and then send it
+     * @param coinsAmount the amount of coins to send, as a string, such as "5", "0.5"
+     * @param publicKey the public key address of the cryptocurrency wallet to send the funds to
+     */
+    fun sendCoins(publicKey: String, coinsAmount: String) {
+        val coins = try {
+            BigDecimal(coinsAmount.toDouble())
+        } catch (e: NumberFormatException) {
+            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
+            return
+        }
+        val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
         val targetAddress: Address?
         try {
             targetAddress = Address.fromString(params, publicKey)
@@ -174,5 +187,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
             walletService = newInstance
             return newInstance
         }
+
+        val SATS_PER_BITCOIN = BigDecimal(100_000_000)
     }
 }

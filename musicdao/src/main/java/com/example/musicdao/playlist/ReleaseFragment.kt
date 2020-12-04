@@ -222,7 +222,8 @@ class ReleaseFragment(
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
                 AudioPlayer.getInstance()
-                    ?.setTrackInfo("Buffering track: " + tor.videoFile.nameWithoutExtension)
+                    ?.setTrackInfo("Buffering track: " + Util.checkAndSanitizeTrackNames(
+                        tor.videoFile.name))
             }
         } else if (localTorrent != null) {
             val fileToPlay =

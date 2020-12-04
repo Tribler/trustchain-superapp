@@ -69,6 +69,8 @@ class MusicService : AppCompatActivity() {
                 .build()
         )
 
+        // We have to wait until torrentStream is initialized -> then we initialize all other
+        // iterative processes
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 val sessionManager = torrentStream?.sessionManager

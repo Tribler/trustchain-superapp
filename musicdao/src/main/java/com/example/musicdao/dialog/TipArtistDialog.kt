@@ -17,7 +17,6 @@ import java.math.BigDecimal
  * @param publicKey the Bitcoin wallet public key to send the tip to
  */
 class TipArtistDialog(private val publicKey: String) : DialogFragment() {
-    var conversionRate = BigDecimal(1.0)
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
         // Get the layout inflater
@@ -43,9 +42,7 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         builder.setView(dialogView)
             .setPositiveButton("Confirm", DialogInterface.OnClickListener { _, _ ->
                 val amount = amountEditText?.text.toString()
-                val usdAmount = BigDecimal(Integer.parseInt(amount))
-                val satoshiAmount = usdAmount * conversionRate * SATS_PER_BITCOIN
-                walletService.sendCoins(publicKey, satoshiAmount.toLong())
+                walletService.sendCoins(publicKey, amount)
             }).setNegativeButton("Cancel", DialogInterface.OnClickListener { _, _ ->
                 dialog?.cancel()
             })
