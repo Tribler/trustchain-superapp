@@ -1,7 +1,11 @@
 package com.example.musicdao.net
 
 import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.Sha1Hash
+import com.frostwire.jlibtorrent.TorrentHandle
 import com.frostwire.jlibtorrent.TorrentInfo
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -41,5 +45,17 @@ class ContentSeederTest {
         // Adding a nonexisting torrent file
         val torrentFile = File("./somenonexistingfile.torrent")
         contentSeeder.add(TorrentInfo(torrentFile), torrentInfoName)
+    }
+
+    @Test
+    fun updateSwarmHealth() {
+        val torrentHandle = mockk<TorrentHandle>()
+        every { torrentHandle.status().numPeers() } returns 1
+        every { torrentHandle.status().numSeeds() } returns 1
+        every { torrentHandle.infoHash() } returns Sha1Hash.max()
+        contentSeeder.updateSwarmHealth(torrentHandle)
+        Assert.assertEquals(contentSeeder.swarmHealthMap.size, 1)
+        contentSeeder.updateSwarmHealth(torrentHandle)
+        Assert.assertEquals(contentSeeder.swarmHealthMap.size, 1)
     }
 }

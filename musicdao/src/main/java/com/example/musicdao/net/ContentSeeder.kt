@@ -46,7 +46,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
                 when (alert.type()) {
                     AlertType.PEER_CONNECT -> {
                         val handle = (alert as PeerConnectAlert).handle()
-                        updateSwarmhealth(handle)
+                        updateSwarmHealth(handle)
                     }
                     else -> {}
                 }
@@ -79,7 +79,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
     /**
      * Keep track of connected peers/seeders per torrent by using a local swarmHealthMap
      */
-    private fun updateSwarmhealth(handle: TorrentHandle) {
+    fun updateSwarmHealth(handle: TorrentHandle) {
         val numPeers = handle.status().numPeers()
         val numSeeds = handle.status().numSeeds()
         // Add to local database to keep track of connectivity of each item
@@ -99,15 +99,14 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
     private fun downloadAndSeed(torrentInfo: TorrentInfo) {
         if (torrentInfo.isValid) {
             sessionManager.download(torrentInfo, saveDir)
-            val torrentHandle = sessionManager.find(torrentInfo.infoHash())
-            if (torrentHandle == null) return
+            val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
             torrentHandle.resume() // This is a fix/hack that forces SEED_MODE to be available, for
             // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
             // state
             // Start by setting swarm connectivity to 1 as the current device is now 1 seeder
-            updateSwarmhealth(torrentHandle)
+            updateSwarmHealth(torrentHandle)
         }
     }
 
