@@ -1,5 +1,6 @@
 package com.example.musicdao.ipv8
 
+import com.example.musicdao.ipv8.SwarmHealth.Deserializer.KEEP_TIME_HOURS
 import com.frostwire.jlibtorrent.Sha1Hash
 import org.junit.Assert
 import org.junit.Test
@@ -29,6 +30,10 @@ class SwarmHealthTest {
         Assert.assertFalse(b > a)
         Assert.assertTrue(a > c)
         Assert.assertTrue(b > c)
+
+        Assert.assertEquals(SwarmHealth.pickBest(a, c), a)
+        Assert.assertEquals(SwarmHealth.pickBest(a, b), b)
+        Assert.assertEquals(SwarmHealth.pickBest(c, b), b)
     }
 
     @Test
@@ -50,5 +55,14 @@ class SwarmHealthTest {
         val b =
             SwarmHealth(Sha1Hash.max().toString(), 1.toUInt(), 0.toUInt(), Date().time.toULong())
         Assert.assertNotEquals(a, b)
+    }
+
+    @Test
+    fun isUpToDate() {
+        val a = SwarmHealth(Sha1Hash.max().toString(), 1.toUInt(), 0.toUInt())
+        Assert.assertTrue(a.isUpToDate())
+        val oldDate = Date().time - 2 * 3600 * KEEP_TIME_HOURS * 1000
+        val b = SwarmHealth(Sha1Hash.max().toString(), 1.toUInt(), 0.toUInt(), oldDate.toULong())
+        Assert.assertFalse(b.isUpToDate())
     }
 }

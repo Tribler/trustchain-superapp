@@ -36,6 +36,17 @@ class SwarmHealth(
             numSeeds == other.numSeeds && timestamp == other.timestamp
     }
 
+    /**
+     * Check whether the swarm health data is outdated
+     */
+    fun isUpToDate(): Boolean {
+        val timestamp = Date(this.timestamp.toLong())
+        if (timestamp.before(Date(Date().time - 3600 * KEEP_TIME_HOURS * 1000))) {
+            return false
+        }
+        return true
+    }
+
     companion object Deserializer : Deserializable<SwarmHealth> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<SwarmHealth, Int> {
             var localOffset = 0
@@ -58,5 +69,29 @@ class SwarmHealth(
                 localOffset
             )
         }
+
+        /**
+         * Pick the best SwarmHealth item to keep; by comparing two objects
+         */
+        fun pickBest(shLocal: SwarmHealth?, shRemote: SwarmHealth?): SwarmHealth? {
+            if (shLocal != null && shRemote != null) {
+                return if (shLocal > shRemote) {
+                    shLocal
+                } else {
+                    shRemote
+                }
+            } else {
+                if (shLocal != null) {
+                    return shLocal
+                }
+                if (shRemote != null) {
+                    return shRemote
+                }
+            }
+            return null
+        }
+
+        // The time, in hours, that we keep this object and see it as up-to-date
+        const val KEEP_TIME_HOURS = 2
     }
 }

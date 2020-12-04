@@ -28,7 +28,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import java.io.File
-import java.util.*
 import kotlin.random.Random
 
 /**
@@ -211,34 +210,19 @@ class MusicService : AppCompatActivity() {
         // Keep the highest numPeers/numSeeds count of all items in both maps
         // This map contains all the combined data, where local and community map data are merged;
         // the highest connectivity count for each item is saved in a gloal map for the MusicService
-        val map = mutableMapOf<Sha1Hash, SwarmHealth>()
+        val map: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
         val allKeys = localMap.keys + communityMap.keys
         for (infoHash in allKeys) {
             val shLocal = localMap[infoHash]
             val shRemote = communityMap[infoHash]
-            if (shLocal != null && shRemote != null) {
-                if (shLocal > shRemote) {
-                    map[infoHash] = shLocal
-                } else {
-                    map[infoHash] = shRemote
-                }
-            } else {
-                if (shLocal != null) {
-                    map[infoHash] = shLocal
-                }
-                if (shRemote != null) {
-                    map[infoHash] = shRemote
-                }
+
+            val bestSwarmHealth = SwarmHealth.pickBest(shLocal, shRemote)
+            if (bestSwarmHealth != null) {
+                map[infoHash] = bestSwarmHealth
             }
         }
-        // Remove outdated swarm health data: if the data is 2 hours old or older, we throw it away
-        for ((infoHash, swarmHealth) in map) {
-            val timestamp = Date(swarmHealth.timestamp.toLong())
-            if (timestamp.before(Date(swarmHealth.timestamp.toLong() - 3600 * 2 * 1000))) {
-                map.remove(infoHash) // TODO this might be a concurrent modification exception
-            }
-        }
-        return map
+        // Remove outdated swarm health data: if the data is outdated, we throw it away
+        return map.filterValues { it.isUpToDate() }.toMutableMap()
     }
 
     /**
