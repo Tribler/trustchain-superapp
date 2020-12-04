@@ -307,7 +307,7 @@ class ReleaseFragment(
         if (localContext != null) {
             val sessionManager =
                 (activity as MusicService).torrentStream?.sessionManager ?: return
-            ContentSeeder.getInstance(localContext.cacheDir, localContext, sessionManager)
+            ContentSeeder.getInstance(localContext.cacheDir, sessionManager)
                 .add(torrentFile, infoName)
         }
     }

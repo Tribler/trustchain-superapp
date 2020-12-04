@@ -1,8 +1,6 @@
 package com.example.musicdao.net
 
-import android.content.Context
 import android.util.Log
-import androidx.core.net.toUri
 import com.example.musicdao.ipv8.SwarmHealth
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
@@ -20,7 +18,7 @@ lateinit var contentSeederInstance: ContentSeeder
  * This maintains an implementation of a strategy of libtorrent seeding.
  * Currently, a max. of 10 torrents, in LIFO ordering, from the cache directory, are being seeded.
  */
-class ContentSeeder(private val saveDir: File, private val context: Context, private val sessionManager: SessionManager) {
+class ContentSeeder(private val saveDir: File, private val sessionManager: SessionManager) {
     private val maxTorrentThreads = 10
     private var started = false
 
@@ -72,7 +70,7 @@ class ContentSeeder(private val saveDir: File, private val context: Context, pri
                     // We only seed torrents that have previously already been fully downloaded,
                     // so that this does not clash with the TorrentStream library
                     if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
-                        downloadAndSeed(file)
+                        downloadAndSeed(torrentInfo)
                     }
                 }
             }
@@ -100,13 +98,11 @@ class ContentSeeder(private val saveDir: File, private val context: Context, pri
         )
     }
 
-    private fun downloadAndSeed(torrentFile: File) {
-        val torrentUri = torrentFile.toUri()
-        val bytes = context.contentResolver.openInputStream(torrentUri)?.readBytes()
-        val torrentInfo = TorrentInfo.bdecode(bytes)
-        if (bytes != null) {
+    private fun downloadAndSeed(torrentInfo: TorrentInfo) {
+        if (torrentInfo.isValid) {
             sessionManager.download(torrentInfo, saveDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash())
+            if (torrentHandle == null) return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
             torrentHandle.resume() // This is a fix/hack that forces SEED_MODE to be available, for
@@ -126,16 +122,16 @@ class ContentSeeder(private val saveDir: File, private val context: Context, pri
             if (!torrentFile.isFile) {
                 FileUtils.copyInputStreamToFile(torrentInfo.bencode().inputStream(), torrentFile)
             }
-            downloadAndSeed(torrentFile)
+            downloadAndSeed(torrentInfo)
             return true
         }
         return false
     }
 
     companion object {
-        fun getInstance(cacheDir: File, context: Context, sessionManager: SessionManager): ContentSeeder {
+        fun getInstance(cacheDir: File, sessionManager: SessionManager): ContentSeeder {
             if (!::contentSeederInstance.isInitialized) {
-                contentSeederInstance = ContentSeeder(cacheDir, context, sessionManager)
+                contentSeederInstance = ContentSeeder(cacheDir, sessionManager)
             }
             return contentSeederInstance
         }

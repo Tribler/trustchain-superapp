@@ -13,8 +13,6 @@ class MusicServiceTest {
         every {
             musicService.applicationContext.cacheDir
         } returns File("./")
-        Assert.assertEquals("Starting libtorrent session...", musicService.getStatsOverview())
-        musicService.initTorrentStream()
-        Assert.assertNotNull(musicService.torrentStream)
+        Assert.assertEquals("Starting torrent client...", musicService.getStatsOverview())
     }
 }

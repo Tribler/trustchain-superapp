@@ -12,7 +12,7 @@ import java.util.*
 /**
  * An 'album cover' or other visual display of a playlist, that can be clicked to view its contents
  */
-class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, private val connectivity: Int) :
+class PlaylistCoverFragment(private val trustChainBlock: TrustChainBlock, private val connectivity: Int = 0) :
     Fragment(R.layout.fragment_release_cover) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

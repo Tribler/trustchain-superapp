@@ -81,7 +81,6 @@ class MusicService : AppCompatActivity() {
                     // Start ContentSeeder service: for serving music torrents to other devices
                     ContentSeeder.getInstance(
                         applicationContext.cacheDir,
-                        applicationContext,
                         sessionManager
                     ).start()
                     // Start WalletService, for maintaining and sending coins
@@ -181,7 +180,7 @@ class MusicService : AppCompatActivity() {
     private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
         val sessionManager = torrentStream?.sessionManager ?: return mutableMapOf()
         val contentSeeder =
-            ContentSeeder.getInstance(cacheDir, applicationContext, sessionManager)
+            ContentSeeder.getInstance(cacheDir, sessionManager)
         val localMap = contentSeeder.swarmHealthMap
         for (infoHash in localMap.keys) {
             // Update all connectivity stats of the torrents that we are currently seeding

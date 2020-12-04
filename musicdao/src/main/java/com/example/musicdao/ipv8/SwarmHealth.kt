@@ -27,6 +27,15 @@ class SwarmHealth(
             serializeULong(timestamp)
     }
 
+    /**
+     * Test if all properties are equal of two objects; mainly useful for unit testing
+     */
+    override fun equals(other: Any?): Boolean {
+        if (other !is SwarmHealth) return false
+        return infoHash == other.infoHash && numPeers == other.numPeers &&
+            numSeeds == other.numSeeds && timestamp == other.timestamp
+    }
+
     companion object Deserializer : Deserializable<SwarmHealth> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<SwarmHealth, Int> {
             var localOffset = 0

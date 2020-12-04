@@ -1,5 +1,6 @@
 package com.example.musicdao.ipv8
 
+import com.frostwire.jlibtorrent.Sha1Hash
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.sqlite.driver.JdbcSqliteDriver
 import io.mockk.every
@@ -92,5 +93,60 @@ class MusicCommunityTest {
 
         val count = trustChainCommunity.performRemoteKeywordSearch("keyword", 1u, ANY_COUNTERPARTY_PK)
         Assert.assertEquals(count, 1)
+    }
+
+    @Test
+    fun sendSwarmHealthMessage() {
+        val musicCommunity = spyk(getCommunity())
+        val swarmHealth = SwarmHealth(Sha1Hash.max().toString(), 1.toUInt(), 0.toUInt())
+        Assert.assertFalse(musicCommunity.sendSwarmHealthMessage(swarmHealth))
+        val newKey = JavaCryptoProvider.generateKey()
+        val neighborPeer = Peer(newKey)
+        every {
+            musicCommunity.getPeers()
+        } returns listOf(neighborPeer)
+        Assert.assertTrue(musicCommunity.sendSwarmHealthMessage(swarmHealth))
+        every {
+            musicCommunity.getPeers()
+        } returns listOf(neighborPeer, neighborPeer)
+        Assert.assertTrue(musicCommunity.sendSwarmHealthMessage(swarmHealth))
+    }
+
+    @Test
+    fun communicateReleaseBlocks() {
+        val community = spyk(getCommunity())
+        val newKey = JavaCryptoProvider.generateKey()
+
+        val block = TrustChainBlock(
+            "publish_release",
+            TransactionEncoding.encode(
+                mapOf(
+                    "magnet" to "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c",
+                    "title" to "title",
+                    "artists" to "artists",
+                    "date" to "date",
+                    "torrentInfoName" to "torrentInfoName"
+                )
+            ),
+            newKey.pub().keyToBin(),
+            1u,
+            ANY_COUNTERPARTY_PK,
+            0u,
+            GENESIS_HASH,
+            EMPTY_SIG,
+            Date()
+        )
+
+        community.database.addBlock(block)
+
+        // 0 peers: we have 1 block, but no one to send it to
+        Assert.assertEquals(community.communicateReleaseBlocks(), 0)
+        val newKey2 = JavaCryptoProvider.generateKey()
+        val neighborPeer = Peer(newKey2)
+        every {
+            community.getPeers()
+        } returns listOf(neighborPeer)
+        // 1 peer: send to 1 person, because we have 1 block
+        Assert.assertEquals(community.communicateReleaseBlocks(), 1)
     }
 }

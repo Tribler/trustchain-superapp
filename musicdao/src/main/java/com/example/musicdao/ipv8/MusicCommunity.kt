@@ -82,9 +82,10 @@ class MusicCommunity(
     /**
      * Send a SwarmHealth message to a random peer
      */
-    fun sendSwarmHealthMessage(swarmHealth: SwarmHealth) {
-        val peer= pickRandomPeer() ?: return
+    fun sendSwarmHealthMessage(swarmHealth: SwarmHealth): Boolean {
+        val peer= pickRandomPeer() ?: return false
         send(peer, serializePacket(MessageId.SWARM_HEALTH_MESSAGE, swarmHealth))
+        return true
     }
 
     /**
@@ -118,15 +119,19 @@ class MusicCommunity(
 
     /**
      * Communicate a few release blocks to one or a few random peers
+     * @return the amount of blocks that were sent
      */
-    fun communicateReleaseBlocks() {
-        val peer = pickRandomPeer() ?: return
+    fun communicateReleaseBlocks(): Int {
+        val peer = pickRandomPeer() ?: return 0
         val releaseBlocks = database.getBlocksWithType("publish_release")
         val maxBlocks = 10
+        var count = 0
         releaseBlocks.asReversed().withIndex().forEach {
-            if (it.index >= maxBlocks) return
+            count += 1
+            if (it.index >= maxBlocks) return count
             sendBlock(it.value, peer)
         }
+        return count
     }
 
     object MessageId {
