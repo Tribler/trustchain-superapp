@@ -11,7 +11,6 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import java.util.*
 
-
 lateinit var contentSeederInstance: ContentSeeder
 
 /**
@@ -22,7 +21,6 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
     private val maxTorrentThreads = 10
     private var started = false
 
-//    val sessionManager: SessionManager = TorrentStream.getInstance().sessionManager // Manages seeding torrents
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
 
     /**

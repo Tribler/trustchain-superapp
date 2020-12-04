@@ -21,7 +21,6 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
 
-
 /**
  * Interaction with a BitcoinJ wallet
  */

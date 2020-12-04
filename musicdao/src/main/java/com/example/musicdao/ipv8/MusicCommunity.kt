@@ -83,7 +83,7 @@ class MusicCommunity(
      * Send a SwarmHealth message to a random peer
      */
     fun sendSwarmHealthMessage(swarmHealth: SwarmHealth): Boolean {
-        val peer= pickRandomPeer() ?: return false
+        val peer = pickRandomPeer() ?: return false
         send(peer, serializePacket(MessageId.SWARM_HEALTH_MESSAGE, swarmHealth))
         return true
     }

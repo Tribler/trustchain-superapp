@@ -327,8 +327,8 @@ class ReleaseFragment(
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
         val audioPlayer = AudioPlayer.getInstance()
-        if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() && torrent != null
-            && currentFileIndex != -1
+        if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() &&
+            torrent != null && currentFileIndex != -1
         ) {
             startPlaying(
                 torrent.videoFile,

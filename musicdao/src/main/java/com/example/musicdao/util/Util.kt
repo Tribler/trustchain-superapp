@@ -6,7 +6,6 @@ import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
 import java.io.File
 
-
 object Util {
 
     /**
