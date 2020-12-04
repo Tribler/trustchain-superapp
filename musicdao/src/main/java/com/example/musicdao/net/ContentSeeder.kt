@@ -96,7 +96,7 @@ class ContentSeeder(private val saveDir: File, private val context: Context, pri
         swarmHealthMap[handle.infoHash()] = SwarmHealth(
             handle.infoHash().toString(),
             numPeers.toUInt(),
-            numSeeds.toUInt() + 1.toUInt()
+            1.toUInt()
         )
     }
 

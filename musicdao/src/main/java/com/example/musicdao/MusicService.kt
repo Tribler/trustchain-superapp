@@ -185,13 +185,15 @@ class MusicService : AppCompatActivity() {
             // Update all connectivity stats of the torrents that we are currently seeding
             if (sessionManager.isRunning) {
                 val handle = sessionManager.find(infoHash)
+                val newSwarmHealth =  SwarmHealth(
+                    infoHash.toString(),
+                    handle.status().numPeers().toUInt(),
+                    handle.status().numSeeds().toUInt()
+                )
+                // Never go below 1, because we know we are at least 1 seeder of our local files
+                if (newSwarmHealth.numSeeds.toInt() < 1) continue
                 if (handle != null) {
-                    localMap[infoHash] =
-                        SwarmHealth(
-                            infoHash.toString(),
-                            handle.status().numPeers().toUInt(),
-                            handle.status().numSeeds().toUInt() + 1.toUInt()
-                        )
+                    localMap[infoHash] = newSwarmHealth
                 }
             }
         }

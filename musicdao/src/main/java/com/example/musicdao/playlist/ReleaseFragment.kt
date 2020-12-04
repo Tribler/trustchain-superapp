@@ -299,7 +299,7 @@ class ReleaseFragment(
         Util.setSequentialPriorities(torrent)
         val torrentFile = torrent.torrentHandle?.torrentFile()
             ?: throw Error("Unknown torrent file metadata")
-        setMetadata(torrentFile.files())
+        if (metadata == null) setMetadata(torrentFile.files())
         // Keep seeding the torrent, also after start-up or after browsing to a different Release
         val infoName = torrentInfoName ?: torrent.torrentHandle.name()
         val localContext = context
