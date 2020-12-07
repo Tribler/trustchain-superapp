@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     name: Run Tests
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -34,7 +34,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
   apk:
     name: Build APK
-    runs-on: macOS-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
