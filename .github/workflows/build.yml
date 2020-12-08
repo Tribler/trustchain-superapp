@@ -24,9 +24,7 @@ jobs:
         java-version: 8
 
     - name: Run tests
-      uses: eskatos/gradle-command-action@v1
-      with:
-        arguments: check
+      run: bash ./gradlew check
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
