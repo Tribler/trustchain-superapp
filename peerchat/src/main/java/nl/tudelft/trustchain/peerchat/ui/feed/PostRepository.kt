@@ -34,11 +34,11 @@ class PostRepository(
 
     fun likePost(block: TrustChainBlock): Boolean {
         return if (!hasLikedPost(block)) {
-            val likeBlock = LikeBlockBuilder(
+            LikeBlockBuilder(
                 trustChainCommunity.myPeer,
                 trustChainCommunity.database, block
             ).sign()
-            trustChainCommunity.onBlockCreated(likeBlock)
+//            trustChainCommunity.onBlockCreated(likeBlock) TODO create a public method for this
             true
         } else {
             false
