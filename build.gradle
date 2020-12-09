@@ -16,7 +16,7 @@ buildscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_gradle_version"
         classpath "com.squareup.sqldelight:gradle-plugin:$sqldelight_version"
@@ -45,6 +45,8 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force("org.objenesis:objenesis:2.6")
+            force('com.google.inject:guice:4.2.1')
+            force('com.google.inject:guice-multibindings:4.2.1')
         }
     }
 }

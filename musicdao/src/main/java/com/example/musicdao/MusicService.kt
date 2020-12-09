@@ -6,97 +6,88 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
-import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
+import com.example.musicdao.ipv8.SwarmHealth
+import com.example.musicdao.net.ContentSeeder
+import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
+import com.frostwire.jlibtorrent.Sha1Hash
 import com.github.se_bastiaan.torrentstream.TorrentOptions
 import com.github.se_bastiaan.torrentstream.TorrentStream
-import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.BaseActivity
-import org.apache.commons.io.FileUtils
 import java.io.File
-import java.io.FileOutputStream
 import kotlin.random.Random
 
-open class MusicService : BaseActivity() {
-    lateinit var torrentStream: TorrentStream
-    lateinit var walletService: WalletService
-    override val navigationGraph = R.navigation.musicdao_navgraph
-    var contentSeeder: ContentSeeder? = null
+/**
+ * This maintains the interactions between the UI and seeding/trustchain
+ */
+class MusicService : AppCompatActivity() {
+    private val navigationGraph: Int = R.navigation.musicdao_navgraph
+    var torrentStream: TorrentStream? = null
+
+    // Popularity measurement by swarm health
+    var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
+    private val popularityGossipInterval: Long = 5000
+    private val gossipTopTorrents = 5 // The amount of most popular torrents we use to gossip its
+
+    // swarm health with neighbours
+    private val gossipRandomTorrents = 5 // The amount of torrents we know its swarm health of
+    // to share with neighbours
+
+    private val navController by lazy {
+        findNavController(R.id.navHostFragment)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Thread {
-            startup()
-        }.start()
+        setContentView(R.layout.fragment_base)
+        navController.setGraph(navigationGraph)
         handleIntent(intent)
+
+        startup()
     }
 
     private fun startup() {
-        torrentStream = try {
-            TorrentStream.getInstance()
-        } catch (e: Exception) {
-            TorrentStream.init(
-                TorrentOptions.Builder()
-                    .saveLocation(applicationContext.cacheDir)
-                    .removeFilesAfterStop(false)
-                    .autoDownload(false)
-                    .build()
-            )
-        }
-        registerBlockSigner()
-        iterativelyCrawlTrustChains()
+        torrentStream = TorrentStream.init(
+            TorrentOptions.Builder()
+                .saveLocation(applicationContext.cacheDir)
+                .removeFilesAfterStop(false)
+                .autoDownload(false)
+                .build()
+        )
 
+        // We have to wait until torrentStream is initialized -> then we initialize all other
+        // iterative processes
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                if (torrentStream.sessionManager != null) {
-                    val seeder =
-                        ContentSeeder.getInstance(
-                            torrentStream.sessionManager,
-                            applicationContext.cacheDir
-                        )
-                    seeder.start()
-                    contentSeeder = seeder
-                    return@launchWhenStarted
+                val sessionManager = torrentStream?.sessionManager
+                if (sessionManager != null) {
+                    registerBlockSigner()
+                    iterativelySendReleaseBlocks()
+                    iterativelyUpdateConnectivityStats()
+                    // Start ContentSeeder service: for serving music torrents to other devices
+                    ContentSeeder.getInstance(
+                        applicationContext.cacheDir,
+                        sessionManager
+                    ).start()
+                    // Start WalletService, for maintaining and sending coins
+                    WalletService.getInstance(applicationContext.cacheDir, this@MusicService).start()
+                    break
                 }
-                delay(3000)
+                delay(1000)
             }
-        }
-
-        walletService =
-            WalletService(applicationContext, IPv8Android.getInstance(), getPrivateKey())
-        walletService.startup()
-    }
-
-    private fun getPrivateKey(): PrivateKey {
-        // Load a key from the shared preferences
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val privateKey = prefs.getString(PREF_PRIVATE_KEY, null)
-        return if (privateKey == null) {
-            // Generate a new key on the first launch
-            val newKey = AndroidCryptoProvider.generateKey()
-            prefs.edit()
-                .putString(PREF_PRIVATE_KEY, newKey.keyToBin().toHex())
-                .apply()
-            newKey
-        } else {
-            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
     }
 
@@ -111,7 +102,10 @@ open class MusicService : BaseActivity() {
             intent.getStringExtra(SearchManager.QUERY)?.also { query ->
                 val args = Bundle()
                 args.putString("filter", query)
-                findNavController(R.id.navHostFragment).navigate(R.id.releaseOverviewFragment, args)
+                findNavController(R.id.navHostFragment).navigate(
+                    R.id.playlistsOverviewFragment,
+                    args
+                )
             }
         }
     }
@@ -136,37 +130,109 @@ open class MusicService : BaseActivity() {
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
      */
-    private fun iterativelyCrawlTrustChains() {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
+    private fun iterativelySendReleaseBlocks() {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                for (peer in musicCommunity.getPeers()) {
-                    musicCommunity.crawlChain(peer)
-                    delay(1000)
-                }
+                musicCommunity?.communicateReleaseBlocks()
                 delay(3000)
             }
         }
     }
 
-    fun getStatsOverview(): String {
-        val sessionManager = torrentStream.sessionManager ?: return ""
-        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${Util.readableBytes(
-            sessionManager.downloadRate()
-        )}, dht nodes: ${sessionManager.dhtNodes()}, magnet peers: ${sessionManager.magnetPeers()?.length}"
+    /**
+     * Keep track of Swarm Health for all torrents being monitored
+     */
+    private fun iterativelyUpdateConnectivityStats() {
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                swarmHealthMap = filterSwarmHealthMap()
+                // Pick 5 of the most popular torrents and 5 random torrents, and send those stats to any neighbour
+                // First, we sort the map based on swarm health
+                val sortedMap = swarmHealthMap.toList()
+                    .sortedBy { (_, value) -> value }
+                    .toMap()
+                gossipSwarmHealth(sortedMap, gossipTopTorrents)
+                gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
+                delay(popularityGossipInterval)
+            }
+        }
     }
 
     /**
-     * Clear cache on every run (for testing, and audio files may be large 15MB+). May be removed
-     * in the future
+     * Send SwarmHealth information to #maxIterations random peers
      */
-    private fun clearCache() {
-        if (cacheDir.isDirectory && cacheDir.listFiles() != null) {
-            val files = cacheDir.listFiles()
-            files?.forEach {
-                it.deleteRecursively()
+    private fun gossipSwarmHealth(map: Map<Sha1Hash, SwarmHealth>, maxInterations: Int) {
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
+        var count = 0
+        for (entry in map.entries) {
+            count += 1
+            if (count > maxInterations) break
+            musicCommunity?.sendSwarmHealthMessage(entry.value)
+        }
+    }
+
+    /**
+     * Go through all the torrents that we are currently seeding and mark its connectivity to peers
+     */
+    private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
+        val sessionManager = torrentStream?.sessionManager ?: return mutableMapOf()
+        val contentSeeder =
+            ContentSeeder.getInstance(cacheDir, sessionManager)
+        val localMap = contentSeeder.swarmHealthMap
+        for (infoHash in localMap.keys) {
+            // Update all connectivity stats of the torrents that we are currently seeding
+            if (sessionManager.isRunning) {
+                val handle = sessionManager.find(infoHash)
+                val newSwarmHealth = SwarmHealth(
+                    infoHash.toString(),
+                    handle.status().numPeers().toUInt(),
+                    handle.status().numSeeds().toUInt()
+                )
+                // Never go below 1, because we know we are at least 1 seeder of our local files
+                if (newSwarmHealth.numSeeds.toInt() < 1) continue
+                if (handle != null) {
+                    localMap[infoHash] = newSwarmHealth
+                }
             }
         }
+        return localMap
+    }
+
+    /**
+     * Merge local and remote swarm health map and remove outdated data
+     */
+    private fun filterSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
+        val localMap = updateLocalSwarmHealthMap()
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
+        val communityMap = musicCommunity?.swarmHealthMap ?: mutableMapOf()
+        // Keep the highest numPeers/numSeeds count of all items in both maps
+        // This map contains all the combined data, where local and community map data are merged;
+        // the highest connectivity count for each item is saved in a gloal map for the MusicService
+        val map: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
+        val allKeys = localMap.keys + communityMap.keys
+        for (infoHash in allKeys) {
+            val shLocal = localMap[infoHash]
+            val shRemote = communityMap[infoHash]
+
+            val bestSwarmHealth = SwarmHealth.pickBest(shLocal, shRemote)
+            if (bestSwarmHealth != null) {
+                map[infoHash] = bestSwarmHealth
+            }
+        }
+        // Remove outdated swarm health data: if the data is outdated, we throw it away
+        return map.filterValues { it.isUpToDate() }.toMutableMap()
+    }
+
+    /**
+     * Show libtorrent connectivity stats
+     */
+    fun getStatsOverview(): String {
+        val sessionManager = torrentStream?.sessionManager ?: return "Starting torrent client..."
+        if (!sessionManager.isRunning) return "Starting torrent client..."
+        return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
+            Util.readableBytes(sessionManager.downloadRate())
+        }"
     }
 
     /**
@@ -175,12 +241,14 @@ open class MusicService : BaseActivity() {
      * artist/label (artist passport).
      */
     private fun registerBlockSigner() {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()!!
-        musicCommunity.registerBlockSigner("publish_release", object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
-            }
-        })
+        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
+        musicCommunity?.registerBlockSigner(
+            "publish_release",
+            object : BlockSigner { // TODO unstable
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
+                }
+            })
     }
 
     /**
@@ -189,44 +257,16 @@ open class MusicService : BaseActivity() {
      */
     @Throws(Resources.NotFoundException::class)
     fun generateTorrent(context: Context, uris: List<Uri>): File {
-        val fileList = mutableListOf<File>()
         val contentResolver = context.contentResolver
-        val projection =
-            arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
-
         val randomInt = Random.nextInt(0, Int.MAX_VALUE)
         val parentDir = "${context.cacheDir}/$randomInt"
 
-        for (uri in uris) {
-            val cursor = contentResolver.query(uri, projection, null, null, null)
-            var fileName = ""
-            if (cursor != null) {
-                try {
-                    // TODO convert this cursor to support multifile sharing
-                    if (cursor.moveToFirst()) {
-                        fileName = cursor.getString(0)
-                    }
-                } finally {
-                    cursor.close()
-                }
-            }
-
-            if (fileName == "") throw Error("Source file name for creating torrent not found")
-            val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-            val tempFileLocation = "$parentDir/$fileName"
-
-            // TODO currently creates temp copies before seeding, but should not be necessary
-            FileUtils.copyInputStreamToFile(input, File(tempFileLocation))
-            fileList.add(File(tempFileLocation))
-        }
-
-        val torrent = SharedTorrent.create(File(parentDir), fileList, 65535, listOf(), "")
-        val torrentFile = "$parentDir.torrent"
-        torrent.save(FileOutputStream(torrentFile))
-        return File(torrentFile)
+        return ReleaseFactory.generateTorrent(parentDir, uris, contentResolver)
     }
 
-    companion object {
-        private const val PREF_PRIVATE_KEY = "private_key"
+    fun showToast(text: String, length: Int) {
+        runOnUiThread {
+            Toast.makeText(baseContext, text, length).show()
+        }
     }
 }

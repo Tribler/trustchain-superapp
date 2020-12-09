@@ -10,18 +10,18 @@
     <TextView
         android:id="@+id/trackId"
         android:layout_width="0dp"
-        android:layout_weight="5"
+        android:layout_weight="10"
         android:minWidth="25dp"
         android:layout_margin="4dp"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="1."
+        android:text="12."
         android:textColor="@color/white"
         android:textSize="20sp" />
 
     <RelativeLayout
         android:layout_width="0dp"
-        android:layout_weight="80"
+        android:layout_weight="75"
         android:layout_margin="4dp"
         android:layout_height="wrap_content">
 
