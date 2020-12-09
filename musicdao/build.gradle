@@ -121,3 +121,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         "-Werror" // Set Kotlin compiler warnings as errors
     ]
 }
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", "./src/main/jniLibs"
+}
