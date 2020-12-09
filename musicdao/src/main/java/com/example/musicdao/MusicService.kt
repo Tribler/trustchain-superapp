@@ -55,6 +55,7 @@ class MusicService : AppCompatActivity() {
         setContentView(R.layout.fragment_base)
         navController.setGraph(navigationGraph)
         handleIntent(intent)
+        actionBar?.setDisplayHomeAsUpEnabled(true)
 
         startup()
     }
@@ -83,7 +84,8 @@ class MusicService : AppCompatActivity() {
                         sessionManager
                     ).start()
                     // Start WalletService, for maintaining and sending coins
-                    WalletService.getInstance(applicationContext.cacheDir, this@MusicService).start()
+                    WalletService.getInstance(applicationContext.cacheDir, this@MusicService)
+                        .start()
                     break
                 }
                 delay(1000)
@@ -119,6 +121,10 @@ class MusicService : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
             R.id.action_search -> {
                 onSearchRequested()
                 true
@@ -183,7 +189,7 @@ class MusicService : AppCompatActivity() {
         for (infoHash in localMap.keys) {
             // Update all connectivity stats of the torrents that we are currently seeding
             if (sessionManager.isRunning) {
-                val handle = sessionManager.find(infoHash)
+                val handle = sessionManager.find(infoHash) ?: continue
                 val newSwarmHealth = SwarmHealth(
                     infoHash.toString(),
                     handle.status().numPeers().toUInt(),
@@ -191,9 +197,7 @@ class MusicService : AppCompatActivity() {
                 )
                 // Never go below 1, because we know we are at least 1 seeder of our local files
                 if (newSwarmHealth.numSeeds.toInt() < 1) continue
-                if (handle != null) {
-                    localMap[infoHash] = newSwarmHealth
-                }
+                localMap[infoHash] = newSwarmHealth
             }
         }
         return localMap
