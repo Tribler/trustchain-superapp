@@ -4,6 +4,7 @@ import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.github.se_bastiaan.torrentstream.Torrent
+import com.mpatric.mp3agic.Mp3File
 import java.io.File
 
 object Util {
@@ -75,17 +76,15 @@ object Util {
     /**
      * Checks if a music file is valid, and make it more readable if it is
      */
-    fun checkAndSanitizeTrackNames(fileName: String): String? {
-        var fileNameLocal = fileName
-        val allowedExtensions =
-            listOf(".flac", ".mp3", ".3gp", ".aac", ".mkv", ".wav", ".ogg", ".mp4", ".m4a")
-        for (s in allowedExtensions) {
-            if (fileNameLocal.endsWith(s)) {
-                fileNameLocal = fileNameLocal.substringBefore(s)
-                fileNameLocal = fileNameLocal.replace("_", " ")
-                return fileNameLocal
+    fun getTitle(mp3File: Mp3File): String? {
+        try {
+            if (mp3File.hasId3v2Tag()) {
+                return mp3File.id3v2Tag.title
             }
-        }
+            if (mp3File.hasId3v1Tag()) {
+                return mp3File.id3v1Tag.title
+            }
+        } catch (e: Exception) {}
         return null
     }
 

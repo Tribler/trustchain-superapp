@@ -22,6 +22,7 @@ import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
+import com.mpatric.mp3agic.Mp3File
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -167,35 +168,40 @@ class ReleaseFragment(
         val filestorage = metadata
 
         for (index in 0 until num) {
-            var fileName = filestorage.fileName(index)
-            fileName = Util.checkAndSanitizeTrackNames(fileName)
-            var progress: Int? = null
-            if (preloaded) {
-                progress = 100
-            }
-            if (fileName != null) {
-                val track = TrackFragment(
-                    fileName,
-                    index,
-                    this,
-                    Util.readableBytes(filestorage.fileSize(index)),
-                    progress
-                )
+            val localContext = context ?: return
+            try {
+                val mp3File = Mp3File(localContext.cacheDir.path + "/" + filestorage.filePath(index))
+                val fileName = Util.getTitle(mp3File)
+                var progress: Int? = null
+                if (preloaded) {
+                    progress = 100
+                }
+                if (fileName != null) {
+                    val track = TrackFragment(
+                        fileName,
+                        index,
+                        this,
+                        Util.readableBytes(filestorage.fileSize(index)),
+                        progress
+                    )
 
-                // Add a table row (Track) to the table (Release)
-                val transaction = childFragmentManager.beginTransaction()
-                transaction.add(R.id.release_table_layout, track, "track$index")
-                transaction.commit()
+                    // Add a table row (Track) to the table (Release)
+                    val transaction = childFragmentManager.beginTransaction()
+                    transaction.add(R.id.release_table_layout, track, "track$index")
+                    transaction.commit()
 
-                val transaction2 = childFragmentManager.beginTransaction()
-                transaction2.add(
-                    R.id.release_table_layout,
-                    Fragment(R.layout.track_table_divider),
-                    "track$index-divider"
-                )
-                transaction2.commitAllowingStateLoss()
+                    val transaction2 = childFragmentManager.beginTransaction()
+                    transaction2.add(
+                        R.id.release_table_layout,
+                        Fragment(R.layout.track_table_divider),
+                        "track$index-divider"
+                    )
+                    transaction2.commitAllowingStateLoss()
 
-                tracks[index] = track
+                    tracks[index] = track
+                }
+            } catch (e: Exception) {
+                continue
             }
         }
     }
@@ -221,9 +227,17 @@ class ReleaseFragment(
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
-                AudioPlayer.getInstance()
-                    ?.setTrackInfo("Buffering track: " + Util.checkAndSanitizeTrackNames(
-                        tor.videoFile.name))
+                try {
+                    val localContext = context ?: return
+                    val mp3File = Mp3File(localContext.cacheDir.path + "/" + tor.videoFile.path)
+                    AudioPlayer.getInstance()
+                        ?.setTrackInfo(
+                            "Buffering track: " +
+                                Util.getTitle(mp3File)
+                        )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         } else if (localTorrent != null) {
             val fileToPlay =
@@ -255,9 +269,13 @@ class ReleaseFragment(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
-        audioPlayer?.setTrackInfo(
-            Util.checkAndSanitizeTrackNames(file.name) ?: ""
-        )
+        try {
+            val localContext = context ?: return
+            val mp3File = Mp3File(localContext.cacheDir.path + "/" + file.path)
+            audioPlayer?.setTrackInfo(Util.getTitle(mp3File) ?: "")
+        } catch (e:Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun resolveTorrentUrl(magnet: String): String {

@@ -56,9 +56,9 @@ class UtilTest {
         val fileName2 = "invalid-File.txt"
         Assert.assertEquals(
             "Valid File-Name",
-            Util.checkAndSanitizeTrackNames(fileName)
+            Util.getTitle(fileName)
         )
-        Assert.assertNull(Util.checkAndSanitizeTrackNames(fileName2))
+        Assert.assertNull(Util.getTitle(fileName2))
     }
 
     @Test
