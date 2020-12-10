@@ -113,6 +113,12 @@ object Util {
         return length
     }
 
+    /**
+     * Go through a directory that contains a musical Release and find an image that corresponds to
+     * the cover art
+     * @param directory the directory containing music files, possibly cover art and possibly other
+     * files
+     */
     fun findCoverArt(directory: File): File? {
         if (!directory.isDirectory) return null
         val allowedExtensions =
