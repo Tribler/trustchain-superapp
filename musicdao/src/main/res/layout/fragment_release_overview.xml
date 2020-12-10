@@ -20,7 +20,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="No music playlists found from peers"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"/>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -33,7 +33,8 @@
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/release_overview_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                app:justifyContent="space_evenly"
                 app:flexWrap="wrap">
 
             </com.google.android.flexbox.FlexboxLayout>

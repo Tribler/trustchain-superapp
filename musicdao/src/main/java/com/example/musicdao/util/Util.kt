@@ -112,4 +112,30 @@ object Util {
         }
         return length
     }
+
+    fun findCoverArt(directory: File): File? {
+        if (!directory.isDirectory) return null
+        val allowedExtensions =
+            listOf(".jpg", ".png")
+        val files = directory.listFiles() ?: return null
+        // Give priority to files named "Cover"
+        for (ext in allowedExtensions) {
+            val cover = File(directory.path + "/" + "cover" + ext)
+            if (cover.isFile) {
+                return cover
+            }
+        }
+        for (file in files) {
+            for (ext in allowedExtensions) {
+                if (file.name.endsWith(ext)) {
+                    return file
+                }
+            }
+        }
+        return null
+    }
+
+    fun sanitizeString(input: String): String {
+        return input.replace("%20", " ")
+    }
 }
