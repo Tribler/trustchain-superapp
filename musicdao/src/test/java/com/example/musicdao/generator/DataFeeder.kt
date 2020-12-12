@@ -38,10 +38,11 @@ class DataFeeder {
         val ipv8Map = mutableMapOf<String, String>() // Artist name, public IPv8 key
 
 //        val btcParams = CryptoCurrencyConfig.networkParams
-
-        for (file in dir.listFiles()) {
+        val allFiles = dir.listFiles() ?: return
+        for (file in allFiles) {
             if (file.isDirectory) {
-                for (audioFile in file.listFiles()) {
+                val audioFiles = file.listFiles() ?: continue
+                for (audioFile in audioFiles) {
                     try {
                         val mp3File = Mp3File(audioFile)
                         // TODO assuming they all have id3v2 tags?
