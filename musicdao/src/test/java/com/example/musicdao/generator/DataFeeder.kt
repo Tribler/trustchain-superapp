@@ -84,7 +84,7 @@ class DataFeeder {
                                 transaction,
                                 publicKey.keyToBin()
                             )
-                            //Check if exists in map
+                            // Check if exists in map
                             // Optional create ipv8 id
                             // Create trustchain block
                             // Publish transaction
@@ -96,9 +96,7 @@ class DataFeeder {
                         } else {
                             continue
                         }
-                    } catch (e: Exception) {
-
-                    }
+                    } catch (e: Exception) {}
                 }
             }
         }
