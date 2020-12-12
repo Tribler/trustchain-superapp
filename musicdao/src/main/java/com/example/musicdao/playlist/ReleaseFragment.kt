@@ -273,7 +273,7 @@ class ReleaseFragment(
             val localContext = context ?: return
             val mp3File = Mp3File(localContext.cacheDir.path + "/" + file.path)
             audioPlayer?.setTrackInfo(Util.getTitle(mp3File) ?: "")
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }
