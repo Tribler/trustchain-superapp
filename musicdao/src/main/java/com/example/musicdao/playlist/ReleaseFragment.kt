@@ -321,12 +321,11 @@ class ReleaseFragment(
     }
 
     override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
-//        val torrentFile: TorrentInfo? = torrent?.torrentHandle?.torrentFile()
-//        if (metadata == null && torrentFile != null) setMetadata(torrentFile.files())
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
         val audioPlayer = AudioPlayer.getInstance()
+        // If we selected a file to play but it is not playing, start playing it after 30% progress
         if (progress > 30 && audioPlayer != null && !audioPlayer.isPlaying() &&
             torrent != null && currentFileIndex != -1
         ) {
@@ -345,6 +344,5 @@ class ReleaseFragment(
     override fun onStreamError(torrent: Torrent?, e: Exception?) {
         Log.e("TorrentStream", "Torrent stream error")
         Toast.makeText(context, "Torrent stream error: ${e?.message}", Toast.LENGTH_LONG).show()
-        e?.printStackTrace()
     }
 }
