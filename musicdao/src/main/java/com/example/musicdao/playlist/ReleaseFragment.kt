@@ -270,8 +270,7 @@ class ReleaseFragment(
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
         try {
-            val localContext = context ?: return
-            val mp3File = Mp3File(localContext.cacheDir.path + "/" + file.path)
+            val mp3File = Mp3File(file)
             audioPlayer?.setTrackInfo(Util.getTitle(mp3File) ?: "")
         } catch (e: Exception) {
             e.printStackTrace()
