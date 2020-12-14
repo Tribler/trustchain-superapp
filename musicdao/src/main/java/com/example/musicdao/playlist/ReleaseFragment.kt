@@ -264,7 +264,7 @@ class ReleaseFragment(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
-        val trackInfo = Util.checkAndSanitizeTrackNames(file.nameWithoutExtension)
+        val trackInfo = Util.checkAndSanitizeTrackNames(file.name)
         audioPlayer?.setTrackInfo(trackInfo ?: "")
     }
 
