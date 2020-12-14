@@ -22,7 +22,6 @@ import com.github.se_bastiaan.torrentstream.StreamStatus
 import com.github.se_bastiaan.torrentstream.Torrent
 import com.github.se_bastiaan.torrentstream.TorrentStream
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener
-import com.mpatric.mp3agic.Mp3File
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -222,17 +221,10 @@ class ReleaseFragment(
             if (tor.videoFile.isFile && tor.videoFile.length() > 1024 * 512) {
                 startPlaying(tor.videoFile, currentFileIndex)
             } else {
-                try {
-                    val localContext = context ?: return
-                    val mp3File = Mp3File(localContext.cacheDir.path + "/" + tor.videoFile.path)
-                    AudioPlayer.getInstance()
-                        ?.setTrackInfo(
-                            "Buffering track: " +
-                                Util.getTitle(mp3File)
-                        )
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                AudioPlayer.getInstance()
+                    ?.setTrackInfo(
+                        "Buffering track: " + Util.checkAndSanitizeTrackNames(tor.videoFile.name)
+                    )
             }
         } else if (localTorrent != null) {
             val fileToPlay =
