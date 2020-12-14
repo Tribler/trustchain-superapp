@@ -168,40 +168,35 @@ class ReleaseFragment(
         val filestorage = metadata
 
         for (index in 0 until num) {
-            val localContext = context ?: return
-            try {
-                val mp3File = Mp3File(localContext.cacheDir.path + "/" + filestorage.filePath(index))
-                val fileName = Util.getTitle(mp3File)
-                var progress: Int? = null
-                if (preloaded) {
-                    progress = 100
-                }
-                if (fileName != null) {
-                    val track = TrackFragment(
-                        fileName,
-                        index,
-                        this,
-                        Util.readableBytes(filestorage.fileSize(index)),
-                        progress
-                    )
+            var fileName = filestorage.fileName(index)
+            fileName = Util.checkAndSanitizeTrackNames(fileName)
+            var progress: Int? = null
+            if (preloaded) {
+                progress = 100
+            }
+            if (fileName != null) {
+                val track = TrackFragment(
+                    fileName,
+                    index,
+                    this,
+                    Util.readableBytes(filestorage.fileSize(index)),
+                    progress
+                )
 
-                    // Add a table row (Track) to the table (Release)
-                    val transaction = childFragmentManager.beginTransaction()
-                    transaction.add(R.id.release_table_layout, track, "track$index")
-                    transaction.commit()
+                // Add a table row (Track) to the table (Release)
+                val transaction = childFragmentManager.beginTransaction()
+                transaction.add(R.id.release_table_layout, track, "track$index")
+                transaction.commit()
 
-                    val transaction2 = childFragmentManager.beginTransaction()
-                    transaction2.add(
-                        R.id.release_table_layout,
-                        Fragment(R.layout.track_table_divider),
-                        "track$index-divider"
-                    )
-                    transaction2.commit()
+                val transaction2 = childFragmentManager.beginTransaction()
+                transaction2.add(
+                    R.id.release_table_layout,
+                    Fragment(R.layout.track_table_divider),
+                    "track$index-divider"
+                )
+                transaction2.commit()
 
-                    tracks[index] = track
-                }
-            } catch (e: Exception) {
-                continue
+                tracks[index] = track
             }
         }
     }
@@ -269,12 +264,8 @@ class ReleaseFragment(
     private fun startPlaying(file: File, index: Int) {
         val audioPlayer = AudioPlayer.getInstance()
         audioPlayer?.setAudioResource(file, index)
-        try {
-            val mp3File = Mp3File(file)
-            audioPlayer?.setTrackInfo(Util.getTitle(mp3File) ?: "")
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        val trackInfo = Util.checkAndSanitizeTrackNames(file.nameWithoutExtension)
+        audioPlayer?.setTrackInfo(trackInfo ?: "")
     }
 
     fun resolveTorrentUrl(magnet: String): String {

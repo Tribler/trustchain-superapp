@@ -73,6 +73,20 @@ object Util {
         return piecePriorities
     }
 
+    fun checkAndSanitizeTrackNames(fileName: String): String? {
+        var fileNameLocal = fileName
+        val allowedExtensions =
+            listOf(".flac", ".mp3", ".3gp", ".aac", ".mkv", ".wav", ".ogg", ".mp4", ".m4a")
+        for (s in allowedExtensions) {
+            if (fileNameLocal.endsWith(s)) {
+                fileNameLocal = fileNameLocal.substringBefore(s)
+                fileNameLocal = fileNameLocal.replace("_", " ")
+                return fileNameLocal
+            }
+        }
+        return null
+    }
+
     /**
      * Checks if a music file is valid, and make it more readable if it is
      */
