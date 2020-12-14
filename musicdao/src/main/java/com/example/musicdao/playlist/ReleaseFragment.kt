@@ -196,7 +196,7 @@ class ReleaseFragment(
                         Fragment(R.layout.track_table_divider),
                         "track$index-divider"
                     )
-                    transaction2.commitAllowingStateLoss()
+                    transaction2.commit()
 
                     tracks[index] = track
                 }
@@ -339,8 +339,8 @@ class ReleaseFragment(
     }
 
     override fun onStreamProgress(torrent: Torrent?, status: StreamStatus) {
-        val torrentFile: TorrentInfo? = torrent?.torrentHandle?.torrentFile()
-        if (metadata == null && torrentFile != null) setMetadata(torrentFile.files())
+//        val torrentFile: TorrentInfo? = torrent?.torrentHandle?.torrentFile()
+//        if (metadata == null && torrentFile != null) setMetadata(torrentFile.files())
         val fileProgress = torrent?.torrentHandle?.fileProgress()
         if (fileProgress != null) updateFileProgress(fileProgress)
         val progress = status.progress
