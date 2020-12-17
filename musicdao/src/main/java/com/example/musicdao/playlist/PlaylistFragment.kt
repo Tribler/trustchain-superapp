@@ -2,6 +2,7 @@ package com.example.musicdao.playlist
 
 import android.os.Bundle
 import com.example.musicdao.MusicBaseFragment
+import com.example.musicdao.MusicService
 import com.example.musicdao.R
 
 /**
@@ -9,7 +10,6 @@ import com.example.musicdao.R
  * to contain tracks from different Releases
  */
 class PlaylistFragment : MusicBaseFragment(R.layout.fragment_playlist) {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val localArgs = arguments
@@ -21,11 +21,12 @@ class PlaylistFragment : MusicBaseFragment(R.layout.fragment_playlist) {
             val publisher = localArgs.getString("publisher", "Publisher not found")
             val torrentInfoName = localArgs.getString("torrentInfoName")
 
-            // TODO fix: Release is currently added every single time the fragment is being attached to the view
+            val sessionManager = (activity as MusicService).sessionManager ?: return
+
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
                 val release = ReleaseFragment(
-                    magnet, artists, title, date, publisher, torrentInfoName
+                    magnet, artists, title, date, publisher, torrentInfoName, sessionManager
                 )
                 transaction.add(R.id.trackListLinearLayout, release, "release")
                 transaction.commit()

@@ -35,7 +35,7 @@ class ContentSeederTest {
         val torrentInfoName = "RFBMP"
         // Adding an existing and valid torrent file
         val torrentFile = File("./src/test/resources/RFBMP.torrent")
-        val validTorrentInfo = contentSeeder.add(TorrentInfo(torrentFile), torrentInfoName)
+        val validTorrentInfo = contentSeeder.saveTorrentInfoToFile(TorrentInfo(torrentFile), torrentInfoName)
         Assert.assertTrue(validTorrentInfo)
     }
 
@@ -44,7 +44,7 @@ class ContentSeederTest {
         val torrentInfoName = "RFBMP"
         // Adding a nonexisting torrent file
         val torrentFile = File("./somenonexistingfile.torrent")
-        contentSeeder.add(TorrentInfo(torrentFile), torrentInfoName)
+        contentSeeder.saveTorrentInfoToFile(TorrentInfo(torrentFile), torrentInfoName)
     }
 
     @Test

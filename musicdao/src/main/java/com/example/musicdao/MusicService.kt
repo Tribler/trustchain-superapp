@@ -19,9 +19,8 @@ import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
+import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.Sha1Hash
-import com.github.se_bastiaan.torrentstream.TorrentOptions
-import com.github.se_bastiaan.torrentstream.TorrentStream
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -35,7 +34,7 @@ import kotlin.random.Random
  */
 class MusicService : AppCompatActivity() {
     private val navigationGraph: Int = R.navigation.musicdao_navgraph
-    var torrentStream: TorrentStream? = null
+    var sessionManager: SessionManager? = null
 
     // Popularity measurement by swarm health
     var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
@@ -55,40 +54,34 @@ class MusicService : AppCompatActivity() {
         setContentView(R.layout.fragment_base)
         navController.setGraph(navigationGraph)
         handleIntent(intent)
+        actionBar?.setDisplayHomeAsUpEnabled(true)
 
         startup()
     }
 
-    private fun startup() {
-        torrentStream = TorrentStream.init(
-            TorrentOptions.Builder()
-                .saveLocation(applicationContext.cacheDir)
-                .removeFilesAfterStop(false)
-                .autoDownload(false)
-                .build()
-        )
+    override fun onDestroy() {
+        sessionManager?.stop()
+        sessionManager = null
+        super.onDestroy()
+    }
 
-        // We have to wait until torrentStream is initialized -> then we initialize all other
-        // iterative processes
-        lifecycleScope.launchWhenStarted {
-            while (isActive) {
-                val sessionManager = torrentStream?.sessionManager
-                if (sessionManager != null) {
-                    registerBlockSigner()
-                    iterativelySendReleaseBlocks()
-                    iterativelyUpdateConnectivityStats()
-                    // Start ContentSeeder service: for serving music torrents to other devices
-                    ContentSeeder.getInstance(
-                        applicationContext.cacheDir,
-                        sessionManager
-                    ).start()
-                    // Start WalletService, for maintaining and sending coins
-                    WalletService.getInstance(applicationContext.cacheDir, this@MusicService).start()
-                    break
-                }
-                delay(1000)
-            }
-        }
+    private fun startup() {
+        val ses = SessionManager() // TODO Add seedbox node address?
+        ses.start()
+
+        registerBlockSigner()
+        iterativelySendReleaseBlocks()
+        iterativelyUpdateConnectivityStats()
+        // Start ContentSeeder service: for serving music torrents to other devices
+        ContentSeeder.getInstance(
+            applicationContext.cacheDir,
+            ses
+        ).start()
+        // Start WalletService, for maintaining and sending coins
+        WalletService.getInstance(applicationContext.cacheDir, this@MusicService)
+            .start()
+
+        sessionManager = ses
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -119,6 +112,10 @@ class MusicService : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                return true
+            }
             R.id.action_search -> {
                 onSearchRequested()
                 true
@@ -176,14 +173,14 @@ class MusicService : AppCompatActivity() {
      * Go through all the torrents that we are currently seeding and mark its connectivity to peers
      */
     private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
-        val sessionManager = torrentStream?.sessionManager ?: return mutableMapOf()
+        val sessionManager = sessionManager ?: return mutableMapOf()
         val contentSeeder =
             ContentSeeder.getInstance(cacheDir, sessionManager)
         val localMap = contentSeeder.swarmHealthMap
         for (infoHash in localMap.keys) {
             // Update all connectivity stats of the torrents that we are currently seeding
             if (sessionManager.isRunning) {
-                val handle = sessionManager.find(infoHash)
+                val handle = sessionManager.find(infoHash) ?: continue
                 val newSwarmHealth = SwarmHealth(
                     infoHash.toString(),
                     handle.status().numPeers().toUInt(),
@@ -191,9 +188,7 @@ class MusicService : AppCompatActivity() {
                 )
                 // Never go below 1, because we know we are at least 1 seeder of our local files
                 if (newSwarmHealth.numSeeds.toInt() < 1) continue
-                if (handle != null) {
-                    localMap[infoHash] = newSwarmHealth
-                }
+                localMap[infoHash] = newSwarmHealth
             }
         }
         return localMap
@@ -228,7 +223,7 @@ class MusicService : AppCompatActivity() {
      * Show libtorrent connectivity stats
      */
     fun getStatsOverview(): String {
-        val sessionManager = torrentStream?.sessionManager ?: return "Starting torrent client..."
+        val sessionManager = sessionManager ?: return "Starting torrent client..."
         if (!sessionManager.isRunning) return "Starting torrent client..."
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
             Util.readableBytes(sessionManager.downloadRate())
