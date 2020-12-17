@@ -65,8 +65,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
                     count += 1
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
-                    // We only seed torrents that have previously already been fully downloaded,
-                    // so that this does not clash with the TorrentStream library
+                    // We only seed torrents that have previously already been fully downloaded
                     if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
                         downloadAndSeed(torrentInfo)
                     }
@@ -111,15 +110,16 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
     }
 
     /**
-     * Create, save and seed a torrent file, based on a TorrentInfo object
+     * Create and save a torrent file with TorrentInfo
+     * @param torrentInfoName the torrentinfo.name() parameter
      */
-    fun add(torrentInfo: TorrentInfo, torrentInfoName: String): Boolean {
-        val torrentFile = File("$saveDir/$torrentInfoName.torrent")
+    fun saveTorrentInfoToFile(torrentInfo: TorrentInfo, torrentInfoName: String): Boolean {
+        val path = "$saveDir/$torrentInfoName.torrent"
+        val torrentFile = File(path)
         if (torrentInfo.isValid) {
             if (!torrentFile.isFile) {
                 FileUtils.copyInputStreamToFile(torrentInfo.bencode().inputStream(), torrentFile)
             }
-            downloadAndSeed(torrentInfo)
             return true
         }
         return false

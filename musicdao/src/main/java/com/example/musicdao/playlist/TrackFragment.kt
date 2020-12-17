@@ -29,15 +29,6 @@ class TrackFragment(
         }
     }
 
-    /**
-     * Calculate how much percentage is downloaded
-     */
-    fun getDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
-        val size = fullSize ?: Long.MAX_VALUE
-        val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
-        return progress.toInt()
-    }
-
     fun setDownloadProgress(progresss: Int): Boolean {
         if (progressBar == null) return false
         progressBar.progress = progresss

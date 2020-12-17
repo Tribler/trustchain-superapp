@@ -133,10 +133,15 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
+//            val publisher = block.transaction["publisher"]
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
                 torrentInfoName is String && torrentInfoName.length > 0
             ) {
-                val coverArt = Util.findCoverArt(File(context?.cacheDir?.path + "/" + Util.sanitizeString(torrentInfoName)))
+                val coverArt = Util.findCoverArt(
+                    File(
+                        context?.cacheDir?.path + "/" + Util.sanitizeString(torrentInfoName)
+                    )
+                )
                 val transaction = activity?.supportFragmentManager?.beginTransaction()
                 val coverFragment = PlaylistCoverFragment(block, connectivity, coverArt)
                 if (coverFragment.filter(searchQuery)) {

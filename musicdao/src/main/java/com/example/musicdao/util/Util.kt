@@ -2,8 +2,8 @@ package com.example.musicdao.util
 
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.Sha1Hash
+import com.frostwire.jlibtorrent.TorrentHandle
 import com.frostwire.jlibtorrent.TorrentInfo
-import com.github.se_bastiaan.torrentstream.Torrent
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
 
@@ -22,6 +22,16 @@ object Util {
         val infoHash = substring.substringBefore("&")
         if (infoHash.length > 39) return Sha1Hash(infoHash)
         return null
+    }
+
+
+    /**
+     * Calculate how much percentage is downloaded of a certain track file based on its file size
+     */
+    fun calculateDownloadProgress(fileProgress: Long, fullSize: Long?): Int {
+        val size = fullSize ?: Long.MAX_VALUE
+        val progress: Double = (fileProgress.toDouble() / size.toDouble()) * 100.0
+        return progress.toInt()
     }
 
     fun calculatePieceIndex(fileIndex: Int, torrentInfo: TorrentInfo): Int {
@@ -49,26 +59,24 @@ object Util {
      * Prefer the first pieces to be downloaded of the selected audio file over the other pieces,
      * so that the first seconds of the track can be buffered as soon as possible
      */
-    fun setSequentialPriorities(torrent: Torrent, onlyCalculating: Boolean = false): Array<Priority> {
+    fun setTorrentPriorities(torrentHandle: TorrentHandle, onlyCalculating: Boolean = false, pieceIndex: Int = 0, fileIndex: Int = 0): Array<Priority> {
+        var interestedPieceIndex = pieceIndex
+        if (interestedPieceIndex == -1) interestedPieceIndex = 0
         val piecePriorities: Array<Priority> =
-            torrent.torrentHandle.piecePriorities()
-        for ((index, piecePriority) in piecePriorities.withIndex()) {
-            if (piecePriority == Priority.SEVEN) {
-                piecePriorities[index] = Priority.SIX
+            torrentHandle.piecePriorities()
+        // Set the 5 concurrent pieces of the interested portion of some track as high priority
+        for (i in interestedPieceIndex until interestedPieceIndex + 5) {
+            if (piecePriorities.indices.contains(i)) {
+                piecePriorities[i] = Priority.SIX
             }
-            if (piecePriority == Priority.NORMAL) {
-                piecePriorities[index] = Priority.FIVE
-            }
-            if (piecePriority == Priority.IGNORE) {
-                piecePriorities[index] = Priority.NORMAL
-            }
-        }
-        for (i in torrent.interestedPieceIndex until torrent.interestedPieceIndex + torrent.piecesToPrepare) {
-            piecePriorities[i] = Priority.SEVEN
         }
         if (onlyCalculating) return piecePriorities // For making unit test possible
         for ((index, priority) in piecePriorities.withIndex()) {
-            torrent.torrentHandle.piecePriority(index, priority)
+            torrentHandle.piecePriority(index, priority)
+        }
+        // Set file priority high of the currently selected track
+        if (torrentHandle.filePriorities().indices.contains(fileIndex)) {
+            torrentHandle.filePriority(fileIndex, Priority.SIX)
         }
         return piecePriorities
     }

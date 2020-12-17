@@ -18,9 +18,5 @@ class ReleaseFragmentTest {
         every {
             releaseFragment.context?.cacheDir
         } returns resources
-        Assert.assertEquals(
-            resources.toURI().toURL().toString() + "RFBMP.torrent",
-            releaseFragment.resolveTorrentUrl("RFBMP")
-        )
     }
 }
