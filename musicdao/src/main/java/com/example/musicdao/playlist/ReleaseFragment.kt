@@ -191,7 +191,6 @@ class ReleaseFragment(
             }
         }
         sessionManager.addListener(torrentListener)
-
     }
 
     private fun fetchTorrentInfo(saveDir: File): TorrentInfo? {
@@ -320,17 +319,18 @@ class ReleaseFragment(
         audioPlayer?.setTrackInfo(trackInfo ?: "")
     }
 
+    /**
+     * Update the UI with the latest state of the selected TorrentHandle
+     */
     fun onStreamProgress(torrentHandle: TorrentHandle) {
         val fileIndex = currentFileIndex
         val currentProgress = torrentHandle.fileProgress()
         if (currentProgress != null) updateFileProgress(currentProgress)
 
         if (!currentProgress.indices.contains(fileIndex)) return
-
         // Progress, measured in downloaded bytes
         val currentFileProgress =
             currentProgress[currentFileIndex]
-
         val audioPlayer = AudioPlayer.getInstance()
         val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex))
         if (!audioFile.isFile) return

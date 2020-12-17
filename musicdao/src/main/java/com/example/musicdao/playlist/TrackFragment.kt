@@ -34,4 +34,8 @@ class TrackFragment(
         progressBar.progress = progresss
         return true
     }
+
+    fun getProgress(): Int {
+        return progress ?: 0
+    }
 }

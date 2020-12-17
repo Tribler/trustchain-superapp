@@ -24,7 +24,6 @@ object Util {
         return null
     }
 
-
     /**
      * Calculate how much percentage is downloaded of a certain track file based on its file size
      */
