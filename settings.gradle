@@ -7,7 +7,6 @@ include ':ipv8-android'
 project(':ipv8-android').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-android')
 
 include ':musicdao-datafeeder'
-project(':musicdao-datafeeder').projectDir = new File(settingsDir, 'kotlin-ipv8/musicdao-datafeeder')
 
 include 'ipv8-jvm'
 project(':ipv8-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-jvm')
