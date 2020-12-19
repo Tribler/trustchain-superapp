@@ -98,7 +98,6 @@ class DataFeeder(private val musicDir: File) {
         )
     }
 
-
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
         val randomWalk = RandomWalk.Factory(timeout = 3.0, peers = 20)
         val randomChurn = RandomChurn.Factory()
@@ -159,7 +158,6 @@ class DataFeeder(private val musicDir: File) {
                     if (artist == null || title == null || year == null) {
                         continue
                     } else {
-                        if (count > 1) break // TODO remove this
                         count += 1
                         // Check if exists in map
                         // Optional create ipv8 id
@@ -181,12 +179,15 @@ class DataFeeder(private val musicDir: File) {
                         }
                         // TODO should we create the torrents ourselves?
 //                        val tor = SharedTorrent.create(albumFile, list, 65535, listOf(), "TrustChain-Superapp")
-                        val torrentFile = "$albumFile.torrent"
+                        var torrentFile = "$albumFile.torrent"
+                        if (!File(torrentFile).isFile) {
+                            torrentFile = "$albumFile.torrent.added"
+                        }
 //                        tor.save(FileOutputStream(torrentFile))
                         val torrentInfo = TorrentInfo(File(torrentFile))
                         val magnet = torrentInfo.makeMagnetUri()
                         val torrentInfoName = torrentInfo.name()
-                        //
+
                         val publicKey = community.myPeer.publicKey
                         val transaction = mutableMapOf<String, String>(
                             "magnet" to magnet,
