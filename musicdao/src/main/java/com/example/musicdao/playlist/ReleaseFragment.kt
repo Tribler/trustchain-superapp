@@ -11,6 +11,7 @@ import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
 import com.example.musicdao.net.ContentSeeder
+import com.example.musicdao.net.TorrentConfig
 import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
@@ -33,7 +34,7 @@ import java.net.URLDecoder
  * of the magnet link that is contained in the Release TrustChain block
  */
 class ReleaseFragment(
-    private val magnet: String,
+    private var magnet: String,
     private val artists: String,
     private val title: String,
     private val releaseDate: String,
@@ -137,7 +138,7 @@ class ReleaseFragment(
                 return
             }
             if (sessionManager.find(torrentInfo.infoHash()) == null) {
-                sessionManager.download(torrentInfo, saveDir)
+                sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
             }
         } else {
             // The torrent has not been finished yet previously, so start downloading
@@ -195,7 +196,7 @@ class ReleaseFragment(
 
     private fun fetchTorrentInfo(saveDir: File): TorrentInfo? {
         val torrentData =
-            sessionManager.fetchMagnet(magnet, 100) ?: return null // 100 second time-out for
+            sessionManager.fetchMagnet(magnet, 1000) ?: return null // 100 second time-out for
         // fetching the TorrentInfo metadata from peers, when no torrent file is available locally
         val torrentInfo = TorrentInfo.bdecode(torrentData)
         ContentSeeder.getInstance(saveDir, sessionManager)

@@ -73,8 +73,19 @@ class DataFeeder(private val musicDir: File) {
         val swarmHealthMap = musicCommunity.swarmHealthMap
         var count = 1
         val max = 5
+        // Update all the timestamps to the current time, as we are still seeding all torrents
+        val iterator = swarmHealthMap.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            val infoHash = entry.key
+            val swarmHealth = entry.value
+            val swarmHealthUpdatedTimestamp = SwarmHealth(swarmHealth.infoHash,
+                swarmHealth.numPeers, swarmHealth.numSeeds)
+            swarmHealthMap[infoHash] = swarmHealthUpdatedTimestamp
+        }
         for ((_, swarmHealth) in swarmHealthMap) {
             if (count > max) return
+            // Refresh the timestamps
             musicCommunity.sendSwarmHealthMessage(swarmHealth)
             count += 1
         }
@@ -177,7 +188,6 @@ class DataFeeder(private val musicDir: File) {
                         audioFiles.forEach {
                             list.add(it)
                         }
-                        // TODO should we create the torrents ourselves?
 //                        val tor = SharedTorrent.create(albumFile, list, 65535, listOf(), "TrustChain-Superapp")
                         var torrentFile = "$albumFile.torrent"
                         if (!File(torrentFile).isFile) {
@@ -188,7 +198,7 @@ class DataFeeder(private val musicDir: File) {
                         val magnet = torrentInfo.makeMagnetUri()
                         val torrentInfoName = torrentInfo.name()
 
-                        val publicKey = community.myPeer.publicKey
+//                        val publicKey = community.myPeer.publicKey
                         val transaction = mutableMapOf<String, String>(
                             "magnet" to magnet,
                             "title" to title,
@@ -201,11 +211,11 @@ class DataFeeder(private val musicDir: File) {
                         for (entry in transaction) {
                             println("${entry.key} - ${entry.value}")
                         }
-                        community.createProposalBlock(
-                            "publish_release",
-                            transaction,
-                            publicKey.keyToBin()
-                        )
+//                        community.createProposalBlock(
+//                            "publish_release",
+//                            transaction,
+//                            publicKey.keyToBin()
+//                        )
                         community.swarmHealthMap[torrentInfo.infoHash()] =
                             SwarmHealth(torrentInfo.infoHash().toString(), 0.toUInt(), 1.toUInt())
                     }

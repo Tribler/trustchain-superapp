@@ -21,6 +21,7 @@ import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.Sha1Hash
+import com.frostwire.jlibtorrent.swig.string_int_pair
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -68,7 +69,9 @@ class MusicService : AppCompatActivity() {
     private fun startup() {
         val ses = SessionManager() // TODO Add seedbox node address?
         ses.start()
-
+        ses.swig().add_dht_node(string_int_pair("130.161.119.207", 51413))
+        ses.startDht()
+//        ses.swig().add_dht_node(string_int_pair("130.161.119.207", 6881))
         registerBlockSigner()
         iterativelySendReleaseBlocks()
         iterativelyUpdateConnectivityStats()
