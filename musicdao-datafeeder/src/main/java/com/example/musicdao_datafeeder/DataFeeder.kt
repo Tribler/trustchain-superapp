@@ -198,7 +198,7 @@ class DataFeeder(private val musicDir: File) {
                         val magnet = torrentInfo.makeMagnetUri()
                         val torrentInfoName = torrentInfo.name()
 
-//                        val publicKey = community.myPeer.publicKey
+                        val publicKey = community.myPeer.publicKey
                         val transaction = mutableMapOf<String, String>(
                             "magnet" to magnet,
                             "title" to title,
@@ -211,11 +211,11 @@ class DataFeeder(private val musicDir: File) {
                         for (entry in transaction) {
                             println("${entry.key} - ${entry.value}")
                         }
-//                        community.createProposalBlock(
-//                            "publish_release",
-//                            transaction,
-//                            publicKey.keyToBin()
-//                        )
+                        community.createProposalBlock(
+                            "publish_release",
+                            transaction,
+                            publicKey.keyToBin()
+                        )
                         community.swarmHealthMap[torrentInfo.infoHash()] =
                             SwarmHealth(torrentInfo.infoHash().toString(), 0.toUInt(), 1.toUInt())
                     }
