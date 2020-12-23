@@ -1,11 +1,14 @@
 package com.example.musicdao.util
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentHandle
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
+import java.io.FileOutputStream
 
 object Util {
 
@@ -58,7 +61,12 @@ object Util {
      * Prefer the first pieces to be downloaded of the selected audio file over the other pieces,
      * so that the first seconds of the track can be buffered as soon as possible
      */
-    fun setTorrentPriorities(torrentHandle: TorrentHandle, onlyCalculating: Boolean = false, pieceIndex: Int = 0, fileIndex: Int = 0): Array<Priority> {
+    fun setTorrentPriorities(
+        torrentHandle: TorrentHandle,
+        onlyCalculating: Boolean = false,
+        pieceIndex: Int = 0,
+        fileIndex: Int = 0
+    ): Array<Priority> {
         var interestedPieceIndex = pieceIndex
         if (interestedPieceIndex == -1) interestedPieceIndex = 0
         val piecePriorities: Array<Priority> =
@@ -150,6 +158,23 @@ object Util {
             if (cover.isFile) {
                 return cover
             }
+        }
+        // If no file named "Cover" exists, we try to extract the albumImage from the first MP3 we
+        // see, and assume it is the album image for the whole Release
+        for (file in files) {
+            try {
+                val mp3File = Mp3File(file)
+                if (!mp3File.hasId3v2Tag()) continue
+                val imageBytes = mp3File.id3v2Tag.albumImage
+                val bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                // Once a valid BMP is found, save this bitmap to a PNG file named cover.png
+                val coverFile = File(directory.path + "/cover.png")
+                val fOut = FileOutputStream(coverFile)
+                bmp.compress(Bitmap.CompressFormat.PNG, 85, fOut)
+                fOut.flush()
+                fOut.close()
+                return coverFile
+            } catch (e: Exception) {}
         }
         for (file in files) {
             for (ext in allowedExtensions) {

@@ -84,7 +84,7 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
+<!--        <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />-->
     </application>
 
 </manifest>

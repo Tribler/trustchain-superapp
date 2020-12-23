@@ -16,10 +16,7 @@ import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.PieceFinishedAlert
-import com.frostwire.jlibtorrent.alerts.TorrentFinishedAlert
+import com.frostwire.jlibtorrent.alerts.*
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.*
 import org.bitcoinj.core.Address
@@ -149,11 +146,15 @@ class ReleaseFragment(
                 currentTorrent = torrentInfo
             }
             if (sessionManager.find(torrentInfo.infoHash()) == null) {
-                sessionManager.download(torrentInfo, saveDir)
+                sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
             }
         }
-
         val torrent = sessionManager.find(currentTorrent?.infoHash())
+        val sessionHandle = SessionHandle(sessionManager.swig())
+        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
+
+        sessionHandle.postDhtStats()
+
         // Prioritize file 1
         activity?.runOnUiThread {
             setMetadata(torrent.torrentFile().files())
@@ -170,7 +171,8 @@ class ReleaseFragment(
             override fun types(): IntArray {
                 return intArrayOf(
                     AlertType.PIECE_FINISHED.swig(),
-                    AlertType.TORRENT_FINISHED.swig()
+                    AlertType.TORRENT_FINISHED.swig(),
+                    AlertType.DHT_STATS.swig()
                 )
             }
 
@@ -185,6 +187,10 @@ class ReleaseFragment(
                         val handle = (alert as TorrentFinishedAlert).handle()
                         if (handle.infoHash() != currentTorrent?.infoHash()) return
                         onStreamProgress(handle)
+                    }
+                    AlertType.DHT_STATS -> {
+                        val dhtStatsAlert = (alert as DhtStatsAlert)
+                        dhtStatsAlert.routingTable()
                     }
                     else -> {
                     }
