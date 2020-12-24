@@ -123,8 +123,8 @@ object Util {
     fun isTorrentCompleted(torrentInfo: TorrentInfo, saveDirectory: File): Boolean {
         val dir = File(saveDirectory.path + "/" + torrentInfo.name())
         if (!dir.isDirectory) return false
-        if (folderSize(dir) != torrentInfo.totalSize()) return false
-        return true
+        if (folderSize(dir) >= torrentInfo.totalSize()) return true
+        return false
     }
 
     private fun folderSize(dir: File): Long {

@@ -11,12 +11,14 @@ import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
 import com.example.musicdao.net.ContentSeeder
-import com.example.musicdao.net.TorrentConfig
 import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.*
+import com.frostwire.jlibtorrent.alerts.Alert
+import com.frostwire.jlibtorrent.alerts.AlertType
+import com.frostwire.jlibtorrent.alerts.PieceFinishedAlert
+import com.frostwire.jlibtorrent.alerts.TorrentFinishedAlert
 import kotlinx.android.synthetic.main.fragment_release.*
 import kotlinx.coroutines.*
 import org.bitcoinj.core.Address
@@ -134,9 +136,7 @@ class ReleaseFragment(
                 }
                 return
             }
-            if (sessionManager.find(torrentInfo.infoHash()) == null) {
-                sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
-            }
+            sessionManager.download(torrentInfo, saveDir)
         } else {
             // The torrent has not been finished yet previously, so start downloading
             val torrentInfo = fetchTorrentInfo(saveDir)
@@ -145,15 +145,11 @@ class ReleaseFragment(
             } else {
                 currentTorrent = torrentInfo
             }
-            if (sessionManager.find(torrentInfo.infoHash()) == null) {
-                sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
-            }
+            sessionManager.download(torrentInfo, saveDir)
         }
         val torrent = sessionManager.find(currentTorrent?.infoHash())
-        val sessionHandle = SessionHandle(sessionManager.swig())
-        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
-
-        sessionHandle.postDhtStats()
+//        val sessionHandle = SessionHandle(sessionManager.swig())
+//        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
 
         // Prioritize file 1
         activity?.runOnUiThread {
@@ -171,8 +167,7 @@ class ReleaseFragment(
             override fun types(): IntArray {
                 return intArrayOf(
                     AlertType.PIECE_FINISHED.swig(),
-                    AlertType.TORRENT_FINISHED.swig(),
-                    AlertType.DHT_STATS.swig()
+                    AlertType.TORRENT_FINISHED.swig()
                 )
             }
 
@@ -187,10 +182,6 @@ class ReleaseFragment(
                         val handle = (alert as TorrentFinishedAlert).handle()
                         if (handle.infoHash() != currentTorrent?.infoHash()) return
                         onStreamProgress(handle)
-                    }
-                    AlertType.DHT_STATS -> {
-                        val dhtStatsAlert = (alert as DhtStatsAlert)
-                        dhtStatsAlert.routingTable()
                     }
                     else -> {
                     }
