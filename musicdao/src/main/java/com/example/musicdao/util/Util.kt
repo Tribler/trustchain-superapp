@@ -96,6 +96,7 @@ object Util {
             if (fileNameLocal.endsWith(s)) {
                 fileNameLocal = fileNameLocal.substringBefore(s)
                 fileNameLocal = fileNameLocal.replace("_", " ")
+                fileNameLocal = fileNameLocal.substringAfterLast("-")
                 return fileNameLocal
             }
         }

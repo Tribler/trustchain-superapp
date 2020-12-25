@@ -11,6 +11,7 @@ import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
 import com.example.musicdao.net.ContentSeeder
+import com.example.musicdao.net.TorrentConfig
 import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
@@ -136,7 +137,7 @@ class ReleaseFragment(
                 }
                 return
             }
-            sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
         } else {
             // The torrent has not been finished yet previously, so start downloading
             val torrentInfo = fetchTorrentInfo(saveDir)
@@ -145,11 +146,11 @@ class ReleaseFragment(
             } else {
                 currentTorrent = torrentInfo
             }
-            sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
         }
         val torrent = sessionManager.find(currentTorrent?.infoHash())
-//        val sessionHandle = SessionHandle(sessionManager.swig())
-//        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
+        val sessionHandle = SessionHandle(sessionManager.swig())
+        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
 
         // Prioritize file 1
         activity?.runOnUiThread {
@@ -321,6 +322,7 @@ class ReleaseFragment(
      * Update the UI with the latest state of the selected TorrentHandle
      */
     fun onStreamProgress(torrentHandle: TorrentHandle) {
+        val saveDir = context?.cacheDir ?: return
         val fileIndex = currentFileIndex
         val currentProgress = torrentHandle.fileProgress()
         if (currentProgress != null) updateFileProgress(currentProgress)
@@ -330,10 +332,10 @@ class ReleaseFragment(
         val currentFileProgress =
             currentProgress[currentFileIndex]
         val audioPlayer = AudioPlayer.getInstance()
-        val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex))
+        val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex, saveDir.absolutePath))
         if (!audioFile.isFile) return
         // If we selected a file to play but it is not playing, start playing it after 30% progress
-        if (currentFileProgress > 64 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
+        if (currentFileProgress > 500 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
             currentFileIndex != -1
         ) {
             startPlaying(

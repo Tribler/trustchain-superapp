@@ -24,7 +24,7 @@
 
         <activity
             android:name=".ui.dashboard.DashboardActivity"
-            android:label="IPv8 Apps"
+            android:label="Trustchain Superapp"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

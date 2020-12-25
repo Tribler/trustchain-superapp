@@ -27,7 +27,7 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
     private var lastReleaseBlocksSize = -1
     private var lastSwarmHealthMapSize = -1
     private var searchQuery = ""
-    private val maxPlaylists = 30 // Max playlists to show
+    private val maxPlaylists = 100 // Max playlists to show
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -133,9 +133,10 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
-//            val publisher = block.transaction["publisher"]
+            val publisher = block.transaction["publisher"]
             if (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
-                torrentInfoName is String && torrentInfoName.length > 0
+                torrentInfoName is String && torrentInfoName.length > 0 && publisher is String &&
+                publisher.length > 0
             ) {
                 val coverArt = Util.findCoverArt(
                     File(
