@@ -18,7 +18,7 @@ lateinit var contentSeederInstance: ContentSeeder
  * Currently, a max. of 10 torrents, in LIFO ordering, from the cache directory, are being seeded.
  */
 class ContentSeeder(private val saveDir: File, private val sessionManager: SessionManager) {
-    private val maxTorrentThreads = 10
+    private val maxTorrentThreads = 20
     private var started = false
 
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()

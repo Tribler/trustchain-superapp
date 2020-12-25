@@ -24,6 +24,7 @@ import java.io.File
  * A screen showing an overview of playlists to browse through
  */
 class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_overview) {
+    private var releaseRefreshCount = 0
     private var lastReleaseBlocksSize = -1
     private var lastSwarmHealthMapSize = -1
     private var searchQuery = ""
@@ -43,15 +44,24 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
 
         lastReleaseBlocksSize = -1
         lastSwarmHealthMapSize = -1
+        releaseRefreshCount = 0
 
         lifecycleScope.launchWhenCreated {
             while (isActive && isAdded && !isDetached) {
                 if (activity is MusicService && debugText != null) {
                     debugText.text = (activity as MusicService).getStatsOverview()
                 }
-                showAllReleases()
+                if (releaseRefreshCount < 3) {
+                    showAllReleases()
+                    releaseRefreshCount += 1
+                }
                 delay(3000)
             }
+        }
+
+        swipeRefresh.setOnRefreshListener {
+            showAllReleases()
+            swipeRefresh.isRefreshing = false
         }
 
         addPlaylistFab.setOnClickListener {

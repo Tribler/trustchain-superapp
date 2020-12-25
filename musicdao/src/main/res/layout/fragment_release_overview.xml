@@ -22,7 +22,8 @@
         android:text="No music playlists found from peers"
         android:textColor="@color/white"/>
 
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ScrollView
@@ -55,5 +56,5 @@
             android:elevation="10dp"
             android:src="@drawable/ic_baseline_add_24"
             app:rippleColor="@color/white" />
-    </RelativeLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>
