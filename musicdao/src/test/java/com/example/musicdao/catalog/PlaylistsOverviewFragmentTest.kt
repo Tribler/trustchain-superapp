@@ -3,7 +3,6 @@ package com.example.musicdao.catalog
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.keyvault.JavaCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import org.bitcoinj.core.ECKey
 import org.junit.Assert
 import org.junit.Test
 import java.util.*
@@ -11,7 +10,7 @@ import java.util.*
 class PlaylistsOverviewFragmentTest {
     private val privateKey =
         JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
-    private val bitcoinPublicKey = ECKey().publicKeyAsHex
+    private val bitcoinPublicKey = "some-key"
     private val wellStructuredBlock = TrustChainBlock(
         "publish_release",
         TransactionEncoding.encode(
