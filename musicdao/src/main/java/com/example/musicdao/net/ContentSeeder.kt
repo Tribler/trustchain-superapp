@@ -19,7 +19,6 @@ lateinit var contentSeederInstance: ContentSeeder
  */
 class ContentSeeder(private val saveDir: File, private val sessionManager: SessionManager) {
     private val maxTorrentThreads = 20
-    private var started = false
 
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
 
@@ -29,8 +28,6 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
      */
     fun start(): Int {
         var count = 0
-//        if (started) return count
-//        started = true TODO should this code stay?
         if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
         val fileList = saveDir.listFiles()
         if (fileList !is Array<File>) return count
