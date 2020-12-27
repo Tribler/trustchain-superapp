@@ -10,6 +10,7 @@ import java.util.*
 class PlaylistsOverviewFragmentTest {
     private val privateKey =
         JavaCryptoProvider.keyFromPrivateBin("4c69624e61434c534b3a069c289bd6031de93d49a8c35c7b2f0758c77c7b24b97842d08097abb894d8e98ba8a91ebc063f0687909f390b7ed9ec1d78fcc462298b81a51b2e3b5b9f77f2".hexToBytes())
+    private val bitcoinPublicKey = "some-key"
     private val wellStructuredBlock = TrustChainBlock(
         "publish_release",
         TransactionEncoding.encode(
@@ -18,7 +19,8 @@ class PlaylistsOverviewFragmentTest {
                 "title" to "title",
                 "artists" to "artists",
                 "date" to "date",
-                "torrentInfoName" to "torrentInfoName"
+                "torrentInfoName" to "torrentInfoName",
+                "publisher" to bitcoinPublicKey
             )
         ),
         privateKey.pub().keyToBin(),

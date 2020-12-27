@@ -21,7 +21,7 @@ class AudioPlayer : MusicBaseFragment(R.layout.fragment_trackplaying) {
     private var playingFile: File? = null
     private var currentFileIndex: Int = 0
 
-    private var exoPlayer: SimpleExoPlayer? = null
+    var exoPlayer: SimpleExoPlayer? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setInstance(this)

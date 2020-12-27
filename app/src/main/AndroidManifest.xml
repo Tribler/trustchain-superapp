@@ -24,7 +24,7 @@
 
         <activity
             android:name=".ui.dashboard.DashboardActivity"
-            android:label="IPv8 Apps"
+            android:label="Trustchain Superapp"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -84,7 +84,7 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
+<!--        <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />-->
     </application>
 
 </manifest>

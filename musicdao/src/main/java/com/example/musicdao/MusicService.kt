@@ -16,11 +16,13 @@ import androidx.navigation.findNavController
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.ipv8.SwarmHealth
 import com.example.musicdao.net.ContentSeeder
+import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.Sha1Hash
+import kotlinx.android.synthetic.main.dialog_tip_artist.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
@@ -60,15 +62,15 @@ class MusicService : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        AudioPlayer.getInstance()?.exoPlayer?.stop()
         sessionManager?.stop()
         sessionManager = null
         super.onDestroy()
     }
 
     private fun startup() {
-        val ses = SessionManager() // TODO Add seedbox node address?
+        val ses = SessionManager()
         ses.start()
-
         registerBlockSigner()
         iterativelySendReleaseBlocks()
         iterativelyUpdateConnectivityStats()
@@ -227,7 +229,7 @@ class MusicService : AppCompatActivity() {
         if (!sessionManager.isRunning) return "Starting torrent client..."
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
             Util.readableBytes(sessionManager.downloadRate())
-        }"
+        }, dht nodes (torrent): ${sessionManager.dhtNodes()}"
     }
 
     /**
