@@ -28,7 +28,7 @@ import java.net.InetAddress
 import java.util.*
 
 fun main(args: Array<String>) {
-    if (args.size != 1) {
+    if (args.size != 2) {
         println("Usage: DataFeeder [path] <nopublish>")
         return
     }
