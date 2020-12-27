@@ -29,7 +29,7 @@ import java.util.*
 
 fun main(args: Array<String>) {
     if (args.size != 1) {
-        println("Usage: DataFeeder [path]")
+        println("Usage: DataFeeder [path] <nopublish>")
         return
     }
     val dir = File(args[0])
@@ -37,14 +37,19 @@ fun main(args: Array<String>) {
         println("$dir is not a directory")
         return
     }
-    DataFeeder(dir).start()
+    val disable = args[1]
+    var publish = false
+    if (disable == "nopublish") {
+        publish = true
+    }
+    DataFeeder(dir, publish).start()
 }
 
 /**
  * @param musicDir a directory with directories (music albums/EPs/singles), in which the deep
  * directory should contain MP3 files
  */
-class DataFeeder(private val musicDir: File) {
+class DataFeeder(private val musicDir: File, private val publish: Boolean) {
     fun start() {
         startIpv8()
         val ipv8Local = ipv8 ?: return
@@ -211,11 +216,13 @@ class DataFeeder(private val musicDir: File) {
                         for (entry in transaction) {
                             println("${entry.key} - ${entry.value}")
                         }
-                        community.createProposalBlock(
-                            "publish_release",
-                            transaction,
-                            publicKey.keyToBin()
-                        )
+                        if (publish) {
+                            community.createProposalBlock(
+                                "publish_release",
+                                transaction,
+                                publicKey.keyToBin()
+                            )
+                        }
                         community.swarmHealthMap[torrentInfo.infoHash()] =
                             SwarmHealth(torrentInfo.infoHash().toString(), 0.toUInt(), 1.toUInt())
                     }

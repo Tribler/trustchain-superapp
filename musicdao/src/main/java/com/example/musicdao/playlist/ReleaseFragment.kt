@@ -47,6 +47,7 @@ class ReleaseFragment(
     private var currentFileIndex = -1
     private var currentTorrent: TorrentInfo? = null
     private var torrentListener: AlertListener? = null
+    private var selectedToPlay = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -288,7 +289,7 @@ class ReleaseFragment(
             File("${context?.cacheDir}/${downloadedTor.files().filePath(currentFileIndex)}")
         // It is not a streaming torrent, and therefore we can conclude we already have
         // it locally so we can just start playing it
-        if (fileToPlay.isFile && fileToPlay.length() > 1024 * 64) {
+        if (fileToPlay.isFile && fileToPlay.length() > 300 * 1024) {
             startPlaying(fileToPlay, currentFileIndex)
         } else {
             AudioPlayer.getInstance()
@@ -335,9 +336,10 @@ class ReleaseFragment(
         val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex, saveDir.absolutePath))
         if (!audioFile.isFile) return
         // If we selected a file to play but it is not playing, start playing it after 30% progress
-        if (currentFileProgress > 500 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
-            currentFileIndex != -1
+        if (currentFileProgress > 300 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
+            currentFileIndex != -1 && selectedToPlay != currentFileIndex
         ) {
+            selectedToPlay = currentFileIndex
             startPlaying(
                 audioFile,
                 currentFileIndex
