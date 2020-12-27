@@ -38,9 +38,9 @@ fun main(args: Array<String>) {
         return
     }
     val disable = args[1]
-    var publish = false
+    var publish = true
     if (disable == "nopublish") {
-        publish = true
+        publish = false
     }
     DataFeeder(dir, publish).start()
 }
