@@ -34,7 +34,7 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             txtMessage.gravity = Gravity.END
         }
         item.transaction?.transaction?.let {
-            txtTransaction.text = TransactionRepository.prettyAmount(item.transaction.transaction["amount"] as Long)
+            txtTransaction.text = TransactionRepository.prettyAmount((item.transaction.transaction["amount"] as BigInteger).toLong())
             if (item.chatMessage.message.isEmpty()) {
                 txtMessage.visibility = View.GONE
             }

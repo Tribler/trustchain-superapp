@@ -21,7 +21,9 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -57,7 +59,7 @@ class TransactionsFragment : BaseFragment(R.layout.fragment_transactions) {
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 // Refresh peer status periodically
-                val items = transactionRepository.getTransactions().map { block -> TransactionItem(
+                val items = transactionRepository.getTransactions().map { block : Transaction -> TransactionItem(
                     block
                 ) }
                 adapter.updateItems(items)
