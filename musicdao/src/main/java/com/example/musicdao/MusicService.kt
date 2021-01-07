@@ -1,11 +1,14 @@
 package com.example.musicdao
 
 import android.app.SearchManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
+import android.os.IBinder
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -35,17 +38,26 @@ import kotlin.random.Random
  * This maintains the interactions between the UI and seeding/trustchain
  */
 class MusicService : AppCompatActivity() {
-    private val navigationGraph: Int = R.navigation.musicdao_navgraph
-    var sessionManager: SessionManager? = null
-
     // Popularity measurement by swarm health
     var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
-    private val popularityGossipInterval: Long = 5000
-    private val gossipTopTorrents = 5 // The amount of most popular torrents we use to gossip its
+    private lateinit var musicGossipingService: MusicGossipingService
+    private var mBound = false // Whether the musicGossipingService is bound to the current activity
+    private val navigationGraph: Int = R.navigation.musicdao_navgraph
 
-    // swarm health with neighbours
-    private val gossipRandomTorrents = 5 // The amount of torrents we know its swarm health of
-    // to share with neighbours
+    private val connection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as MusicGossipingService.LocalBinder
+            musicGossipingService = binder.getService()
+            mBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            mBound = false
+        }
+    }
+
+    var sessionManager: SessionManager? = null
 
     private val navController by lazy {
         findNavController(R.id.navHostFragment)
@@ -68,17 +80,36 @@ class MusicService : AppCompatActivity() {
         super.onDestroy()
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        Intent(this, MusicGossipingService::class.java).also { intent ->
+            startService(intent)
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (mBound) {
+            unbindService(connection)
+            mBound = false
+        }
+    }
+
     private fun startup() {
         val ses = SessionManager()
         ses.start()
         registerBlockSigner()
-        iterativelySendReleaseBlocks()
-        iterativelyUpdateConnectivityStats()
+        iterativelyUpdateSwarmHealth()
+
         // Start ContentSeeder service: for serving music torrents to other devices
         ContentSeeder.getInstance(
             applicationContext.cacheDir,
             ses
         ).start()
+
         // Start WalletService, for maintaining and sending coins
         WalletService.getInstance(applicationContext.cacheDir, this@MusicService)
             .start()
@@ -127,73 +158,19 @@ class MusicService : AppCompatActivity() {
     }
 
     /**
-     * This is a very simplistic way to crawl all chains from the peers you know
-     */
-    private fun iterativelySendReleaseBlocks() {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
-        lifecycleScope.launchWhenStarted {
-            while (isActive) {
-                musicCommunity?.communicateReleaseBlocks()
-                delay(3000)
-            }
-        }
-    }
-
-    /**
      * Keep track of Swarm Health for all torrents being monitored
      */
-    private fun iterativelyUpdateConnectivityStats() {
+    private fun iterativelyUpdateSwarmHealth() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 swarmHealthMap = filterSwarmHealthMap()
-                // Pick 5 of the most popular torrents and 5 random torrents, and send those stats to any neighbour
-                // First, we sort the map based on swarm health
-                val sortedMap = swarmHealthMap.toList()
-                    .sortedBy { (_, value) -> value }
-                    .toMap()
-                gossipSwarmHealth(sortedMap, gossipTopTorrents)
-                gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
-                delay(popularityGossipInterval)
+
+                if (mBound) {
+                    musicGossipingService.setSwarmHealthMap(swarmHealthMap)
+                }
+                delay(3000)
             }
         }
-    }
-
-    /**
-     * Send SwarmHealth information to #maxIterations random peers
-     */
-    private fun gossipSwarmHealth(map: Map<Sha1Hash, SwarmHealth>, maxInterations: Int) {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
-        var count = 0
-        for (entry in map.entries) {
-            count += 1
-            if (count > maxInterations) break
-            musicCommunity?.sendSwarmHealthMessage(entry.value)
-        }
-    }
-
-    /**
-     * Go through all the torrents that we are currently seeding and mark its connectivity to peers
-     */
-    private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
-        val sessionManager = sessionManager ?: return mutableMapOf()
-        val contentSeeder =
-            ContentSeeder.getInstance(cacheDir, sessionManager)
-        val localMap = contentSeeder.swarmHealthMap
-        for (infoHash in localMap.keys) {
-            // Update all connectivity stats of the torrents that we are currently seeding
-            if (sessionManager.isRunning) {
-                val handle = sessionManager.find(infoHash) ?: continue
-                val newSwarmHealth = SwarmHealth(
-                    infoHash.toString(),
-                    handle.status().numPeers().toUInt(),
-                    handle.status().numSeeds().toUInt()
-                )
-                // Never go below 1, because we know we are at least 1 seeder of our local files
-                if (newSwarmHealth.numSeeds.toInt() < 1) continue
-                localMap[infoHash] = newSwarmHealth
-            }
-        }
-        return localMap
     }
 
     /**
@@ -222,6 +199,31 @@ class MusicService : AppCompatActivity() {
     }
 
     /**
+     * Go through all the torrents that we are currently seeding and mark its connectivity to peers
+     */
+    private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
+        val sessionManager = sessionManager ?: return mutableMapOf()
+        val contentSeeder =
+            ContentSeeder.getInstance(cacheDir, sessionManager)
+        val localMap = contentSeeder.swarmHealthMap
+        for (infoHash in localMap.keys) {
+            // Update all connectivity stats of the torrents that we are currently seeding
+            if (sessionManager.isRunning) {
+                val handle = sessionManager.find(infoHash) ?: continue
+                val newSwarmHealth = SwarmHealth(
+                    infoHash.toString(),
+                    handle.status().numPeers().toUInt(),
+                    handle.status().numSeeds().toUInt()
+                )
+                // Never go below 1, because we know we are at least 1 seeder of our local files
+                if (newSwarmHealth.numSeeds.toInt() < 1) continue
+                localMap[infoHash] = newSwarmHealth
+            }
+        }
+        return localMap
+    }
+
+    /**
      * Show libtorrent connectivity stats
      */
     fun getStatsOverview(): String {
@@ -241,7 +243,7 @@ class MusicService : AppCompatActivity() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         musicCommunity?.registerBlockSigner(
             "publish_release",
-            object : BlockSigner { // TODO unstable
+            object : BlockSigner {
                 override fun onSignatureRequest(block: TrustChainBlock) {
                     musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
                 }
