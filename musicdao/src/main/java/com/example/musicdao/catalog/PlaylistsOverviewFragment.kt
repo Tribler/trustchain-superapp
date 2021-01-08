@@ -53,7 +53,6 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 }
                 if (releaseRefreshCount < 3) {
                     showAllReleases()
-                    releaseRefreshCount += 1
                 }
                 delay(3000)
             }
@@ -166,6 +165,9 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                     transaction?.commitAllowingStateLoss()
                 }
             }
+        }
+        if (count != 0) {
+            releaseRefreshCount += 1
         }
         return count
     }
