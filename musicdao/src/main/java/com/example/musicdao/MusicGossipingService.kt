@@ -69,7 +69,7 @@ class MusicGossipingService :
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         while (scope.isActive) {
             musicCommunity?.communicateReleaseBlocks()
-            delay(3000)
+            delay(10000)
         }
     }
 
@@ -85,7 +85,7 @@ class MusicGossipingService :
                 .toMap()
             gossipSwarmHealth(sortedMap, gossipTopTorrents)
             gossipSwarmHealth(swarmHealthMap, gossipRandomTorrents)
-            delay(5000)
+            delay(10000)
         }
     }
 
