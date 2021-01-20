@@ -23,8 +23,7 @@ import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.ReleaseFactory
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
-import com.frostwire.jlibtorrent.SessionManager
-import com.frostwire.jlibtorrent.Sha1Hash
+import com.frostwire.jlibtorrent.*
 import kotlinx.android.synthetic.main.dialog_tip_artist.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

@@ -94,6 +94,8 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
 
     private fun downloadAndSeed(torrentInfo: TorrentInfo) {
         if (torrentInfo.isValid) {
+            torrentInfo.addTracker("udp://130.161.119.207:8000/announce")
+            torrentInfo.addTracker("http://130.161.119.207:8000/announce")
             sessionManager.download(torrentInfo, saveDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))

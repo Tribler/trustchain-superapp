@@ -103,7 +103,7 @@ dependencies {
     implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
 
     // Google Core
-    implementation "com.google.guava:guava:28.2-android"
+//    implementation "com.google.guava:guava:28.2-android"
 
     // Blockchain Info
     implementation 'info.blockchain:api:1.1.4'
