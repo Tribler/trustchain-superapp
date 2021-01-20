@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 22
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -91,7 +91,7 @@ dependencies {
 
     // Cryptocurrency integration
     implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
-    implementation 'com.google.guava:guava:29.0-android'
+//    implementation 'com.google.guava:guava:29.0-android'
     implementation 'org.knowm.xchange:xchange-parent:5.0.1'
     implementation 'org.knowm.xchange:xchange-binance:5.0.1'
 
@@ -108,7 +108,7 @@ dependencies {
     implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
 
     // Reading MP3 metadata
-    implementation 'com.mpatric:mp3agic:0.9.1'
+    implementation 'com.mpatric:mp3agic:0.9.0'
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'

@@ -48,6 +48,18 @@ object Util {
         return pieceIndex
     }
 
+    fun calculateLastPieceIndex(fileIndex: Int, torrentInfo: TorrentInfo): Int {
+        var pieceIndex = 0
+        for (i in 0..fileIndex) {
+            var fullSize = torrentInfo.files().fileSize(i)
+            while (fullSize > 1) {
+                fullSize -= torrentInfo.pieceSize(pieceIndex)
+                pieceIndex += 1
+            }
+        }
+        return pieceIndex
+    }
+
     /**
      * Converts bytes into a string that shows it in a readable format
      */
@@ -71,12 +83,27 @@ object Util {
         if (interestedPieceIndex == -1) interestedPieceIndex = 0
         val piecePriorities: Array<Priority> =
             torrentHandle.piecePriorities()
+
         // Set the 5 concurrent pieces of the interested portion of some track as high priority
         for (i in interestedPieceIndex until interestedPieceIndex + 5) {
             if (piecePriorities.indices.contains(i)) {
                 piecePriorities[i] = Priority.SIX
             }
         }
+
+        // Attempt to set the last piece of the selected file as a high priority
+        val pieceSize = torrentHandle.torrentFile().pieceLength()
+        val fileSize = torrentHandle.torrentFile().files().fileSize(fileIndex)
+        val offset = torrentHandle.torrentFile().files().fileOffset(fileIndex)
+
+        val finalPieceBytes = offset + fileSize - 1
+        if (finalPieceBytes > 0) {
+            val finalPieceIndex = finalPieceBytes / pieceSize
+            if (piecePriorities.indices.contains(finalPieceIndex.toInt())) {
+                piecePriorities[finalPieceIndex.toInt()] = Priority.SIX
+            }
+        }
+
         if (onlyCalculating) return piecePriorities // For making unit test possible
         for ((index, priority) in piecePriorities.withIndex()) {
             torrentHandle.piecePriority(index, priority)
@@ -189,5 +216,12 @@ object Util {
 
     fun sanitizeString(input: String): String {
         return input.replace("%20", " ")
+    }
+
+    /**
+     * Add HTTP and UDP trackers (dedicated tracker for MusicDAO running on a server with static IP)
+     */
+    fun addTrackersToMagnet(magnet: String): String {
+        return "$magnet&tr=udp%3A%2F%2F130.161.119.207%3A8000%2Fannounce&tr=http%3A%2F%2F130.161.119.207%3A8000%2Fannounce"
     }
 }

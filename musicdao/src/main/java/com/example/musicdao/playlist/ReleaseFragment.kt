@@ -11,7 +11,6 @@ import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
 import com.example.musicdao.net.ContentSeeder
-import com.example.musicdao.net.TorrentConfig
 import com.example.musicdao.player.AudioPlayer
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.CryptoCurrencyConfig
@@ -138,7 +137,9 @@ class ReleaseFragment(
                 }
                 return
             }
-            sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
+            currentTorrent?.addTracker("udp://130.161.119.207:F8000/announce")
+            currentTorrent?.addTracker("http://130.161.119.207:8000/announce")
+            sessionManager.download(currentTorrent, saveDir)
         } else {
             // The torrent has not been finished yet previously, so start downloading
             val torrentInfo = fetchTorrentInfo(saveDir)
@@ -147,11 +148,11 @@ class ReleaseFragment(
             } else {
                 currentTorrent = torrentInfo
             }
-            sessionManager.download(torrentInfo, saveDir, null, null, TorrentConfig.bootstrapPeers)
+            currentTorrent?.addTracker("udp://130.161.119.207:8000/announce")
+            currentTorrent?.addTracker("http://130.161.119.207:8000/announce")
+            sessionManager.download(currentTorrent, saveDir)
         }
         val torrent = sessionManager.find(currentTorrent?.infoHash())
-        val sessionHandle = SessionHandle(sessionManager.swig())
-        sessionHandle.addDhtNode(Pair("130.161.119.207", 51413))
 
         // Prioritize file 1
         activity?.runOnUiThread {
@@ -194,6 +195,7 @@ class ReleaseFragment(
     }
 
     private fun fetchTorrentInfo(saveDir: File): TorrentInfo? {
+        magnet = Util.addTrackersToMagnet(magnet)
         val torrentData =
             sessionManager.fetchMagnet(magnet, 100) ?: return null // 100 second time-out for
         // fetching the TorrentInfo metadata from peers, when no torrent file is available locally
