@@ -18,7 +18,7 @@ lateinit var contentSeederInstance: ContentSeeder
  * Currently, a max. of 10 torrents, in LIFO ordering, from the cache directory, are being seeded.
  */
 class ContentSeeder(private val saveDir: File, private val sessionManager: SessionManager) {
-    private val maxTorrentThreads = 20
+    private val maxTorrentThreads = 10
 
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
 
@@ -59,12 +59,12 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
-                    count += 1
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
                     // We only seed torrents that have previously already been fully downloaded
                     if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
                         downloadAndSeed(torrentInfo)
+                        count += 1
                     }
                 }
             }
@@ -96,6 +96,8 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
         if (torrentInfo.isValid) {
             torrentInfo.addTracker("udp://130.161.119.207:8000/announce")
             torrentInfo.addTracker("http://130.161.119.207:8000/announce")
+            torrentInfo.addTracker("udp://130.161.119.207:8000")
+            torrentInfo.addTracker("http://130.161.119.207:8000")
             sessionManager.download(torrentInfo, saveDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
