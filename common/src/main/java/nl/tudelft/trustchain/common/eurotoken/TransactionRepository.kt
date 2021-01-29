@@ -130,22 +130,25 @@ class TransactionRepository (
         return block
     }
 
-    fun sendDestroyProposal(paymentId: String, amount: Long, recipient: String, ip: String, port: Int): TrustChainBlock {
-        val transaction = mapOf(
-            KEY_PAYMENT_ID to paymentId,
-            KEY_AMOUNT to BigInteger.valueOf(amount),
-            KEY_BALANCE to BigInteger.valueOf(getMyBalance() - amount).toLong()
-        )
-        val block =  trustChainCommunity.createProposalBlock(
-            BLOCK_TYPE_DESTROY, transaction,
-            recipient.hexToBytes()
-        )
-
-        val key = defaultCryptoProvider.keyFromPublicBin(recipient.hexToBytes())
+    fun sendDestroyProposal(recipient: ByteArray, ip: String, port: Int, paymentId: String, amount: Long): TrustChainBlock {
+        Log.w("EuroTokenBlockDestroy", "Creating destroy..." )
+        val key = defaultCryptoProvider.keyFromPublicBin(recipient)
         val address = IPv4Address(ip, port)
         val peer = Peer(key, address)
 
+        val transaction = mapOf(
+            KEY_PAYMENT_ID to paymentId,
+            KEY_AMOUNT to BigInteger.valueOf(amount),
+            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
+        )
+        val block =  trustChainCommunity.createProposalBlock(
+            BLOCK_TYPE_DESTROY, transaction,
+            recipient
+        )
+        Log.w("EuroTokenBlockDestroy", "Block made" )
+
         trustChainCommunity.sendBlock(block, peer)
+        Log.w("EuroTokenBlockDestroy", "Sent to peer" )
         return block
     }
 
@@ -184,10 +187,11 @@ class TransactionRepository (
                 val balanceBefore = getBalanceForBlock(database.getBlockBefore(block))
                 val change = getBlockBalanceChange(block)
                 if (block.isProposal){
+                    Log.w("EuroTokenBlockTransfer", "Proposal validating..." )
                     if (block.transaction[KEY_BALANCE] != balanceBefore + change) {
-                        Log.d("EuroTokenBlockTransfer", "verification failed ${block.transaction[KEY_BALANCE]} != ${balanceBefore} + ${change}" )
                         return false
                     }
+                    Log.w("EuroTokenBlockTransfer", "Valid" )
                 } else {
                     if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
                 }
@@ -216,7 +220,6 @@ class TransactionRepository (
                 block: TrustChainBlock,
                 database: TrustChainStore
             ): Boolean {
-                Log.w("EuroTokenBlockCreate", "verification..." )
                 //if (!block.transaction.containsKey(KEY_BALANCE)) return false
                 if (block.isProposal) {
                     if (!block.transaction.containsKey(KEY_AMOUNT)) return false
@@ -224,9 +227,7 @@ class TransactionRepository (
                     Log.w("EuroTokenBlockCreate", "Is valid proposal" )
                 } else {
                     if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
-                    Log.w("EuroTokenBlockCreate", "Is valid agreement" )
                 }
-                Log.w("EuroTokenBlockCreate", "verification succeeded" )
                 //TODO: validate gateway ID here
                 return true
             }
@@ -254,12 +255,14 @@ class TransactionRepository (
                 database: TrustChainStore
             ): Boolean {
                 if (block.isProposal) {
+                    Log.w("EuroTokenBlockDestroy", "Validating..." )
                     if (!block.transaction.containsKey(KEY_BALANCE)) return false
                     if (!block.transaction.containsKey(KEY_AMOUNT)) return false
                     if (!block.transaction.containsKey(KEY_PAYMENT_ID)) return false
                     val balanceBefore = getBalanceForBlock(database.getBlockBefore(block))
                     if (block.transaction[KEY_BALANCE] != balanceBefore + getBlockBalanceChange(block))
                         return false
+                    Log.w("EuroTokenBlockDestroy", "Valid" )
                 } else {
                     if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
                 }

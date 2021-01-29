@@ -25,8 +25,7 @@ class EuroTokenCommunity(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun connectToGateway(payment_id: String, public_key: String, ip: String, port: Int) {
-        println(public_key)
+    fun connectToGateway(public_key: String, ip: String, port: Int, payment_id: String) {
         val key = defaultCryptoProvider.keyFromPublicBin(public_key.hexToBytes())
         val address = IPv4Address(ip, port)
         val peer = Peer(key, address)

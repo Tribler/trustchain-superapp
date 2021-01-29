@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import kotlinx.android.synthetic.main.fragment_exchange.*
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
@@ -58,10 +59,11 @@ class ExchangeFragment : BaseFragment() {
             val connectionData = ConnectionData(it)
             Toast.makeText(requireContext(), connectionData.ip, Toast.LENGTH_LONG).show()
             if (connectionData.amount == -1L){
-                getEuroTokenCommunity().connectToGateway(connectionData.payment_id, connectionData.public_key, connectionData.ip, connectionData.port)
+                getEuroTokenCommunity().connectToGateway(connectionData.public_key, connectionData.ip, connectionData.port, connectionData.payment_id )
                 Toast.makeText(requireContext(), "Sending message", Toast.LENGTH_LONG).show()
             } else {
-                transactionRepository.sendDestroyProposal(connectionData.payment_id, connectionData.amount, connectionData.public_key, connectionData.ip, connectionData.port)
+                //getEuroTokenCommunity().connectToGateway(connectionData.public_key, connectionData.ip, connectionData.port, connectionData.payment_id )
+                transactionRepository.sendDestroyProposal(connectionData.public_key.hexToBytes(), connectionData.ip, connectionData.port, connectionData.payment_id, connectionData.amount )
                 Toast.makeText(requireContext(), "Payment sent", Toast.LENGTH_LONG).show()
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
