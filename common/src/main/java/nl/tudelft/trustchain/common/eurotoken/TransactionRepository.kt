@@ -351,13 +351,13 @@ class TransactionRepository (
 
     companion object {
         fun prettyAmount(amount: Long): String {
-            return (if (amount <0 ) "-" else "") + "€" + (amount / 100).toString() + "," + (abs(amount) % 100).toString().padStart(2, '0')
+            return "€" + (amount / 100).toString() + "," + (abs(amount) % 100).toString().padStart(2, '0')
         }
 
-        private const val BLOCK_TYPE_TRANSFER    = "eurotoken_transfer"
-        private const val BLOCK_TYPE_CREATE      = "eurotoken_creation"
-        private const val BLOCK_TYPE_DESTROY     = "eurotoken_destruction"
-        private const val BLOCK_TYPE_CHECKPOINT  = "eurotoken_checkpoint"
+        const val BLOCK_TYPE_TRANSFER    = "eurotoken_transfer"
+        const val BLOCK_TYPE_CREATE      = "eurotoken_creation"
+        const val BLOCK_TYPE_DESTROY     = "eurotoken_destruction"
+        const val BLOCK_TYPE_CHECKPOINT  = "eurotoken_checkpoint"
 
         private val EUROTOKEN_TYPES  = listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_CREATE, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT)
 

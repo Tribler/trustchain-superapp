@@ -15,6 +15,7 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
@@ -44,12 +45,24 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
             transactionRepository.trustChainCommunity.sendBlock(transaction.block)
         }
 
+        fun payBack(transaction: Transaction) {
+            if (transaction.block.isAgreement) {
+                transactionRepository.sendTransferProposal(recipient=transaction.block.linkPublicKey, amount=transaction.amount)
+            } else {
+                transactionRepository.sendTransferProposal(recipient=transaction.block.publicKey, amount=transaction.amount)
+            }
+        }
+
         fun showOptions(transaction: Transaction) {
-            val items = arrayOf("Resend")
+            var items = arrayOf("Resend")
+            if (!transaction.outgoing && transaction.block.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
+                items = arrayOf("Resend", "Pay back")
+            }
             AlertDialog.Builder(requireContext())
                 .setItems(items) { _, which ->
                     when (which) {
                         0 -> resendBlock(transaction)
+                        1 -> payBack(transaction)
                     }
                 }
                 .show()
