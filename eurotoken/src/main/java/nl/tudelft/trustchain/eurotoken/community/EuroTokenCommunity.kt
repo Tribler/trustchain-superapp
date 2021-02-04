@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.eurotoken.community
 
 import android.content.Context
-import android.database.sqlite.SQLiteConstraintException
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -11,9 +9,6 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import java.nio.charset.StandardCharsets.UTF_16
-import java.util.*
 
 class EuroTokenCommunity(
     private val context: Context

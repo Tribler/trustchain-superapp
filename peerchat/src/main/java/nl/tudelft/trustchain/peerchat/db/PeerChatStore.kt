@@ -16,7 +16,7 @@ import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
-class PeerChatStore( context: Context ) {
+class PeerChatStore( context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "peerchat.db")
     private val database = Database(driver)
     val contactsStore = ContactStore.getInstance(context)

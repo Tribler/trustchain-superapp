@@ -9,9 +9,10 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.common.sqldelight.ContactDatabase
 
-class ContactStore(context: Context ) {
+class ContactStore(context: Context) {
     private val driver = AndroidSqliteDriver(ContactDatabase.Schema, context, "common.db")
     private val database = ContactDatabase(driver)
+
 
     fun addContact(publicKey: PublicKey, name: String) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())

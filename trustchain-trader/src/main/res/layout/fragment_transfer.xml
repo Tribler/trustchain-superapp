@@ -32,6 +32,7 @@
             android:paddingBottom="20dp"
             android:textSize="20sp"
             android:textAlignment="viewStart" />
+
     </LinearLayout>
 
     <LinearLayout

@@ -12,10 +12,22 @@ import java.lang.Math.abs
 import java.math.BigInteger
 
 import nl.tudelft.ipv8.android.IPv8Android
+import java.net.InetAddress
 
 class TransactionRepository (
-    private val trustChainCommunity: TrustChainCommunity
+    public val trustChainCommunity: TrustChainCommunity
 ) {
+    fun getGatewayPeer(): Peer {
+
+        //val ipaddress = InetAddress.getByName("eurotoken.hectobyte.net").address.toString()
+        val ipaddress = "10.0.0.27"
+        val tcpip = IPv4Address(ipaddress, 8090)
+
+        val pubkey = "4c69624e61434c504b3a035fd325276e03b9d0d106a91353cdd00f7a21aa861be79226224809cfedf80cbcc0e210c2ddc2f91a1fbc3e1e3cd0622e32027a27a8be7f5d28a73b42c0369f"
+        val key = defaultCryptoProvider.keyFromPublicBin(pubkey.hexToBytes())
+
+        return Peer(key, tcpip)
+    }
 
     fun getBlockBalanceChange(block: TrustChainBlock?) : Long {
         if (block == null) return 0
@@ -113,20 +125,30 @@ class TransactionRepository (
         )
     }
 
+    fun getPeer(recipient: String, ip: String, port: Int): Peer {
+        val key = defaultCryptoProvider.keyFromPublicBin(recipient.hexToBytes())
+        val address = IPv4Address(ip, port)
+        return Peer(key, address)
+    }
+
     fun sendCheckpointProposal(recipient: String, ip: String, port: Int): TrustChainBlock {
+        return sendCheckpointProposal(getPeer(recipient, ip, port))
+    }
+
+    fun sendCheckpointProposal(peer: Peer): TrustChainBlock {
+        Log.w("EuroTokenBlockCheck", "Creating check..." )
         val transaction = mapOf(
             KEY_BALANCE to BigInteger.valueOf(getMyBalance()).toLong()
         )
         val block =  trustChainCommunity.createProposalBlock(
             BLOCK_TYPE_CHECKPOINT, transaction,
-            recipient.hexToBytes()
+            peer.publicKey.keyToBin()
         )
 
-        val key = defaultCryptoProvider.keyFromPublicBin(recipient.hexToBytes())
-        val address = IPv4Address(ip, port)
-        val peer = Peer(key, address)
+        Log.w("EuroTokenBlockCheck", "Block made" )
 
         trustChainCommunity.sendBlock(block, peer)
+        Log.w("EuroTokenBlockCheck", "Sent to peer" )
         return block
     }
 
@@ -161,7 +183,7 @@ class TransactionRepository (
                 block,
                 sender,
                 defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey),
-                (block.transaction[KEY_AMOUNT] as BigInteger).toLong(),
+                if (block.transaction.containsKey(KEY_AMOUNT)) { (block.transaction[KEY_AMOUNT] as BigInteger).toLong()} else 0L,
                 block.type,
                 getBlockBalanceChange(block) < 0,
                 block.timestamp
@@ -263,8 +285,10 @@ class TransactionRepository (
                     if (block.transaction[KEY_BALANCE] != balanceBefore + getBlockBalanceChange(block))
                         return false
                     Log.w("EuroTokenBlockDestroy", "Valid" )
+                    Log.w("EuroTokenBlockDestroy", "Acceptance" )
                 } else {
-                    if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+                    Log.w("EuroTokenBlockDestroy", "Acceptance" )
+                    //if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
                 }
                 //TODO: validate gateway here
                 return true
@@ -279,7 +303,7 @@ class TransactionRepository (
 
         trustChainCommunity.addListener(BLOCK_TYPE_DESTROY, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("EuroTokenBlockDestroy", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }
@@ -296,7 +320,8 @@ class TransactionRepository (
                     if (block.transaction[KEY_BALANCE] != balanceBefore + getBlockBalanceChange(block))
                         return false
                 } else {
-                    if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+                    Log.d("EuroTokenBlockCheck", "acceptance")
+                    //if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
                 }
                 //TODO: validate gateway here
                 return true
@@ -311,7 +336,7 @@ class TransactionRepository (
 
         trustChainCommunity.addListener(BLOCK_TYPE_CHECKPOINT, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("EuroTokenBlockCheck", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }

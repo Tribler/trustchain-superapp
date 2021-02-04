@@ -115,7 +115,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     }
 
     private fun createItems(contacts: List<Pair<Contact, ChatMessage?>>, peers: List<Peer>): List<Item> {
-        return contacts.map { contactWithMessage ->
+        return contacts.filter { it.first.publicKey != getIpv8().myPeer.publicKey }.map { contactWithMessage ->
             val (contact, message) = contactWithMessage
             val peer = peers.find { it.mid == contact.mid }
             ContactItem(

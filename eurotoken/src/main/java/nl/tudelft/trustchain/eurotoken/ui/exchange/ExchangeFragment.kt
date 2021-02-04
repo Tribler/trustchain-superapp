@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
+import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONObject
 
 
@@ -29,14 +30,10 @@ private const val ARG_PARAM2 = "param2"
  * Use the [ExchangeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ExchangeFragment : BaseFragment() {
+class ExchangeFragment : EurotokenBaseFragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
-
-    private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!)
-    }
 
     private fun getEuroTokenCommunity(): EuroTokenCommunity {
         return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
@@ -48,6 +45,7 @@ class ExchangeFragment : BaseFragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
         class ConnectionData(json: String) : JSONObject(json) {
             val payment_id = this.optString("payment_id")
             val public_key = this.optString("public_key")

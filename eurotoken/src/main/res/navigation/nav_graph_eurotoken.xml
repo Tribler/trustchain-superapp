@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_eurotoken"
-    app:startDestination="@id/transactionFragment">
+    app:startDestination="@id/transferFragment">
     <fragment
-        android:id="@+id/transactionFragment"
+        android:id="@+id/transactionsFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionsFragment"
         android:label="Transaction History"
         tools:layout="@layout/fragment_transactions"
@@ -16,4 +16,41 @@
         android:label="Buy / Sell"
         tools:layout="@layout/fragment_exchange"
         />
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment"
+        android:label="Transfer" >
+        <action
+            android:id="@+id/action_transferFragment_to_sendMoneyFragment"
+            app:destination="@id/sendMoneyFragment" />
+        <action
+            android:id="@+id/action_transferFragment_to_requestMoneyFragment"
+            app:destination="@id/requestMoneyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/sendMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.SendMoneyFragment"
+        android:label="Send Money">
+        <action
+            android:id="@+id/action_sendMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+        <argument
+            android:name="amount"
+            app:argType="long" />
+        <argument android:name="pubkey" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/requestMoneyFragment"
+        android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.RequestMoneyFragment"
+        android:label="Request Money">
+        <action
+            android:id="@+id/action_requestMoneyFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
+        <argument
+            android:name="data"
+            app:argType="string" />
+    </fragment>
 </navigation>

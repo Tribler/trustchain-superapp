@@ -43,13 +43,13 @@
         android:gravity="center"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/txtAmount"
-        app:layout_constraintBottom_toTopOf="@id/txtPeerId"
+        app:layout_constraintBottom_toTopOf="@id/txtDate"
         app:layout_constraintVertical_chainStyle="packed"
         android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:ellipsize="end"
         android:lines="1"
-        tools:text="Matt"
+        tools:text="John"
         android:layout_marginLeft="16dp"
         android:paddingRight="8dp" />
 
@@ -59,10 +59,22 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textColor="#AAAAAA"
-        app:layout_constraintTop_toTopOf="@id/txtName"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginRight="5dp"
+        app:layout_constraintTop_toBottomOf="@id/txtName"
+        app:layout_constraintStart_toStartOf="@id/txtName"
         app:layout_constraintBottom_toBottomOf="@id/txtName"
         tools:text="10:00" />
+
+    <TextView
+        android:id="@+id/txtSeq"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="#AAAAAA"
+        app:layout_constraintTop_toTopOf="@id/txtDate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/txtDate"
+        tools:text="(12)" />
 
     <TextView
         android:id="@+id/txtPeerId"
@@ -73,9 +85,8 @@
         android:ellipsize="end"
         android:lines="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtName"
-        app:layout_constraintStart_toStartOf="@id/txtName"
-        app:layout_constraintBottom_toTopOf="@id/txtMessage"
+        app:layout_constraintTop_toTopOf="@id/txtName"
+        app:layout_constraintStart_toEndOf="@id/txtName"
         tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
     <TextView
@@ -86,10 +97,49 @@
         android:textColor="@color/text_secondary"
         android:ellipsize="end"
         android:lines="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtPeerId"
+        android:layout_marginRight="5dp"
+        app:layout_constraintEnd_toStartOf="@id/txtProp"
+        app:layout_constraintTop_toBottomOf="@id/txtDate"
         app:layout_constraintStart_toStartOf="@id/txtName"
-        app:layout_constraintBottom_toBottomOf="parent"
         tools:text="Transfer" />
+
+    <TextView
+        android:id="@+id/txtProp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/text_secondary"
+        android:ellipsize="end"
+        android:lines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/txtType"
+        app:layout_constraintBottom_toBottomOf="@id/txtType"
+        tools:text="P+A" />
+
+    <TextView
+        android:id="@+id/txtBalance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/text_secondary"
+        android:ellipsize="end"
+        android:lines="1"
+        app:layout_constraintStart_toStartOf="@id/txtName"
+        app:layout_constraintTop_toBottomOf="@id/txtType"
+        tools:text="Balance" />
+
+    <TextView
+        android:id="@+id/txtVBalance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/text_secondary"
+        android:ellipsize="end"
+        android:lines="1"
+        android:layout_marginLeft="5dp"
+        app:layout_constraintStart_toEndOf="@id/txtBalance"
+        app:layout_constraintTop_toBottomOf="@id/txtType"
+        app:layout_constraintBottom_toBottomOf="@id/txtBalance"
+        tools:text="Verified" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
