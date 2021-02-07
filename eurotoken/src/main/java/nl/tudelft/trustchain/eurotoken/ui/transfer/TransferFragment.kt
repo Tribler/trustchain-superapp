@@ -44,7 +44,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact = ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
-                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
                     binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
@@ -63,7 +63,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
         val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownKey.keyToHash().toHex()
 
         if (ownContact?.name != null) {

@@ -88,6 +88,14 @@ class TransactionRepository (
         }
     }
 
+    fun getMyVerifiedBalance() : Long {
+        val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
+        val latestBlock = trustChainCommunity.database.getLatest(mykey)
+        //val latestBlocks = trustChainCommunity.database.getLatestBlocks(mykey, limit=1, blockTypes=EUROTOKEN_TYPES)
+        //val latestBlock : TrustChainBlock? = if (latestBlocks.isNotEmpty()) latestBlocks[0] else null
+        return getVerifiedBalanceForBlock(latestBlock)
+    }
+
     fun getMyBalance() : Long {
         val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBlock = trustChainCommunity.database.getLatest(mykey)

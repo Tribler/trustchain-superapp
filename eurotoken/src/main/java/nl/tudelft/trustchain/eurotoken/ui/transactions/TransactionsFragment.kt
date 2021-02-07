@@ -76,12 +76,13 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
                 val ownContact = ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
-                // Refresh peer status periodically
+                // Refresh transactions periodically
                 val items = transactionRepository.getTransactions().map { block : Transaction -> TransactionItem(
                     block
                 ) }
                 adapter.updateItems(items)
-                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                adapter.notifyDataSetChanged()
+                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
                 }
@@ -101,7 +102,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         items.observe(viewLifecycleOwner, Observer {
             adapter.updateItems(it)
             binding.txtBalance.text =
-                TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+                TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         })
     }
 }

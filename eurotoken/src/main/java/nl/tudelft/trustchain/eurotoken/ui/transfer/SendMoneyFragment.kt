@@ -61,7 +61,7 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
             }
         }
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey

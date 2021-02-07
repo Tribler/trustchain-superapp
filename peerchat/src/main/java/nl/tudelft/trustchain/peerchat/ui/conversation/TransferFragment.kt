@@ -67,7 +67,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
         val isRequest = requireArguments().getBoolean(ARG_IS_REQUEST)
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyBalance())
+        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
 
         if (isRequest) {
             binding.btnTransfer.text = "Request money"
