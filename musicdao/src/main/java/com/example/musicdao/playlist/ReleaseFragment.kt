@@ -137,8 +137,10 @@ class ReleaseFragment(
                 }
                 return
             }
-            currentTorrent?.addTracker("udp://130.161.119.207:F8000/announce")
+            currentTorrent?.addTracker("udp://130.161.119.207:8000/announce")
             currentTorrent?.addTracker("http://130.161.119.207:8000/announce")
+            currentTorrent?.addTracker("udp://130.161.119.207:8000")
+            currentTorrent?.addTracker("http://130.161.119.207:8000")
             sessionManager.download(currentTorrent, saveDir)
         } else {
             // The torrent has not been finished yet previously, so start downloading
@@ -150,6 +152,8 @@ class ReleaseFragment(
             }
             currentTorrent?.addTracker("udp://130.161.119.207:8000/announce")
             currentTorrent?.addTracker("http://130.161.119.207:8000/announce")
+            currentTorrent?.addTracker("udp://130.161.119.207:8000")
+            currentTorrent?.addTracker("http://130.161.119.207:8000")
             sessionManager.download(currentTorrent, saveDir)
         }
         val torrent = sessionManager.find(currentTorrent?.infoHash())
@@ -291,7 +295,7 @@ class ReleaseFragment(
             File("${context?.cacheDir}/${downloadedTor.files().filePath(currentFileIndex)}")
         // It is not a streaming torrent, and therefore we can conclude we already have
         // it locally so we can just start playing it
-        if (fileToPlay.isFile && fileToPlay.length() > 300 * 1024) {
+        if (fileToPlay.isFile && fileToPlay.length() > 200 * 1024) {
             startPlaying(fileToPlay, currentFileIndex)
         } else {
             AudioPlayer.getInstance()
@@ -338,7 +342,7 @@ class ReleaseFragment(
         val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex, saveDir.absolutePath))
         if (!audioFile.isFile) return
         // If we selected a file to play but it is not playing, start playing it after 30% progress
-        if (currentFileProgress > 300 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
+        if (currentFileProgress > 600 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&
             currentFileIndex != -1 && selectedToPlay != currentFileIndex
         ) {
             selectedToPlay = currentFileIndex

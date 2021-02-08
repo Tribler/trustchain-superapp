@@ -27,7 +27,7 @@ class ContentSeederTest {
     @Test
     fun start() {
         val count = contentSeeder.start()
-        Assert.assertEquals(1, count)
+        Assert.assertEquals(0, count)
     }
 
     @Test

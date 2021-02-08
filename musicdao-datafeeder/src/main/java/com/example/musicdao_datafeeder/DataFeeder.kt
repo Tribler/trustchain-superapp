@@ -63,7 +63,7 @@ class DataFeeder(private val musicDir: File, private val publish: Boolean) {
                 communicateSwarmHealth(musicCommunity)
 
                 logger.info("===")
-                delay(5000)
+                delay(10000)
             }
         }
         // Wait until we have some peers, then send the proposal blocks

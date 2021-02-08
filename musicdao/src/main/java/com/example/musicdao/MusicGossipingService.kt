@@ -96,9 +96,9 @@ class MusicGossipingService :
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         var count = 0
         for (entry in map.entries) {
-            count += 1
             if (count > maxInterations) break
             musicCommunity?.sendSwarmHealthMessage(entry.value)
+            count += 1
         }
     }
 }
