@@ -9,6 +9,7 @@ import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.trader.util.getAmount
 import nl.tudelft.trustchain.trader.util.getBalance
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -46,7 +47,7 @@ class DDValidatorTest {
 
         val valid = validator.validate(block, database)
 
-        assertEquals(valid, ValidationResult.Invalid(listOf("")))
+        assertNotEquals(valid, ValidationResult.Valid)
     }
 
     @Test
