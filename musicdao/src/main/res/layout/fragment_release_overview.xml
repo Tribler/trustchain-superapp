@@ -20,9 +20,10 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="No music playlists found from peers"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"/>
 
-    <RelativeLayout
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <ScrollView
@@ -33,7 +34,8 @@
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/release_overview_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                app:justifyContent="space_evenly"
                 app:flexWrap="wrap">
 
             </com.google.android.flexbox.FlexboxLayout>
@@ -54,7 +56,5 @@
             android:elevation="10dp"
             android:src="@drawable/ic_baseline_add_24"
             app:rippleColor="@color/white" />
-    </RelativeLayout>
-
-
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

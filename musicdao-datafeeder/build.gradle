@@ -1,0 +1,32 @@
+plugins {
+    id 'application'
+    id 'kotlin'
+}
+
+dependencies {
+//    implementation project(':common')
+    implementation project(':ipv8-jvm')
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'io.github.microutils:kotlin-logging:1.7.7'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.7'
+    implementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
+    implementation 'com.mpatric:mp3agic:0.9.1'
+    implementation 'com.turn:ttorrent-core:1.5'
+    implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
+    implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
+
+    implementation files('libs/jlibtorrent-1.2.10.0.jar')
+}
+
+application {
+    mainClassName = 'com.example.musicdao_datafeeder.DataFeederKt'
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions.freeCompilerArgs += [
+        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
+        "-Werror" // Set Kotlin compiler warnings as errors
+    ]
+}

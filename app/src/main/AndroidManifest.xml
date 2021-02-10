@@ -16,6 +16,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
@@ -23,7 +24,7 @@
 
         <activity
             android:name=".ui.dashboard.DashboardActivity"
-            android:label="IPv8 Apps"
+            android:label="Trustchain Superapp"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -76,8 +77,9 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:name="com.example.musicdao.MusicService"
+            android:label="Music app"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -88,6 +90,10 @@
         </activity>
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
+        <service
+            android:name="com.example.musicdao.MusicGossipingService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

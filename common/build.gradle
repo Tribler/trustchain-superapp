@@ -59,6 +59,8 @@ android {
 dependencies {
     api project(':ipv8-android')
 
+    api 'com.google.guava:guava:30.0-android'
+
     // AndroidX
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
@@ -92,15 +94,11 @@ dependencies {
     implementation 'com.mattskala:itemadapter:0.3'
 
     // BitTorrent
-    api files('libs/jlibtorrent-1.2.5.0.jar')
-    api files('libs/jlibtorrent-android-arm64-1.2.5.0.jar')
-    api files('libs/jlibtorrent-android-arm-1.2.5.0.jar')
-    api files('libs/jlibtorrent-android-x86-1.2.5.0.jar')
-    api files('libs/jlibtorrent-android-x86_64-1.2.5.0.jar')
-
-    //This AAR dependency also contains jlibtorrent
-    api files('libs/torrentstream-android.jar')
-    implementation 'androidx.room:room-runtime:2.2.5'
+    api files('libs/jlibtorrent-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-arm-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-x86-1.2.10.0.jar')
+    api files('libs/jlibtorrent-android-x86_64-1.2.10.0.jar')
 
     // Testing
     testImplementation 'junit:junit:4.12'

@@ -9,24 +9,30 @@ import kotlinx.android.synthetic.main.fragment_wallet.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
+/**
+ * This shows details of the user's wallet
+ */
 class WalletFragment : Fragment(R.layout.fragment_wallet) {
-    lateinit var walletService: WalletService
+    private lateinit var walletService: WalletService
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setMenuVisibility(false)
-        walletService = (activity as MusicService).walletService
+        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
+        walletService = WalletService.getInstance(walletDir, (activity as MusicService))
 
         lifecycleScope.launchWhenStarted {
             while (isActive) {
+                wallet_public_key.text = walletService.publicKeyText()
+                wallet_balance.text = walletService.balanceText()
+
                 val progress = walletService.percentageSynced
                 if (progress < 100) {
                     blockchain_progress.progress = progress
                     wallet_status.text = "Syncing chain... progress: $progress%"
                 }
+
                 if (progress == 100) {
                     blockchain_progress.progress = 100
-                    wallet_public_key.text = walletService.publicKeyText()
-                    wallet_balance.text = walletService.balanceText()
                     wallet_status.text = "Finished syncing chain"
                 }
 

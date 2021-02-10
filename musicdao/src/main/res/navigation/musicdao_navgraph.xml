@@ -2,15 +2,15 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/musicdao_navgraph"
-    app:startDestination="@id/releaseOverviewFragment">
+    app:startDestination="@id/playlistsOverviewFragment">
 
     <fragment
-        android:id="@+id/releaseOverviewFragment"
-        android:name="com.example.musicdao.ReleaseOverviewFragment"
+        android:id="@+id/playlistsOverviewFragment"
+        android:name="com.example.musicdao.catalog.PlaylistsOverviewFragment"
         android:label="Music app">
 
         <action
-            android:id="@+id/action_releaseOverviewFragment_to_playlistFragment"
+            android:id="@+id/action_playlistsOverviewFragment_to_playlistFragment"
             app:destination="@id/playlistFragment">
             <argument
                 android:name="publisher"
@@ -35,7 +35,7 @@
 
     <fragment
         android:id="@+id/playlistFragment"
-        android:name="com.example.musicdao.PlaylistFragment"
+        android:name="com.example.musicdao.playlist.PlaylistFragment"
         android:label="Playlist">
     </fragment>
 
