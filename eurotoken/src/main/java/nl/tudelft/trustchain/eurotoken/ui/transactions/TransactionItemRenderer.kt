@@ -25,7 +25,7 @@ class TransactionItemRenderer(
 
     override fun bindView(item: TransactionItem, view: View) = with(view) {
         if (item.transaction.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT) {
-            txtAmount.text = TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
+            txtAmount.text = TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
             imageInOut.setImageResource(R.drawable.ic_baseline_check_circle_outline_24)
             imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue))
         } else if (item.transaction.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
@@ -81,8 +81,8 @@ class TransactionItemRenderer(
             true
         }
 
-        txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
-//        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block))
+//        txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
+        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
     }
 
     override fun getLayoutResourceId(): Int {

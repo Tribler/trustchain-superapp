@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.eurotoken.ui.transactions
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -56,7 +57,8 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         fun payBack(transaction: Transaction) {
             if (transaction.block.isAgreement) {
-                transactionRepository.sendTransferProposal(recipient=transaction.block.linkPublicKey, amount=transaction.amount)
+                transactionRepository.sendTransferProposal(recipient=transaction.block.linkPublicKey, amount=transaction.amount) ?:
+                return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
             } else {
                 transactionRepository.sendTransferProposal(recipient=transaction.block.publicKey, amount=transaction.amount)
             }
@@ -77,13 +79,13 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         fun showOptions(transaction: Transaction) {
             if (!transaction.outgoing && transaction.block.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
-                val items = arrayOf("Resend", "Pay back", "Roll back")
+                val items = arrayOf("Resend", "Pay back")//, "Roll back")
                 AlertDialog.Builder(requireContext())
                     .setItems(items) { _, which ->
                         when (which) {
                             0 -> resendBlock(transaction)
                             1 -> payBack(transaction)
-                            2 -> rollBack(transaction)
+//                            2 -> rollBack(transaction)
                         }
                     }
                     .show()
@@ -94,8 +96,6 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 .setItems(items) { _, which ->
                     when (which) {
                         0 -> resendBlock(transaction)
-                        1 -> payBack(transaction)
-                        2 -> rollBack(transaction)
                     }
                 }
                 .show()

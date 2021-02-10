@@ -5,6 +5,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -55,6 +56,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
     private fun sendMoneyMessage(amount: Long, message: String) {
         val block = transactionRepository.sendTransferProposal(publicKey.keyToBin(), amount)
+            ?: return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
         //if (message.isNotEmpty()) {
         getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)
         //}

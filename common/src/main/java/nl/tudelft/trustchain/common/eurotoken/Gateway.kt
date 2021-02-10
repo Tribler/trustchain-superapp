@@ -4,6 +4,7 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
+import java.net.InetAddress
 
 data class Gateway(
     val name: String,
@@ -16,6 +17,10 @@ data class Gateway(
 
     val peer by lazy {
         Peer(publicKey, IPv4Address(ip, port.toInt()))
+    }
+
+    val connInfo by lazy {
+        "$ip:$port"
     }
 
     override fun equals(other: Any?): Boolean {

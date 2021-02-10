@@ -14,6 +14,7 @@ class GatewayItemRenderer(
     override fun bindView(item: GatewayItem, view: View) = with(view) {
         txtName.text = item.gateway.name
         txtPeerId.text = item.gateway.mid
+        txtAddress.text = item.gateway.connInfo
         if (item.gateway.preferred) {
             txtPref.visibility = View.VISIBLE
         } else {

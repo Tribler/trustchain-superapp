@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.eurotoken.ui.transfer
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -82,6 +83,7 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
                     .addContact(key, newName)
             }
             transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
+                ?: return@setOnClickListener Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transactionsFragment)
         }
 
