@@ -81,8 +81,8 @@ class TransactionItemRenderer(
             true
         }
 
-//        txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
-        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
+        txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
+//        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block, transactionRepository.trustChainCommunity.database)!!)
     }
 
     override fun getLayoutResourceId(): Int {
