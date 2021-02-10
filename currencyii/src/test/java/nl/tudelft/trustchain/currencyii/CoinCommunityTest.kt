@@ -164,7 +164,7 @@ class CoinCommunityTest {
 //        )
 //        every { swJoinBlock.transaction } returns hashMapOf("message" to blockData.getJsonString())
 
-        // Actual test
+    // Actual test
 //        coinCommunity.broadcastJoinedSharedWallet(SW_BLOCK_HASH)
 //
 //        verify {

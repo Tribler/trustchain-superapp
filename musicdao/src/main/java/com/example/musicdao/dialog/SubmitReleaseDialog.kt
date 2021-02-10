@@ -22,7 +22,8 @@ import com.frostwire.jlibtorrent.TorrentInfo
  * A form within a dialog which allows the user to submit a Release and publish it, by either
  * selecting local audio files or by pasting a magnet link
  */
-class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOverviewFragment) : DialogFragment() {
+class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOverviewFragment) :
+    DialogFragment() {
     private var dialogView: View? = null
     private var localTorrentInfo: TorrentInfo? = null
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

@@ -9,7 +9,8 @@ import nl.tudelft.trustchain.trader.R
 class PayloadItemRenderer(
     private val onItemClick: (PayloadItem) -> Unit
 ) : ItemLayoutRenderer<PayloadItem, View>(
-    PayloadItem::class.java) {
+    PayloadItem::class.java
+) {
     @SuppressLint("SetTextI18n")
     override fun bindView(item: PayloadItem, view: View) = with(view) {
         txtPeerId.text = item.publicKey.toString()

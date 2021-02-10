@@ -11,8 +11,8 @@
         android:id="@+id/debugText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:textColor="@color/white"/>
+        android:textColor="@color/white"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/loadingReleases"
@@ -20,12 +20,13 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:text="No music playlists found from peers"
-        android:textColor="@color/white"/>
+        android:textColor="@color/white" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ScrollView
             android:id="@+id/release_overview_scroll_view"
             android:layout_width="match_parent"
@@ -35,8 +36,8 @@
                 android:id="@+id/release_overview_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:justifyContent="space_evenly"
-                app:flexWrap="wrap">
+                app:flexWrap="wrap"
+                app:justifyContent="space_evenly">
 
             </com.google.android.flexbox.FlexboxLayout>
         </ScrollView>

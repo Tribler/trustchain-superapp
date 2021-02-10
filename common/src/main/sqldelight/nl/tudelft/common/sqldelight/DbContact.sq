@@ -8,6 +8,9 @@ addContact:
 REPLACE INTO contacts (name, public_key)
 VALUES(?, ?);
 
+getContact:
+SELECT * FROM contacts WHERE public_key = ?;
+
 getAll:
 SELECT * FROM contacts;
 

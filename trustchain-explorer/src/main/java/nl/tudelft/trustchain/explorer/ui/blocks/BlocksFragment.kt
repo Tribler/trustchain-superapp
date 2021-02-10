@@ -2,7 +2,10 @@ package nl.tudelft.trustchain.explorer.ui.blocks
 
 import android.os.Bundle
 import android.text.InputType
-import android.view.*
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -15,11 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentBlocksBinding

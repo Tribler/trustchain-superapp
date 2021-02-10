@@ -23,7 +23,6 @@ import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amo
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity.PayloadsList.amountDD
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItem
 import nl.tudelft.trustchain.trader.ui.payload.PayloadItemRenderer
-import java.lang.Exception
 import kotlin.math.roundToInt
 
 @ExperimentalUnsignedTypes
@@ -49,11 +48,21 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
 
         binding.acceptedPayloads.adapter = adapterAccepted
         binding.acceptedPayloads.layoutManager = LinearLayoutManager(context)
-        binding.acceptedPayloads.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.acceptedPayloads.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         binding.declinedPayloads.adapter = adapterDeclined
         binding.declinedPayloads.layoutManager = LinearLayoutManager(context)
-        binding.declinedPayloads.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.declinedPayloads.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         val marketCommunity = getMarketCommunity()
         marketCommunity.addListener(TradePayload.Type.ASK, ::askListener)
@@ -92,7 +101,11 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
                         val adapterCount = adapterAccepted.itemCount
                         adapterAccepted.updateItems(items)
                         if (adapterCount != adapterAccepted.itemCount) {
-                            acceptedPayloads.layoutManager!!.smoothScrollToPosition(acceptedPayloads, RecyclerView.State(), 0)
+                            acceptedPayloads.layoutManager!!.smoothScrollToPosition(
+                                acceptedPayloads,
+                                RecyclerView.State(),
+                                0
+                            )
                         }
                     } else if (adapterString == "declined") {
                         val adapterCount = adapterDeclined.itemCount
@@ -127,8 +140,10 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment",
             "New ask came in! They are selling ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
-            payload.primaryCurrency, payload.price, payload.amount, payload.type)
+        val receivedPayload = TradePayload(
+            payload.publicKey, payload.secondaryCurrency,
+            payload.primaryCurrency, payload.price, payload.amount, payload.type
+        )
         if (isTrading) {
             val type = ai.predict(payload.price!!.roundToInt() / payload.amount!!.roundToInt())
             if (type == 0) {
@@ -156,8 +171,10 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             "PayloadFragment",
             "New bid came in! They are asking ${payload.amount} ${payload.primaryCurrency}. The price is ${payload.price} ${payload.secondaryCurrency} per ${payload.primaryCurrency}"
         )
-        val receivedPayload = TradePayload(payload.publicKey, payload.secondaryCurrency,
-            payload.primaryCurrency, payload.price, payload.amount, payload.type)
+        val receivedPayload = TradePayload(
+            payload.publicKey, payload.secondaryCurrency,
+            payload.primaryCurrency, payload.price, payload.amount, payload.type
+        )
         if (isTrading) {
             val type = ai.predict(payload.amount!!.roundToInt() / payload.price!!.roundToInt())
             if (type == 1) {
@@ -175,6 +192,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             }
         }
     }
+
     private fun round(price: Int): Int {
         return when {
             price > 115 -> {
@@ -205,6 +223,7 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
             updateWallet(payload.amount!!, payload.price!!, type)
         }
     }
+
     private fun updateWallet(DD: Double, BTC: Double, type: Int) {
         if (type == 0) {
             amountDD -= DD

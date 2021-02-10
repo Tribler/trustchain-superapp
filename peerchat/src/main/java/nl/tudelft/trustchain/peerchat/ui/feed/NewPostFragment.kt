@@ -5,9 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.lifecycle.*
 import androidx.navigation.fragment.findNavController
-import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -48,10 +46,12 @@ class NewPostFragment : BaseFragment(R.layout.fragment_new_post) {
                     val hash = arguments?.getString(ARG_HASH)?.hexToBytes()
                     if (hash != null) {
                         postRepository.createReply(hash, text)
-                        Toast.makeText(context, "Your reply has been created", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Your reply has been created", Toast.LENGTH_SHORT)
+                            .show()
                     } else {
                         postRepository.createPost(text)
-                        Toast.makeText(context, "Your post has been created", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Your post has been created", Toast.LENGTH_SHORT)
+                            .show()
                     }
                     findNavController().navigateUp()
                 }

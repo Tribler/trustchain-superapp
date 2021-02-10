@@ -19,14 +19,15 @@ import androidx.core.text.buildSpannedString
 import androidx.core.text.inSpans
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentDebugBinding
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -86,7 +87,8 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 if (index > 0) append("\n")
                 append(overlay.javaClass.simpleName)
                 append(" (")
-                val textColorResId = if (overlay.getPeers().isNotEmpty()) R.color.green else R.color.red
+                val textColorResId =
+                    if (overlay.getPeers().isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 inSpans(ForegroundColorSpan(textColor)) {
                     val peers = overlay.getPeers()
@@ -107,7 +109,13 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
             val textColorResId = if (totalPeersCount > 0) R.color.green else R.color.red
             val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
             inSpans(ForegroundColorSpan(textColor)) {
-                append(resources.getQuantityString(R.plurals.x_peers, totalPeersCount, totalPeersCount))
+                append(
+                    resources.getQuantityString(
+                        R.plurals.x_peers,
+                        totalPeersCount,
+                        totalPeersCount
+                    )
+                )
             }
         }
 
@@ -161,7 +169,8 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 R.drawable.indicator_offline
             val drawable = resources.getDrawable(resId, null)
             view.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null)
-            view.compoundDrawablePadding = resources.getDimensionPixelSize(R.dimen.indicator_padding)
+            view.compoundDrawablePadding =
+                resources.getDimensionPixelSize(R.dimen.indicator_padding)
             view.typeface = Typeface.MONOSPACE
             view.setTextColor(Color.BLACK)
             binding.bootstrapContainer.addView(view)

@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/item_new_block"
-        android:title="New Block"
         android:icon="@drawable/ic_add_black_24dp"
+        android:title="New Block"
         app:showAsAction="always" />
     <item
         android:id="@+id/item_crawl"
-        android:title="Crawl"
         android:icon="@drawable/ic_refresh_white_24dp"
+        android:title="Crawl"
         app:showAsAction="always" />
 </menu>

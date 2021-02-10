@@ -36,12 +36,10 @@
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.example.musicdao.playlist.PlaylistFragment"
-        android:label="Playlist">
-    </fragment>
+        android:label="Playlist"></fragment>
 
     <fragment
         android:id="@+id/walletFragment"
         android:name="com.example.musicdao.wallet.WalletFragment"
-        android:label="Wallet overview">
-    </fragment>
+        android:label="Wallet overview"></fragment>
 </navigation>

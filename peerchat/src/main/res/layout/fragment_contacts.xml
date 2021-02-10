@@ -2,9 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
@@ -17,80 +17,80 @@
         android:id="@+id/imgEmpty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/recyclerView"
-        app:layout_constraintBottom_toBottomOf="@id/recyclerView">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/recyclerView">
 
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:tint="@color/mild_gray"
-            app:srcCompat="@drawable/ic_person_add_black_24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:srcCompat="@drawable/ic_person_add_black_24dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/text_tertiary"
             android:gravity="center"
-            android:text="Start by adding\nyour first contact" />
+            android:text="Start by adding\nyour first contact"
+            android:textColor="@color/text_tertiary" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/connectivityStatus"
         android:layout_width="match_parent"
         android:layout_height="48dp"
-        android:orientation="horizontal"
         android:background="@color/light_gray"
+        android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent">
 
         <FrameLayout
             android:id="@+id/btnInternetContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnBluetoothContainer">
+            app:layout_constraintEnd_toStartOf="@id/btnBluetoothContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/btnInternet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:textColor="@color/text_secondary"
+                android:drawableStart="@drawable/ic_wifi_black_24dp"
                 android:drawablePadding="8dp"
                 android:gravity="center"
-                android:drawableStart="@drawable/ic_wifi_black_24dp"
-                android:text="Internet" />
+                android:text="Internet"
+                android:textColor="@color/text_secondary" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/btnBluetoothContainer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toEndOf="@id/btnInternetContainer"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnInternetContainer"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/btnBluetooth"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:drawablePadding="8dp"
-                android:textColor="@color/text_secondary"
-                android:gravity="center"
                 android:drawableStart="@drawable/ic_bluetooth_black_24dp"
-                android:text="Bluetooth" />
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="Bluetooth"
+                android:textColor="@color/text_secondary" />
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -99,29 +99,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        fab:fab_labelStyle="@style/MenuLabelStyle"
+        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
+        app:layout_constraintEnd_toEndOf="parent"
         fab:fab_addButtonColorNormal="@color/purple"
         fab:fab_addButtonColorPressed="@color/purple"
-        app:layout_constraintBottom_toBottomOf="@id/recyclerView"
-        app:layout_constraintEnd_toEndOf="parent">
+        fab:fab_labelStyle="@style/MenuLabelStyle">
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnAddRemote"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_title="Add remote contact"
-            fab:fab_icon="@drawable/ic_link_white_24dp"
             fab:fab_colorNormal="@color/purple"
-            fab:fab_colorPressed="@color/purple" />
+            fab:fab_colorPressed="@color/purple"
+            fab:fab_icon="@drawable/ic_link_white_24dp"
+            fab:fab_title="Add remote contact" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnAddNearby"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            fab:fab_title="Add nearby contact"
-            fab:fab_icon="@drawable/ic_photo_camera_white_24dp"
             fab:fab_colorNormal="@color/purple"
-            fab:fab_colorPressed="@color/purple" />
+            fab:fab_colorPressed="@color/purple"
+            fab:fab_icon="@drawable/ic_photo_camera_white_24dp"
+            fab:fab_title="Add nearby contact" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 </androidx.constraintlayout.widget.ConstraintLayout>

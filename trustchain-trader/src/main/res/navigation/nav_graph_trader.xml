@@ -9,7 +9,7 @@
         android:id="@+id/traderFragment"
         android:name="nl.tudelft.trustchain.trader.ui.TraderFragment"
         android:label="Trader"
-        tools:layout="@layout/fragment_trader" >
+        tools:layout="@layout/fragment_trader">
         <action
             android:id="@+id/action_traderFragment_to_AI_HistoryFragment"
             app:destination="@id/AI_HistoryFragment"
@@ -36,7 +36,7 @@
     <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferFragment"
-        android:label="Transfer" >
+        android:label="Transfer">
         <action
             android:id="@+id/action_transferFragment_to_transferReceiveFragment"
             app:destination="@id/transferReceiveFragment" />
@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/transferConfirmationFragment"
         android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferConfirmationFragment"
-        android:label="TransferConfirmationFragment" >
+        android:label="TransferConfirmationFragment">
         <action
             android:id="@+id/action_transferConfirmationFragment_to_transferFragment"
             app:destination="@id/transferFragment"
@@ -59,7 +59,7 @@
     <fragment
         android:id="@+id/transferReceiveFragment"
         android:name="nl.tudelft.trustchain.trader.ui.transfer.TransferReceiveFragment"
-        android:label="TransferReceiveFragment" >
+        android:label="TransferReceiveFragment">
         <action
             android:id="@+id/action_transferReceiveFragment_to_transferConfirmationFragment"
             app:destination="@id/transferConfirmationFragment" />
@@ -72,7 +72,7 @@
         android:id="@+id/AI_HistoryFragment"
         android:name="nl.tudelft.trustchain.trader.ui.AI_HistoryFragment"
         android:label="AI History"
-        tools:layout="@layout/fragment_ai_history" >
+        tools:layout="@layout/fragment_ai_history">
         <action
             android:id="@+id/action_AI_HistoryFragment_to_traderFragment"
             app:destination="@id/traderFragment"
@@ -81,7 +81,7 @@
     </fragment>
     <fragment
         android:id="@+id/blocksFragment"
-        tools:layout="@layout/fragment_blocks"
         android:name="nl.tudelft.trustchain.trader.ui.trader_blocks.MarketBlocksFragment"
-        android:label="Market Blocks" />
+        android:label="Market Blocks"
+        tools:layout="@layout/fragment_blocks" />
 </navigation>

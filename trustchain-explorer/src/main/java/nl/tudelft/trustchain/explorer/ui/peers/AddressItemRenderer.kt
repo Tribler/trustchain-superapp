@@ -12,7 +12,8 @@ import kotlin.math.roundToInt
 class AddressItemRenderer(
     private val onItemClick: (AddressItem) -> Unit
 ) : ItemLayoutRenderer<AddressItem, View>(
-    AddressItem::class.java) {
+    AddressItem::class.java
+) {
     @SuppressLint("SetTextI18n")
     override fun bindView(item: AddressItem, view: View) = with(view) {
         txtPeerId.text = "?"

@@ -1,9 +1,8 @@
 package nl.tudelft.trustchain.peerchat.ui.contacts
 
 import com.mattskala.itemadapter.Item
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.Contact
-import java.util.*
 
 data class ContactItem(
     val contact: Contact,

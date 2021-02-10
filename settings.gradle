@@ -1,4 +1,5 @@
-rootProject.name='TrustChain'
+include ':eurotoken'
+rootProject.name = 'TrustChain'
 
 include ':ipv8'
 project(':ipv8').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8')
@@ -23,3 +24,4 @@ include ':freedomOfComputing'
 include ':trustchain-voter'
 include ':musicdao'
 include ':peerchat'
+include ':eurotoken'

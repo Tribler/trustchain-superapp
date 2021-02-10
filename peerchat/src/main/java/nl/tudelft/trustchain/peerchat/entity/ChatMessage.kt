@@ -53,5 +53,11 @@ data class ChatMessage(
     /**
      * True if the attachment has been fetched and stored locally (for incoming messages).
      */
-    val attachmentFetched: Boolean
+    val attachmentFetched: Boolean,
+
+    /**
+     * Optional reference to a TrustChain proposal block that includes a TrustChain transaction
+     */
+    val transactionHash: ByteArray?
+
 )

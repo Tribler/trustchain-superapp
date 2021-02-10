@@ -1,51 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingHorizontal="5dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingHorizontal="5dp">
 
     <LinearLayout
         android:id="@+id/payloadLayout"
-        android:orientation="vertical"
-        android:gravity="top"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="top"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <Switch
             android:id="@+id/askBidSwitch"
-            android:text="Ask / Bid"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="0dp"
             android:layout_marginTop="20dp"
-            android:textOn="Ask"
-            android:textOff="Bid"
+            android:layout_marginBottom="0dp"
             android:paddingHorizontal="6dp"
             android:paddingBottom="10dp"
-            android:textSize="20sp"
-            android:textAlignment="viewStart" />
+            android:text="Ask / Bid"
+            android:textAlignment="viewStart"
+            android:textOff="Bid"
+            android:textOn="Ask"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/txtExplanationAsk"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ASK: I have Dymbe $, I want BTC"
-            android:paddingHorizontal="3dp" />
+            android:paddingHorizontal="3dp"
+            android:text="ASK: I have Dymbe $, I want BTC" />
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/askLayout"
-        android:orientation="vertical"
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginTop="110dp"
+        android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -53,46 +52,45 @@
             android:id="@+id/txtAmount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Amount of currency available:"
-            android:paddingHorizontal="3dp" />
+            android:paddingHorizontal="3dp"
+            android:text="Amount of currency available:" />
 
         <EditText
             android:id="@+id/editTextAmount"
-            android:gravity="start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:hint="Enter Amount of Dymbe $ Available" />
+            android:gravity="start"
+            android:hint="Enter Amount of Dymbe $ Available"
+            android:singleLine="true" />
 
         <TextView
             android:id="@+id/txtPrice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
             android:layout_marginHorizontal="3dp"
+            android:layout_marginTop="30dp"
             android:text="Price:" />
 
         <EditText
             android:id="@+id/editTextPrice"
-            android:gravity="start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:hint="Enter Price in Bitcoin" />
+            android:gravity="start"
+            android:hint="Enter Price in Bitcoin"
+            android:singleLine="true" />
 
         <Button
             android:id="@+id/btnCreatePayload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_gravity="end"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
-            android:layout_gravity="end"
-            android:text="Create Payload" />
+            android:text="Create Payload"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </LinearLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

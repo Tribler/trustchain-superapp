@@ -5,8 +5,8 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.entity.Contact
 
 class PostRepository(
     private val trustChainCommunity: TrustChainCommunity,
@@ -16,8 +16,10 @@ class PostRepository(
         val transaction = mapOf(
             KEY_TEXT to text
         )
-        return trustChainCommunity.createProposalBlock(BLOCK_TYPE_POST, transaction,
-            ANY_COUNTERPARTY_PK)
+        return trustChainCommunity.createProposalBlock(
+            BLOCK_TYPE_POST, transaction,
+            ANY_COUNTERPARTY_PK
+        )
     }
 
     fun createReply(blockHash: ByteArray, text: String): TrustChainBlock? {
@@ -54,7 +56,7 @@ class PostRepository(
             .getAllLinked(block)
         return linkedBlocks.find {
             it.type == BLOCK_TYPE_LIKE &&
-            it.publicKey.contentEquals(myPeer.publicKey.keyToBin())
+                it.publicKey.contentEquals(myPeer.publicKey.keyToBin())
         } != null
     }
 
@@ -70,7 +72,7 @@ class PostRepository(
 
     suspend fun getPostsByFriends(): List<PostItem> {
         val myPeer = IPv8Android.getInstance().myPeer
-        val contacts = peerChatStore.getContacts().first()
+        val contacts = peerChatStore.contactsStore.getContacts().first()
         val posts = trustChainCommunity.database
             .getBlocksWithType(BLOCK_TYPE_POST)
             .sortedByDescending { it.insertTime }

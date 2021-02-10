@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.bitcoin.MyProposalsFragment"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".ui.bitcoin.MyProposalsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,18 +12,18 @@
         android:layout_weight="1">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/txtIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                android:text="To protect yourself against impersonation and man-in-the-middle attack, you should exchange a public key with your contact via a secure channel." />
+                android:text="To protect yourself against impersonation and man-in-the-middle attack, you should exchange a public key with your contact via a secure channel."
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/txtStep1"
@@ -33,14 +32,14 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="32dp"
                 android:background="@drawable/circle_step"
-                android:textSize="20sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
                 android:gravity="center"
                 android:text="1"
-                app:layout_constraintTop_toBottomOf="@id/txtIntro"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
 
             <TextView
                 android:id="@+id/txtStep1Description"
@@ -56,12 +55,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_field"
-                android:paddingStart="14dp"
-                android:paddingEnd="48dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="48dp"
+                android:paddingBottom="14dp"
                 android:textColor="@color/text_primary"
                 app:layout_constraintTop_toBottomOf="@id/txtStep1Description"
                 tools:text="12345" />
@@ -70,11 +69,11 @@
                 android:id="@+id/btnCopy"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:src="@drawable/ic_content_copy_black_24dp"
                 android:background="?selectableItemBackground"
+                android:src="@drawable/ic_content_copy_black_24dp"
+                app:layout_constraintBottom_toBottomOf="@id/txtMyPublicKey"
                 app:layout_constraintEnd_toEndOf="@id/txtMyPublicKey"
-                app:layout_constraintTop_toTopOf="@id/txtMyPublicKey"
-                app:layout_constraintBottom_toBottomOf="@id/txtMyPublicKey" />
+                app:layout_constraintTop_toTopOf="@id/txtMyPublicKey" />
 
 
             <TextView
@@ -84,14 +83,14 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="32dp"
                 android:background="@drawable/circle_step"
-                android:textSize="20sp"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold"
                 android:gravity="center"
                 android:text="2"
-                app:layout_constraintTop_toBottomOf="@id/txtMyPublicKey"
+                android:textColor="@color/text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/txtMyPublicKey" />
 
             <TextView
                 android:id="@+id/txtStep2Description"
@@ -107,27 +106,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_field"
-                android:paddingStart="14dp"
-                android:paddingEnd="48dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:textSize="14sp"
+                android:hint="Paste the public key..."
+                android:paddingStart="14dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="48dp"
+                android:paddingBottom="14dp"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_tertiary"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/txtStep2Description"
-                android:hint="Paste the public key..."
                 tools:text="12345" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnContinue"
+        style="@style/Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="Continue"
-        style="@style/Button"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

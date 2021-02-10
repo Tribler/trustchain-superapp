@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.peerchat.entity
+package nl.tudelft.trustchain.common.contacts
 
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex

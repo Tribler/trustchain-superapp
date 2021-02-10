@@ -100,8 +100,10 @@ class DAOCreateFragment : BaseFragment() {
         } catch (e: MnemonicException) {
             Toast.makeText(
                 this.requireContext(),
-                "The mnemonic seed provided is not correct. ${e.message
-                    ?: "No further information"}.",
+                "The mnemonic seed provided is not correct. ${
+                    e.message
+                        ?: "No further information"
+                }.",
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -147,8 +149,10 @@ class DAOCreateFragment : BaseFragment() {
         } catch (t: Throwable) {
             Toast.makeText(
                 this.requireContext(),
-                "Something went wrong while initializing the wallet. ${t.message
-                    ?: "No further information"}.",
+                "Something went wrong while initializing the wallet. ${
+                    t.message
+                        ?: "No further information"
+                }.",
                 Toast.LENGTH_SHORT
             ).show()
             return

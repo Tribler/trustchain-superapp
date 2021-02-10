@@ -54,7 +54,6 @@ public class DistributedActivity extends BaseActivity {
         plot.invalidate();
 
 
-
     }
 
 }

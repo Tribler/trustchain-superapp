@@ -2,16 +2,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:label="DAO Login Screen"
     android:orientation="vertical"
     android:padding="16dp"
-    android:label="DAO Login Screen"
     tools:context=".ui.bitcoin.DAOLoginChoiceFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="16dp"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/textView119"

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/contactsFragment">
 
@@ -33,7 +34,7 @@
     <fragment
         android:id="@+id/addRemoteFragment"
         android:name="nl.tudelft.trustchain.peerchat.ui.addcontact.AddRemoteFragment"
-        android:label="Add Remote Contact" >
+        android:label="Add Remote Contact">
         <action
             android:id="@+id/action_addRemoteFragment_to_addContactFragment"
             app:destination="@id/addContactFragment"
@@ -45,7 +46,7 @@
     <fragment
         android:id="@+id/addContactFragment"
         android:name="nl.tudelft.trustchain.peerchat.ui.addcontact.AddContactFragment"
-        android:label="Add Contact" >
+        android:label="Add Contact">
         <argument android:name="public_key" />
     </fragment>
     <fragment
@@ -54,6 +55,9 @@
         android:label="{name}">
         <argument android:name="name" />
         <argument android:name="public_key" />
+        <action
+            android:id="@+id/action_conversationFragment_to_transferFragment"
+            app:destination="@id/transferFragment" />
     </fragment>
     <fragment
         android:id="@+id/addNearbyFragment"
@@ -85,5 +89,16 @@
         android:name="nl.tudelft.trustchain.peerchat.ui.feed.NewPostFragment"
         android:label="New Post">
         <argument android:name="hash" />
+    </fragment>
+    <fragment
+        android:id="@+id/transferFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.conversation.TransferFragment"
+        android:label="New Transfer"
+        tools:layout="@layout/transfer_fragment">
+        <argument android:name="name" />
+        <argument android:name="public_key" />
+        <argument
+            android:name="is_request"
+            app:argType="boolean" />
     </fragment>
 </navigation>

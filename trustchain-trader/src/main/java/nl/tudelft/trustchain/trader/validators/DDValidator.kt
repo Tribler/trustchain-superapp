@@ -3,24 +3,25 @@ package nl.tudelft.trustchain.trader.validators
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
-import nl.tudelft.trustchain.trader.util.getBalance
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.trader.util.getAmount
+import nl.tudelft.trustchain.trader.util.getBalance
 
 class DDValidator : TransactionValidator {
     @ExperimentalUnsignedTypes
     override fun validate(
         block: TrustChainBlock,
         database: TrustChainStore
-    ): Boolean {
+    ): ValidationResult {
         // Do not validate offline transactions
         val offline = block.transaction["offline"].toString().toBoolean()
         if (offline) {
-            return true
+            return ValidationResult.Valid
         }
 
         // Self signed blocks print money, they are always valid
         if (block.isSelfSigned) {
-            return true
+            return ValidationResult.Valid
         }
 
         val amount = getAmount(block)
@@ -28,12 +29,20 @@ class DDValidator : TransactionValidator {
         if (block.isProposal) {
             val balance =
                 getBalance(block.linkPublicKey, database, block.linkSequenceNumber - 1u)
-            return balance > amount
+            return if (balance > amount) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(listOf("Insufficient balance"))
+            }
         } else if (block.isAgreement) {
             val balance =
                 getBalance(block.publicKey, database, block.sequenceNumber - 1u)
-            return balance > amount
+            return if (balance > amount) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(listOf("Insufficient balance"))
+            }
         }
-        return false
+        return ValidationResult.Invalid(listOf(""))
     }
 }
