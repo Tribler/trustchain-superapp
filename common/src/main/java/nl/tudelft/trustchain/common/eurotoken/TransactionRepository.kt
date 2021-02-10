@@ -12,31 +12,26 @@ import java.lang.Math.abs
 import java.math.BigInteger
 
 import nl.tudelft.ipv8.android.IPv8Android
-import java.net.InetAddress
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.util.toHex
 
 class TransactionRepository (
-    public val trustChainCommunity: TrustChainCommunity
+    val trustChainCommunity: TrustChainCommunity,
+    val gatewayStore: GatewayStore
 ) {
-    fun getGatewayPeer(): Peer {
-
-        //val ipaddress = InetAddress.getByName("eurotoken.hectobyte.net").address.toString()
-        val ipaddress = "10.0.0.27"
-        val tcpip = IPv4Address(ipaddress, 8090)
-
-        val pubkey = "4c69624e61434c504b3a035fd325276e03b9d0d106a91353cdd00f7a21aa861be79226224809cfedf80cbcc0e210c2ddc2f91a1fbc3e1e3cd0622e32027a27a8be7f5d28a73b42c0369f"
-        val key = defaultCryptoProvider.keyFromPublicBin(pubkey.hexToBytes())
-
-        return Peer(key, tcpip)
+    fun getGatewayPeer(): Peer? {
+        return gatewayStore.getPreferred().getOrNull(0)?.peer
     }
 
-    fun getBlockBalanceChange(block: TrustChainBlock?) : Long {
+    private fun getBlockBalanceChange(block: TrustChainBlock?) : Long {
         if (block == null) return 0
         return if (
             ( listOf(BLOCK_TYPE_TRANSFER).contains(block.type) && block.isProposal ) ||
+            ( listOf(BLOCK_TYPE_ROLLBACK).contains(block.type) && block.isProposal ) ||
             ( listOf(BLOCK_TYPE_DESTROY).contains(block.type) && block.isProposal )
         ) {
             // block is sending money
-            //-(block.transaction[KEY_AMOUNT] as Long)
+            Log.d("EuroTokenBlock", (block.transaction[KEY_AMOUNT] as BigInteger).toString())
             -(block.transaction[KEY_AMOUNT] as BigInteger).toLong()
         } else if (
             ( listOf(BLOCK_TYPE_TRANSFER).contains(block.type) && block.isAgreement) ||
@@ -51,75 +46,62 @@ class TransactionRepository (
         }
     }
 
-    fun getVerifiedBalanceForBlock(block: TrustChainBlock?) : Long {
-        if (block == null) return 0
-        if (!EUROTOKEN_TYPES.contains(block.type)) return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockBefore(block))
-        if ( listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT).contains(block.type) && block.isProposal ) {
+    fun getVerifiedBalanceForBlock(block: TrustChainBlock?) : Long? {
+        if (block == null) return null
+        if (block.isGenesis) return 0
+        if (!EUROTOKEN_TYPES.contains(block.type)) return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
+        if ( BLOCK_TYPE_CHECKPOINT == block.type && block.isProposal ) {
             // block contains balance but linked block determines verification
             return if (trustChainCommunity.database.getLinked(block) != null){ //verified
                 (block.transaction[KEY_BALANCE] as Long)
-            } else { // subtract transfer amount and recurse TODO: maybe crawl for block??
-                val amount = if (block.type == BLOCK_TYPE_CHECKPOINT) 0
-                else (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
-                getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockBefore(block)) - amount
+            } else {
+                getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
             }
         } else if (listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_CREATE).contains(block.type) && block.isAgreement) {
             // block is receiving money, but balance is not verified, just recurse
-            return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockBefore(block))
+            return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
+        } else if (listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_DESTROY, BLOCK_TYPE_ROLLBACK).contains(block.type) && block.isProposal) {
+            // block is sending money, but balance is not verified, subtract transfer amount and recurse
+            val amount = (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+            return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))?.minus(
+                amount
+            )
         } else {
             //bad type that shouldn't exist, for now just ignore and return for next
-            return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockBefore(block))
+            return getVerifiedBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
         }
     }
 
-    fun getBalanceForBlock(block: TrustChainBlock?) : Long {
-        if (block == null) return 0
-        if (!EUROTOKEN_TYPES.contains(block.type)) return getBalanceForBlock(trustChainCommunity.database.getBlockBefore(block))
+    fun getBalanceForBlock(block: TrustChainBlock?) : Long? {
+        if (block == null) return null
+        if (block.isGenesis)
+            return getBlockBalanceChange(block)
+        if (!EUROTOKEN_TYPES.contains(block.type)) return getBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
         return if ( // block contains balance (base case)
-            (listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT).contains(block.type) && block.isProposal)
+            (listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT, BLOCK_TYPE_ROLLBACK).contains(block.type) && block.isProposal)
         ) {
             (block.transaction[KEY_BALANCE] as Long)
         } else if (listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_CREATE).contains(block.type) && block.isAgreement) {
             // block is receiving money add it and recurse
-            getBalanceForBlock(trustChainCommunity.database.getBlockBefore(block)) + (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+            getBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))?.plus(
+                (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+            )
         } else {
             //bad type that shouldn't exist, for now just ignore and return for next
-            getBalanceForBlock(trustChainCommunity.database.getBlockBefore(block))
+            getBalanceForBlock(trustChainCommunity.database.getBlockWithHash(block.previousHash))
         }
     }
 
     fun getMyVerifiedBalance() : Long {
         val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
-        val latestBlock = trustChainCommunity.database.getLatest(mykey)
-        //val latestBlocks = trustChainCommunity.database.getLatestBlocks(mykey, limit=1, blockTypes=EUROTOKEN_TYPES)
-        //val latestBlock : TrustChainBlock? = if (latestBlocks.isNotEmpty()) latestBlocks[0] else null
-        return getVerifiedBalanceForBlock(latestBlock)
+        val latestBlock = trustChainCommunity.database.getLatest(mykey) ?: return 0
+        return getVerifiedBalanceForBlock(latestBlock)!!
     }
 
-    fun getMyBalance() : Long {
-        val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
-        val latestBlock = trustChainCommunity.database.getLatest(mykey)
-        //val latestBlocks = trustChainCommunity.database.getLatestBlocks(mykey, limit=1, blockTypes=EUROTOKEN_TYPES)
-        //val latestBlock : TrustChainBlock? = if (latestBlocks.isNotEmpty()) latestBlocks[0] else null
-        return getBalanceForBlock(latestBlock)
-    }
-
-    fun isBlockTransactionVerified(block: TrustChainBlock?): Boolean {
-        if (block == null) return false
-        if (block.type == BLOCK_TYPE_CREATE && block.isAgreement) {
-            // block is verified
-            return true
-        } else if ( listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT).contains(block.type) && block.isProposal ) {
-            // linked block determines verification
-            if (trustChainCommunity.database.getLinked(block) != null){ //verified
-                return true
-            } else { // if not verified yet TODO: maybe crawl for block??
-                return false //isBlockTransactionVerified(trustChainCommunity.database.getBlockAfter(block))
-            }
-        } else {
-            // block is not a verification block, recurse
-            return isBlockTransactionVerified(trustChainCommunity.database.getBlockAfter(block))
-        }
+    private fun getMyBalance() : Long {
+        val myKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
+        val latestBlock = trustChainCommunity.database.getLatest(myKey) ?: return 0
+        return getBalanceForBlock(latestBlock)!!
     }
 
     fun sendTransferProposal(recipient: ByteArray, amount: Long): TrustChainBlock {
@@ -133,14 +115,10 @@ class TransactionRepository (
         )
     }
 
-    fun getPeer(recipient: String, ip: String, port: Int): Peer {
+    private fun getPeer(recipient: String, ip: String, port: Int): Peer {
         val key = defaultCryptoProvider.keyFromPublicBin(recipient.hexToBytes())
         val address = IPv4Address(ip, port)
         return Peer(key, address)
-    }
-
-    fun sendCheckpointProposal(recipient: String, ip: String, port: Int): TrustChainBlock {
-        return sendCheckpointProposal(getPeer(recipient, ip, port))
     }
 
     fun sendCheckpointProposal(peer: Peer): TrustChainBlock {
@@ -158,6 +136,33 @@ class TransactionRepository (
         trustChainCommunity.sendBlock(block, peer)
         Log.w("EuroTokenBlockCheck", "Sent to peer" )
         return block
+    }
+
+    fun attemptRollback(peer: Peer?, blockHash: ByteArray): TrustChainBlock? {
+        if (peer != null && peer.publicKey != getGatewayPeer()?.publicKey) {
+            Log.w("EuroTokenBlockRollback", "Not a valid gateway")
+            return null
+        }
+        val rolledBackBlock = trustChainCommunity.database.getBlockWithHash(blockHash)
+        if (rolledBackBlock == null) {
+            Log.d("EuroTokenBlockRollback", "block not found")
+            return null
+        }
+        if (!rolledBackBlock.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+            Log.d("EuroTokenBlockRollback", "Not my block")
+            return null
+        }
+        val amount = rolledBackBlock.transaction[KEY_AMOUNT] as BigInteger
+        val transaction = mapOf(
+            KEY_TRANSACTION to blockHash.toHex(),
+            KEY_AMOUNT to amount,
+            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount.toLong()).toLong())
+        )
+        Log.d("EuroTokenBlockRollback", (transaction[KEY_BALANCE] as Long).toString())
+        return trustChainCommunity.createProposalBlock(
+            BLOCK_TYPE_ROLLBACK, transaction,
+            rolledBackBlock.publicKey
+        )
     }
 
     fun sendDestroyProposal(recipient: ByteArray, ip: String, port: Int, paymentId: String, amount: Long): TrustChainBlock {
@@ -206,26 +211,56 @@ class TransactionRepository (
         }
     }
 
-    fun addTransferListners(){
+    fun verifyBalance(block: TrustChainBlock, database: TrustChainStore): ValidationResult {
+        if (block.isProposal){
+            if (!block.transaction.containsKey(KEY_BALANCE)) return ValidationResult.Invalid(listOf("Missing balance"))
+            if (block.isGenesis) {
+                if (block.transaction.containsKey(KEY_AMOUNT)) {
+                    if (block.transaction[KEY_BALANCE] != -(block.transaction[KEY_AMOUNT] as BigInteger).toLong()) {
+                        return ValidationResult.Invalid(listOf("Invalid genesis balance"))
+                    } else {
+                        return ValidationResult.Valid
+                    }
+                } else {
+                    if (block.transaction[KEY_BALANCE] != 0L) {
+                        return ValidationResult.Invalid(listOf("Invalid genesis balance"))
+                    } else {
+                        return ValidationResult.Valid
+                    }
+                }
+            }
+            val blockBefore = database.getBlockWithHash(block.previousHash)
+            if (blockBefore == null) {
+                Log.d("EuroTokenBlock", "Has to crawl for previous!!" )
+                return ValidationResult.PartialPrevious
+            }
+            val balanceBefore = getBalanceForBlock(blockBefore) ?: return ValidationResult.PartialPrevious
+            val change = getBlockBalanceChange(block)
+            if (block.transaction[KEY_BALANCE] != balanceBefore + change) {
+                Log.w("EuroTokenBlock", "Invalid balance" )
+                return ValidationResult.Invalid(listOf("Invalid balance"))
+            }
+        } else {
+            Log.d("EuroTokenBlockDestroy", "Acceptance" )
+            if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) {
+                return ValidationResult.Invalid(listOf("Linked transaction doesn't match"))
+            }
+        }
+        return ValidationResult.Valid
+    }
+
+    private fun addTransferListeners(){
         trustChainCommunity.registerTransactionValidator(BLOCK_TYPE_TRANSFER, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
-            ): Boolean {
-                if (!block.transaction.containsKey(KEY_BALANCE)) return false
-                if (!block.transaction.containsKey(KEY_AMOUNT)) return false
-                val balanceBefore = getBalanceForBlock(database.getBlockBefore(block))
-                val change = getBlockBalanceChange(block)
-                if (block.isProposal){
-                    Log.w("EuroTokenBlockTransfer", "Proposal validating..." )
-                    if (block.transaction[KEY_BALANCE] != balanceBefore + change) {
-                        return false
-                    }
-                    Log.w("EuroTokenBlockTransfer", "Valid" )
-                } else {
-                    if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+            ): ValidationResult {
+                if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(listOf("Missing amount"))
+                val result  = verifyBalance(block, database)
+                if (result != ValidationResult.Valid) {
+                    return result
                 }
-                return true
+                return ValidationResult.Valid
             }
         })
 
@@ -244,22 +279,22 @@ class TransactionRepository (
         })
     }
 
-    fun addCreationListners(){
+    private fun addCreationListeners(){
         trustChainCommunity.registerTransactionValidator(BLOCK_TYPE_CREATE, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
-            ): Boolean {
+            ): ValidationResult {
                 //if (!block.transaction.containsKey(KEY_BALANCE)) return false
                 if (block.isProposal) {
-                    if (!block.transaction.containsKey(KEY_AMOUNT)) return false
-                    if (!block.transaction.containsKey(KEY_PAYMENT_ID)) return false
+                    if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(listOf("Missing amount"))
+                    if (!block.transaction.containsKey(KEY_PAYMENT_ID)) return ValidationResult.Invalid(listOf("Missing Payment ID"))
                     Log.w("EuroTokenBlockCreate", "Is valid proposal" )
                 } else {
-                    if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+                    if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return ValidationResult.Invalid(listOf("Linked transaction doesn't match"))
                 }
                 //TODO: validate gateway ID here
-                return true
+                return ValidationResult.Valid
             }
         })
 
@@ -278,28 +313,22 @@ class TransactionRepository (
         })
 
     }
-    fun addDestructionListners(){
+    private fun addDestructionListeners(){
         trustChainCommunity.registerTransactionValidator(BLOCK_TYPE_DESTROY, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
-            ): Boolean {
+            ): ValidationResult {
+                if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(listOf("Missing amount"))
+                if (!block.transaction.containsKey(KEY_PAYMENT_ID)) return ValidationResult.Invalid(listOf("Missing Payment id"))
                 if (block.isProposal) {
-                    Log.w("EuroTokenBlockDestroy", "Validating..." )
-                    if (!block.transaction.containsKey(KEY_BALANCE)) return false
-                    if (!block.transaction.containsKey(KEY_AMOUNT)) return false
-                    if (!block.transaction.containsKey(KEY_PAYMENT_ID)) return false
-                    val balanceBefore = getBalanceForBlock(database.getBlockBefore(block))
-                    if (block.transaction[KEY_BALANCE] != balanceBefore + getBlockBalanceChange(block))
-                        return false
-                    Log.w("EuroTokenBlockDestroy", "Valid" )
-                    Log.w("EuroTokenBlockDestroy", "Acceptance" )
-                } else {
-                    Log.w("EuroTokenBlockDestroy", "Acceptance" )
-                    //if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+                    val result  = verifyBalance(block, database)
+                    if (result != ValidationResult.Valid) {
+                        return result
+                    }
                 }
                 //TODO: validate gateway here
-                return true
+                return ValidationResult.Valid
             }
         })
 
@@ -316,23 +345,20 @@ class TransactionRepository (
         })
     }
 
-    fun addCheckpointListners(){
+    private fun addCheckpointListeners(){
         trustChainCommunity.registerTransactionValidator(BLOCK_TYPE_CHECKPOINT, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
-            ): Boolean {
-                if (block.isProposal) {
-                    if (!block.transaction.containsKey(KEY_BALANCE)) return false
-                    val balanceBefore = getBalanceForBlock(database.getBlockBefore(block))
-                    if (block.transaction[KEY_BALANCE] != balanceBefore + getBlockBalanceChange(block))
-                        return false
-                } else {
-                    Log.d("EuroTokenBlockCheck", "acceptance")
-                    //if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) return false //TODO: crawl??
+            ): ValidationResult {
+                if (block.isProposal){
+                    val result  = verifyBalance(block, database)
+                    if (result != ValidationResult.Valid) {
+                        return result
+                    }
                 }
                 //TODO: validate gateway here
-                return true
+                return ValidationResult.Valid
             }
         })
 
@@ -349,13 +375,42 @@ class TransactionRepository (
         })
     }
 
-    fun initTrustChainCommunity() {
-        addTransferListners()
-        addCreationListners()
-        addDestructionListners()
-        addCheckpointListners()
+    private fun addRollbackListeners(){
+        trustChainCommunity.registerTransactionValidator(BLOCK_TYPE_ROLLBACK, object : TransactionValidator {
+            override fun validate(
+                block: TrustChainBlock,
+                database: TrustChainStore
+            ): ValidationResult {
+                if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(listOf("Missing amount"))
+                if (!block.transaction.containsKey(KEY_TRANSACTION)) return ValidationResult.Invalid(listOf("Missing transaction hash"))
+                val result  = verifyBalance(block, database)
+                if (result != ValidationResult.Valid) {
+                    return result
+                }
+                return ValidationResult.Valid
+            }
+        })
+
+        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_ROLLBACK, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                //rollbacks don't need to be signed, their existence is a declaration of forfeit
+            }
+        })
+
+        trustChainCommunity.addListener(BLOCK_TYPE_ROLLBACK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("EuroTokenBlockRollback", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
     }
 
+    fun initTrustChainCommunity() {
+        addTransferListeners()
+        addCreationListeners()
+        addDestructionListeners()
+        addCheckpointListeners()
+        addRollbackListeners()
+    }
 
     companion object {
         fun prettyAmount(amount: Long): String {
@@ -366,11 +421,13 @@ class TransactionRepository (
         const val BLOCK_TYPE_CREATE      = "eurotoken_creation"
         const val BLOCK_TYPE_DESTROY     = "eurotoken_destruction"
         const val BLOCK_TYPE_CHECKPOINT  = "eurotoken_checkpoint"
+        const val BLOCK_TYPE_ROLLBACK    = "eurotoken_rollback"
 
-        private val EUROTOKEN_TYPES  = listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_CREATE, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT)
+        private val EUROTOKEN_TYPES  = listOf(BLOCK_TYPE_TRANSFER, BLOCK_TYPE_CREATE, BLOCK_TYPE_DESTROY, BLOCK_TYPE_CHECKPOINT, BLOCK_TYPE_ROLLBACK)
 
         const val KEY_AMOUNT = "amount"
         const val KEY_BALANCE = "balance"
+        const val KEY_TRANSACTION = "transaction_hash"
         const val KEY_PAYMENT_ID = "payment_id"
     }
 }

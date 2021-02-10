@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?selectableItemBackground">
+
+
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:textStyle="bold"
+        android:ellipsize="end"
+        android:lines="1"
+        tools:text="Primary gateway"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/txtPeerId"
+        app:layout_constraintEnd_toStartOf="@id/txtPref"
+        />
+
+    <TextView
+        android:id="@+id/txtPref"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:lines="1"
+        android:text="Preferred"
+        app:layout_constraintTop_toTopOf="@id/txtName"
+        app:layout_constraintBottom_toBottomOf="@id/txtName"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/txtPeerId"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:typeface="monospace"
+        android:ellipsize="end"
+        android:lines="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtName"
+        app:layout_constraintStart_toStartOf="@id/txtName"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

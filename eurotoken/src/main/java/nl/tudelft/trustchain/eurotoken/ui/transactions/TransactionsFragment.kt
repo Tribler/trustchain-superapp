@@ -15,20 +15,18 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransactionsBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-/**
- * A fragment representing a list of Items.
- */
-@OptIn(ExperimentalCoroutinesApi::class)
 class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transactions) {
     private val binding by viewBinding(FragmentTransactionsBinding::bind)
 
@@ -38,11 +36,22 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         liveData { emit(listOf<Item>()) }
     }
 
+    @JvmName("getEuroTokenCommunity1")
+    private fun getEuroTokenCommunity(): EuroTokenCommunity {
+        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
+    }
+
+    private val euroTokenCommunity by lazy {
+        getEuroTokenCommunity()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         fun resendBlock(transaction: Transaction) {
-            transactionRepository.trustChainCommunity.sendBlock(transaction.block)
+            val key = defaultCryptoProvider.keyFromPublicBin(transaction.block.linkPublicKey)
+            val peer = Peer(key)
+            transactionRepository.trustChainCommunity.sendBlock(transaction.block, peer)
         }
 
         fun payBack(transaction: Transaction) {
@@ -53,16 +62,40 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
             }
         }
 
-        fun showOptions(transaction: Transaction) {
-            var items = arrayOf("Resend")
-            if (!transaction.outgoing && transaction.block.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
-                items = arrayOf("Resend", "Pay back")
+        fun rollBack(transaction: Transaction) {
+            if (transaction.block.isAgreement) {
+                transactionRepository.attemptRollback(null, transaction.block.calculateHash())
             }
+        }
+
+        fun requestRollback(transaction: Transaction) {
+            val key = defaultCryptoProvider.keyFromPublicBin(transaction.block.linkPublicKey)
+            val peer = Peer(key)
+            val linked = transactionRepository.trustChainCommunity.database.getLinked(transaction.block) ?: return
+            euroTokenCommunity.requestRollback(linked.calculateHash(), peer)
+        }
+
+        fun showOptions(transaction: Transaction) {
+            if (!transaction.outgoing && transaction.block.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
+                val items = arrayOf("Resend", "Pay back", "Roll back")
+                AlertDialog.Builder(requireContext())
+                    .setItems(items) { _, which ->
+                        when (which) {
+                            0 -> resendBlock(transaction)
+                            1 -> payBack(transaction)
+                            2 -> rollBack(transaction)
+                        }
+                    }
+                    .show()
+                return
+            }
+            val items = arrayOf("Resend")
             AlertDialog.Builder(requireContext())
                 .setItems(items) { _, which ->
                     when (which) {
                         0 -> resendBlock(transaction)
                         1 -> payBack(transaction)
+                        2 -> rollBack(transaction)
                     }
                 }
                 .show()
@@ -84,7 +117,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 adapter.notifyDataSetChanged()
                 binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
-                    binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
+                    binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
                 }
                 delay(1000L)
             }
@@ -93,6 +126,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
         binding.list.adapter = adapter
         binding.list.layoutManager = LinearLayoutManager(context)

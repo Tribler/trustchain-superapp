@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -24,8 +25,12 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
         return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+
     private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!)
+        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private val publicKeyBin by lazy {

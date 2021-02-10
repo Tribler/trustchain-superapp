@@ -5,9 +5,12 @@ import androidx.core.content.ContextCompat
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_transaction.view.*
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.Gateway
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.eurotoken.R
@@ -21,28 +24,46 @@ class TransactionItemRenderer(
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
 
     override fun bindView(item: TransactionItem, view: View) = with(view) {
-        txtAmount.text = TransactionRepository.prettyAmount(item.transaction.amount)
-
-        val contact: Contact?
-        val peer: PublicKey
-        if (item.transaction.outgoing) {
-            imageInOut.setImageResource(R.drawable.ic_baseline_outgoing_24)
-            imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.red));
-        } else{
-            imageInOut.setImageResource(R.drawable.ic_baseline_incoming_24)
-            imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.green));
+        if (item.transaction.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT) {
+            txtAmount.text = TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
+            imageInOut.setImageResource(R.drawable.ic_baseline_check_circle_outline_24)
+            imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.blue))
+        } else if (item.transaction.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
+            txtAmount.text = TransactionRepository.prettyAmount(item.transaction.amount)
+            imageInOut.setImageResource(R.drawable.ic_baseline_undo_24)
+            imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.red))
+        } else {
+            txtAmount.text = TransactionRepository.prettyAmount(item.transaction.amount)
+            if (item.transaction.outgoing) {
+                imageInOut.setImageResource(R.drawable.ic_baseline_outgoing_24)
+                imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.red))
+            } else{
+                imageInOut.setImageResource(R.drawable.ic_baseline_incoming_24)
+                imageInOut.setColorFilter(ContextCompat.getColor(getContext(), R.color.green))
+            }
         }
+        val peer: PublicKey
         peer = item.transaction.receiver
-        contact = ContactStore.getInstance(view.context).getContactFromPublicKey(peer)
+        if (listOf(TransactionRepository.BLOCK_TYPE_DESTROY, TransactionRepository.BLOCK_TYPE_CREATE, TransactionRepository.BLOCK_TYPE_CHECKPOINT).contains(item.transaction.type)) {
+            val gateway: Gateway?
+            gateway = GatewayStore.getInstance(view.context).getGatewayFromPublicKey(peer)
+            txtName.text = gateway?.name ?: ""
+        } else {
+            val contact: Contact?
+            contact = ContactStore.getInstance(view.context).getContactFromPublicKey(peer)
+            txtName.text = contact?.name ?: ""
+        }
 
-        txtName.text = contact?.name ?: ""
         txtDate.text = dateFormat.format(item.transaction.timestamp)
         txtSeq.text = """(${item.transaction.block.sequenceNumber})"""
 
         txtPeerId.text = peer.keyToHash().toHex()
 
         txtType.text = item.transaction.type
-        if (item.transaction.block.isProposal) {
+        if (item.transaction.block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
+            txtType.text = "Rollback of seq: "
+            txtProp.text = "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION] as String).hexToBytes())!!.sequenceNumber})"
+        } else if (item.transaction.block.isProposal) {
             if (transactionRepository.trustChainCommunity.database.getLinked(item.transaction.block) != null) {
                 txtProp.text = "P+A"
                 txtProp.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
@@ -60,8 +81,8 @@ class TransactionItemRenderer(
             true
         }
 
-        txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block))
-        //txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block))
+        txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(transactionRepository.getBalanceForBlock(item.transaction.block)!!)
+//        txtVBalance.text = TransactionRepository.prettyAmount(transactionRepository.getVerifiedBalanceForBlock(item.transaction.block))
     }
 
     override fun getLayoutResourceId(): Int {

@@ -11,8 +11,10 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.findNavController
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.eurotoken.R
@@ -20,7 +22,11 @@ import nl.tudelft.trustchain.eurotoken.R
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
     protected val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!)
+        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
+    }
+
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
     }
 
     private val contactStore by lazy {
@@ -42,8 +48,13 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
         return when (item.itemId) {
             R.id.verifyBalance -> {
-                transactionRepository.sendCheckpointProposal(transactionRepository.getGatewayPeer());
-                Toast.makeText(requireContext(), "CHECKPOINT", Toast.LENGTH_SHORT).show()
+                val gateway = transactionRepository.getGatewayPeer()
+                if (gateway == null) {
+                    Toast.makeText(requireContext(), "No preferred gateway set", Toast.LENGTH_SHORT).show()
+                } else {
+                    transactionRepository.sendCheckpointProposal(gateway)
+                    Toast.makeText(requireContext(), "CHECKPOINT", Toast.LENGTH_SHORT).show()
+                }
                 true
             }
             R.id.copyKey -> {
@@ -55,6 +66,10 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
             }
             R.id.renameSelf -> {
                 renameSelf()
+                true
+            }
+            R.id.gateways -> {
+                findNavController().navigate(R.id.gatewaysFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)

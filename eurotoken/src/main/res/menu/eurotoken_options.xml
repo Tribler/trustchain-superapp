@@ -3,4 +3,5 @@
     <item android:id="@+id/copyKey" android:title="Copy PubKey" />
     <item android:id="@+id/verifyBalance" android:title="Verify Balance" />
     <item android:id="@+id/renameSelf" android:title="Change name" />
+    <item android:id="@+id/gateways" android:title="Manage gateways" />
 </menu>

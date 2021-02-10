@@ -19,6 +19,7 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
@@ -32,6 +33,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
@@ -75,14 +77,21 @@ class TrustChainApplication : Application() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
 
-        TransactionRepository(trustchain).initTrustChainCommunity() // register eurotoken listners
+        val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
+        tr.initTrustChainCommunity() // register eurotoken listners
+        val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
+        euroTokenCommunity.setTransactionRepository(tr)
 
         trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
             override fun validate(
                 block: TrustChainBlock,
                 database: TrustChainStore
-            ): Boolean {
-                return block.transaction["message"] != null || block.isAgreement
+            ): ValidationResult {
+                if (block.transaction["message"] != null || block.isAgreement) {
+                    return ValidationResult.Valid
+                } else {
+                    return ValidationResult.Invalid(listOf("Proposal must have a message"))
+                }
             }
         })
 
@@ -146,8 +155,9 @@ class TrustChainApplication : Application() {
 
     private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
         val randomWalk = RandomWalk.Factory()
+        val store = GatewayStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(this),
+            EuroTokenCommunity.Factory(this, store),
             listOf(randomWalk)
         )
     }

@@ -7,12 +7,11 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.common.sqldelight.ContactDatabase
+import nl.tudelft.common.sqldelight.Database
 
 class ContactStore(context: Context) {
-    private val driver = AndroidSqliteDriver(ContactDatabase.Schema, context, "common.db")
-    private val database = ContactDatabase(driver)
-
+    private val driver = AndroidSqliteDriver(Database.Schema, context, "common.db")
+    private val database = Database(driver)
 
     fun addContact(publicKey: PublicKey, name: String) {
         database.dbContactQueries.addContact(name, publicKey.keyToBin())

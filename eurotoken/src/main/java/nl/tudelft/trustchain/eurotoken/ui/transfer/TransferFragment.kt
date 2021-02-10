@@ -27,6 +27,7 @@ import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
+import org.json.JSONException
 import org.json.JSONObject
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
@@ -47,10 +48,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
-                    binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
+                    binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
                 } else {
                     binding.missingNameLayout.visibility = View.VISIBLE
-                    binding.txtOwnName.text = "Your balance"
+                    binding.txtOwnName.text = "Your verified balance"
                 }
                 delay(1000L)
             }
@@ -68,7 +69,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
         if (ownContact?.name != null) {
             binding.missingNameLayout.visibility = View.GONE
-            binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
+            binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
         }
 
         fun addName() {
@@ -78,7 +79,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                     .addContact(ownKey, newName)
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
-                    binding.txtOwnName.text = "Your balance (" + ownContact?.name + ")"
+                    binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
                 val inputMethodManager = requireContext().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
@@ -99,11 +100,13 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             val amount = getAmount(binding.edtAmount.text.toString())
             if (amount > 0) {
                 val myPeer = transactionRepository.trustChainCommunity.myPeer
+                val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
                 connectionData.put("amount", amount)
                 connectionData.put("name", ownContact?.name ?: "")
+                connectionData.put("type", "transfer")
 
                 val args = Bundle()
 
@@ -120,13 +123,21 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let{
-            val connectionData = ConnectionData(it)
+            try {
+                val connectionData = ConnectionData(it)
 
-            val args = Bundle()
-            args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
-            args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
-            args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
-            findNavController().navigate(R.id.action_transferFragment_to_sendMoneyFragment, args)
+                val args = Bundle()
+                args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
+                args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
+                args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
+                if (connectionData.type == "transfer") {
+                    findNavController().navigate(R.id.action_transferFragment_to_sendMoneyFragment, args)
+                } else {
+                    Toast.makeText(requireContext(), "Invalid QR", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: JSONException) {
+                Toast.makeText(requireContext(), "Scan failed, try again", Toast.LENGTH_LONG).show()
+            }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
     }
@@ -154,6 +165,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             var public_key = this.optString("public_key")
             var amount = this.optLong("amount", -1L)
             var name = this.optString("name")
+            var type = this.optString("type")
         }
 
         fun getAmount(amount: String) : Long {

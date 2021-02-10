@@ -3,25 +3,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.exchange.ExchangeFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-    <Button
-        android:id="@+id/btn_connect_gateway"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-    android:text="Creation event" />
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="To buy/sell EuroToken, go to an exchange and start a transaction. Then scan the QR code they provide. "
+            android:textStyle="bold"
+            android:textSize="20dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_horizontal" />
 
-    <Button
-        android:id="@+id/btnDestroy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Destroy event" />
-
-    </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Scan qr code"
+            app:layout_constraintTop_toBottomOf="@+id/txtInfo"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="16dp"
+            app:icon="@drawable/ic_baseline_photo_camera_24"
+            style="@style/Button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -19,8 +20,12 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
 
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+
     private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!)
+        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private val ownPublicKey by lazy {
@@ -31,25 +36,28 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
         super.onViewCreated(view, savedInstanceState)
 
         val publicKey = requireArguments().getString(ARG_PUBLIC_KEY)!!
-        val amount = requireArguments().getLong(ARG_AMOUNT)!!
+        val amount = requireArguments().getLong(ARG_AMOUNT)
         val name = requireArguments().getString(ARG_NAME)!!
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(key)
 
-        binding.txtContactName.text = contact?.name ?: ""
+        binding.txtContactName.text = contact?.name ?: name
 
         binding.newContactName.visibility = View.GONE
 
-        if (contact != null){
-            binding.addContactSwitch.visibility = View.GONE
+        if (name.isNotEmpty()) {
+            binding.newContactName.setText(name)
         }
 
-        if (name.isNotEmpty()) {
+        if (contact == null) {
             binding.addContactSwitch.toggle()
             addContact = true
             binding.newContactName.visibility = View.VISIBLE
             binding.newContactName.setText(name)
+        } else {
+            binding.addContactSwitch.visibility = View.GONE
+            binding.newContactName.visibility = View.GONE
         }
 
         binding.addContactSwitch.setOnClickListener {

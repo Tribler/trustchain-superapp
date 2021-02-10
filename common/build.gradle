@@ -12,7 +12,7 @@ ktlint {
 }
 
 sqldelight {
-    ContactDatabase {
+    Database {
         packageName = "nl.tudelft.common.sqldelight"
         sourceFolders = ["sqldelight"]
         schemaOutputDirectory = file("src/main/sqldelight/databases")
