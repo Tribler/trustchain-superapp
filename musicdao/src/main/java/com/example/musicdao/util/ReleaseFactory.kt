@@ -37,7 +37,12 @@ class ReleaseFactory {
          * Generates a a .torrent File from local files
          * @param uris the list of Uris pointing to local audio source files to publish
          */
-        fun generateTorrent(parentDirPath: String, uris: List<Uri>, contentResolver: ContentResolver, ioInteraction: Boolean = true): File {
+        fun generateTorrent(
+            parentDirPath: String,
+            uris: List<Uri>,
+            contentResolver: ContentResolver,
+            ioInteraction: Boolean = true
+        ): File {
             val fileList = mutableListOf<File>()
             val projection =
                 arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
@@ -50,7 +55,8 @@ class ReleaseFactory {
                 }
 
                 if (fileName == "") throw Error("Source file name for creating torrent not found")
-                val input = contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+                val input =
+                    contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
                 val fileLocation = "$parentDirPath/$fileName"
 
                 if (ioInteraction) FileUtils.copyInputStreamToFile(input, File(fileLocation))

@@ -91,7 +91,8 @@ class MusicCommunityTest {
             trustChainCommunity.getPeers()
         } returns listOf(neighborPeer)
 
-        val count = trustChainCommunity.performRemoteKeywordSearch("keyword", 1u, ANY_COUNTERPARTY_PK)
+        val count =
+            trustChainCommunity.performRemoteKeywordSearch("keyword", 1u, ANY_COUNTERPARTY_PK)
         Assert.assertEquals(count, 1)
     }
 

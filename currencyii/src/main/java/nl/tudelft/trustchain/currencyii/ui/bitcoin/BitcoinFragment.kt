@@ -12,7 +12,10 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.*
+import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
+import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.NetworkParameters
 
@@ -168,8 +171,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             } catch (t: Throwable) {
                 Toast.makeText(
                     this.requireContext(),
-                    "Something went wrong while initializing the new wallet. ${t.message
-                        ?: "No further information"}.",
+                    "Something went wrong while initializing the new wallet. ${
+                        t.message
+                            ?: "No further information"
+                    }.",
                     Toast.LENGTH_SHORT
                 ).show()
                 return

@@ -11,7 +11,10 @@ import nl.tudelft.ipv8.attestation.trustchain.EMPTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
-import nl.tudelft.ipv8.keyvault.*
+import nl.tudelft.ipv8.keyvault.LibNaClSK
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.EndpointAggregator
 import nl.tudelft.ipv8.peerdiscovery.Network
 import nl.tudelft.ipv8.sqldelight.Database
@@ -21,7 +24,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
-import java.lang.Exception
 
 class VotingHelperTest {
 
@@ -233,7 +235,12 @@ class VotingHelperTest {
         // Create a reply agreement block
         votingHelper.respondToProposal(true, propBlock)
 
-        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(1, 0))
+        Assert.assertTrue(
+            votingHelper.castedByPeer(
+                propBlock,
+                community.myPeer.publicKey
+            ) == Pair(1, 0)
+        )
     }
 
     @Test
@@ -256,7 +263,12 @@ class VotingHelperTest {
             EMPTY_PK
         )
 
-        Assert.assertTrue(votingHelper.castedByPeer(propBlock, community.myPeer.publicKey) == Pair(0, 0))
+        Assert.assertTrue(
+            votingHelper.castedByPeer(
+                propBlock,
+                community.myPeer.publicKey
+            ) == Pair(0, 0)
+        )
     }
 
     @Test

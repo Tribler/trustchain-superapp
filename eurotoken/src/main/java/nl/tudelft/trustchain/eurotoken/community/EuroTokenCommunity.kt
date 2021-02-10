@@ -3,7 +3,10 @@ package nl.tudelft.trustchain.eurotoken.community
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import nl.tudelft.ipv8.*
+import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
+import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
@@ -27,7 +30,7 @@ class EuroTokenCommunity(
     }
 
     @JvmName("setTransactionRepository1")
-    fun setTransactionRepository(transactionRepositoryLocal: TransactionRepository){
+    fun setTransactionRepository(transactionRepositoryLocal: TransactionRepository) {
         transactionRepository = transactionRepositoryLocal
     }
 
@@ -46,7 +49,7 @@ class EuroTokenCommunity(
         val address = IPv4Address(ip, port)
         val peer = Peer(key, address)
 
-        val payload = MessagePayload( payment_id )
+        val payload = MessagePayload(payment_id)
 
         val packet = serializePacket(
             MessageId.GATEWAY_CONNECT,
@@ -57,7 +60,7 @@ class EuroTokenCommunity(
     }
 
     fun requestRollback(transactionHash: ByteArray, peer: Peer) {
-        val payload = RollbackRequestPayload( transactionHash )
+        val payload = RollbackRequestPayload(transactionHash)
 
         val packet = serializePacket(
             MessageId.ROLLBACK_REQUEST,

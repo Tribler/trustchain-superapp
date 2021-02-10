@@ -65,27 +65,29 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         requireArguments().getString(ARG_NAME)!!
     }
 
-    private val onCommitContentListener = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
-        val lacksPermission = (flags and
-            InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
-            try {
-                inputContentInfo.requestPermission()
-            } catch (e: Exception) {
-                return@OnCommitContentListener false // return false if failed
+    private val onCommitContentListener =
+        InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
+            val lacksPermission = (flags and
+                InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+                try {
+                    inputContentInfo.requestPermission()
+                } catch (e: Exception) {
+                    return@OnCommitContentListener false // return false if failed
+                }
             }
+
+            val uri = inputContentInfo.contentUri
+            Log.d("ConversationFragment", "uri: $uri")
+
+            sendImageFromUri(uri)
+
+            true
         }
 
-        val uri = inputContentInfo.contentUri
-        Log.d("ConversationFragment", "uri: $uri")
-
-        sendImageFromUri(uri)
-
-        true
-    }
-
     private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -176,14 +178,20 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         return messages.mapIndexed { index, chatMessage ->
             val shouldShowAvatar = !chatMessage.outgoing && (
                 index == messages.size - 1 ||
-                messages[index + 1].outgoing != chatMessage.outgoing)
+                    messages[index + 1].outgoing != chatMessage.outgoing)
             /*
             val shouldShowDate = (index == messages.size - 1 ||
                 messages[index + 1].outgoing != chatMessage.outgoing ||
                 (messages[index + 1].timestamp.time - chatMessage.timestamp.time > GROUP_TIME_LIMIT))
              */
             val shouldShowDate = true
-            ChatMessageItem(chatMessage, transactionRepository.getTransactionWithHash(chatMessage.transactionHash), shouldShowAvatar, shouldShowDate, name)
+            ChatMessageItem(
+                chatMessage,
+                transactionRepository.getTransactionWithHash(chatMessage.transactionHash),
+                shouldShowAvatar,
+                shouldShowDate,
+                name
+            )
         }
     }
 

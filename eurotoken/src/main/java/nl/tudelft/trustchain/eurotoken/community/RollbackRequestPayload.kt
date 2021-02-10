@@ -1,7 +1,10 @@
 package nl.tudelft.trustchain.eurotoken.community
 
 import android.util.Log
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 
 class RollbackRequestPayload constructor(
     val transactionHash: ByteArray
@@ -11,7 +14,10 @@ class RollbackRequestPayload constructor(
     }
 
     companion object Deserializer : Deserializable<RollbackRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<RollbackRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<RollbackRequestPayload, Int> {
             Log.d("Deserialise", "start")
             var localOffset = offset
             var (transactionHash, transactionHashSize) = deserializeVarLen(buffer, localOffset)

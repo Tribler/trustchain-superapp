@@ -60,4 +60,4 @@ data class ChatMessage(
      */
     val transactionHash: ByteArray?
 
-    )
+)

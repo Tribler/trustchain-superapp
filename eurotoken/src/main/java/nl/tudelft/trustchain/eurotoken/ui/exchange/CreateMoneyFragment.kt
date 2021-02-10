@@ -18,7 +18,7 @@ import nl.tudelft.trustchain.eurotoken.databinding.FragmentCreateMoneyBinding
 
 class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
 
-    private var addGateway   = false
+    private var addGateway = false
     private var setPreferred = false
 
     private val binding by viewBinding(FragmentCreateMoneyBinding::bind)
@@ -32,11 +32,15 @@ class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
     }
 
     private val ownPublicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex().hexToBytes())
+        defaultCryptoProvider.keyFromPublicBin(
+            transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
+                .hexToBytes()
+        )
     }
 
     private fun getEuroTokenCommunity(): EuroTokenCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
     }
 
 
@@ -48,7 +52,7 @@ class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
         val name = requireArguments().getString(ARG_NAME)!!
         val payment_id = requireArguments().getString(ARG_PAYMENT_ID)!!
         val ip = requireArguments().getString(ARG_IP)!!
-        val port = requireArguments().getInt(ARG_PORT)!!
+        val port = requireArguments().getInt(ARG_PORT)
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val gateway = GatewayStore.getInstance(view.context).getGatewayFromPublicKey(key)
@@ -96,7 +100,8 @@ class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
             }
         }
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        binding.txtBalance.text =
+            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtGatewayPublicKey.text = publicKey
 
@@ -105,10 +110,10 @@ class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
             if (addGateway && newName.isNotEmpty()) {
                 GatewayStore.getInstance(requireContext())
                     .addGateway(key, newName, ip, port.toLong(), setPreferred)
-            } else if (setPreferred && gateway != null ) {
+            } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }
-            getEuroTokenCommunity().connectToGateway(publicKey, ip, port, payment_id )
+            getEuroTokenCommunity().connectToGateway(publicKey, ip, port, payment_id)
             findNavController().navigate(R.id.action_createMoneyFragment_to_transactionsFragment)
         }
 

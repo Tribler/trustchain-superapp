@@ -2,30 +2,54 @@ package nl.tudelft.trustchain.common.eurotoken
 
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.common.sqldelight.Database
 
 class GatewayStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "common.db")
     private val database = Database(driver)
 
-    fun addGateway(publicKey: PublicKey, name: String, ip: String, port: Long, preferred: Boolean = false) {
+    fun addGateway(
+        publicKey: PublicKey,
+        name: String,
+        ip: String,
+        port: Long,
+        preferred: Boolean = false
+    ) {
         if (preferred) {
             clearPreferred()
         }
-        database.dbGatewayQueries.addGateway(name, publicKey.keyToBin(), ip, port, if (preferred) 1L else 0L)
+        database.dbGatewayQueries.addGateway(
+            name,
+            publicKey.keyToBin(),
+            ip,
+            port,
+            if (preferred) 1L else 0L
+        )
     }
 
-    fun updateGateway(publicKey: PublicKey, name: String, ip: String, port: Long, preferred: Boolean = false) {
+    fun updateGateway(
+        publicKey: PublicKey,
+        name: String,
+        ip: String,
+        port: Long,
+        preferred: Boolean = false
+    ) {
         if (preferred) {
             clearPreferred()
         }
-        database.dbGatewayQueries.addGateway(name, publicKey.keyToBin(), ip, port, if (preferred) 1L else 0L)
+        database.dbGatewayQueries.addGateway(
+            name,
+            publicKey.keyToBin(),
+            ip,
+            port,
+            if (preferred) 1L else 0L
+        )
     }
 
     private fun clearPreferred() {
-        for (pref in getPreferred()){
+        for (pref in getPreferred()) {
             updateGateway(pref.publicKey, pref.name, pref.ip, pref.port, false)
         }
     }
@@ -41,8 +65,10 @@ class GatewayStore(context: Context) {
             Gateway(name, publicKey, ip, port, preferred == 1L)
         }.executeAsList()
     }
-    fun getGatewayFromPublicKey(publicKey: PublicKey) : Gateway? {
-        val gateway = database.dbGatewayQueries.getGateway(publicKey.keyToBin()).executeAsOneOrNull()
+
+    fun getGatewayFromPublicKey(publicKey: PublicKey): Gateway? {
+        val gateway =
+            database.dbGatewayQueries.getGateway(publicKey.keyToBin()).executeAsOneOrNull()
         return if (gateway != null) {
             Gateway(
                 gateway.name,
@@ -75,4 +101,3 @@ class GatewayStore(context: Context) {
         }
     }
 }
-

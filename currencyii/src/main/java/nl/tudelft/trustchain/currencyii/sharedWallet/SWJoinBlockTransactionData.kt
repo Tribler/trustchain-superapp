@@ -2,8 +2,8 @@ package nl.tudelft.trustchain.currencyii.sharedWallet
 
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 
 data class SWJoinBlockTD(
     var SW_UNIQUE_ID: String,

@@ -1,10 +1,10 @@
 package nl.tudelft.trustchain.voting
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import nl.tudelft.trustchain.voting.databinding.BlankFragmentBinding
 
 // TODO: Rename parameter arguments, choose names that match
@@ -23,6 +23,7 @@ class BlankFragment : Fragment() {
     private var param2: String? = null
 
     private var _binding: BlankFragmentBinding? = null
+
     // This property is only valid between onCreateView and
 // onDestroyView.
     private val binding get() = _binding!!

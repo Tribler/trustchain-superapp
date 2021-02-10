@@ -29,7 +29,10 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
     }
 
     private val ownPublicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex().hexToBytes())
+        defaultCryptoProvider.keyFromPublicBin(
+            transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
+                .hexToBytes()
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +43,7 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
         val name = requireArguments().getString(ARG_NAME)!!
         val payment_id = requireArguments().getString(ARG_PAYMENT_ID)!!
         val ip = requireArguments().getString(ARG_IP)!!
-        val port = requireArguments().getInt(ARG_PORT)!!
+        val port = requireArguments().getInt(ARG_PORT)
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val gateway = GatewayStore.getInstance(view.context).getGatewayFromPublicKey(key)
@@ -88,7 +91,8 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
             }
         }
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        binding.txtBalance.text =
+            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtGatewayPublicKey.text = publicKey
@@ -98,10 +102,16 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
             if (addGateway && newName.isNotEmpty()) {
                 GatewayStore.getInstance(requireContext())
                     .addGateway(key, newName, ip, port.toLong(), setPreferred)
-            } else if (setPreferred && gateway != null ) {
+            } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }
-            transactionRepository.sendDestroyProposal(publicKey.hexToBytes(), ip, port, payment_id, amount)
+            transactionRepository.sendDestroyProposal(
+                publicKey.hexToBytes(),
+                ip,
+                port,
+                payment_id,
+                amount
+            )
             findNavController().navigate(R.id.action_destroyMoneyFragment_to_transactionsFragment)
         }
 

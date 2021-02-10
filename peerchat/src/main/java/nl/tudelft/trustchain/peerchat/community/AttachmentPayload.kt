@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.peerchat.community
 
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 
 class AttachmentPayload(
     val id: String,

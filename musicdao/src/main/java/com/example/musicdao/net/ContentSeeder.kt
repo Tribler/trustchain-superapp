@@ -45,7 +45,8 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
                         val handle = (alert as PeerConnectAlert).handle()
                         updateSwarmHealth(handle)
                     }
-                    else -> {}
+                    else -> {
+                    }
                 }
             }
         })

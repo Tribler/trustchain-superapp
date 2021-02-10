@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
@@ -39,7 +38,8 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
     @JvmName("getEuroTokenCommunity1")
     private fun getEuroTokenCommunity(): EuroTokenCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("EuroTokenCommunity is not configured")
     }
 
     private val euroTokenCommunity by lazy {
@@ -57,10 +57,19 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         fun payBack(transaction: Transaction) {
             if (transaction.block.isAgreement) {
-                transactionRepository.sendTransferProposal(recipient=transaction.block.linkPublicKey, amount=transaction.amount) ?:
-                return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
+                transactionRepository.sendTransferProposal(
+                    recipient = transaction.block.linkPublicKey,
+                    amount = transaction.amount
+                ) ?: return Toast.makeText(
+                    requireContext(),
+                    "Insufficient balance",
+                    Toast.LENGTH_LONG
+                ).show()
             } else {
-                transactionRepository.sendTransferProposal(recipient=transaction.block.publicKey, amount=transaction.amount)
+                transactionRepository.sendTransferProposal(
+                    recipient = transaction.block.publicKey,
+                    amount = transaction.amount
+                )
             }
         }
 
@@ -73,7 +82,9 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         fun requestRollback(transaction: Transaction) {
             val key = defaultCryptoProvider.keyFromPublicBin(transaction.block.linkPublicKey)
             val peer = Peer(key)
-            val linked = transactionRepository.trustChainCommunity.database.getLinked(transaction.block) ?: return
+            val linked =
+                transactionRepository.trustChainCommunity.database.getLinked(transaction.block)
+                    ?: return
             euroTokenCommunity.requestRollback(linked.calculateHash(), peer)
         }
 
@@ -107,15 +118,19 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
             while (isActive) {
 
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
-                val ownContact = ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
+                val ownContact =
+                    ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
                 // Refresh transactions periodically
-                val items = transactionRepository.getTransactions().map { block : Transaction -> TransactionItem(
-                    block
-                ) }
+                val items = transactionRepository.getTransactions().map { block: Transaction ->
+                    TransactionItem(
+                        block
+                    )
+                }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
-                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                binding.txtBalance.text =
+                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
                 }

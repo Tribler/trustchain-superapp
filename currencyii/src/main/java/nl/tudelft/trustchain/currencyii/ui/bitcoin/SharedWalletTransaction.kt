@@ -2,11 +2,11 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_shared_wallet_transaction.*
 import kotlinx.coroutines.Dispatchers
@@ -67,13 +67,15 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
     private fun transferFundsClicked() {
         if (!validateTransferInput()) {
             activity?.runOnUiThread {
-                alert_view.text = "Failed: Bitcoin PK should be a string, minimal satoshi amount: ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}"
+                alert_view.text =
+                    "Failed: Bitcoin PK should be a string, minimal satoshi amount: ${SWUtil.MINIMAL_TRANSACTION_AMOUNT}"
             }
         }
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
-        val swJoinBlock: TrustChainBlock = getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
-            ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
+        val swJoinBlock: TrustChainBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
         val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
 
         val transferFundsData = try {
@@ -83,7 +85,10 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 satoshiTransferAmount
             )
         } catch (t: Throwable) {
-            Log.i("Coin", "Proposing transfer funds failed. ${t.message ?: "No further information"}.")
+            Log.i(
+                "Coin",
+                "Proposing transfer funds failed. ${t.message ?: "No further information"}."
+            )
             activity?.runOnUiThread {
                 alert_view.text = t.message ?: "Unexpected error occurred. Try again"
             }

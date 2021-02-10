@@ -12,7 +12,6 @@ import androidx.core.view.updateLayoutParams
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
@@ -20,7 +19,8 @@ import java.math.BigInteger
 import java.text.SimpleDateFormat
 
 class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
-    ChatMessageItem::class.java) {
+    ChatMessageItem::class.java
+) {
 
     private val dateTimeFormat = SimpleDateFormat.getDateTimeInstance()
     private val timeFormat = SimpleDateFormat.getTimeInstance()
@@ -34,7 +34,8 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             txtMessage.gravity = Gravity.END
         }
         item.transaction?.transaction?.let {
-            txtTransaction.text = TransactionRepository.prettyAmount((item.transaction.transaction["amount"] as BigInteger).toLong())
+            txtTransaction.text =
+                TransactionRepository.prettyAmount((item.transaction.transaction["amount"] as BigInteger).toLong())
             if (item.chatMessage.message.isEmpty()) {
                 txtMessage.visibility = View.GONE
             }
@@ -67,7 +68,8 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             txtMessage.isVisible = false
             txtTransaction.isVisible = false
         } else if (item.chatMessage.transactionHash != null) {
-            progress.isVisible = item.transaction == null //transaction not yet received via trustchain
+            progress.isVisible =
+                item.transaction == null // transaction not yet received via trustchain
 
             txtMessage.isVisible = item.chatMessage.message.isNotBlank()
 

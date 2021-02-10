@@ -30,7 +30,10 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
     }
 
     private val ownPublicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex().hexToBytes())
+        defaultCryptoProvider.keyFromPublicBin(
+            transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
+                .hexToBytes()
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,7 +73,8 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
             }
         }
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        binding.txtBalance.text =
+            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
@@ -83,7 +87,11 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
                     .addContact(key, newName)
             }
             transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
-                ?: return@setOnClickListener Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
+                ?: return@setOnClickListener Toast.makeText(
+                    requireContext(),
+                    "Insufficient balance",
+                    Toast.LENGTH_LONG
+                ).show()
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transactionsFragment)
         }
 

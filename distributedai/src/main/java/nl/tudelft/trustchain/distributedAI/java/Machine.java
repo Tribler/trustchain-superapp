@@ -10,12 +10,13 @@ public class Machine {
 
     /**
      * Constructor, initializes the machine.
+     *
      * @param x - first argument.
      * @param y - second argument.
      */
     @SuppressWarnings("all")
     public Machine(double x, double y) {
-        this.pair = new Pair<Double>(x,y);
+        this.pair = new Pair<Double>(x, y);
 
         this.intercept = 0;
         this.bias = 0;
@@ -39,10 +40,6 @@ public class Machine {
     }
 
 
-
-
-
-
     public void updateUM(Machine other) {
         double interm_intercept = DerivativeWithRespectToIntercept(this.pair.Y(), this.getIntercept(), this.pair.X(), this.getBias());
         double interm_slope = DerivativeWithRespectToSlope(this.pair.Y(), this.getIntercept(), this.pair.X(), this.getBias());
@@ -64,16 +61,13 @@ public class Machine {
     }
 
 
-    private double DerivativeWithRespectToIntercept(double y, double s, double x, double b){
-        return (-2)*(y-s*x-b);
+    private double DerivativeWithRespectToIntercept(double y, double s, double x, double b) {
+        return (-2) * (y - s * x - b);
     }
 
-    private double DerivativeWithRespectToSlope(double y, double s, double x, double b){
-        return (-2)*x*(y-s*x-b);
+    private double DerivativeWithRespectToSlope(double y, double s, double x, double b) {
+        return (-2) * x * (y - s * x - b);
     }
-
-
-
 
 
     //getters and setters
@@ -90,9 +84,9 @@ public class Machine {
     @Override
     public String toString() {
         return "Machine{" +
-                "intercept=" + intercept +
-                ", bias=" + bias +
-                '}';
+            "intercept=" + intercept +
+            ", bias=" + bias +
+            '}';
     }
 
 }

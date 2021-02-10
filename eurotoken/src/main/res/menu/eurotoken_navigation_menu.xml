@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/transferFragment"
-        android:title="Transfer"
-        android:icon="@drawable/ic_baseline_euro_symbol_24" />
+        android:icon="@drawable/ic_baseline_euro_symbol_24"
+        android:title="Transfer" />
     <item
         android:id="@+id/transactionsFragment"
-        android:title="Transaction History"
-        android:icon="@drawable/ic_baseline_trans_hist_alt_24" />
+        android:icon="@drawable/ic_baseline_trans_hist_alt_24"
+        android:title="Transaction History" />
     <item
         android:id="@+id/exchangeFragment"
-        android:title="Exchange"
-        android:icon="@drawable/ic_baseline_account_balance_24" />
+        android:icon="@drawable/ic_baseline_account_balance_24"
+        android:title="Exchange" />
 </menu>

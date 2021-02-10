@@ -54,4 +54,4 @@ data class Transaction(
      */
     val read: Boolean
 
-    )
+)

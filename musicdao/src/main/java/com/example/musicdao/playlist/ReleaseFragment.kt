@@ -339,7 +339,9 @@ class ReleaseFragment(
         val currentFileProgress =
             currentProgress[currentFileIndex]
         val audioPlayer = AudioPlayer.getInstance()
-        val audioFile = File(torrentHandle.torrentFile().files().filePath(currentFileIndex, saveDir.absolutePath))
+        val audioFile = File(
+            torrentHandle.torrentFile().files().filePath(currentFileIndex, saveDir.absolutePath)
+        )
         if (!audioFile.isFile) return
         // If we selected a file to play but it is not playing, start playing it after 30% progress
         if (currentFileProgress > 600 * 1024 && audioPlayer != null && !audioPlayer.isPlaying() &&

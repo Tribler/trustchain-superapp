@@ -50,7 +50,8 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
             R.id.verifyBalance -> {
                 val gateway = transactionRepository.getGatewayPeer()
                 if (gateway == null) {
-                    Toast.makeText(requireContext(), "No preferred gateway set", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "No preferred gateway set", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     transactionRepository.sendCheckpointProposal(gateway)
                     Toast.makeText(requireContext(), "CHECKPOINT", Toast.LENGTH_SHORT).show()
@@ -58,7 +59,8 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 true
             }
             R.id.copyKey -> {
-                val clipboard = ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
+                val clipboard =
+                    ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
                 val clip = ClipData.newPlainText("Public Key", myPublicKey)
                 clipboard?.setPrimaryClip(clip)
                 Toast.makeText(requireContext(), "Copied to clipboard", Toast.LENGTH_SHORT).show()
@@ -77,9 +79,9 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
     }
 
     private fun renameSelf() {
-        val myKey  = getIpv8().myPeer.publicKey
+        val myKey = getIpv8().myPeer.publicKey
 
-        val contact  = contactStore.getContactFromPublicKey(myKey)
+        val contact = contactStore.getContactFromPublicKey(myKey)
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Rename Contact")
 
@@ -99,7 +101,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                     contactStore.deleteContact(contact)
                 }
             } else {
-                contactStore.updateContact(myKey, input.text.toString() )
+                contactStore.updateContact(myKey, input.text.toString())
             }
         }
         builder.setNegativeButton(

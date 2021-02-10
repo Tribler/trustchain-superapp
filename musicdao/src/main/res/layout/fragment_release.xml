@@ -7,10 +7,10 @@
 
     <TextView
         android:id="@+id/debugTextRelease"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white" />
+        android:textColor="@color/white"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/blockMetadata"
@@ -24,20 +24,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/musicColorAccent"
-        android:visibility="gone"
-        android:text="Tip this artist/band"/>
+        android:text="Tip this artist/band"
+        android:visibility="gone" />
 
     <TableLayout
         android:id="@+id/release_table_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </TableLayout>
+        android:layout_height="wrap_content"></TableLayout>
 
     <TextView
         android:id="@+id/loadingTracks"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textColor="@color/white"
-        android:text="Searching metadata from peers..."/>
+        android:text="Searching metadata from peers..."
+        android:textColor="@color/white" />
 </LinearLayout>

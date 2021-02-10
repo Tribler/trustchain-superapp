@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.common.messaging
 
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 import nl.tudelft.trustchain.common.constants.Currency
 
 class TradePayload(
@@ -43,7 +46,10 @@ class TradePayload(
             localOffset += publicKeySize
             val (askCurrency, askCurrencySize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += askCurrencySize
-            val (paymentCurrency, paymentCurrencySize) = deserializeVarLen(buffer, offset + localOffset)
+            val (paymentCurrency, paymentCurrencySize) = deserializeVarLen(
+                buffer,
+                offset + localOffset
+            )
             localOffset += paymentCurrencySize
             val (amount, amountSize) = deserializeVarLen(buffer, offset + localOffset)
             localOffset += amountSize

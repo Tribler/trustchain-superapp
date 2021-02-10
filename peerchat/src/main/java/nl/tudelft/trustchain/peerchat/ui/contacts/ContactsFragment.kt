@@ -41,7 +41,6 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 
-
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     private val binding by viewBinding(FragmentContactsBinding::bind)
@@ -61,7 +60,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     }
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,17 +114,21 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         })
     }
 
-    private fun createItems(contacts: List<Pair<Contact, ChatMessage?>>, peers: List<Peer>): List<Item> {
-        return contacts.filter { it.first.publicKey != getIpv8().myPeer.publicKey }.map { contactWithMessage ->
-            val (contact, message) = contactWithMessage
-            val peer = peers.find { it.mid == contact.mid }
-            ContactItem(
-                contact,
-                message,
-                peer != null && !peer.address.isEmpty(),
-                peer?.bluetoothAddress != null
-            )
-        }
+    private fun createItems(
+        contacts: List<Pair<Contact, ChatMessage?>>,
+        peers: List<Peer>
+    ): List<Item> {
+        return contacts.filter { it.first.publicKey != getIpv8().myPeer.publicKey }
+            .map { contactWithMessage ->
+                val (contact, message) = contactWithMessage
+                val peer = peers.find { it.mid == contact.mid }
+                ContactItem(
+                    contact,
+                    message,
+                    peer != null && !peer.address.isEmpty(),
+                    peer?.bluetoothAddress != null
+                )
+            }
     }
 
     @Suppress("DEPRECATION")
@@ -192,7 +196,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         builder.setPositiveButton(
             "Rename"
         ) { _, _ ->
-            store.contactsStore.updateContact(contact.publicKey, input.text.toString() )
+            store.contactsStore.updateContact(contact.publicKey, input.text.toString())
         }
         builder.setNegativeButton(
             "Cancel"

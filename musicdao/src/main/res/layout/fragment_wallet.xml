@@ -2,21 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="409dp"
     android:layout_height="729dp"
-    android:orientation="vertical"
     android:background="@color/bgColor"
+    android:orientation="vertical"
     android:padding="@dimen/fab_margin">
 
     <TextView
         android:id="@+id/wallet_status"
-        android:textColor="@color/white"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/wallet_status_2"
-        android:textColor="@color/white"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/white" />
 
     <ProgressBar
         android:id="@+id/blockchain_progress"
@@ -26,16 +26,16 @@
         android:progress="100" />
 
     <TextView
-        android:textColor="@color/white"
         android:id="@+id/wallet_public_key"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wallet public key: "/>
+        android:text="Wallet public key: "
+        android:textColor="@color/white" />
 
     <TextView
-        android:textColor="@color/white"
         android:id="@+id/wallet_balance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Wallet balance: "/>
+        android:text="Wallet balance: "
+        android:textColor="@color/white" />
 </LinearLayout>

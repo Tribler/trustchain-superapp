@@ -4,8 +4,8 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.trustchain.trader.util.getBalance
 import nl.tudelft.trustchain.trader.util.getAmount
+import nl.tudelft.trustchain.trader.util.getBalance
 
 class DDValidator : TransactionValidator {
     @ExperimentalUnsignedTypes

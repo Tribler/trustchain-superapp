@@ -86,7 +86,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginVertical="5dp" >
+                    android:layout_marginVertical="5dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_bitcoin_public_key"
@@ -99,7 +99,7 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="5dp" >
+                    android:layout_marginTop="5dp">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/input_satoshi_amount"

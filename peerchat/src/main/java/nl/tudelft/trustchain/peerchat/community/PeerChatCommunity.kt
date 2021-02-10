@@ -68,7 +68,11 @@ class PeerChatCommunity(
         }
     }
 
-    fun sendMessageWithTransaction(message: String, transaction_hash: ByteArray?, recipient: PublicKey) {
+    fun sendMessageWithTransaction(
+        message: String,
+        transaction_hash: ByteArray?,
+        recipient: PublicKey
+    ) {
         val chatMessage = createOutgoingChatMessage(message, null, transaction_hash, recipient)
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
@@ -135,14 +139,16 @@ class PeerChatCommunity(
 
     private fun sendAttachment(peer: Peer, id: String, file: File) {
         val payload = AttachmentPayload(id, file.readBytes())
-        val packet = serializePacket(MessageId.ATTACHMENT, payload, encrypt = true, recipient = peer)
+        val packet =
+            serializePacket(MessageId.ATTACHMENT, payload, encrypt = true, recipient = peer)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
     private fun onMessagePacket(packet: Packet) {
         val (peer, payload) = packet.getDecryptedAuthPayload(
-            MessagePayload.Deserializer, myPeer.key as PrivateKey)
+            MessagePayload.Deserializer, myPeer.key as PrivateKey
+        )
         logger.debug { "<- $payload, ${payload.transactionHash}" }
         onMessage(peer, payload)
     }
@@ -161,7 +167,8 @@ class PeerChatCommunity(
 
     private fun onAttachmentPacket(packet: Packet) {
         val (_, payload) = packet.getDecryptedAuthPayload(
-            AttachmentPayload.Deserializer, myPeer.key as PrivateKey)
+            AttachmentPayload.Deserializer, myPeer.key as PrivateKey
+        )
         logger.debug { "<- $payload" }
         onAttachment(payload)
     }

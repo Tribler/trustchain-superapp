@@ -23,7 +23,8 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     private val binding by viewBinding(TransferFragmentBinding::bind)
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
     private val gatewayStore by lazy {
@@ -43,7 +44,9 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     }
 
     private val ownPublicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(getPeerChatCommunity().myPeer.publicKey.keyToBin().toHex().hexToBytes())
+        defaultCryptoProvider.keyFromPublicBin(
+            getPeerChatCommunity().myPeer.publicKey.keyToBin().toHex().hexToBytes()
+        )
     }
 
     private val name by lazy {
@@ -56,10 +59,11 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
     private fun sendMoneyMessage(amount: Long, message: String) {
         val block = transactionRepository.sendTransferProposal(publicKey.keyToBin(), amount)
-            ?: return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
-        //if (message.isNotEmpty()) {
+            ?: return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG)
+                .show()
+        // if (message.isNotEmpty()) {
         getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)
-        //}
+        // }
     }
 
     private fun requestMoney(amount: Long) {
@@ -74,12 +78,12 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
 
         val isRequest = requireArguments().getBoolean(ARG_IS_REQUEST)
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        binding.txtBalance.text =
+            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
 
         if (isRequest) {
             binding.btnTransfer.text = "Request money"
-        }
-        else {
+        } else {
             binding.btnTransfer.text = "Transfer money"
         }
 
@@ -92,8 +96,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
             val message = binding.edtMessage.text.toString()
             if (isRequest) {
                 requestMoney(amount)
-            }
-            else{
+            } else {
                 sendMoneyMessage(amount, message)
             }
             findNavController().navigateUp()
@@ -102,7 +105,6 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
         binding.txtContactName.text = name
         binding.txtContactPublicKey.text = publicKey.toString()
         binding.avatar.setUser(publicKey.toString(), name)
-
     }
 
     companion object {
@@ -110,7 +112,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
         const val ARG_NAME = "name"
         const val ARG_IS_REQUEST = "is_request"
 
-        fun getAmount(amount: String) : Long {
+        fun getAmount(amount: String): Long {
             val regex = """[^\d]""".toRegex()
             return regex.replace(amount, "").toLong()
         }
@@ -123,7 +125,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
                 return ""
             }
 
-            //val amount = string.replace("[^\\d]", "").toLong()
+            // val amount = string.replace("[^\\d]", "").toLong()
             return (amount / 100).toString() + "." + (amount % 100).toString().padStart(2, '0')
         }
 
@@ -143,16 +145,17 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
                     }
                 }
 
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
                 }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
                 }
-
             })
         }
     }
-
 }

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,34 +12,32 @@
         android:layout_weight="1">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/txtTitleBalance"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your balance:"
-                android:textStyle="bold"
-                android:textSize="20dp"
                 android:layout_marginTop="10dp"
-                />
+                android:text="Your balance:"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/balanceLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/txtTitleBalance"
-                tools:layout_editor_absoluteX="1dp"
-                android:padding="16dp"
                 android:layout_margin="16dp"
                 android:background="#EEEEEE"
-                >
+                android:padding="16dp"
+                app:layout_constraintTop_toBottomOf="@id/txtTitleBalance"
+                tools:layout_editor_absoluteX="1dp">
 
 
                 <LinearLayout
@@ -79,152 +76,143 @@
                     android:layout_height="wrap_content"
                     android:text="20.00"
                     android:textSize="20dp"
-                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    />
+                    app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:id="@+id/txtTitle"
-                app:layout_constraintTop_toBottomOf="@id/balanceLayout"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Transfering:"
-                android:textStyle="bold"
-                android:textSize="20dp"
                 android:layout_marginTop="10dp"
-                />
+                android:text="Transfering:"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/balanceLayout" />
 
             <TextView
                 android:id="@+id/txtAmount"
-                app:layout_constraintTop_toBottomOf="@id/txtTitle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="20.00"
-                android:textStyle="bold"
-                android:textSize="20dp"
                 android:layout_marginTop="10dp"
-                />
+                android:text="20.00"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtTitle" />
 
             <TextView
                 android:id="@+id/txtTo"
-                app:layout_constraintTop_toBottomOf="@id/txtAmount"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="To:"
-                android:textStyle="bold"
-                android:textSize="20dp"
                 android:layout_marginTop="10dp"
-                />
+                android:text="To:"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtAmount" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/contactLayout"
-                app:layout_constraintTop_toBottomOf="@id/txtTo"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:background="#EEEEEE"
                 android:layout_margin="16dp"
-                >
+                android:background="#EEEEEE"
+                android:padding="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txtTo">
 
                 <TextView
                     android:id="@+id/txtGatewayName"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:textStyle="bold"
                     android:ellipsize="end"
                     android:lines="1"
-                    tools:text="Primary gateway"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    android:textColor="@color/text_primary"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@id/txtGatewayPublicKey"
                     app:layout_constraintEnd_toStartOf="@id/txtPref"
-                    />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Primary gateway" />
 
                 <TextView
                     android:id="@+id/txtPref"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:lines="1"
-                    android:visibility="gone"
                     android:text="Preferred"
-                    app:layout_constraintTop_toTopOf="@id/txtGatewayName"
+                    android:visibility="gone"
                     app:layout_constraintBottom_toBottomOf="@id/txtGatewayName"
                     app:layout_constraintEnd_toEndOf="parent"
-                    />
+                    app:layout_constraintTop_toTopOf="@id/txtGatewayName" />
 
                 <TextView
                     android:id="@+id/txtGatewayPublicKey"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
-                    android:typeface="monospace"
                     android:ellipsize="end"
                     android:lines="1"
+                    android:textColor="@color/text_primary"
+                    android:typeface="monospace"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/txtGatewayName"
                     app:layout_constraintStart_toStartOf="@id/txtGatewayName"
-                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6"
-                    />kkkzz
+                    app:layout_constraintTop_toBottomOf="@id/txtGatewayName"
+                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />kkkzz
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <Switch
                 android:id="@+id/addGatewaySwitch"
-                android:text="Save gateway?"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
-                app:layout_constraintTop_toBottomOf="@id/contactLayout"
+                android:layout_marginBottom="20dp"
+                android:gravity="start"
                 android:paddingHorizontal="6dp"
                 android:paddingBottom="20dp"
-                android:textSize="20sp"
+                android:text="Save gateway?"
                 android:textAlignment="viewStart"
-                android:gravity="start" />
+                android:textSize="20sp"
+                app:layout_constraintTop_toBottomOf="@id/contactLayout" />
 
             <Switch
                 android:id="@+id/swiMakePreferred"
-                android:text="Make preferred"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
-                app:layout_constraintTop_toBottomOf="@id/addGatewaySwitch"
+                android:layout_marginBottom="20dp"
+                android:gravity="start"
                 android:paddingHorizontal="6dp"
                 android:paddingBottom="20dp"
-                android:textSize="20sp"
+                android:text="Make preferred"
                 android:textAlignment="viewStart"
-                android:gravity="start" />
+                android:textSize="20sp"
+                app:layout_constraintTop_toBottomOf="@id/addGatewaySwitch" />
 
             <EditText
                 android:id="@+id/newGatewayName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/swiMakePreferred"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 android:hint="Gateway name"
-                />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/swiMakePreferred" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSend"
+        style="@style/Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="Continue"
-        style="@style/Button"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

@@ -12,7 +12,7 @@ class DDValidator : TransactionValidator {
     override fun validate(
         block: TrustChainBlock,
         database: TrustChainStore
-    ): ValidationResult{
+    ): ValidationResult {
         // Do not validate offline transactions
         val offline = block.transaction["offline"]?.toString()?.toBoolean()
         if (offline != null && offline) {

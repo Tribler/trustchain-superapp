@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/copyKey" android:title="Copy PubKey" />
-    <item android:id="@+id/verifyBalance" android:title="Verify Balance" />
-    <item android:id="@+id/renameSelf" android:title="Change name" />
-    <item android:id="@+id/gateways" android:title="Manage gateways" />
+    <item
+        android:id="@+id/copyKey"
+        android:title="Copy PubKey" />
+    <item
+        android:id="@+id/verifyBalance"
+        android:title="Verify Balance" />
+    <item
+        android:id="@+id/renameSelf"
+        android:title="Change name" />
+    <item
+        android:id="@+id/gateways"
+        android:title="Manage gateways" />
 </menu>

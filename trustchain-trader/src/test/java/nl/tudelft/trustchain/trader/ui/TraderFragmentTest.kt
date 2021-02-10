@@ -28,12 +28,12 @@ class TraderFragmentTest {
 
     @Test
     fun testAskListener() {
-        every { tradePayload.publicKey } returns(ByteArray(0))
-        every { tradePayload.amount } returns(1.0)
-        every { tradePayload.price } returns(90.0)
-        every { tradePayload.primaryCurrency } returns(Currency.BTC)
-        every { tradePayload.secondaryCurrency } returns(Currency.DYMBE_DOLLAR)
-        every { tradePayload.type } returns(TradePayload.Type.ASK)
+        every { tradePayload.publicKey } returns (ByteArray(0))
+        every { tradePayload.amount } returns (1.0)
+        every { tradePayload.price } returns (90.0)
+        every { tradePayload.primaryCurrency } returns (Currency.BTC)
+        every { tradePayload.secondaryCurrency } returns (Currency.DYMBE_DOLLAR)
+        every { tradePayload.type } returns (TradePayload.Type.ASK)
         every { aiMock.predict(any()) } returns 1
 
         fragmentMock.askListener(tradePayload)
@@ -43,12 +43,12 @@ class TraderFragmentTest {
 
     @Test
     fun testBidListener() {
-        every { tradePayload.publicKey } returns(ByteArray(0))
-        every { tradePayload.amount } returns(1.0)
-        every { tradePayload.price } returns(90.0)
-        every { tradePayload.primaryCurrency } returns(Currency.BTC)
-        every { tradePayload.secondaryCurrency } returns(Currency.DYMBE_DOLLAR)
-        every { tradePayload.type } returns(TradePayload.Type.ASK)
+        every { tradePayload.publicKey } returns (ByteArray(0))
+        every { tradePayload.amount } returns (1.0)
+        every { tradePayload.price } returns (90.0)
+        every { tradePayload.primaryCurrency } returns (Currency.BTC)
+        every { tradePayload.secondaryCurrency } returns (Currency.DYMBE_DOLLAR)
+        every { tradePayload.type } returns (TradePayload.Type.ASK)
         every { aiMock.predict(any()) } returns 0
 
         fragmentMock.bidListener(tradePayload)

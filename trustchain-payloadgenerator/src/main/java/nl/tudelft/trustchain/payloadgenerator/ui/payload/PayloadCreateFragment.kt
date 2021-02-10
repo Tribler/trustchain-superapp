@@ -55,7 +55,8 @@ class PayloadCreateFragment : BaseFragment() {
                 type = "Ask"
             }
             val bundle = bundleOf("amount" to amount, "price" to price, "type" to type)
-            view.findNavController().navigate(R.id.action_payloadCreateFragment_to_payloadFragment, bundle)
+            view.findNavController()
+                .navigate(R.id.action_payloadCreateFragment_to_payloadFragment, bundle)
         }
     }
 }

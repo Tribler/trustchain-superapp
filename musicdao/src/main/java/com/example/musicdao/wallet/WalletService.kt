@@ -151,7 +151,11 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
         try {
             app.wallet().sendCoins(sendRequest)
-            musicService.showToast("Sending funds: ${Coin.valueOf(satoshiAmount).toFriendlyString()}", Toast.LENGTH_SHORT)
+            musicService.showToast(
+                "Sending funds: ${
+                    Coin.valueOf(satoshiAmount).toFriendlyString()
+                }", Toast.LENGTH_SHORT
+            )
         } catch (e: Exception) {
             musicService.showToast(
                 "Error creating transaction (do you have sufficient funds?)",

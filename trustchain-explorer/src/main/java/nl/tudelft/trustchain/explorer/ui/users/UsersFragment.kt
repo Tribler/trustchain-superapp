@@ -9,10 +9,13 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.coroutines.*
-import nl.tudelft.trustchain.common.ui.BaseFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.explorer.R
 import nl.tudelft.trustchain.explorer.databinding.FragmentUsersBinding
@@ -37,7 +40,12 @@ class UsersFragment : BaseFragment(R.layout.fragment_users) {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         loadNetworkInfo()
     }

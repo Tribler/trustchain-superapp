@@ -30,14 +30,14 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
+import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 
@@ -51,18 +51,20 @@ class TrustChainApplication : Application() {
     }
 
     private fun initIPv8() {
-        val config = IPv8Configuration(overlays = listOf(
-            createDiscoveryCommunity(),
-            createTrustChainCommunity(),
-            createPeerChatCommunity(),
-            createEuroTokenCommunity(),
-            createTFTPCommunity(),
-            createDemoCommunity(),
-            createMarketCommunity(),
-            createCoinCommunity(),
-            createVotingCommunity(),
-            createMusicCommunity()
-        ), walkerInterval = 5.0)
+        val config = IPv8Configuration(
+            overlays = listOf(
+                createDiscoveryCommunity(),
+                createTrustChainCommunity(),
+                createPeerChatCommunity(),
+                createEuroTokenCommunity(),
+                createTFTPCommunity(),
+                createDemoCommunity(),
+                createMarketCommunity(),
+                createCoinCommunity(),
+                createVotingCommunity(),
+                createMusicCommunity()
+            ), walkerInterval = 5.0
+        )
 
         IPv8Android.Factory(this)
             .setConfiguration(config)

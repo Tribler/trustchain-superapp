@@ -8,14 +8,12 @@
         android:id="@+id/transactionsFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionsFragment"
         android:label="Transaction History"
-        tools:layout="@layout/fragment_transactions"
-        />
+        tools:layout="@layout/fragment_transactions" />
     <fragment
         android:id="@+id/exchangeFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.ExchangeFragment"
         android:label="Buy / Sell"
-        tools:layout="@layout/fragment_exchange"
-        >
+        tools:layout="@layout/fragment_exchange">
         <action
             android:id="@+id/action_exchangeFragment_to_destroyMoneyFragment"
             app:destination="@id/destroyMoneyFragment" />
@@ -26,7 +24,7 @@
     <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment"
-        android:label="Transfer" >
+        android:label="Transfer">
         <action
             android:id="@+id/action_transferFragment_to_sendMoneyFragment"
             app:destination="@id/sendMoneyFragment" />
@@ -67,18 +65,24 @@
     <fragment
         android:id="@+id/destroyMoneyFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.exchange.DestroyMoneyFragment"
-        android:label="Selling EuroToken" >
-        <argument android:name="amount"
+        android:label="Selling EuroToken">
+        <argument
+            android:name="amount"
             app:argType="long" />
-        <argument android:name="name"
+        <argument
+            android:name="name"
             app:argType="string" />
-        <argument android:name="payment_id"
+        <argument
+            android:name="payment_id"
             app:argType="string" />
-        <argument android:name="ip"
+        <argument
+            android:name="ip"
             app:argType="string" />
-        <argument android:name="port"
+        <argument
+            android:name="port"
             app:argType="integer" />
-        <argument android:name="public_key"
+        <argument
+            android:name="public_key"
             app:argType="string" />
         <action
             android:id="@+id/action_destroyMoneyFragment_to_transactionsFragment"

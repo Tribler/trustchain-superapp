@@ -7,17 +7,12 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.consumeAsFlow
 import nl.tudelft.ipv8.IPv4Address
-import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.debug.databinding.FragmentPunctureBinding
-import nl.tudelft.trustchain.debug.databinding.FragmentWanLogBinding
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.math.max
-import kotlin.math.min
 
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
@@ -41,7 +36,10 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
         }
         lifecycleScope.launchWhenCreated {
             getDemoCommunity().punctureChannel.asFlow().collect { (peer, payload) ->
-                Log.i("PunctureFragment", "Received puncture from ${peer} on port ${payload.identifier}")
+                Log.i(
+                    "PunctureFragment",
+                    "Received puncture from ${peer} on port ${payload.identifier}"
+                )
                 received++
                 receivedMap[peer.toString()] = (receivedMap[peer.toString()] ?: 0) + 1
                 if (firstMessageTimestamps[peer.toString()] == null) {
@@ -113,11 +111,12 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
 
     private fun updateView() {
         val df = SimpleDateFormat.getTimeInstance(SimpleDateFormat.MEDIUM)
-        binding.txtResult.text = "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" + receivedMap.map {
-            val date = firstMessageTimestamps[it.key]
-            val time = if (date != null) df.format(date) else null
-            it.key + " (" + time + ") -> " + it.value
-        }.joinToString("\n")
+        binding.txtResult.text =
+            "Sent: $sent\nFirst Sent: $firstSentMessageTimestamp\nReceived: $received\n\n" + receivedMap.map {
+                val date = firstMessageTimestamps[it.key]
+                val time = if (date != null) df.format(date) else null
+                it.key + " (" + time + ") -> " + it.value
+            }.joinToString("\n")
     }
 
     companion object {

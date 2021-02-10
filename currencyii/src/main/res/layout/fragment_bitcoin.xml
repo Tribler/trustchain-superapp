@@ -9,6 +9,7 @@
         android:id="@+id/bitcoin_refresh_swiper"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -22,7 +23,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="16dp"
-                    android:background="@color/light_gray"/>
+                    android:background="@color/light_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -37,8 +38,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginRight="64dp"
                         android:text="Total Balance"
-                        android:textColor="?android:textColorPrimary"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:textColor="?android:textColorPrimary" />
 
                     <TextView
                         android:id="@+id/walletBalance"
@@ -50,8 +51,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/light_gray"
-                    android:layout_marginBottom="32dp"/>
+                    android:layout_marginBottom="32dp"
+                    android:background="@color/light_gray" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -176,8 +177,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:text="Network" />
+                    android:text="Network"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
                 <TextView
                     android:id="@+id/chosenNetwork"

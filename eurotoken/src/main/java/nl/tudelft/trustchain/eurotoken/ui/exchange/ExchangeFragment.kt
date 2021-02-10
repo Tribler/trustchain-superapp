@@ -3,20 +3,16 @@ package nl.tudelft.trustchain.eurotoken.ui.exchange
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_exchange.*
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.R
-import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
 import org.json.JSONObject
@@ -52,11 +48,11 @@ class ExchangeFragment : EurotokenBaseFragment() {
             val amount = this.optLong("amount", -1L)
             val type = this.optString("type")
         }
-        qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let{
+        qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val connectionData = ConnectionData(it)
                 Toast.makeText(requireContext(), connectionData.ip, Toast.LENGTH_LONG).show()
-                if (connectionData.type == "destruction"){
+                if (connectionData.type == "destruction") {
                     val args = Bundle()
                     args.putString(DestroyMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
                     args.putString(DestroyMoneyFragment.ARG_NAME, connectionData.name)
@@ -64,15 +60,21 @@ class ExchangeFragment : EurotokenBaseFragment() {
                     args.putInt(DestroyMoneyFragment.ARG_PORT, connectionData.port)
                     args.putString(DestroyMoneyFragment.ARG_IP, connectionData.ip)
                     args.putString(DestroyMoneyFragment.ARG_PAYMENT_ID, connectionData.payment_id)
-                    findNavController().navigate(R.id.action_exchangeFragment_to_destroyMoneyFragment, args)
-                } else if (connectionData.type == "creation"){
+                    findNavController().navigate(
+                        R.id.action_exchangeFragment_to_destroyMoneyFragment,
+                        args
+                    )
+                } else if (connectionData.type == "creation") {
                     val args = Bundle()
                     args.putString(CreateMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
                     args.putString(CreateMoneyFragment.ARG_NAME, connectionData.name)
                     args.putInt(CreateMoneyFragment.ARG_PORT, connectionData.port)
                     args.putString(CreateMoneyFragment.ARG_IP, connectionData.ip)
                     args.putString(CreateMoneyFragment.ARG_PAYMENT_ID, connectionData.payment_id)
-                    findNavController().navigate(R.id.action_exchangeFragment_to_createMoneyFragment, args)
+                    findNavController().navigate(
+                        R.id.action_exchangeFragment_to_createMoneyFragment,
+                        args
+                    )
                 } else {
                     Toast.makeText(requireContext(), "Invalid QR", Toast.LENGTH_LONG).show()
                 }

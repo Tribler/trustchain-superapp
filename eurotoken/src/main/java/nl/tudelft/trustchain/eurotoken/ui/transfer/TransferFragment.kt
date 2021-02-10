@@ -11,7 +11,6 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_transactions.*
@@ -19,14 +18,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -43,9 +40,11 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
                 val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
-                val ownContact = ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
+                val ownContact =
+                    ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
 
-                binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                binding.txtBalance.text =
+                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
                     binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
@@ -64,7 +63,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
         val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
-        binding.txtBalance.text = TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+        binding.txtBalance.text =
+            TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
         binding.txtOwnPublicKey.text = ownKey.keyToHash().toHex()
 
         if (ownContact?.name != null) {
@@ -81,7 +81,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                     binding.missingNameLayout.visibility = View.GONE
                     binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
-                val inputMethodManager = requireContext().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+                val inputMethodManager =
+                    requireContext().getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
             }
         }
@@ -100,7 +101,8 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             val amount = getAmount(binding.edtAmount.text.toString())
             if (amount > 0) {
                 val myPeer = transactionRepository.trustChainCommunity.myPeer
-                val ownContact = ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
+                val ownContact =
+                    ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
@@ -112,7 +114,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
                 args.putString(RequestMoneyFragment.ARG_DATA, connectionData.toString())
 
-                findNavController().navigate(R.id.action_transferFragment_to_requestMoneyFragment, args)
+                findNavController().navigate(
+                    R.id.action_transferFragment_to_requestMoneyFragment,
+                    args
+                )
             }
         }
 
@@ -122,7 +127,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let{
+        qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
                 val connectionData = ConnectionData(it)
 
@@ -131,7 +136,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
                 if (connectionData.type == "transfer") {
-                    findNavController().navigate(R.id.action_transferFragment_to_sendMoneyFragment, args)
+                    findNavController().navigate(
+                        R.id.action_transferFragment_to_sendMoneyFragment,
+                        args
+                    )
                 } else {
                     Toast.makeText(requireContext(), "Invalid QR", Toast.LENGTH_LONG).show()
                 }
@@ -168,16 +176,17 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             var type = this.optString("type")
         }
 
-        fun getAmount(amount: String) : Long {
+        fun getAmount(amount: String): Long {
             val regex = """[^\d]""".toRegex()
-            if (amount.isEmpty()){
+            if (amount.isEmpty()) {
                 return 0L
             }
             return regex.replace(amount, "").toLong()
         }
 
         fun Context.hideKeyboard(view: View) {
-            val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            val inputMethodManager =
+                getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
         }
 
@@ -208,8 +217,16 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                         this@addDecimalLimiter.setSelection(pos)
                     }
                 }
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             })
         }
     }

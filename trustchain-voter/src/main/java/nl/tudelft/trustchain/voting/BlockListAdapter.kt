@@ -63,7 +63,11 @@ class BlockListAdapter(
 
         if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 0)) {
             holder.propIndicator.text = "NEW"
-        } else if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(1, 0) || vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(0, 1)) {
+        } else if (vh.castedByPeer(proposalBlock, vh.myPublicKey) == Pair(1, 0) || vh.castedByPeer(
+                proposalBlock,
+                vh.myPublicKey
+            ) == Pair(0, 1)
+        ) {
             holder.propIndicator.text = "VOTED"
         }
 

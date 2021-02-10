@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?selectableItemBackground">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/txtPeerId"
@@ -43,6 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
+
         <TextView
             android:id="@+id/txtReceivingIcon"
             android:layout_width="wrap_content"
@@ -52,6 +53,7 @@
             android:drawableTint="@color/green"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/red" />
+
         <TextView
             android:id="@+id/txtReceiving"
             android:layout_width="wrap_content"
@@ -65,6 +67,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp">
+
         <TextView
             android:id="@+id/txtPayloadTypeIcon"
             android:layout_width="wrap_content"
@@ -74,6 +77,7 @@
             android:drawableTint="@color/blue"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/blue" />
+
         <TextView
             android:id="@+id/txtPayloadType"
             android:layout_width="wrap_content"

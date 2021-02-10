@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.exchange.ExchangeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -15,28 +15,27 @@
             android:id="@+id/txtInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:text="To buy/sell EuroToken, go to an exchange and start a transaction. Then scan the QR code they provide. "
-            android:textStyle="bold"
-            android:textSize="20dp"
             android:layout_marginTop="10dp"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:text="To buy/sell EuroToken, go to an exchange and start a transaction. Then scan the QR code they provide. "
+            android:textSize="20dp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCamera"
+            style="@style/Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Scan qr code"
-            app:layout_constraintTop_toBottomOf="@+id/txtInfo"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="16dp"
+            android:text="Scan qr code"
             app:icon="@drawable/ic_baseline_photo_camera_24"
-            style="@style/Button"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txtInfo" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

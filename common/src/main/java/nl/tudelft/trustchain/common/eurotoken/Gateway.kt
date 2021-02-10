@@ -4,7 +4,6 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
-import java.net.InetAddress
 
 data class Gateway(
     val name: String,

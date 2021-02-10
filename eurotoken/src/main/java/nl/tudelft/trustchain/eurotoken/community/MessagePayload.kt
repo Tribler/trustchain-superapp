@@ -1,8 +1,11 @@
 package nl.tudelft.trustchain.eurotoken.community
 
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 
-class MessagePayload constructor( val id: String ) : Serializable {
+class MessagePayload constructor(val id: String) : Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(id.toByteArray())
     }
@@ -14,7 +17,7 @@ class MessagePayload constructor( val id: String ) : Serializable {
             localOffset += idSize
 
             return Pair(
-                MessagePayload( id.toString(Charsets.UTF_8) ),
+                MessagePayload(id.toString(Charsets.UTF_8)),
                 localOffset - offset
             )
         }

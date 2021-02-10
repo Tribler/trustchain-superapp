@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.currencyii.coin
 
 import nl.tudelft.ipv8.util.hexToBytes
-import org.bitcoinj.core.*
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.LegacyAddress
+import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.script.ScriptPattern
-import org.junit.Assert.*
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
-import java.lang.IllegalArgumentException
 
 class WalletManagerTest {
 
@@ -92,8 +95,10 @@ class WalletManagerTest {
             entranceFee
         )
 
-        assertFalse("The transaction is not, and never will be, confirmed. Should not pass",
-            entranceFeePayed)
+        assertFalse(
+            "The transaction is not, and never will be, confirmed. Should not pass",
+            entranceFeePayed
+        )
     }
 
     @Test
@@ -129,26 +134,38 @@ class WalletManagerTest {
         val entranceFee = Coin.valueOf(100000)
         val threshold = 2
 
-        val transaction = WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
+        val transaction =
+            WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
 
         assertTrue("Not exactly one output in transaction", transaction.outputs.size == 1)
 
         val output = transaction.outputs[0]
-        assertTrue("Transaction output value is not equal to the entrance fee", output.value == entranceFee)
+        assertTrue(
+            "Transaction output value is not equal to the entrance fee",
+            output.value == entranceFee
+        )
 
         val script = output.scriptPubKey
         assertTrue("Script is not a multisig script", ScriptPattern.isSentToMultisig(script))
 
-        assertTrue("Amount of signatures that are needed to complete the transaction is not correct in the script",
-            script.numberOfSignaturesRequiredToSpend == threshold)
+        assertTrue(
+            "Amount of signatures that are needed to complete the transaction is not correct in the script",
+            script.numberOfSignaturesRequiredToSpend == threshold
+        )
 
         // Check whether all keys are in the script
-        assertTrue("First pubkey did not match first pubkey in script",
-            script.pubKeys[0].pubKey.contentEquals(key1.pubKey))
-        assertTrue("Second pubkey did not match second pubkey in script",
-            script.pubKeys[1].pubKey.contentEquals(key2.pubKey))
-        assertTrue("Third pubkey did not match third pubkey in script",
-            script.pubKeys[2].pubKey.contentEquals(key3.pubKey))
+        assertTrue(
+            "First pubkey did not match first pubkey in script",
+            script.pubKeys[0].pubKey.contentEquals(key1.pubKey)
+        )
+        assertTrue(
+            "Second pubkey did not match second pubkey in script",
+            script.pubKeys[1].pubKey.contentEquals(key2.pubKey)
+        )
+        assertTrue(
+            "Third pubkey did not match third pubkey in script",
+            script.pubKeys[2].pubKey.contentEquals(key3.pubKey)
+        )
     }
 
     @Test(expected = IllegalArgumentException::class)

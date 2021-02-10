@@ -12,7 +12,8 @@ class PostItemRenderer(
     private val onLike: (PostItem) -> Unit,
     private val onComment: (PostItem) -> Unit
 ) : ItemLayoutRenderer<PostItem, View>(
-    PostItem::class.java) {
+    PostItem::class.java
+) {
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
 
     override fun bindView(item: PostItem, view: View) = with(view) {

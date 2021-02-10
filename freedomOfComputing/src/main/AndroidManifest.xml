@@ -15,8 +15,8 @@
         <activity
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
             android:label="@string/title_activity_main_FOC"
-            android:windowSoftInputMode="stateHidden"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden"></activity>
     </application>
 
 </manifest>

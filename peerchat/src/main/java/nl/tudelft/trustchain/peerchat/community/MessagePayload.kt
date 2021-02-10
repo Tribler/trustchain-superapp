@@ -39,7 +39,7 @@ class MessagePayload constructor(
             var (transactionHash, transactionHashSize) = deserializeVarLen(buffer, localOffset)
             localOffset += transactionHashSize
 
-            logger.debug { "after deserialisation: ${String(transactionHash)}"}
+            logger.debug { "after deserialisation: ${String(transactionHash)}" }
 
             return Pair(
                 MessagePayload(

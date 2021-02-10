@@ -19,10 +19,10 @@ class RichEditText @JvmOverloads constructor(
         val ic: InputConnection = super.onCreateInputConnection(editorInfo)
         EditorInfoCompat.setContentMimeTypes(editorInfo, arrayOf("image/*"))
 
-        val callback = InputConnectionCompat.OnCommitContentListener {
-                inputContentInfo, flags, opts ->
-            onCommitContentListener?.onCommitContent(inputContentInfo, flags, opts) ?: false
-        }
+        val callback =
+            InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, opts ->
+                onCommitContentListener?.onCommitContent(inputContentInfo, flags, opts) ?: false
+            }
 
         return InputConnectionCompat.createWrapper(ic, editorInfo, callback)
     }

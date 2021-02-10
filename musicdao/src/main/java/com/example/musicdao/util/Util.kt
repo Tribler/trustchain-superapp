@@ -141,7 +141,8 @@ object Util {
             if (mp3File.hasId3v1Tag()) {
                 return mp3File.id3v1Tag.title
             }
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
         return null
     }
 
@@ -202,7 +203,8 @@ object Util {
                 fOut.flush()
                 fOut.close()
                 return coverFile
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
         }
         for (file in files) {
             for (ext in allowedExtensions) {

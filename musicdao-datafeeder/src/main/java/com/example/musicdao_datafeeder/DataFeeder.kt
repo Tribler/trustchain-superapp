@@ -84,8 +84,10 @@ class DataFeeder(private val musicDir: File, private val publish: Boolean) {
             val entry = iterator.next()
             val infoHash = entry.key
             val swarmHealth = entry.value
-            val swarmHealthUpdatedTimestamp = SwarmHealth(swarmHealth.infoHash,
-                swarmHealth.numPeers, swarmHealth.numSeeds)
+            val swarmHealthUpdatedTimestamp = SwarmHealth(
+                swarmHealth.infoHash,
+                swarmHealth.numPeers, swarmHealth.numSeeds
+            )
             swarmHealthMap[infoHash] = swarmHealthUpdatedTimestamp
         }
         for ((_, swarmHealth) in swarmHealthMap) {

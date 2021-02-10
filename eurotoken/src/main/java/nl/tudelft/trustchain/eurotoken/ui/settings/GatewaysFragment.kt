@@ -6,28 +6,25 @@ import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.isActive
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Gateway
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentGatewaysBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
     private val binding by viewBinding(FragmentGatewaysBinding::bind)
 
@@ -50,7 +47,7 @@ class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
-                val items = store.getGateways().map { gateway : Gateway -> GatewayItem( gateway ) }
+                val items = store.getGateways().map { gateway: Gateway -> GatewayItem(gateway) }
                 adapter.updateItems(items)
                 adapter.notifyDataSetChanged()
                 delay(1000L)

@@ -5,7 +5,10 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.view.isVisible
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.liveData
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -44,7 +47,8 @@ class FeedFragment : BaseFragment(R.layout.fragment_feed) {
 
         adapter.registerRenderer(PostItemRenderer({
             if (!postRepository.likePost(it.block)) {
-                Toast.makeText(requireContext(), "You already liked this post", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "You already liked this post", Toast.LENGTH_SHORT)
+                    .show()
             }
         }, {
             val args = Bundle()
@@ -68,7 +72,12 @@ class FeedFragment : BaseFragment(R.layout.fragment_feed) {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
