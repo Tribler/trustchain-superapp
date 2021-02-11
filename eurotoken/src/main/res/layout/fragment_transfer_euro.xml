@@ -28,7 +28,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Your are anonymous, add your name:"
+                android:text="Add your name:"
                 android:textStyle="bold" />
 
             <EditText
