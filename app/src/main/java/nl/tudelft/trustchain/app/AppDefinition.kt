@@ -12,6 +12,8 @@ import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
+import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
+import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -96,5 +98,11 @@ enum class AppDefinition(
         "EuroToken",
         R.color.metallic_gold,
         EuroTokenMainActivity::class.java
+    ),
+    LIQUIDITY(
+        R.drawable.ic_add_black_24dp,
+        "Liquidity Pool",
+        R.color.blue,
+        LiquidityPoolMainActivity::class.java
     )
 }
