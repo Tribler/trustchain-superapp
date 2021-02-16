@@ -11,9 +11,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.coroutines.*
-import nl.tudelft.trustchain.common.ui.BaseFragment
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.trader.R
 import nl.tudelft.trustchain.trader.databinding.FragmentPeersBinding
@@ -41,7 +42,12 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         loadNetworkInfo()
     }

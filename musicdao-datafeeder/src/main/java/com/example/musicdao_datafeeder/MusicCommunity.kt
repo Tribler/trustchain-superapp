@@ -36,7 +36,11 @@ class MusicCommunity(
         messageHandlers[MessageId.SWARM_HEALTH_MESSAGE] = ::onSwarmHealth
     }
 
-    fun performRemoteKeywordSearch(keyword: String, ttl: UInt = 1u, originPublicKey: ByteArray = myPeer.publicKey.keyToBin()): Int {
+    fun performRemoteKeywordSearch(
+        keyword: String,
+        ttl: UInt = 1u,
+        originPublicKey: ByteArray = myPeer.publicKey.keyToBin()
+    ): Int {
         val maxPeersToAsk = 20 // This is a magic number, tweak during/after experiments
         var count = 0
         for ((index, peer) in getPeers().withIndex()) {

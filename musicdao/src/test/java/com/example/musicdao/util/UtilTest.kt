@@ -24,7 +24,10 @@ class UtilTest {
         val magnet = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c&dn=displayname"
         val name = Util.extractInfoHash(magnet)
         Assert.assertEquals(name, Sha1Hash("a83cc13bf4a07e85b938dcf06aa707955687ca7c"))
-        Assert.assertEquals(name.toString(), Sha1Hash("a83cc13bf4a07e85b938dcf06aa707955687ca7c").toString())
+        Assert.assertEquals(
+            name.toString(),
+            Sha1Hash("a83cc13bf4a07e85b938dcf06aa707955687ca7c").toString()
+        )
         Assert.assertNotEquals(name, "somethingelse")
     }
 

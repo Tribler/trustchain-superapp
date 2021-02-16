@@ -77,13 +77,15 @@ class TransferFragment : BaseFragment() {
                 0f
             }
             val publicKey = if (editTxtAddress.text != null && editTxtAddress.text.isNotEmpty() &&
-                editTxtAddress.text.length % 2 == 0) {
+                editTxtAddress.text.length % 2 == 0
+            ) {
                 editTxtAddress.text.toString().hexToBytes()
             } else {
                 "null".hexToBytes()
             }
             if (editTxtAddress.text != null && editTxtAmount.text != null &&
-                editTxtAmount.text.isNotEmpty() && editTxtAddress.text.isNotEmpty()) {
+                editTxtAmount.text.isNotEmpty() && editTxtAddress.text.isNotEmpty()
+            ) {
                 if (editTxtAddress.text.length % 2 == 0) {
                     val bundle = bundleOf("Amount" to amount, "Public Key" to publicKey)
                     trustchain.createTxProposalBlock(amount, publicKey)

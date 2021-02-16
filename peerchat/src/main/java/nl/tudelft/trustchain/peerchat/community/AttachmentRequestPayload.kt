@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.peerchat.community
 
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 
 data class AttachmentRequestPayload(
     val id: String
@@ -10,7 +13,10 @@ data class AttachmentRequestPayload(
     }
 
     companion object Deserializer : Deserializable<AttachmentRequestPayload> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<AttachmentRequestPayload, Int> {
+        override fun deserialize(
+            buffer: ByteArray,
+            offset: Int
+        ): Pair<AttachmentRequestPayload, Int> {
             var localOffset = offset
             val (id, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize

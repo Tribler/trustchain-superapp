@@ -68,8 +68,18 @@ class PeerChatCommunity(
         }
     }
 
+    fun sendMessageWithTransaction(
+        message: String,
+        transaction_hash: ByteArray?,
+        recipient: PublicKey
+    ) {
+        val chatMessage = createOutgoingChatMessage(message, null, transaction_hash, recipient)
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
     fun sendMessage(message: String, recipient: PublicKey) {
-        val chatMessage = createOutgoingChatMessage(message, null, recipient)
+        val chatMessage = createOutgoingChatMessage(message, null, null, recipient)
         database.addMessage(chatMessage)
 
         sendMessage(chatMessage)
@@ -78,7 +88,7 @@ class PeerChatCommunity(
     fun sendImage(file: File, recipient: PublicKey) {
         val hash = file.name.hexToBytes()
         val attachment = MessageAttachment(MessageAttachment.TYPE_IMAGE, file.length(), hash)
-        val chatMessage = createOutgoingChatMessage("", attachment, recipient)
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
         database.addMessage(chatMessage)
 
         sendMessage(chatMessage)
@@ -94,7 +104,8 @@ class PeerChatCommunity(
                 chatMessage.message,
                 chatMessage.attachment?.type ?: "",
                 chatMessage.attachment?.size ?: 0L,
-                chatMessage.attachment?.content ?: ByteArray(0)
+                chatMessage.attachment?.content ?: ByteArray(0),
+                chatMessage.transactionHash
             )
 
             val packet = serializePacket(
@@ -105,7 +116,7 @@ class PeerChatCommunity(
                 recipient = peer
             )
 
-            logger.debug { "-> $payload" }
+            logger.debug { "-> $payload, ${chatMessage.transactionHash}, ${payload.transactionHash}" }
             send(peer, packet)
         } else {
             Log.d("PeerChat", "Peer $mid not online")
@@ -128,15 +139,17 @@ class PeerChatCommunity(
 
     private fun sendAttachment(peer: Peer, id: String, file: File) {
         val payload = AttachmentPayload(id, file.readBytes())
-        val packet = serializePacket(MessageId.ATTACHMENT, payload, encrypt = true, recipient = peer)
+        val packet =
+            serializePacket(MessageId.ATTACHMENT, payload, encrypt = true, recipient = peer)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
     private fun onMessagePacket(packet: Packet) {
         val (peer, payload) = packet.getDecryptedAuthPayload(
-            MessagePayload.Deserializer, myPeer.key as PrivateKey)
-        logger.debug { "<- $payload" }
+            MessagePayload.Deserializer, myPeer.key as PrivateKey
+        )
+        logger.debug { "<- $payload, ${payload.transactionHash}" }
         onMessage(peer, payload)
     }
 
@@ -154,7 +167,8 @@ class PeerChatCommunity(
 
     private fun onAttachmentPacket(packet: Packet) {
         val (_, payload) = packet.getDecryptedAuthPayload(
-            AttachmentPayload.Deserializer, myPeer.key as PrivateKey)
+            AttachmentPayload.Deserializer, myPeer.key as PrivateKey
+        )
         logger.debug { "<- $payload" }
         onAttachment(payload)
     }
@@ -219,6 +233,7 @@ class PeerChatCommunity(
     private fun createOutgoingChatMessage(
         message: String,
         attachment: MessageAttachment?,
+        transaction_hash: ByteArray?,
         recipient: PublicKey
     ): ChatMessage {
         val id = UUID.randomUUID().toString()
@@ -232,7 +247,8 @@ class PeerChatCommunity(
             Date(),
             ack = false,
             read = true,
-            attachmentFetched = true
+            attachmentFetched = true,
+            transactionHash = transaction_hash
         )
     }
 
@@ -242,6 +258,8 @@ class PeerChatCommunity(
         val file = if (message.attachmentData.isNotEmpty())
             saveFile(context, message.attachmentData) else null
          */
+
+        logger.debug { "got message with hash ${message.transactionHash}" }
 
         return ChatMessage(
             message.id,
@@ -253,7 +271,8 @@ class PeerChatCommunity(
             Date(),
             ack = false,
             read = false,
-            attachmentFetched = false
+            attachmentFetched = false,
+            transactionHash = message.transactionHash
         )
     }
 

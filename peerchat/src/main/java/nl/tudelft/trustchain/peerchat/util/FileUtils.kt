@@ -5,7 +5,8 @@ import android.net.Uri
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
 
 fun saveFile(context: Context, uri: Uri): File {
     val inputStream = context.contentResolver.openInputStream(uri)

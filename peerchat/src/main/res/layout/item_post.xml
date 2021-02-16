@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="?selectableItemBackground">
+    android:padding="16dp">
 
     <nl.tudelft.trustchain.peerchat.ui.contacts.AvatarView
         android:id="@+id/avatar"
@@ -21,22 +20,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:orientation="horizontal"
         android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/avatar"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@id/txtPeerId"
+        app:layout_constraintStart_toEndOf="@id/avatar"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed">
 
         <TextView
             android:id="@+id/txtName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/text_primary"
-            android:textStyle="bold"
             android:ellipsize="end"
             android:lines="1"
             android:paddingEnd="8dp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
             tools:text="Matt" />
     </LinearLayout>
 
@@ -44,25 +43,25 @@
         android:id="@+id/txtDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
         android:textColor="#AAAAAA"
-        app:layout_constraintTop_toTopOf="@id/nameContainer"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="@id/nameContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/nameContainer"
         tools:text="10:00" />
 
     <TextView
         android:id="@+id/txtPeerId"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/text_primary"
-        android:typeface="monospace"
         android:ellipsize="end"
         android:lines="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/nameContainer"
-        app:layout_constraintStart_toStartOf="@id/nameContainer"
+        android:textColor="@color/text_primary"
+        android:typeface="monospace"
         app:layout_constraintBottom_toTopOf="@id/txtMessage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/nameContainer"
+        app:layout_constraintTop_toBottomOf="@id/nameContainer"
         tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
     <TextView
@@ -70,62 +69,62 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:textColor="@color/text_secondary"
         android:ellipsize="end"
         android:lines="1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/txtPeerId"
-        app:layout_constraintStart_toStartOf="@id/nameContainer"
+        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toTopOf="@id/buttonsContainer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@id/nameContainer"
+        app:layout_constraintTop_toBottomOf="@id/txtPeerId"
         tools:text="Hello World!" />
 
     <LinearLayout
         android:id="@+id/buttonsContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_marginTop="8dp"
         android:gravity="center_vertical"
-        app:layout_constraintTop_toBottomOf="@id/txtMessage"
-        app:layout_constraintStart_toStartOf="@id/txtMessage">
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="@id/txtMessage"
+        app:layout_constraintTop_toBottomOf="@id/txtMessage">
 
         <ImageView
             android:id="@+id/btnLike"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="8dp"
             android:layout_marginStart="0dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:padding="8dp"
             android:tint="@color/text_secondary"
-            app:srcCompat="@drawable/ic_baseline_thumb_up_24"
-            android:background="?selectableItemBackgroundBorderless"/>
+            app:srcCompat="@drawable/ic_baseline_thumb_up_24" />
 
         <TextView
             android:id="@+id/txtLikeCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:textColor="@color/text_secondary"
-            android:text="0" />
+            android:text="0"
+            android:textColor="@color/text_secondary" />
 
         <ImageView
             android:id="@+id/btnComment"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:padding="6dp"
             android:layout_marginStart="16dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:padding="6dp"
             android:tint="@color/text_secondary"
-            app:srcCompat="@drawable/ic_baseline_reply_24"
-            app:layout_constraintTop_toBottomOf="@id/txtMessage"
             app:layout_constraintStart_toEndOf="@id/btnLike"
-            android:background="?selectableItemBackgroundBorderless"/>
+            app:layout_constraintTop_toBottomOf="@id/txtMessage"
+            app:srcCompat="@drawable/ic_baseline_reply_24" />
 
         <TextView
             android:id="@+id/txtCommentCount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:textColor="@color/text_secondary"
-            android:text="0" />
+            android:text="0"
+            android:textColor="@color/text_secondary" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

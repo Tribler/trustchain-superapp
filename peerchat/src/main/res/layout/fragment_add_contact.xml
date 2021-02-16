@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,38 +12,38 @@
         android:layout_weight="1">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/txtTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
+                android:text="Your Contact's Key"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent"
-                android:text="Your Contact's Key" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/txtPublicKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                app:layout_constraintTop_toBottomOf="@id/txtTitle"
                 android:fontFamily="monospace"
-                android:text="1234567890" />
+                android:gravity="center_horizontal"
+                android:text="1234567890"
+                app:layout_constraintTop_toBottomOf="@id/txtTitle" />
 
             <ImageView
                 android:id="@+id/qr"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                app:layout_constraintTop_toBottomOf="@id/txtPublicKey"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/txtPublicKey" />
 
             <TextView
                 android:id="@+id/txtDescription"
@@ -60,28 +59,28 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_field"
-                android:paddingStart="14dp"
-                android:paddingEnd="48dp"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:textSize="14sp"
+                android:hint="Enter a name..."
+                android:inputType="textPersonName|textCapWords"
+                android:paddingStart="14dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="48dp"
+                android:paddingBottom="14dp"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_tertiary"
-                android:inputType="textPersonName|textCapWords"
+                android:textSize="14sp"
                 app:layout_constraintTop_toBottomOf="@id/txtDescription"
-                android:hint="Enter a name..."
                 tools:text="Matt" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
+        style="@style/Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="Save"
-        style="@style/Button"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

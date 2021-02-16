@@ -1,0 +1,24 @@
+CREATE TABLE gateways (
+    name TEXT NOT NULL,
+    public_key BLOB NOT NULL,
+    ip TEXT NOT NULL,
+    port INTEGER NOT NULL,
+    preferred INTEGER NOT NULL,
+    PRIMARY KEY (public_key)
+);
+
+addGateway:
+REPLACE INTO gateways (name, public_key, ip, port, preferred)
+VALUES(?, ?, ?, ?, ?);
+
+getGateway:
+SELECT * FROM gateways WHERE public_key = ?;
+
+getAll:
+SELECT * FROM gateways;
+
+deleteGateway:
+DELETE FROM gateways WHERE public_key = ?;
+
+getPreffered:
+SELECT * FROM gateways WHERE preferred = 1;

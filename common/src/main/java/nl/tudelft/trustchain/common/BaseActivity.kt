@@ -42,6 +42,10 @@ abstract class BaseActivity : AppCompatActivity() {
         navController.setGraph(navigationGraph)
 
         // Setup ActionBar
+        println("---")
+        println(navController)
+        println(appBarConfiguration)
+        println("---")
         setupActionBarWithNavController(navController, appBarConfiguration)
 
         // Setup bottom navigation

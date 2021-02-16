@@ -60,7 +60,8 @@ class NaiveBayesClassifier<F, C>(
     /**
      * Adds an observation of features to a category
      */
-    fun addObservation(category: C, vararg features: F) = addObservation(category, features.asList())
+    fun addObservation(category: C, vararg features: F) =
+        addObservation(category, features.asList())
 
     fun rebuildModel() {
 
@@ -108,35 +109,46 @@ class NaiveBayesClassifier<F, C>(
         return categories.asSequence()
             .filter { c -> population.any { it.category == c } && probabilities.values.any { it.feature in f } }
             .map { c ->
-                val probIfCategory = probabilities.values.asSequence().filter { it.category == c }.map {
-                    if (it.feature in f) {
-                        ln(it.probability)
-                    } else {
-                        ln(1.0 - it.probability)
-                    }
-                }.sum().let(Math::exp)
+                val probIfCategory =
+                    probabilities.values.asSequence().filter { it.category == c }.map {
+                        if (it.feature in f) {
+                            ln(it.probability)
+                        } else {
+                            ln(1.0 - it.probability)
+                        }
+                    }.sum().let(Math::exp)
 
-                val probIfNotCategory = probabilities.values.asSequence().filter { it.category == c }.map {
-                    if (it.feature in f) {
-                        ln(it.notProbability)
-                    } else {
-                        ln(1.0 - it.notProbability)
-                    }
-                }.sum().let(Math::exp)
+                val probIfNotCategory =
+                    probabilities.values.asSequence().filter { it.category == c }.map {
+                        if (it.feature in f) {
+                            ln(it.notProbability)
+                        } else {
+                            ln(1.0 - it.notProbability)
+                        }
+                    }.sum().let(Math::exp)
 
-                CategoryProbability(category = c, probability = probIfCategory / (probIfCategory + probIfNotCategory))
+                CategoryProbability(
+                    category = c,
+                    probability = probIfCategory / (probIfCategory + probIfNotCategory)
+                )
             }.filter { it.probability >= .1 }
             .sortedByDescending { it.probability }
             .firstOrNull()
     }
 
-    class FeatureProbability<F, C>(val feature: F, val category: C, nbc: NaiveBayesClassifier<F, C>) {
-        val probability = (nbc.k1 + nbc.population.count { it.category == category && feature in it.features }) /
+    class FeatureProbability<F, C>(
+        val feature: F,
+        val category: C,
+        nbc: NaiveBayesClassifier<F, C>
+    ) {
+        val probability =
+            (nbc.k1 + nbc.population.count { it.category == category && feature in it.features }) /
                 (nbc.k2 + nbc.population.count { it.category == category })
 
         val notProbability = (nbc.k1 + nbc.population.count {
             it.category != category && feature in it.features
         }) / (nbc.k2 + nbc.population.count { it.category != category })
+
         data class Key<F, C>(val feature: F, val category: C)
     }
 }

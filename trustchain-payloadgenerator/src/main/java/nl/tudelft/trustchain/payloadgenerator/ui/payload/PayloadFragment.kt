@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.payloadgenerator.ui.payload
 
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -17,6 +16,7 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.trustchain.common.constants.Currency
 import nl.tudelft.trustchain.common.messaging.TradePayload
+import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.payloadgenerator.R
 import nl.tudelft.trustchain.payloadgenerator.databinding.FragmentPayloadBinding
@@ -39,7 +39,14 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
 
         adapter.registerRenderer(PayloadItemRenderer {
 
-            trustchain.createAcceptTxProposalBlock(it.primaryCurrency, it.secondaryCurrency, it.amount?.toFloat(), it.price?.toFloat(), it.type, it.publicKey)
+            trustchain.createAcceptTxProposalBlock(
+                it.primaryCurrency,
+                it.secondaryCurrency,
+                it.amount?.toFloat(),
+                it.price?.toFloat(),
+                it.type,
+                it.publicKey
+            )
             Log.d("PayloadFragment", "TX block send to: ${it.publicKey}!")
         })
     }
@@ -85,7 +92,11 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 createPayloadSerializable(amount, price, type)
             val payload = createPayload(amount, price, type)
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
-            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(
+                recyclerViewPayload,
+                RecyclerView.State(),
+                0
+            )
             marketCommunity.broadcast(payloadSerializable)
         }
 
@@ -94,6 +105,7 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         }
         loadCurrentPayloads((TrustChainPayloadGeneratorActivity.PayloadsList).payloads)
     }
+
     private fun sendAutoMessages() {
         thread(start = true) {
             while (isAutoSending) {
@@ -116,7 +128,11 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
                 marketCommunity.broadcast(payloadSerializable)
                 Log.d("PayloadFragment", "message send!")
                 (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
-                recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
+                recyclerViewPayload.layoutManager!!.smoothScrollToPosition(
+                    recyclerViewPayload,
+                    RecyclerView.State(),
+                    0
+                )
                 Thread.sleep(1000)
             }
         }
@@ -183,9 +199,14 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
             TrustChainPayloadGeneratorActivity.payloads.add(0, payload)
-            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(
+                recyclerViewPayload,
+                RecyclerView.State(),
+                0
+            )
         }
     }
+
     private fun bidListener(payload: TradePayload) {
         Log.d(
             "PayloadFragment",
@@ -193,7 +214,11 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
         if (!(TrustChainPayloadGeneratorActivity.PayloadsList).payloads.contains(payload)) {
             (TrustChainPayloadGeneratorActivity.PayloadsList).payloads.add(0, payload)
-            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(recyclerViewPayload, RecyclerView.State(), 0)
+            recyclerViewPayload.layoutManager!!.smoothScrollToPosition(
+                recyclerViewPayload,
+                RecyclerView.State(),
+                0
+            )
         }
     }
 

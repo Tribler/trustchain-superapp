@@ -6,38 +6,40 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.peerchat.sqldelight.Database
+import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
 class PeerChatStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "peerchat.db")
     private val database = Database(driver)
+    val contactsStore = ContactStore.getInstance(context)
 
-    private val messageMapper = {
-            id: String,
-            message: String,
-            senderPk: ByteArray,
-            receipientPk: ByteArray,
-            outgoing: Long,
-            timestamp: Long,
-            ack: Long,
-            read: Long,
-            attachmentType: String?,
-            attachmentSize: Long?,
-            attachmentContent: ByteArray?,
-            attachmentFetched: Long ->
+    private val messageMapper = { id: String,
+                                  message: String,
+                                  senderPk: ByteArray,
+                                  receipientPk: ByteArray,
+                                  outgoing: Long,
+                                  timestamp: Long,
+                                  ack: Long,
+                                  read: Long, attachmentType: String?,
+                                  attachmentSize: Long?,
+                                  attachmentContent: ByteArray?,
+                                  attachmentFetched: Long,
+                                  transaction_hash: ByteArray?
+        ->
         ChatMessage(
             id,
             message,
             if (attachmentType != null && attachmentSize != null && attachmentContent != null)
-                MessageAttachment(attachmentType,
+                MessageAttachment(
+                    attachmentType,
                     attachmentSize,
                     attachmentContent
                 ) else null,
@@ -47,19 +49,9 @@ class PeerChatStore(context: Context) {
             Date(timestamp),
             ack == 1L,
             read == 1L,
-            attachmentFetched == 1L
+            attachmentFetched == 1L,
+            transactionHash = transaction_hash
         )
-    }
-
-    fun addContact(publicKey: PublicKey, name: String) {
-        database.dbContactQueries.addContact(name, publicKey.keyToBin())
-    }
-
-    fun getContacts(): Flow<List<Contact>> {
-        return database.dbContactQueries.getAll { name, public_key ->
-            val publicKey = defaultCryptoProvider.keyFromPublicBin(public_key)
-            Contact(name, publicKey)
-        }.asFlow().mapToList()
     }
 
     private fun getAllMessages(): Flow<List<ChatMessage>> {
@@ -80,7 +72,7 @@ class PeerChatStore(context: Context) {
     }
 
     fun getContactsWithLastMessages(): Flow<List<Pair<Contact, ChatMessage?>>> {
-        return combine(getContacts(), getAllMessages()) { contacts, messages ->
+        return combine(contactsStore.getContacts(), getAllMessages()) { contacts, messages ->
             val notContacts = messages
                 .asSequence()
                 .filter { !it.outgoing }
@@ -100,7 +92,8 @@ class PeerChatStore(context: Context) {
     }
 
     fun addMessage(message: ChatMessage) {
-        database.dbMessageQueries.addMessage(message.id,
+        database.dbMessageQueries.addMessage(
+            message.id,
             message.message,
             message.sender.keyToBin(),
             message.recipient.keyToBin(),
@@ -111,7 +104,8 @@ class PeerChatStore(context: Context) {
             message.attachment?.type,
             message.attachment?.size,
             message.attachment?.content,
-            if (message.attachmentFetched) 1L else 0L
+            if (message.attachmentFetched) 1L else 0L,
+            message.transactionHash
         )
     }
 
@@ -121,12 +115,12 @@ class PeerChatStore(context: Context) {
 
     fun getAllByPublicKey(publicKey: PublicKey): Flow<List<ChatMessage>> {
         val publicKeyBin = publicKey.keyToBin()
-        return database.dbMessageQueries.getAllByPublicKey(publicKeyBin, publicKeyBin, messageMapper)
+        return database.dbMessageQueries.getAllByPublicKey(
+            publicKeyBin,
+            publicKeyBin,
+            messageMapper
+        )
             .asFlow().mapToList()
-    }
-
-    fun deleteContact(contact: Contact) {
-        database.dbContactQueries.deleteContact(contact.publicKey.keyToBin())
     }
 
     companion object {

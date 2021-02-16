@@ -3,12 +3,14 @@ package nl.tudelft.trustchain.common
 import android.util.Log
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BroadcastChannel
-import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Address
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import nl.tudelft.ipv8.messaging.payload.PuncturePayload
 import java.util.*
@@ -58,7 +60,11 @@ class DemoCommunity : Community() {
     // SEND MESSAGE
     fun broadcastGreeting() {
         for (peer in getPeers()) {
-            val packet = serializePacket(MessageId.THALIS_MESSAGE, MyMessage("Hello from Freedom of Computing!"), true)
+            val packet = serializePacket(
+                MessageId.THALIS_MESSAGE,
+                MyMessage("Hello from Freedom of Computing!"),
+                true
+            )
             send(peer.address, packet)
         }
     }

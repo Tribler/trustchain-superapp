@@ -5,9 +5,11 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.trader.util.getAmount
 import nl.tudelft.trustchain.trader.util.getBalance
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -27,14 +29,14 @@ class DDValidatorTest {
     fun offline_isValid() {
         every { block.transaction } returns mapOf("offline" to true)
         val valid = validator.validate(block, database)
-        assertTrue(valid)
+        assertEquals(valid, ValidationResult.Valid)
     }
 
     @Test
     fun selfSigned_isValid() {
         every { block.isSelfSigned } returns true
         val valid = validator.validate(block, database)
-        assertTrue(valid)
+        assertEquals(valid, ValidationResult.Valid)
     }
 
     @Test
@@ -45,7 +47,7 @@ class DDValidatorTest {
 
         val valid = validator.validate(block, database)
 
-        assertFalse(valid)
+        assertNotEquals(valid, ValidationResult.Valid)
     }
 
     @Test
@@ -56,6 +58,6 @@ class DDValidatorTest {
 
         val valid = validator.validate(block, database)
 
-        assertTrue(valid)
+        assertEquals(valid, ValidationResult.Valid)
     }
 }

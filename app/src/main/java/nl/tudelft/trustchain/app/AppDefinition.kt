@@ -9,10 +9,11 @@ import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
-import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
+import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
 import nl.tudelft.trustchain.voting.VotingActivity
 
 enum class AppDefinition(
@@ -80,5 +81,11 @@ enum class AppDefinition(
         "MusicDAO",
         R.color.black,
         MusicService::class.java
+    ),
+    EUROTOKEN(
+        R.drawable.ic_baseline_euro_symbol_24,
+        "EuroToken",
+        R.color.metallic_gold,
+        EuroTokenMainActivity::class.java
     )
 }

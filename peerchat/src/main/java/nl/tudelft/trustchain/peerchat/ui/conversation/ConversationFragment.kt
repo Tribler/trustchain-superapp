@@ -11,6 +11,7 @@ import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -18,6 +19,8 @@ import kotlinx.android.synthetic.main.fragment_conversation.*
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R
@@ -42,8 +45,19 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         PeerChatStore.getInstance(requireContext())
     }
 
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+
+    private val transactionRepository by lazy {
+        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
+    }
+
+    private val publicKeyBin by lazy {
+        requireArguments().getString(ARG_PUBLIC_KEY)!!
+    }
+
     private val publicKey by lazy {
-        val publicKeyBin = requireArguments().getString(ARG_PUBLIC_KEY)!!
         defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
     }
 
@@ -51,27 +65,29 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         requireArguments().getString(ARG_NAME)!!
     }
 
-    private val onCommitContentListener = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
-        val lacksPermission = (flags and
-            InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
-            try {
-                inputContentInfo.requestPermission()
-            } catch (e: Exception) {
-                return@OnCommitContentListener false // return false if failed
+    private val onCommitContentListener =
+        InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
+            val lacksPermission = (flags and
+                InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+                try {
+                    inputContentInfo.requestPermission()
+                } catch (e: Exception) {
+                    return@OnCommitContentListener false // return false if failed
+                }
             }
+
+            val uri = inputContentInfo.contentUri
+            Log.d("ConversationFragment", "uri: $uri")
+
+            sendImageFromUri(uri)
+
+            true
         }
 
-        val uri = inputContentInfo.contentUri
-        Log.d("ConversationFragment", "uri: $uri")
-
-        sendImageFromUri(uri)
-
-        true
-    }
-
     private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,6 +113,38 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
         binding.edtMessage.onCommitContentListener = onCommitContentListener
 
+        edtMessage.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                fab.collapse()
+            }
+        }
+
+        /*
+        btnRequestMoney.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            args.putBoolean(TransferFragment.ARG_IS_REQUEST, true)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_transferFragment,
+                args
+            )
+        }
+        */
+
+        btnSendMoney.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            args.putBoolean(TransferFragment.ARG_IS_REQUEST, false)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_transferFragment,
+                args
+            )
+        }
+
         btnSend.setOnClickListener {
             val message = binding.edtMessage.text.toString()
             if (message.isNotEmpty()) {
@@ -107,6 +155,7 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
         btnAddImage.setOnClickListener {
             val intent = Intent()
+            fab.collapse()
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
@@ -129,14 +178,20 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         return messages.mapIndexed { index, chatMessage ->
             val shouldShowAvatar = !chatMessage.outgoing && (
                 index == messages.size - 1 ||
-                messages[index + 1].outgoing != chatMessage.outgoing)
+                    messages[index + 1].outgoing != chatMessage.outgoing)
             /*
             val shouldShowDate = (index == messages.size - 1 ||
                 messages[index + 1].outgoing != chatMessage.outgoing ||
                 (messages[index + 1].timestamp.time - chatMessage.timestamp.time > GROUP_TIME_LIMIT))
              */
             val shouldShowDate = true
-            ChatMessageItem(chatMessage, shouldShowAvatar, shouldShowDate, name)
+            ChatMessageItem(
+                chatMessage,
+                transactionRepository.getTransactionWithHash(chatMessage.transactionHash),
+                shouldShowAvatar,
+                shouldShowDate,
+                name
+            )
         }
     }
 

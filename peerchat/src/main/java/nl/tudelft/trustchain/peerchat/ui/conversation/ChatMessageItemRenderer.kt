@@ -12,19 +12,34 @@ import androidx.core.view.updateLayoutParams
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_message.view.*
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
+import java.math.BigInteger
 import java.text.SimpleDateFormat
-import java.util.*
 
 class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
-    ChatMessageItem::class.java) {
+    ChatMessageItem::class.java
+) {
+
     private val dateTimeFormat = SimpleDateFormat.getDateTimeInstance()
     private val timeFormat = SimpleDateFormat.getTimeInstance()
     private val constraintSet = ConstraintSet()
 
     override fun bindView(item: ChatMessageItem, view: View) = with(view) {
         txtMessage.text = item.chatMessage.message
+        if (item.chatMessage.outgoing) {
+            txtMessage.gravity = Gravity.START
+        } else {
+            txtMessage.gravity = Gravity.END
+        }
+        item.transaction?.transaction?.let {
+            txtTransaction.text =
+                TransactionRepository.prettyAmount((item.transaction.transaction["amount"] as BigInteger).toLong())
+            if (item.chatMessage.message.isEmpty()) {
+                txtMessage.visibility = View.GONE
+            }
+        }
         val color = getColorByHash(context, item.chatMessage.sender.toString())
         val newColor = Color.argb(50, Color.red(color), Color.green(color), Color.blue(color))
         txtMessage.backgroundTintList = ColorStateList.valueOf(newColor)
@@ -51,10 +66,20 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             }
             image.isVisible = true
             txtMessage.isVisible = false
+            txtTransaction.isVisible = false
+        } else if (item.chatMessage.transactionHash != null) {
+            progress.isVisible =
+                item.transaction == null // transaction not yet received via trustchain
+
+            txtMessage.isVisible = item.chatMessage.message.isNotBlank()
+
+            image.isVisible = false
+            txtTransaction.isVisible = true
         } else {
             image.isVisible = false
             txtMessage.isVisible = true
             progress.isVisible = false
+            txtTransaction.isVisible = false
         }
 
         if (item.chatMessage.outgoing) {

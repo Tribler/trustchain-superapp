@@ -1,32 +1,26 @@
 package nl.tudelft.trustchain.FOC;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
+import android.widget.LinearLayout;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.os.Environment;
-import android.util.Log;
-import android.widget.LinearLayout;
+import dalvik.system.DexClassLoader;
 
 //import com.google.gson.Gson;
 
-import dalvik.system.DexClassLoader;
-
 public class ExecutionActivity extends AppCompatActivity {
     private static Context context;
-
-    private Class fragmentClass = null;
-    private Fragment mainFragment = null;
-
     LinearLayout mainLayoutContainer = null;
     LinearLayout tmpLayout = null;
-
+    private Class fragmentClass = null;
+    private Fragment mainFragment = null;
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -34,7 +28,11 @@ public class ExecutionActivity extends AppCompatActivity {
         FragmentTransaction transaction = manager.beginTransaction();
 
         transaction.remove(mainFragment);
-        try { transaction.commit(); } catch(Exception e) {e.printStackTrace();}
+        try {
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         mainLayoutContainer.removeView(tmpLayout);
 
@@ -51,12 +49,12 @@ public class ExecutionActivity extends AppCompatActivity {
 
         String apkName = "";
         Bundle extras = this.getIntent().getExtras();
-        if(extras.containsKey("fileName")) {
+        if (extras.containsKey("fileName")) {
             apkName = this.getIntent().getStringExtra("fileName");
         }
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
         final String apkPath = apkName;
-        String appName = apkName.substring(apkName.lastIndexOf("/")+1, apkName.lastIndexOf("."));
+        String appName = apkName.substring(apkName.lastIndexOf("/") + 1, apkName.lastIndexOf("."));
         //final String apkPath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + apkName;
         final ClassLoader classLoader = new DexClassLoader(apkPath, context.getCacheDir().getAbsolutePath(), null, this.getClass().getClassLoader());
 
@@ -77,8 +75,7 @@ public class ExecutionActivity extends AppCompatActivity {
             transaction.commit();
 
             mainLayoutContainer.addView(tmpLayout);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Log.i("personal", "Something went wrong");
             e.printStackTrace();
         }

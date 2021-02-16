@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:background="?selectableItemBackground">
+    android:padding="8dp">
 
     <TextView
         android:id="@+id/txtPeerId"
@@ -25,18 +25,18 @@
             android:id="@+id/txtSendingIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:drawableStart="@drawable/ic_arrow_drop_up_black_16dp"
             android:drawableTint="@color/red"
             android:fontFamily="sans-serif-medium"
-            android:textColor="@color/green" />
+            android:textColor="@color/green"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/txtSending"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:textColor="@color/text_primary"
+            android:textSize="12sp"
             android:typeface="monospace"
             tools:text="50 BTC" />
     </LinearLayout>
@@ -44,21 +44,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/txtReceivingIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:drawableStart="@drawable/ic_arrow_drop_down_black_16dp"
             android:drawableTint="@color/green"
             android:fontFamily="sans-serif-medium"
-            android:textColor="@color/red" />
+            android:textColor="@color/red"
+            android:textSize="12sp" />
+
         <TextView
             android:id="@+id/txtReceiving"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:textColor="@color/text_primary"
+            android:textSize="12sp"
             android:typeface="monospace"
             tools:text="1 Dymbe $" />
     </LinearLayout>
@@ -66,21 +68,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <TextView
             android:id="@+id/txtPayloadTypeIcon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:drawableStart="@drawable/ic_swap_horiz_black_16dp"
             android:drawableTint="@color/blue"
             android:fontFamily="sans-serif-medium"
-            android:textColor="@color/blue" />
+            android:textColor="@color/blue"
+            android:textSize="12sp" />
+
         <TextView
             android:id="@+id/txtPayloadType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
             android:textColor="@color/text_primary"
+            android:textSize="12sp"
             android:typeface="monospace"
             tools:text="Ask" />
     </LinearLayout>

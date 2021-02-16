@@ -40,7 +40,10 @@ class AddRemoteFragment : BaseFragment(R.layout.fragment_add_remote) {
             try {
                 defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
                 args.putString(AddContactFragment.ARG_PUBLIC_KEY, publicKeyBin)
-                findNavController().navigate(R.id.action_addRemoteFragment_to_addContactFragment, args)
+                findNavController().navigate(
+                    R.id.action_addRemoteFragment_to_addContactFragment,
+                    args
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid public key", Toast.LENGTH_LONG).show()

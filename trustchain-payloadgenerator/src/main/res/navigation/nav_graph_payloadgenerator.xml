@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/payloadFragment"
         android:name="nl.tudelft.trustchain.payloadgenerator.ui.payload.PayloadFragment"
-        android:label="Payload Generator" >
+        android:label="Payload Generator">
         <action
             android:id="@+id/action_payloadFragment_to_payloadCreateFragment"
             app:destination="@id/payloadCreateFragment"
@@ -17,7 +17,7 @@
     <fragment
         android:id="@+id/payloadCreateFragment"
         android:name="nl.tudelft.trustchain.payloadgenerator.ui.payload.PayloadCreateFragment"
-        android:label="Create Payload" >
+        android:label="Create Payload">
         <action
             android:id="@+id/action_payloadCreateFragment_to_payloadFragment"
             app:destination="@id/payloadFragment"

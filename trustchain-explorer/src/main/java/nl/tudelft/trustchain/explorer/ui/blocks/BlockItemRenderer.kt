@@ -12,7 +12,8 @@ class BlockItemRenderer(
     private val onExpandClick: (BlockItem) -> Unit,
     private val onSignClick: (BlockItem) -> Unit
 ) : ItemLayoutRenderer<BlockItem, View>(
-    BlockItem::class.java) {
+    BlockItem::class.java
+) {
     override fun bindView(item: BlockItem, view: View) = with(view) {
         val block = item.block
         txtPublicKey.text = block.publicKey.toHex()
@@ -28,7 +29,8 @@ class BlockItemRenderer(
         txtType.text = block.type
         txtTransaction.text = block.transaction.toString()
         txtExpandedTransaction.text = block.transaction.toString()
-        txtTransactionSize.text = view.resources.getString(R.string.x_bytes, block.rawTransaction.size)
+        txtTransactionSize.text =
+            view.resources.getString(R.string.x_bytes, block.rawTransaction.size)
         txtTimestamp.text = block.timestamp.toString()
         txtInsertTime.text = block.insertTime?.toString()
         txtBlockHash.text = block.calculateHash().toHex()
@@ -63,16 +65,35 @@ class BlockItemRenderer(
 
         when (item.status) {
             BlockItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
-                txtBlockStatus.text = context.getString(R.string.block_status, "Waiting for Signature")
-                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.red, null))
+                txtBlockStatus.text =
+                    context.getString(R.string.block_status, "Waiting for Signature")
+                txtBlockStatus.setBackgroundColor(
+                    ResourcesCompat.getColor(
+                        resources,
+                        R.color.red,
+                        null
+                    )
+                )
             }
             BlockItem.BlockStatus.SELF_SIGNED -> {
                 txtBlockStatus.text = context.getString(R.string.block_status, "Self-signed")
-                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.green, null))
+                txtBlockStatus.setBackgroundColor(
+                    ResourcesCompat.getColor(
+                        resources,
+                        R.color.green,
+                        null
+                    )
+                )
             }
             BlockItem.BlockStatus.SIGNED -> {
                 txtBlockStatus.text = context.getString(R.string.block_status, "Signed")
-                txtBlockStatus.setBackgroundColor(ResourcesCompat.getColor(resources, R.color.green, null))
+                txtBlockStatus.setBackgroundColor(
+                    ResourcesCompat.getColor(
+                        resources,
+                        R.color.green,
+                        null
+                    )
+                )
             }
         }
     }

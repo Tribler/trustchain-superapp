@@ -3,15 +3,15 @@
 
     <item
         android:id="@+id/traderFragment"
-        android:title="Trader"
-        android:icon="@drawable/ic_person_black_24dp" />
+        android:icon="@drawable/ic_person_black_24dp"
+        android:title="Trader" />
     <item
         android:id="@+id/transferFragment"
-        android:title="Transfer"
-        android:icon="@drawable/ic_money_transaction_24px" />
+        android:icon="@drawable/ic_money_transaction_24px"
+        android:title="Transfer" />
     <item
         android:id="@+id/peerFragment"
-        android:title="Peers"
-        android:icon="@drawable/ic_device_hub_black_24dp" />
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Peers" />
 
 </menu>

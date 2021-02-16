@@ -10,7 +10,11 @@ import nl.tudelft.trustchain.trader.constants.BlockType
  * account.
  */
 @ExperimentalUnsignedTypes
-fun getBalance(publicKey: ByteArray, database: TrustChainStore, sequenceNumber: UInt? = null): Float {
+fun getBalance(
+    publicKey: ByteArray,
+    database: TrustChainStore,
+    sequenceNumber: UInt? = null
+): Float {
     val blockCount = database.getBlockCount().toInt()
     val txBlocks = database.getMutualBlocks(publicKey, limit = blockCount)
         .filter { sequenceNumber == null || it.sequenceNumber <= sequenceNumber }

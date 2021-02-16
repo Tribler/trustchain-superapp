@@ -11,12 +11,13 @@ CREATE TABLE messages (
     attachment_size INTEGER,
     attachment_content BLOB,
     attachment_fetched INTEGER NOT NULL DEFAULT 0,
+    transaction_hash BLOB,
     PRIMARY KEY (id)
 );
 
 addMessage:
-INSERT INTO messages (id, message, sender_public_key, recipient_public_key, outgoing, timestamp, ack, read, attachment_type, attachment_size, attachment_content, attachment_fetched)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO messages (id, message, sender_public_key, recipient_public_key, outgoing, timestamp, ack, read, attachment_type, attachment_size, attachment_content, attachment_fetched, transaction_hash)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 ackMessage:
 UPDATE messages SET ack = 1 WHERE id = ?;

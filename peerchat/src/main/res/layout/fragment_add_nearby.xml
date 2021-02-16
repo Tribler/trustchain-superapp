@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,18 +11,18 @@
         android:layout_weight="1">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:clipToPadding="false">
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/txtIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                android:text="To add a person who is nearby, you have to scan each other’s public key encoded as a QR code." />
+                android:text="To add a person who is nearby, you have to scan each other’s public key encoded as a QR code."
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/txtTitle"
@@ -32,27 +30,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
+                android:text="Your Key"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/txtIntro"
-                android:text="Your Key" />
+                app:layout_constraintTop_toBottomOf="@id/txtIntro" />
 
             <TextView
                 android:id="@+id/txtMyPublicKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                app:layout_constraintTop_toBottomOf="@id/txtTitle"
                 android:fontFamily="monospace"
-                android:text="1234567890" />
+                android:gravity="center_horizontal"
+                android:text="1234567890"
+                app:layout_constraintTop_toBottomOf="@id/txtTitle" />
 
             <ImageView
                 android:id="@+id/qr"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                app:layout_constraintTop_toBottomOf="@id/txtMyPublicKey"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/txtMyPublicKey" />
 
             <TextView
                 android:id="@+id/txtContactTitle"
@@ -60,49 +58,49 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:gravity="center_horizontal"
+                android:text="Your Contact's Key"
                 android:textColor="@color/text_primary"
                 android:textStyle="bold"
-                app:layout_constraintTop_toBottomOf="@id/qr"
-                android:text="Your Contact's Key" />
+                app:layout_constraintTop_toBottomOf="@id/qr" />
 
             <TextView
                 android:id="@+id/txtContactPublicKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                app:layout_constraintTop_toBottomOf="@id/txtContactTitle"
                 android:fontFamily="monospace"
-                android:text="" />
+                android:gravity="center_horizontal"
+                android:text=""
+                app:layout_constraintTop_toBottomOf="@id/txtContactTitle" />
 
             <ImageView
                 android:id="@+id/contactQrPlaceholder"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_margin="16dp"
-                android:src="@drawable/ic_camera_alt_black_24dp"
-                android:scaleType="center"
                 android:background="@color/light_gray"
-                app:layout_constraintTop_toTopOf="@id/contactQr"
+                android:scaleType="center"
+                android:src="@drawable/ic_camera_alt_black_24dp"
                 app:layout_constraintBottom_toBottomOf="@id/contactQr"
+                app:layout_constraintEnd_toEndOf="@id/contactQr"
                 app:layout_constraintStart_toStartOf="@id/contactQr"
-                app:layout_constraintEnd_toEndOf="@id/contactQr" />
+                app:layout_constraintTop_toTopOf="@id/contactQr" />
 
             <ImageView
                 android:id="@+id/contactQr"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                app:layout_constraintTop_toBottomOf="@id/txtContactPublicKey"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/txtContactPublicKey" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnContinue"
+        style="@style/Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="Continue"
-        style="@style/Button"
         app:layout_constraintBottom_toBottomOf="parent" />
 </LinearLayout>

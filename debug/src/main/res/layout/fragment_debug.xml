@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <LinearLayout
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bootstrap Servers"
-                style="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:text="Bootstrap Servers" />
 
             <LinearLayout
                 android:id="@+id/bootstrapContainer"
@@ -30,169 +29,169 @@
 
                 <TextView
                     android:id="@+id/txtBootstrap"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/indicator_offline"
                     android:drawablePadding="8dp"
                     android:text="0.0.0.0:0"
-                    app:fontFamily="monospace"
-                    style="@style/TextAppearance.MaterialComponents.Body2"/>
+                    app:fontFamily="monospace" />
             </LinearLayout>
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Overlays"
-                style="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:text="Overlays" />
 
             <TextView
                 android:id="@+id/txtOverlays"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="DiscoveryCommunity"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                android:text="DiscoveryCommunity" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="My Peer"
-                style="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:text="My Peer" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="LAN Address"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="LAN Address" />
 
             <TextView
                 android:id="@+id/txtLanAddress"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0.0.0:0"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="WAN Address"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="WAN Address" />
 
             <TextView
                 android:id="@+id/txtWanAddress"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0.0.0.0:0"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Connection Type"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="Connection Type" />
 
             <TextView
                 android:id="@+id/txtConnectionType"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Member ID"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="Member ID" />
 
             <TextView
                 android:id="@+id/txtPeerId"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Public Key"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="Public Key" />
 
             <TextView
                 android:id="@+id/txtPublicKey"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="0"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="TrustChain"
-                style="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:text="TrustChain" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Stored Block Count"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="Stored Block Count" />
 
             <TextView
                 android:id="@+id/txtBlockCount"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="?"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="My Chain Length"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="My Chain Length" />
 
             <TextView
                 android:id="@+id/txtChainLength"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="?"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="Other"
-                style="@style/TextAppearance.MaterialComponents.Headline6" />
+                android:text="Other" />
 
             <TextView
+                style="@style/TextAppearance.MaterialComponents.Subtitle2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="App Version"
-                style="@style/TextAppearance.MaterialComponents.Subtitle2"/>
+                android:text="App Version" />
 
             <TextView
                 android:id="@+id/txtAppVersion"
+                style="@style/TextAppearance.MaterialComponents.Body2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="?"
-                app:fontFamily="monospace"
-                style="@style/TextAppearance.MaterialComponents.Body2"/>
+                app:fontFamily="monospace" />
         </LinearLayout>
 
     </ScrollView>

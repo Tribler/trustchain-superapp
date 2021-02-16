@@ -1,8 +1,8 @@
 package nl.tudelft.trustchain.common.messaging
 
 import nl.tudelft.trustchain.common.constants.Currency
-import org.junit.Test
 import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class TradePayloadTest {
     @Test

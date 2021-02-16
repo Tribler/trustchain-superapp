@@ -5,7 +5,9 @@ import android.content.res.ColorStateList
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat.getColor
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.R
@@ -36,7 +39,6 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.FragmentContactsBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.entity.Contact
 import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,7 +60,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     }
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay() ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,7 +91,12 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
 
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.addItemDecoration(DividerItemDecoration(context, LinearLayout.VERTICAL))
+        binding.recyclerView.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
 
         binding.btnAddNearby.setOnClickListener {
             findNavController().navigate(R.id.action_contactsFragment_to_addNearbyFragment)
@@ -106,17 +114,21 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         })
     }
 
-    private fun createItems(contacts: List<Pair<Contact, ChatMessage?>>, peers: List<Peer>): List<Item> {
-        return contacts.map { contactWithMessage ->
-            val (contact, message) = contactWithMessage
-            val peer = peers.find { it.mid == contact.mid }
-            ContactItem(
-                contact,
-                message,
-                peer != null && !peer.address.isEmpty(),
-                peer?.bluetoothAddress != null
-            )
-        }
+    private fun createItems(
+        contacts: List<Pair<Contact, ChatMessage?>>,
+        peers: List<Peer>
+    ): List<Item> {
+        return contacts.filter { it.first.publicKey != getIpv8().myPeer.publicKey }
+            .map { contactWithMessage ->
+                val (contact, message) = contactWithMessage
+                val peer = peers.find { it.mid == contact.mid }
+                ContactItem(
+                    contact,
+                    message,
+                    peer != null && !peer.address.isEmpty(),
+                    peer?.bluetoothAddress != null
+                )
+            }
     }
 
     @Suppress("DEPRECATION")
@@ -159,17 +171,41 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     }
 
     private fun showOptions(contact: Contact) {
-        val items = arrayOf("Delete")
+        val items = arrayOf("Rename", "Delete")
         AlertDialog.Builder(requireContext())
             .setItems(items) { _, which ->
                 when (which) {
-                    0 -> deleteContact(contact)
+                    0 -> renameContact(contact)
+                    1 -> deleteContact(contact)
                 }
             }
             .show()
     }
 
+    private fun renameContact(contact: Contact) {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Rename Contact")
+
+        // Set up the input
+        val input = EditText(requireContext())
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.setText(contact.name)
+        builder.setView(input)
+
+        // Set up the buttons
+        builder.setPositiveButton(
+            "Rename"
+        ) { _, _ ->
+            store.contactsStore.updateContact(contact.publicKey, input.text.toString())
+        }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, _ -> dialog.cancel() }
+
+        builder.show()
+    }
+
     private fun deleteContact(contact: Contact) {
-        store.deleteContact(contact)
+        store.contactsStore.deleteContact(contact)
     }
 }
