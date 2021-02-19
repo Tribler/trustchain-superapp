@@ -86,6 +86,9 @@ dependencies {
 
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0"
 
+    // Wallet libraries
+    implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
+
     // Testing
     testImplementation "junit:junit:4.12"
     testImplementation "io.mockk:mockk:1.9.3"
