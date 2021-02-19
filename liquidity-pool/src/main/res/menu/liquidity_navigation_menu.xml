@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/liquidityWalletFragment"
+        android:icon="@drawable/ic_baseline_euro_symbol_24"
+        android:title="Wallet" />
+    <item
+        android:id="@+id/poolFragment"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Item" />
+</menu>
