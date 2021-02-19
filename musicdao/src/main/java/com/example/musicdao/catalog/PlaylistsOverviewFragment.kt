@@ -85,6 +85,10 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 findNavController().navigate(R.id.walletFragment)
                 true
             }
+            R.id.action_sync -> {
+                // TODO
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

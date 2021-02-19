@@ -16,5 +16,6 @@
     <string name="search_hint">Search through music</string>
     <string name="debug_hint">Connectivity stats</string>
     <string name="android_wallet">View balance</string>
+    <string name="sync_hint">Synchronize votes</string>
 
 </resources>
