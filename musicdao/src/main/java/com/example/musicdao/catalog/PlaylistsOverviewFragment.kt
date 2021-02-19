@@ -13,6 +13,7 @@ import com.example.musicdao.dialog.SubmitReleaseDialog
 import com.example.musicdao.util.Util
 import com.example.musicdao.wallet.WalletService
 import com.frostwire.jlibtorrent.Sha1Hash
+import kotlinx.android.synthetic.main.fragment_release_cover.*
 import kotlinx.android.synthetic.main.fragment_release_overview.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -29,6 +30,7 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
     private var lastSwarmHealthMapSize = -1
     private var searchQuery = ""
     private val maxPlaylists = 100 // Max playlists to show
+    private var playlistCoverFragments: ArrayList<PlaylistCoverFragment> = ArrayList()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -86,7 +88,10 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 true
             }
             R.id.action_sync -> {
-                // TODO
+                val showVotes: Boolean = playlistCoverFragments[0].votes.visibility != View.VISIBLE
+                for (playlistCoverFragment in playlistCoverFragments) {
+                    playlistCoverFragment.votes.visibility = if (showVotes) View.VISIBLE else View.GONE
+                }
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -133,16 +138,17 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 release_overview_layout.removeAllViews()
             }
         }
-        refreshReleaseBlocks(sortedMap)
+        playlistCoverFragments = refreshReleaseBlocks(sortedMap)
     }
 
     /**
      * @param releaseBlocks map of: release block, number of (known) seeders
      */
-    fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): Int {
+    fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): ArrayList<PlaylistCoverFragment> {
         var count = 0
+        val coverFragments: ArrayList<PlaylistCoverFragment> = ArrayList()
         for ((block, connectivity) in releaseBlocks) {
-            if (count == maxPlaylists) return count
+            if (count == maxPlaylists) return coverFragments
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
@@ -168,12 +174,13 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 activity?.runOnUiThread {
                     transaction?.commitAllowingStateLoss()
                 }
+                coverFragments.add(coverFragment)
             }
         }
         if (count != 0) {
             releaseRefreshCount += 1
         }
-        return count
+        return coverFragments
     }
 
     /**

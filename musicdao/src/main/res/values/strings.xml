@@ -17,5 +17,7 @@
     <string name="debug_hint">Connectivity stats</string>
     <string name="android_wallet">View balance</string>
     <string name="sync_hint">Synchronize votes</string>
+    <string name="downvotes">Downvotes</string>
+    <string name="upvotes">Upvotes</string>
 
 </resources>
