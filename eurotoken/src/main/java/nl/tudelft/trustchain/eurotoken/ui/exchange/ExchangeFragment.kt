@@ -9,11 +9,19 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_exchange.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.Transaction
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
+import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -91,10 +99,27 @@ class ExchangeFragment : EurotokenBaseFragment() {
             param1 = it.getString(ARG_PARAM1)
             param2 = it.getString(ARG_PARAM2)
         }
+
+        lifecycleScope.launchWhenResumed {
+            while (isActive) {
+
+                val ownKey = transactionRepository.trustChainCommunity.myPeer.publicKey
+                val ownContact =
+                    ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)
+
+                txtBalance.text =
+                    TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
+                if (ownContact?.name != null) {
+                    txtOwnName.text = "Your balance (" + ownContact.name + ")"
+                }
+                delay(1000L)
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        txtOwnPublicKey.text = getTrustChainCommunity().myPeer.publicKey.keyToHash().toHex()
         btnCamera.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }

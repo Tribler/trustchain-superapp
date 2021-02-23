@@ -24,7 +24,7 @@
     <fragment
         android:id="@+id/transferFragment"
         android:name="nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment"
-        android:label="Transfer">
+        android:label="Balance">
         <action
             android:id="@+id/action_transferFragment_to_sendMoneyFragment"
             app:destination="@id/sendMoneyFragment" />

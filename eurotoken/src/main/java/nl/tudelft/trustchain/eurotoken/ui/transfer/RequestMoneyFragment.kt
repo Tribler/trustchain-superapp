@@ -12,8 +12,9 @@ import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentRequestMoneyBinding
+import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-class RequestMoneyFragment : BaseFragment(R.layout.fragment_request_money) {
+class RequestMoneyFragment : EurotokenBaseFragment(R.layout.fragment_request_money) {
     private val binding by viewBinding(FragmentRequestMoneyBinding::bind)
 
     private val qrCodeUtils by lazy {
