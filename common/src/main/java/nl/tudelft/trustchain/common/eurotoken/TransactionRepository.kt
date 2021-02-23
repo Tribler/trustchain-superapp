@@ -13,7 +13,6 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import java.lang.Math.abs
 import java.math.BigInteger
-import kotlin.math.max
 
 class TransactionRepository(
     val trustChainCommunity: TrustChainCommunity,
@@ -53,29 +52,29 @@ class TransactionRepository(
         )
         val peer = trustChainCommunity.getPeers().find { it.publicKey.keyToBin().contentEquals(block.publicKey) }
             ?: Peer(defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey))
-        //Should only be run when receiving blocks, not when sending
+        // Should only be run when receiving blocks, not when sending
         val blocks = runBlocking { trustChainCommunity.sendCrawlRequest(peer, block.publicKey, range, forHalfBlock = block) }
-        if (blocks.isEmpty()) return null //No connection partial previous
-        return blocks.find { //linked block
+        if (blocks.isEmpty()) return null // No connection partial previous
+        return blocks.find { // linked block
             it.publicKey.contentEquals(block.linkPublicKey) &&
             it.sequenceNumber == block.linkSequenceNumber
-        } ?: block //no linked block exists
+        } ?: block // no linked block exists
     }
 
     fun ensureCheckpointLinks(block: TrustChainBlock, database: TrustChainStore) {
-        if (block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) return //no need to crawl own chain
+        if (block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) return // no need to crawl own chain
         val blockBefore = database.getBlockWithHash(block.previousHash)
         if (BLOCK_TYPE_CHECKPOINT == block.type && block.isProposal) {
             // block could verify balance
             if (database.getLinked(block) != null) { // verified
                 return
-            } else { //gateway verification is missing
-                val linked = crawlForLinked(block) //try to crawl for it
-                    ?: return //peer didnt repond, TODO: Store this detail to make verification work better
-                if (linked == block){ //No linked block exists in peer, so they sent the transaction based on a different checkpoint
-                    ensureCheckpointLinks(blockBefore ?: return, database) //check next
+            } else { // gateway verification is missing
+                val linked = crawlForLinked(block) // try to crawl for it
+                    ?: return // peer didnt repond, TODO: Store this detail to make verification work better
+                if (linked == block) { // No linked block exists in peer, so they sent the transaction based on a different checkpoint
+                    ensureCheckpointLinks(blockBefore ?: return, database) // check next
                 } else {
-                    return //linked
+                    return // linked
                 }
             }
         } else {
@@ -84,7 +83,7 @@ class TransactionRepository(
     }
 
     fun getVerifiedBalanceForBlock(block: TrustChainBlock?, database: TrustChainStore): Long? {
-        if (block == null) return null //Missing block
+        if (block == null) return null // Missing block
         Log.d("EuroTokenBlock", "Validation, Getting balance for block ${block.sequenceNumber}")
         if (block.isGenesis) return 0
         if (!EUROTOKEN_TYPES.contains(block.type)) {
