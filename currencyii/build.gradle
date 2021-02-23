@@ -41,8 +41,8 @@ android {
         allWarningsAsErrors = true
     }
 
-    viewBinding {
-        enabled = true
+    buildFeatures {
+        viewBinding = true
     }
 
     testOptions {
