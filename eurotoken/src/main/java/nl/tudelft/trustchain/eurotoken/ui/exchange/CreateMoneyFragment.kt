@@ -15,8 +15,9 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentCreateMoneyBinding
+import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
+class CreateMoneyFragment : EurotokenBaseFragment(R.layout.fragment_create_money) {
 
     private var addGateway = false
     private var setPreferred = false
@@ -25,10 +26,6 @@ class CreateMoneyFragment : BaseFragment(R.layout.fragment_create_money) {
 
     private val gatewayStore by lazy {
         GatewayStore.getInstance(requireContext())
-    }
-
-    private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private val ownPublicKey by lazy {

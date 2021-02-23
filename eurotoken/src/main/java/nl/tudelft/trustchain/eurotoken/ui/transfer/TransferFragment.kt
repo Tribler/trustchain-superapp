@@ -47,10 +47,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                     TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
                     binding.missingNameLayout.visibility = View.GONE
-                    binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
+                    binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 } else {
                     binding.missingNameLayout.visibility = View.VISIBLE
-                    binding.txtOwnName.text = "Your verified balance"
+                    binding.txtOwnName.text = "Your balance"
                 }
                 delay(1000L)
             }
