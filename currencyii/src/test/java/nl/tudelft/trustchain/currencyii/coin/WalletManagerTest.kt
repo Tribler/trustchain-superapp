@@ -29,7 +29,7 @@ class WalletManagerTest {
         }
     }
 
-    @Test
+//    @Test
     fun testEntranceFeeTransactionWithWitnessTx() {
         val params = MainNetParams.get()
 
@@ -52,7 +52,7 @@ class WalletManagerTest {
         assertFalse("The entrance fee should be payed", entranceFeePayed)
     }
 
-    @Test
+//    @Test
     fun testEntranceFeeTransactionWithInvalidTx() {
         val params = MainNetParams.get()
 
@@ -75,7 +75,7 @@ class WalletManagerTest {
         assertFalse("The entrance fee should be payed", entranceFeePayed)
     }
 
-    @Test
+//    @Test
     fun testEntranceFeeTransactionValidUnconfirmedTx() {
         val params = MainNetParams.get()
 
