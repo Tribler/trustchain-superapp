@@ -46,12 +46,12 @@ class QRCodeUtils(private val context: Context) {
      * from: https://demonuts.com/kotlin-generate-qr-code/
      * Creates a QR code from text
      */
-    fun createQR(text: String): Bitmap? {
+    fun createQR(text: String, size: Int = QRCodeSize): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
         } else {
             try {
-                return textToImageEncode(text)
+                return textToImageEncode(text, size)
             } catch (e: WriterException) {
                 e.printStackTrace()
             }
@@ -63,14 +63,14 @@ class QRCodeUtils(private val context: Context) {
      * Encode the text into a bitmap
      */
     @Throws(WriterException::class)
-    private fun textToImageEncode(Value: String): Bitmap? {
+    private fun textToImageEncode(value: String, size: Int = QRCodeSize): Bitmap? {
         val bitMatrix: BitMatrix
         try {
             bitMatrix = MultiFormatWriter().encode(
-                Value,
+                value,
                 BarcodeFormat.QR_CODE,
-                QRCodeSize,
-                QRCodeSize, null
+                size,
+                size, null
             )
         } catch (IllegalArgumentException: IllegalArgumentException) {
             return null
@@ -91,7 +91,7 @@ class QRCodeUtils(private val context: Context) {
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
 
-        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight)
+        bitmap.setPixels(pixels, 0, bitMatrixWidth, 0, 0, bitMatrixWidth, bitMatrixHeight)
         return bitmap
     }
 
