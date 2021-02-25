@@ -11,7 +11,9 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.integration.android.IntentIntegrator
+import com.journeyapps.barcodescanner.CaptureActivity
 import nl.tudelft.trustchain.common.R
+import nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait
 
 /**
  * Helper class for creating
@@ -21,9 +23,18 @@ class QRCodeUtils(private val context: Context) {
     /**
      * Start the QR scanner, which if successful, calls onActivityResult() on the fragment
      */
-    fun startQRScanner(fragment: Fragment) {
+    fun startQRScanner(fragment: Fragment, vertical: Boolean = false) {
         run {
-            FragmentIntentIntegrator(fragment).initiateScan()
+            val integrator = FragmentIntentIntegrator(fragment)
+                .setPrompt("Scan QR Code")
+                .setOrientationLocked(false)
+                .setBeepEnabled(true)
+                .setCameraId(0)
+            if (vertical) {
+                integrator.captureActivity = QRCodeActivityPortrait::class.java
+            }
+            integrator.initiateScan()
+
         }
     }
 
