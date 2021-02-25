@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/peersFragment2"
+        android:icon="@drawable/ic_arrow_drop_down_black_16dp"
+        android:title="Peers" />
+
+    <item
+        android:id="@+id/verificationFragment"
+        android:icon="@drawable/ic_baseline_camera_24"
+        android:title="Scanner" />
+
+    <item
+        android:id="@+id/databaseFragment"
+        android:icon="@drawable/ic_cloud_off_black_24dp"
+        android:title="Database" />
+</menu>

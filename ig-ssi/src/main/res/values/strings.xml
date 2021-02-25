@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_fire_missiles">Hello!</string>
+    <string name="fire">Fire</string>
+    <string name="cancel">Cancel</string>
+    <string name="attribute">Attribute value</string>
+    <string name="peer_address">Peer address and port</string>
+</resources>
