@@ -99,7 +99,12 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 bitmap = withContext(Dispatchers.Default) {
                     qrCodeUtils.createQR(data.toString())!!
                 }
-                binding.publicKeyQRCode.setImageBitmap(bitmap)
+                try {
+                    binding.qrCodePlaceHolder.visibility = View.GONE
+                    binding.publicKeyQRCode.setImageBitmap(bitmap)
+                } catch (e: IllegalStateException) {
+                    // This happens if we already switched screens.
+                }
             }
         } else {
             binding.publicKeyQRCode.setImageBitmap(bitmap)
@@ -112,7 +117,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             if (it.scaleX > 1) {
                 it.animate().scaleX(1f).scaleY(1f)
             } else {
-                it.animate().scaleX(1.5f).scaleY(1.5f)
+                it.animate().scaleX(1.2f).scaleY(1.2f)
             }
         }
     }
