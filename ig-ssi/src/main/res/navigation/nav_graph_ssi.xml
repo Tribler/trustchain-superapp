@@ -2,22 +2,27 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph_ssi"
-    app:startDestination="@id/peersFragment2">
+    app:startDestination="@id/databaseFragment">
 
     <fragment
         android:id="@+id/peersFragment2"
         android:name="nl.tudelft.trustchain.ssi.peers.PeersFragment"
-        android:label="PeersFragment2" >
-        <action
-            android:id="@+id/action_peersFragment_to_databaseFragment"
-            app:destination="@id/databaseFragment" />
-    </fragment>
+        android:label="SSI Clients" />
     <fragment
         android:id="@+id/databaseFragment"
         android:name="nl.tudelft.trustchain.ssi.database.DatabaseFragment"
-        android:label="DatabaseFragment" />
+        android:label="Home Screen" />
     <fragment
         android:id="@+id/verificationFragment"
         android:name="nl.tudelft.trustchain.ssi.verifier.VerificationFragment"
-        android:label="VerificationFragment" />
+        android:label="Verification">
+        <action
+            android:id="@+id/action_verificationFragment_to_databaseFragment"
+            app:destination="@id/databaseFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:launchSingleTop="false"
+            app:popUpTo="@id/nav_graph_ssi"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>

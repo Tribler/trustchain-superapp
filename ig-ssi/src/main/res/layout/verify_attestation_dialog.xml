@@ -13,7 +13,7 @@
         android:id="@+id/attribute_name_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/attribute" />
+        android:hint="@string/attribute_value" />
 
 
 </LinearLayout>
