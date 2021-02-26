@@ -10,9 +10,9 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -45,8 +45,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             try {
                 val attestationPresentation = JSONObject(attestationPresentationString)
                 logger.debug("SSI: Found the following data: $attestationPresentation")
-                val format = attestationPresentation.get("presentation")
-                when (format) {
+                when (val format = attestationPresentation.get("presentation")) {
                     "authority" -> {
                         val authorityKey =
                             attestationPresentation.getString("public_key").hexToBytes()
@@ -77,9 +76,11 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid data found", Toast.LENGTH_LONG).show()
+                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
             }
         } else {
-            Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Scan cancelled", Toast.LENGTH_LONG).show()
+            findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
         }
     }
 }
@@ -97,19 +98,32 @@ class AuthorityConfirmationDialog(private val authorityKey: ByteArray) : DialogF
                     DialogInterface.OnClickListener { _, _ ->
                         val community =
                             IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-                        community.trustedAuthorityManager.addTrustedAuthority(
-                            defaultCryptoProvider.keyFromPublicBin(
-                                authorityKey
-                            )
+                        val key = defaultCryptoProvider.keyFromPublicBin(
+                            authorityKey
                         )
+                        val authorityManager = community.trustedAuthorityManager
+                        if (!authorityManager.contains(key.keyToHash().toHex())) {
+                            community.trustedAuthorityManager.addTrustedAuthority(
+                                key
+                            )
 
-                        Handler(Looper.getMainLooper()).post {
-                            Toast.makeText(
-                                context,
-                                "Successfully added new Authority",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(
+                                    context,
+                                    "Successfully added new Authority",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        } else {
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(
+                                    context,
+                                    "Authority already added",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
+                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
                     }
                 )
                 .setNegativeButton(
@@ -122,6 +136,7 @@ class AuthorityConfirmationDialog(private val authorityKey: ByteArray) : DialogF
                                 Toast.LENGTH_LONG
                             ).show()
                         }
+                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
                     }
                 )
 
@@ -142,9 +157,9 @@ class AttestationConfirmationDialog(
         return activity?.let {
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Attestation Found")
-                .setMessage("Address: ${authorityKey.toHex()}")
+                .setMessage("Attestation presented by: ${attesteeKey.toHex()}")
                 .setPositiveButton(
-                    "Add",
+                    "Verify",
                     DialogInterface.OnClickListener { _, _ ->
                         val community =
                             IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
@@ -163,7 +178,7 @@ class AttestationConfirmationDialog(
                     }
                 )
                 .setNegativeButton(
-                    R.string.cancel,
+                    "dismiss",
                     DialogInterface.OnClickListener { _, _ ->
                         DangerDialog().show(parentFragmentManager, this.tag)
                     }
@@ -175,34 +190,48 @@ class AttestationConfirmationDialog(
 
 class SuccessDialog : DialogFragment() {
 
+    lateinit var mDialog: Dialog
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.success_dialog, container, false)
+        val view = inflater.inflate(R.layout.success_dialog, container, false)
+        view.setOnClickListener {
+            mDialog.dismiss()
+            findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+        }
+        return view
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        return dialog
+        super.onCreateDialog(savedInstanceState)
+        mDialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        return mDialog
     }
 }
 
 class DangerDialog : DialogFragment() {
 
+    lateinit var mDialog: Dialog
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.danger_dialog, container, false)
+        val view = inflater.inflate(R.layout.danger_dialog, container, false)
+        view.setOnClickListener {
+            mDialog.dismiss()
+            findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+        }
+        return view
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        return dialog
+        super.onCreateDialog(savedInstanceState)
+        mDialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        return mDialog
     }
 }
