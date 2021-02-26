@@ -303,6 +303,18 @@ class TransactionRepository(
         }
     }
 
+    fun lastCheckpointIsEmpty(
+        block: TrustChainBlock,
+        database: TrustChainStore
+    ): Boolean {
+        if (BLOCK_TYPE_CHECKPOINT == block.type && block.isProposal) {
+            return database.getLinked(block) == null // Checkpoint acceptance is missing and should be crawled to prove validity
+        } else {
+            val blockBefore = database.getBlockWithHash(block.previousHash) ?: return true // null will not actually happen, but true will result in PartialPrevious
+            return lastCheckpointIsEmpty(blockBefore, database)
+        }
+    }
+
     fun verifyBalanceAvailable(
         block: TrustChainBlock,
         database: TrustChainStore
@@ -310,6 +322,11 @@ class TransactionRepository(
         val balance =
             getVerifiedBalanceForBlock(block, database) ?: return ValidationResult.PartialPrevious
         if (balance < 0) {
+            val blockBefore = database.getBlockWithHash(block.previousHash) ?: return ValidationResult.PartialPrevious
+            if (lastCheckpointIsEmpty(blockBefore, database)) {
+                // IF INVALID IS RETURNED WE WONT CRAWL FOR LINKED BLOCKS
+                return ValidationResult.PartialPrevious
+            }
             return ValidationResult.Invalid(
                 listOf(
                     "Insufficient balance ($balance) for amount (${
