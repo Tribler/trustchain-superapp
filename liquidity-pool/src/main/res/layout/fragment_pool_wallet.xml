@@ -4,149 +4,144 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F5F5F5">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/ConstraintLayout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_margin="16dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="16dp">
 
-        <LinearLayout
-            android:id="@+id/linearLayout"
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/light_gray"
-            android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:cardCornerRadius="5dp"
+            app:cardElevation="5dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/layout_bg"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/bitCoinText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/layout_top_bg"
-                    android:text="Bitcoin"
+                    android:background="@color/blue"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:text="@string/bitcoin"
                     android:textAlignment="center"
+                    android:textColor="@color/white"
                     android:textSize="24sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:padding="5dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.9"
+                        android:layout_weight="0.8"
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/bitCoinAddressText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.9"
                             android:gravity="center_vertical"
-                            android:text="Wallet public key:"
-                            android:textAlignment="center" />
+                            android:text="@string/wallet_public_key"
+                            android:textAlignment="textStart" />
 
                         <TextView
                             android:id="@+id/bitCoinAddress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="key"
-                            android:textAlignment="center" />
+                            android:textAlignment="textStart" />
+
+
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/bitCoinCopyButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="0.1"
+                        android:layout_width="55dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.2"
                         android:drawableLeft="@drawable/ic_content_copy" />
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/bitCoinBalance"
+                    android:id="@+id/bitcoinBalance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Wallet balance: "
-                    android:textAlignment="center" />
-
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp" />
+                    android:padding="5dp"
+                    android:text="@string/wallet_balance"
+                    android:textAlignment="textStart"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="5dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/layout_bg"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/euroTokenText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/layout_top_bg"
-                    android:text="Euro Token"
+                    android:background="@color/blue"
+                    android:paddingLeft="5dp"
+                    android:text="@string/euro_token"
                     android:textAlignment="center"
+                    android:textColor="@color/white"
                     android:textSize="24sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:padding="5dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.9"
+                        android:layout_weight="0.8"
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/euroTokenAddressText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="0.9"
                             android:gravity="center_vertical"
-                            android:text="Wallet public key:"
-                            android:textAlignment="center" />
+                            android:text="@string/wallet_public_key"
+                            android:textAlignment="textStart" />
 
                         <TextView
                             android:id="@+id/euroTokenAddress"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="key"
-                            android:textAlignment="center" />
+                            android:textAlignment="textStart" />
+
                     </LinearLayout>
 
                     <Button
                         android:id="@+id/euroTokenCopyButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_weight="0.1"
+                        android:layout_width="55dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.2"
                         android:drawableLeft="@drawable/ic_content_copy" />
                 </LinearLayout>
 
@@ -154,20 +149,15 @@
                     android:id="@+id/euroTokenBalance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Wallet balance: "
-                    android:textAlignment="center" />
-
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="10dp" />
+                    android:padding="5dp"
+                    android:text="@string/wallet_balance"
+                    android:textAlignment="textStart"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="5dp" />
-
-        </LinearLayout>
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
