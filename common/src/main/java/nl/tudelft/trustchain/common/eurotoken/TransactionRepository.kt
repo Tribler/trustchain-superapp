@@ -308,9 +308,9 @@ class TransactionRepository(
         database: TrustChainStore
     ): Boolean {
         if (BLOCK_TYPE_CHECKPOINT == block.type && block.isProposal) {
-            return database.getLinked(block) == null //Checkpoint acceptance is missing and should be crawled to prove validity
+            return database.getLinked(block) == null // Checkpoint acceptance is missing and should be crawled to prove validity
         } else {
-            val blockBefore = database.getBlockWithHash(block.previousHash) ?: return true //null will not actually happen, but true will result in PartialPrevious
+            val blockBefore = database.getBlockWithHash(block.previousHash) ?: return true // null will not actually happen, but true will result in PartialPrevious
             return lastCheckpointIsEmpty(blockBefore, database)
         }
     }
@@ -324,7 +324,7 @@ class TransactionRepository(
         if (balance < 0) {
             val blockBefore = database.getBlockWithHash(block.previousHash) ?: return ValidationResult.PartialPrevious
             if (lastCheckpointIsEmpty(blockBefore, database)) {
-                //IF INVALID IS RETURNED WE WONT CRAWL FOR LINKED BLOCKS
+                // IF INVALID IS RETURNED WE WONT CRAWL FOR LINKED BLOCKS
                 return ValidationResult.PartialPrevious
             }
             return ValidationResult.Invalid(
