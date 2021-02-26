@@ -1,25 +1,42 @@
 package nl.tudelft.trustchain.liquidity.data
 
-import nl.tudelft.trustchain.liquidity.service.WalletService
-import org.bitcoinj.core.Address
+import android.util.Log
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.bitcoin.WalletService
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import org.bitcoinj.core.*
 import org.bitcoinj.core.Coin.valueOf
+import org.bitcoinj.core.listeners.TransactionReceivedInBlockListener
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
+import org.bitcoinj.kits.WalletAppKit
+import org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener
 
-class BitcoinLiquidityWallet(private val wallet: Wallet) : LiquidityWallet {
+class BitcoinLiquidityWallet(private val wallet: Wallet, private val app: WalletAppKit, private val transactionRepository: TransactionRepository, private val publicKey: PublicKey) : LiquidityWallet {
+
     override val coinName: String = "BTC"
 
     // TODO: Figure out who to send money to in a transaction response
-    override fun initializePool(pool: LiquidityPool) =
-        if (pool.wallet1 == this) {
-            wallet.addCoinsReceivedEventListener { _, tx, _, _ ->
-                pool.convert1To2(tx.outputSum.value.toDouble(), "me")
+    override fun initializePool() {
+
+        // TODO: Look into different listeners, this event is called before the transfer is verified, not sure if this will be an issue
+        app.wallet().addCoinsReceivedEventListener(object : WalletCoinsReceivedEventListener {
+            override fun onCoinsReceived(
+                wallet: Wallet?,
+                tx: Transaction?,
+                prevBalance: Coin?,
+                newBalance: Coin?
+            ) {
+                val transaction = mapOf(
+                    "bitcoin_tx" to tx!!.txId.toString(),
+                    "amount" to tx.getValueSentToMe(wallet).toFriendlyString()
+                )
+                Log.d("bitcoin_received", "Bitcoins received making a note on my chain")
+                transactionRepository.trustChainCommunity.createProposalBlock("bitcoin_transfer", transaction, publicKey.keyToBin())
             }
-        } else {
-            wallet.addCoinsReceivedEventListener { _, tx, _, _ ->
-                pool.convert2To1(tx.outputSum.value.toDouble(), "me")
-            }
-        }
+        })
+    }
 
     // TODO: Properly convert amount in double to long or the other way around
     override fun startTransaction(amount: Double, address: String) {
@@ -30,4 +47,9 @@ class BitcoinLiquidityWallet(private val wallet: Wallet) : LiquidityWallet {
             )
         )
     }
+
+
+
 }
+
+

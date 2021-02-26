@@ -40,6 +40,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
@@ -109,18 +110,17 @@ class TrustChainApplication : Application() {
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
         euroTokenCommunity.setTransactionRepository(tr)
 
-        trustchain.registerTransactionValidator(
-            BLOCK_TYPE,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    return if (block.transaction["message"] != null || block.isAgreement) {
-                        ValidationResult.Valid
-                    } else {
-                        ValidationResult.Invalid(listOf("Proposal must have a message"))
-                    }
+        WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
+
+        trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
+            override fun validate(
+                block: TrustChainBlock,
+                database: TrustChainStore
+            ): ValidationResult {
+                if (block.transaction["message"] != null || block.isAgreement) {
+                    return ValidationResult.Valid
+                } else {
+                    return ValidationResult.Invalid(listOf("Proposal must have a message"))
                 }
             }
         )

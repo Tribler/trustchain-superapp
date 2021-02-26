@@ -100,6 +100,8 @@ dependencies {
 
     implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
 
+    implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
+
     // BitTorrent
     api files('libs/jlibtorrent-1.2.10.0.jar')
     api files('libs/jlibtorrent-android-arm64-1.2.10.0.jar')
