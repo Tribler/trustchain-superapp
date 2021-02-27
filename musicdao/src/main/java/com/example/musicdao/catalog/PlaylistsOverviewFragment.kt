@@ -88,9 +88,13 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 true
             }
             R.id.action_sync -> {
-                val showVotes: Boolean = playlistCoverFragments[0].votes.visibility != View.VISIBLE
-                for (playlistCoverFragment in playlistCoverFragments) {
-                    playlistCoverFragment.votes.visibility = if (showVotes) View.VISIBLE else View.GONE
+                if (playlistCoverFragments.size > 0) {
+                    val showVotes: Boolean =
+                        playlistCoverFragments[0].votes.visibility != View.VISIBLE
+                    for (playlistCoverFragment in playlistCoverFragments) {
+                        playlistCoverFragment.votes.visibility =
+                            if (showVotes) View.VISIBLE else View.GONE
+                    }
                 }
                 true
             }
