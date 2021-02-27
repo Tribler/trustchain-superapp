@@ -33,7 +33,12 @@
         </action>
         <action
             android:id="@+id/action_playlistsOverviewFragment_to_votesFragment"
-            app:destination="@id/votesFragment" />
+            app:destination="@id/votesFragment">
+            <argument
+                android:name="title"
+                app:argType="string" />
+        </action>
+
     </fragment>
 
     <fragment

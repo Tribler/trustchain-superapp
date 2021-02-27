@@ -38,7 +38,7 @@ class PlaylistCoverFragment(
         seedCount.text = "Peers: $connectivity"
         votes.setOnClickListener {
             val action =
-                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToVotesFragment();
+                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToVotesFragment(title);
             findNavController().navigate(action)
         }
         if (coverArt != null) {
