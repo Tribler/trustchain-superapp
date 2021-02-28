@@ -30,7 +30,8 @@ class DashboardActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-        adapter.updateItems(getAppList())
+        val appList = getAppList().sortedBy { it.app.appName }
+        adapter.updateItems(appList)
     }
 
     private fun getAppList(): List<DashboardItem> {
