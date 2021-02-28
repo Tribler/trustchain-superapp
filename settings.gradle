@@ -1,4 +1,3 @@
-include ':eurotoken'
 rootProject.name = 'TrustChain'
 
 include ':ipv8'
@@ -7,21 +6,26 @@ project(':ipv8').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8')
 include ':ipv8-android'
 project(':ipv8-android').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-android')
 
-include ':musicdao-datafeeder'
-
 include 'ipv8-jvm'
 project(':ipv8-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/ipv8-jvm')
 
+
+include 'demo-jvm'
+project(':demo-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/demo-jvm')
+
+
 include ':app'
 include ':common'
-include ':trustchain-explorer'
-include ':debug'
-include ':trustchain-trader'
-include ':trustchain-payloadgenerator'
 include ':currencyii'
+include ':debug'
 include ':distributedai'
-include ':freedomOfComputing'
-include ':trustchain-voter'
-include ':musicdao'
-include ':peerchat'
 include ':eurotoken'
+include ':freedomOfComputing'
+include ':ig-ssi'
+include ':musicdao'
+include ':musicdao-datafeeder'
+include ':peerchat'
+include ':trustchain-explorer'
+include ':trustchain-payloadgenerator'
+include ':trustchain-trader'
+include ':trustchain-voter'

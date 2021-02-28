@@ -38,6 +38,17 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.ssi.SSIMainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:theme="@style/Theme.SSI" />
+
+        <activity
+            android:name="nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <activity
             android:name="nl.tudelft.trustchain.debug.DebugActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
@@ -90,6 +101,7 @@
         </activity>
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
+
         <service
             android:name="com.example.musicdao.MusicGossipingService"
             android:enabled="true"

@@ -8,6 +8,7 @@ import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+import com.squareup.sqldelight.db.SqlDriver
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -15,11 +16,15 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
+import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
+import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
@@ -39,6 +44,7 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+
 import nl.tudelft.trustchain.voting.VotingCommunity
 
 class TrustChainApplication : Application() {
@@ -59,16 +65,21 @@ class TrustChainApplication : Application() {
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
                 createDemoCommunity(),
+                createWalletCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createVotingCommunity(),
-                createMusicCommunity()
+                createMusicCommunity(),
             ), walkerInterval = 5.0
         )
 
         IPv8Android.Factory(this)
             .setConfiguration(config)
             .setPrivateKey(getPrivateKey())
+            .setIdentityKeySmall(getIdAlgorithmKey(PREF_ID_METADATA_KEY))
+            .setIdentityKeyBig(getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY))
+            .setIdentityKeyHuge(getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY))
+            .setIdentityKeyRange18Plus(getIdAlgorithmKey(PREF_ID_METADATA_RANGE_18PLUS_KEY))
             .setServiceClass(TrustChainService::class.java)
             .init()
 
@@ -80,7 +91,7 @@ class TrustChainApplication : Application() {
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
 
         val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
-        tr.initTrustChainCommunity() // register eurotoken listners
+        tr.initTrustChainCommunity() // register eurotoken listeners
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
         euroTokenCommunity.setTransactionRepository(tr)
 
@@ -122,6 +133,18 @@ class TrustChainApplication : Application() {
         })
     }
 
+    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
+        val database = Database(driver)
+        val store = AttestationSQLiteStore(database)
+        val randomWalk = RandomWalk.Factory()
+
+        return OverlayConfiguration(
+            AttestationCommunity.Factory(store),
+            listOf(randomWalk)
+        )
+    }
+
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
         val randomWalk = RandomWalk.Factory()
         val randomChurn = RandomChurn.Factory()
@@ -154,6 +177,7 @@ class TrustChainApplication : Application() {
             listOf(randomWalk)
         )
     }
+
 
     private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
         val randomWalk = RandomWalk.Factory()
@@ -228,6 +252,25 @@ class TrustChainApplication : Application() {
         )
     }
 
+    private fun getIdAlgorithmKey(idFormat: String): BonehPrivateKey {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(idFormat, null)
+
+        val schemaManager = SchemaManager()
+        schemaManager.registerDefaultSchemas()
+
+        return if (privateKey == null) {
+            // Generate a new key on the first launch
+            val newKey = schemaManager.getAlgorithmInstance(idFormat).generateSecretKey()
+            prefs.edit()
+                .putString(idFormat, newKey.serialize().toHex())
+                .apply()
+            newKey
+        } else {
+            BonehPrivateKey.deserialize(privateKey.hexToBytes())!!
+        }
+    }
+
     private fun getPrivateKey(): PrivateKey {
         // Load a key from the shared preferences
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
@@ -246,6 +289,10 @@ class TrustChainApplication : Application() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
+        private const val PREF_ID_METADATA_KEY = "id_metadata"
+        private const val PREF_ID_METADATA_BIG_KEY = "id_metadata_big"
+        private const val PREF_ID_METADATA_HUGE_KEY = "id_metadata_huge"
+        private const val PREF_ID_METADATA_RANGE_18PLUS_KEY = "id_metadata_range_18plus"
         private const val BLOCK_TYPE = "demo_block"
     }
 }
