@@ -1,21 +1,28 @@
 package nl.tudelft.trustchain.ssi.database
 
+import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
@@ -48,9 +55,14 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         super.onCreate(savedInstanceState)
 
         adapter.registerRenderer(
-            DatabaseItemRenderer {
-                setDatabaseItemAction(it)
-            }
+            DatabaseItemRenderer(
+                {
+                    setDatabaseItemAction(it)
+                },
+                {
+                    RemoveAttestationDialog(it).show(parentFragmentManager, this.tag)
+                }
+            )
         )
 
 
@@ -164,14 +176,14 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                     .mapIndexed { index, blob -> DatabaseItem(index, blob) }
 
                 adapter.updateItems(entries)
-                databaseTitle.text = "database.db"
+                databaseTitle.text = "Attestations"
                 txtAttestationCount.text = "${entries.size} entries"
                 val textColorResId = if (entries.isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 txtAttestationCount.setTextColor(textColor)
                 imgEmpty.isVisible = entries.isEmpty()
 
-                delay(1000)
+                delay(5000)
             }
         }
     }
@@ -206,5 +218,46 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             }
             dialog.setQRCode(bitmap)
         }
+    }
+}
+
+
+class RemoveAttestationDialog(val item: DatabaseItem) : DialogFragment() {
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
+        return activity?.let {
+            // Use the Builder class for convenient dialog construction
+            val builder = AlertDialog.Builder(it)
+            builder.setView(view)
+                .setPositiveButton(
+                    "Delete Attestation",
+                    DialogInterface.OnClickListener { _, _ ->
+                        IPv8Android.getInstance()
+                            .getOverlay<AttestationCommunity>()!!.database.deleteAttestationByHash(
+                                item.attestationBlob.attestationHash
+                            )
+                        Toast.makeText(
+                            requireContext(),
+                            "Successfully deleted attestation",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                .setNegativeButton(
+                    R.string.cancel,
+                    DialogInterface.OnClickListener { _, _ ->
+                        Toast.makeText(
+                            requireContext(),
+                            "Cancelled deletion",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                .setTitle("Delete Attestation permanently?")
+                .setIcon(R.drawable.ic_round_warning_amber_24)
+                .setMessage("Note: this action cannot be undone.")
+            // Create the AlertDialog object and return it
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }

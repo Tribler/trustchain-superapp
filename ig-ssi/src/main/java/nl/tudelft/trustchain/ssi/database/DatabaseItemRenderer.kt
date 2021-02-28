@@ -10,6 +10,7 @@ import org.json.JSONObject
 
 class DatabaseItemRenderer(
     private val onItemClick: (DatabaseItem) -> Unit,
+    private val onRemoveButtonClick: (DatabaseItem) -> Unit,
 ) : ItemLayoutRenderer<DatabaseItem, View>(
     DatabaseItem::class.java
 ) {
@@ -27,9 +28,14 @@ class DatabaseItemRenderer(
         idformat.text = item.attestationBlob.idFormat
         blob.text = item.attestationBlob.blob.toHex()
 
+        removeButton.setOnClickListener {
+            onRemoveButtonClick(item)
+        }
+
         setOnClickListener {
             onItemClick(item)
         }
+
     }
 
     override fun getLayoutResourceId(): Int {

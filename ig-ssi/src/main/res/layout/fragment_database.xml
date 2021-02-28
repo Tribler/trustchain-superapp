@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
-    android:background="#FFFFFF"
     android:orientation="vertical">
 
     <LinearLayout
@@ -118,11 +117,13 @@
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/metallic_gold"
         android:src="@drawable/ic_round_bolt_24"
-        app:fabSize="normal"
+        app:backgroundTint="#000000"
+        app:borderWidth="0dp"
         app:fabCustomSize="70dp"
-        app:maxImageSize="50dp"
+        app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:maxImageSize="50dp"
         app:tint="@color/white" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -131,6 +132,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         android:backgroundTint="@android:color/holo_red_dark"
+        app:borderWidth="0dp"
         app:fabSize="normal"
         app:layout_constraintBottom_toTopOf="@+id/action_fab"
         app:layout_constraintEnd_toEndOf="@+id/action_fab"
@@ -158,6 +160,7 @@
         android:layout_marginBottom="24dp"
         android:backgroundTint="@android:color/holo_red_dark"
         android:textColor="@color/white"
+        app:borderWidth="0dp"
         app:fabSize="normal"
         app:layout_constraintBottom_toTopOf="@+id/add_attestation_fab"
         app:layout_constraintEnd_toEndOf="@+id/add_attestation_fab"
@@ -183,8 +186,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:backgroundTint="@android:color/holo_red_light"
+        android:backgroundTint="@color/colorPrimaryDarkSSI"
         android:textColor="@color/white"
+        app:borderWidth="0dp"
         app:fabSize="normal"
         app:layout_constraintBottom_toTopOf="@+id/add_authority_fab"
         app:layout_constraintEnd_toEndOf="@+id/add_authority_fab"
