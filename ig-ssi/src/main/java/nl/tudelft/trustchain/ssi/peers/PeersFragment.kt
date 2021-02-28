@@ -3,17 +3,20 @@ package nl.tudelft.trustchain.ssi.peers
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_peers.*
+import kotlinx.android.synthetic.main.fragment_peers2.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
@@ -23,20 +26,22 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.databinding.FragmentPeersBinding
+import nl.tudelft.trustchain.ssi.database.DatabaseItem
+import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
 
-class PeersFragment : BaseFragment(R.layout.fragment_peers) {
+class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
 
-    private val adapter = ItemAdapter()
-    private val binding by viewBinding(FragmentPeersBinding::bind)
+    private val adapterClients = ItemAdapter()
+    private val adapterAuthorities = ItemAdapter()
+    private val binding by viewBinding(FragmentPeers2Binding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(
+        adapterClients.registerRenderer(
             PeerItemRenderer(
                 {
-                    FireMissilesDialogFragment(it.peer).show(parentFragmentManager, "test")
+                    FireMissilesDialogFragment(it.peer).show(parentFragmentManager, this.tag)
                 },
                 {
                     copyToClipboard(it.peer)
@@ -44,25 +49,42 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
             )
         )
 
-        adapter.registerRenderer(
+        adapterClients.registerRenderer(
             AddressItemRenderer {
                 // NOOP
             }
         )
+
+        adapterAuthorities.registerRenderer(
+            AuthorityItemRenderer(
+                {},
+                { RemoveAuthorityDialog(it).show(parentFragmentManager, this.tag) })
+        )
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
-        binding.recyclerView.addItemDecoration(
+        binding.recyclerViewClients.adapter = adapterClients
+        binding.recyclerViewClients.layoutManager = LinearLayoutManager(context)
+        binding.recyclerViewClients.addItemDecoration(
             DividerItemDecoration(
                 context,
                 LinearLayout.VERTICAL
             )
         )
 
+        binding.recyclerViewAuthorities.adapter = adapterAuthorities
+        binding.recyclerViewAuthorities.layoutManager = LinearLayoutManager(context)
+        binding.recyclerViewAuthorities.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayout.VERTICAL
+            )
+        )
+
+        loadAuthorities()
         loadNetworkInfo()
     }
 
@@ -118,16 +140,70 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
 
                 val items = peerItems + bluetoothAddressItems + addressItems
 
-                adapter.updateItems(items)
+                adapterClients.updateItems(items)
                 txtCommunityName.text = demoCommunity.javaClass.simpleName
                 txtPeerCount.text = "${peers.size} peers"
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 txtPeerCount.setTextColor(textColor)
-                imgEmpty.isVisible = items.isEmpty()
+                imgEmpty1.isVisible = items.isEmpty()
 
                 delay(1000)
             }
         }
+    }
+
+    private fun loadAuthorities() {
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                val authorities = IPv8Android.getInstance()
+                    .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.getAuthorities()
+                    .map { AuthorityItem(it.publicKey, it.hash, "lorem ipsum") }
+                imgEmpty.isVisible = authorities.isEmpty()
+                adapterAuthorities.updateItems(authorities)
+                delay(5000)
+            }
+        }
+    }
+}
+
+
+class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
+        return activity?.let {
+            // Use the Builder class for convenient dialog construction
+            val builder = AlertDialog.Builder(it)
+            builder.setView(view)
+                .setPositiveButton(
+                    "Delete Authority",
+                    DialogInterface.OnClickListener { _, _ ->
+                        IPv8Android.getInstance()
+                            .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.deleteTrustedAuthority(
+                                item.publicKeyHash
+                            )
+                        Toast.makeText(
+                            requireContext(),
+                            "Successfully deleted authority",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                .setNegativeButton(
+                    R.string.cancel,
+                    DialogInterface.OnClickListener { _, _ ->
+                        Toast.makeText(
+                            requireContext(),
+                            "Cancelled deletion",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                )
+                .setTitle("Delete Authority permanently?")
+                .setIcon(R.drawable.ic_round_warning_amber_24)
+                .setMessage("Note: this action cannot be undone.")
+            // Create the AlertDialog object and return it
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
