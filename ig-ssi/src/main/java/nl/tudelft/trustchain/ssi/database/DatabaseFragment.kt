@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
 import kotlinx.coroutines.*
@@ -23,6 +26,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.PresentAttestationDialog
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
+import nl.tudelft.trustchain.ssi.verifier.VerificationFragmentDirections
 import org.json.JSONObject
 
 private val logger = KotlinLogging.logger {}
@@ -38,43 +42,18 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         QRCodeUtils(requireContext())
     }
 
+    private var areFabsVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val tag = this.tag
         adapter.registerRenderer(
             DatabaseItemRenderer {
-                val dialog = PresentAttestationDialog(it.attestationBlob.idFormat)
-                dialog.show(
-                    parentFragmentManager,
-                    tag
-                )
-                lifecycleScope.launch {
-                    val metadata = it.attestationBlob.metadata
-                    val manager = SchemaManager()
-                    manager.registerDefaultSchemas()
-                    val attestation =
-                        manager.deserialize(it.attestationBlob.blob, it.attestationBlob.idFormat)
-
-                    val signature = it.attestationBlob.signature!!.toHex()
-                    val attestorKey = it.attestationBlob.attestorKey!!.keyToBin().toHex()
-                    val key = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
-
-                    val data = JSONObject()
-                    data.put("presentation", "attestation")
-                    data.put("metadata", metadata)
-                    data.put("attestationHash", attestation.getHash().toHex())
-                    data.put("signature", signature)
-                    data.put("signee_key", key)
-                    data.put("attestor_key", attestorKey)
-                    logger.debug("SSI: Presenting Attestation as QRCode: Size ${data.toString().length}, Data: $data")
-                    val bitmap = withContext(Dispatchers.Default) {
-                        qrCodeUtils.createQR(data.toString(), 750)!!
-                    }
-                    dialog.setQRCode(bitmap)
-                }
+                setDatabaseItemAction(it)
             }
         )
+
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -93,11 +72,13 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             lifecycleScope.launch {
                 val data = JSONObject()
                 data.put("presentation", "authority")
-                val publicKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
+                val myPeer = IPv8Android.getInstance().myPeer
+                val publicKey = myPeer.publicKey.keyToBin().toHex()
                 data.put("public_key", publicKey)
+                IPv8Android.getInstance()
 
                 bitmap = withContext(Dispatchers.Default) {
-                    qrCodeUtils.createQR(data.toString())!!
+                    qrCodeUtils.createQR(data.toString(), 300)!!
                 }
                 try {
                     binding.qrCodePlaceHolder.visibility = View.GONE
@@ -120,6 +101,58 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 it.animate().scaleX(1.2f).scaleY(1.2f)
             }
         }
+
+        binding.addAttestationFab.visibility = View.GONE
+        binding.addAuthorityFab.visibility = View.GONE
+        binding.scanAttestationFab.visibility = View.GONE
+        binding.addAttestationActionText.visibility = View.GONE
+        binding.addAuthorityActionTxt.visibility = View.GONE
+        binding.scanAttestationActionText.visibility = View.GONE
+
+        binding.actionFab.setOnClickListener {
+            if (!areFabsVisible) {
+                binding.addAttestationFab.show()
+                binding.addAuthorityFab.show()
+                binding.scanAttestationFab.show()
+                binding.addAttestationActionText.visibility = View.VISIBLE
+                binding.addAuthorityActionTxt.visibility = View.VISIBLE
+                binding.scanAttestationActionText.visibility = View.VISIBLE
+                areFabsVisible = true
+            } else {
+                binding.addAttestationFab.hide()
+                binding.addAuthorityFab.hide()
+                binding.scanAttestationFab.hide()
+                binding.addAttestationActionText.visibility = View.GONE
+                binding.addAuthorityActionTxt.visibility = View.GONE
+                binding.scanAttestationActionText.visibility = View.GONE
+                areFabsVisible = false
+            }
+        }
+
+        binding.addAttestationFab.setOnClickListener {
+            val bundle = bundleOf("qrCodeHint" to "Scan signee public key", "intent" to 0)
+            findNavController().navigate(
+                DatabaseFragmentDirections.actionDatabaseFragmentToVerificationFragment().actionId,
+                bundle
+            )
+        }
+
+        binding.addAuthorityFab.setOnClickListener {
+            val bundle = bundleOf("qrCodeHint" to "Scan signee public key", "intent" to 1)
+            findNavController().navigate(
+                DatabaseFragmentDirections.actionDatabaseFragmentToVerificationFragment().actionId,
+                bundle
+            )
+        }
+
+        binding.scanAttestationFab.setOnClickListener {
+            val bundle = bundleOf("qrCodeHint" to "Scan attestation", "intent" to 2)
+            findNavController().navigate(
+                DatabaseFragmentDirections.actionDatabaseFragmentToVerificationFragment().actionId,
+                bundle
+            )
+        }
+
     }
 
     private fun loadDatabaseEntries() {
@@ -140,6 +173,38 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
                 delay(1000)
             }
+        }
+    }
+
+    private fun setDatabaseItemAction(it: DatabaseItem) {
+        val dialog = PresentAttestationDialog(it.attestationBlob.idFormat)
+        dialog.show(
+            parentFragmentManager,
+            tag
+        )
+        lifecycleScope.launch {
+            val metadata = it.attestationBlob.metadata
+            val manager = SchemaManager()
+            manager.registerDefaultSchemas()
+            val attestation =
+                manager.deserialize(it.attestationBlob.blob, it.attestationBlob.idFormat)
+
+            val signature = it.attestationBlob.signature!!.toHex()
+            val attestorKey = it.attestationBlob.attestorKey!!.keyToBin().toHex()
+            val key = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
+
+            val data = JSONObject()
+            data.put("presentation", "attestation")
+            data.put("metadata", metadata)
+            data.put("attestationHash", attestation.getHash().toHex())
+            data.put("signature", signature)
+            data.put("signee_key", key)
+            data.put("attestor_key", attestorKey)
+            logger.debug("SSI: Presenting Attestation as QRCode: Size ${data.toString().length}, Data: $data")
+            val bitmap = withContext(Dispatchers.Default) {
+                qrCodeUtils.createQR(data.toString())!!
+            }
+            dialog.setQRCode(bitmap)
         }
     }
 }

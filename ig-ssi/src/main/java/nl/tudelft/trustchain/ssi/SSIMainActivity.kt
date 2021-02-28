@@ -132,6 +132,11 @@ class FireMissilesDialogFragment(val peer: Peer) : DialogFragment() {
                             hashMapOf("id_format" to "id_metadata_range_18plus"),
                             true
                         )
+                        Toast.makeText(
+                            requireContext(),
+                            "Requested attestation for ${attrInput.text.toString()} from ${peer.mid}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 )
                 .setNegativeButton(

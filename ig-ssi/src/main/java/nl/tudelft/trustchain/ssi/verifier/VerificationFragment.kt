@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -22,10 +23,15 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
+import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
 import org.json.JSONObject
 
 private val logger = KotlinLogging.logger {}
+
+const val REQUEST_ATTESTATION_INTENT = 0
+const val ADD_AUTHORITY_INTENT = 1
+const val SCAN_ATTESTATION_INTENT = 2
 
 class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
 
@@ -33,9 +39,13 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         QRCodeUtils(requireContext())
     }
 
+    private val args: VerificationFragmentArgs by navArgs()
+    private var intent = -1
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        qrCodeUtils.startQRScanner(this, true)
+        this.intent = args.intent
+        qrCodeUtils.startQRScanner(this, args.qrCodeHint, vertical = true)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -48,11 +58,38 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                 when (val format = attestationPresentation.get("presentation")) {
                     "authority" -> {
                         val authorityKey =
-                            attestationPresentation.getString("public_key").hexToBytes()
-                        AuthorityConfirmationDialog(authorityKey).show(
-                            parentFragmentManager,
-                            this.tag
-                        )
+                            attestationPresentation.getString("public_key")
+                        when (this.intent) {
+                            REQUEST_ATTESTATION_INTENT -> {
+                                val peer =
+                                    IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+                                        .getPeers().find { peer ->
+                                            peer.publicKey.keyToBin().toHex() == authorityKey
+                                        }
+                                if (peer != null) {
+                                    FireMissilesDialogFragment(
+                                        peer
+                                    ).show(parentFragmentManager, this.tag)
+                                } else {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Could not locate peer",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+                            }
+                            ADD_AUTHORITY_INTENT -> AuthorityConfirmationDialog(authorityKey.hexToBytes()).show(
+                                parentFragmentManager,
+                                this.tag
+                            )
+                            else -> {
+                                ScanIntentDialog(authorityKey).show(
+                                    parentFragmentManager,
+                                    this.tag
+                                )
+                            }
+                        }
                     }
                     "attestation" -> {
                         val metadata = attestationPresentation.getString("metadata")
@@ -76,7 +113,8 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid data found", Toast.LENGTH_LONG).show()
-                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+//                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+                qrCodeUtils.startQRScanner(this, args.qrCodeHint, vertical = true)
             }
         } else {
             Toast.makeText(requireContext(), "Scan cancelled", Toast.LENGTH_LONG).show()
@@ -183,6 +221,51 @@ class AttestationConfirmationDialog(
                         DangerDialog().show(parentFragmentManager, this.tag)
                     }
                 )
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
+    }
+}
+
+class ScanIntentDialog(
+    private val authorityKey: String
+) : DialogFragment() {
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return activity?.let {
+            val builder = AlertDialog.Builder(it)
+            builder.setTitle("Select Action")
+                .setItems(
+                    arrayOf("Request attestation", "Register public key as authority"),
+                    DialogInterface.OnClickListener { _, which ->
+                        when (which) {
+                            0 -> {
+                                val peer =
+                                    IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+                                        .getPeers().find { peer ->
+                                            peer.publicKey.keyToBin().toHex() == authorityKey
+                                        }
+                                if (peer != null) {
+                                    FireMissilesDialogFragment(
+                                        peer
+                                    ).show(parentFragmentManager, this.tag)
+                                } else {
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Could not locate peer",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+                            }
+                            1 -> {
+                                AuthorityConfirmationDialog(authorityKey.hexToBytes()).show(
+                                    parentFragmentManager,
+                                    this.tag
+                                )
+                            }
+                        }
+                    })
+//                .setMessage("Scanned public key, please state your action.")
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }

@@ -109,4 +109,101 @@
         app:layout_constraintVertical_bias="0.8"
         app:srcCompat="@drawable/ic_cloud_off_black_24dp" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/action_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/metallic_gold"
+        android:src="@drawable/ic_round_bolt_24"
+        app:fabSize="normal"
+        app:fabCustomSize="70dp"
+        app:maxImageSize="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/white" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_attestation_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/action_fab"
+        app:layout_constraintEnd_toEndOf="@+id/action_fab"
+        app:layout_constraintStart_toStartOf="@+id/action_fab"
+        app:srcCompat="@drawable/ic_round_add_moderator_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/add_attestation_action_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_corners"
+        android:padding="5dp"
+        android:text="Add Attestation"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/add_attestation_fab"
+        app:layout_constraintEnd_toStartOf="@+id/add_attestation_fab"
+        app:layout_constraintTop_toTopOf="@+id/add_attestation_fab" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_authority_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:textColor="@color/white"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/add_attestation_fab"
+        app:layout_constraintEnd_toEndOf="@+id/add_attestation_fab"
+        app:layout_constraintStart_toStartOf="@+id/add_attestation_fab"
+        app:srcCompat="@drawable/ic_round_person_add_alt_1_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/add_authority_action_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_corners"
+        android:padding="5dp"
+        android:text="Add Authority"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/add_authority_fab"
+        app:layout_constraintEnd_toStartOf="@id/add_authority_fab"
+        app:layout_constraintTop_toTopOf="@id/add_authority_fab" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/scan_attestation_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@android:color/holo_red_light"
+        android:textColor="@color/white"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@+id/add_authority_fab"
+        app:layout_constraintEnd_toEndOf="@+id/add_authority_fab"
+        app:layout_constraintStart_toStartOf="@+id/add_authority_fab"
+        app:srcCompat="@android:drawable/ic_menu_camera"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/scan_attestation_action_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_corners"
+        android:padding="5dp"
+        android:text="Verify Attestation"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/scan_attestation_fab"
+        app:layout_constraintEnd_toStartOf="@id/scan_attestation_fab"
+        app:layout_constraintTop_toTopOf="@id/scan_attestation_fab" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
