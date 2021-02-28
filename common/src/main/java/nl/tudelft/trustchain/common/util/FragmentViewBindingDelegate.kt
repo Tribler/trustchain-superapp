@@ -22,6 +22,8 @@ class FragmentViewBindingDelegate<T : ViewBinding>(
     init {
         fragment.lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onCreate(owner: LifecycleOwner) {
+                @Suppress("COMPATIBILITY_WARNING")
+                // TODO: Replace observe.
                 fragment.viewLifecycleOwnerLiveData.observe(fragment) { viewLifecycleOwner ->
                     viewLifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
                         override fun onDestroy(owner: LifecycleOwner) {
