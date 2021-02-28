@@ -134,7 +134,7 @@ class FireMissilesDialogFragment(val peer: Peer) : DialogFragment() {
                         )
                         Toast.makeText(
                             requireContext(),
-                            "Requested attestation for ${attrInput.text.toString()} from ${peer.mid}",
+                            "Requested attestation for ${attrInput.text} from ${peer.mid}",
                             Toast.LENGTH_LONG
                         ).show()
                     }

@@ -2,15 +2,12 @@ package nl.tudelft.trustchain.ssi.peers
 
 import android.annotation.SuppressLint
 import android.view.View
-import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_authority.view.*
 import kotlinx.android.synthetic.main.item_peer.view.*
-import nl.tudelft.ipv8.attestation.Authority
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.R
 import java.util.*
-import kotlin.math.roundToInt
 
 class AuthorityItemRenderer(
     private val onItemClick: (AuthorityItem) -> Unit,

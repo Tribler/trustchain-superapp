@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.ssi.peers
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.messaging.Address
 import java.util.*
 
 class AuthorityItem(

@@ -264,7 +264,8 @@ class ScanIntentDialog(
                                 )
                             }
                         }
-                    })
+                    }
+                )
 //                .setMessage("Scanned public key, please state your action.")
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")

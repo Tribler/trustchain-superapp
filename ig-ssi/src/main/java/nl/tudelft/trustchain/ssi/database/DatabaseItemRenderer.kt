@@ -35,7 +35,6 @@ class DatabaseItemRenderer(
         setOnClickListener {
             onItemClick(item)
         }
-
     }
 
     override fun getLayoutResourceId(): Int {

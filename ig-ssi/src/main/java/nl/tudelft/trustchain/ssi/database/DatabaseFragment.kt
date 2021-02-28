@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.ssi.database
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -16,13 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.textfield.TextInputEditText
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
@@ -33,7 +29,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.PresentAttestationDialog
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
-import nl.tudelft.trustchain.ssi.verifier.VerificationFragmentDirections
 import org.json.JSONObject
 
 private val logger = KotlinLogging.logger {}
@@ -64,8 +59,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 }
             )
         )
-
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -164,7 +157,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 bundle
             )
         }
-
     }
 
     private fun loadDatabaseEntries() {
@@ -221,7 +213,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
     }
 }
 
-
 class RemoveAttestationDialog(val item: DatabaseItem) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
@@ -234,8 +225,8 @@ class RemoveAttestationDialog(val item: DatabaseItem) : DialogFragment() {
                     DialogInterface.OnClickListener { _, _ ->
                         IPv8Android.getInstance()
                             .getOverlay<AttestationCommunity>()!!.database.deleteAttestationByHash(
-                                item.attestationBlob.attestationHash
-                            )
+                            item.attestationBlob.attestationHash
+                        )
                         Toast.makeText(
                             requireContext(),
                             "Successfully deleted attestation",

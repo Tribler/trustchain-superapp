@@ -26,7 +26,6 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.database.DatabaseItem
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
 
 class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
@@ -58,9 +57,9 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
         adapterAuthorities.registerRenderer(
             AuthorityItemRenderer(
                 {},
-                { RemoveAuthorityDialog(it).show(parentFragmentManager, this.tag) })
+                { RemoveAuthorityDialog(it).show(parentFragmentManager, this.tag) }
+            )
         )
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -167,7 +166,6 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
     }
 }
 
-
 class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
@@ -180,8 +178,8 @@ class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
                     DialogInterface.OnClickListener { _, _ ->
                         IPv8Android.getInstance()
                             .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.deleteTrustedAuthority(
-                                item.publicKeyHash
-                            )
+                            item.publicKeyHash
+                        )
                         Toast.makeText(
                             requireContext(),
                             "Successfully deleted authority",
