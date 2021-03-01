@@ -20,6 +20,9 @@
         <action
             android:id="@+id/action_exchangeFragment_to_createMoneyFragment"
             app:destination="@id/createMoneyFragment" />
+        <action
+            android:id="@+id/action_exchangeFragment_to_transactionsFragment"
+            app:destination="@id/transactionsFragment" />
     </fragment>
     <fragment
         android:id="@+id/transferFragment"

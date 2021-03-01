@@ -8,7 +8,6 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentDestroyMoneyBinding
@@ -102,7 +101,7 @@ class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_mon
             } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }
-            transactionRepository.sendDestroyProposal(
+            transactionRepository.sendDestroyProposalWithPaymentID(
                 publicKey.hexToBytes(),
                 ip,
                 port,
