@@ -8,6 +8,7 @@ import android.text.Html
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -30,7 +31,6 @@ class PresentAttestationDialog(
             val view = inflater.inflate(R.layout.present_attestation_dialog, null)!!
             mView = view
             builder.setView(mView)
-            builder.setTitle("hello")
 
             val dialog: Dialog
             val title = "Attestation for <font color='#EE0000'>${attributeName.capitalize()}</font>"
@@ -60,5 +60,12 @@ class PresentAttestationDialog(
             progressBar.visibility = View.GONE
         }
         mView!!.findViewById<ImageView>(R.id.qrCodeView).setImageBitmap(bitmap)
+    }
+
+    fun showError() {
+        val textView = mView!!.findViewById<TextView>(R.id.unsupportedAttestation)
+        val progressBar = mView!!.findViewById<ProgressBar>(R.id.progressBar)
+        progressBar.visibility = View.GONE
+        textView.visibility = View.VISIBLE
     }
 }
