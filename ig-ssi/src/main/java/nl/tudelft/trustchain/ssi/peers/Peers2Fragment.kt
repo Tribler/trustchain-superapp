@@ -24,9 +24,9 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
+import nl.tudelft.trustchain.ssi.dialogs.FireMissilesDialog
 
 class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 
@@ -40,7 +40,7 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
         adapterClients.registerRenderer(
             PeerItemRenderer(
                 {
-                    FireMissilesDialogFragment(it.peer).show(parentFragmentManager, this.tag)
+                    FireMissilesDialog(it.peer).show(parentFragmentManager, this.tag)
                 },
                 {
                     copyToClipboard(it.peer)
@@ -57,7 +57,12 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
         adapterAuthorities.registerRenderer(
             AuthorityItemRenderer(
                 {},
-                { RemoveAuthorityDialog(it).show(parentFragmentManager, this.tag) }
+                {
+                    RemoveAuthorityDialog(it, ::loadAuthorities).show(
+                        parentFragmentManager,
+                        this.tag
+                    )
+                }
             )
         )
     }
@@ -152,22 +157,27 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
         }
     }
 
-    private fun loadAuthorities() {
+    private fun loadAuthoritiesOnLoop() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val authorities = IPv8Android.getInstance()
-                    .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.getAuthorities()
-                    .map { AuthorityItem(it.publicKey, it.hash, "lorem ipsum") }
-                imgEmpty.isVisible = authorities.isEmpty()
-                binding.txtAuthoritiesCount.text = "${authorities.size} authorities"
-                adapterAuthorities.updateItems(authorities)
-                delay(5000)
+                loadAuthorities()
+                delay(1500)
             }
         }
     }
+
+    private fun loadAuthorities() {
+        val authorities = IPv8Android.getInstance()
+            .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.getAuthorities()
+            .map { AuthorityItem(it.publicKey, it.hash, "lorem ipsum") }
+        imgEmpty.isVisible = authorities.isEmpty()
+        binding.txtAuthoritiesCount.text = "${authorities.size} authorities"
+        adapterAuthorities.updateItems(authorities)
+    }
 }
 
-class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
+class RemoveAuthorityDialog(val item: AuthorityItem, val callback: (() -> Unit) = { }) :
+    DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
         return activity?.let {
@@ -186,6 +196,7 @@ class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
                             "Successfully deleted authority",
                             Toast.LENGTH_LONG
                         ).show()
+                        callback()
                     }
                 )
                 .setNegativeButton(
@@ -196,6 +207,7 @@ class RemoveAuthorityDialog(val item: AuthorityItem) : DialogFragment() {
                             "Cancelled deletion",
                             Toast.LENGTH_LONG
                         ).show()
+                        callback()
                     }
                 )
                 .setTitle("Delete Authority permanently?")
