@@ -35,6 +35,16 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
     private var started = false
     var percentageSynced = 0
 
+    private var currentTransactionAmount: Long = 0
+    private lateinit var currentTransactionInput: TransactionInput
+    private var spendTx : Transaction? = null
+    private lateinit var currentTransaction : Transaction
+    private lateinit var currentAddress: Address
+    private lateinit var clientKey : ECKey
+    private lateinit var serverKey : ECKey
+    private var clientSignature: ECKey.ECDSASignature? = null
+    private var serverSignature: ECKey.ECDSASignature? = null
+
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
         app = object : WalletAppKit(params, walletDir, filePrefix) {
@@ -133,7 +143,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         }
     }
 
-    fun hardcodedShit(publicKey: String, coinsAmount: String) {
+    fun createProposal(publicKey: String, coinsAmount: String) {
         println(publicKey)
         val coins = try {
             BigDecimal(coinsAmount.toDouble())
@@ -142,33 +152,30 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
             return
         }
 
-        val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
-        val targetAddress: Address?
+        currentTransactionAmount = (coins * SATS_PER_BITCOIN).toLong()
+
         try {
-            targetAddress = Address.fromString(params, "mkd6JAvpH4VNVXFSz8wrq3pQccwGHCT9f7")
+            currentAddress = Address.fromString(params, "mkd6JAvpH4VNVXFSz8wrq3pQccwGHCT9f7")
         } catch (e: Exception) {
             musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
             return
         }
 
-        val clientKey = app.wallet().issuedReceiveKeys[0]
-        val serverKey = ECKey()
+        clientKey = app.wallet().issuedReceiveKeys[0]
+        serverKey = ECKey()
 
-        val contract = Transaction(params)
+        currentTransaction = Transaction(params)
 
         val keys = listOf(clientKey, serverKey)
         val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
-        val coin = Coin.valueOf(satoshiAmount)
-        contract.addOutput(coin, script)
+        val coin = Coin.valueOf(currentTransactionAmount)
+        currentTransaction.addOutput(coin, script)
+    }
 
 
-//        val req = SendRequest.forTx(contract)
-//        app.wallet().completeTx(req)
-//        app.peerGroup().broadcastTransaction(req.tx)
-
-
+    fun signUser1() {
         // serverside
-        val multisigOutput = contract.getOutput(0)
+        val multisigOutput = currentTransaction.getOutput(0)
         val multisigScript = multisigOutput.scriptPubKey
 
         try {
@@ -180,36 +187,68 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
         val coinValue = multisigOutput.value
 
-        val spendTx = Transaction(params)
-        spendTx.addOutput(coinValue, targetAddress)
-        val input = spendTx.addInput(multisigOutput)
-
-        val sighash = spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-        val signature = serverKey.sign(sighash)
+        if(spendTx == null) {
+            spendTx = Transaction(params)
+            spendTx!!.addOutput(coinValue, currentAddress)
+            currentTransactionInput = spendTx!!.addInput(multisigOutput)
+        }
 
         // send it to client
 
-        val sighashClient = spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-        val mySignature = clientKey.sign(sighashClient)
+        val sighash = spendTx!!.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
+        serverSignature = serverKey.sign(sighash)
 
+        verifyTransaction()
+    }
+
+    fun signUser2() {
+        // serverside
+        val multisigOutput = currentTransaction.getOutput(0)
+        val multisigScript = multisigOutput.scriptPubKey
+
+        try {
+            check(ScriptPattern.isSentToMultisig(multisigScript))
+        } catch (e: Exception) {
+            musicService.showToast("multisig script doesn't match format", Toast.LENGTH_LONG)
+            return
+        }
+
+        val coinValue = multisigOutput.value
+
+        if(spendTx == null) {
+            spendTx = Transaction(params)
+            spendTx!!.addOutput(coinValue, currentAddress)
+            currentTransactionInput = spendTx!!.addInput(multisigOutput)
+        }
+
+        // send it to client
+
+        val sighashClient = spendTx!!.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
+        clientSignature = clientKey.sign(sighashClient)
+
+        verifyTransaction()
+    }
+
+    fun verifyTransaction() {
         // complete transaction
+        if(clientSignature == null || serverSignature == null) return
 
-        val transactionSignatures = listOf<ECKey.ECDSASignature>(mySignature, signature).map { sig ->
+        val transactionSignatures = listOf<ECKey.ECDSASignature>(clientSignature!!, serverSignature!!).map { sig ->
             TransactionSignature(sig, Transaction.SigHash.ALL, false)
         }
         val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
 
-        input.scriptSig = inputScript
+        currentTransactionInput.scriptSig = inputScript
 
         try {
-            input.verify(multisigOutput)
+            currentTransactionInput.verify(currentTransaction.getOutput(0))
         } catch (e: ScriptException) {
             Log.i("TYFUS", e.toString())
             musicService.showToast(e.toString(), Toast.LENGTH_LONG)
             return
         }
 
-        val req = SendRequest.forTx(contract)
+        val req = SendRequest.forTx(currentTransaction)
         app.wallet().completeTx(req)
 
         app.peerGroup().broadcastTransaction(req.tx)
@@ -217,7 +256,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         try {
             musicService.showToast(
                 "Sending funds: ${
-                Coin.valueOf(satoshiAmount).toFriendlyString()
+                Coin.valueOf(currentTransactionAmount).toFriendlyString()
                 }", Toast.LENGTH_SHORT
             )
         } catch (e: Exception) {
