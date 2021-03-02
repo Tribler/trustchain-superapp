@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/peersFragment2"
-        android:name="nl.tudelft.trustchain.ssi.peers.PeersFragment"
+        android:name="nl.tudelft.trustchain.ssi.peers.Peers2Fragment"
         android:label="SSI Clients" />
     <fragment
         android:id="@+id/databaseFragment"

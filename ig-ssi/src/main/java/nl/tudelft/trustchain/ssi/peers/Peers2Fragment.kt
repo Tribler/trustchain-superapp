@@ -28,7 +28,7 @@ import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
 
-class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
+class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 
     private val adapterClients = ItemAdapter()
     private val adapterAuthorities = ItemAdapter()
@@ -159,8 +159,10 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers2) {
                     .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.getAuthorities()
                     .map { AuthorityItem(it.publicKey, it.hash, "lorem ipsum") }
                 imgEmpty.isVisible = authorities.isEmpty()
+                binding.txtAuthoritiesCount.text = "${authorities.size} authorities"
                 adapterAuthorities.updateItems(authorities)
                 delay(5000)
+
             }
         }
     }
