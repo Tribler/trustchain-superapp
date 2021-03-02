@@ -162,7 +162,6 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
                 binding.txtAuthoritiesCount.text = "${authorities.size} authorities"
                 adapterAuthorities.updateItems(authorities)
                 delay(5000)
-
             }
         }
     }

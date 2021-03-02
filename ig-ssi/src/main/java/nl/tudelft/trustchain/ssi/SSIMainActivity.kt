@@ -9,11 +9,9 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Html
 import android.text.InputType
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
