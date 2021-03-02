@@ -2,13 +2,13 @@ package com.example.musicdao.wallet
 
 import android.widget.Toast
 import com.example.musicdao.MusicService
-import org.bitcoinj.core.Address
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.PeerAddress
+import org.bitcoinj.core.*
 import org.bitcoinj.core.listeners.DownloadProgressTracker
+import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
+import org.bitcoinj.script.ScriptBuilder
+import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
@@ -20,6 +20,7 @@ import java.net.InetAddress
 import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
+
 
 /**
  * Interaction with a BitcoinJ wallet
@@ -127,6 +128,100 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         } catch (e: Exception) {
             e.printStackTrace()
             ""
+        }
+    }
+
+    fun hardcodedShit(publicKey: String, coinsAmount: String) {
+        val coins = try {
+            BigDecimal(coinsAmount.toDouble())
+        } catch (e: NumberFormatException) {
+            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
+            return
+        }
+
+        val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
+        val targetAddress: Address?
+        try {
+            targetAddress = Address.fromString(params, publicKey)
+        } catch (e: Exception) {
+            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
+            return
+        }
+
+        val clientKey = app.wallet().importedKeys
+        val serverKey = ECKey()
+
+        val contract = Transaction(params)
+
+        val keys = listOf<ECKey>(clientKey, serverKey)
+        val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
+        val coin = Coin.valueOf(satoshiAmount)
+        contract.addOutput(coin, script)
+
+
+//        val req = SendRequest.forTx(contract)
+//        app.wallet().completeTx(req)
+//        app.peerGroup().broadcastTransaction(req.tx)
+
+
+        // serverside
+        val multisigOutput = contract.getOutput(1)
+        val multisigScript = multisigOutput.scriptPubKey
+
+        try {
+            check(ScriptPattern.isSentToMultisig(multisigScript))
+        } catch (e: Exception) {
+            musicService.showToast("multisig script doesn't match format", Toast.LENGTH_LONG)
+            return
+        }
+
+        val coinValue = multisigOutput.value
+
+        val spendTx = Transaction(params)
+        spendTx.addOutput(coinValue, targetAddress)
+        spendTx.addInput(multisigOutput)
+
+        val sighash = spendTx.hashForSignature(1, multisigScript, Transaction.SigHash.ALL, false)
+        val signature = serverKey.sign(sighash)
+
+        // send it to client
+
+        val spendTxClient = Transaction(params)
+        spendTxClient.addOutput(coinValue, targetAddress)
+        val input = spendTxClient.addInput(multisigOutput)
+
+        val sighashClient = spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
+        val mySignature = clientKey.sign(sighashClient)
+
+        // complete transaction
+
+        val transactionSignatures = listOf<ECKey.ECDSASignature>(mySignature, signature).map { sig ->
+            TransactionSignature(sig, Transaction.SigHash.ALL, false)
+        }
+        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
+
+        input.scriptSig = inputScript
+
+        try {
+            input.verify(multisigOutput)
+        } catch (e: Exception) {
+            musicService.showToast("Multisig input verification failed", Toast.LENGTH_LONG)
+            return
+        }
+
+        app.peerGroup().broadcastTransaction(spendTx)
+
+        try {
+            musicService.showToast(
+                "Sending funds: ${
+                Coin.valueOf(satoshiAmount).toFriendlyString()
+                }", Toast.LENGTH_SHORT
+            )
+        } catch (e: Exception) {
+            musicService.showToast(
+                "Error creating transaction (do you have sufficient funds?)",
+                Toast.LENGTH_SHORT
+            )
         }
     }
 
