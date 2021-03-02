@@ -11,4 +11,9 @@
         android:hint="@string/attribute_name"
         android:textCursorDrawable="@null" />
 
+    <Spinner
+        android:id="@+id/idFormatSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </LinearLayout>

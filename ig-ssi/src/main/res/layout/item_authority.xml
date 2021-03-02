@@ -17,7 +17,6 @@
             android:id="@+id/removeButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginRight="10dp"
             android:layout_weight="0"
             android:background="@android:color/holo_red_dark"
             android:minWidth="30dp"
@@ -27,36 +26,27 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="300dp"
+            <TextView
+                android:id="@+id/authorityHash"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:textColor="@color/text_primary"
+                android:typeface="monospace"
+                tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
-                <TextView
-                    android:id="@+id/authorityHash"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:lines="1"
-                    android:maxLines="1"
-                    android:textColor="@color/text_primary"
-                    android:typeface="monospace"
-                    tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
-
-                <TextView
-                    android:id="@+id/authorityKey"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:typeface="monospace"
-                    tools:text="130.161.211.254:1873" />
-
-            </LinearLayout>
+            <TextView
+                android:id="@+id/authorityKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:maxLines="1"
+                android:typeface="monospace"
+                tools:text="D3751D33F9CD5049C4AF2B462735457E4D3BAF130BCBB87F389E349FBAEB20B9" />
 
         </LinearLayout>
 
