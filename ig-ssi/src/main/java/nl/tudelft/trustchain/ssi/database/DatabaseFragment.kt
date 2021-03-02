@@ -93,6 +93,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 }
             }
         } else {
+            binding.qrCodePlaceHolder.visibility = View.GONE
             binding.publicKeyQRCode.setImageBitmap(bitmap)
         }
 
@@ -181,7 +182,17 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
     }
 
     private fun setDatabaseItemAction(it: DatabaseItem) {
-        val dialog = PresentAttestationDialog(it.attestationBlob.idFormat)
+        var attributeName = "unknown attribute"
+        var attributeValue = "unknown attribute"
+        if (it.attestationBlob.metadata != null) {
+            val parsedMetadata = JSONObject(it.attestationBlob.metadata!!)
+            attributeName = parsedMetadata.optString("attribute", "unknown attribute")
+            attributeValue = parsedMetadata.optString("value", "unknown value")
+        }
+        val dialog = PresentAttestationDialog(
+            attributeName,
+            attributeValue
+        )
         dialog.show(
             parentFragmentManager,
             tag
@@ -225,8 +236,8 @@ class RemoveAttestationDialog(val item: DatabaseItem) : DialogFragment() {
                     DialogInterface.OnClickListener { _, _ ->
                         IPv8Android.getInstance()
                             .getOverlay<AttestationCommunity>()!!.database.deleteAttestationByHash(
-                            item.attestationBlob.attestationHash
-                        )
+                                item.attestationBlob.attestationHash
+                            )
                         Toast.makeText(
                             requireContext(),
                             "Successfully deleted attestation",
