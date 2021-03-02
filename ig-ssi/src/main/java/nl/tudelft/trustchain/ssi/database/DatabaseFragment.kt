@@ -133,32 +133,42 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             parentFragmentManager,
             tag
         )
-        lifecycleScope.launch {
-            val metadata = it.attestationBlob.metadata
-            val manager = SchemaManager()
-            manager.registerDefaultSchemas()
-            val attestation =
-                manager.deserialize(it.attestationBlob.blob, it.attestationBlob.idFormat)
 
-            val signature = it.attestationBlob.signature!!.toHex()
-            val attestorKey = it.attestationBlob.attestorKey!!.keyToBin().toHex()
-            val key = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
-
-            val data = JSONObject()
-            data.put("presentation", "attestation")
-            data.put("metadata", metadata)
-            data.put("attestationHash", attestation.getHash().toHex())
-            data.put("signature", signature)
-            data.put("signee_key", key)
-            data.put("attestor_key", attestorKey)
-            Log.d(
-                "ig-ssi",
-                "Presenting Attestation as QRCode: Size ${data.toString().length}, Data: $data"
-            )
-            val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(data.toString())!!
+        // If the attestation contains no signature, show an error.
+        if (it.attestationBlob.signature == null) {
+            lifecycleScope.launch {
+                // Give ample time for the dialog to be rendered.
+                delay(500)
+                dialog.showError()
             }
-            dialog.setQRCode(bitmap)
+        } else {
+            lifecycleScope.launch {
+                val metadata = it.attestationBlob.metadata
+                val manager = SchemaManager()
+                manager.registerDefaultSchemas()
+                val attestation =
+                    manager.deserialize(it.attestationBlob.blob, it.attestationBlob.idFormat)
+
+                val signature = it.attestationBlob.signature!!.toHex()
+                val attestorKey = it.attestationBlob.attestorKey!!.keyToBin().toHex()
+                val key = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
+
+                val data = JSONObject()
+                data.put("presentation", "attestation")
+                data.put("metadata", metadata)
+                data.put("attestationHash", attestation.getHash().toHex())
+                data.put("signature", signature)
+                data.put("signee_key", key)
+                data.put("attestor_key", attestorKey)
+                Log.d(
+                    "ig-ssi",
+                    "Presenting Attestation as QRCode: Size ${data.toString().length}, Data: $data"
+                )
+                val bitmap = withContext(Dispatchers.Default) {
+                    qrCodeUtils.createQR(data.toString())!!
+                }
+                dialog.setQRCode(bitmap)
+            }
         }
     }
 
