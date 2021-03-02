@@ -79,7 +79,6 @@ class TrustChainApplication : Application() {
             .setIdentityKeySmall(getIdAlgorithmKey(PREF_ID_METADATA_KEY))
             .setIdentityKeyBig(getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY))
             .setIdentityKeyHuge(getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY))
-            .setIdentityKeyRange18Plus(getIdAlgorithmKey(PREF_ID_METADATA_RANGE_18PLUS_KEY))
             .setServiceClass(TrustChainService::class.java)
             .init()
 
