@@ -1,5 +1,6 @@
 package com.example.musicdao.wallet
 
+import android.util.Log
 import android.widget.Toast
 import com.example.musicdao.MusicService
 import org.bitcoinj.core.*
@@ -8,6 +9,7 @@ import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
+import org.bitcoinj.script.ScriptException
 import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
@@ -132,6 +134,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
     }
 
     fun hardcodedShit(publicKey: String, coinsAmount: String) {
+        println(publicKey)
         val coins = try {
             BigDecimal(coinsAmount.toDouble())
         } catch (e: NumberFormatException) {
@@ -142,18 +145,18 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
         val targetAddress: Address?
         try {
-            targetAddress = Address.fromString(params, publicKey)
+            targetAddress = Address.fromString(params, "mkd6JAvpH4VNVXFSz8wrq3pQccwGHCT9f7")
         } catch (e: Exception) {
             musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
             return
         }
 
-        val clientKey = app.wallet().importedKeys
+        val clientKey = app.wallet().issuedReceiveKeys[0]
         val serverKey = ECKey()
 
         val contract = Transaction(params)
 
-        val keys = listOf<ECKey>(clientKey, serverKey)
+        val keys = listOf(clientKey, serverKey)
         val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
         val coin = Coin.valueOf(satoshiAmount)
         contract.addOutput(coin, script)
@@ -165,7 +168,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
 
         // serverside
-        val multisigOutput = contract.getOutput(1)
+        val multisigOutput = contract.getOutput(0)
         val multisigScript = multisigOutput.scriptPubKey
 
         try {
@@ -179,16 +182,12 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
         val spendTx = Transaction(params)
         spendTx.addOutput(coinValue, targetAddress)
-        spendTx.addInput(multisigOutput)
+        val input = spendTx.addInput(multisigOutput)
 
-        val sighash = spendTx.hashForSignature(1, multisigScript, Transaction.SigHash.ALL, false)
+        val sighash = spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
         val signature = serverKey.sign(sighash)
 
         // send it to client
-
-        val spendTxClient = Transaction(params)
-        spendTxClient.addOutput(coinValue, targetAddress)
-        val input = spendTxClient.addInput(multisigOutput)
 
         val sighashClient = spendTx.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
         val mySignature = clientKey.sign(sighashClient)
@@ -204,12 +203,16 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
         try {
             input.verify(multisigOutput)
-        } catch (e: Exception) {
-            musicService.showToast("Multisig input verification failed", Toast.LENGTH_LONG)
+        } catch (e: ScriptException) {
+            Log.i("TYFUS", e.toString())
+            musicService.showToast(e.toString(), Toast.LENGTH_LONG)
             return
         }
 
-        app.peerGroup().broadcastTransaction(spendTx)
+        val req = SendRequest.forTx(contract)
+        app.wallet().completeTx(req)
+
+        app.peerGroup().broadcastTransaction(req.tx)
 
         try {
             musicService.showToast(
