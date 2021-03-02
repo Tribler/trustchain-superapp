@@ -17,7 +17,7 @@ class AuthorityItemRenderer(
 ) {
     @SuppressLint("SetTextI18n")
     override fun bindView(item: AuthorityItem, view: View) = with(view) {
-        authorityKey.text = item.publicKey.keyToBin().toHex()
+        authorityKey.text = item.publicKey.keyToBin().copyOfRange(0, 20).toHex()
         authorityHash.text = item.publicKeyHash
 
         removeButton.setOnClickListener {

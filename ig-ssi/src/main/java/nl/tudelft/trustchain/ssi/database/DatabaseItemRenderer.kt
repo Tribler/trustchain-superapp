@@ -24,9 +24,9 @@ class DatabaseItemRenderer(
         } else {
             attributeNameAndValue.text = "ATTRIBUTE INFORMATION NOT STORED"
         }
-        hash.text = item.attestationBlob.attestationHash.toHex()
+        hash.text = item.attestationBlob.attestationHash.copyOfRange(0, 20).toHex()
         idformat.text = item.attestationBlob.idFormat
-        blob.text = item.attestationBlob.blob.toHex()
+        blob.text = item.attestationBlob.blob.copyOfRange(0, 20).toHex()
 
         removeButton.setOnClickListener {
             onRemoveButtonClick(item)
