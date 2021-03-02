@@ -43,5 +43,14 @@
             android:name="intent"
             app:argType="integer"
             android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_verificationFragment_to_peersFragment2"
+            app:destination="@id/peersFragment2"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/databaseFragment"
+            app:popUpToInclusive="false" />
     </fragment>
 </navigation>

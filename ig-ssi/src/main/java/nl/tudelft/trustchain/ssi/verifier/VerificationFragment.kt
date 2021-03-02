@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +15,6 @@ import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
@@ -23,11 +23,9 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
-import nl.tudelft.trustchain.ssi.FireMissilesDialogFragment
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.dialogs.FireMissilesDialog
 import org.json.JSONObject
-
-private val logger = KotlinLogging.logger {}
 
 const val REQUEST_ATTESTATION_INTENT = 0
 const val ADD_AUTHORITY_INTENT = 1
@@ -54,7 +52,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         if (attestationPresentationString != null) {
             try {
                 val attestationPresentation = JSONObject(attestationPresentationString)
-                logger.debug("SSI: Found the following data: $attestationPresentation")
+                Log.d("ig-ssi", "Found the following data: $attestationPresentation")
                 when (val format = attestationPresentation.get("presentation")) {
                     "authority" -> {
                         val authorityKey =
@@ -67,7 +65,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                                             peer.publicKey.keyToBin().toHex() == authorityKey
                                         }
                                 if (peer != null) {
-                                    FireMissilesDialogFragment(
+                                    FireMissilesDialog(
                                         peer
                                     ).show(parentFragmentManager, this.tag)
                                 } else {
@@ -113,7 +111,6 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid data found", Toast.LENGTH_LONG).show()
-//                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
                 qrCodeUtils.startQRScanner(this, args.qrCodeHint, vertical = true)
             }
         } else {
@@ -129,7 +126,7 @@ class AuthorityConfirmationDialog(private val authorityKey: ByteArray) : DialogF
         return activity?.let {
             // Use the Builder class for convenient dialog construction
             val builder = AlertDialog.Builder(it)
-            builder.setTitle("New Authority Found")
+            builder.setTitle("Authority Found")
                 .setMessage("Address: ${authorityKey.toHex()}")
                 .setPositiveButton(
                     "Add",
@@ -161,7 +158,7 @@ class AuthorityConfirmationDialog(private val authorityKey: ByteArray) : DialogF
                                 ).show()
                             }
                         }
-                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToPeersFragment2())
                     }
                 )
                 .setNegativeButton(
@@ -245,7 +242,7 @@ class ScanIntentDialog(
                                             peer.publicKey.keyToBin().toHex() == authorityKey
                                         }
                                 if (peer != null) {
-                                    FireMissilesDialogFragment(
+                                    FireMissilesDialog(
                                         peer
                                     ).show(parentFragmentManager, this.tag)
                                 } else {
@@ -266,7 +263,6 @@ class ScanIntentDialog(
                         }
                     }
                 )
-//                .setMessage("Scanned public key, please state your action.")
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
