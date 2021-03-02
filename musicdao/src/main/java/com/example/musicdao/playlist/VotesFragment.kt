@@ -19,8 +19,9 @@ import com.example.musicdao.R
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.fragment_votes.*
-import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class VotesFragment : Fragment() {
@@ -29,6 +30,10 @@ class VotesFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
 
     private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Undecided votes")
+
+    // initialize voters with 0 pro, 0 against and 2 undecided votes
+    private val voters =
+        mutableMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to arrayListOf("Steven", "Rick"))
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,26 +45,9 @@ class VotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
-        val votersString =
-            this.context?.assets?.open("temp_voters.json")?.bufferedReader().use { it?.readText() }
-        val voters = Response(votersString.toString())
-
-
         adapter = Adapter(this, voters)
         viewPager = view.findViewById(R.id.viewpager)
         viewPager.adapter = adapter
-
-        var favorVoters = 0
-        var againstVoters = 0
-        var undecidedVotes = 0
-
-        for (voter in voters.data!!) {
-            when (voter.voted) {
-                0 -> favorVoters++
-                1 -> againstVoters++
-                2 -> undecidedVotes++
-            }
-        }
 
         val localArgs = arguments
         if (localArgs is Bundle) {
@@ -69,27 +57,47 @@ class VotesFragment : Fragment() {
 
             cover_title.text = title
             vote_tip_price.text = getString(R.string.bounty_payout, price, title)
-            fab.setOnClickListener { v ->
+            fab_user.setOnClickListener { v ->
                 val builder = AlertDialog.Builder(v.context)
                 builder.setTitle(getString(R.string.bounty_payout, price, title))
-                builder.setMessage(
-                    getString(R.string.bounty_payout_message, price, title, favorVoters, againstVoters, undecidedVotes)
-                )
+                builder.setMessage(getString(R.string.bounty_payout_message,price,title,1,2,3))
                 builder.setPositiveButton("YES") { _, _ ->
-                    Toast.makeText(
-                        v.context,
-                        getString(R.string.bounty_payout_upvoted, price, title), Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(v.context,getString(R.string.bounty_payout_upvoted, price, title), Toast.LENGTH_SHORT).show()
+                    voters[0]!!.add("Rick")
+                    voters[2]!!.remove("Rick")
                     userHasAlreadyVoted()
+                    adapter.notifyChanges()
                 }
 
                 builder.setNeutralButton("NO") { _, _ ->
-                    Toast.makeText(
-                        v.context,
-                        getString(R.string.bounty_payout_downvoted, price, title),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(v.context,getString(R.string.bounty_payout_downvoted, price, title),Toast.LENGTH_SHORT).show()
+                    voters[1]!!.add("Rick")
+                    voters[2]!!.remove("Rick")
                     userHasAlreadyVoted()
+                    adapter.notifyChanges()
+                }
+                builder.show()
+            }
+
+            // FOR THE DEMO TOMORROW
+            fab_demo.setOnClickListener { v ->
+                val builder = AlertDialog.Builder(v.context)
+                builder.setTitle(getString(R.string.bounty_payout, price, title))
+                builder.setMessage(getString(R.string.bounty_payout_message,price,title,1,2,3))
+                builder.setPositiveButton("YES") { _, _ ->
+                    Toast.makeText(v.context,getString(R.string.bounty_payout_upvoted, price, title), Toast.LENGTH_SHORT).show()
+                    voters[0]!!.add("Steven")
+                    voters[2]!!.remove("Steven")
+                    fab_demo.visibility = View.GONE
+                    adapter.notifyChanges()
+                }
+
+                builder.setNeutralButton("NO") { _, _ ->
+                    Toast.makeText(v.context,getString(R.string.bounty_payout_downvoted, price, title),Toast.LENGTH_SHORT).show()
+                    voters[1]!!.add("Steven")
+                    voters[2]!!.remove("Steven")
+                    fab_demo.visibility = View.GONE
+                    adapter.notifyChanges()
                 }
                 builder.show()
             }
@@ -106,27 +114,41 @@ class VotesFragment : Fragment() {
     }
 
     private fun userHasAlreadyVoted() {
-        vote_tip_price.visibility = View.GONE
-        fab.visibility = View.GONE
+        fab_user.visibility = View.GONE
     }
 }
 
-class Adapter(fragment: Fragment, voters: Response) : FragmentStateAdapter(fragment) {
+class Adapter(fragment: Fragment, private val voters: Map<Int, ArrayList<String>>) :
+    FragmentStateAdapter(fragment) {
 
-    private var voters = voters.data
+    private var fragmentList = arrayListOf<FragmentObject>()
+
     override fun getItemCount(): Int = 3
 
     override fun createFragment(position: Int): Fragment {
         // Return a NEW fragment instance in createFragment(int)
-        val fragment = FragmentObject(voters)
+        val fragment = FragmentObject()
+        fragmentList.add(fragment)
         fragment.arguments = Bundle().apply {
             putInt("tapPosition", position)
+            putStringArrayList("voters", voters[position])
         }
         return fragment
     }
+
+    // Somehow notifying for changes doesn't work properly..
+    fun notifyChanges() {
+        for (fragment in fragmentList) {
+            fragment.adapter.notifyDataSetChanged()
+        }
+        this.notifyDataSetChanged()
+    }
 }
 
-class FragmentObject(private var voters: List<Voter>?) : Fragment() {
+class FragmentObject : Fragment() {
+
+    lateinit var adapter: VotesAdapter
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -141,9 +163,7 @@ class FragmentObject(private var voters: List<Voter>?) : Fragment() {
         }?.apply {
 
             val votesList = view.findViewById<ListView>(R.id.votes)
-            val newVoters = voters?.filter { v -> v.voted == getInt("tapPosition") }
-            val adapter =
-                VotesAdapter(view.context, newVoters, requireArguments().getInt("tapPosition"))
+            adapter = VotesAdapter(view.context,requireArguments().getStringArrayList("voters"),requireArguments().getInt("tapPosition"))
             votesList.adapter = adapter
         }
     }
@@ -151,7 +171,7 @@ class FragmentObject(private var voters: List<Voter>?) : Fragment() {
 
 class VotesAdapter(
     private val context: Context,
-    private val voters: List<Voter>?,
+    private val voters: ArrayList<String>?,
     private val tabPosition: Int
 ) :
     BaseAdapter() {
@@ -161,7 +181,7 @@ class VotesAdapter(
     }
 
     override fun getItem(position: Int): Any {
-        return voters?.get(position)!!
+        return voters!![position]
     }
 
     override fun getItemId(position: Int): Long {
@@ -174,30 +194,16 @@ class VotesAdapter(
             LayoutInflater.from(context).inflate(R.layout.fragment_votes_entry, parent, false)
 
         val voter = voters!![position]
-        view.findViewById<TextView>(R.id.voter_name).text = voter.name
+        view.findViewById<TextView>(R.id.voter_name).text = voter
 
         if (tabPosition != 2) {
             // Remove this when actual data
             val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
-            val formatted = simpleDateFormat.format(voter.timestamp)
+            val formatted = simpleDateFormat.format(Date())
 
             view.findViewById<TextView>(R.id.voter_time).text = formatted.toString()
         }
 
         return view
     }
-}
-
-class Response(json: String) : JSONObject(json) {
-    val data = this.optJSONArray("data")
-        ?.let {
-            0.until(it.length()).map { i -> it.optJSONObject(i) }
-        } // returns an array of JSONObject
-        ?.map { Voter(it.toString()) } // transforms each JSONObject of the array into Foo
-}
-
-class Voter(json: String) : JSONObject(json) {
-    val name: String = this.optString("name")
-    val voted = this.optInt("voted")
-    val timestamp = this.optInt("timestamp")
 }
