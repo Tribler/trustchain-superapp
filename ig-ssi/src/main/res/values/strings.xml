@@ -6,4 +6,6 @@
     <string name="attribute_value">Attribute value (e.g. 21)</string>
     <string name="attribute_name">Attribute name (e.g. age)</string>
     <string name="peer_address">Peer address and port</string>
+    <string name="unsupported_attestation">This attestation appears to be malformed. Please request a reissue from the issuing authority.</string>
+    <string name="attestation_qr_code_content_description">Attestation QR Code</string>
 </resources>

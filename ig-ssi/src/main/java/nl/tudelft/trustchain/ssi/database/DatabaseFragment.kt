@@ -304,8 +304,8 @@ class RemoveAttestationDialog(val item: DatabaseItem, val callback: (() -> Unit)
                     DialogInterface.OnClickListener { _, _ ->
                         IPv8Android.getInstance()
                             .getOverlay<AttestationCommunity>()!!.database.deleteAttestationByHash(
-                                item.attestationBlob.attestationHash
-                            )
+                            item.attestationBlob.attestationHash
+                        )
                         Toast.makeText(
                             requireContext(),
                             "Successfully deleted attestation",

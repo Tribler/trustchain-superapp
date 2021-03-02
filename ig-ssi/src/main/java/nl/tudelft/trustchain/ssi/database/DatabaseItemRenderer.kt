@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.ssi.database
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_database.view.*
@@ -22,7 +23,8 @@ class DatabaseItemRenderer(
             attributeNameAndValue.text =
                 metadata.optString("attribute") + ": " + metadata.optString("value")
         } else {
-            attributeNameAndValue.text = "ATTRIBUTE INFORMATION NOT STORED"
+            attributeNameAndValue.text = "MALFORMED ATTESTATION"
+            attributeNameAndValue.setTextColor(Color.RED)
         }
         hash.text = item.attestationBlob.attestationHash.copyOfRange(0, 20).toHex()
         idformat.text = item.attestationBlob.idFormat
