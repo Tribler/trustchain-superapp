@@ -100,7 +100,13 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         val attestationCommunity =
             IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
         val entries = attestationCommunity.database.getAllAttestations()
-            .mapIndexed { index, blob -> DatabaseItem(index, blob) }
+            .mapIndexed { index, blob -> DatabaseItem(index, blob) }.sortedBy {
+                if (it.attestationBlob.metadata != null) {
+                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString("attribute")
+                } else {
+                    return@sortedBy ""
+                }
+            }
 
         adapter.updateItems(entries)
         databaseTitle.text = "Attestations"
