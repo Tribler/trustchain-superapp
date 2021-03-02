@@ -24,5 +24,6 @@
     <string name="bounty_payout_message">Do you agree on paying %1$s from our common funds to artist named %2$s?\nThere are already %3$d upvotes, %4$d downvotes, and %5$d" undecided votes</string>
     <string name="bounty_payout_upvoted">You voted in favor of paying %1$s from our common funds to artist named %2$s</string>
     <string name="bounty_payout_downvoted">You voted against paying %1$s from our common funds to artist named %2$s</string>
+    <string name="bounty_payout_all_voted">Everyone voted, based on the majority we decided to pay the artist</string>
 
 </resources>

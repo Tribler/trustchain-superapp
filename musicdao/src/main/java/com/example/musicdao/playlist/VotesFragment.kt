@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.musicdao.R
@@ -21,7 +22,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.fragment_votes.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 class VotesFragment : Fragment() {
@@ -51,30 +51,56 @@ class VotesFragment : Fragment() {
 
         val localArgs = arguments
         if (localArgs is Bundle) {
-            val title = localArgs.getString("artists", "Artists not found")
+            val artists = localArgs.getString("artists", "Artists not found")
             val price = localArgs.getString("amount", "Price not found") + "BTC"
             val userHasVoted = false
 
-            cover_title.text = title
-            vote_tip_price.text = getString(R.string.bounty_payout, price, title)
+            cover_title.text = artists
+            vote_tip_price.text = getString(R.string.bounty_payout, price, artists)
+            val favorVotes = voters[0]!!.size
+            val againstVotes = voters[1]!!.size
+            val undecidedVotes = voters[2]!!.size
             fab_user.setOnClickListener { v ->
                 val builder = AlertDialog.Builder(v.context)
-                builder.setTitle(getString(R.string.bounty_payout, price, title))
-                builder.setMessage(getString(R.string.bounty_payout_message,price,title,1,2,3))
+                builder.setTitle(getString(R.string.bounty_payout, price, artists))
+                builder.setMessage(
+                    getString(
+                        R.string.bounty_payout_message,
+                        price,
+                        artists,
+                        favorVotes,
+                        againstVotes,
+                        undecidedVotes
+                    )
+                )
                 builder.setPositiveButton("YES") { _, _ ->
-                    Toast.makeText(v.context,getString(R.string.bounty_payout_upvoted, price, title), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        v.context, getString(
+                            R.string.bounty_payout_upvoted,
+                            price,
+                            artists
+                        ), Toast.LENGTH_SHORT
+                    ).show()
                     voters[0]!!.add("Rick")
                     voters[2]!!.remove("Rick")
                     userHasAlreadyVoted()
                     adapter.notifyChanges()
+                    checkIfAllVoted(v)
                 }
 
                 builder.setNeutralButton("NO") { _, _ ->
-                    Toast.makeText(v.context,getString(R.string.bounty_payout_downvoted, price, title),Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        v.context, getString(
+                            R.string.bounty_payout_downvoted,
+                            price,
+                            artists
+                        ), Toast.LENGTH_SHORT
+                    ).show()
                     voters[1]!!.add("Rick")
                     voters[2]!!.remove("Rick")
                     userHasAlreadyVoted()
                     adapter.notifyChanges()
+                    checkIfAllVoted(v)
                 }
                 builder.show()
             }
@@ -82,22 +108,45 @@ class VotesFragment : Fragment() {
             // FOR THE DEMO TOMORROW
             fab_demo.setOnClickListener { v ->
                 val builder = AlertDialog.Builder(v.context)
-                builder.setTitle(getString(R.string.bounty_payout, price, title))
-                builder.setMessage(getString(R.string.bounty_payout_message,price,title,1,2,3))
+                builder.setTitle(getString(R.string.bounty_payout, price, artists))
+                builder.setMessage(
+                    getString(
+                        R.string.bounty_payout_message,
+                        price,
+                        artists,
+                        favorVotes,
+                        againstVotes,
+                        undecidedVotes
+                    )
+                )
                 builder.setPositiveButton("YES") { _, _ ->
-                    Toast.makeText(v.context,getString(R.string.bounty_payout_upvoted, price, title), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        v.context, getString(
+                            R.string.bounty_payout_upvoted,
+                            price,
+                            artists
+                        ), Toast.LENGTH_SHORT
+                    ).show()
                     voters[0]!!.add("Steven")
                     voters[2]!!.remove("Steven")
                     fab_demo.visibility = View.GONE
                     adapter.notifyChanges()
+                    checkIfAllVoted(v)
                 }
 
                 builder.setNeutralButton("NO") { _, _ ->
-                    Toast.makeText(v.context,getString(R.string.bounty_payout_downvoted, price, title),Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        v.context, getString(
+                            R.string.bounty_payout_downvoted,
+                            price,
+                            artists
+                        ), Toast.LENGTH_SHORT
+                    ).show()
                     voters[1]!!.add("Steven")
                     voters[2]!!.remove("Steven")
                     fab_demo.visibility = View.GONE
                     adapter.notifyChanges()
+                    checkIfAllVoted(v)
                 }
                 builder.show()
             }
@@ -111,6 +160,17 @@ class VotesFragment : Fragment() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = TAB_NAMES[position]
         }.attach()
+    }
+
+    private fun checkIfAllVoted(v: View) {
+        if (voters[2]!!.size == 0) {
+            Toast.makeText(
+                v.context,
+                getString(R.string.bounty_payout_all_voted),
+                Toast.LENGTH_LONG
+            ).show()
+            findNavController().navigateUp()
+        }
     }
 
     private fun userHasAlreadyVoted() {
@@ -128,15 +188,15 @@ class Adapter(fragment: Fragment, private val voters: Map<Int, ArrayList<String>
     override fun createFragment(position: Int): Fragment {
         // Return a NEW fragment instance in createFragment(int)
         val fragment = FragmentObject()
-        fragmentList.add(fragment)
         fragment.arguments = Bundle().apply {
             putInt("tapPosition", position)
             putStringArrayList("voters", voters[position])
         }
+        fragmentList.add(fragment)
         return fragment
     }
 
-    // Somehow notifying for changes doesn't work properly..
+    // TODO Somehow notifying for changes doesn't work properly..
     fun notifyChanges() {
         for (fragment in fragmentList) {
             fragment.adapter.notifyDataSetChanged()
@@ -163,7 +223,13 @@ class FragmentObject : Fragment() {
         }?.apply {
 
             val votesList = view.findViewById<ListView>(R.id.votes)
-            adapter = VotesAdapter(view.context,requireArguments().getStringArrayList("voters"),requireArguments().getInt("tapPosition"))
+            adapter = VotesAdapter(
+                view.context,
+                requireArguments().getStringArrayList("voters"),
+                requireArguments().getInt(
+                    "tapPosition"
+                )
+            )
             votesList.adapter = adapter
         }
     }

@@ -40,36 +40,36 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:layout_margin="20dp">
 
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton xmlns:app="http://schemas.android.com/apk/res-auto"
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fab_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:contentDescription="@string/vote"
             android:gravity="center"
-            android:src="@drawable/ic_baseline_check_24"
             android:text="@string/vote"
             android:theme="@style/VoteButton"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fab_demo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="false"
             android:backgroundTint="#FFEB3B"
             android:contentDescription="@string/vote"
             android:gravity="center"
-            android:src="@drawable/ic_baseline_check_24"
             android:text="@string/vote"
             android:theme="@style/VoteButton"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </LinearLayout>
