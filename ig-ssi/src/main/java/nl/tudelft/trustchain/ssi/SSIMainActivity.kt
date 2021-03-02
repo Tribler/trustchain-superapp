@@ -1,16 +1,19 @@
 package nl.tudelft.trustchain.ssi
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Html
+import android.text.InputType
+import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
@@ -21,10 +24,12 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
+import nl.tudelft.ipv8.attestation.schema.*
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.trustchain.common.BaseActivity
 import org.json.JSONObject
+import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
@@ -46,7 +51,7 @@ class SSIMainActivity : BaseActivity() {
             Toast.makeText(
                 applicationContext,
                 "Received attestation chunk $i from ${peer.mid}.",
-                Toast.LENGTH_LONG
+                Toast.LENGTH_SHORT
             )
                 .show()
         }
@@ -68,7 +73,7 @@ class SSIMainActivity : BaseActivity() {
             Handler(Looper.getMainLooper()).post {
                 Toast.makeText(
                     applicationContext,
-                    "Sending attestation for $attributeName to peer ${forPeer.mid}",
+                    "Successfully sent attestation for $attributeName to peer ${forPeer.mid}",
                     Toast.LENGTH_LONG
                 )
                     .show()
@@ -94,11 +99,20 @@ class SSIMainActivity : BaseActivity() {
     ): ByteArray {
         logger.info("Attestation: called")
         val parsedMetadata = JSONObject(metadata)
-        val idFormat = parsedMetadata.optString("id_format", "id_metadata")
+        val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
         val input =
-            BlockingDialogManager.getInstance().showAndWait<String?>(this, AttestationValueDialog())
+            BlockingDialogManager.getInstance()
+                .showAndWait<String?>(this, AttestationValueDialog(attributeName, idFormat))
                 ?: throw RuntimeException("User cancelled dialog.")
         logger.info("Signing attestation with value $input with format $idFormat.")
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(
+                applicationContext,
+                "Signing attestation for $attributeName for peer ${peer.mid} ...",
+                Toast.LENGTH_LONG
+            )
+                .show()
+        }
         return when (idFormat) {
             "id_metadata_range_18plus" -> byteArrayOf(input.toByte())
             else -> input.toByteArray()
@@ -119,25 +133,20 @@ class FireMissilesDialogFragment(val peer: Peer) : DialogFragment() {
             val attestationCommunity =
                 IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
             val view = inflater.inflate(R.layout.request_attestation_dialog, null)
+            val spinner = view.findViewById<Spinner>(R.id.idFormatSpinner)
+            val arrayAdapter = ArrayAdapter(
+                requireContext(),
+                R.layout.support_simple_spinner_dropdown_item,
+                attestationCommunity.schemaManager.getSchemaNames().sorted()
+            )
+            arrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
+            spinner.adapter = arrayAdapter
+            spinner.setSelection(3, true)
+
             builder.setView(view)
                 .setPositiveButton(
                     R.string.fire,
-                    DialogInterface.OnClickListener { _, _ ->
-                        val attrInput = view.findViewById<TextInputEditText>(R.id.attribute_input)
-                        logger.info("Sending attestation for ${attrInput.text} to ${peer.mid}")
-                        attestationCommunity.requestAttestation(
-                            peer,
-                            attrInput.text.toString(),
-                            IPv8Android.getIdentityKeySmall(),
-                            hashMapOf("id_format" to "id_metadata_range_18plus"),
-                            true
-                        )
-                        Toast.makeText(
-                            requireContext(),
-                            "Requested attestation for ${attrInput.text} from ${peer.mid}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    null
                 )
                 .setNegativeButton(
                     R.string.cancel,
@@ -145,12 +154,46 @@ class FireMissilesDialogFragment(val peer: Peer) : DialogFragment() {
                 )
                 .setTitle("Request Attestation")
             // Create the AlertDialog object and return it
-            builder.create()
+            val dialog = builder.create()
+            dialog.setOnShowListener {
+                val posBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                posBtn.setOnClickListener {
+                    val attrInput = view.findViewById<TextInputEditText>(R.id.attribute_input)
+                    if (attrInput.text.toString() != "") {
+                        val idFormat = spinner.selectedItem.toString()
+                        val myPeer = IPv8Android.getInstance().myPeer
+                        val key = when (idFormat) {
+                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
+                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
+                            else -> myPeer.identityPrivateKeySmall!!
+                        }
+                        attestationCommunity.requestAttestation(
+                            peer,
+                            attrInput.text.toString().toUpperCase(Locale.getDefault()),
+                            key,
+                            hashMapOf("id_format" to idFormat),
+                            true
+                        )
+                        logger.info("Sending attestation for ${attrInput.text} to ${peer.mid}")
+                        dialog.dismiss()
+                        Toast.makeText(
+                            requireContext(),
+                            "Requested attestation for ${attrInput.text} from ${peer.mid}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        attrInput.error = "Please enter a claim name."
+                    }
+                }
+            }
+            dialog
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
 
-class AttestationValueDialog() : BlockingDialogFragment<String>() {
+@SuppressLint("ValidFragment")
+class AttestationValueDialog(private val attributeName: String, private val idFormat: String) :
+    BlockingDialogFragment<String>() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog? {
         @Suppress("DEPRECATION")
@@ -158,13 +201,17 @@ class AttestationValueDialog() : BlockingDialogFragment<String>() {
             val builder = AlertDialog.Builder(it)
             val inflater = it.layoutInflater
             val view = inflater.inflate(R.layout.attestation_value_dialog, null)
+            val attrInput = view.findViewById<TextInputEditText>(R.id.value_input)
+            when (idFormat) {
+                ID_METADATA_RANGE_18PLUS -> attrInput.inputType = InputType.TYPE_CLASS_NUMBER
+                ID_METADATA_RANGE_UNDERAGE -> attrInput.inputType = InputType.TYPE_CLASS_NUMBER
+                else -> attrInput.inputType = InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+            }
+
             builder.setView(view)
                 .setPositiveButton(
                     R.string.fire,
-                    DialogInterface.OnClickListener { _, _ ->
-                        val attrInput = view.findViewById<TextInputEditText>(R.id.value_input)
-                        setResult(attrInput.text.toString(), false)
-                    }
+                    null
                 )
                 .setNegativeButton(
                     R.string.cancel,
@@ -173,13 +220,30 @@ class AttestationValueDialog() : BlockingDialogFragment<String>() {
                     }
                 )
                 .setTitle("Attestation Requested")
+                .setMessage(Html.fromHtml("An attestation has been requested for <b>$attributeName</b> with format <b>$idFormat</b>."))
             // Create the AlertDialog object and return it
-            builder.create()
+            val dialog = builder.create()
+            dialog.setOnShowListener {
+                val posBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                posBtn.setOnClickListener {
+                    val inputValue = attrInput.text.toString()
+                    if (inputValue != "") {
+                        setResult(inputValue, false)
+                        dialog.dismiss()
+                    } else {
+                        attrInput.error = "Enter a value."
+                    }
+                }
+            }
+            dialog
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
 
-class PresentAttestationDialog(private val attributeName: String) :
+class PresentAttestationDialog(
+    private val attributeName: String,
+    private val attributeValue: String
+) :
     DialogFragment() {
 
     private var mView: View? = null
@@ -188,11 +252,32 @@ class PresentAttestationDialog(private val attributeName: String) :
         return activity?.let {
             val builder = AlertDialog.Builder(it)
             val inflater = requireActivity().layoutInflater
-            mView = inflater.inflate(R.layout.present_attestation_dialog, null)
+
+            @SuppressLint("InflateParams")
+            val view = inflater.inflate(R.layout.present_attestation_dialog, null)!!
+            mView = view
             builder.setView(mView)
-                .setTitle("Attestation for $attributeName")
-            // Create the AlertDialog object and return it
-            builder.create()
+            builder.setTitle("hello")
+
+            val dialog: Dialog
+            val title = "Attestation for <font color='#EE0000'>${attributeName.capitalize()}</font>"
+            val message = "<b>$attributeName:</b> $attributeValue"
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                builder.setTitle(Html.fromHtml(title, Html.FROM_HTML_MODE_LEGACY))
+                dialog = builder.create()
+                dialog.setMessage(
+                    Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                builder.setTitle(Html.fromHtml(title))
+                dialog = builder.create()
+                @Suppress("DEPRECATION")
+                dialog.setMessage(
+                    Html.fromHtml(message)
+                )
+            }
+            dialog
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
