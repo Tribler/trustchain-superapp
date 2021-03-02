@@ -35,7 +35,10 @@
             android:id="@+id/action_playlistsOverviewFragment_to_votesFragment"
             app:destination="@id/votesFragment">
             <argument
-                android:name="title"
+                android:name="artists"
+                app:argType="string" />
+            <argument
+                android:name="amount"
                 app:argType="string" />
         </action>
 

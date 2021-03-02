@@ -33,7 +33,7 @@ class VotesFragment : Fragment() {
 
     // initialize voters with 0 pro, 0 against and 2 undecided votes
     private val voters =
-        mutableMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to arrayListOf("Steven", "Rick"))
+        mutableMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to arrayListOf("Rick", "Steven"))
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,8 +51,8 @@ class VotesFragment : Fragment() {
 
         val localArgs = arguments
         if (localArgs is Bundle) {
-            val title = localArgs.getString("title", "Title not found")
-            val price = "50mBTC"
+            val title = localArgs.getString("artists", "Artists not found")
+            val price = localArgs.getString("amount", "Price not found") + "BTC"
             val userHasVoted = false
 
             cover_title.text = title
