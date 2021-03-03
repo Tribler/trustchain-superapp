@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util
 
+import android.util.Log
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit
 
 class DAOCreateHelper() {
     private fun getTrustChainCommunity(): TrustChainCommunity {
+
         return IPv8Android.getInstance().getOverlay()
             ?: throw IllegalStateException("TrustChainCommunity is not configured")
     }
@@ -86,6 +88,7 @@ class DAOCreateHelper() {
             arrayListOf(bitcoinPublicKey)
         )
 
+        Log.i("Callum", "BlockType: ${blockData.blockType}")
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)
     }
 }
