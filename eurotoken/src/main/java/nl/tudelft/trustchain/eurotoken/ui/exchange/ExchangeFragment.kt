@@ -135,12 +135,12 @@ class ExchangeFragment : EurotokenBaseFragment() {
             val amount = TransferFragment.getAmount(edtAmount.text.toString())
             if (amount > 0) {
                 val iban = edtIBAN.text.toString()
-                if (Regex("^NL\\d{2}\\s[A-Z]{4}\\s0(\\d\\s?){9}\$").matches(iban)) {
+//                if (Regex("^NL\\d{2}\\s[A-Z]{4}\\s0(\\d\\s?){9,30}\$").matches(iban)) {
                     transactionRepository.sendDestroyProposalWithIBAN(iban, amount)
                     findNavController().navigate( R.id.action_exchangeFragment_to_transactionsFragment )
-                } else {
-                    Toast.makeText(requireContext(), "Please specify a valid iban", Toast.LENGTH_LONG).show()
-                }
+//                } else {
+//                    Toast.makeText(requireContext(), "Please specify a valid iban", Toast.LENGTH_LONG).show()
+//                }
             } else {
                 Toast.makeText(requireContext(), "Please specify a positive amount", Toast.LENGTH_LONG).show()
             }
