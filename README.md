@@ -37,6 +37,12 @@ An online indicator and the last message is shown for each contact. Users can ex
 
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
 
+### Digital Euro
+
+<img src="https://user-images.githubusercontent.com/446634/107397810-47e00300-6aff-11eb-8abe-5d345a096ade.jpeg" width=200>
+Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
+
+
 ### AI trading bot
 The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
 Built on top of Trustchain, the app provides a small decentralized market for trading, providing safe and verifiable transaction for any arbitrary change of goods.
