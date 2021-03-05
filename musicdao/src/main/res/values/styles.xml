@@ -8,17 +8,4 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="VoteButton" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="textAppearanceButton">@style/AppTextAppearance.Button</item>
-    </style>
-    <!--To fix rendering in preview -->
-    <style name="AppTextAppearance.Button" parent="TextAppearance.MaterialComponents.Button">
-        <item name="android:textAllCaps">true</item>
-    </style>
-
-    <style name="ShapeAppearanceOverlayExtended" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">0dp</item>
-    </style>
 </resources>

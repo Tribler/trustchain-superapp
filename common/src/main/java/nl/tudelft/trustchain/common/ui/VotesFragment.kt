@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.currencyii.ui.bitcoin
+package nl.tudelft.trustchain.common.ui
 
 import android.content.Context
 import android.os.Build
@@ -19,8 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.fragment_votes.*
-import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.common.R
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -52,7 +51,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         val localArgs = arguments
         if (localArgs is Bundle) {
-            val walletId = localArgs.getString("wallet_id", "Wallet name not found")
+            val walletId = localArgs.getString("title", "Title not found")
             val priceString = localArgs.getString("amount", "Price not found") + "BTC"
             val userHasVoted = false
 
@@ -262,7 +261,7 @@ class VotesAdapter(
 
         if (tabPosition != 2) {
             // Remove this when actual data
-            val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss")
+            val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
             val formatted = simpleDateFormat.format(Date())
 
             view.findViewById<TextView>(R.id.voter_time).text = formatted.toString()

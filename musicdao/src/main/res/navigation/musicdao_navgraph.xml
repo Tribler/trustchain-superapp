@@ -35,7 +35,7 @@
             android:id="@+id/action_playlistsOverviewFragment_to_votesFragment"
             app:destination="@id/votesFragment">
             <argument
-                android:name="artists"
+                android:name="title"
                 app:argType="string" />
             <argument
                 android:name="amount"
@@ -56,6 +56,6 @@
 
     <fragment
         android:id="@+id/votesFragment"
-        android:name="com.example.musicdao.playlist.VotesFragment"
+        android:name="nl.tudelft.trustchain.common.ui.VotesFragment"
         android:label="Votes" />
 </navigation>

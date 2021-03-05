@@ -73,7 +73,7 @@
             android:id="@+id/toVotesFragment"
             app:destination="@id/votesFragment">
             <argument
-                android:name="wallet_id"
+                android:name="title"
                 app:argType="string" />
             <argument
                 android:name="amount"
@@ -82,7 +82,7 @@
     </fragment>
     <fragment
         android:id="@+id/votesFragment"
-        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.VotesFragment"
+        android:name="nl.tudelft.trustchain.common.ui.VotesFragment"
         android:label="Votes" />
     <fragment
         android:id="@+id/createSWFragment"
