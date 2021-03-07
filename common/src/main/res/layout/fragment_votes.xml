@@ -47,12 +47,13 @@
         android:layout_margin="20dp">
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_user"
+            android:id="@+id/fab_demo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:backgroundTint="#FFEB3B"
             android:contentDescription="@string/vote"
             android:gravity="center"
-            android:text="@string/voteUser1"
+            android:text="@string/voteUser2"
             android:theme="@style/VoteButton"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended" />
 
@@ -62,13 +63,12 @@
             android:layout_weight="1"/>
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_demo"
+            android:id="@+id/fab_user"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#FFEB3B"
             android:contentDescription="@string/vote"
             android:gravity="center"
-            android:text="@string/voteUser2"
+            android:text="@string/voteUser1"
             android:theme="@style/VoteButton"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended" />
     </LinearLayout>
