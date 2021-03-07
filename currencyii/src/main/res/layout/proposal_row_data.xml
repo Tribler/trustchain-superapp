@@ -132,7 +132,7 @@
             android:clickable="false"
             android:enabled="false"
             android:focusable="false"
-            android:text="vote yes"
+            android:text="See Votes"
             android:textColor="@color/colorAccent" />
 
     </LinearLayout>

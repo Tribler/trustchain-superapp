@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+
 
 data class SWTransferFundsAskBlockTD(
     var SW_UNIQUE_ID: String,
@@ -18,9 +20,19 @@ data class SWTransferFundsAskBlockTD(
 
 class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionData(
     data, CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
-) {
+)  {
+
+    var SW_VOTES:HashMap<Int, ArrayList<String>> = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to ArrayList(getData().SW_BITCOIN_PKS))
+
     fun getData(): SWTransferFundsAskBlockTD {
         return Gson().fromJson(getJsonString(), SWTransferFundsAskBlockTD::class.java)
+    }
+
+    fun userVotes(userID: String, voteID: Int): HashMap<Int, ArrayList<String>> {
+        SW_VOTES[2]!!.remove(userID)
+        SW_VOTES[voteID]!!.toMutableList().add(userID)
+        //TODO: Send this to others
+        return SW_VOTES
     }
 
     constructor(
