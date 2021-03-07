@@ -12,9 +12,11 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.Adapter
-import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private lateinit var adapter: Adapter
@@ -36,19 +38,28 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         val localArgs = arguments
         if (localArgs is Bundle) {
-            val walletId = localArgs.getString("title", "Title not found")
-            val priceString = localArgs.getLong("amount").toString() + "BTC"
-            val userID = localArgs.getString("userID")!!
+            val userID = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+            val position = localArgs.getInt("position")
 
-            @Suppress("UNCHECKED_CAST")
-            voters = localArgs.get("voters") as HashMap<Int, ArrayList<String>>
-//            val block: TrustChainBlock = localArgs.get("Block") as TrustChainBlock
-            val signatures = localArgs.getStringArrayList("signatures")
-            voters[0] = signatures!!
+            val block = getCoinCommunity().fetchProposalBlocks()[position]
+
+            val rawData = SWTransferFundsAskTransactionData(block.transaction)
+            voters = rawData.SW_VOTES
+            val data = rawData.getData()
+
+            val walletId = data.SW_UNIQUE_PROPOSAL_ID
+            val priceString = data.SW_TRANSFER_FUNDS_AMOUNT.toString() + " Satoshi"
+
+            val signatures =
+                ArrayList(getCoinCommunity().fetchProposalSignatures(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                ))
+            voters[0] = signatures
             voters[2]!!.removeAll(signatures)
             val userHasVoted = voters[2]!!.contains(userID)
 
-            view.findViewById<TextView>(R.id.title).text = walletId
+            view.findViewById<TextView>(R.id.title).text = data.SW_UNIQUE_PROPOSAL_ID
             view.findViewById<TextView>(R.id.price).text = getString(R.string.bounty_payout, priceString, walletId)
             view.findViewById<ExtendedFloatingActionButton>(R.id.fab_user).setOnClickListener { v ->
                 val builder = AlertDialog.Builder(v.context)
@@ -69,10 +80,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                         getString(R.string.bounty_payout_upvoted, priceString, walletId),
                         Toast.LENGTH_SHORT
                     ).show()
-                    voters[2]!!.remove(userID)
-                    voters[0]!!.add(userID)
-//                    voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(userID, 0)
-
+                    voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(userID, 0)
+                    println("AAAAA")
+                    println(voters.toString())
                     userHasAlreadyVoted(view)
                     adapter.notifyChanges()
 
@@ -93,9 +103,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                         getString(R.string.bounty_payout_downvoted, priceString, walletId),
                         Toast.LENGTH_SHORT
                     ).show()
-                    voters[2]!!.remove(userID)
-                    voters[1]!!.add(userID)
-//                    voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(userID, 1)
+                    voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(userID, 1)
 
                     userHasAlreadyVoted(view)
                     adapter.notifyChanges()
