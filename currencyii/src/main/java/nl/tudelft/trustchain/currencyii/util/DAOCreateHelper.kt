@@ -88,7 +88,7 @@ class DAOCreateHelper() {
             arrayListOf(bitcoinPublicKey)
         )
 
-        Log.i("Callum", "BlockType: ${blockData.blockType}")
+        Log.i("Callum", "[DAOCreateHelper] BlockType: ${blockData.blockType}")
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)
     }
 }
