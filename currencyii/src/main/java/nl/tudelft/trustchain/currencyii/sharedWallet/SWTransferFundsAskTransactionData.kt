@@ -22,7 +22,7 @@ class SWTransferFundsAskTransactionData(data: JsonObject) : SWBlockTransactionDa
     data, CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
 )  {
     // TODO: Update 0 and 1 to corresponding lists, but I can't find them yet
-    var SW_VOTES:HashMap<Int, ArrayList<String>> = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to ArrayList(getData().SW_BITCOIN_PKS))
+    var SW_VOTES:HashMap<Int, ArrayList<String>> = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to ArrayList(/*getData().SW_BITCOIN_PKS*/))
 
 
     fun getData(): SWTransferFundsAskBlockTD {
