@@ -25,6 +25,17 @@ An online indicator and the last message is shown for each contact. Users can ex
  
  <img src="https://user-images.githubusercontent.com/1122874/82873643-1a353880-9f35-11ea-8da3-24ce189c939d.png" width="180"> <img src="https://user-images.githubusercontent.com/1122874/82873661-1f928300-9f35-11ea-9955-6a7488936b02.png" width="180">
 
+### Digital Euro Experiment
+
+The Superapp is connected to the European IBAN Euro system. You can send and receive digital Euros using QR-codes or build-in chat. Sending Euros is as easy as sending a smiley. We did a test with native implementation of Trustchain and [a digital Euro last week](https://twitter.com/TriblerTeam/status/1367526077422256128). Field test date: 4 March 2021 at 10:30am. The native Android implementation in Kotlin is slowly getting mature. Location: the bar Doerak (with a liquor license! This is a special place, therefore selected as the site for our trail. Shops which sell coffee or closed canisters of alcohol are "essential shops" and therefore open in Corona times.) Loading real money on your phone requires an operational an open source [gateway](https://github.com/rwblokzijl/stablecoin-exchange) of Euros to digital Euros. Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
+
+Creative Commons CC0 license - share freely:
+<IMG src="https://user-images.githubusercontent.com/325224/110597367-c1135a00-8180-11eb-9a75-207f4630ebb4.jpg" width=200>
+Zooming into the actual mechanism of QR-Codes (Creative Commons CC0 license - share freely)
+<IMG src="https://user-images.githubusercontent.com/325224/110597621-15b6d500-8181-11eb-828a-0f3409b6608c.jpg" width=150>
+
+<img src="https://user-images.githubusercontent.com/446634/107397810-47e00300-6aff-11eb-8abe-5d345a096ade.jpeg" width=200>
+
 ### Debug
 
 **Debug** shows various information related to connectivity, including:
@@ -36,12 +47,6 @@ An online indicator and the last message is shown for each contact. Users can ex
 - TrustChain statistics (the number of stored blocks and the length of our own chain)
 
 <img src="https://raw.githubusercontent.com/Tribler/kotlin-ipv8/master/doc/demo-android-debug.png" width="180">
-
-### Digital Euro
-
-<img src="https://user-images.githubusercontent.com/446634/107397810-47e00300-6aff-11eb-8abe-5d345a096ade.jpeg" width=200>
-Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
-
 
 ### AI trading bot
 The AI trading bot is a zero-server AI, which ultimately can understand markets, limit orderbooks, bid/ask pairs and global stock patterns using only smartphones for computing power and connection.
