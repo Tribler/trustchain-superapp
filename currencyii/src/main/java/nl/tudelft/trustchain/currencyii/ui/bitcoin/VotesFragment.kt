@@ -13,14 +13,18 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.Transaction
 
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private lateinit var tabsAdapter: TabsAdapter
@@ -49,6 +53,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         demoVoteFab = view.findViewById(R.id.fab_demo)
         voteFab = view.findViewById(R.id.fab_user)
         tabLayout = view.findViewById(R.id.tab_layout)
+        viewPager = view.findViewById(R.id.viewpager)
 
         demoVoteFab.visibility = View.GONE
 
@@ -64,7 +69,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             }
         }
 
-        viewPager = view.findViewById(R.id.viewpager)
         tabsAdapter = TabsAdapter(this, voters)
         viewPager.adapter = tabsAdapter
 
@@ -94,6 +98,24 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
+        // Get my signature
+        val walletManager = WalletManagerAndroid.getInstance()
+
+        val latestHash = data.SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
+
+        val newTransactionSerialized = data.SW_TRANSACTION_SERIALIZED
+        val mySignature = walletManager.safeSigningJoinWalletTransaction(
+            Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),
+            Transaction(walletManager.params, oldTransaction.hexToBytes()),
+            walletManager.protocolECKey()
+        )
+        val mySignatureSerialized = mySignature.encodeToDER().toHex()
+
+
         // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
         val signatures =
             ArrayList(
@@ -102,11 +124,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                     data.SW_UNIQUE_PROPOSAL_ID
                 )
             )
-        // TODO Check if user has voted already
+
         voters[0] = signatures
         voters[2]!!.removeAll(signatures)
 
-        val userHasVoted = !voters[2]!!.contains(myPublicKey.toHex())
+        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(mySignatureSerialized)
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         price.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId, data.SW_SIGNATURES_REQUIRED)
@@ -124,6 +146,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
                 Toast.makeText(v.context, getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
+                updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey)
@@ -143,6 +166,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
                 Toast.makeText(v.context, getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
+                updateTabNames()
 
                 // TODO: send no vote for user
             }
@@ -170,6 +194,34 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
+        // Get my signature
+        val walletManager = WalletManagerAndroid.getInstance()
+
+        val latestHash = data.SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
+
+        val satoshiAmount = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT)
+        val previousTransaction = Transaction(
+            walletManager.params,
+            oldTransaction.hexToBytes()
+        )
+        val receiverAddress = org.bitcoinj.core.Address.fromString(
+            walletManager.params,
+            data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
+        )
+        val mySignature = walletManager.safeSigningTransactionFromMultiSig(
+            previousTransaction,
+            walletManager.protocolECKey(),
+            receiverAddress,
+            satoshiAmount
+        )
+
+        val mySignatureSerialized = mySignature.encodeToDER().toHex()
+
+
         // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
         val signatures =
             ArrayList(
@@ -178,11 +230,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                     data.SW_UNIQUE_PROPOSAL_ID
                 )
             )
-        // TODO Check if user has voted already
+
         voters[0] = signatures
         voters[2]!!.removeAll(signatures)
 
-        val userHasVoted = !voters[2]!!.contains(myPublicKey.toHex())
+        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(mySignatureSerialized)
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         price.text = getString(R.string.bounty_payout, priceString, walletId)
@@ -207,6 +259,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
                 Toast.makeText(v.context, getString(R.string.bounty_payout_upvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
+                updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey)
@@ -226,6 +279,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
                 Toast.makeText(v.context, getString(R.string.bounty_payout_downvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
+                updateTabNames()
 
                 // TODO: send no vote for user
             }
@@ -239,6 +293,5 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
     private fun userHasAlreadyVoted() {
         voteFab.visibility = View.GONE
-        updateTabNames()
     }
 }
