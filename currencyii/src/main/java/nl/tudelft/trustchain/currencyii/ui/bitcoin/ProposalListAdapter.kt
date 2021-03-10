@@ -33,22 +33,38 @@ class ProposalListAdapter(
 
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
+
+            val signatures =
+                ArrayList(
+                    context.getCoinCommunity().fetchProposalSignatures(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                )
             about.text = "Transfer funds request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = data.SW_SIGNATURES_REQUIRED.toString()
+            signaturesRequired.text = signatures.size.toString() + "/" + data.SW_SIGNATURES_REQUIRED.toString()
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = "${data.SW_TRANSFER_FUNDS_AMOUNT} Satoshi"
         }
 
         if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
+
+            val signatures =
+                ArrayList(
+                    context.getCoinCommunity().fetchProposalSignatures(
+                        data.SW_UNIQUE_ID,
+                        data.SW_UNIQUE_PROPOSAL_ID
+                    )
+                )
             about.text = "Join request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = "${data.SW_SIGNATURES_REQUIRED}"
+            signaturesRequired.text = signatures.size.toString() + "/" + data.SW_SIGNATURES_REQUIRED.toString()
 
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)

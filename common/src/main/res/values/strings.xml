@@ -20,18 +20,18 @@
     <string name="x_bytes">%d B</string>
 
     <string name="vote">Vote</string>
-    <string name="voteUser1">Vote</string>
-    <string name="voteUser2">Vote Demo</string>
+    <string name="voteUser">Vote</string>
+    <string name="voteDemo">Vote Demo</string>
     <string name="bounty_payout">Pay %1$s from our common funds to transaction id: %2$s?</string>
     <string name="bounty_payout_message">Do you agree on paying %1$s from our common funds to transaction id: %2$s?\nThere are already %3$d upvotes, %4$d downvotes, and %5$d" undecided votes</string>
     <string name="bounty_payout_upvoted">You voted in favor of paying %1$s from our common funds to transaction id: %2$s</string>
     <string name="bounty_payout_downvoted">You voted against paying %1$s from our common funds to transaction id: %2$s</string>
-    <string name="bounty_payout_all_voted">Everyone voted, based on the majority we decided to pay the transaction</string>
+    <string name="bounty_payout_all_voted">The majority voted, based on the majority we decided to pay the transaction</string>
 
     <string name="vote_join_request_title">Join Request</string>
-    <string name="vote_join_request_message">Allow %1$s into our shared walet with id: %2$s?</string>
+    <string name="vote_join_request_message">Allow %1$s into our shared walet with id: %2$s?\n We need %3$d votes</string>
     <string name="vote_join_request_upvoted">You voted in favor of allowing %1$s into our shared wallet with id: %2$s</string>
     <string name="vote_join_request_downvoted">You voted against allowing %1$s into our shared wallet with id: %2$s</string>
-    <string name="vote_join_request_voted">Everyone voted, based on the majority we decided to pay the transaction</string>
+    <string name="vote_join_request_voted">The majority voted, based on the majority we execute the transaction</string>
 
 </resources>

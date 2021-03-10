@@ -12,29 +12,28 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.coin.WalletManager
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.json.JSONObject
 
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private lateinit var tabsAdapter: TabsAdapter
     private lateinit var viewPager: ViewPager2
 
-    private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Undecided votes")
+    private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Not voted")
 
     private lateinit var voters: HashMap<Int, ArrayList<String>>
     private lateinit var title: TextView
     private lateinit var price: TextView
     private lateinit var demoVoteFab: ExtendedFloatingActionButton
     private lateinit var voteFab: ExtendedFloatingActionButton
+    private lateinit var tabLayout: TabLayout
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +48,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         price = view.findViewById(R.id.price)
         demoVoteFab = view.findViewById(R.id.fab_demo)
         voteFab = view.findViewById(R.id.fab_user)
+        tabLayout = view.findViewById(R.id.tab_layout)
 
         demoVoteFab.visibility = View.GONE
 
@@ -68,14 +68,17 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         tabsAdapter = TabsAdapter(this, voters)
         viewPager.adapter = tabsAdapter
 
-        val tabLayout = view.findViewById<TabLayout>(R.id.tab_layout)
+        updateTabNames()
+    }
+
+    private fun updateTabNames() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = TAB_NAMES[position]
+            tab.text = TAB_NAMES[position] + " (" + voters[position]!!.size + ")"
         }.attach()
     }
 
     private fun signatureAskBlockVotes(position: Int) {
-        val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getCoinCommunity().fetchProposalBlocks()[position]
 
         val rawData = SWSignatureAskTransactionData(block.transaction)
@@ -91,28 +94,29 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
-        // TODO get the signatures that already voted
-//        val signatures =
-//            ArrayList(
-//                getCoinCommunity().fetchProposalSignatures(
-//                    data.SW_UNIQUE_ID,
-//                    data.SW_UNIQUE_PROPOSAL_ID
-//                )
-//            )
-//        voters[0] = signatures
-//        voters[2]!!.removeAll(signatures)
+        // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalSignatures(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
+            )
+        // TODO Check if user has voted already
+        voters[0] = signatures
+        voters[2]!!.removeAll(signatures)
 
-        val userHasVoted = !voters[2]!!.contains(myPublicKey)
+        val userHasVoted = !voters[2]!!.contains(myPublicKey.toHex())
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
-        price.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId)
+        price.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId, data.SW_SIGNATURES_REQUIRED)
         voteFab.setOnClickListener { v ->
             val builder = AlertDialog.Builder(v.context)
             builder.setTitle(R.string.vote_join_request_title)
-            builder.setMessage(getString(R.string.vote_join_request_message, requestToJoinId, walletId))
+            builder.setMessage(getString(R.string.vote_join_request_message, requestToJoinId, walletId, data.SW_SIGNATURES_REQUIRED))
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey, 0)
+                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 0)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -121,7 +125,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 viewPager.currentItem = 0
                 Toast.makeText(v.context, getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
 
-                // TODO: send yes vote for user
+                // Send yes vote
+                getCoinCommunity().joinAskBlockReceived(block, myPublicKey)
+
                 if (voters[2]!!.size == 0) {
                     findNavController().navigateUp()
                 }
@@ -129,7 +135,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey, 1)
+                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 1)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -149,7 +155,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     }
 
     private fun transferFundsAskBlockVotes(position: Int) {
-        val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getCoinCommunity().fetchProposalBlocks()[position]
 
         val rawData = SWTransferFundsAskTransactionData(block.transaction)
@@ -158,25 +164,25 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
         val priceString = data.SW_TRANSFER_FUNDS_AMOUNT.toString() + " Satoshi"
 
-
         val sw = getCoinCommunity().discoverSharedWallets().filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
-        // TODO get the signatures that already voted
-//        val signatures =
-//            ArrayList(
-//                getCoinCommunity().fetchProposalSignatures(
-//                    data.SW_UNIQUE_ID,
-//                    data.SW_UNIQUE_PROPOSAL_ID
-//                )
-//            )
-//        voters[0] = signatures
-//        voters[2]!!.removeAll(signatures)
+        // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
+        val signatures =
+            ArrayList(
+                getCoinCommunity().fetchProposalSignatures(
+                    data.SW_UNIQUE_ID,
+                    data.SW_UNIQUE_PROPOSAL_ID
+                )
+            )
+        // TODO Check if user has voted already
+        voters[0] = signatures
+        voters[2]!!.removeAll(signatures)
 
-        val userHasVoted = !voters[2]!!.contains(myPublicKey)
+        val userHasVoted = !voters[2]!!.contains(myPublicKey.toHex())
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         price.text = getString(R.string.bounty_payout, priceString, walletId)
@@ -193,15 +199,18 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 ))
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey, 0)
+                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 0)
 
+                // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
                 Toast.makeText(v.context, getString(R.string.bounty_payout_upvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
 
-                // TODO: send yes vote for user
+                // Send yes vote
+                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey)
+
                 if (voters[2]!!.size == 0) {
                     findNavController().navigateUp()
                 }
@@ -209,7 +218,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey, 1)
+                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 1)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -230,5 +239,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
     private fun userHasAlreadyVoted() {
         voteFab.visibility = View.GONE
+        updateTabNames()
     }
 }
