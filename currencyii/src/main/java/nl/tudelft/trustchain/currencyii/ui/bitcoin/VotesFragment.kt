@@ -12,7 +12,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
@@ -24,6 +23,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionDa
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
 
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
@@ -90,10 +90,17 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         val walletId = data.SW_UNIQUE_ID
 
-        val sw = getCoinCommunity().discoverSharedWallets().filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
+        val sw = getCoinCommunity().discoverSharedWallets()
+            .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         val requestToJoinId = sw.publicKey.toHex()
+
+        val bitcoinhex = swData.SW_BITCOIN_PKS[0].hexToBytes()
+        val trustchainhex = swData.SW_TRUSTCHAIN_PKS[0].hexToBytes()
+
+        println(bitcoinhex)
+        println(trustchainhex)
 
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
@@ -102,8 +109,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletManager = WalletManagerAndroid.getInstance()
 
         val latestHash = data.SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-            ?: throw IllegalStateException("Most recent DAO block not found")
+        val mostRecentSWBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+                ?: throw IllegalStateException("Most recent DAO block not found")
         val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
             .SW_TRANSACTION_SERIALIZED
 
@@ -125,27 +133,50 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 )
             )
 
-        voters[0] = signatures
-        voters[2]!!.removeAll(signatures)
+        val pk = ArrayList(signatures.map { getPK(it, data.SW_TRANSACTION_SERIALIZED) })
 
-        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(mySignatureSerialized)
+        voters[0] = pk
+        voters[2]!!.removeAll(pk)
+
+        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(
+            mySignatureSerialized
+        )
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
-        price.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId, data.SW_SIGNATURES_REQUIRED)
+        price.text = getString(
+            R.string.vote_join_request_message,
+            requestToJoinId,
+            walletId,
+            data.SW_SIGNATURES_REQUIRED
+        )
         voteFab.setOnClickListener { v ->
             val builder = AlertDialog.Builder(v.context)
             builder.setTitle(R.string.vote_join_request_title)
-            builder.setMessage(getString(R.string.vote_join_request_message, requestToJoinId, walletId, data.SW_SIGNATURES_REQUIRED))
+            builder.setMessage(
+                getString(
+                    R.string.vote_join_request_message,
+                    requestToJoinId,
+                    walletId,
+                    data.SW_SIGNATURES_REQUIRED
+                )
+            )
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 0)
+                voters = SWSignatureAskTransactionData(block.transaction).userVotes(
+                    myPublicKey.toHex(),
+                    0
+                )
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
-                Toast.makeText(v.context, getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    v.context,
+                    getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId),
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateTabNames()
 
                 // Send yes vote
@@ -158,14 +189,21 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 1)
+                voters = SWSignatureAskTransactionData(block.transaction).userVotes(
+                    myPublicKey.toHex(),
+                    1
+                )
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
-                Toast.makeText(v.context, getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    v.context,
+                    getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId),
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateTabNames()
 
                 // TODO: send no vote for user
@@ -188,7 +226,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
         val priceString = data.SW_TRANSFER_FUNDS_AMOUNT.toString() + " Satoshi"
 
-        val sw = getCoinCommunity().discoverSharedWallets().filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
+        val sw = getCoinCommunity().discoverSharedWallets()
+            .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         // TODO get the actual votes, instead of only the participants
@@ -198,8 +237,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletManager = WalletManagerAndroid.getInstance()
 
         val latestHash = data.SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-            ?: throw IllegalStateException("Most recent DAO block not found")
+        val mostRecentSWBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+                ?: throw IllegalStateException("Most recent DAO block not found")
         val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
             .SW_TRANSACTION_SERIALIZED
 
@@ -234,31 +274,42 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         voters[0] = signatures
         voters[2]!!.removeAll(signatures)
 
-        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(mySignatureSerialized)
+        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(
+            mySignatureSerialized
+        )
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         price.text = getString(R.string.bounty_payout, priceString, walletId)
         voteFab.setOnClickListener { v ->
             val builder = AlertDialog.Builder(v.context)
             builder.setTitle(getString(R.string.bounty_payout, priceString, walletId))
-            builder.setMessage(getString(
+            builder.setMessage(
+                getString(
                     R.string.bounty_payout_message,
                     priceString,
                     walletId,
                     voters[0]!!.size,
                     voters[1]!!.size,
                     voters[2]!!.size
-                ))
+                )
+            )
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 0)
+                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(
+                    myPublicKey.toHex(),
+                    0
+                )
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
-                Toast.makeText(v.context, getString(R.string.bounty_payout_upvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    v.context,
+                    getString(R.string.bounty_payout_upvoted, priceString, walletId),
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateTabNames()
 
                 // Send yes vote
@@ -271,14 +322,21 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(myPublicKey.toHex(), 1)
+                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(
+                    myPublicKey.toHex(),
+                    1
+                )
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
-                Toast.makeText(v.context, getString(R.string.bounty_payout_downvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    v.context,
+                    getString(R.string.bounty_payout_downvoted, priceString, walletId),
+                    Toast.LENGTH_SHORT
+                ).show()
                 updateTabNames()
 
                 // TODO: send no vote for user
@@ -293,5 +351,17 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
     private fun userHasAlreadyVoted() {
         voteFab.visibility = View.GONE
+    }
+
+    private fun getPK(signature: String, swTransactionSerialized: String): String {
+        val signatureKey = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
+
+        for (pk in voters[2]!!) {
+            val verified =
+                ECKey.verify(swTransactionSerialized.hexToBytes(), signatureKey, pk.hexToBytes())
+            if (verified) return pk
+        }
+
+        return "Incorrect signature found"
     }
 }
