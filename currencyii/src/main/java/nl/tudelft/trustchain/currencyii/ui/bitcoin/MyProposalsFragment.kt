@@ -39,11 +39,15 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
 
     private fun updateProposalListUI() {
         activity?.runOnUiThread {
-            val adaptor = ProposalListAdapter(this, proposals)
+            val uniqueProposals:ArrayList<TrustChainBlock> = ArrayList()
+            for (proposal in proposals) {
+                if (!uniqueProposals.contains(proposal)) uniqueProposals.add(proposal)
+            }
+            val adaptor = ProposalListAdapter(this, uniqueProposals)
             proposal_list_view.adapter = adaptor
             val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
             proposal_list_view.setOnItemClickListener { _, _, position, _ ->
-                val block = proposals[position]
+                val block = uniqueProposals[position]
                 if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                     try {
                         Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
@@ -93,7 +97,8 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
 
         for (peer in allUsers) {
             try {
-                withTimeout(JoinDAOFragment.SW_CRAWLING_TIMEOUT_MILLI) {
+                // TODO: Commented this line out, it causes the app to crash
+//                withTimeout(JoinDAOFragment.SW_CRAWLING_TIMEOUT_MILLI) {
                     trustchain.crawlChain(peer)
                     val crawlResult = trustchain
                         .getChainByUser(peer.publicKey.keyToBin())
@@ -109,7 +114,7 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                         updateProposals(crawlResult)
                         updateProposalListUI()
                     }
-                }
+//                }
             } catch (t: Throwable) {
                 val message = t.message ?: "no message"
                 Log.i("Coin", "Crawling failed for: ${peer.address} message: $message")
