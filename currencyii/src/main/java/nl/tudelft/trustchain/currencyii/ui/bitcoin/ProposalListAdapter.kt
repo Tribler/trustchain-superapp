@@ -48,9 +48,7 @@ class ProposalListAdapter(
             signaturesRequired.text = signatures.size.toString() + "/" + data.SW_SIGNATURES_REQUIRED.toString()
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = "${data.SW_TRANSFER_FUNDS_AMOUNT} Satoshi"
-        }
-
-        if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
+        } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
 
             val signatures =
@@ -68,6 +66,8 @@ class ProposalListAdapter(
 
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)
+        } else {
+            println(block.type)
         }
 
         return view

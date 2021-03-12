@@ -187,7 +187,8 @@ class DAOJoinHelper {
         fun joinAskBlockReceived(
             oldTransactionSerialized: String,
             block: TrustChainBlock,
-            myPublicKey: ByteArray
+            myPublicKey: ByteArray,
+            votedInFavor: Boolean
         ) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
 
@@ -212,17 +213,31 @@ class DAOJoinHelper {
                 walletManager.protocolECKey()
             )
             val signatureSerialized = signature.encodeToDER().toHex()
-            val agreementData = SWResponseSignatureTransactionData(
-                blockData.SW_UNIQUE_ID,
-                blockData.SW_UNIQUE_PROPOSAL_ID,
-                signatureSerialized
-            )
+            if (votedInFavor) {
+                val agreementData = SWResponseSignatureTransactionData(
+                    blockData.SW_UNIQUE_ID,
+                    blockData.SW_UNIQUE_PROPOSAL_ID,
+                    signatureSerialized
+                )
 
-            trustchain.createProposalBlock(
-                agreementData.getTransactionData(),
-                myPublicKey,
-                agreementData.blockType
-            )
+                trustchain.createProposalBlock(
+                    agreementData.getTransactionData(),
+                    myPublicKey,
+                    agreementData.blockType
+                )
+            } else {
+                val negativeResponseData = SWResponseNegativeSignatureTransactionData(
+                    blockData.SW_UNIQUE_ID,
+                    blockData.SW_UNIQUE_PROPOSAL_ID,
+                    signatureSerialized
+                )
+
+                trustchain.createProposalBlock(
+                    negativeResponseData.getTransactionData(),
+                    myPublicKey,
+                    negativeResponseData.blockType
+                )
+            }
         }
     }
 }

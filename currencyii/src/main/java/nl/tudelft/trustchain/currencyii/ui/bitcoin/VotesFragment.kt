@@ -1,17 +1,21 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
@@ -22,9 +26,17 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.*
+import org.bitcoinj.core.DumpedPrivateKey.fromBase58
+import org.bitcoinj.core.LegacyAddress.fromBase58
+import org.bitcoinj.crypto.BIP38PrivateKey.fromBase58
+import org.bouncycastle.util.encoders.Base64Encoder
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private lateinit var tabsAdapter: TabsAdapter
@@ -32,7 +44,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
     private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Not voted")
 
-    private lateinit var voters: HashMap<Int, ArrayList<String>>
+    private var voters: HashMap<Int, ArrayList<String>> = hashMapOf()
     private lateinit var title: TextView
     private lateinit var price: TextView
     private lateinit var demoVoteFab: ExtendedFloatingActionButton
@@ -59,15 +71,16 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         val localArgs = arguments
         if (localArgs is Bundle) {
-            val position = localArgs.getInt("position")
             val type = localArgs.getString("type")
+            val blockId = localArgs.getString("blockId")!!
 
             if (type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
-                signatureAskBlockVotes(position)
+                signatureAskBlockVotes(blockId)
             } else if (type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
-                transferFundsAskBlockVotes(position)
+                transferFundsAskBlockVotes(blockId)
             }
         }
+        if (voters.size == 0) return
 
         tabsAdapter = TabsAdapter(this, voters)
         viewPager.adapter = tabsAdapter
@@ -81,26 +94,31 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }.attach()
     }
 
-    private fun signatureAskBlockVotes(position: Int) {
+    private fun getSelectedBlock(blockId: String): TrustChainBlock? {
+        val allBlocks = getCoinCommunity().fetchProposalBlocks()
+        for (block in allBlocks) {
+            if (block.blockId == blockId) return block
+        }
+        findNavController().navigateUp()
+        Toast.makeText(this.context, "Something went wrong while fetching this block\nYou have ${allBlocks.size} blocks available", Toast.LENGTH_SHORT).show()
+        return null
+    }
+
+    private fun signatureAskBlockVotes(blockId: String) {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
-        val block = getCoinCommunity().fetchProposalBlocks()[position]
+        val block = getSelectedBlock(blockId) ?: return
 
         val rawData = SWSignatureAskTransactionData(block.transaction)
         val data = rawData.getData()
 
         val walletId = data.SW_UNIQUE_ID
 
+        // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
         val sw = getCoinCommunity().discoverSharedWallets()
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         val requestToJoinId = sw.publicKey.toHex()
-
-        val bitcoinhex = swData.SW_BITCOIN_PKS[0].hexToBytes()
-        val trustchainhex = swData.SW_TRUSTCHAIN_PKS[0].hexToBytes()
-
-        println(bitcoinhex)
-        println(trustchainhex)
 
         // TODO get the actual votes, instead of only the participants
         voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
@@ -123,7 +141,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         )
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
-
         // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
         val signatures =
             ArrayList(
@@ -133,10 +150,15 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 )
             )
 
-        val pk = ArrayList(signatures.map { getPK(it, data.SW_TRANSACTION_SERIALIZED) })
+        val negativeSignatures = ArrayList( getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
-        voters[0] = pk
-        voters[2]!!.removeAll(pk)
+        val favorPKs = signatures//ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        val againstPKs = negativeSignatures//ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+
+        voters[0] = favorPKs
+        voters[1] = againstPKs
+        voters[2]!!.removeAll(againstPKs)
+        voters[2]!!.removeAll(favorPKs)
 
         val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(
             mySignatureSerialized
@@ -180,7 +202,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send yes vote
-                getCoinCommunity().joinAskBlockReceived(block, myPublicKey)
+                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
 
                 if (voters[2]!!.size == 0) {
                     findNavController().navigateUp()
@@ -206,7 +228,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 ).show()
                 updateTabNames()
 
-                // TODO: send no vote for user
+                // Send no vote
+                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false)
             }
             builder.show()
         }
@@ -216,9 +239,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }
     }
 
-    private fun transferFundsAskBlockVotes(position: Int) {
+    private fun transferFundsAskBlockVotes(blockId: String) {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
-        val block = getCoinCommunity().fetchProposalBlocks()[position]
+        val block = getSelectedBlock(blockId) ?: return
 
         val rawData = SWTransferFundsAskTransactionData(block.transaction)
         val data = rawData.getData()
@@ -248,7 +271,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             walletManager.params,
             oldTransaction.hexToBytes()
         )
-        val receiverAddress = org.bitcoinj.core.Address.fromString(
+        val receiverAddress = Address.fromString(
             walletManager.params,
             data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
         )
@@ -353,15 +376,34 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         voteFab.visibility = View.GONE
     }
 
-    private fun getPK(signature: String, swTransactionSerialized: String): String {
+    private fun getPK(
+        signature: String,
+        bitcoin_pks: ArrayList<String>,
+        swTransactionSerialized: String
+    ): String {
         val signatureKey = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
 
-        for (pk in voters[2]!!) {
-            val verified =
-                ECKey.verify(swTransactionSerialized.hexToBytes(), signatureKey, pk.hexToBytes())
-            if (verified) return pk
+        for (pk in bitcoin_pks) {
+            val result = ECKey.verify(swTransactionSerialized.hexToBytes(), signatureKey, pk.hexToBytes())
+
+
+            val walletManager = WalletManagerAndroid.getInstance()
+            val key = walletManager.protocolECKey().pubKey.toHex()
+//            val myPk = walletManager.networkPublicECKeyHex()
+            println(key)
+
+
+//            val message = "hello World"
+//            val signatureBytes = signature.hexToBytes()
+//            val signatureBase64 = Base64.getEncoder().encodeToString(signatureBytes)
+//            val key = ECKey.recoverFromSignature(1, signatureKey, Sha256Hash.of(swTransactionSerialized.hexToBytes()), true)
+//            println(key)
+//            key.toAddress(Address.fromBase58(null, pk).getParameters()).toString().equals(pk);
+            println(result)
+            println(bitcoin_pks)
+            println(swTransactionSerialized)
         }
 
-        return "Incorrect signature found"
+        return "Unknown signature found"
     }
 }
