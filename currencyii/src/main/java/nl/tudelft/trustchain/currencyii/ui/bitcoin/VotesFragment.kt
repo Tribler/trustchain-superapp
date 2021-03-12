@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
@@ -15,7 +13,6 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.keyvault.LibNaClPK
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
@@ -26,28 +23,27 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.*
-import org.bitcoinj.core.DumpedPrivateKey.fromBase58
-import org.bitcoinj.core.LegacyAddress.fromBase58
-import org.bitcoinj.crypto.BIP38PrivateKey.fromBase58
-import org.bouncycastle.util.encoders.Base64Encoder
-import java.security.KeyFactory
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
-import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+import org.bitcoinj.core.Address
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.Transaction
 
+/**
+ * The class for showing the votes fragment. This class is helped by VotesFragmentHelper.kt in Common.
+ * It shows the layout in R.layout.fragment_votes in common.
+ * A user can here see the (up/down/undecided)votes
+ */
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
+    // from common helper class
     private lateinit var tabsAdapter: TabsAdapter
     private lateinit var viewPager: ViewPager2
 
     private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Not voted")
 
-    private var voters: HashMap<Int, ArrayList<String>> = hashMapOf()
+    // from the layout class
+    private var voters: Array<ArrayList<String>> = arrayOf(ArrayList(), ArrayList(), ArrayList())
     private lateinit var title: TextView
     private lateinit var price: TextView
-    private lateinit var demoVoteFab: ExtendedFloatingActionButton
     private lateinit var voteFab: ExtendedFloatingActionButton
     private lateinit var tabLayout: TabLayout
 
@@ -59,51 +55,67 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         return inflater.inflate(R.layout.fragment_votes, container, false)
     }
 
+    /**
+     * When the view is created it puts the correct data on it.
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         title = view.findViewById(R.id.title)
         price = view.findViewById(R.id.price)
-        demoVoteFab = view.findViewById(R.id.fab_demo)
         voteFab = view.findViewById(R.id.fab_user)
         tabLayout = view.findViewById(R.id.tab_layout)
         viewPager = view.findViewById(R.id.viewpager)
-
-        demoVoteFab.visibility = View.GONE
 
         val localArgs = arguments
         if (localArgs is Bundle) {
             val type = localArgs.getString("type")
             val blockId = localArgs.getString("blockId")!!
 
+            // Check which type the block is and set the corresponding data
             if (type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
                 signatureAskBlockVotes(blockId)
             } else if (type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
                 transferFundsAskBlockVotes(blockId)
             }
         }
-        if (voters.size == 0) return
+        // When there are no participants, there is an error and we should return.
+        if (voters.isEmpty()) return
 
+        // Set the tabs with the helper class in common
         tabsAdapter = TabsAdapter(this, voters)
         viewPager.adapter = tabsAdapter
 
         updateTabNames()
     }
 
+    /**
+     * Set the tab names with the number of votes in brackets
+     */
     private fun updateTabNames() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = TAB_NAMES[position] + " (" + voters[position]!!.size + ")"
+            tab.text = TAB_NAMES[position] + " (" + voters[position].size + ")"
         }.attach()
     }
 
+    /**
+     * Get the selected block via the blockId parsed.
+     * @param blockId - the id of the block that is clicked
+     * @return TrustChainBlock
+     */
     private fun getSelectedBlock(blockId: String): TrustChainBlock? {
         val allBlocks = getCoinCommunity().fetchProposalBlocks()
         for (block in allBlocks) {
             if (block.blockId == blockId) return block
         }
+
+        // If we couldn't find the block then move one page up and show a toast with error message
         findNavController().navigateUp()
         Toast.makeText(this.context, "Something went wrong while fetching this block\nYou have ${allBlocks.size} blocks available", Toast.LENGTH_SHORT).show()
         return null
     }
 
+    /**
+     * The method for setting the data for join requests
+     */
     private fun signatureAskBlockVotes(blockId: String) {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getSelectedBlock(blockId) ?: return
@@ -119,9 +131,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         val requestToJoinId = sw.publicKey.toHex()
-
-        // TODO get the actual votes, instead of only the participants
-        voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
         // Get my signature
         val walletManager = WalletManagerAndroid.getInstance()
@@ -142,25 +151,16 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
         // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
-        val signatures =
-            ArrayList(
-                getCoinCommunity().fetchProposalSignatures(
-                    data.SW_UNIQUE_ID,
-                    data.SW_UNIQUE_PROPOSAL_ID
-                )
-            )
+        val signatures =ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID,data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
-        val negativeSignatures = ArrayList( getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        // TODO: get the PKs
+        val favorPKs = signatures //ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        val againstPKs = negativeSignatures //ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
 
-        val favorPKs = signatures//ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
-        val againstPKs = negativeSignatures//ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
 
-        voters[0] = favorPKs
-        voters[1] = againstPKs
-        voters[2]!!.removeAll(againstPKs)
-        voters[2]!!.removeAll(favorPKs)
-
-        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(
+        val userHasVoted = voters[0].contains(mySignatureSerialized) || voters[1].contains(
             mySignatureSerialized
         )
 
@@ -184,10 +184,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             )
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(
-                    myPublicKey.toHex(),
-                    0
-                )
+                voters[2].remove(myPublicKey.toHex())
+                voters[0].add(myPublicKey.toString())
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -204,17 +202,16 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
 
-                if (voters[2]!!.size == 0) {
+
+                if (voters[2].isEmpty()) {
                     findNavController().navigateUp()
                 }
             }
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWSignatureAskTransactionData(block.transaction).userVotes(
-                    myPublicKey.toHex(),
-                    1
-                )
+                voters[2].remove(myPublicKey.toHex())
+                voters[1].add(myPublicKey.toString())
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -239,6 +236,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }
     }
 
+    /**
+     * The method for setting the data for transfer funds requests
+     */
     private fun transferFundsAskBlockVotes(blockId: String) {
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getSelectedBlock(blockId) ?: return
@@ -253,8 +253,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
-        // TODO get the actual votes, instead of only the participants
-        voters = hashMapOf(0 to arrayListOf(), 1 to arrayListOf(), 2 to swData.SW_TRUSTCHAIN_PKS)
 
         // Get my signature
         val walletManager = WalletManagerAndroid.getInstance()
@@ -286,18 +284,16 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
 
         // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
-        val signatures =
-            ArrayList(
-                getCoinCommunity().fetchProposalSignatures(
-                    data.SW_UNIQUE_ID,
-                    data.SW_UNIQUE_PROPOSAL_ID
-                )
-            )
+        val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
-        voters[0] = signatures
-        voters[2]!!.removeAll(signatures)
+        // TODO: get the PKs
+        val favorPKs = signatures//ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        val againstPKs = negativeSignatures//ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
 
-        val userHasVoted = voters[0]!!.contains(mySignatureSerialized) || voters[1]!!.contains(
+        setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
+
+        val userHasVoted = voters[0].contains(mySignatureSerialized) || voters[1].contains(
             mySignatureSerialized
         )
 
@@ -311,17 +307,15 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                     R.string.bounty_payout_message,
                     priceString,
                     walletId,
-                    voters[0]!!.size,
-                    voters[1]!!.size,
-                    voters[2]!!.size
+                    voters[0].size,
+                    voters[1].size,
+                    voters[2].size
                 )
             )
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(
-                    myPublicKey.toHex(),
-                    0
-                )
+                voters[2].remove(myPublicKey.toHex())
+                voters[0].add(myPublicKey.toString())
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -336,19 +330,17 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send yes vote
-                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey)
+                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true)
 
-                if (voters[2]!!.size == 0) {
+                if (voters[2].isEmpty()) {
                     findNavController().navigateUp()
                 }
             }
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters = SWTransferFundsAskTransactionData(block.transaction).userVotes(
-                    myPublicKey.toHex(),
-                    1
-                )
+                voters[2].remove(myPublicKey.toHex())
+                voters[1].add(myPublicKey.toString())
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -362,7 +354,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 ).show()
                 updateTabNames()
 
-                // TODO: send no vote for user
+                // Send no vote
+                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, false)
             }
             builder.show()
         }
@@ -372,10 +365,20 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }
     }
 
+    /**
+     * When the user has already voted, or made a vote
+     * It hides the vote button and maybe something more in the future.
+     */
     private fun userHasAlreadyVoted() {
         voteFab.visibility = View.GONE
     }
 
+    /**
+     * TODO:
+     * Get the primary corresponding to the signature.
+     * @param
+     * @return String - Public Key
+     */
     private fun getPK(
         signature: String,
         bitcoin_pks: ArrayList<String>,
@@ -405,5 +408,21 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }
 
         return "Unknown signature found"
+    }
+
+    /**
+     * Set the voters, ordered by if they voted in favor, against or not.
+     * @param participants - All the participants of the DAO.
+     * @param favorPKs - All the primary keys of people that already voted in favor.
+     * @param againstPKs - All the primary keys of people that already voted against.
+     */
+    private fun setVoters(participants: ArrayList<String>, favorPKs: ArrayList<String>, againstPKs: ArrayList<String>) {
+        voters[0] = favorPKs
+        voters[1] = againstPKs
+        voters[2] = participants
+
+        // If a user has already voted remove their entry from the participants
+        voters[2].removeAll(againstPKs)
+        voters[2].removeAll(favorPKs)
     }
 }

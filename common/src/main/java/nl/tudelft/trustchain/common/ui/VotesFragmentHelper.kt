@@ -13,11 +13,13 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import nl.tudelft.trustchain.common.R
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
-class TabsAdapter(fragment: Fragment, private val voters: HashMap<Int, ArrayList<String>>) :
+/**
+ * The adapter for showing the tab fragments in the voting fragment
+ */
+class TabsAdapter(fragment: Fragment, private val voters: Array<ArrayList<String>>) :
     FragmentStateAdapter(fragment) {
-
-    private var tabFragmentList = arrayListOf<TabFragment>()
 
     override fun getItemCount(): Int = 3
 
@@ -28,11 +30,13 @@ class TabsAdapter(fragment: Fragment, private val voters: HashMap<Int, ArrayList
             putInt("tabPosition", position)
             putStringArrayList("voters", voters[position])
         }
-        tabFragmentList.add(fragment)
         return fragment
     }
 }
 
+/**
+ * The fragment for showing the votes in a list
+ */
 class TabFragment : Fragment() {
 
     private lateinit var votesAdapter: VotesAdapter
@@ -63,6 +67,9 @@ class TabFragment : Fragment() {
     }
 }
 
+/**
+ * The adapter for showing the vote entries in the TabFragment in the list.
+ */
 class VotesAdapter(
     private val context: Context,
     private val voters: ArrayList<String>,
@@ -89,6 +96,7 @@ class VotesAdapter(
         val voter = voters[position]
         view.findViewById<TextView>(R.id.voter_name).text = voter
 
+        // If we have voted add the timestamp of the vote
         if (tabPosition != 2) {
             // TODO: Remove this when actual data
             val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
