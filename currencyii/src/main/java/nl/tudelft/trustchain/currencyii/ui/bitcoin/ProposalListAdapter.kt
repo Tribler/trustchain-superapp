@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -7,6 +8,7 @@ import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
@@ -33,14 +35,15 @@ class ProposalListAdapter(
 
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val againstSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val totalVoters = data.SW_BITCOIN_PKS
+            val requiredVotes = data.SW_SIGNATURES_REQUIRED
 
-            val signatures =
-                ArrayList(
-                    context.getCoinCommunity().fetchProposalSignatures(
-                        data.SW_UNIQUE_ID,
-                        data.SW_UNIQUE_PROPOSAL_ID
-                    )
-                )
+            if (requiredVotes > totalVoters.size - againstSignatures.size)  {
+                view.setBackgroundResource(R.drawable.border)
+            }
+
             about.text = "Transfer funds request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
@@ -51,13 +54,18 @@ class ProposalListAdapter(
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
 
-            val signatures =
-                ArrayList(
-                    context.getCoinCommunity().fetchProposalSignatures(
-                        data.SW_UNIQUE_ID,
-                        data.SW_UNIQUE_PROPOSAL_ID
-                    )
-                )
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val sw = context.getCoinCommunity().discoverSharedWallets()
+                .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == data.SW_UNIQUE_ID }[0]
+            val swData = SWJoinBlockTransactionData(sw.transaction).getData()
+            val againstSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val totalVoters = swData.SW_BITCOIN_PKS
+            val requiredVotes = data.SW_SIGNATURES_REQUIRED
+
+            if (requiredVotes > totalVoters.size - againstSignatures.size)  {
+                view.setBackgroundResource(R.drawable.border)
+            }
+
             about.text = "Join request"
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
@@ -66,8 +74,6 @@ class ProposalListAdapter(
 
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)
-        } else {
-            println(block.type)
         }
 
         return view
