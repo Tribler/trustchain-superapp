@@ -24,12 +24,18 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/price"
+                android:id="@+id/sub_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textSize="18sp"
-                android:visibility="visible" />
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/required_votes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="18sp" />
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout"

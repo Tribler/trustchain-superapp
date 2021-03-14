@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,32 +19,29 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.Address
-import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.Transaction
 
 /**
  * The class for showing the votes fragment. This class is helped by VotesFragmentHelper.kt in Common.
  * It shows the layout in R.layout.fragment_votes in common.
- * A user can here see the (up/down/undecided)votes
+ * A user can here see the (up/down/undecided)votes and send a vote himself
  */
 class VotesFragment : BaseFragment(R.layout.fragment_votes) {
-    // from common helper class
+    // From common helper class
     private lateinit var tabsAdapter: TabsAdapter
     private lateinit var viewPager: ViewPager2
 
     private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Not voted")
 
-    // from the layout class
+    // From the layout class
     private var voters: Array<ArrayList<String>> = arrayOf(ArrayList(), ArrayList(), ArrayList())
     private lateinit var title: TextView
-    private lateinit var price: TextView
+    private lateinit var subTitle: TextView
+    private lateinit var requiredVotes: TextView
     private lateinit var voteFab: ExtendedFloatingActionButton
     private lateinit var tabLayout: TabLayout
 
@@ -60,7 +58,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         title = view.findViewById(R.id.title)
-        price = view.findViewById(R.id.price)
+        subTitle = view.findViewById(R.id.sub_title)
+        requiredVotes = view.findViewById(R.id.required_votes)
         voteFab = view.findViewById(R.id.fab_user)
         tabLayout = view.findViewById(R.id.tab_layout)
         viewPager = view.findViewById(R.id.viewpager)
@@ -126,83 +125,67 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
 
         // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
+        // Get information about the shared wallet
         val sw = getCoinCommunity().discoverSharedWallets()
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
+        // Get the id of the person that wants to join
         val requestToJoinId = sw.publicKey.toHex()
 
         // Get my signature
-        val walletManager = WalletManagerAndroid.getInstance()
-
-        val latestHash = data.SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock =
-            getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-                ?: throw IllegalStateException("Most recent DAO block not found")
-        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
-            .SW_TRANSACTION_SERIALIZED
-
-        val newTransactionSerialized = data.SW_TRANSACTION_SERIALIZED
-        val mySignature = walletManager.safeSigningJoinWalletTransaction(
-            Transaction(walletManager.params, newTransactionSerialized.hexToBytes()),
-            Transaction(walletManager.params, oldTransaction.hexToBytes()),
-            walletManager.protocolECKey()
-        )
+        val mySignature = getCoinCommunity().getMySignatureJoinRequest(data)
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
-        // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
-        val signatures =ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID,data.SW_UNIQUE_PROPOSAL_ID))
+        // TODO get the PK of the users that already voted, the signatures aren't the same, but at least they represent the number of upvotes
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // TODO: get the PKs
-        val favorPKs = signatures //ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
-        val againstPKs = negativeSignatures //ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
+        val againstPKs = ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
 
+        // Set the voters so that they are visible in the different kind of tabs
         setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
 
-        val userHasVoted = voters[0].contains(mySignatureSerialized) || voters[1].contains(
+        // Check if I have already voted
+        val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
             mySignatureSerialized
         )
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
-        price.text = getString(
-            R.string.vote_join_request_message,
-            requestToJoinId,
-            walletId,
-            data.SW_SIGNATURES_REQUIRED
-        )
+        subTitle.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId)
+        // Check if the proposal can still be met.
+        if (getCoinCommunity().canWinJoinRequest(data)) {
+            requiredVotes.text = getString(R.string.votes_required, data.SW_SIGNATURES_REQUIRED)
+        } else {
+            requiredVotes.text = getString(R.string.votes_required_fails, data.SW_SIGNATURES_REQUIRED)
+            requiredVotes.setTextColor(Color.RED)
+        }
+        // Vote functionality
         voteFab.setOnClickListener { v ->
             val builder = AlertDialog.Builder(v.context)
             builder.setTitle(R.string.vote_join_request_title)
-            builder.setMessage(
-                getString(
-                    R.string.vote_join_request_message,
-                    requestToJoinId,
-                    walletId,
-                    data.SW_SIGNATURES_REQUIRED
-                )
-            )
+            builder.setMessage(getString(R.string.vote_join_request_message, requestToJoinId, walletId))
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
                 voters[2].remove(myPublicKey.toHex())
-                voters[0].add(myPublicKey.toString())
+                voters[0].add(myPublicKey.toHex())
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
-                Toast.makeText(
-                    v.context,
-                    getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(v.context, getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
                 updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
 
-
+                // TODO: Check if the proposal is met
                 if (voters[2].isEmpty()) {
                     findNavController().navigateUp()
                 }
@@ -211,18 +194,14 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
                 voters[2].remove(myPublicKey.toHex())
-                voters[1].add(myPublicKey.toString())
+                voters[1].add(myPublicKey.toHex())
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
-                Toast.makeText(
-                    v.context,
-                    getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(v.context, getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
                 updateTabNames()
 
                 // Send no vote
@@ -249,56 +228,45 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
         val priceString = data.SW_TRANSFER_FUNDS_AMOUNT.toString() + " Satoshi"
 
+        // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
+        // Get information about the shared wallet
         val sw = getCoinCommunity().discoverSharedWallets()
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
-
         // Get my signature
-        val walletManager = WalletManagerAndroid.getInstance()
-
-        val latestHash = data.SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock =
-            getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-                ?: throw IllegalStateException("Most recent DAO block not found")
-        val oldTransaction = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
-            .SW_TRANSACTION_SERIALIZED
-
-        val satoshiAmount = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT)
-        val previousTransaction = Transaction(
-            walletManager.params,
-            oldTransaction.hexToBytes()
-        )
-        val receiverAddress = Address.fromString(
-            walletManager.params,
-            data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
-        )
-        val mySignature = walletManager.safeSigningTransactionFromMultiSig(
-            previousTransaction,
-            walletManager.protocolECKey(),
-            receiverAddress,
-            satoshiAmount
-        )
-
+        val mySignature = getCoinCommunity().getMySignatureTransaction(data)
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
 
-        // TODO get the id of the users that already voted, the signatures aren't the same, but they represent the number of upvotes
+        // TODO get the PK of the users that already voted, the signatures aren't the same, but at least they represent the number of upvotes
+        // Get the favor and against votes
         val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // TODO: get the PKs
-        val favorPKs = signatures//ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
-        val againstPKs = negativeSignatures//ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, oldTransaction) })
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
+        val againstPKs = ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
 
+        // Set the voters so that they are visible in the different kind of tabs
         setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
 
-        val userHasVoted = voters[0].contains(mySignatureSerialized) || voters[1].contains(
+        // Check if I have already voted
+        val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
             mySignatureSerialized
         )
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
-        price.text = getString(R.string.bounty_payout, priceString, walletId)
+        subTitle.text = getString(R.string.bounty_payout, priceString, walletId)
+        // Check if the proposal can still be met.
+        if (getCoinCommunity().canWinTransferRequest(data)) {
+            requiredVotes.text = getString(R.string.votes_required, data.SW_SIGNATURES_REQUIRED)
+        } else {
+            requiredVotes.text = getString(R.string.votes_required_fails, data.SW_SIGNATURES_REQUIRED)
+            requiredVotes.setTextColor(Color.RED)
+        }
+        // Vote functionality
         voteFab.setOnClickListener { v ->
             val builder = AlertDialog.Builder(v.context)
             builder.setTitle(getString(R.string.bounty_payout, priceString, walletId))
@@ -315,23 +283,20 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
                 voters[2].remove(myPublicKey.toHex())
-                voters[0].add(myPublicKey.toString())
+                voters[0].add(myPublicKey.toHex())
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
-                Toast.makeText(
-                    v.context,
-                    getString(R.string.bounty_payout_upvoted, priceString, walletId),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(v.context, getString(R.string.bounty_payout_upvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
                 updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true)
 
+                // TODO: Check if the proposal is met
                 if (voters[2].isEmpty()) {
                     findNavController().navigateUp()
                 }
@@ -340,18 +305,14 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
                 voters[2].remove(myPublicKey.toHex())
-                voters[1].add(myPublicKey.toString())
+                voters[1].add(myPublicKey.toHex())
 
                 // Update the GUI
                 userHasAlreadyVoted()
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
-                Toast.makeText(
-                    v.context,
-                    getString(R.string.bounty_payout_downvoted, priceString, walletId),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(v.context, getString(R.string.bounty_payout_downvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
                 updateTabNames()
 
                 // Send no vote
@@ -382,29 +343,32 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private fun getPK(
         signature: String,
         bitcoin_pks: ArrayList<String>,
-        swTransactionSerialized: String
+        walletId: String,
+        proposalId: String
     ): String {
         val signatureKey = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
 
         for (pk in bitcoin_pks) {
-            val result = ECKey.verify(swTransactionSerialized.hexToBytes(), signatureKey, pk.hexToBytes())
+
+//            val block = getTrustChainCommunity().database.getBlocksWithType(CoinCommunity.SIGNATURE_AGREEMENT_NEGATIVE_BLOCK)
+//                .filter {
+//                    val blockData = SWResponseNegativeSignatureTransactionData(it.transaction)
+//                    blockData.matchesProposal(walletId, proposalId) && blockData.getData().SW_SIGNATURE_SERIALIZED == signature
+//                }[0]
+
+            val block = getTrustChainCommunity().database.getBlocksWithType(CoinCommunity.SIGNATURE_ASK_BLOCK).filter {
+                val blockData = SWSignatureAskTransactionData(it.transaction).getData()
+                blockData.SW_UNIQUE_ID == walletId && blockData.SW_UNIQUE_PROPOSAL_ID == proposalId
+            }[0]
+
+            val temp = SWSignatureAskTransactionData(block.transaction).getData().SW_TRANSACTION_SERIALIZED
+
+            val result = ECKey.verify(temp.hexToBytes(), signatureKey, pk.hexToBytes())
 
 
-            val walletManager = WalletManagerAndroid.getInstance()
-            val key = walletManager.protocolECKey().pubKey.toHex()
-//            val myPk = walletManager.networkPublicECKeyHex()
-            println(key)
-
-
-//            val message = "hello World"
-//            val signatureBytes = signature.hexToBytes()
-//            val signatureBase64 = Base64.getEncoder().encodeToString(signatureBytes)
-//            val key = ECKey.recoverFromSignature(1, signatureKey, Sha256Hash.of(swTransactionSerialized.hexToBytes()), true)
-//            println(key)
-//            key.toAddress(Address.fromBase58(null, pk).getParameters()).toString().equals(pk);
             println(result)
             println(bitcoin_pks)
-            println(swTransactionSerialized)
+//            println(swTransactionSerialized)
         }
 
         return "Unknown signature found"
