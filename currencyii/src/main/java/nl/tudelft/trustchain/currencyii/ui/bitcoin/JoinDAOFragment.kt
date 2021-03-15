@@ -30,7 +30,6 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initListeners()
-        this.refresh()
     }
 
     private fun initListeners() {
@@ -70,13 +69,11 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     }
 
     private fun fetchSharedWalletsAndUpdateUI() {
-        lifecycleScope.launch {
+       lifecycleScope.launch {
             withContext(Dispatchers.IO) {
                 setAlertText("Crawling blocks for DAOs...")
-
-                val discoveredWallets = getCoinCommunity().discoverSharedWallets()
+                val discoveredWallets = getCoinCommunity().discoverSharedWallets().toSet()
                 updateSharedWallets(discoveredWallets)
-                updateSharedWalletsUI()
                 crawlAvailableSharedWallets()
                 updateSharedWalletsUI()
 
@@ -91,7 +88,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
         }
     }
 
-    private fun updateSharedWallets(newWallets: List<TrustChainBlock>) {
+     private fun updateSharedWallets(newWallets: Set<TrustChainBlock>) {
         val walletIds = fetchedWallets.map {
             SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
         }
@@ -104,7 +101,6 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
             }
 
         Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
-
         for (wallet in distinctById) {
             val currentId = SWJoinBlockTransactionData(wallet.transaction).getData().SW_UNIQUE_ID
             if (!walletIds.contains(currentId)) {
@@ -120,11 +116,14 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun updateSharedWalletsUI() {
         lifecycleScope.launchWhenStarted {
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-
+            var uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
+            for (wallet in fetchedWallets.toSet()) {
+                uniqueWallets.add(wallet)
+            }
             // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
                 this@JoinDAOFragment,
-                fetchedWallets,
+                uniqueWallets,
                 publicKey,
                 "Click to join",
                 disableOnUserJoined = true
@@ -149,25 +148,26 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     /**
      * Crawl all shared wallet blocks of users in the trust chain.
      */
-    private suspend fun crawlAvailableSharedWallets() {
-        val allUsers = getDemoCommunity().getPeers()
-        Log.i("Coin", "Found ${allUsers.size} peers, crawling")
-
+        private suspend fun crawlAvailableSharedWallets() {
+        val allUsers = getTrustChainCommunity().getPeers()
+        val gtc = getTrustChainCommunity()
         for (peer in allUsers) {
             try {
-                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
-                    trustchain.crawlChain(peer)
-                    val crawlResult = trustchain
-                        .getChainByUser(peer.publicKey.keyToBin())
-
-                    updateSharedWallets(crawlResult)
-                }
+                val wallets = gtc.database.getBlocksWithType(JOIN_BLOCK)
+                    .distinctBy { parseTransactionDataGetWalletId(it.transaction) }.toSet()
+                updateSharedWallets(wallets)
             } catch (t: Throwable) {
                 val message = t.message ?: "No further information"
                 Log.i("Coin", "Crawling failed for: ${peer.publicKey}. $message.")
             }
         }
         disableRefresher()
+    }
+
+    fun parseTransactionDataGetWalletId(trans:TrustChainTransaction) : String {
+        val transaction = trans["message"].toString()
+        val transactionObj = JSONObject(transaction.substring(transaction.indexOf("{"), transaction.lastIndexOf("}") + 1))
+        return transactionObj["SW_UNIQUE_ID"].toString()
     }
 
     /**
