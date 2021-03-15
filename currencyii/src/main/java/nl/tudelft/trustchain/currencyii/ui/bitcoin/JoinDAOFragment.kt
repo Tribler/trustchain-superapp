@@ -30,7 +30,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initListeners()
-        this.refresh()
     }
 
     private fun initListeners() {
@@ -76,7 +75,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 
                 val discoveredWallets = getCoinCommunity().discoverSharedWallets()
                 updateSharedWallets(discoveredWallets)
-                updateSharedWalletsUI()
                 crawlAvailableSharedWallets()
                 updateSharedWalletsUI()
 
@@ -107,7 +105,6 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             }
 
         Log.i("Coin", "${distinctById.size} unique wallets founds. Adding if not present already.")
-
         for (wallet in distinctById) {
             val currentId = SWJoinBlockTransactionData(wallet.transaction).getData().SW_UNIQUE_ID
             if (!walletIds.contains(currentId)) {
