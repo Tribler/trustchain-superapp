@@ -10,19 +10,21 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_join_network.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskBlockTD
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.json.JSONObject
 
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
+class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
@@ -116,7 +118,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun updateSharedWalletsUI() {
         lifecycleScope.launchWhenStarted {
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-            var uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
+            val uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
             for (wallet in fetchedWallets.toSet()) {
                 uniqueWallets.add(wallet)
             }
@@ -153,7 +155,7 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
         val gtc = getTrustChainCommunity()
         for (peer in allUsers) {
             try {
-                val wallets = gtc.database.getBlocksWithType(JOIN_BLOCK)
+                val wallets = gtc.database.getBlocksWithType(CoinCommunity.JOIN_BLOCK)
                     .distinctBy { parseTransactionDataGetWalletId(it.transaction) }.toSet()
                 updateSharedWallets(wallets)
             } catch (t: Throwable) {
