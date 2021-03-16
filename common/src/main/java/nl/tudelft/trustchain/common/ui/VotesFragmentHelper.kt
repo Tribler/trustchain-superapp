@@ -11,9 +11,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import nl.tudelft.trustchain.common.R
-import java.text.SimpleDateFormat
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * The adapter for showing the tab fragments in the voting fragment
@@ -51,16 +48,13 @@ class TabFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         arguments?.takeIf {
-            it.containsKey("tabPosition")
+            it.containsKey("voters")
         }?.apply {
 
             val votesList = view.findViewById<ListView>(R.id.votes)
             votesAdapter = VotesAdapter(
                 view.context,
-                requireArguments().getStringArrayList("voters")!!,
-                requireArguments().getInt(
-                    "tabPosition"
-                )
+                requireArguments().getStringArrayList("voters")!!
             )
             votesList.adapter = votesAdapter
         }
@@ -72,10 +66,8 @@ class TabFragment : Fragment() {
  */
 class VotesAdapter(
     private val context: Context,
-    private val voters: ArrayList<String>,
-    private val tabPosition: Int
-) :
-    BaseAdapter() {
+    private val voters: ArrayList<String>
+) : BaseAdapter() {
 
     override fun getCount(): Int {
         return voters.size
@@ -93,17 +85,7 @@ class VotesAdapter(
         val view =
             LayoutInflater.from(context).inflate(R.layout.fragment_votes_entry, parent, false)
 
-        val voter = voters[position]
-        view.findViewById<TextView>(R.id.voter_name).text = voter
-
-        // If we have voted add the timestamp of the vote
-        if (tabPosition != 2) {
-            // TODO: Remove this when actual data
-            val simpleDateFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
-            val formatted = simpleDateFormat.format(Date())
-
-            view.findViewById<TextView>(R.id.voter_time).text = formatted.toString()
-        }
+        view.findViewById<TextView>(R.id.voter_name).text = voters[position]
 
         return view
     }

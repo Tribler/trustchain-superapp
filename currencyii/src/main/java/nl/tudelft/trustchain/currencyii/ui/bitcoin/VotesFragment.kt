@@ -141,12 +141,10 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val mySignature = getCoinCommunity().getMySignatureJoinRequest(data)
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
-        // TODO get the PK of the users that already voted, the signatures aren't the same, but at least they represent the number of upvotes
         // Get the favor and against votes
         val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
-        // TODO: get the PKs
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
         val againstPKs = ArrayList(negativeSignatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
@@ -188,11 +186,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
-
-                // TODO: Check if the proposal is met
-                if (voters[2].isEmpty()) {
-                    findNavController().navigateUp()
-                }
             }
 
             builder.setNeutralButton("NO") { _, _ ->
@@ -244,13 +237,10 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val mySignature = getCoinCommunity().getMySignatureTransaction(data)
         val mySignatureSerialized = mySignature.encodeToDER().toHex()
 
-
-        // TODO get the PK of the users that already voted, the signatures aren't the same, but at least they represent the number of upvotes
         // Get the favor and against votes
         val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
-        // TODO: get the PKs
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
         val againstPKs = ArrayList(negativeSignatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
@@ -301,11 +291,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send yes vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true)
-
-                // TODO: Check if the proposal is met
-                if (voters[2].isEmpty()) {
-                    findNavController().navigateUp()
-                }
             }
 
             builder.setNeutralButton("NO") { _, _ ->
