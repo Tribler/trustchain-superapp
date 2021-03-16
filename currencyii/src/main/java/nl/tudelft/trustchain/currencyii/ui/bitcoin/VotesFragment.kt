@@ -19,11 +19,12 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.*
 
 /**
  * The class for showing the votes fragment. This class is helped by VotesFragmentHelper.kt in Common.
@@ -101,6 +102,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * @return TrustChainBlock
      */
     private fun getSelectedBlock(blockId: String): TrustChainBlock? {
+        // TODO: Check if this is the correct way to fetch all proposal blocks, because sometimes it crashes?
         val allBlocks = getCoinCommunity().fetchProposalBlocks()
         for (block in allBlocks) {
             if (block.blockId == blockId) return block
@@ -116,6 +118,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * The method for setting the data for join requests
      */
     private fun signatureAskBlockVotes(blockId: String) {
+        val walletManager = WalletManagerAndroid.getInstance()
+        val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getSelectedBlock(blockId) ?: return
 
@@ -144,11 +148,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         // TODO: get the PKs
         // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
-        val againstPKs = ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
+        val favorPKs = ArrayList(signatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
+        val againstPKs = ArrayList(negativeSignatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
 
         // Set the voters so that they are visible in the different kind of tabs
-        setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
+        setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
 
         // Check if I have already voted
         val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
@@ -171,8 +175,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             builder.setMessage(getString(R.string.vote_join_request_message, requestToJoinId, walletId))
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters[2].remove(myPublicKey.toHex())
-                voters[0].add(myPublicKey.toHex())
+                voters[2].remove(myPublicBitcoinKey)
+                voters[0].add(myPublicBitcoinKey)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -193,8 +197,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters[2].remove(myPublicKey.toHex())
-                voters[1].add(myPublicKey.toHex())
+                voters[2].remove(myPublicBitcoinKey)
+                voters[1].add(myPublicBitcoinKey)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -219,6 +223,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * The method for setting the data for transfer funds requests
      */
     private fun transferFundsAskBlockVotes(blockId: String) {
+        val walletManager = WalletManagerAndroid.getInstance()
+        val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
         val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin()
         val block = getSelectedBlock(blockId) ?: return
 
@@ -246,11 +252,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         // TODO: get the PKs
         // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
-        val againstPKs = ArrayList(negativeSignatures.map { getPK(it, swData.SW_BITCOIN_PKS, data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID) })
+        val favorPKs = ArrayList(signatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
+        val againstPKs = ArrayList(negativeSignatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
 
         // Set the voters so that they are visible in the different kind of tabs
-        setVoters(swData.SW_TRUSTCHAIN_PKS, favorPKs, againstPKs)
+        setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
 
         // Check if I have already voted
         val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
@@ -282,8 +288,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             )
             builder.setPositiveButton("YES") { _, _ ->
                 // Update the voter's list, because I voted yes
-                voters[2].remove(myPublicKey.toHex())
-                voters[0].add(myPublicKey.toHex())
+                voters[2].remove(myPublicBitcoinKey)
+                voters[0].add(myPublicBitcoinKey)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -304,8 +310,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
             builder.setNeutralButton("NO") { _, _ ->
                 // Update the voter's list, because I voted no
-                voters[2].remove(myPublicKey.toHex())
-                voters[1].add(myPublicKey.toHex())
+                voters[2].remove(myPublicBitcoinKey)
+                voters[1].add(myPublicBitcoinKey)
 
                 // Update the GUI
                 userHasAlreadyVoted()
@@ -335,43 +341,101 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     }
 
     /**
-     * TODO:
      * Get the primary corresponding to the signature.
-     * @param
+     * @param signature - The signature string that signed the message
+     * @param bitcoin_pks - A list with all the bitcoin primary keys to compare the signature with
+     * @param block - The Trustchainblock
      * @return String - Public Key
      */
-    private fun getPK(
+    private fun getPKJoin(
         signature: String,
         bitcoin_pks: ArrayList<String>,
-        walletId: String,
-        proposalId: String
+        block: TrustChainBlock
     ): String {
-        val signatureKey = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
+        val signatureKey: ECKey.ECDSASignature = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
+
+        val latestHash = SWSignatureAskTransactionData(block.transaction).getData()
+            .SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransactionSerialized = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val blockData = SWSignatureAskTransactionData(block.transaction).getData()
+
+        val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
+        val newTransaction = Transaction(walletManager.params, newTransactionSerialized.hexToBytes())
+        val oldTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
+
+        val oldMultiSignatureOutput = walletManager.getMultiSigOutput(oldTransaction).unsignedOutput
+
+        val sighash: Sha256Hash = newTransaction.hashForSignature(
+            0,
+            oldMultiSignatureOutput.scriptPubKey,
+            Transaction.SigHash.ALL,
+            false
+        )
 
         for (pk in bitcoin_pks) {
-
-//            val block = getTrustChainCommunity().database.getBlocksWithType(CoinCommunity.SIGNATURE_AGREEMENT_NEGATIVE_BLOCK)
-//                .filter {
-//                    val blockData = SWResponseNegativeSignatureTransactionData(it.transaction)
-//                    blockData.matchesProposal(walletId, proposalId) && blockData.getData().SW_SIGNATURE_SERIALIZED == signature
-//                }[0]
-
-            val block = getTrustChainCommunity().database.getBlocksWithType(CoinCommunity.SIGNATURE_ASK_BLOCK).filter {
-                val blockData = SWSignatureAskTransactionData(it.transaction).getData()
-                blockData.SW_UNIQUE_ID == walletId && blockData.SW_UNIQUE_PROPOSAL_ID == proposalId
-            }[0]
-
-            val temp = SWSignatureAskTransactionData(block.transaction).getData().SW_TRANSACTION_SERIALIZED
-
-            val result = ECKey.verify(temp.hexToBytes(), signatureKey, pk.hexToBytes())
-
-
-            println(result)
-            println(bitcoin_pks)
-//            println(swTransactionSerialized)
+            val key = ECKey.fromPublicOnly(pk.hexToBytes())
+            val result = key.verify(sighash, signatureKey)
+            if (result) {
+                return pk
+            }
         }
+        return "Unrecognized signature received"
+    }
 
-        return "Unknown signature found"
+    /**
+     * Get the primary corresponding to the signature.
+     * @param signature - The signature string that signed the message
+     * @param bitcoin_pks - A list with all the bitcoin primary keys to compare the signature with
+     * @param block - The Trustchainblock
+     * @return String - Public Key
+     */
+    private fun getPKTransfer(
+        signature: String,
+        bitcoin_pks: ArrayList<String>,
+        block: TrustChainBlock
+    ): String {
+        val signatureKey: ECKey.ECDSASignature = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
+
+        val latestHash = SWTransferFundsAskTransactionData(block.transaction).getData()
+            .SW_PREVIOUS_BLOCK_HASH
+        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
+            ?: throw IllegalStateException("Most recent DAO block not found")
+        val oldTransactionSerialized = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
+            .SW_TRANSACTION_SERIALIZED
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
+
+        val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
+        val previousTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
+        val receiverAddress = Address.fromString(walletManager.params, blockData.SW_TRANSFER_FUNDS_TARGET_SERIALIZED)
+
+        val previousMultiSigOutput: TransactionOutput =
+            walletManager.getMultiSigOutput(previousTransaction).unsignedOutput
+
+        // Create the transaction which will have the multisig output as input,
+        // The outputs will be the receiver address and another one for residual funds
+        val spendTx =
+            walletManager.createMultiSigPaymentTx(receiverAddress, satoshiAmount, previousMultiSigOutput)
+
+        // Sign the transaction and return it.
+        val multiSigScript = previousMultiSigOutput.scriptPubKey
+        val sighash: Sha256Hash =
+            spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
+
+        for (pk in bitcoin_pks) {
+            val key = ECKey.fromPublicOnly(pk.hexToBytes())
+            val result = key.verify(sighash, signatureKey)
+            if (result) {
+                return pk
+            }
+        }
+        return "Unrecognized signature received"
     }
 
     /**
@@ -386,7 +450,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         voters[2] = participants
 
         // If a user has already voted remove their entry from the participants
-        voters[2].removeAll(againstPKs)
-        voters[2].removeAll(favorPKs)
+        for (favorPK in favorPKs) {
+            voters[2].remove(favorPK)
+        }
+        for (againstPk in againstPKs) {
+            voters[2].remove(againstPk)
+        }
     }
 }
