@@ -23,8 +23,7 @@ class TransactionRepository(
     }
 
     fun verifyGatewayIdentity(block: TrustChainBlock?): ValidationResult {
-        if (block != null)
-        {
+        if (block != null) {
             return ValidationResult.Valid
         }
         return ValidationResult.Valid
