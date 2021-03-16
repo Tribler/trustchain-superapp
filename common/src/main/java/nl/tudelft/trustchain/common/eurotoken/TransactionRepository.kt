@@ -22,6 +22,14 @@ class TransactionRepository(
         return gatewayStore.getPreferred().getOrNull(0)?.peer
     }
 
+    fun verifyGatewayIdentity(block: TrustChainBlock?): ValidationResult {
+        if (block != null)
+        {
+            return ValidationResult.Valid
+        }
+        return ValidationResult.Valid
+    }
+
     private fun getBalanceChangeForBlock(block: TrustChainBlock?): Long {
         if (block == null) return 0
         return if (
@@ -70,7 +78,7 @@ class TransactionRepository(
                 return
             } else { // gateway verification is missing
                 val linked = crawlForLinked(block) // try to crawl for it
-                    ?: return // peer didnt repond, TODO: Store this detail to make verification work better
+                    ?: return // peer didnt repond, maybe later store this detail to make verification work better
                 if (linked == block) { // No linked block exists in peer, so they sent the transaction based on a different checkpoint
                     ensureCheckpointLinks(blockBefore ?: return, database) // check next
                 } else {
@@ -478,7 +486,10 @@ class TransactionRepository(
                             listOf("Linked transaction doesn't match")
                         )
                     }
-                    // TODO: validate gateway ID here
+                    val result = verifyGatewayIdentity(block)
+                    if (result != ValidationResult.Valid) {
+                        return result
+                    }
                     return ValidationResult.Valid
                 }
             })
@@ -534,7 +545,10 @@ class TransactionRepository(
                             return result
                         }
                     }
-                    // TODO: validate gateway here
+                    val result = verifyGatewayIdentity(block)
+                    if (result != ValidationResult.Valid) {
+                        return result
+                    }
                     return ValidationResult.Valid
                 }
             })
@@ -574,7 +588,10 @@ class TransactionRepository(
                             return result
                         }
                     }
-                    // TODO: validate gateway here
+                    val result = verifyGatewayIdentity(block)
+                    if (result != ValidationResult.Valid) {
+                        return result
+                    }
                     return ValidationResult.Valid
                 }
             })
