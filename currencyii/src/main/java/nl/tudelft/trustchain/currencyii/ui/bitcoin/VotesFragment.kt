@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -103,7 +105,21 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      */
     private fun getSelectedBlock(blockId: String): TrustChainBlock? {
         // TODO: Check if this is the correct way to fetch all proposal blocks, because sometimes it crashes?
-        val allBlocks = getCoinCommunity().fetchProposalBlocks()
+        var allBlocks: List<TrustChainBlock> = getCoinCommunity().fetchProposalBlocks()
+
+        val allUsers = getDemoCommunity().getPeers()
+        for (peer in allUsers) {
+            lifecycleScope.launch {
+                trustchain.crawlChain(peer)
+            }
+            val crawlResult = trustchain
+                .getChainByUser(peer.publicKey.keyToBin())
+                .filter {
+                    it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                        it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                }
+            allBlocks = allBlocks + crawlResult
+        }
         for (block in allBlocks) {
             if (block.blockId == blockId) return block
         }
@@ -137,10 +153,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         // Get the id of the person that wants to join
         val requestToJoinId = sw.publicKey.toHex()
 
-        // Get my signature
-        val mySignature = getCoinCommunity().getMySignatureJoinRequest(data)
-        val mySignatureSerialized = mySignature.encodeToDER().toHex()
-
         // Get the favor and against votes
         val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
@@ -153,9 +165,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
 
         // Check if I have already voted
-        val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
-            mySignatureSerialized
-        )
+        userHasAlreadyVoted(myPublicBitcoinKey)
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         subTitle.text = getString(R.string.vote_join_request_message, requestToJoinId, walletId)
@@ -177,7 +187,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 voters[0].add(myPublicBitcoinKey)
 
                 // Update the GUI
-                userHasAlreadyVoted()
+                userHasAlreadyVoted(myPublicBitcoinKey)
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
@@ -194,7 +204,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 voters[1].add(myPublicBitcoinKey)
 
                 // Update the GUI
-                userHasAlreadyVoted()
+                userHasAlreadyVoted(myPublicBitcoinKey)
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
@@ -205,10 +215,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false)
             }
             builder.show()
-        }
-
-        if (userHasVoted) {
-            userHasAlreadyVoted()
         }
     }
 
@@ -233,10 +239,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
-        // Get my signature
-        val mySignature = getCoinCommunity().getMySignatureTransaction(data)
-        val mySignatureSerialized = mySignature.encodeToDER().toHex()
-
         // Get the favor and against votes
         val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
@@ -249,9 +251,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
 
         // Check if I have already voted
-        val userHasVoted = signatures.contains(mySignatureSerialized) || negativeSignatures.contains(
-            mySignatureSerialized
-        )
+        userHasAlreadyVoted(myPublicBitcoinKey)
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
         subTitle.text = getString(R.string.bounty_payout, priceString, walletId)
@@ -282,7 +282,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 voters[0].add(myPublicBitcoinKey)
 
                 // Update the GUI
-                userHasAlreadyVoted()
+                userHasAlreadyVoted(myPublicBitcoinKey)
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 0
@@ -299,7 +299,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 voters[1].add(myPublicBitcoinKey)
 
                 // Update the GUI
-                userHasAlreadyVoted()
+                userHasAlreadyVoted(myPublicBitcoinKey)
                 tabsAdapter = TabsAdapter(this, voters)
                 viewPager.adapter = tabsAdapter
                 viewPager.currentItem = 1
@@ -311,18 +311,16 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             }
             builder.show()
         }
-
-        if (userHasVoted) {
-            userHasAlreadyVoted()
-        }
     }
 
     /**
      * When the user has already voted, or made a vote
      * It hides the vote button and maybe something more in the future.
      */
-    private fun userHasAlreadyVoted() {
-        voteFab.visibility = View.GONE
+    private fun userHasAlreadyVoted(myPublicBitcoinKey: String) {
+        if (!voters[2].contains(myPublicBitcoinKey)) {
+            voteFab.visibility = View.GONE
+        }
     }
 
     /**
