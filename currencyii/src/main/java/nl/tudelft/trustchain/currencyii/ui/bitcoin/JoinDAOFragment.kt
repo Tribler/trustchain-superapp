@@ -121,7 +121,9 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         lifecycleScope.launchWhenStarted {
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
             val uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
-            for (wallet in fetchedWallets) {
+            val walletCopy = arrayListOf<TrustChainBlock>()
+            walletCopy.addAll(fetchedWallets)
+            for (wallet in walletCopy) {
                 if (!uniqueWallets.contains(wallet)) uniqueWallets.add(wallet)
             }
             // Update the list view with the found shared wallets
