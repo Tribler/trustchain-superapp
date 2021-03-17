@@ -40,7 +40,9 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
     private fun updateProposalListUI() {
         activity?.runOnUiThread {
             val uniqueProposals:ArrayList<TrustChainBlock> = ArrayList()
-            for (proposal in proposals) {
+            val proposalCopy = arrayListOf<TrustChainBlock>()
+            proposalCopy.addAll(proposals)
+            for (proposal in proposalCopy) {
                 if (!uniqueProposals.contains(proposal)) uniqueProposals.add(proposal)
             }
             val adaptor = ProposalListAdapter(this, uniqueProposals)
