@@ -164,6 +164,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 
         for (peer in allUsers) {
             try {
+                // TODO: Commented this line out, it causes the app to crash
 //                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
                 trustchain.crawlChain(peer)
                 val crawlResult = trustchain
