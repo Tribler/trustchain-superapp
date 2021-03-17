@@ -92,7 +92,10 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     }
 
     private fun updateSharedWallets(newWallets: List<TrustChainBlock>) {
-        val walletIds = fetchedWallets.map {
+        // This copy prevents the ConcurrentModificationException
+        val walletsCopy = arrayListOf<TrustChainBlock>()
+        walletsCopy.addAll(fetchedWallets)
+        val walletIds = walletsCopy.map {
             SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
         }
         val distinctById = newWallets
@@ -121,6 +124,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         lifecycleScope.launchWhenStarted {
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
             val uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
+            // This copy prevents the ConcurrentModificationException
             val walletCopy = arrayListOf<TrustChainBlock>()
             walletCopy.addAll(fetchedWallets)
             for (wallet in walletCopy) {
