@@ -36,7 +36,7 @@ class DAOJoinHelper {
      * **NOTE** the latest walletBlockData should be given, otherwise the serialized transaction is invalid.
      * @param mostRecentWalletBlock - the latest (that you know of) shared wallet block.
      */
-    public fun proposeJoinWallet(
+    fun proposeJoinWallet(
         myPeer: Peer,
         mostRecentWalletBlock: TrustChainBlock
     ): SWSignatureAskTransactionData {
@@ -50,12 +50,15 @@ class DAOJoinHelper {
         val requiredSignatures =
             SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
 
+        val proposalID = SWUtil.randomUUID()
+
         var askSignatureBlockData = SWSignatureAskTransactionData(
             blockData.SW_UNIQUE_ID,
             serializedTransaction,
             mostRecentBlockHash,
             requiredSignatures,
-            ""
+            "",
+            proposalID
         )
 
         for (swParticipantPk in blockData.SW_TRUSTCHAIN_PKS) {
@@ -68,7 +71,8 @@ class DAOJoinHelper {
                 serializedTransaction,
                 mostRecentBlockHash,
                 requiredSignatures,
-                swParticipantPk
+                swParticipantPk,
+                proposalID
             )
 
             trustchain.createProposalBlock(

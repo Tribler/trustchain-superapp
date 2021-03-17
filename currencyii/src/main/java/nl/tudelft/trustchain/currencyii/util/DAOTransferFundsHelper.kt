@@ -30,7 +30,7 @@ class DAOTransferFundsHelper {
      * 3.1 Send a proposal block on trustchain to ask for the signatures.
      * Assumed that people agreed to the transfer.
      */
-    public fun proposeTransferFunds(
+    fun proposeTransferFunds(
         myPeer: Peer,
         mostRecentWallet: TrustChainBlock,
         receiverAddressSerialized: String,
@@ -43,6 +43,8 @@ class DAOTransferFundsHelper {
         val requiredSignatures =
             SWUtil.percentageToIntThreshold(total, walletData.SW_VOTING_THRESHOLD)
 
+        val proposalID = SWUtil.randomUUID()
+
         var askSignatureBlockData = SWTransferFundsAskTransactionData(
             walletData.SW_UNIQUE_ID,
             walletHash,
@@ -50,7 +52,8 @@ class DAOTransferFundsHelper {
             satoshiAmount,
             walletData.SW_BITCOIN_PKS,
             receiverAddressSerialized,
-            ""
+            "",
+            proposalID
         )
 
         for (swParticipantPk in walletData.SW_TRUSTCHAIN_PKS) {
@@ -65,7 +68,8 @@ class DAOTransferFundsHelper {
                 satoshiAmount,
                 walletData.SW_BITCOIN_PKS,
                 receiverAddressSerialized,
-                swParticipantPk
+                swParticipantPk,
+                proposalID
             )
 
             trustchain.createProposalBlock(
@@ -80,7 +84,7 @@ class DAOTransferFundsHelper {
     /**
      * 3.2 Transfer funds from an existing shared wallet to a third-party. Broadcast bitcoin transaction.
      */
-    public fun transferFunds(
+    fun transferFunds(
         myPeer: Peer,
         transferFundsData: SWTransferFundsAskTransactionData,
         walletData: SWJoinBlockTD,
@@ -170,7 +174,7 @@ class DAOTransferFundsHelper {
         /**
          * Given a shared wallet transfer fund proposal block, calculate the signature and send an agreement block.
          */
-        public fun transferFundsBlockReceived(
+        fun transferFundsBlockReceived(
             oldTransactionSerialized: String,
             block: TrustChainBlock,
             myPublicKey: ByteArray,

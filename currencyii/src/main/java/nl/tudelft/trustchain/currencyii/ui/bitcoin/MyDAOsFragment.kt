@@ -165,4 +165,9 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
             )
         }
     }
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = JoinDAOFragment()
+    }
 }

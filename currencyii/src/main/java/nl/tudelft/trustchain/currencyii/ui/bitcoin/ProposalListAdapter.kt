@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.view.marginBottom
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock

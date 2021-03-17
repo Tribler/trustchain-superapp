@@ -12,7 +12,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import org.bitcoinj.core.Coin
 import java.util.concurrent.TimeUnit
 
-class DAOCreateHelper() {
+class DAOCreateHelper {
     private fun getTrustChainCommunity(): TrustChainCommunity {
 
         return IPv8Android.getInstance().getOverlay()
@@ -36,7 +36,7 @@ class DAOCreateHelper() {
      }is valid, the result is broadcasted on trust chain.
      * **Throws** exceptions if something goes wrong with creating or broadcasting bitcoin transaction.
      */
-    public fun createBitcoinGenesisWallet(
+    fun createBitcoinGenesisWallet(
         myPeer: Peer,
         entranceFee: Long,
         threshold: Int,
