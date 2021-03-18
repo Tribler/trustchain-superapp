@@ -427,7 +427,11 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * @param favorPKs - All the primary keys of people that already voted in favor.
      * @param againstPKs - All the primary keys of people that already voted against.
      */
-    private fun setVoters(participants: ArrayList<String>, favorPKs: ArrayList<String>, againstPKs: ArrayList<String>) {
+    private fun setVoters(
+        participants: ArrayList<String>,
+        favorPKs: ArrayList<String>,
+        againstPKs: ArrayList<String>
+    ) {
         voters[0] = favorPKs
         voters[1] = againstPKs
         voters[2] = participants

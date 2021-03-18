@@ -4,8 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.trustchain.currencyii.CoinCommunity
-import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-
 
 data class SWTransferFundsAskBlockTD(
     var SW_UNIQUE_ID: String,

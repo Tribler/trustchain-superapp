@@ -2,7 +2,6 @@ package com.example.musicdao.wallet
 
 import android.util.Log
 import android.widget.Toast
-import androidx.navigation.fragment.findNavController
 import com.example.musicdao.MusicService
 import org.bitcoinj.core.*
 import org.bitcoinj.core.listeners.DownloadProgressTracker
@@ -24,7 +23,6 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
 
-
 /**
  * Interaction with a BitcoinJ wallet
  */
@@ -38,11 +36,11 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
     private var currentTransactionAmount: Long = 0
     private lateinit var currentTransactionInput: TransactionInput
-    private var spendTx : Transaction? = null
-    private lateinit var currentTransaction : Transaction
+    private var spendTx: Transaction? = null
+    private lateinit var currentTransaction: Transaction
     private lateinit var currentAddress: Address
-    private lateinit var clientKey : ECKey
-    private lateinit var serverKey : ECKey
+    private lateinit var clientKey: ECKey
+    private lateinit var serverKey: ECKey
     private var clientSignature: ECKey.ECDSASignature? = null
     private var serverSignature: ECKey.ECDSASignature? = null
 
@@ -173,8 +171,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         currentTransaction.addOutput(coin, script)
     }
 
-
-    fun signWalletOwner() : Boolean {
+    fun signWalletOwner(): Boolean {
         // serverside
         val multisigOutput = currentTransaction.getOutput(0)
         val multisigScript = multisigOutput.scriptPubKey
@@ -188,7 +185,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
         val coinValue = multisigOutput.value
 
-        if(spendTx == null) {
+        if (spendTx == null) {
             spendTx = Transaction(params)
             spendTx!!.addOutput(coinValue, currentAddress)
             currentTransactionInput = spendTx!!.addInput(multisigOutput)
@@ -202,7 +199,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         return verifyTransaction()
     }
 
-    fun signwalletUser(): Boolean{
+    fun signwalletUser(): Boolean {
         // serverside
         val multisigOutput = currentTransaction.getOutput(0)
         val multisigScript = multisigOutput.scriptPubKey
@@ -216,7 +213,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
 
         val coinValue = multisigOutput.value
 
-        if(spendTx == null) {
+        if (spendTx == null) {
             spendTx = Transaction(params)
             spendTx!!.addOutput(coinValue, currentAddress)
             currentTransactionInput = spendTx!!.addInput(multisigOutput)
@@ -230,9 +227,9 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         return verifyTransaction()
     }
 
-    fun verifyTransaction() : Boolean {
+    fun verifyTransaction(): Boolean {
         // complete transaction
-        if(clientSignature == null || serverSignature == null) return false
+        if (clientSignature == null || serverSignature == null) return false
 
         val transactionSignatures = listOf<ECKey.ECDSASignature>(clientSignature!!, serverSignature!!).map { sig ->
             TransactionSignature(sig, Transaction.SigHash.ALL, false)

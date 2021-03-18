@@ -48,7 +48,7 @@ class ProposalListAdapter(
             }
 
             // If the proposal can't be met anymore, draw a red border
-            if (!context.getCoinCommunity().canWinTransferRequest(data))  {
+            if (!context.getCoinCommunity().canWinTransferRequest(data)) {
                 view.setBackgroundResource(R.drawable.border)
                 println(view.paddingBottom)
                 println(view.marginBottom)
@@ -76,7 +76,7 @@ class ProposalListAdapter(
             }
 
             // If the proposal can't be met anymore, draw a red border
-            if (!context.getCoinCommunity().canWinJoinRequest(data))  {
+            if (!context.getCoinCommunity().canWinJoinRequest(data)) {
                 view.setBackgroundResource(R.drawable.border)
             }
 

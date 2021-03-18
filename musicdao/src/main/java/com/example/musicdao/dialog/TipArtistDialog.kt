@@ -2,7 +2,6 @@ package com.example.musicdao.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView

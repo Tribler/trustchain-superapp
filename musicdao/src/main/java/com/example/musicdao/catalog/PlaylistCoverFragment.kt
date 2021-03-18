@@ -39,7 +39,7 @@ class PlaylistCoverFragment(
         votes.setOnClickListener {
 //            TODO set price
             val action =
-                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToVotesFragment(artists, "35");
+                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToVotesFragment(artists, "35")
             findNavController().navigate(action)
         }
         if (coverArt != null) {
