@@ -4,7 +4,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.core.view.marginBottom
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
@@ -50,9 +49,6 @@ class ProposalListAdapter(
             // If the proposal can't be met anymore, draw a red border
             if (!context.getCoinCommunity().canWinTransferRequest(data)) {
                 view.setBackgroundResource(R.drawable.border)
-                println(view.paddingBottom)
-                println(view.marginBottom)
-                view.paddingBottom
             }
 
             about.text = "Transfer funds request"

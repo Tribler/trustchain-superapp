@@ -51,21 +51,6 @@
 
     </LinearLayout>
 
-    <!-- TODO: Remove this, it is only for demo purposes -->
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/fab_demo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
-        android:layout_margin="20dp"
-        android:backgroundTint="#FFEB3B"
-        android:contentDescription="@string/vote"
-        android:gravity="center"
-        android:text="@string/voteDemo"
-        android:theme="@style/VoteButton"
-        android:visibility="gone"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlayExtended" />
-
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_user"
         android:layout_width="wrap_content"

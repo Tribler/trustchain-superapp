@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.currencyii.util
 
-import android.util.Log
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -88,7 +87,6 @@ class DAOCreateHelper {
             arrayListOf(bitcoinPublicKey)
         )
 
-        Log.i("Callum", "[DAOCreateHelper] BlockType: ${blockData.blockType}")
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)
     }
 }
