@@ -183,7 +183,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
 
     private fun validateTransferInput(): Boolean {
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
-        val satoshiTransferAmount:Long = try {
+        val satoshiTransferAmount: Long = try {
             input_satoshi_amount.text.toString().toLong()
         } catch (e: NumberFormatException) {
             0
