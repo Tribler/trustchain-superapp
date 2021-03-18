@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.eurotoken.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
@@ -11,7 +12,10 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -33,12 +37,48 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         ContactStore.getInstance(requireContext())
     }
 
+    private val onReceiveListener = object : BlockListener {
+        override fun onBlockReceived(block: TrustChainBlock) {
+            if (block.isAgreement && block.publicKey.contentEquals(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                playMoneySound()
+                makeMoneyToast()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
+
+        lifecycleScope.launchWhenResumed {
+        }
     }
 
+    fun makeMoneyToast(){
+        Toast.makeText(requireContext(), "Money received!", Toast.LENGTH_LONG).show()
+    }
+
+    fun playMoneySound() {
+        val afd = activity?.assets?.openFd("Coins.mp3") ?: return
+        val player = MediaPlayer();
+        player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length);
+        player.prepare();
+        player.start();
+    }
+
+
+    override fun onResume() {
+        transactionRepository.trustChainCommunity.addListener(TransactionRepository.BLOCK_TYPE_TRANSFER, onReceiveListener)
+        transactionRepository.trustChainCommunity.addListener(TransactionRepository.BLOCK_TYPE_CREATE, onReceiveListener)
+        super.onResume()
+    }
+
+    override fun onPause() {
+        transactionRepository.trustChainCommunity.removeListener(onReceiveListener, TransactionRepository.BLOCK_TYPE_TRANSFER)
+        transactionRepository.trustChainCommunity.removeListener(onReceiveListener, TransactionRepository.BLOCK_TYPE_CREATE)
+        super.onPause()
+    }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.eurotoken_options, menu)

@@ -4,7 +4,7 @@
     <item
         android:id="@+id/transferFragment"
         android:icon="@drawable/ic_baseline_euro_symbol_24"
-        android:title="Transfer" />
+        android:title="Balance" />
     <item
         android:id="@+id/transactionsFragment"
         android:icon="@drawable/ic_baseline_trans_hist_alt_24"

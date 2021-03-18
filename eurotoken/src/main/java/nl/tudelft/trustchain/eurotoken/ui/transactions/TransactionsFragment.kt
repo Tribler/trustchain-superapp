@@ -90,13 +90,13 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
 
         fun showOptions(transaction: Transaction) {
             if (!transaction.outgoing && transaction.block.type == TransactionRepository.BLOCK_TYPE_TRANSFER) {
-                val items = arrayOf("Resend", "Pay back")//, "Roll back")
+                val items = arrayOf("Resend", "Pay back", "Roll back")
                 AlertDialog.Builder(requireContext())
                     .setItems(items) { _, which ->
                         when (which) {
                             0 -> resendBlock(transaction)
                             1 -> payBack(transaction)
-//                            2 -> rollBack(transaction)
+                            2 -> rollBack(transaction)
                         }
                     }
                     .show()
@@ -132,7 +132,7 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
                 binding.txtBalance.text =
                     TransactionRepository.prettyAmount(transactionRepository.getMyVerifiedBalance())
                 if (ownContact?.name != null) {
-                    binding.txtOwnName.text = "Your verified balance (" + ownContact.name + ")"
+                    binding.txtOwnName.text = "Your balance (" + ownContact.name + ")"
                 }
                 delay(1000L)
             }

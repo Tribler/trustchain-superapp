@@ -8,12 +8,12 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentDestroyMoneyBinding
+import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
+class DestroyMoneyFragment : EurotokenBaseFragment(R.layout.fragment_destroy_money) {
 
     private var addGateway = false
     private var setPreferred = false
@@ -22,10 +22,6 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
 
     private val gatewayStore by lazy {
         GatewayStore.getInstance(requireContext())
-    }
-
-    private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private val ownPublicKey by lazy {
@@ -105,7 +101,7 @@ class DestroyMoneyFragment : BaseFragment(R.layout.fragment_destroy_money) {
             } else if (setPreferred && gateway != null) {
                 GatewayStore.getInstance(requireContext()).setPreferred(gateway)
             }
-            transactionRepository.sendDestroyProposal(
+            transactionRepository.sendDestroyProposalWithPaymentID(
                 publicKey.hexToBytes(),
                 ip,
                 port,

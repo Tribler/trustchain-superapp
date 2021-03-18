@@ -14,8 +14,9 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
+import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
-class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
+class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
     private var addContact = false
 
@@ -23,10 +24,6 @@ class SendMoneyFragment : BaseFragment(R.layout.fragment_send_money) {
 
     private val gatewayStore by lazy {
         GatewayStore.getInstance(requireContext())
-    }
-
-    private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private val ownPublicKey by lazy {
