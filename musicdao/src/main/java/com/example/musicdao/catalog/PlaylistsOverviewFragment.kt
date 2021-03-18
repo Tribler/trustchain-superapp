@@ -142,17 +142,17 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
                 release_overview_layout.removeAllViews()
             }
         }
-        playlistCoverFragments = refreshReleaseBlocks(sortedMap)
+        refreshReleaseBlocks(sortedMap)
     }
 
     /**
      * @param releaseBlocks map of: release block, number of (known) seeders
      */
-    fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): ArrayList<PlaylistCoverFragment> {
+    fun refreshReleaseBlocks(releaseBlocks: Map<TrustChainBlock, Int>): Int {
         var count = 0
         val coverFragments: ArrayList<PlaylistCoverFragment> = ArrayList()
         for ((block, connectivity) in releaseBlocks) {
-            if (count == maxPlaylists) return coverFragments
+            if (count == maxPlaylists) return count
             val magnet = block.transaction["magnet"]
             val title = block.transaction["title"]
             val torrentInfoName = block.transaction["torrentInfoName"]
@@ -184,7 +184,8 @@ class PlaylistsOverviewFragment : MusicBaseFragment(R.layout.fragment_release_ov
         if (count != 0) {
             releaseRefreshCount += 1
         }
-        return coverFragments
+        playlistCoverFragments = coverFragments
+        return count
     }
 
     /**
