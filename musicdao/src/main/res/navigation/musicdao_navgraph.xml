@@ -31,31 +31,15 @@
                 android:name="torrentInfoName"
                 app:argType="string" />
         </action>
-        <action
-            android:id="@+id/action_playlistsOverviewFragment_to_votesFragment"
-            app:destination="@id/votesFragment">
-            <argument
-                android:name="artists"
-                app:argType="string" />
-            <argument
-                android:name="amount"
-                app:argType="string" />
-        </action>
-
     </fragment>
 
     <fragment
         android:id="@+id/playlistFragment"
         android:name="com.example.musicdao.playlist.PlaylistFragment"
-        android:label="Playlist" />
+        android:label="Playlist"></fragment>
 
     <fragment
         android:id="@+id/walletFragment"
         android:name="com.example.musicdao.wallet.WalletFragment"
-        android:label="Wallet overview" />
-
-    <fragment
-        android:id="@+id/votesFragment"
-        android:name="com.example.musicdao.playlist.VotesFragment"
-        android:label="Votes" />
+        android:label="Wallet overview"></fragment>
 </navigation>

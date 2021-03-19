@@ -51,65 +51,6 @@
                 android:text="Seeders: "
                 android:textColor="@color/musicColorAccent"
                 android:textSize="12dp" />
-
-            <LinearLayout
-                android:id="@+id/votes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:text="Votes"
-                    android:textColor="@color/mild_gray" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:src="@drawable/ic_baseline_arrow_upward_24"
-                        android:contentDescription="@string/upvotes" />
-
-                    <TextView
-                        android:id="@+id/votes_up"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="1"
-                        android:textColor="@color/mild_gray" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:src="@drawable/ic_baseline_arrow_downward_24"
-                        android:contentDescription="@string/downvotes" />
-
-                    <TextView
-                        android:id="@+id/votes_down"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:text="2"
-                        android:textColor="@color/mild_gray" />
-                </LinearLayout>
-            </LinearLayout>
         </LinearLayout>
 
     </RelativeLayout>

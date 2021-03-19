@@ -1,16 +1,14 @@
 package com.example.musicdao.wallet
 
-import android.util.Log
 import android.widget.Toast
 import com.example.musicdao.MusicService
-import org.bitcoinj.core.*
+import org.bitcoinj.core.Address
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.ECKey
+import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.core.listeners.DownloadProgressTracker
-import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
-import org.bitcoinj.script.ScriptBuilder
-import org.bitcoinj.script.ScriptException
-import org.bitcoinj.script.ScriptPattern
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
@@ -33,16 +31,6 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
     private val filePrefix = CryptoCurrencyConfig.chainFileName
     private var started = false
     var percentageSynced = 0
-
-    private var currentTransactionAmount: Long = 0
-    private lateinit var currentTransactionInput: TransactionInput
-    private var spendTx: Transaction? = null
-    private lateinit var currentTransaction: Transaction
-    private lateinit var currentAddress: Address
-    private lateinit var clientKey: ECKey
-    private lateinit var serverKey: ECKey
-    private var clientSignature: ECKey.ECDSASignature? = null
-    private var serverSignature: ECKey.ECDSASignature? = null
 
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
@@ -140,131 +128,6 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
             e.printStackTrace()
             ""
         }
-    }
-
-    fun createProposal(publicKey: String, coinsAmount: String) {
-        println(publicKey)
-        val coins = try {
-            BigDecimal(coinsAmount.toDouble())
-        } catch (e: NumberFormatException) {
-            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
-            return
-        }
-
-        currentTransactionAmount = (coins * SATS_PER_BITCOIN).toLong()
-
-        try {
-            currentAddress = Address.fromString(params, "mkd6JAvpH4VNVXFSz8wrq3pQccwGHCT9f7")
-        } catch (e: Exception) {
-            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
-            return
-        }
-
-        clientKey = app.wallet().issuedReceiveKeys[0]
-        serverKey = ECKey()
-
-        currentTransaction = Transaction(params)
-
-        val keys = listOf(clientKey, serverKey)
-        val script = ScriptBuilder.createMultiSigOutputScript(2, keys)
-        val coin = Coin.valueOf(currentTransactionAmount)
-        currentTransaction.addOutput(coin, script)
-    }
-
-    fun signWalletOwner(): Boolean {
-        // serverside
-        val multisigOutput = currentTransaction.getOutput(0)
-        val multisigScript = multisigOutput.scriptPubKey
-
-        try {
-            check(ScriptPattern.isSentToMultisig(multisigScript))
-        } catch (e: Exception) {
-            musicService.showToast("multisig script doesn't match format", Toast.LENGTH_LONG)
-            return false
-        }
-
-        val coinValue = multisigOutput.value
-
-        if (spendTx == null) {
-            spendTx = Transaction(params)
-            spendTx!!.addOutput(coinValue, currentAddress)
-            currentTransactionInput = spendTx!!.addInput(multisigOutput)
-        }
-
-        // send it to client
-
-        val sighash = spendTx!!.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-        serverSignature = serverKey.sign(sighash)
-
-        return verifyTransaction()
-    }
-
-    fun signwalletUser(): Boolean {
-        // serverside
-        val multisigOutput = currentTransaction.getOutput(0)
-        val multisigScript = multisigOutput.scriptPubKey
-
-        try {
-            check(ScriptPattern.isSentToMultisig(multisigScript))
-        } catch (e: Exception) {
-            musicService.showToast("multisig script doesn't match format", Toast.LENGTH_LONG)
-            return false
-        }
-
-        val coinValue = multisigOutput.value
-
-        if (spendTx == null) {
-            spendTx = Transaction(params)
-            spendTx!!.addOutput(coinValue, currentAddress)
-            currentTransactionInput = spendTx!!.addInput(multisigOutput)
-        }
-
-        // send it to client
-
-        val sighashClient = spendTx!!.hashForSignature(0, multisigScript, Transaction.SigHash.ALL, false)
-        clientSignature = clientKey.sign(sighashClient)
-
-        return verifyTransaction()
-    }
-
-    fun verifyTransaction(): Boolean {
-        // complete transaction
-        if (clientSignature == null || serverSignature == null) return false
-
-        val transactionSignatures = listOf<ECKey.ECDSASignature>(clientSignature!!, serverSignature!!).map { sig ->
-            TransactionSignature(sig, Transaction.SigHash.ALL, false)
-        }
-        val inputScript = ScriptBuilder.createMultiSigInputScript(transactionSignatures)
-
-        currentTransactionInput.scriptSig = inputScript
-
-        try {
-            currentTransactionInput.verify(currentTransaction.getOutput(0))
-        } catch (e: ScriptException) {
-            Log.i("TYFUS", e.toString())
-            musicService.showToast(e.toString(), Toast.LENGTH_LONG)
-            return false
-        }
-
-        val req = SendRequest.forTx(currentTransaction)
-        app.wallet().completeTx(req)
-
-        app.peerGroup().broadcastTransaction(req.tx)
-
-        try {
-            musicService.showToast(
-                "Sending funds: ${
-                Coin.valueOf(currentTransactionAmount).toFriendlyString()
-                }", Toast.LENGTH_SHORT
-            )
-            return true
-        } catch (e: Exception) {
-            musicService.showToast(
-                "Error creating transaction (do you have sufficient funds?)",
-                Toast.LENGTH_SHORT
-            )
-        }
-        return false
     }
 
     /**

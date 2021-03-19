@@ -6,11 +6,6 @@
     android:layout_height="wrap_content"
     tools:context=".MusicService">
     <item
-        android:id="@+id/action_sync"
-        android:icon="@drawable/ic_baseline_sync_24"
-        android:title="@string/sync_hint"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_debug"
         android:icon="@drawable/ic_baseline_bar_chart_24"
         android:title="@string/debug_hint"

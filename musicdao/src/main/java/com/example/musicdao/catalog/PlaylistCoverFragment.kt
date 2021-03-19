@@ -36,12 +36,6 @@ class PlaylistCoverFragment(
         coverTitle.text = title
         coverArtists.text = artists
         seedCount.text = "Peers: $connectivity"
-        votes.setOnClickListener {
-//            TODO set price
-            val action =
-                PlaylistsOverviewFragmentDirections.actionPlaylistsOverviewFragmentToVotesFragment(artists, "35")
-            findNavController().navigate(action)
-        }
         if (coverArt != null) {
             coverArtImage.setImageURI(Uri.fromFile(coverArt))
         }
