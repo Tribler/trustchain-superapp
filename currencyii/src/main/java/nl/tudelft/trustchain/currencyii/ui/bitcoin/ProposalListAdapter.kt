@@ -55,7 +55,7 @@ class ProposalListAdapter(
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = signatures.size.toString() + "/" + data.SW_SIGNATURES_REQUIRED.toString()
+            signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = "${data.SW_TRANSFER_FUNDS_AMOUNT} Satoshi"
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
@@ -80,7 +80,7 @@ class ProposalListAdapter(
             createdAt.text = formatter.format(block.timestamp)
             doaId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = signatures.size.toString() + "/" + data.SW_SIGNATURES_REQUIRED.toString()
+            signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
 
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)

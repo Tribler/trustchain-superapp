@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -196,6 +197,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
+                Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
             }
 
             builder.setNeutralButton("NO") { _, _ ->
@@ -213,6 +215,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send no vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false)
+                Log.i("Coin", "Voted no on joining of: ${block.transaction}")
             }
             builder.show()
         }
@@ -291,6 +294,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send yes vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true)
+                Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
             }
 
             builder.setNeutralButton("NO") { _, _ ->
@@ -308,6 +312,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Send no vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, false)
+                Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
             }
             builder.show()
         }
