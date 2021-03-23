@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
@@ -131,8 +132,12 @@ class BitcoinFragment :
             "${walletManager.kit.wallet().balance.toFriendlyString()}"
         if (walletManager.params.id === NetworkParameters.ID_MAINNET) {
             chosenNetwork.text = "Production Network"
+        } else if (walletManager.params.id === NetworkParameters.ID_REGTEST) {
+            chosenNetwork.text = "RegTest Network"
+        } else if (walletManager.params.id === NetworkParameters.ID_TESTNET) {
+            chosenNetwork.text = "TestNet Network"
         } else {
-            chosenNetwork.text = "Test Network"
+            chosenNetwork.text = "Unknown Network selected"
         }
         val seed = walletManager.toSeed()
         walletSeed.text = "${seed.seed}, ${seed.creationTime}"
@@ -163,11 +168,18 @@ class BitcoinFragment :
         fun newInstance() = BitcoinFragment()
     }
 
-    override fun onImport(address: String, privateKey: String, testNet: Boolean) {
+    override fun onImport(address: String, privateKey: String, testNet: Int) {
         if (!WalletManagerAndroid.isRunning) {
             val config = WalletManagerConfiguration(
-                //TODO add regtest/testnet
-                if (testNet) BitcoinNetworkOptions.REG_TEST else BitcoinNetworkOptions.PRODUCTION,
+                when (bitcoin_network_radio_group.checkedRadioButtonId) {
+                    1 -> BitcoinNetworkOptions.PRODUCTION
+                    2 -> BitcoinNetworkOptions.TEST_NET
+                    3 -> BitcoinNetworkOptions.REG_TEST
+                    else -> {
+                        Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                        return
+                    }
+                },
                 null,
                 AddressPrivateKeyPair(address, privateKey)
             )

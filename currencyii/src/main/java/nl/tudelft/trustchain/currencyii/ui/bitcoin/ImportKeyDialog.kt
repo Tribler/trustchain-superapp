@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.Switch
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,7 +13,7 @@ class ImportKeyDialog : DialogFragment() {
     private lateinit var listener: ImportKeyDialogListener
 
     interface ImportKeyDialogListener {
-        fun onImport(address: String, privateKey: String, testNet: Boolean)
+        fun onImport(address: String, privateKey: String, testNet: Int)
         fun onImportDone()
     }
 
@@ -40,7 +40,7 @@ class ImportKeyDialog : DialogFragment() {
 
                     val ad = view.findViewById<TextView>(R.id.address_input)
                     val sk = view.findViewById<TextView>(R.id.private_key_input)
-                    val netSwitch = view.findViewById<Switch>(R.id.net_switch)
+                    val networkGroup = view.findViewById<RadioGroup>(R.id.bitcoin_network_radio_group)
 
                     val address = ad.text.toString()
                     val privateKey = sk.text.toString()
@@ -49,10 +49,9 @@ class ImportKeyDialog : DialogFragment() {
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
                     if (addressValid && privateKeyValid) {
-                        listener.onImport(address, privateKey, netSwitch.isChecked)
+                        listener.onImport(address, privateKey, networkGroup.checkedRadioButtonId)
                         ad.text = ""
                         sk.text = ""
-                        netSwitch.isSelected = true
 
                         listener.onImportDone()
                         Toast.makeText(

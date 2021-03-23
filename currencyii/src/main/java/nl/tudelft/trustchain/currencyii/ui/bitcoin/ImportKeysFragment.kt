@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_import_keys.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
@@ -26,8 +27,15 @@ class ImportKeysFragment : Fragment() {
         import_btc_address_btn.setOnClickListener {
 
             val config = WalletManagerConfiguration(
-                //TODO add testnet/regtest
-                if (net_switch.isChecked) BitcoinNetworkOptions.REG_TEST else BitcoinNetworkOptions.PRODUCTION,
+                when (bitcoin_network_radio_group.checkedRadioButtonId) {
+                    1 -> BitcoinNetworkOptions.PRODUCTION
+                    2 -> BitcoinNetworkOptions.TEST_NET
+                    3 -> BitcoinNetworkOptions.REG_TEST
+                    else -> {
+                        Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                },
                 null,
                 AddressPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
             )
@@ -47,7 +55,6 @@ class ImportKeysFragment : Fragment() {
 
             pk_input.setText("")
             sk_input.setText("")
-            net_switch.isSelected = true
         }
     }
 
