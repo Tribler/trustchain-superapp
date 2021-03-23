@@ -76,12 +76,6 @@ class WalletManager(
                     Log.i("Coin", "Coin: Added manually created fresh key")
                     wallet().importKey(ECKey())
                 }
-                // TODO
-//                if (wallet().balance.isZero) {
-//                    val address = wallet().issuedReceiveAddresses[0].toString()
-//                    // Ask, using REST call to faucet to get some coins to start with
-//                    requestStarterCoins(address)
-//                }
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
             }
@@ -162,7 +156,7 @@ class WalletManager(
         Log.i("Coin", "Coin: Imported Keys: ${kit.wallet().toString(true, false, false, null)}")
     }
 
-    fun formatKey(privateKey: String): ECKey {
+    private fun formatKey(privateKey: String): ECKey {
         return if (privateKey.length == 51 || privateKey.length == 52) {
             val dumpedPrivateKey =
                 DumpedPrivateKey.fromBase58(params, privateKey)
@@ -381,9 +375,8 @@ class WalletManager(
         val multiSigScript = previousMultiSigOutput.scriptPubKey
         val sighash: Sha256Hash =
             spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
-        val signature: ECDSASignature = myPrivateKey.sign(sighash)
 
-        return signature
+        return myPrivateKey.sign(sighash)
     }
 
     /**
