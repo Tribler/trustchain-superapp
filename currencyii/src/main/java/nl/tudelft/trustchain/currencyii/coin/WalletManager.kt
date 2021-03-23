@@ -15,6 +15,7 @@ import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.crypto.TransactionSignature
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.params.TestNet3Params
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
@@ -24,9 +25,12 @@ import org.bitcoinj.wallet.KeyChainGroup
 import org.bitcoinj.wallet.KeyChainGroupStructure
 import org.bitcoinj.wallet.SendRequest
 import java.io.File
+import java.net.InetAddress
+import java.net.UnknownHostException
 import java.util.*
 
-const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
+const val TEST_NET_WALLET_NAME = "forwarding-service-signet"
+const val REG_TEST_WALLET_NAME = "forwarding-service-regtest"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
 const val MIN_BLOCKCHAIN_PEERS = 5
 
@@ -56,11 +60,13 @@ class WalletManager(
         params = when (walletManagerConfiguration.network) {
             BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
             BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
+            BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
         }
 
         val filePrefix = when (walletManagerConfiguration.network) {
             BitcoinNetworkOptions.TEST_NET -> TEST_NET_WALLET_NAME
             BitcoinNetworkOptions.PRODUCTION -> MAIN_NET_WALLET_NAME
+            BitcoinNetworkOptions.REG_TEST -> REG_TEST_WALLET_NAME
         }
 
         kit = object : WalletAppKit(params, walletDir, filePrefix) {
@@ -70,8 +76,23 @@ class WalletManager(
                     Log.i("Coin", "Coin: Added manually created fresh key")
                     wallet().importKey(ECKey())
                 }
+                // TODO
+//                if (wallet().balance.isZero) {
+//                    val address = wallet().issuedReceiveAddresses[0].toString()
+//                    // Ask, using REST call to faucet to get some coins to start with
+//                    requestStarterCoins(address)
+//                }
                 wallet().allowSpendingUnconfirmedTransactions()
                 Log.i("Coin", "Coin: WalletManager started successfully.")
+            }
+        }
+
+        if (params == RegTestParams.get()) {
+            try {
+                val localHost = InetAddress.getByName("131.180.27.224")
+                kit.setPeerNodes(PeerAddress(params, localHost, params.port))
+            } catch (e: UnknownHostException) {
+                throw RuntimeException(e)
             }
         }
 
@@ -736,6 +757,7 @@ class WalletManager(
             val params = when (paramsRaw) {
                 BitcoinNetworkOptions.TEST_NET -> TestNet3Params.get()
                 BitcoinNetworkOptions.PRODUCTION -> MainNetParams.get()
+                BitcoinNetworkOptions.REG_TEST -> RegTestParams.get()
             }
             val keyChainGroup = KeyChainGroup.builder(params, KeyChainGroupStructure.DEFAULT)
                 .fromRandom(Script.ScriptType.P2PKH).build()

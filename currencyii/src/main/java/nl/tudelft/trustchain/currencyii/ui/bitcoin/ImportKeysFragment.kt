@@ -26,7 +26,8 @@ class ImportKeysFragment : Fragment() {
         import_btc_address_btn.setOnClickListener {
 
             val config = WalletManagerConfiguration(
-                if (net_switch.isChecked) BitcoinNetworkOptions.TEST_NET else BitcoinNetworkOptions.PRODUCTION,
+                //TODO add testnet/regtest
+                if (net_switch.isChecked) BitcoinNetworkOptions.REG_TEST else BitcoinNetworkOptions.PRODUCTION,
                 null,
                 AddressPrivateKeyPair(pk_input.text.toString(), sk_input.text.toString())
             )
