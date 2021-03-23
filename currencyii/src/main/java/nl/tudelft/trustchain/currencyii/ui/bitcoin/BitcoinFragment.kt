@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -10,6 +12,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
@@ -18,7 +23,9 @@ import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
+import kotlin.concurrent.thread
 
 /**
  * A simple [Fragment] subclass.
@@ -77,19 +84,17 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
     }
 
     private fun initClickListeners() {
+        val walletManager = WalletManagerAndroid.getInstance()
         button_copy_public_address.setOnClickListener {
-            val walletManager = WalletManagerAndroid.getInstance()
             copyToClipboard(walletManager.protocolAddress().toString())
         }
 
         button_copy_wallet_seed.setOnClickListener {
-            val walletManager = WalletManagerAndroid.getInstance()
             val seed = walletManager.toSeed()
             copyToClipboard("${seed.seed}, ${seed.creationTime}")
         }
 
         button_copy_bitcoin_public_key.setOnClickListener {
-            val walletManager = WalletManagerAndroid.getInstance()
             copyToClipboard(walletManager.networkPublicECKeyHex())
         }
 
@@ -101,6 +106,20 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 } catch (e: IllegalStateException) {
                 }
             }, 1500)
+        }
+
+        // If the user has too little bitcoin, he can press the button to get more,
+        // the amount is hardcoded on the server somewhere.
+        if (walletManager.kit.wallet().balance.isGreaterThan(Coin.parseCoin("5"))) {
+            add_btc.isClickable = false
+            add_btc.setBackgroundColor(Color.GRAY)
+            add_btc.setPadding(33, 27, 33, 27)
+        } else {
+            add_btc.setOnClickListener {
+                addBTC(walletManager.protocolAddress().toString())
+                Thread.sleep(1000)
+                this.refresh(true)
+            }
         }
     }
 
@@ -119,10 +138,10 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
             return
         }
 
-        var walletManager = WalletManagerAndroid.getInstance()
+        val walletManager = WalletManagerAndroid.getInstance()
 
         walletBalance.text =
-            "${walletManager.kit.wallet().balance.toFriendlyString()}"
+            walletManager.kit.wallet().balance.toFriendlyString()
         if (walletManager.params.id === NetworkParameters.ID_MAINNET) {
             chosenNetwork.text = "Production Network"
         } else if (walletManager.params.id === NetworkParameters.ID_REGTEST) {
@@ -138,6 +157,29 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
         protocolKey.text = walletManager.protocolAddress().toString()
 
         requireActivity().invalidateOptionsMenu()
+    }
+
+    /**
+     * Add bitcoin to the wallet
+     * @param context
+     * @param address - The address where I have to send the BTC to.
+     */
+    private fun addBTC(address: String) {
+        val queue = Volley.newRequestQueue(context)
+        val url = "http://131.180.27.224:8000?address=${address}"
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            {
+                Log.i("Steven", "Successfully added bitcoin to $address")
+                Toast.makeText(context, "Successfully added bitcoin", Toast.LENGTH_SHORT).show()
+            },
+            { error ->
+                Log.i("Steven", "Failed to add bitcoin to $address; error: $error")
+                Toast.makeText(context, "Failed to add bitcoin", Toast.LENGTH_SHORT).show()
+            })
+
+        queue.add(stringRequest)
     }
 
     override fun onCreateView(

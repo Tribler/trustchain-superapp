@@ -110,6 +110,10 @@ dependencies {
 
     // GSON
     implementation 'com.google.code.gson:gson:2.8.6'
+
+    // HTTP requests
+    implementation 'com.android.volley:volley:1.2.0'
+
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
