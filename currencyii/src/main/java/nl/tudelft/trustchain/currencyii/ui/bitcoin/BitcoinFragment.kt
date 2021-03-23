@@ -36,6 +36,8 @@ class BitcoinFragment :
     BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
+    private var getBitcoinPressed = false
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
@@ -123,9 +125,12 @@ class BitcoinFragment :
             }
         } else {
             add_btc.setOnClickListener {
-                addBTC(walletManager.protocolAddress().toString())
-                Thread.sleep(1000)
-                this.refresh(true)
+                if (!getBitcoinPressed) {
+                    getBitcoinPressed = true
+                    addBTC(walletManager.protocolAddress().toString())
+                } else {
+                    Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -185,12 +190,15 @@ class BitcoinFragment :
         val stringRequest = StringRequest(
             Request.Method.GET, url,
             {
-                Log.i("Steven", "Successfully added bitcoin to $address")
+                Log.i("Coin", "Successfully added bitcoin to $address")
                 Toast.makeText(context, "Successfully added bitcoin", Toast.LENGTH_SHORT).show()
+                getBitcoinPressed = false
+                this.refresh(true)
             },
             { error ->
-                Log.i("Steven", "Failed to add bitcoin to $address; error: $error")
+                Log.i("Coin", "Failed to add bitcoin to $address; error: $error")
                 Toast.makeText(context, "Failed to add bitcoin", Toast.LENGTH_SHORT).show()
+                getBitcoinPressed = false
             })
 
         queue.add(stringRequest)
