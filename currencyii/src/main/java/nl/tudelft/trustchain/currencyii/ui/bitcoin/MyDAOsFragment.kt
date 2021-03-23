@@ -133,7 +133,8 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         } else if (hasOneWalletFile && !WalletManagerAndroid.isInitialized()) {
             // Initialize wallet with the single wallet file that the user has stored
             val params = when (testNetWalletExists) {
-                true -> BitcoinNetworkOptions.TEST_NET
+                //TODO add testnet/regtest
+                true -> BitcoinNetworkOptions.REG_TEST
                 false -> BitcoinNetworkOptions.PRODUCTION
             }
             val config = WalletManagerConfiguration(params)

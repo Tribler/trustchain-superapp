@@ -56,7 +56,8 @@ class DAOCreateFragment : BaseFragment() {
 
         generate_new_seed.setOnClickListener {
             val params = when (production_testnet_input.isChecked) {
-                true -> BitcoinNetworkOptions.TEST_NET
+                //TODO add regtest/testnet
+                true -> BitcoinNetworkOptions.REG_TEST
                 false -> BitcoinNetworkOptions.PRODUCTION
             }
             val seed = WalletManager.generateRandomDeterministicSeed(params)
@@ -79,7 +80,8 @@ class DAOCreateFragment : BaseFragment() {
         val creationNumberText = seed_number_input.text.toString()
         val privateKeys = private_keys_input.text.lines()
         val params = when (production_testnet_input.isChecked) {
-            true -> BitcoinNetworkOptions.TEST_NET
+            //TODO add regtest/testnet
+            true -> BitcoinNetworkOptions.REG_TEST
             false -> BitcoinNetworkOptions.PRODUCTION
         }
 
