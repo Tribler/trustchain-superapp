@@ -28,8 +28,7 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
         }
 
         load_testnet_wallet.setOnClickListener {
-            // TODO: Add testnet/regtest
-            loadWallet(BitcoinNetworkOptions.REG_TEST)
+            loadWallet(BitcoinNetworkOptions.TEST_NET)
         }
     }
 
@@ -40,13 +39,13 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
         }
 
         // Make sure to hide any other wallets that exists, when creating a new wallet
+        // TODO: Is this even still in use?
         val walletToHide = when (params) {
-            //TODO fix these
-            BitcoinNetworkOptions.PRODUCTION -> BitcoinNetworkOptions.REG_TEST
-            BitcoinNetworkOptions.TEST_NET -> BitcoinNetworkOptions.REG_TEST
-            BitcoinNetworkOptions.REG_TEST -> BitcoinNetworkOptions.TEST_NET
+            BitcoinNetworkOptions.PRODUCTION -> BitcoinNetworkOptions.TEST_NET
+            BitcoinNetworkOptions.TEST_NET -> BitcoinNetworkOptions.PRODUCTION
+            else -> null
         }
-        hideWalletFiles(walletToHide)
+        hideWalletFiles(walletToHide!!)
 
         // Initialize wallet manager
         val config = WalletManagerConfiguration(params)

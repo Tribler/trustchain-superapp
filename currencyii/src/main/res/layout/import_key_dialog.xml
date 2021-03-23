@@ -31,13 +31,6 @@
             android:inputType="text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Switch
-        android:id="@+id/net_switch"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-        android:checked="true"
-        android:paddingLeft="10px"
-        android:text="Testnet"
-        tools:checked="true" />
+    <include layout="@layout/bitcoin_networks"/>
 
 </LinearLayout>

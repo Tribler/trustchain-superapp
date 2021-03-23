@@ -18,14 +18,7 @@
             android:layout_height="wrap_content"
             android:text="Fill in your address details" />
 
-        <Switch
-            android:id="@+id/net_switch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:showText="false"
-            android:splitTrack="false"
-            android:text="Testnet" />
+        <include layout="@layout/bitcoin_networks"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
