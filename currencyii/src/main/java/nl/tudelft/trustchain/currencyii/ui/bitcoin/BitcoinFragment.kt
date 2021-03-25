@@ -116,13 +116,8 @@ class BitcoinFragment :
 
         // If the user has too little bitcoin, he can press the button to get more,
         // the amount that is added is hardcoded on the server somewhere.
-        @Suppress("DEPRECATION")
-        if (walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).isGreaterThan(Coin.parseCoin("10"))) {
-            add_btc.isClickable = false
-            add_btc.background.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
-            add_btc.setOnClickListener {
-                Toast.makeText(this.requireContext(), "You already have enough bitcoin don't you think?", Toast.LENGTH_SHORT).show()
-            }
+        if (checkTooMuchBitcoin()) {
+            disableGetBitcoinButton()
         } else {
             add_btc.setOnClickListener {
                 if (!getBitcoinPressed) {
@@ -132,6 +127,20 @@ class BitcoinFragment :
                     Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
+
+    private fun checkTooMuchBitcoin(): Boolean {
+        val walletManager = WalletManagerAndroid.getInstance()
+        return walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).isGreaterThan(Coin.parseCoin("10"))
+    }
+
+    @Suppress("DEPRECATION")
+    private fun disableGetBitcoinButton() {
+        add_btc.isClickable = false
+        add_btc.background.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
+        add_btc.setOnClickListener {
+            Toast.makeText(this.requireContext(), "You already have enough bitcoin don't you think?", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -176,6 +185,10 @@ class BitcoinFragment :
         yourPublicHex.text = walletManager.networkPublicECKeyHex()
         protocolKey.text = walletManager.protocolAddress().toString()
 
+        if (checkTooMuchBitcoin()) {
+            disableGetBitcoinButton()
+        }
+
         requireActivity().invalidateOptionsMenu()
     }
 
@@ -193,6 +206,7 @@ class BitcoinFragment :
                 Log.i("Coin", "Successfully added bitcoin to $address")
                 Toast.makeText(context, "Successfully added bitcoin", Toast.LENGTH_SHORT).show()
                 getBitcoinPressed = false
+                Thread.sleep(500)
                 this.refresh(true)
             },
             { error ->
