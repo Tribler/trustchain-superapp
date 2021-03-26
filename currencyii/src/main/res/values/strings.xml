@@ -36,11 +36,4 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="proposals">Proposals</string>
 
-    <string-array name="planets_array">
-        <item>Production</item>
-        <item>TestNet</item>
-        <item>RegNet</item>
-        <item>SigNet</item>
-    </string-array>
-
 </resources>

@@ -29,7 +29,7 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
 
-const val TEST_NET_WALLET_NAME = "forwarding-service-signet"
+const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val REG_TEST_WALLET_NAME = "forwarding-service-regtest"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
 const val MIN_BLOCKCHAIN_PEERS_TEST_NET = 5
@@ -86,7 +86,7 @@ class WalletManager(
             }
         }
 
-        MIN_BLOCKCHAIN_PEERS = when(params) {
+        MIN_BLOCKCHAIN_PEERS = when (params) {
             RegTestParams.get() -> MIN_BLOCKCHAIN_PEERS_REG_TEST
             MainNetParams.get() -> MIN_BLOCKCHAIN_PEERS_PRODUCTION
             TestNet3Params.get() -> MIN_BLOCKCHAIN_PEERS_TEST_NET
