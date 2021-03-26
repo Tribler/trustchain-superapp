@@ -15,11 +15,14 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.coin.CoinUtil
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import java.lang.NumberFormatException
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.Transaction
 
 /**
  * A simple [Fragment] subclass.
@@ -31,6 +34,33 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        calculate_fee.setOnClickListener {
+            val walletManager = WalletManagerAndroid.getInstance()
+            val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
+            val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
+
+            val spendTx = Transaction(walletManager.params)
+            spendTx.addOutput(Coin.valueOf(satoshiTransferAmount), org.bitcoinj.core.Address.fromString(walletManager.params, bitcoinPublicKey))
+            // Use a placeholder value for the residual output. Size of Tx needs to be accurate to estimate fee.
+//            spendTx.addOutput(Coin.valueOf(9999), multiSigScript)
+            // Be careful with adding more inputs!! We assume the first input is the multisig input
+//            spendTx.addInput(previousMultiSigOutput)
+
+            // Calculate fee and set the change output corresponding to calculated fee
+            // TODO: Fix this, it doesn't shows the correct fee yet
+            val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(
+                spendTx,
+                walletManager.params,
+                CoinUtil.TxPriority.LOW_PRIORITY
+            )
+
+            calculate_fee.setOnClickListener {}
+            calculate_fee.isEnabled = false
+            calculate_fee.text = "Fee = $calculatedFeeValue Satoshi"
+            button.isEnabled = true
+            Log.i("Steven", calculatedFeeValue.toString())
+        }
 
         button.setOnClickListener {
             lifecycleScope.launch {

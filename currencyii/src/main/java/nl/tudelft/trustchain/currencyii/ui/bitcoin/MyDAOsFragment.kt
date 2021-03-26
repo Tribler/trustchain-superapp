@@ -129,13 +129,13 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
         val testNetWalletExists = vWalletFileTestNet.exists()
         val regTestWalletExists = vWalletFileRegTest.exists()
 
-        val walletCount = arrayOf(mainNetWalletExists, testNetWalletExists, regTestWalletExists).size
+        val wallets = arrayOf(mainNetWalletExists, testNetWalletExists, regTestWalletExists).count { it }
 
-        if (walletCount > 1 && !WalletManagerAndroid.isInitialized()) {
+        if (wallets > 1 && !WalletManagerAndroid.isInitialized()) {
             // Go to login, user has 3 wallet files and wallet manager is not initialized
-            Log.i("Coin", "$walletCount wallet files exist, navigation to choice screen.")
+            Log.i("Coin", "$wallets wallet files exist, navigation to choice screen.")
             navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToDaoLoginChoice())
-        } else if (walletCount == 1 && !WalletManagerAndroid.isInitialized()) {
+        } else if (wallets == 1 && !WalletManagerAndroid.isInitialized()) {
             // Initialize wallet with the single wallet file that the user has stored
             val params = when {
                 testNetWalletExists -> BitcoinNetworkOptions.TEST_NET
@@ -147,7 +147,7 @@ class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
                 .setConfiguration(config).init()
             Log.i("Coin", "Wallet file exists, starting wallet and going to download screen.")
             navController.navigate(MyDAOsFragmentDirections.actionMyDAOsFragmentToBlockchainDownloadFragment())
-        } else {
+        } else if (wallets == 0) {
             // Go to login to create/import a bitcoin wallet, user has no wallet files
             Log.i("Coin", "No wallet file exists, navigation to create screen.")
             navController.navigate(
