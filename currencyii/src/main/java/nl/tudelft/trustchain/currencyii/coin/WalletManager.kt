@@ -32,7 +32,7 @@ import java.util.*
 const val TEST_NET_WALLET_NAME = "forwarding-service-signet"
 const val REG_TEST_WALLET_NAME = "forwarding-service-regtest"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
-const val MIN_BLOCKCHAIN_PEERS = 5
+var MIN_BLOCKCHAIN_PEERS: Int = 5
 
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
@@ -85,6 +85,8 @@ class WalletManager(
             try {
                 val localHost = InetAddress.getByName("131.180.27.224")
                 kit.setPeerNodes(PeerAddress(params, localHost, params.port))
+                // RegTest only requires 1 peer, since the server is the only peer
+                MIN_BLOCKCHAIN_PEERS = 1
             } catch (e: UnknownHostException) {
                 throw RuntimeException(e)
             }
@@ -436,7 +438,8 @@ class WalletManager(
         Log.i("Coin", "Coin: txId: ${transaction.txId}")
         printTransactionInformation(transaction)
 
-        Log.i("Coin", "Waiting for peers")
+        Log.i("Coin", "Waiting for $MIN_BLOCKCHAIN_PEERS peers")
+        Log.i("Coin", "There are currently ${kit.peerGroup().connectedPeers.size} peers")
         kit.peerGroup().waitForPeers(MIN_BLOCKCHAIN_PEERS).get()
         Log.i("Coin", "Got >= $MIN_BLOCKCHAIN_PEERS peers: ${kit.peerGroup().connectedPeers}")
         Log.i(
@@ -444,12 +447,6 @@ class WalletManager(
             "Transaction broadcast setup ${transaction.txId} completed. Not broadcasted yet."
         )
         return kit.peerGroup().broadcastTransaction(transaction)
-
-//        broadcastTransaction.setProgressCallback { progress ->
-//            Log.i("Coin", "Coin: broadcast of transaction ${transaction.txId} progress: $progress.")
-//        }
-//        Log.i("Coin", "Coin: transaction broadcast of ${transaction.txId} is initiated.")
-//        broadcastTransaction.broadcast()
     }
 
     /**
