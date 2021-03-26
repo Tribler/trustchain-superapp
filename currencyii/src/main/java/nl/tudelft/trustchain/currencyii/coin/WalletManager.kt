@@ -32,8 +32,13 @@ import java.util.*
 const val TEST_NET_WALLET_NAME = "forwarding-service-signet"
 const val REG_TEST_WALLET_NAME = "forwarding-service-regtest"
 const val MAIN_NET_WALLET_NAME = "forwarding-service"
-var MIN_BLOCKCHAIN_PEERS: Int = 5
+const val MIN_BLOCKCHAIN_PEERS_TEST_NET = 5
+const val MIN_BLOCKCHAIN_PEERS_REG_TEST = 1
+const val MIN_BLOCKCHAIN_PEERS_PRODUCTION = 5
+const val REG_TEST_FAUCET_IP = "131.180.27.224"
+const val REG_TEST_FAUCET_PORT = "8000"
 
+var MIN_BLOCKCHAIN_PEERS = MIN_BLOCKCHAIN_PEERS_TEST_NET
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
  * with bitcoin wallets (including multi-signature wallets).
@@ -81,12 +86,17 @@ class WalletManager(
             }
         }
 
+        MIN_BLOCKCHAIN_PEERS = when(params) {
+            RegTestParams.get() -> MIN_BLOCKCHAIN_PEERS_REG_TEST
+            MainNetParams.get() -> MIN_BLOCKCHAIN_PEERS_PRODUCTION
+            TestNet3Params.get() -> MIN_BLOCKCHAIN_PEERS_TEST_NET
+            else -> MIN_BLOCKCHAIN_PEERS
+        }
+
         if (params == RegTestParams.get()) {
             try {
-                val localHost = InetAddress.getByName("131.180.27.224")
+                val localHost = InetAddress.getByName(REG_TEST_FAUCET_IP)
                 kit.setPeerNodes(PeerAddress(params, localHost, params.port))
-                // RegTest only requires 1 peer, since the server is the only peer
-                MIN_BLOCKCHAIN_PEERS = 1
             } catch (e: UnknownHostException) {
                 throw RuntimeException(e)
             }
@@ -628,6 +638,7 @@ class WalletManager(
     }
 
     companion object {
+
         fun createMultiSignatureWallet(
             publicKeys: List<ECKey>,
             entranceFee: Coin,

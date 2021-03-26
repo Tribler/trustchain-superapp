@@ -18,15 +18,13 @@ import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.AddressPrivateKeyPair
-import nl.tudelft.trustchain.currencyii.coin.BitcoinNetworkOptions
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
+import nl.tudelft.trustchain.currencyii.coin.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.wallet.Wallet
 
+const val BALANCE_THRESHOLD = "10"
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
@@ -119,28 +117,46 @@ class BitcoinFragment :
         if (checkTooMuchBitcoin()) {
             disableGetBitcoinButton()
         } else {
-            add_btc.setOnClickListener {
-                if (!getBitcoinPressed) {
-                    getBitcoinPressed = true
-                    addBTC(walletManager.protocolAddress().toString())
-                } else {
-                    Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
-                }
-            }
+            enableGetBitcoinButton()
         }
     }
 
+    /**
+     * If the balance on your wallet is higher than BALANCE_THRESHOLD than return true, otherwise false.
+     * @return if the balance is too large
+     */
     private fun checkTooMuchBitcoin(): Boolean {
         val walletManager = WalletManagerAndroid.getInstance()
-        return walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).isGreaterThan(Coin.parseCoin("10"))
+        val balance = walletManager.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED)
+        return balance.isGreaterThan(Coin.parseCoin(BALANCE_THRESHOLD))
     }
 
+    /**
+     * Disable the get BTC button, sets the color to gray and changes the onclick listener
+     */
     @Suppress("DEPRECATION")
     private fun disableGetBitcoinButton() {
         add_btc.isClickable = false
         add_btc.background.setColorFilter(Color.GRAY, PorterDuff.Mode.MULTIPLY)
         add_btc.setOnClickListener {
             Toast.makeText(this.requireContext(), "You already have enough bitcoin don't you think?", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    /**
+     * Enable the get BTC button, set the color and the onclick listener correctly.
+     */
+    private fun enableGetBitcoinButton() {
+        val walletManager = WalletManagerAndroid.getInstance()
+        add_btc.isClickable = true
+        add_btc.setBackgroundColor(R.style.Widget_AppCompat_Button_Colored)
+        add_btc.setOnClickListener {
+            if (!getBitcoinPressed) {
+                getBitcoinPressed = true
+                addBTC(walletManager.protocolAddress().toString())
+            } else {
+                Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -187,6 +203,8 @@ class BitcoinFragment :
 
         if (checkTooMuchBitcoin()) {
             disableGetBitcoinButton()
+        } else {
+            enableGetBitcoinButton()
         }
 
         requireActivity().invalidateOptionsMenu()
@@ -198,7 +216,7 @@ class BitcoinFragment :
      */
     private fun addBTC(address: String) {
         val queue = Volley.newRequestQueue(context)
-        val url = "http://131.180.27.224:8000?address=$address"
+        val url = "http://$REG_TEST_FAUCET_IP:$REG_TEST_FAUCET_PORT?address=$address"
 
         val stringRequest = StringRequest(
             Request.Method.GET, url,
@@ -243,15 +261,11 @@ class BitcoinFragment :
         if (!WalletManagerAndroid.isRunning) {
             val config = WalletManagerConfiguration(
                 when (bitcoin_network_radio_group.checkedRadioButtonId) {
-                    1 -> BitcoinNetworkOptions.PRODUCTION
-                    2 -> BitcoinNetworkOptions.TEST_NET
-                    3 -> BitcoinNetworkOptions.REG_TEST
+                    R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                    R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                    R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
                     else -> {
-                        Toast.makeText(
-                            this.requireContext(),
-                            "Please select a bitcoin network first",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this.requireContext(),"Please select a bitcoin network first",Toast.LENGTH_SHORT).show()
                         return
                     }
                 },

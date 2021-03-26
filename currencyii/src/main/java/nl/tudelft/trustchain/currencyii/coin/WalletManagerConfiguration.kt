@@ -15,7 +15,7 @@ enum class BitcoinNetworkOptions {
 }
 
 class WalletManagerConfiguration(
-    val network: BitcoinNetworkOptions = BitcoinNetworkOptions.REG_TEST,
+    val network: BitcoinNetworkOptions,
     val key: SerializedDeterministicKey? = null,
     val addressPrivateKeyPair: AddressPrivateKeyPair? = null
 )

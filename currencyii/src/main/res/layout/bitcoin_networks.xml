@@ -2,24 +2,29 @@
     android:id="@+id/bitcoin_network_radio_group"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:checkedButton="@+id/regtest_radiobutton"
     android:orientation="horizontal">
 
     <RadioButton
+        android:id="@+id/production_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Production" />
 
     <RadioButton
+        android:id="@+id/testnet_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="TestNet" />
 
     <RadioButton
+        android:id="@+id/regtest_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="RegTest" />
 
     <RadioButton
+        android:id="@+id/signet_radiobutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:enabled="false"

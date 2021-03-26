@@ -28,9 +28,9 @@ class ImportKeysFragment : Fragment() {
 
             val config = WalletManagerConfiguration(
                 when (bitcoin_network_radio_group.checkedRadioButtonId) {
-                    1 -> BitcoinNetworkOptions.PRODUCTION
-                    2 -> BitcoinNetworkOptions.TEST_NET
-                    3 -> BitcoinNetworkOptions.REG_TEST
+                    R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                    R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                    R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
                     else -> {
                         Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
