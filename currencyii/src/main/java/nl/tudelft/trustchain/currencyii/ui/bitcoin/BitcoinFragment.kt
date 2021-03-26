@@ -149,7 +149,6 @@ class BitcoinFragment :
     private fun enableGetBitcoinButton() {
         val walletManager = WalletManagerAndroid.getInstance()
         add_btc.isClickable = true
-        add_btc.setBackgroundColor(R.style.Widget_AppCompat_Button_Colored)
         add_btc.setOnClickListener {
             if (!getBitcoinPressed) {
                 getBitcoinPressed = true
