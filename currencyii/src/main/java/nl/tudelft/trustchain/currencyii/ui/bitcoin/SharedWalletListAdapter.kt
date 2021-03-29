@@ -7,13 +7,12 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Transaction
-import org.w3c.dom.Text
 
 class SharedWalletListAdapter(
     private val context: BaseFragment,
@@ -42,7 +41,7 @@ class SharedWalletListAdapter(
 
         val walletIdText = "${blockData.SW_UNIQUE_ID}"
         val votingThresholdText = "${blockData.SW_VOTING_THRESHOLD} %"
-        val entranceFeeText = "${blockData.SW_ENTRANCE_FEE} Satoshi"
+        val entranceFeeText = Coin.valueOf(blockData.SW_ENTRANCE_FEE).toFriendlyString()
         val users = "${trustchainPks.size} user(s) in this shared wallet"
         val inWalletText = "$isUserInWallet"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"
