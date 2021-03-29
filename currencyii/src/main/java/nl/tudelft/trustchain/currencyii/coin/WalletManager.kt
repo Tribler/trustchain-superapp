@@ -585,7 +585,7 @@ class WalletManager(
             "Coin",
             "Coin: Setting output for residual funds ${residualFunds.value} based on a calculated fee of $calculatedFee satoshi."
         )
-        // TODO: Why aren't we doing something with this after creating the payment?
+
         tempResidualOutput.value = residualFunds
 
         // Set input script signatures if passed to the method

@@ -13,7 +13,7 @@ class ImportKeyDialog : DialogFragment() {
     private lateinit var listener: ImportKeyDialogListener
 
     interface ImportKeyDialogListener {
-        fun onImport(address: String, privateKey: String, testNet: Int)
+        fun onImport(address: String, privateKey: String)
         fun onImportDone()
     }
 
@@ -49,7 +49,7 @@ class ImportKeyDialog : DialogFragment() {
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
                     if (addressValid && privateKeyValid) {
-                        listener.onImport(address, privateKey, networkGroup.checkedRadioButtonId)
+                        listener.onImport(address, privateKey)
                         ad.text = ""
                         sk.text = ""
 

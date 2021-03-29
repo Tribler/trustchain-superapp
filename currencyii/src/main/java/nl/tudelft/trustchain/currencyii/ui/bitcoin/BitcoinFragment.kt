@@ -248,7 +248,7 @@ class BitcoinFragment :
         fun newInstance() = BitcoinFragment()
     }
 
-    override fun onImport(address: String, privateKey: String, testNet: Int) {
+    override fun onImport(address: String, privateKey: String) {
         if (!WalletManagerAndroid.isRunning) {
             val config = WalletManagerConfiguration(
                 when (bitcoin_network_radio_group.checkedRadioButtonId) {
