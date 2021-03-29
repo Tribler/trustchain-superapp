@@ -41,7 +41,10 @@ class ProposalListAdapter(
         val votedButton = view.findViewById<TextView>(R.id.voted_button)
         val fee = view.findViewById<TextView>(R.id.transfer_fee_tv)
         val balance = view.findViewById<TextView>(R.id.dao_balance_tv)
+        val balanceText = view.findViewById<TextView>(R.id.balance_tv)
         val feeText = view.findViewById<TextView>(R.id.fee_tv)
+
+        val walletManager = WalletManagerAndroid.getInstance()
 
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
@@ -61,7 +64,6 @@ class ProposalListAdapter(
                 view.setBackgroundResource(R.drawable.border)
             }
 
-            val walletManager = WalletManagerAndroid.getInstance()
             val previousTransaction = Transaction(
                 walletManager.params,
                 data.SW_TRANSACTION_SERIALIZED.hexToBytes()
@@ -78,7 +80,8 @@ class ProposalListAdapter(
             // Make sure that the fee does not exceed the amount of funds available
             val calculatedFee =
                 Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT)).value))
-
+            balanceText.visibility = View.VISIBLE
+            balance.visibility = View.VISIBLE
             feeText.visibility = View.VISIBLE
             fee.visibility = View.VISIBLE
 
@@ -114,7 +117,6 @@ class ProposalListAdapter(
             daoId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
             signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
-
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)
         }

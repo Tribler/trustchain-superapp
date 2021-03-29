@@ -15,10 +15,13 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Coin
+import org.bitcoinj.core.Transaction
 import java.lang.NumberFormatException
 
 /**
@@ -51,18 +54,38 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             inflater.inflate(R.layout.fragment_shared_wallet_transaction, container, false)
         val args = SharedWalletTransactionArgs.fromBundle(requireArguments())
 
+        blockHash = args.trustChainBlockHash.hexToBytes()
+
         fragment.findViewById<TextView>(R.id.users_proposal).text =
             "${args.users} user(s) in this shared wallet"
         fragment.findViewById<TextView>(R.id.public_key_proposal).text =
             "Wallet ID: ${args.publicKey}"
         fragment.findViewById<TextView>(R.id.entrance_fee_proposal).text =
-            "Entrance fee: ${args.entranceFee} Satoshi"
+            "Entrance fee: ${Coin.valueOf(args.entranceFee).toFriendlyString()}"
         fragment.findViewById<TextView>(R.id.voting_threshold_proposal).text =
             "Voting threshold: ${args.votingThreshold}%"
-
-        blockHash = args.trustChainBlockHash.hexToBytes()
+        fragment.findViewById<TextView>(R.id.dao_balance).text =
+            "Balance: ${getBalance().toFriendlyString()}"
 
         return fragment
+    }
+
+    /**
+     * Get the balance of the current wallet
+     * @return current balance
+     */
+    private fun getBalance(): Coin {
+        val swJoinBlock: TrustChainBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
+        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+
+        val walletManager = WalletManagerAndroid.getInstance()
+        val previousTransaction = Transaction(
+            walletManager.params,
+            walletData.SW_TRANSACTION_SERIALIZED.hexToBytes()
+        )
+        return walletManager.getMultiSigOutput(previousTransaction).value
     }
 
     private fun transferFundsClicked() {
@@ -79,6 +102,14 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
         val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+
+        if (getBalance().minus(Coin.valueOf(satoshiTransferAmount)).isNegative) {
+            activity?.runOnUiThread {
+                alert_view.text =
+                    "Failed: Transfer amount should be smaller than the current balance"
+            }
+            return
+        }
 
         val transferFundsData = try {
             getCoinCommunity().proposeTransferFunds(

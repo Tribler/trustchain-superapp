@@ -65,6 +65,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
+                    android:id="@+id/balance_tv"
+                    android:visibility="gone"
                     android:text="Balance:" />
 
                 <TextView
@@ -136,6 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:visibility="gone"
                     android:text="-" />
 
                 <TextView
