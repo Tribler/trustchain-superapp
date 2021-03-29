@@ -58,6 +58,12 @@
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Your votes:" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Balance:" />
             </LinearLayout>
 
             <LinearLayout
@@ -104,6 +110,13 @@
 
                 <TextView
                     android:id="@+id/your_votes_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="text" />
+
+                <TextView
+                    android:id="@+id/your_balance_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"

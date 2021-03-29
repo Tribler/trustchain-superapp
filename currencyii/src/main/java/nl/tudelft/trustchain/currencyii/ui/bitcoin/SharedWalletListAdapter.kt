@@ -6,9 +6,14 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.core.Transaction
+import org.w3c.dom.Text
 
 class SharedWalletListAdapter(
     private val context: BaseFragment,
@@ -30,6 +35,7 @@ class SharedWalletListAdapter(
         val inWallet = view.findViewById<TextView>(R.id.you_joined_tv)
         val yourVotes = view.findViewById<TextView>(R.id.your_votes_tv)
         val clickToJoin = view.findViewById<TextView>(R.id.click_to_join)
+        val balance = view.findViewById<TextView>(R.id.your_balance_tv)
 
         val trustchainPks = blockData.SW_TRUSTCHAIN_PKS
         val isUserInWallet = trustchainPks.contains(myPublicKey)
@@ -41,6 +47,12 @@ class SharedWalletListAdapter(
         val inWalletText = "$isUserInWallet"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"
 
+        val walletManager = WalletManagerAndroid.getInstance()
+        val previousTransaction = Transaction(
+            walletManager.params,
+            blockData.SW_TRANSACTION_SERIALIZED.hexToBytes()
+        )
+
         walletId.text = walletIdText
         votingThreshold.text = votingThresholdText
         entranceFee.text = entranceFeeText
@@ -48,6 +60,8 @@ class SharedWalletListAdapter(
         inWallet.text = inWalletText
         yourVotes.text = votes
         clickToJoin.text = listButtonText
+        balance.text = walletManager.getMultiSigOutput(previousTransaction).value.toFriendlyString()
+
         if (this.disableOnUserJoined!! && isUserInWallet) {
             clickToJoin.isEnabled = false
             clickToJoin.setTextColor(Color.GRAY)

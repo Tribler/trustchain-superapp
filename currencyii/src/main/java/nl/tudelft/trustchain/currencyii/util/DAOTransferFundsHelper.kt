@@ -53,7 +53,8 @@ class DAOTransferFundsHelper {
             walletData.SW_BITCOIN_PKS,
             receiverAddressSerialized,
             "",
-            proposalID
+            proposalID,
+            walletData.SW_TRANSACTION_SERIALIZED
         )
 
         for (swParticipantPk in walletData.SW_TRUSTCHAIN_PKS) {
@@ -69,7 +70,8 @@ class DAOTransferFundsHelper {
                 walletData.SW_BITCOIN_PKS,
                 receiverAddressSerialized,
                 swParticipantPk,
-                proposalID
+                proposalID,
+                walletData.SW_TRANSACTION_SERIALIZED
             )
 
             trustchain.createProposalBlock(

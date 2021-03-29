@@ -40,7 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
-                    android:text="DOA ID:" />
+                    android:text="DAO ID:" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -62,11 +62,26 @@
                     android:text="Transfer amount:" />
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:text="Balance:" />
+
+                <TextView
+                    android:id="@+id/fee_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:visibility="gone"
+                    android:text="Fee:" />
+
+                <TextView
                     android:id="@+id/transfer_target"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Transfer address:" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -117,11 +132,27 @@
                     android:text="-" />
 
                 <TextView
+                    android:id="@+id/dao_balance_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="-" />
+
+                <TextView
+                    android:id="@+id/transfer_fee_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:visibility="gone"
+                    android:text="-" />
+
+                <TextView
                     android:id="@+id/transfer_target_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="-" />
+
             </LinearLayout>
 
         </LinearLayout>

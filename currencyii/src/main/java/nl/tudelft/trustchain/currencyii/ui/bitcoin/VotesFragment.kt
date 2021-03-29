@@ -234,7 +234,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val data = rawData.getData()
 
         val walletId = data.SW_UNIQUE_ID
-        val priceString = data.SW_TRANSFER_FUNDS_AMOUNT.toString() + " Satoshi"
+        val priceString = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
 
         // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
         // Get information about the shared wallet
@@ -257,7 +257,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         userHasAlreadyVoted(myPublicBitcoinKey)
 
         title.text = data.SW_UNIQUE_PROPOSAL_ID
-        subTitle.text = getString(R.string.bounty_payout, priceString, walletId)
+        subTitle.text = getString(R.string.bounty_payout, priceString, data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED)
         // Check if the proposal can still be met.
         if (getCoinCommunity().canWinTransferRequest(data)) {
             requiredVotes.text = getString(R.string.votes_required, data.SW_SIGNATURES_REQUIRED)
