@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -40,7 +39,6 @@ class ImportKeyDialog : DialogFragment() {
 
                     val ad = view.findViewById<TextView>(R.id.address_input)
                     val sk = view.findViewById<TextView>(R.id.private_key_input)
-                    val networkGroup = view.findViewById<RadioGroup>(R.id.bitcoin_network_radio_group)
 
                     val address = ad.text.toString()
                     val privateKey = sk.text.toString()

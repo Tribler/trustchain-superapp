@@ -14,6 +14,9 @@ import kotlinx.android.synthetic.main.fragment_blockchain_download.*
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import org.bitcoinj.params.MainNetParams
+import org.bitcoinj.params.RegTestParams
+import org.bitcoinj.params.TestNet3Params
 import kotlin.concurrent.thread
 
 /**
@@ -65,6 +68,13 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
                 "${WalletManagerAndroid.getInstance().progress}%"
             fragment.findViewById<ProgressBar>(R.id.bitcoin_download_progress).progress =
                 WalletManagerAndroid.getInstance().progress
+            val networkName = when (WalletManagerAndroid.getInstance().params) {
+                RegTestParams.get() -> "RegTest"
+                TestNet3Params.get() -> "TestNet"
+                MainNetParams.get() -> "MainNet"
+                else -> return null
+            }
+            fragment.findViewById<TextView>(R.id.downloading_chain_tv).text = "Please wait while the chain from $networkName is downloading. "
             thread {
                 // TODO: find a better way of handling uninitialized wallet managers while not stopping the while loop
                 while (WalletManagerAndroid.getInstance().progress < 100) {
