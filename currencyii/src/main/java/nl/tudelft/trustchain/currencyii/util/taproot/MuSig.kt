@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
 import nl.tudelft.ipv8.util.sha256
-import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.ECKey
 import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
@@ -20,10 +19,10 @@ class MuSig {
                 }
             }
 
-            val r_agg_affine = Triple(r_agg!!.xCoord, r_agg.yCoord, r_agg.zCoords)
+            r_agg = r_agg!!.normalize()
+            val r_agg_affine = Triple(r_agg.affineXCoord, r_agg.affineYCoord, 1)
             var negated = false
 
-            // doesn't seem to work correctly yet :(
             if (Schnorr.jacobi(r_agg_affine.second.toBigInteger()) != BigInteger.ONE) {
                 negated = true
                 r_agg = r_agg.negate()

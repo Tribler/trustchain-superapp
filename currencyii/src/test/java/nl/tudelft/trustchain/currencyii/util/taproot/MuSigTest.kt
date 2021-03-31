@@ -22,12 +22,22 @@ class MuSigTest {
 
     @Test
     fun aggregate_schnorr_nonces() {
-        val key1 = ECKey.fromPrivate(BigInteger("2c68916c316d82ea8f3ebb27037354741ce080464590268780ffca750c5727f6", 16))
-        val key2 = ECKey.fromPrivate(BigInteger("08d538794fcc7766ecc1e0fd9c1642e5cd5147c67807cce4d46144db5fcc8534", 16))
+        var key1 = ECKey.fromPrivate(BigInteger("2c68916c316d82ea8f3ebb27037354741ce080464590268780ffca750c5727f6", 16))
+        var key2 = ECKey.fromPrivate(BigInteger("08d538794fcc7766ecc1e0fd9c1642e5cd5147c67807cce4d46144db5fcc8534", 16))
 
-        val expected = "03326be2da46e2af92df7df4affacc9afdd8b0fb80e7958da65da62b6fc67883f4"
-        val actual = MuSig.aggregate_schnorr_nonces(listOf(key1, key2)).first.getEncoded(true).toHex()
+        var expected = "03326be2da46e2af92df7df4affacc9afdd8b0fb80e7958da65da62b6fc67883f4"
+        var actual = MuSig.aggregate_schnorr_nonces(listOf(key1, key2))
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.first.getEncoded(true).toHex())
+        assertTrue(actual.second)
+
+        key1 = ECKey.fromPrivate(BigInteger("01232b5623b219913420d5570fd5052538c8ee3014adfc9c8d9a73585110f7c7", 16))
+        key2 = ECKey.fromPrivate(BigInteger("1a6f152e82687bd327d65dafb44c84dad1bcc605c9a128231ce0725305ffdc98", 16))
+
+        expected = "037bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf"
+        actual = MuSig.aggregate_schnorr_nonces(listOf(key1, key2))
+
+        assertEquals(expected, actual.first.getEncoded(true).toHex())
+        assertFalse(actual.second)
     }
 }
