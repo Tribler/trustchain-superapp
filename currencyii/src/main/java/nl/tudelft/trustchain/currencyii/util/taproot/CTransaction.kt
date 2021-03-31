@@ -1,22 +1,120 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
-class CTransaction(private val nVersion: Int = 1, val vin: Array<CTxIn> = emptyArray<CTxIn>(), val vout: Array<CTxOut> = emptyArray<CTxOut>(), val nLockTime: Int = 1, val wit: CTxWitness = CTxWitness(), val sha256: UInt? = null, val hash: UInt? = null) {
+import nl.tudelft.ipv8.util.sha256
+import java.nio.ByteBuffer
+import kotlin.experimental.and
 
+
+class CTransaction(
+    val nVersion: Int = 1,
+    val vin: Array<CTxIn> = arrayOf(),
+    val vout: Array<CTxOut> = arrayOf(),
+    val wit: CTxWitness = CTxWitness(),
+    val nLockTime: Int = 0,
+    val sha256: UInt? = null,
+    val hash: UInt? = null
+)
+
+class CTxIn(
+    val prevout: COutPoint = COutPoint(),
+    val scriptSig: ByteArray = byteArrayOf(),
+    val nSequence: Int = 0
+)
+
+class CTxOut(
+    val nValue: Int = 0,
+    val scriptPubKey: ByteArray = byteArrayOf()
+) {
+    fun serialize(): Any {
+
+    }
 }
 
-class CTxIn() {
+class CTxWitness(val vtxinwit: Array<CTxIn> = arrayOf())
 
+class COutPoint(
+    var hash: Byte = 0,
+    var n: Int = 0
+) {
+
+//    fun deserialize(f: ByteArray) {
+//        hash = deser_uint256(f)
+//        val f_buf = ByteBuffer.wrap(f)
+//        n = f_buf.getInt(f)
+//    }
+
+    fun serialize(): ByteArray {
+        var r: ByteArray = byteArrayOf()
+        r += ser_uint256(hash.toInt())
+        val r_buf: ByteBuffer = ByteBuffer.wrap(r)
+        r_buf.putInt(n)
+        r += r_buf.array()
+        return r
+    }
 }
 
-class CTxOut() {
+class CScript(
+    val bytes: ByteArray
+)
 
+val DEFAULT_TAPSCRIPT_VER = 0xc0
+val TAPROOT_VER = 0
+val SIGHASH_ALL_TAPROOT: Byte = 0
+val SIGHASH_ALL: Byte = 1
+val SIGHASH_NONE: Byte = 2
+val SIGHASH_SINGLE: Byte = 3
+val SIGHASH_ANYONECANPAY: Byte = 0x80.toByte()
+
+fun ser_uint256(u_in: Int): ByteArray {
+    var u = u_in
+    var rs: ByteArray = byteArrayOf()
+    for (i in 0..8) {
+        rs += ByteBuffer.allocate(1).putInt((u and 0xFFFFFFFF.toInt()).toInt()).array()
+        u = u shr 32
+    }
+    return rs
 }
 
-class CTxWitness(){
+fun TaprootSignatureHash(
+    txTo: CTransaction,
+    spent_utxos: Array<CTxOut>,
+    hash_type: Byte,
+    input_index: Int = 0,
+    scriptpath: Boolean = false,
+    tapscript: CScript = CScript(), //TODO: No idea what the input should be
+    codeseparator_pos: Int = -1,
+    annex: Int? = null,
+    tapscript_ver: Int = DEFAULT_TAPSCRIPT_VER
+) {
+    assert(txTo.vin.size == spent_utxos.size)
+    assert((hash_type in 0..3) || (hash_type in 0x81..0x83))
+    assert(input_index < txTo.vin.size)
+
+    val spk = spent_utxos[input_index].scriptPubKey
+    val ss_buf: ByteBuffer = ByteBuffer.wrap(byteArrayOf(0, hash_type)) // Epoch, hash_type
+    ss_buf.putInt(txTo.nVersion)
+    ss_buf.putInt(txTo.nLockTime)
+    var ss: ByteArray = ss_buf.array()
+
+    if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
+        ss += sha256(txTo.vin.map { it.prevout.serialize() })
+        var temp: ByteBuffer = ByteBuffer.allocate(spent_utxos.size)
+        for (u in spent_utxos) {
+            temp.putInt(u.nValue)
+        }
+        ss += sha256(temp.array())
+        temp = ByteBuffer.allocate(txTo.vin.size)
+        for (i in txTo.vin) {
+            temp.putInt(i.nSequence)
+        }
+        ss += sha256(temp.array())
+    }
+    if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
+        ss += sha256(txTo.vout.map { it.serialize() })
+    }
+    val spend_type = 0
 
 }
-
-//    public static byte[] TaprootSignatureHash(CTransaction txTo, spent_utxos, hash_type, input_index = 0, scriptpath = False, tapscript = CScript(), codeseparator_pos = -1, annex = None, tapscript_ver = DEFAULT_TAPSCRIPT_VER):
 //        assert (len(txTo.vin) == len(spent_utxos))
 //        assert((hash_type >= 0 and hash_type <= 3) or (hash_type >= 0x81 and hash_type <= 0x83))
 //        assert (input_index < len(txTo.vin))
@@ -62,29 +160,29 @@ class CTxWitness(){
 //        assert (len(ss) == 177 - bool(hash_type & SIGHASH_ANYONECANPAY) * 50 - ((hash_type & 3) == SIGHASH_NONE) * 32 - (IsPayToScriptHash(spk)) * 12 + (annex is not None) * 32 + scriptpath * 35)
 //        return tagged_hash("TapSighash", ss)
 
-//fun create_spending_transaction(): def??:
-//"""Construct a CTransaction object that spends the first ouput from txid."""
-//# Construct transaction
-//spending_tx = CTransaction()
+// fun create_spending_transaction(): def??:
+// """Construct a CTransaction object that spends the first ouput from txid."""
+// # Construct transaction
+// spending_tx = CTransaction()
 //
-//# Populate the transaction version
-//spending_tx.nVersion = version
+// # Populate the transaction version
+// spending_tx.nVersion = version
 //
-//# Populate the locktime
-//spending_tx.nLockTime = 0
+// # Populate the locktime
+// spending_tx.nLockTime = 0
 //
-//# Populate the transaction inputs
-//outpoint = COutPoint(int(txid, 16), 0)
-//spending_tx_in = CTxIn(outpoint=outpoint, nSequence=nSequence)
-//spending_tx.vin = [spending_tx_in]
+// # Populate the transaction inputs
+// outpoint = COutPoint(int(txid, 16), 0)
+// spending_tx_in = CTxIn(outpoint=outpoint, nSequence=nSequence)
+// spending_tx.vin = [spending_tx_in]
 //
-//# Generate new Bitcoin Core wallet address
-//dest_addr = self.nodes[0].getnewaddress(address_type="bech32")
-//scriptpubkey = bytes.fromhex(self.nodes[0].getaddressinfo(dest_addr)['scriptPubKey'])
+// # Generate new Bitcoin Core wallet address
+// dest_addr = self.nodes[0].getnewaddress(address_type="bech32")
+// scriptpubkey = bytes.fromhex(self.nodes[0].getaddressinfo(dest_addr)['scriptPubKey'])
 //
-//# Complete output which returns 0.5 BTC to Bitcoin Core wallet
-//amount_sat = int(0.5 * 100_000_000)
-//dest_output = CTxOut(nValue=amount_sat, scriptPubKey=scriptpubkey)
-//spending_tx.vout = [dest_output]
+// # Complete output which returns 0.5 BTC to Bitcoin Core wallet
+// amount_sat = int(0.5 * 100_000_000)
+// dest_output = CTxOut(nValue=amount_sat, scriptPubKey=scriptpubkey)
+// spending_tx.vout = [dest_output]
 //
-//return spending_tx
+// return spending_tx
