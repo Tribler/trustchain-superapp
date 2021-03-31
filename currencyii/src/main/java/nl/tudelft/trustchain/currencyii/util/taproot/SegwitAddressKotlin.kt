@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.currencyii.util.taproot
 
 import java.util.*
 
-class SegwitAddress {
+class SegwitAddressKotlin {
     companion object {
         val CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
