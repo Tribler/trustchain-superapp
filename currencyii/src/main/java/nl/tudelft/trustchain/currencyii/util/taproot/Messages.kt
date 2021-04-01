@@ -1,9 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
-import nl.tudelft.ipv8.util.sha256
-import org.bitcoinj.core.ECKey
-import org.bouncycastle.math.ec.ECPoint
-import java.math.BigInteger
+import nl.tudelft.ipv8.util.hexToBytes
 import java.nio.ByteBuffer
 
 class Messages {
@@ -29,7 +26,7 @@ class Messages {
         }
 
         fun ser_string(s: String): ByteArray {
-            return ser_compact_size(s.length) + s.toByte()
+            return ser_compact_size(s.length) + s.hexToBytes()
         }
     }
 //    def ser_compact_size(l):
@@ -43,5 +40,4 @@ class Messages {
 //    else:
 //    r = struct.pack("<BQ", 255, l)
 //    return r
-
 }

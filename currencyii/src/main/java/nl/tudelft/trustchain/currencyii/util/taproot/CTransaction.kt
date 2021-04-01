@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
 import nl.tudelft.ipv8.util.sha256
+import nl.tudelft.ipv8.util.toHex
 import java.nio.ByteBuffer
 import kotlin.experimental.and
 
@@ -27,7 +28,7 @@ class CTxOut(
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
         r += ByteBuffer.allocate(1).putLong(nValue).array()
-        r += Messages.ser_string(scriptPubKey)
+        r += Messages.ser_string(scriptPubKey.toHex())
         return r
     }
 }
@@ -38,12 +39,6 @@ class COutPoint(
     var hash: Byte = 0,
     var n: Int = 0
 ) {
-
-//    fun deserialize(f: ByteArray) {
-//        hash = deser_uint256(f)
-//        val f_buf = ByteBuffer.wrap(f)
-//        n = f_buf.getInt(f)
-//    }
 
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
@@ -59,11 +54,19 @@ class CScript(val bytes: ByteArray = byteArrayOf()) {
     fun size(): Int {
         return bytes.size
     }
+
+    fun toHex(): String {
+        return bytes.toHex()
+    }
 }
 
 class CScriptOp(private val n: Int) {
     override fun equals(other: Any?): Boolean {
         return n.toByte() == other
+    }
+
+    override fun hashCode(): Int {
+        return n
     }
 }
 
@@ -159,7 +162,7 @@ fun TaprootSignatureHash(
         spend_type = spend_type or 4
     }
     ss += byteArrayOf(spend_type.toByte())
-    ss += Messages.ser_string(spk)
+    ss += Messages.ser_string(spk.toHex())
     if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
         ss += txTo.vin[input_index.toInt()].prevout.serialize()
         ss += ByteBuffer.allocate(1).putLong(spent_utxos[input_index.toInt()].nValue).array()
@@ -168,14 +171,14 @@ fun TaprootSignatureHash(
         ss += ByteBuffer.allocate(1).putShort(input_index).array()
     }
     if ((spend_type and 2) != 0) {
-        ss += sha256(Messages.ser_string(annex))
+        ss += sha256(Messages.ser_string(annex!!.toHex()))
     }
     if ((hash_type and 3) == SIGHASH_SINGLE) {
         assert(input_index < txTo.vout.size)
         ss += sha256(txTo.vout[input_index.toInt()].serialize())
     }
     if (scriptpath) {
-        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript))
+        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.toHex()))
         ss += byteArrayOf(0x02)
         ss += ByteBuffer.allocate(1).putInt(codeseparator_pos).array()
     }
