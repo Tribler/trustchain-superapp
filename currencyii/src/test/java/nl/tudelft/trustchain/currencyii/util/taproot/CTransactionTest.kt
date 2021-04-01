@@ -33,4 +33,14 @@ class CTransactionTest {
 
         Assert.assertEquals(expected, actual)
     }
+
+    @Test
+    fun CTxInSerialize() {
+        val prevout = COutPoint(hash = "92ba46893466d7d219a3980db4bf33206cf85ec5ce7726e9062b943d62fe995d", n = 0)
+        val ctxIn = CTxIn(prevout = prevout)
+        val expected = "5d99fe623d942b06e92677cec55ef86c2033bfb40d98a319d2d766348946ba92000000000000000000"
+        val actual = ctxIn.serialize().toHex()
+
+        Assert.assertEquals(expected, actual)
+    }
 }

@@ -78,7 +78,7 @@ class CTxIn(
         var r: ByteArray = byteArrayOf()
         r += prevout.serialize()
         r += Messages.serString(scriptSig)
-        r += nSequence.toUInt().toByte()
+        r += littleEndian(nSequence.toUInt())
         return r
     }
 }
@@ -89,7 +89,7 @@ class CTxOut(
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
-        r += nValue.toInt().toByte()
+        r += littleEndian(nValue)
         r += Messages.serString(scriptPubKey)
         return r
     }
@@ -260,6 +260,13 @@ fun littleEndian(long: Long): ByteArray {
     return bb.array()
 }
 
+fun littleEndian(uShort: UShort): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(2)
+    bb.order(ByteOrder.LITTLE_ENDIAN)
+    bb.put(uShort.toByte())
+    return bb.array()
+}
+
 fun TaprootSignatureHash(
     txTo: CTransaction,
     spentUtxos: Array<CTxOut>,
@@ -296,7 +303,7 @@ fun TaprootSignatureHash(
         }
         ssBuf += sha256(temp)
     }
-    //TODODODODODODODODODO checked until here, so far correct
+
     if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
         ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
     }
@@ -322,24 +329,30 @@ fun TaprootSignatureHash(
     ssBuf += byteArrayOf(spendType.toByte())
     ssBuf += Messages.serString(spk)
 
-    if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
+    if (hash_type and SIGHASH_ANYONECANPAY == 1.toByte()) {
+        // not tested, not needed for the transactions we make now.
+        // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
         ssBuf += txTo.vin[input_index.toInt()].prevout.serialize()
         ssBuf += byteArrayOf(spentUtxos[input_index.toInt()].nValue.toByte())
         ssBuf += byteArrayOf(txTo.vin[input_index.toInt()].nSequence.toByte())
     } else {
-        ssBuf += byteArrayOf(input_index.toUShort().toByte())
+        ssBuf += littleEndian(input_index.toUShort())
     }
 
-    if ((spendType and 2) != 0) {
+    if ((spendType and 2) == 1) {
+        // not tested, not needed for the transactions we make now.
         ssBuf += sha256(Messages.serString(annex!!))
     }
 
     if ((hash_type and 3) == SIGHASH_SINGLE) {
+        // not tested, not needed for the transactions we make now.
         assert(input_index < txTo.vout.size)
         ssBuf += sha256(txTo.vout[input_index.toInt()].serialize())
     }
 
     if (scriptpath) {
+        // not tested, not needed for the transactions we make now.
+        // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
         ssBuf += taggedHash(
             "TapLeaf",
             byteArrayOf(tapscript_ver) + Messages.serString(tapscript.bytes)
