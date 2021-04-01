@@ -1,8 +1,12 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.serCompactSize
+import java.math.BigInteger
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import kotlin.experimental.and
 import kotlin.reflect.KProperty1
 
@@ -123,14 +127,21 @@ class CTxWitness(
     }
 }
 
+fun littleEndian(uint: UInt): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(4)
+    bb.order(ByteOrder.LITTLE_ENDIAN)
+    bb.put(uint.toByte())
+    return bb.array()
+}
+
 class COutPoint(
     var hash: String = "",
     var n: Int = 0
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
-        r += serUint256(hash.toUInt())
-        r += n.toUInt().toByte()
+        r += serUint256(BigInteger(1, hash.hexToBytes()))
+        r += littleEndian(n.toUInt())
         return r
     }
 }
@@ -168,12 +179,19 @@ val OP_EQUAL = CScriptOp(0x87)
 val OP_1 = CScriptOp(0x51)
 const val ANNEX_TAG = 0x50.toByte()
 
-fun serUint256(u_in: UInt): ByteArray {
-    var u: UInt = u_in
+fun littleEndian(bigChungus: BigInteger): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(bigChungus.toByteArray().size)
+    bb.order(ByteOrder.BIG_ENDIAN)
+    bb.put(bigChungus.toByteArray())
+    return bb.array().reversedArray().copyOfRange(0, 4)
+}
+
+fun serUint256(u_in: BigInteger): ByteArray {
+    var u: BigInteger = u_in
     var rs: ByteArray = byteArrayOf()
-    for (i in 0..8) {
-        rs += (u and 0xFFFFFFFFu).toUInt().toByte()
-        u = u shr 32
+    for (i in 0..7) {
+        rs += littleEndian(u.and(0xFFFFFFFF.toBigInteger()))
+        u = u.shiftRight(32)
     }
     return rs
 }
@@ -228,6 +246,13 @@ fun taggedHash(tag: String, data: ByteArray): ByteArray {
     return sha256(ss)
 }
 
+fun littleEndian(int: Int): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(4)
+    bb.order(ByteOrder.LITTLE_ENDIAN)
+    bb.putInt(int)
+    return bb.array()
+}
+
 fun TaprootSignatureHash(
     txTo: CTransaction,
     spentUtxos: Array<CTxOut>,
@@ -246,12 +271,13 @@ fun TaprootSignatureHash(
     val spk = spentUtxos[input_index.toInt()].scriptPubKey
 
     var ssBuf: ByteArray = byteArrayOf(0, hash_type)
-    ssBuf += txTo.nVersion.toByte()
-    ssBuf += txTo.nLockTime.toByte()
+    ssBuf += littleEndian(txTo.nVersion)
+    ssBuf += littleEndian(txTo.nLockTime)
 
-    if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
-        ssBuf += sha256(txTo.vin.map { it.prevout.serialize() })
-        var temp: ByteArray = byteArrayOf()
+    if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
+        ssBuf += sha256(txTo.vin.map { it.prevout.serialize() }[0])
+
+        var temp: ByteArray = byteArrayOf() //TODODODODODODODODODO checked until here, so far correct
         for (u in spentUtxos) {
             temp += u.nValue.toByte()
         }
