@@ -3,9 +3,12 @@ package nl.tudelft.trustchain.eurotoken.ui.exchange
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
@@ -22,6 +25,8 @@ import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
+import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
+import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment.Companion.addDecimalLimiter
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -123,6 +128,23 @@ class ExchangeFragment : EurotokenBaseFragment() {
         btnCamera.setOnClickListener {
             qrCodeUtils.startQRScanner(this)
         }
+
+        edtAmount.addDecimalLimiter()
+
+        btnInstaSell.setOnClickListener {
+            val amount = TransferFragment.getAmount(edtAmount.text.toString())
+            if (amount > 0) {
+                val iban = edtIBAN.text.toString()
+//                if (Regex("^NL\\d{2}\\s[A-Z]{4}\\s0(\\d\\s?){9,30}\$").matches(iban)) {
+                    transactionRepository.sendDestroyProposalWithIBAN(iban, amount)
+                    findNavController().navigate( R.id.action_exchangeFragment_to_transactionsFragment )
+//                } else {
+//                    Toast.makeText(requireContext(), "Please specify a valid iban", Toast.LENGTH_LONG).show()
+//                }
+            } else {
+                Toast.makeText(requireContext(), "Please specify a positive amount", Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     override fun onCreateView(
@@ -142,5 +164,45 @@ class ExchangeFragment : EurotokenBaseFragment() {
                     putString(ARG_PARAM2, param2)
                 }
             }
+
+        fun EditText.decimalLimiter(string: String): String {
+
+            var amount = TransferFragment.getAmount(string)
+
+            if (amount == 0L) {
+                return ""
+            }
+
+            //val amount = string.replace("[^\\d]", "").toLong()
+            return (amount / 100).toString() + "." + (amount % 100).toString().padStart(2, '0')
+        }
+
+        fun EditText.addDecimalLimiter() {
+
+            this.addTextChangedListener(object : TextWatcher {
+
+                override fun afterTextChanged(s: Editable?) {
+                    val str = this@addDecimalLimiter.text!!.toString()
+                    if (str.isEmpty()) return
+                    val str2 = decimalLimiter(str)
+
+                    if (str2 != str) {
+                        this@addDecimalLimiter.setText(str2)
+                        val pos = this@addDecimalLimiter.text!!.length
+                        this@addDecimalLimiter.setSelection(pos)
+                    }
+                }
+
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+        }
     }
 }

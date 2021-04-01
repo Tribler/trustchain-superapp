@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".ui.exchange.ExchangeFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -81,10 +86,81 @@
             android:layout_margin="16dp"
             android:text="Scan qr code"
             app:icon="@drawable/ic_baseline_photo_camera_24"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txtInfo" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            app:layout_constraintBottom_toBottomOf="@id/btnCamera"
+            />
+
+        <TextView
+            android:id="@+id/txtIntro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textSize="20dp"
+            android:text="Or sell directly to the preferred gateway."
+            app:layout_constraintTop_toBottomOf="@id/divider"
+            />
+
+        <TextView
+            android:id="@+id/txtAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:textSize="15dp"
+            android:text="Amount:"
+            app:layout_constraintTop_toBottomOf="@id/txtIntro"
+            />
+
+        <EditText
+            android:id="@+id/edtAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="0.00"
+            android:inputType="numberDecimal"
+            android:textSize="32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtAmount" />
+
+        <TextView
+            android:id="@+id/txtIban"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
+            android:textSize="15dp"
+            android:text="IBAN for payout:"
+            app:layout_constraintTop_toBottomOf="@id/edtAmount"
+            />
+
+        <EditText
+            android:id="@+id/edtIBAN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="NL91 ABNA 0417 1643 00"
+            android:textSize="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/txtIban" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnInstaSell"
+            style="@style/Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="Instant sell!"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/edtIBAN" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
 
 </FrameLayout>
