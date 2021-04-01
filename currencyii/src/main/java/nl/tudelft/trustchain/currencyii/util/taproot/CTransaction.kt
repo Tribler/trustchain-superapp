@@ -125,26 +125,26 @@ fun TaprootSignatureHash(
     assert(input_index < txTo.vin.size)
 
     val spk = spent_utxos[input_index.toInt()].scriptPubKey
-    val ss_buf: ByteBuffer = ByteBuffer.wrap(byteArrayOf(0, hash_type)) // Epoch, hash_type
-    ss_buf.putInt(txTo.nVersion)
-    ss_buf.putInt(txTo.nLockTime)
-    var ss: ByteArray = ss_buf.array()
+
+    var ss_buf: ByteArray = byteArrayOf(0, hash_type)
+    ss_buf += txTo.nVersion.toByte()
+    ss_buf += txTo.nLockTime.toByte()
 
     if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
-        ss += sha256(txTo.vin.map { it.prevout.serialize() })
-        var temp: ByteBuffer = ByteBuffer.allocate(spent_utxos.size)
+        ss_buf += sha256(txTo.vin.map { it.prevout.serialize() })
+        var temp: ByteArray = byteArrayOf()
         for (u in spent_utxos) {
-            temp.putLong(u.nValue)
+            temp += u.nValue.toByte()
         }
-        ss += sha256(temp.array())
-        temp = ByteBuffer.allocate(txTo.vin.size)
+        ss_buf += sha256(temp)
+        temp = byteArrayOf()
         for (i in txTo.vin) {
-            temp.putInt(i.nSequence)
+            temp += i.nSequence.toUInt().toByte()
         }
-        ss += sha256(temp.array())
+        ss_buf += sha256(temp)
     }
     if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
-        ss += sha256(txTo.vout.map { it.serialize() })
+        ss_buf += sha256(txTo.vout.map { it.serialize() })
     }
     var spend_type = 0
     if (isPayToScriptHash(spk)) {
@@ -161,33 +161,33 @@ fun TaprootSignatureHash(
         assert(codeseparator_pos >= -1)
         spend_type = spend_type or 4
     }
-    ss += byteArrayOf(spend_type.toByte())
-    ss += Messages.ser_string(spk)
+    ss_buf += byteArrayOf(spend_type.toByte())
+    ss_buf += Messages.ser_string(spk)
     if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
-        ss += txTo.vin[input_index.toInt()].prevout.serialize()
-        ss += ByteBuffer.allocate(1).putLong(spent_utxos[input_index.toInt()].nValue).array()
-        ss += ByteBuffer.allocate(1).putInt(txTo.vin[input_index.toInt()].nSequence).array()
+        ss_buf += txTo.vin[input_index.toInt()].prevout.serialize()
+        ss_buf += byteArrayOf(spent_utxos[input_index.toInt()].nValue.toByte())
+        ss_buf += byteArrayOf(txTo.vin[input_index.toInt()].nSequence.toByte())
     } else {
-        ss += ByteBuffer.allocate(1).putShort(input_index).array()
+        ss_buf += byteArrayOf(input_index.toUShort().toByte())
     }
     if ((spend_type and 2) != 0) {
-        ss += sha256(Messages.ser_string(annex!!))
+        ss_buf += sha256(Messages.ser_string(annex!!))
     }
     if ((hash_type and 3) == SIGHASH_SINGLE) {
         assert(input_index < txTo.vout.size)
-        ss += sha256(txTo.vout[input_index.toInt()].serialize())
+        ss_buf += sha256(txTo.vout[input_index.toInt()].serialize())
     }
     if (scriptpath) {
-        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.bytes))
-        ss += byteArrayOf(0x02)
-        ss += ByteBuffer.allocate(1).putInt(codeseparator_pos).array()
+        ss_buf += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.bytes))
+        ss_buf += byteArrayOf(0x02)
+        ss_buf += byteArrayOf(codeseparator_pos.toShort().toByte())
     }
     assert(
-        ss.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 - (hash_type and 3 == SIGHASH_NONE).compareTo(
+        ss_buf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 - (hash_type and 3 == SIGHASH_NONE).compareTo(
             true
         ) * 32 - (isPayToScriptHash(spk)).compareTo(true) * 12 + (annex != null).compareTo(true) * 32 + scriptpath.compareTo(
             true
         ) * 35
     )
-    return tagged_hash("TapSighash", ss)
+    return tagged_hash("TapSighash", ss_buf)
 }
