@@ -153,8 +153,9 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
             app.wallet().sendCoins(sendRequest)
             musicService.showToast(
                 "Sending funds: ${
-                    Coin.valueOf(satoshiAmount).toFriendlyString()
-                }", Toast.LENGTH_SHORT
+                Coin.valueOf(satoshiAmount).toFriendlyString()
+                }",
+                Toast.LENGTH_SHORT
             )
         } catch (e: Exception) {
             musicService.showToast(

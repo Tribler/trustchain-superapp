@@ -67,8 +67,10 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
     private val onCommitContentListener =
         InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
-            val lacksPermission = (flags and
-                InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+            val lacksPermission = (
+                flags and
+                    InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION
+                ) != 0
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
                 try {
                     inputContentInfo.requestPermission()
@@ -95,14 +97,17 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
         adapter.registerRenderer(ChatMessageItemRenderer())
 
-        items.observe(this, Observer {
-            val oldCount = adapter.itemCount
-            adapter.updateItems(it)
-            if (adapter.itemCount != oldCount) {
-                // New message, scroll to the bottom
-                binding.recyclerView.scrollToPosition(adapter.itemCount - 1)
+        items.observe(
+            this,
+            Observer {
+                val oldCount = adapter.itemCount
+                adapter.updateItems(it)
+                if (adapter.itemCount != oldCount) {
+                    // New message, scroll to the bottom
+                    binding.recyclerView.scrollToPosition(adapter.itemCount - 1)
+                }
             }
-        })
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -178,7 +183,8 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         return messages.mapIndexed { index, chatMessage ->
             val shouldShowAvatar = !chatMessage.outgoing && (
                 index == messages.size - 1 ||
-                    messages[index + 1].outgoing != chatMessage.outgoing)
+                    messages[index + 1].outgoing != chatMessage.outgoing
+                )
             /*
             val shouldShowDate = (index == messages.size - 1 ||
                 messages[index + 1].outgoing != chatMessage.outgoing ||

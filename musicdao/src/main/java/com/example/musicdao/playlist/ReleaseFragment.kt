@@ -70,7 +70,8 @@ class ReleaseFragment(
         blockMetadata.text =
             HtmlCompat.fromHtml(
                 "<b>$artists - $title<br></b>" +
-                    releaseDate, 0
+                    releaseDate,
+                0
             )
 
         enableTipButton()

@@ -113,9 +113,10 @@ class VotingHelper(
 
             // Check whether the voter is in voting list.
             if (!voters.any { v ->
-                    val voteString = v.keyToBin()
-                    voteString.contentEquals(blockPublicKey.keyToBin())
-                }) {
+                val voteString = v.keyToBin()
+                voteString.contentEquals(blockPublicKey.keyToBin())
+            }
+            ) {
                 continue
             }
 
@@ -280,7 +281,8 @@ class VotingHelper(
      */
     private fun handleInvalidVote(block: TrustChainBlock, errorType: String): Nothing {
         Log.e(
-            "vote_debug", "Encountered an invalid voting block with ID ${block.blockId}." +
+            "vote_debug",
+            "Encountered an invalid voting block with ID ${block.blockId}." +
                 "The reason for invalidity was: $errorType"
         )
         throw Exception(errorType)

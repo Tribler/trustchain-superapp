@@ -101,8 +101,8 @@ class DAOCreateFragment : BaseFragment() {
             Toast.makeText(
                 this.requireContext(),
                 "The mnemonic seed provided is not correct. ${
-                    e.message
-                        ?: "No further information"
+                e.message
+                    ?: "No further information"
                 }.",
                 Toast.LENGTH_SHORT
             ).show()
@@ -150,8 +150,8 @@ class DAOCreateFragment : BaseFragment() {
             Toast.makeText(
                 this.requireContext(),
                 "Something went wrong while initializing the wallet. ${
-                    t.message
-                        ?: "No further information"
+                t.message
+                    ?: "No further information"
                 }.",
                 Toast.LENGTH_SHORT
             ).show()

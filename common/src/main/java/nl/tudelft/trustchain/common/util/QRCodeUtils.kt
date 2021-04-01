@@ -33,7 +33,6 @@ class QRCodeUtils(private val context: Context) {
                 integrator.captureActivity = QRCodeActivityPortrait::class.java
             }
             integrator.initiateScan()
-
         }
     }
 
