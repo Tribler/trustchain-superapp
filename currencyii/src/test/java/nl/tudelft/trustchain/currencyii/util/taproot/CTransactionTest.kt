@@ -8,7 +8,7 @@ import org.junit.Test
 class CTransactionTest {
 
     @Test
-    fun taprootsignature() {
+    fun taprootSignature() {
         val hash = "9810b6e1b42d1f5d3c9377c5b1c3b6bb2ee0f96427d9adead6c99626798faac8"
         val publicKey: ByteArray = "001420501761e7ba8b479cc516488d47e8f5d02e52d7".hexToBytes()
         val coutPoint = COutPoint(hash = hash, n = 0)
@@ -40,7 +40,7 @@ class CTransactionTest {
     }
 
     @Test
-    fun CTxInSerialize() {
+    fun cTxInSerialize() {
         val prevout = COutPoint(
             hash = "92ba46893466d7d219a3980db4bf33206cf85ec5ce7726e9062b943d62fe995d",
             n = 0
@@ -54,7 +54,29 @@ class CTransactionTest {
     }
 
     @Test
-    fun CTransactionSerializeWithWitness() {
+    fun cTransactionSerializeWithWitness2() {
+        val hash = "9810b6e1b42d1f5d3c9377c5b1c3b6bb2ee0f96427d9adead6c99626798faac8"
+        val publicKey: ByteArray = "001420501761e7ba8b479cc516488d47e8f5d02e52d7".hexToBytes()
+        val coutPoint = COutPoint(hash = hash, n = 0)
+        val cTxIn = CTxIn(prevout = coutPoint, scriptSig = byteArrayOf(), nSequence = 0)
+        val cTxOut = CTxOut(nValue = (0.50000000 * 100_000_000).toLong(), scriptPubKey = publicKey)
+        val spending_tx = CTransaction(
+            nVersion = 1,
+            vin = arrayOf(cTxIn),
+            vout = arrayOf(cTxOut),
+            wit = CTxWitness(),
+            nLockTime = 0
+        )
+
+        spending_tx.wit.vtxinwit = arrayOf(CTxInWitness(arrayOf("7bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf4f058be84a536603799b4acce1f0eeb048c634d740aa38351cb18b7465e4b125".hexToBytes())))
+        val expected = "01000000000101c8aa8f792696c9d6eaadd92764f9e02ebbb6c3b1c577933c5d1f2db4e1b610980000000000000000000180f0fa020000000016001420501761e7ba8b479cc516488d47e8f5d02e52d701407bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf4f058be84a536603799b4acce1f0eeb048c634d740aa38351cb18b7465e4b12500000000"
+        val actual = spending_tx.serialize().toHex()
+
+        Assert.assertEquals(expected, actual)
+    }
+
+    @Test
+    fun cTransactionSerializeWithWitness() {
         val hash = "92ba46893466d7d219a3980db4bf33206cf85ec5ce7726e9062b943d62fe995d"
         val publicKey: ByteArray = "0014062b4b39acb17d358f130b15ca3e92acfe1604d6".hexToBytes()
         val cOutpoint = COutPoint(hash = hash, n = 0)

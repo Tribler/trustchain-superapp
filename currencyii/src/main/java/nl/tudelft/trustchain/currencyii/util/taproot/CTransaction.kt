@@ -30,24 +30,29 @@ class CTransaction(
         }
         var r = byteArrayOf()
         r += littleEndian(nVersion)
-        //TODO: Debugging
-        println(r.toHex())
-        if (flags != 0) {
+
+        if (flags == 1) {
             val dummy: Array<CTxIn> = arrayOf()
             r += serVector(dummy)
             r += littleEndian(flags.toChar())
         }
+
         r += serVector(vin)
         r += serVector(vout)
-        if ((flags and 1) != 0) {
+
+        if ((flags and 1) == 1) {
             if (wit.vtxinwit.size != vin.size) {
-                for (i in wit.vtxinwit.size..vin.size) {
+                // not tested, not needed for the transactions we make now.
+                for (i in wit.vtxinwit.size until vin.size) {
                     wit.vtxinwit += CTxInWitness()
                 }
             }
+
             r += wit.serialize()
         }
+
         r += littleEndian(nLockTime.toUInt())
+
         return r
     }
 }
@@ -99,7 +104,7 @@ class CTxOut(
 
 class CScriptWitness(var stack: Array<ByteArray> = arrayOf()) {
     fun isNull(): Boolean {
-        return stack.isNotEmpty()
+        return stack.isEmpty()
     }
 }
 
@@ -263,7 +268,7 @@ fun littleEndian(long: Long): ByteArray {
 }
 
 fun littleEndian(char: Char): ByteArray {
-    val bb: ByteBuffer = ByteBuffer.allocate(8)
+    val bb: ByteBuffer = ByteBuffer.allocate(1)
     bb.order(ByteOrder.LITTLE_ENDIAN)
     bb.put(char.toByte())
     return bb.array()
