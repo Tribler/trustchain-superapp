@@ -263,7 +263,7 @@ fun TaprootSignatureHash(
         ssBuf += sha256(temp)
     }
     if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
-        ssBuf += sha256(txTo.vout.map { it.serialize() })
+        ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
     }
     var spendType = 0
     if (isPayToScriptHash(spk)) {
@@ -305,11 +305,9 @@ fun TaprootSignatureHash(
         ssBuf += byteArrayOf(codeseparator_pos.toShort().toByte())
     }
     assert(
-        ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 - (hash_type and 3 == SIGHASH_NONE).compareTo(
-            true
-        ) * 32 - (isPayToScriptHash(spk)).compareTo(true) * 12 + (annex != null).compareTo(true) * 32 + scriptpath.compareTo(
-            true
-        ) * 35
+        ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
+            (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(spk))
+            1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
     )
     return taggedHash("TapSighash", ssBuf)
 }
