@@ -237,6 +237,7 @@ class TransactionRepository(
             KEY_AMOUNT to amount,
             KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount.toLong()).toLong())
         )
+        @Suppress("CAST_NEVER_SUCCEEDS")
         Log.d("EuroTokenBlockRollback", (transaction[KEY_BALANCE] as Long).toString())
         return trustChainCommunity.createProposalBlock(
             BLOCK_TYPE_ROLLBACK, transaction,
