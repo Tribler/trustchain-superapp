@@ -19,15 +19,23 @@ class CTxIn(
     val prevout: COutPoint = COutPoint(),
     val scriptSig: ByteArray = byteArrayOf(),
     val nSequence: Int = 0
-)
+) {
+    fun serialize(): ByteArray {
+        var r: ByteArray = byteArrayOf()
+        r += prevout.serialize()
+        r += Messages.ser_string(scriptSig)
+        r += nSequence.toUInt().toByte()
+        return r
+    }
+}
 
 class CTxOut(
-    val nValue: Long = 0,
+    val nValue: Double = 0.0,
     val scriptPubKey: ByteArray = byteArrayOf()
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
-        r += ByteBuffer.allocate(1).putLong(nValue).array()
+        r += nValue.toByte()
         r += Messages.ser_string(scriptPubKey)
         return r
     }
@@ -39,13 +47,10 @@ class COutPoint(
     var hash: Byte = 0,
     var n: Int = 0
 ) {
-
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
-        r += ser_uint256(hash.toInt())
-        val r_buf: ByteBuffer = ByteBuffer.wrap(r)
-        r_buf.putInt(n)
-        r += r_buf.array()
+        r += ser_uint256(hash.toUInt())
+        r += n.toUInt().toByte()
         return r
     }
 }
@@ -82,11 +87,11 @@ val OP_HASH160 = CScriptOp(0xa9)
 val OP_EQUAL = CScriptOp(0x87)
 val OP_1 = CScriptOp(0x51)
 val ANNEX_TAG = 0x50.toByte()
-fun ser_uint256(u_in: Int): ByteArray {
-    var u = u_in
+fun ser_uint256(u_in: UInt): ByteArray {
+    var u: UInt = u_in
     var rs: ByteArray = byteArrayOf()
     for (i in 0..8) {
-        rs += ByteBuffer.allocate(1).putInt((u and 0xFFFFFFFF.toInt()).toInt()).array()
+        rs += (u and 0xFFFFFFFFu).toUInt().toByte()
         u = u shr 32
     }
     return rs
