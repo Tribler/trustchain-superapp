@@ -28,6 +28,16 @@ class Messages {
         fun ser_string(s: ByteArray): ByteArray {
             return ser_compact_size(s.size) + s
         }
+
+        fun ser_string_vector(l: Array<ByteArray>): ByteArray {
+            var r = ser_compact_size(l.size)
+
+            for (sv in l) {
+                r += ser_string(sv)
+            }
+
+            return r
+        }
     }
 //    def ser_compact_size(l):
 //    r = b""

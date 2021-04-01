@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.currencyii.util.taproot
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.ser_compact_size
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.ser_string
 import kotlin.experimental.and
 
 class CTransaction(
@@ -45,8 +46,19 @@ class CTransaction(
     }
 }
 
-class CTxInWitness(val witness_stack: Array<CTxIn>? = null) {
+class CTxInWitness(
+    val witness_stack: Array<ByteArray>? = null,
+    val scriptWitness: CScriptWitness = CScriptWitness()
+) {
+    init {
+        if (witness_stack != null) {
+            scriptWitness.stack = witness_stack
+        }
+    }
 
+    fun serialize(): ByteArray {
+        return Messages.ser_string_vector(scriptWitness.stack)
+    }
 }
 
 class CTxIn(
@@ -75,7 +87,7 @@ class CTxOut(
     }
 }
 
-class CScriptWitness(val stack: Array<String> = arrayOf()) {
+class CScriptWitness(var stack: Array<ByteArray> = arrayOf()) {
     fun is_null(): Boolean {
         return stack.size != 0
     }
