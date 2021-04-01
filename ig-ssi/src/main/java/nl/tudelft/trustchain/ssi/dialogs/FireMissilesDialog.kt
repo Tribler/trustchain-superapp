@@ -58,24 +58,40 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                         val idFormat = spinner.selectedItem.toString()
                         val myPeer = IPv8Android.getInstance().myPeer
                         val key = when (idFormat) {
-                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
-                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
-                            else -> myPeer.identityPrivateKeySmall!!
+                            ID_METADATA_BIG -> myPeer.identityPrivateKeyBig
+                            ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge
+                            else -> myPeer.identityPrivateKeySmall
                         }
-                        attestationCommunity.requestAttestation(
-                            peer,
-                            attrInput.text.toString().toUpperCase(Locale.getDefault()),
-                            key,
-                            hashMapOf("id_format" to idFormat),
-                            true
-                        )
-                        Log.d("ig-ssi", "Sending attestation for ${attrInput.text} to ${peer.mid}")
-                        dialog.dismiss()
-                        Toast.makeText(
-                            requireContext(),
-                            "Requested attestation for ${attrInput.text} from ${peer.mid}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        if (key == null) {
+                            Log.e("ig-ssi", "Key was null on attestation request.")
+                            dialog.dismiss()
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Oops!")
+                                .setMessage("The private keys are not fully initialized yet, try again in a few seconds.") // Specifying a listener allows you to take an action before dismissing the dialog.
+                                .setPositiveButton(
+                                    "Ok"
+                                ) { _, _ -> }
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .show()
+                        } else {
+                            attestationCommunity.requestAttestation(
+                                peer,
+                                attrInput.text.toString().toUpperCase(Locale.getDefault()),
+                                key,
+                                hashMapOf("id_format" to idFormat),
+                                true
+                            )
+                            Log.d(
+                                "ig-ssi",
+                                "Sending attestation for ${attrInput.text} to ${peer.mid}"
+                            )
+                            dialog.dismiss()
+                            Toast.makeText(
+                                requireContext(),
+                                "Requested attestation for ${attrInput.text} from ${peer.mid}",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     } else {
                         attrInput.error = "Please enter a claim name."
                     }

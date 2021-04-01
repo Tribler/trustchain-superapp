@@ -9,6 +9,8 @@ import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -77,13 +79,21 @@ class TrustChainApplication : Application() {
         IPv8Android.Factory(this)
             .setConfiguration(config)
             .setPrivateKey(getPrivateKey())
-            .setIdentityKeySmall(getIdAlgorithmKey(PREF_ID_METADATA_KEY))
-            .setIdentityKeyBig(getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY))
-            .setIdentityKeyHuge(getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY))
             .setServiceClass(TrustChainService::class.java)
             .init()
 
+        initWallet()
         initTrustChain()
+    }
+
+    private fun initWallet() {
+        GlobalScope.launch {
+            // Generate keys in a coroutine as this significantly impacts first launch.
+            val ipv8 = IPv8Android.getInstance()
+            ipv8.myPeer.identityPrivateKeySmall = getIdAlgorithmKey(PREF_ID_METADATA_KEY)
+            ipv8.myPeer.identityPrivateKeyBig = getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY)
+            ipv8.myPeer.identityPrivateKeyHuge = getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY)
+        }
     }
 
     private fun initTrustChain() {
@@ -124,7 +134,10 @@ class TrustChainApplication : Application() {
             BLOCK_TYPE,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d("TrustChainDemo", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                    Log.d(
+                        "TrustChainDemo",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
                 }
             }
         )
