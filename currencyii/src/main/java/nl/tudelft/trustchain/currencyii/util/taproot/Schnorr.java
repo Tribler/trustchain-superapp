@@ -5,7 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- *
  * @author michaeltan
  *
  * Source: https://github.com/miketwk/bip-schnorr-java/blob/master/Schnorr.java

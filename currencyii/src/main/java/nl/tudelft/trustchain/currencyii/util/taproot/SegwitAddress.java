@@ -16,6 +16,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
+ * Copy paste of SegwitAddress class from BitcoinJ. We needed to make some constructors public to be able to use
+ * witness versions other than 0.
+ *
  * <p>Implementation of native segwit addresses. They are composed of two parts:</p>
  *
  * <ul>

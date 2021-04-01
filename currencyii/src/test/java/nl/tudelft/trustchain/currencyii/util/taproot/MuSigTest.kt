@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.ECKey
 import org.junit.Test
@@ -8,6 +9,40 @@ import org.junit.Assert.*
 import java.math.BigInteger
 
 class MuSigTest {
+
+    @Test
+    fun aggregate_musig_signatures() {
+        val nonceKey1 = ECKey.fromPrivate(BigInteger("514451593258031455215956018794650590333274290798379324717376700610851698631"))
+        val nonceKey2 = ECKey.fromPrivate(BigInteger("11956400277919736063286645919884525832160975522703242034429953595835464801432"))
+        val R_agg = MuSig.aggregate_schnorr_nonces(listOf(nonceKey1, nonceKey2)).first
+
+        val s1 = BigInteger("87702316580188192134768828685038019069684190982614451361055363232288478978335")
+        val s2 = BigInteger("70205003187379344988121702708730152167489459605852932449770410784261163634250")
+
+        val expected = "7bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf5d1c6031344b0127f0ebc54b27eb1b7a1cd34229e86be03a2e521ccd92066e28"
+        val actual = MuSig.aggregate_musig_signatures(listOf(s1, s2), R_agg).toHex()
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun sign_musig() {
+        val key1 = ECKey.fromPrivate(BigInteger("88218786999700320424912157840922001183470238663577897435520060565802125439712"))
+        val key2 = ECKey.fromPrivate(BigInteger("11756621930195768229168784074199362003209438395325908648574429387730312779458"))
+        val agg_pubkey = MuSig.generate_musig_key(listOf(key1, key2)).second
+
+        val key1_c = ECKey.fromPrivate(BigInteger("1831054192583883058098689099279726084283766354549572339919052854814308263405"))
+        val nonceKey1 = ECKey.fromPrivate(BigInteger("514451593258031455215956018794650590333274290798379324717376700610851698631"))
+        val nonceKey2 = ECKey.fromPrivate(BigInteger("11956400277919736063286645919884525832160975522703242034429953595835464801432"))
+        val R_agg = MuSig.aggregate_schnorr_nonces(listOf(nonceKey1, nonceKey2)).first
+
+        val sighash_musig = "594dc4e841a628509c9467fdcb7361de7b7bba490bedd601d18d4ba7d752888b".hexToBytes()
+
+        val expected = BigInteger("87702316580188192134768828685038019069684190982614451361055363232288478978335")
+        val actual = MuSig.sign_musig(key1_c, nonceKey1, R_agg, agg_pubkey, sighash_musig)
+
+        assertEquals(expected, actual)
+    }
 
     @Test
     fun generate_musig_key() {

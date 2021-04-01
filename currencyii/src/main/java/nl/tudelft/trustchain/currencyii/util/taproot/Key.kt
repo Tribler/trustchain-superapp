@@ -4,11 +4,15 @@ import org.bitcoinj.core.ECKey
 import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
 
+/**
+ * Ported from python code located here: https://github.com/bitcoinops/taproot-workshop/blob/master/test_framework/key.py
+ */
 class Key {
 
     companion object {
         /**
          * Generate a random valid bip-schnorr nonce.
+         *
          * See https://github.com/bitcoinops/bips/blob/v0.1/bip-schnorr.mediawiki#Signing.
          * This implementation ensures the y-coordinate of the nonce point is a quadratic residue modulo the field size.
          */

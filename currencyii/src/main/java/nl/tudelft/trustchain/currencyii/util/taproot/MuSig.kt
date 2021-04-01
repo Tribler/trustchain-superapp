@@ -5,9 +5,55 @@ import org.bitcoinj.core.ECKey
 import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
 
+/**
+ * Preliminary MuSig implementation.
+ *
+ * Ported from python code located here: https://github.com/bitcoinops/taproot-workshop/blob/master/test_framework/musig.py
+ *
+ * See https://eprint.iacr.org/2018/068.pdf for the MuSig signature scheme implemented here.
+ */
 class MuSig {
 
     companion object {
+        /**
+         * Construct valid Schnorr signature from a list of partial MuSig signatures.
+         */
+        fun aggregate_musig_signatures(s_list: List<BigInteger>, aggregateNonce: ECPoint): ByteArray {
+            var s_agg = BigInteger.ZERO
+
+            for (signature in s_list) {
+                s_agg = s_agg.add(signature)
+            }
+
+            s_agg = s_agg.mod(Schnorr.n)
+
+            return aggregateNonce.xCoord.encoded.plus(s_agg.toByteArray())
+        }
+
+        /**
+         * Construct a MuSig partial signature and return the s value.
+         */
+        fun sign_musig(privateKey: ECKey, nonceKey: ECKey, aggregateNonce: ECPoint, aggregatePublicKey: ECPoint, message: ByteArray): BigInteger {
+            assert(privateKey.pubKeyPoint.isValid)
+            assert(message.size == 32)
+            assert(privateKey.isCompressed)
+            assert(nonceKey.privKey != BigInteger.ZERO)
+            assert(Schnorr.jacobi(aggregateNonce.affineYCoord.toBigInteger()) == BigInteger.ONE)
+
+            val e = musig_digest(aggregateNonce, aggregatePublicKey, message)
+            return (nonceKey.privKey.add(privateKey.privKey.multiply(e))).mod(Schnorr.n)
+        }
+
+        /**
+         * Get the digest to sign for musig
+         */
+        fun musig_digest(aggregateNonce: ECPoint, aggregatePublicKey: ECPoint, message: ByteArray): BigInteger {
+            return BigInteger(1, sha256(aggregateNonce.xCoord.encoded.plus(aggregatePublicKey.getEncoded(true)).plus(message))).mod(Schnorr.n)
+        }
+
+        /**
+         * Construct aggregated musig nonce from individually generated nonces.
+         */
         fun aggregate_schnorr_nonces(nonceList: List<ECKey>): Pair<ECPoint, Boolean> {
             var r_agg: ECPoint? = null
 
@@ -31,6 +77,11 @@ class MuSig {
             return Pair(r_agg!!, negated)
         }
 
+        /**
+         * Aggregate individually generated public keys.
+         *
+         * Returns a MuSig public key as defined in the MuSig paper.
+         */
         fun generate_musig_key(pubKeys: List<ECKey>): Pair<HashMap<ECKey, ByteArray>, ECPoint> {
             val pubKeyList = ArrayList<BigInteger>()
 
