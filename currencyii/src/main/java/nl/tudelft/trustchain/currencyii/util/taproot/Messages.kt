@@ -7,26 +7,26 @@ class Messages {
 
     companion object {
         fun ser_compact_size(l: Int): ByteArray {
-            val ss_buf: ByteBuffer = ByteBuffer.allocate(2)
+            var ss_buf: ByteArray = byteArrayOf()
 
             if (l < 253) {
-                ss_buf.putChar(l.toChar())
+                ss_buf += l.toChar().toByte()
             } else if (l < 0x10000) {
-                ss_buf.putChar(253.toChar())
-                ss_buf.putShort(l.toShort())
+                ss_buf += 253.toChar().toByte()
+                ss_buf += l.toShort().toByte()
             } else if (l < 0x100000000) {
-                ss_buf.putChar(254.toChar())
-                ss_buf.putInt(l)
+                ss_buf += 254.toChar().toByte()
+                ss_buf += l.toByte()
             } else {
-                ss_buf.putChar(255.toChar())
-                ss_buf.putLong(l.toLong())
+                ss_buf += 255.toChar().toByte()
+                ss_buf += l.toLong().toByte()
             }
 
-            return ss_buf.array()
+            return ss_buf
         }
 
-        fun ser_string(s: String): ByteArray {
-            return ser_compact_size(s.length) + s.hexToBytes()
+        fun ser_string(s: ByteArray): ByteArray {
+            return ser_compact_size(s.size) + s
         }
     }
 //    def ser_compact_size(l):

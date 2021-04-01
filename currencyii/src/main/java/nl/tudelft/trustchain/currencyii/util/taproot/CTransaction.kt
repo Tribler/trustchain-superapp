@@ -28,7 +28,7 @@ class CTxOut(
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
         r += ByteBuffer.allocate(1).putLong(nValue).array()
-        r += Messages.ser_string(scriptPubKey.toHex())
+        r += Messages.ser_string(scriptPubKey)
         return r
     }
 }
@@ -162,7 +162,7 @@ fun TaprootSignatureHash(
         spend_type = spend_type or 4
     }
     ss += byteArrayOf(spend_type.toByte())
-    ss += Messages.ser_string(spk.toHex())
+    ss += Messages.ser_string(spk)
     if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
         ss += txTo.vin[input_index.toInt()].prevout.serialize()
         ss += ByteBuffer.allocate(1).putLong(spent_utxos[input_index.toInt()].nValue).array()
@@ -171,14 +171,14 @@ fun TaprootSignatureHash(
         ss += ByteBuffer.allocate(1).putShort(input_index).array()
     }
     if ((spend_type and 2) != 0) {
-        ss += sha256(Messages.ser_string(annex!!.toHex()))
+        ss += sha256(Messages.ser_string(annex!!))
     }
     if ((hash_type and 3) == SIGHASH_SINGLE) {
         assert(input_index < txTo.vout.size)
         ss += sha256(txTo.vout[input_index.toInt()].serialize())
     }
     if (scriptpath) {
-        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.toHex()))
+        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.bytes))
         ss += byteArrayOf(0x02)
         ss += ByteBuffer.allocate(1).putInt(codeseparator_pos).array()
     }
