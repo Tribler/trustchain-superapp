@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.currencyii.util.taproot
 
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
-import java.nio.ByteBuffer
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.ser_compact_size
 import kotlin.experimental.and
 
 class CTransaction(
@@ -13,7 +13,41 @@ class CTransaction(
     val nLockTime: Int = 0,
     val sha256: UInt? = null,
     val hash: UInt? = null
-)
+) {
+    fun serialize(): ByteArray {
+        return serialize_with_witness()
+    }
+
+    private fun serialize_with_witness(): ByteArray {
+        var flags = 0
+        if (!wit.is_null()) {
+            flags = flags or 1
+        }
+        var r = byteArrayOf()
+        r += nVersion.toInt().toByte()
+        if (flags != 0) {
+            val dummy: Array<CTxIn> = arrayOf()
+            r += ser_vector(dummy)
+            r += flags.toChar().toByte()
+        }
+        r += ser_vector(vin)
+        r += ser_vector(vout)
+        if ((flags and 1) != 0) {
+            if (wit.vtxinwit.size != vin.size) {
+                for (i in wit.vtxinwit.size..vin.size) {
+                    wit.vtxinwit += CTxInWitness().witness_stack!!
+                }
+            }
+            r += wit.serialize()
+        }
+        r += nLockTime.toUInt().toByte()
+        return r
+    }
+}
+
+class CTxInWitness(val witness_stack: Array<CTxIn>? = null) {
+
+}
 
 class CTxIn(
     val prevout: COutPoint = COutPoint(),
@@ -41,7 +75,37 @@ class CTxOut(
     }
 }
 
-class CTxWitness(val vtxinwit: Array<CTxIn> = arrayOf())
+class CScriptWitness(val stack: Array<String> = arrayOf()) {
+    fun is_null(): Boolean {
+        return stack.size != 0
+    }
+}
+
+class CTxWitness(
+    var vtxinwit: Array<CScriptWitness> = arrayOf()
+) {
+    /**
+     * This is different than the usual vector serialization
+     * we omit the length of the vector, which is required to be
+     * the same length as the transaction's vin vector.
+     */
+    fun serialize(): ByteArray {
+        var r: ByteArray = byteArrayOf()
+        for (x in vtxinwit) {
+            r += x.serialize()
+        }
+        return r
+    }
+
+    fun is_null(): Boolean {
+        for (x in vtxinwit) {
+            if (!x.is_null()) {
+                return false
+            }
+        }
+        return true
+    }
+}
 
 class COutPoint(
     var hash: Byte = 0,
@@ -95,6 +159,30 @@ fun ser_uint256(u_in: UInt): ByteArray {
         u = u shr 32
     }
     return rs
+}
+
+fun ser_vector(l: Array<CTxOut>, ser_function_name: String? = null): ByteArray {
+    var r = ser_compact_size(l.size)
+    for (i in l) {
+        if (ser_function_name != null) {
+            r += getattr(i, ser_function_name)()
+        } else {
+            r += i.serialize()
+        }
+    }
+    return r
+}
+
+fun ser_vector(l: Array<CTxIn>, ser_function_name: String? = null): ByteArray {
+    var r = ser_compact_size(l.size)
+    for (i in l) {
+        if (ser_function_name != null) {
+            r += getattr(i, ser_function_name)()
+        } else {
+            r += i.serialize()
+        }
+    }
+    return r
 }
 
 fun isPayToScriptHash(script: ByteArray): Boolean {
@@ -183,7 +271,10 @@ fun TaprootSignatureHash(
         ss_buf += sha256(txTo.vout[input_index.toInt()].serialize())
     }
     if (scriptpath) {
-        ss_buf += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.bytes))
+        ss_buf += tagged_hash(
+            "TapLeaf",
+            byteArrayOf(tapscript_ver) + Messages.ser_string(tapscript.bytes)
+        )
         ss_buf += byteArrayOf(0x02)
         ss_buf += byteArrayOf(codeseparator_pos.toShort().toByte())
     }
