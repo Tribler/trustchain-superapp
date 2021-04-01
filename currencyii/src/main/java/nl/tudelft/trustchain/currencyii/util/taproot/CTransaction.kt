@@ -5,6 +5,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.ser_compact_size
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.ser_string
 import kotlin.experimental.and
+import kotlin.reflect.KProperty1
 
 class CTransaction(
     val nVersion: Int = 1,
@@ -36,7 +37,7 @@ class CTransaction(
         if ((flags and 1) != 0) {
             if (wit.vtxinwit.size != vin.size) {
                 for (i in wit.vtxinwit.size..vin.size) {
-                    wit.vtxinwit += CTxInWitness().witness_stack!!
+                    wit.vtxinwit += CTxInWitness()
                 }
             }
             r += wit.serialize()
@@ -54,6 +55,10 @@ class CTxInWitness(
         if (witness_stack != null) {
             scriptWitness.stack = witness_stack
         }
+    }
+
+    fun is_null(): Boolean {
+        return scriptWitness.is_null()
     }
 
     fun serialize(): ByteArray {
@@ -81,7 +86,7 @@ class CTxOut(
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
-        r += nValue.toByte()
+        r += nValue.toInt().toByte()
         r += Messages.ser_string(scriptPubKey)
         return r
     }
@@ -94,7 +99,7 @@ class CScriptWitness(var stack: Array<ByteArray> = arrayOf()) {
 }
 
 class CTxWitness(
-    var vtxinwit: Array<CScriptWitness> = arrayOf()
+    var vtxinwit: Array<CTxInWitness> = arrayOf()
 ) {
     /**
      * This is different than the usual vector serialization
@@ -151,18 +156,19 @@ class CScriptOp(private val n: Int) {
     }
 }
 
-val DEFAULT_TAPSCRIPT_VER = 0xc0.toByte()
-val TAPROOT_VER = 0
-val SIGHASH_ALL_TAPROOT: Byte = 0
-val SIGHASH_ALL: Byte = 1
-val SIGHASH_NONE: Byte = 2
-val SIGHASH_SINGLE: Byte = 3
-val SIGHASH_ANYONECANPAY: Byte = 0x80.toByte()
+const val DEFAULT_TAPSCRIPT_VER = 0xc0.toByte()
+const val TAPROOT_VER = 0
+const val SIGHASH_ALL_TAPROOT: Byte = 0
+const val SIGHASH_ALL: Byte = 1
+const val SIGHASH_NONE: Byte = 2
+const val SIGHASH_SINGLE: Byte = 3
+const val SIGHASH_ANYONECANPAY: Byte = 0x80.toByte()
 
 val OP_HASH160 = CScriptOp(0xa9)
 val OP_EQUAL = CScriptOp(0x87)
 val OP_1 = CScriptOp(0x51)
-val ANNEX_TAG = 0x50.toByte()
+const val ANNEX_TAG = 0x50.toByte()
+
 fun ser_uint256(u_in: UInt): ByteArray {
     var u: UInt = u_in
     var rs: ByteArray = byteArrayOf()
@@ -177,7 +183,7 @@ fun ser_vector(l: Array<CTxOut>, ser_function_name: String? = null): ByteArray {
     var r = ser_compact_size(l.size)
     for (i in l) {
         if (ser_function_name != null) {
-            r += getattr(i, ser_function_name)()
+            r += readInstanceProperty<ByteArray>(i, ser_function_name)
         } else {
             r += i.serialize()
         }
@@ -189,12 +195,22 @@ fun ser_vector(l: Array<CTxIn>, ser_function_name: String? = null): ByteArray {
     var r = ser_compact_size(l.size)
     for (i in l) {
         if (ser_function_name != null) {
-            r += getattr(i, ser_function_name)()
+            r += readInstanceProperty<ByteArray>(i, ser_function_name)
         } else {
             r += i.serialize()
         }
     }
     return r
+}
+
+
+@Suppress("UNCHECKED_CAST")
+fun <R> readInstanceProperty(instance: Any, propertyName: String): R {
+    val property = instance::class.members
+        // don't cast here to <Any, R>, it would succeed silently
+        .first { it.name == propertyName } as KProperty1<Any, *>
+    // force a invalid cast exception if incorrect type here
+    return property.get(instance) as R
 }
 
 fun isPayToScriptHash(script: ByteArray): Boolean {
