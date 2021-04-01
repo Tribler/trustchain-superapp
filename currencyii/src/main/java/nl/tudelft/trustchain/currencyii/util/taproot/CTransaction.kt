@@ -25,7 +25,7 @@ class CTxOut(
     val nValue: Int = 0,
     val scriptPubKey: ByteArray = byteArrayOf()
 ) {
-    fun serialize(): Any {
+    fun serialize(): ByteArray {
 
     }
 }
@@ -57,7 +57,9 @@ class CScript(
     val bytes: ByteArray
 )
 
-val DEFAULT_TAPSCRIPT_VER = 0xc0
+class CScriptOp(val n: Int)
+
+val DEFAULT_TAPSCRIPT_VER = 0xc0.toByte()
 val TAPROOT_VER = 0
 val SIGHASH_ALL_TAPROOT: Byte = 0
 val SIGHASH_ALL: Byte = 1
@@ -65,6 +67,10 @@ val SIGHASH_NONE: Byte = 2
 val SIGHASH_SINGLE: Byte = 3
 val SIGHASH_ANYONECANPAY: Byte = 0x80.toByte()
 
+val OP_HASH160 = CScriptOp(0xa9)
+val OP_EQUAL = CScriptOp(0x87)
+val OP_1 = CScriptOp(0x51)
+val ANNEX_TAG = 0x50.toByte()
 fun ser_uint256(u_in: Int): ByteArray {
     var u = u_in
     var rs: ByteArray = byteArrayOf()
@@ -75,6 +81,21 @@ fun ser_uint256(u_in: Int): ByteArray {
     return rs
 }
 
+fun isPayToScriptHash(script: ByteArray): Boolean {
+    return script.size == 23 && script[0] == OP_HASH160 && script[1].toInt() == 20 && script[22] == OP_EQUAL
+}
+
+fun isPayToTaproot(script: ByteArray): Boolean {
+    return script.size == 35 && script[0] == OP_1 && script[1].toInt() == 33 && script[2] >= 0 && script[2] <= 1
+}
+
+fun tagged_hash(tag: String, data: ByteArray): ByteArray {
+    var ss = sha256(tag.toByteArray(Charsets.UTF_8))
+    ss += ss
+    ss += data
+    return sha256(ss)
+}
+
 fun TaprootSignatureHash(
     txTo: CTransaction,
     spent_utxos: Array<CTxOut>,
@@ -83,9 +104,9 @@ fun TaprootSignatureHash(
     scriptpath: Boolean = false,
     tapscript: CScript = CScript(), //TODO: No idea what the input should be
     codeseparator_pos: Int = -1,
-    annex: Int? = null,
-    tapscript_ver: Int = DEFAULT_TAPSCRIPT_VER
-) {
+    annex: ByteArray? = null,
+    tapscript_ver: Byte = DEFAULT_TAPSCRIPT_VER
+): ByteArray {
     assert(txTo.vin.size == spent_utxos.size)
     assert((hash_type in 0..3) || (hash_type in 0x81..0x83))
     assert(input_index < txTo.vin.size)
@@ -112,8 +133,44 @@ fun TaprootSignatureHash(
     if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
         ss += sha256(txTo.vout.map { it.serialize() })
     }
-    val spend_type = 0
-
+    var spend_type = 0
+    if (isPayToScriptHash(spk)) {
+        spend_type = 1
+    } else {
+        assert(isPayToTaproot(spk))
+    }
+    if (annex != null) {
+        assert(annex[0] == ANNEX_TAG)
+        spend_type = spend_type or 2
+    }
+    if (scriptpath) {
+        assert(tapscript.size > 0)
+        assert(codeseparator_pos >= -1)
+        spend_type = spend_type or 4
+    }
+    ss += byteArrayOf(spend_type.toByte())
+    ss += ser_string(spk)
+    if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
+        ss += txTo.vin[input_index].prevout.serialize()
+        ss += ByteBuffer.allocate(1).putInt(spent_utxos[input_index].nValue).array()
+        ss += ByteBuffer.allocate(1).putInt(txTo.vin[input_index].nSequence).array()
+    } else {
+        ss += ByteBuffer.allocate(1).putInt(input_index).array()
+    }
+    if ((spend_type and 2) != 0) {
+        ss += sha256(ser_string(annex))
+    }
+    if ((hash_type and 3) == SIGHASH_SINGLE) {
+        assert(input_index < txTo.vout.size)
+        ss += sha256(txTo.vout[input_index].serialize())
+    }
+    if (scriptpath) {
+        ss += tagged_hash("TapLeaf", byteArrayOf(tapscript_ver) + ser_string(tapscript))
+        ss += byteArrayOf(0x02)
+        ss += ByteBuffer.allocate(1).putInt(codeseparator_pos).array()
+    }
+    assert(ss.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 - (hash_type and 3 == SIGHASH_NONE).compareTo(true) * 32 - (isPayToScriptHash(spk)).compareTo(true) * 12 + (annex != null).compareTo(true) * 32 + scriptpath.compareTo(true) * 35)
+    return tagged_hash("TapSighash", ss)
 }
 //        assert (len(txTo.vin) == len(spent_utxos))
 //        assert((hash_type >= 0 and hash_type <= 3) or (hash_type >= 0x81 and hash_type <= 0x83))
