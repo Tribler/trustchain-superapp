@@ -120,7 +120,7 @@ class CTxWitness(
 }
 
 class COutPoint(
-    var hash: Byte = 0,
+    var hash: String = "",
     var n: Int = 0
 ) {
     fun serialize(): ByteArray {
