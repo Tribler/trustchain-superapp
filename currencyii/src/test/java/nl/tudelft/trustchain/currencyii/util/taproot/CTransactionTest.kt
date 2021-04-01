@@ -13,7 +13,7 @@ class CTransactionTest {
         val publicKey: ByteArray = "001420501761e7ba8b479cc516488d47e8f5d02e52d7".hexToBytes()
         val coutPoint = COutPoint(hash = hash, n = 0)
         val cTxIn = CTxIn(prevout = coutPoint, scriptSig = byteArrayOf(), nSequence = 0)
-        val cTxOut = CTxOut(nValue = 0.50000000, scriptPubKey = publicKey)
+        val cTxOut = CTxOut(nValue = (0.50000000 * 100_000_000).toLong(), scriptPubKey = publicKey)
         val spending_tx = CTransaction(
             nVersion = 1,
             vin = arrayOf(cTxIn),
@@ -24,7 +24,7 @@ class CTransactionTest {
 
         val publicKey2 =
             "5121003dd5fc3c1766d0a73466a5997da83efcc529107c9ecd0c56e2a28519f0eb3104".hexToBytes()
-        val txVout = CTxOut(nValue = 1.00000000, scriptPubKey = publicKey2)
+        val txVout = CTxOut(nValue = (1.00000000 * 100_000_000).toLong(), scriptPubKey = publicKey2)
 
         val expected =
             "c58660789cf1bbd4c265823168ccdc2e13a5f97c4d2e8742e08e16ee21d0929a"

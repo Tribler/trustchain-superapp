@@ -84,7 +84,7 @@ class CTxIn(
 }
 
 class CTxOut(
-    val nValue: Double = 0.0,
+    val nValue: Long = 0,
     val scriptPubKey: ByteArray = byteArrayOf()
 ) {
     fun serialize(): ByteArray {
@@ -253,6 +253,13 @@ fun littleEndian(int: Int): ByteArray {
     return bb.array()
 }
 
+fun littleEndian(long: Long): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(8)
+    bb.order(ByteOrder.LITTLE_ENDIAN)
+    bb.putLong(long)
+    return bb.array()
+}
+
 fun TaprootSignatureHash(
     txTo: CTransaction,
     spentUtxos: Array<CTxOut>,
@@ -277,37 +284,44 @@ fun TaprootSignatureHash(
     if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
         ssBuf += sha256(txTo.vin.map { it.prevout.serialize() }[0])
 
-        var temp: ByteArray = byteArrayOf() //TODODODODODODODODODO checked until here, so far correct
+        var temp: ByteArray = byteArrayOf()
         for (u in spentUtxos) {
-            temp += u.nValue.toByte()
+            temp += littleEndian(u.nValue)
         }
         ssBuf += sha256(temp)
+
         temp = byteArrayOf()
         for (i in txTo.vin) {
-            temp += i.nSequence.toUInt().toByte()
+            temp += littleEndian(i.nSequence.toUInt())
         }
         ssBuf += sha256(temp)
     }
+    //TODODODODODODODODODO checked until here, so far correct
     if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
         ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
     }
+
     var spendType = 0
     if (isPayToScriptHash(spk)) {
         spendType = 1
     } else {
         assert(isPayToTaproot(spk))
     }
+
     if (annex != null) {
         assert(annex[0] == ANNEX_TAG)
         spendType = spendType or 2
     }
+
     if (scriptpath) {
         assert(tapscript.size() > 0)
         assert(codeseparator_pos >= -1)
         spendType = spendType or 4
     }
+
     ssBuf += byteArrayOf(spendType.toByte())
     ssBuf += Messages.serString(spk)
+
     if (hash_type and SIGHASH_ANYONECANPAY != 0.toByte()) {
         ssBuf += txTo.vin[input_index.toInt()].prevout.serialize()
         ssBuf += byteArrayOf(spentUtxos[input_index.toInt()].nValue.toByte())
@@ -315,13 +329,16 @@ fun TaprootSignatureHash(
     } else {
         ssBuf += byteArrayOf(input_index.toUShort().toByte())
     }
+
     if ((spendType and 2) != 0) {
         ssBuf += sha256(Messages.serString(annex!!))
     }
+
     if ((hash_type and 3) == SIGHASH_SINGLE) {
         assert(input_index < txTo.vout.size)
         ssBuf += sha256(txTo.vout[input_index.toInt()].serialize())
     }
+
     if (scriptpath) {
         ssBuf += taggedHash(
             "TapLeaf",
@@ -330,10 +347,12 @@ fun TaprootSignatureHash(
         ssBuf += byteArrayOf(0x02)
         ssBuf += byteArrayOf(codeseparator_pos.toShort().toByte())
     }
+
     assert(
         ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
             (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(spk))
             1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
     )
+
     return taggedHash("TapSighash", ssBuf)
 }
