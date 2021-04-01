@@ -18,7 +18,6 @@ class SegwitAddressKotlin {
             return ret
         }
 
-
         /**
          * Decode a segwiti address
          */
@@ -130,7 +129,6 @@ class SegwitAddressKotlin {
             }
             return data
         }
-
 
         /**
          * General power of 2 base conversion

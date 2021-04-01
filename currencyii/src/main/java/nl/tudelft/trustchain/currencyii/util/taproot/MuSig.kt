@@ -33,7 +33,13 @@ class MuSig {
         /**
          * Construct a MuSig partial signature and return the s value.
          */
-        fun sign_musig(privateKey: ECKey, nonceKey: ECKey, aggregateNonce: ECPoint, aggregatePublicKey: ECPoint, message: ByteArray): BigInteger {
+        fun sign_musig(
+            privateKey: ECKey,
+            nonceKey: ECKey,
+            aggregateNonce: ECPoint,
+            aggregatePublicKey: ECPoint,
+            message: ByteArray
+        ): BigInteger {
             assert(privateKey.pubKeyPoint.isValid)
             assert(message.size == 32)
             assert(privateKey.isCompressed)

@@ -29,7 +29,6 @@ class Key {
         }
     }
 
-
 //    /**
 //     * Convert a Jacobian point tuple p1 to affine form, or None if at infinity.
 //     * An affine point is represented as the Jacobian (x, y, 1)
@@ -80,7 +79,7 @@ class Key {
 //    }
 }
 
-//fun main() {
+// fun main() {
 //    val maxLimit = BigInteger("115792089237316195423570985008687907852837564279074904382605163141518161494337")
 //    val minLimit = BigInteger("1")
 //    val bigInteger: BigInteger = maxLimit.subtract(minLimit)
@@ -94,8 +93,8 @@ class Key {
 //    val key = Key()
 //    val yeet = key.generate_schnorr_nonce()
 //    println(yeet.privKeyBytes.toHex())
-//}
+// }
 
-//class EllipticCurve(var p: BigInteger, var a: BigInteger, var b: BigInteger) {
+// class EllipticCurve(var p: BigInteger, var a: BigInteger, var b: BigInteger) {
 //
-//}
+// }

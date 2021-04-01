@@ -1,10 +1,7 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.currencyii.coin.WalletManager
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import org.bitcoinj.core.NetworkParameters
-
 
 class Address {
     companion object {
