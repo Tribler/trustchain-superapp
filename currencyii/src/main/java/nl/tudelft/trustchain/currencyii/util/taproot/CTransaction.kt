@@ -29,11 +29,13 @@ class CTransaction(
             flags = flags or 1
         }
         var r = byteArrayOf()
-        r += nVersion.toByte()
+        r += littleEndian(nVersion)
+        //TODO: Debugging
+        println(r.toHex())
         if (flags != 0) {
             val dummy: Array<CTxIn> = arrayOf()
             r += serVector(dummy)
-            r += flags.toChar().toByte()
+            r += littleEndian(flags.toChar())
         }
         r += serVector(vin)
         r += serVector(vout)
@@ -45,7 +47,7 @@ class CTransaction(
             }
             r += wit.serialize()
         }
-        r += nLockTime.toUInt().toByte()
+        r += littleEndian(nLockTime.toUInt())
         return r
     }
 }
@@ -257,6 +259,13 @@ fun littleEndian(long: Long): ByteArray {
     val bb: ByteBuffer = ByteBuffer.allocate(8)
     bb.order(ByteOrder.LITTLE_ENDIAN)
     bb.putLong(long)
+    return bb.array()
+}
+
+fun littleEndian(char: Char): ByteArray {
+    val bb: ByteBuffer = ByteBuffer.allocate(8)
+    bb.order(ByteOrder.LITTLE_ENDIAN)
+    bb.put(char.toByte())
     return bb.array()
 }
 
