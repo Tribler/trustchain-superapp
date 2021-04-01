@@ -9,8 +9,8 @@ class CTransactionTest {
 
     @Test
     fun taprootsignature() {
-        val hash = "6f7780b2e1d8fb77f53dedf284dd4689b1391bddbed34d6c045a23d2eb7ac003"
-        val publicKey: ByteArray = "0014bdca1d681e5f2c8564b518ef85d6b9bf9bd43c6e".hexToBytes()
+        val hash = "9810b6e1b42d1f5d3c9377c5b1c3b6bb2ee0f96427d9adead6c99626798faac8  "
+        val publicKey: ByteArray = "001420501761e7ba8b479cc516488d47e8f5d02e52d7".hexToBytes()
         val coutPoint = COutPoint(hash = hash, n = 0)
         val cTxIn = CTxIn(prevout = coutPoint, scriptSig = byteArrayOf(), nSequence = 0)
         val cTxOut = CTxOut(nValue = 0.50000000, scriptPubKey = publicKey)
@@ -23,11 +23,11 @@ class CTransactionTest {
         )
 
         val publicKey2 =
-            "512100e50574addc18523907058a69e4b3db029c19eb13e01d5278568abfada10686d4".hexToBytes()
+            "5121003dd5fc3c1766d0a73466a5997da83efcc529107c9ecd0c56e2a28519f0eb3104".hexToBytes()
         val txVout = CTxOut(nValue = 1.00000000, scriptPubKey = publicKey2)
 
         val expected =
-            "0ff9af91b4bf80cbf8305c787984bd8d936d86f971e34f92d4f0931f7b525badd4d242e8ac675033f52235453f09efb6db23b6952a3baf8e390369d745e166ae"
+            "c58660789cf1bbd4c265823168ccdc2e13a5f97c4d2e8742e08e16ee21d0929a"
         val actual =
             TaprootSignatureHash(spending_tx, arrayOf(txVout), SIGHASH_ALL_TAPROOT, input_index = 0).toHex()
 
