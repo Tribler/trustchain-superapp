@@ -18,11 +18,17 @@ class WalletService {
         val params: RegTestParams = RegTestParams.get()
         private lateinit var lastDir: File
 
+        /**
+         * Creates a global bitcoin wallet
+         */
         fun createGlobalWallet(dir: File) {
             lastDir = dir
             globalWallet = createWallet(dir, "global")
         }
 
+        /**
+         * Returns the global bitcoin wallet, [createGlobalWallet] needs to be called at least once first for the correct cache location
+         */
         fun getGlobalWallet(): WalletAppKit {
             globalWallet = createWallet(lastDir, "global")
             return globalWallet

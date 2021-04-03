@@ -9,12 +9,13 @@
     <item
         android:id="@+id/JoinPoolFragment"
         android:icon="@drawable/ic_add_black_24dp"
-        android:title="Join Pool" />
+        android:title="Join" />
     <item
         android:id="@+id/poolFragment"
         android:icon="@drawable/ic_device_hub_black_24dp"
         android:title="Exchange" />
     <item
         android:id="@+id/poolOwnerFragment"
-        android:title="Owners" />
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Pool" />
 </menu>

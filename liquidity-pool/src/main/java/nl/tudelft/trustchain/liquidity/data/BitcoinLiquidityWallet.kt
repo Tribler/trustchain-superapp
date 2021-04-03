@@ -1,14 +1,9 @@
 package nl.tudelft.trustchain.liquidity.data
 
 import android.util.Log
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import org.bitcoinj.core.*
-import org.bitcoinj.core.Coin.valueOf
-import org.bitcoinj.core.listeners.TransactionReceivedInBlockListener
-import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.listeners.WalletCoinsReceivedEventListener
@@ -17,7 +12,6 @@ class BitcoinLiquidityWallet(private val wallet: Wallet, private val app: Wallet
 
     override val coinName: String = "BTC"
 
-    // TODO: Figure out who to send money to in a transaction response
     override fun initializePool() {
 
         // TODO: Look into different listeners, this event is called before the transfer is verified, not sure if this will be an issue
@@ -37,19 +31,6 @@ class BitcoinLiquidityWallet(private val wallet: Wallet, private val app: Wallet
             }
         })
     }
-
-    // TODO: Properly convert amount in double to long or the other way around
-    override fun startTransaction(amount: Double, address: String) {
-        wallet.sendCoins(
-            SendRequest.to(
-                Address.fromString(WalletService.params, address),
-                valueOf(amount.toLong())
-            )
-        )
-    }
-
-
-
 }
 
 

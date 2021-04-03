@@ -1,27 +1,20 @@
 package nl.tudelft.trustchain.liquidity.ui
 
-import android.content.ClipData
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_pool_wallet.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
 import nl.tudelft.trustchain.liquidity.data.EuroTokenWallet
-import org.bitcoinj.wallet.Wallet
-import java.security.acl.Owner
 
 
 /**

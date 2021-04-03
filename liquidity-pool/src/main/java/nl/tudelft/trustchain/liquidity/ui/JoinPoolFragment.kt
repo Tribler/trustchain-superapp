@@ -1,17 +1,20 @@
 package nl.tudelft.trustchain.liquidity.ui
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.lifecycle.lifecycleScope
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import kotlinx.android.synthetic.main.fragment_pool_join.*
-import kotlinx.android.synthetic.main.fragment_pool_wallet.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -42,7 +45,8 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
     lateinit var btcLiqWallet: Wallet
     lateinit var sharedPreference: SharedPreferences
     lateinit var  euroWallet: EuroTokenWallet
-    val euroLiqWallet = "4c69624e61434c504b3ae55b0802f7307efb438cb6c8300c383a25f0d948aff41ab53a241be45bb9c85d7d3e90053e6eb12d56027907039715c173ef440bf104adc937aee914fd9d9c3d"
+    lateinit var poolEuroAddress: String
+    lateinit var poolBitcoinAddress: String
     var status: MutableMap<String, Status> = mutableMapOf("btc" to Status.NOTSEND, "euro" to Status.NOTSEND)
     var btcTransaction: Transaction? = null
     var euroTokenTransaction: TrustChainBlock? = null
@@ -56,12 +60,8 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
 
-//        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
         app = WalletService.getGlobalWallet()
         btcWallet = app.wallet()
-
-//        val app2 = WalletService.createWallet(walletDir, "Alo?")
-//        btcLiqWallet = app2.wallet()
 
         sharedPreference = this.requireActivity().getSharedPreferences("transactions", Context.MODE_PRIVATE)
 
@@ -74,6 +74,8 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
         super.onViewCreated(view, savedInstanceState)
 
         lifecycleScope.launchWhenStarted {
+            poolBitcoinAddress = sharedPreference.getString("poolBitcoinAddress", "mv7x4cqQMM8ptFgiHwJZTMTQTcTFV5rteU").toString()
+            poolEuroAddress = sharedPreference.getString("poolEuroAddress", "4c69624e61434c504b3a85f8c38cec5caa72c2e23da91d0288d7f49615ee400ca82e97e925e1a2f7ae33460843aea94611d04eb535f463a9857f592a7cb072eb7e0b52f080ef078c7c5f").toString()
             val btcTXID = sharedPreference.getString("btcTXID", null)
             if (btcTXID != null) {
                 btcTransaction = btcWallet.getTransaction(Sha256Hash.wrap(btcTXID))
@@ -87,14 +89,13 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
             val joinTXID = sharedPreference.getString("joinTXID", null)
             if (joinTXID != null) {
                 joinTransaction = transactionRepository.getTransactionWithHash(joinTXID.hexToBytes())
-     //           join_pool.isEnabled = false
             }
 
             val params = RegTestParams.get()
             sendBtc.setOnClickListener {
                 println(params)
                 sendBtc.isEnabled = false
-                val sendRequest = SendRequest.to(Address.fromString(params, "miy4QcCWJko2GBih8WeraKTZWEM32rBaDZ"), Coin.valueOf(10000000))
+                val sendRequest = SendRequest.to(Address.fromString(params, poolBitcoinAddress), Coin.valueOf(10000000))
                 val sendRes = btcWallet.sendCoins(sendRequest)
                 status["btc"] = Status.SEND
                 // TODO: Make it such we can still get the result even if the user closes the fragment before the callback is made.
@@ -120,7 +121,7 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
             sendEuro.setOnClickListener {
                 sendEuro.isEnabled = false
                 status["euro"] = Status.SEND
-                val proposalBlock: TrustChainBlock? = euroWallet.sendTokens(euroLiqWallet.hexToBytes(), 0L)
+                val proposalBlock: TrustChainBlock? = euroWallet.sendTokens(poolEuroAddress.hexToBytes(), 0L)
                 if(proposalBlock != null) {
                     status["euro"] = Status.PENDING
                     euroTokenTransaction = proposalBlock
@@ -136,7 +137,7 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
             join_pool.setOnClickListener {
                 if(btcTransaction != null && euroTokenTransaction != null) {
                     join_pool.isEnabled = false
-                    val joinProposalBlock = euroWallet.joinPool(euroLiqWallet.hexToBytes(), btcTransaction!!.txId.toString(), euroTokenTransaction!!.calculateHash().toHex())
+                    val joinProposalBlock = euroWallet.joinPool(poolEuroAddress.hexToBytes(), btcTransaction!!.txId.toString(), euroTokenTransaction!!.calculateHash().toHex())
                     if(joinProposalBlock != null) {
                         joinTransaction = joinProposalBlock
                         val txid = joinTransaction!!.calculateHash()
@@ -147,11 +148,39 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
                 }
             }
 
+            joinPoolSettingsButton.setOnClickListener {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Liquidity Pool Addresses")
+                val inputEuro = EditText(requireContext())
+                inputEuro.inputType = InputType.TYPE_CLASS_TEXT
+                inputEuro.hint = "Liquidity Pool Eurotoken Address\n${poolEuroAddress}"
+                val inputBtc = EditText(requireContext())
+                inputBtc.inputType = InputType.TYPE_CLASS_TEXT
+                inputBtc.hint = "Liquidity Pool Bitcoin Address\n${poolBitcoinAddress}"
+                val layout = LinearLayout(requireContext())
+                layout.orientation = LinearLayout.VERTICAL
+                layout.addView(inputEuro)
+                layout.addView(inputBtc)
+                builder.setView(layout)
+                builder.setPositiveButton("OK") { _, _ ->
+                    poolEuroAddress = inputEuro.text.toString()
+                    poolBitcoinAddress = inputBtc.text.toString()}
+                builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+                val editor = sharedPreference.edit()
+                editor.putString("poolEuroAddress", poolEuroAddress)
+                editor.putString("poolBitcoinAddress", poolBitcoinAddress)
+                editor.apply()
+
+                builder.show()
+            }
+
             while (isActive) {
                 checkBtcStatus()
                 checkEuroStatus()
-    //            join_pool.isEnabled = status["btc"] == Status.VERIFIED && status["euro"] == Status.VERIFIED  && joinTransaction == null
-    //            join_pool.isEnabled = true
+                // TODO: Uncomment the line below when not testing
+//                join_pool.isEnabled = status["btc"] == Status.VERIFIED && status["euro"] == Status.VERIFIED  && joinTransaction == null
+                join_pool.isEnabled = true
                 btc_status.text = getString(R.string.transaction_status, getStatusString("btc"))
                 eurotoken_status.text = getString(R.string.transaction_status, getStatusString("euro"))
                 join_status.text = getString(R.string.transaction_status, getPoolStatus())
