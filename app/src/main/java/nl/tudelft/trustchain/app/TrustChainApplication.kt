@@ -205,7 +205,8 @@ class TrustChainApplication : Application() {
     }
 
     private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
-        val settings = TrustChainSettings()
+        val blockTypesBcDisabled: Set<String> = setOf("eurotoken_join", "eurotoken_trade")
+        val settings = TrustChainSettings(blockTypesBcDisabled)
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()

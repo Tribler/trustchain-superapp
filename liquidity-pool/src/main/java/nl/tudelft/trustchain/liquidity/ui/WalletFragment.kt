@@ -24,7 +24,6 @@ class WalletFragment : BaseFragment(R.layout.fragment_pool_wallet) {
      * The wallet app kit used to get a running bitcoin wallet.
      */
     lateinit var app: WalletAppKit
-   // lateinit var app2: WalletAppKit
 
     /**
      * A repository for transactions in Euro Tokens.
@@ -36,22 +35,11 @@ class WalletFragment : BaseFragment(R.layout.fragment_pool_wallet) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
-  //      val params = RegTestParams.get()
-        // Create the wallets for bitcoin and euro token.
-//        app = WalletService.createPersonalWallet(walletDir)
         app = WalletService.getGlobalWallet()
-        // Get the directory where wallets can be stored.
-//        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
-//        app = WalletService.createPersonalWallet(walletDir)
-        val btwWallet = app.wallet()
+        val btcWallet = app.wallet()
 
-        /* No longer needed second btc wallet for testing
-        app2 = WalletService.createWallet(walletDir, "Alo?")
-        val btwWallet2 = app2.wallet()*/
-
-        val btcLiqWallet = BitcoinLiquidityWallet(btwWallet, app, transactionRepository, getIpv8().myPeer.publicKey)
+        // Technically only necessary for the liquidity pool owner
+        val btcLiqWallet = BitcoinLiquidityWallet(btcWallet, app, transactionRepository, getIpv8().myPeer.publicKey)
         btcLiqWallet.initializePool()
 
         val euroWallet = EuroTokenWallet(transactionRepository, getIpv8().myPeer.publicKey);
@@ -69,19 +57,11 @@ class WalletFragment : BaseFragment(R.layout.fragment_pool_wallet) {
                 Toast.makeText(requireContext(), "Copied key to clipboard!", Toast.LENGTH_SHORT).show()
             }
 
-            Toast.makeText(requireContext(), "droop", Toast.LENGTH_SHORT).show()
-
             while (isActive) {
-                bitCoinAddress.text = btwWallet.currentReceiveAddress().toString()
+                bitCoinAddress.text = btcWallet.currentReceiveAddress().toString()
                 bitcoinBalance.text = getString(R.string.wallet_balance_conf_est,
-                    btwWallet.balance.toFriendlyString(),
-                    btwWallet.getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString())
-/*
-                bitCoinAddress2.text = btwWallet2.currentReceiveAddress().toString()
-                bitcoinBalance2.text = getString(R.string.wallet_balance_conf_est,
-                    btwWallet2.balance.toFriendlyString(),
-                    btwWallet2.getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString())
-*/
+                    btcWallet.balance.toFriendlyString(),
+                    btcWallet.getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString())
                 euroTokenAddress.text = euroWallet.getWalletAddress()
                 euroTokenBalance.text = getString(R.string.wallet_balance_conf,
                     TransactionRepository.prettyAmount(euroWallet.getBalance()))

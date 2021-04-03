@@ -185,6 +185,9 @@ class TransactionRepository(
         }
     }
 
+    /**
+     * Traverses the chain to find all participants of this liquidity pool
+     */
     fun getPoolOwnersForBlock(block: TrustChainBlock?, database: TrustChainStore): ArrayList<String>? {
         var list = ArrayList<String>()
         if (block == null) return null
@@ -230,6 +233,9 @@ class TransactionRepository(
         return getBalanceForBlock(latestBlock, trustChainCommunity.database)!!
     }
 
+    /**
+     * Returns a list of pool owners associated with your liquidity pool
+     */
     fun getPoolOwners(): List<String> {
         val myKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBlock = trustChainCommunity.database.getLatest(myKey) ?: return listOf()
@@ -264,8 +270,10 @@ class TransactionRepository(
         getGatewayPeer()?.let { sendCheckpointProposal(it) }
     }
 
+    /**
+     * Sends a proposal block to join a liquidity pool with the hashes of a bitcoin and eurotoken transaction
+     */
     fun sendJoinProposal(recipient: ByteArray, btcHash: String, euroHash: String): TrustChainBlock? {
-        // TODO verify the btc and eurotoken transactions from the liquidity provider
         if (btcHash == euroHash) {
             Log.d("LiquidityPool", "This is a bullsh*t check to make the app build")
         }
@@ -279,6 +287,10 @@ class TransactionRepository(
         )
     }
 
+    /**
+     * Sends a proposal block to trade with the liquidity pool by specifying the direction you want to trade in (i.e. which currency you want to receive),
+     * a hash of a transaction in the opposing currency, as well as an address where you would like to receive the currency specified in the direction.
+     */
     fun sendTradeProposal(recipient: ByteArray, hash: String, direction: String, receiveAddress: String): TrustChainBlock? {
         val transaction = mapOf(
             "hash" to hash,
@@ -486,19 +498,26 @@ class TransactionRepository(
         return ValidationResult.Valid
     }
 
-    private fun verifyJoinTransactions(btcHash: String, euroHash: String): ValidationResult {
+    /**
+     * Checks the chain for the hashes specified in the join proposal
+     */
+    private fun verifyJoinTransactions(btcHash: String, euroHash: String, euroAddress: ByteArray): ValidationResult {
         val myKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         var latestBlock = trustChainCommunity.database.getLatest(myKey) ?: return ValidationResult.Invalid(
             listOf("Empty Chain")
         )
         var btcConfirmed = false
         var euroConfirmed = false
-
         // Traverse the chain while the corresponding btc/euro transfer blocks are not found
         while(!euroConfirmed || !btcConfirmed) {
             // For eurotoken blocks check the linked block for the correct hash
             if (latestBlock.type.equals(BLOCK_TYPE_TRANSFER)) {
                 if (trustChainCommunity.database.getLinked(latestBlock)?.calculateHash()?.toHex().equals(euroHash)) {
+                    if (!latestBlock.linkPublicKey.toHex().equals(euroAddress.toHex())) {
+                        return ValidationResult.Invalid(
+                            listOf("Not your Eurotoken transaction!")
+                        )
+                    }
                     euroConfirmed = true
                 }
             } else if (latestBlock.type.equals("bitcoin_transfer")) { //For bitcoin blocks check the value in the transactions of the block
@@ -524,7 +543,12 @@ class TransactionRepository(
         }
     }
 
-    private fun verifyTradeTransactions(hash: String, direction: String): ValidationResult {
+    /**
+     * Checks the chain for the hash specified in the trade proposals
+     * The hash belongs to a transaction of the opposing currency of direction.
+     * I.e. if direction is eurotoken, you are looking for a bitcoin transaction.
+     */
+    private fun verifyTradeTransactions(hash: String, direction: String, euroAddress: ByteArray): ValidationResult {
         val myKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         var latestBlock = trustChainCommunity.database.getLatest(myKey) ?: return ValidationResult.Invalid(
             listOf("Empty Chain")
@@ -532,6 +556,11 @@ class TransactionRepository(
         while (true) {
             if (direction.equals("bitcoin") && latestBlock.type.equals(BLOCK_TYPE_TRANSFER)) {
                 if (trustChainCommunity.database.getLinked(latestBlock)?.calculateHash()?.toHex().equals(hash)) {
+                    if (!latestBlock.linkPublicKey.toHex().equals(euroAddress.toHex())) {
+                        return ValidationResult.Invalid(
+                            listOf("Not your Eurotoken transaction!")
+                        )
+                    }
                     Log.d("verifyTradeTransactions", "Found valid eurotoken transfer")
                     return ValidationResult.Valid
                 }
@@ -602,7 +631,6 @@ class TransactionRepository(
                     if (block.publicKey.toHex() == mykey.toHex() && block.isProposal) return ValidationResult.Valid
 
                     if (block.isProposal) {
-                        // TODO: Add checks for invalid Join proposal block, i.e. check if hashes are included in the block
                         Log.d("RecvProp", "Received Proposal Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
 
                         if (!block.transaction.containsKey("btcHash") || !block.transaction.containsKey("euroHash")) return ValidationResult.Invalid(
@@ -611,7 +639,8 @@ class TransactionRepository(
                         Log.d("EuroTokenBlockJoin", "Received join request with hashes\nBTC: ${block.transaction.get("btcHash")}\nEuro: ${block.transaction.get("euroHash")}")
                         // Check if hashes are valid by searching in own chain
                         return verifyJoinTransactions(block.transaction.get("btcHash") as String,
-                            block.transaction.get("euroHash") as String
+                            block.transaction.get("euroHash") as String,
+                            block.publicKey
                         )
                     } else {
                         Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
@@ -669,19 +698,19 @@ class TransactionRepository(
 
                     if (block.isProposal) {
                         // Check if hash is valid for the corresponding direction
-                        val result = verifyTradeTransactions(block.transaction.get("hash") as String, block.transaction.get("direction") as String)
+                        val result = verifyTradeTransactions(block.transaction.get("hash") as String, block.transaction.get("direction") as String, euroAddress = block.publicKey)
                         if (result != ValidationResult.Valid) {
                             return result
                         }
                         Log.d("Trade", "Valid trade")
                         // It is valid, so we need to send some funds back
                         if ((block.transaction.get("direction") as String).equals("bitcoin")) {
-                            Log.d("TradeBitcoin", "Sending bitcoins back to some address: {}".format(block.transaction.get("receive") as String))
+                            Log.d("TradeBitcoin", "Sending bitcoins back to some address: ${block.transaction.get("receive") as String}")
                             val wallet = WalletService.getGlobalWallet().wallet()
                             val sendRequest = SendRequest.to(Address.fromString(WalletService.params, block.transaction.get("receive") as String), Coin.valueOf(10000000))
                             wallet.sendCoins(sendRequest)
                         } else if ((block.transaction.get("direction") as String).equals("eurotoken")) {
-                            Log.d("TradeEurotoken", "Sending eurotokens back to some address: {}".format(block.transaction.get("receive") as String))
+                            Log.d("TradeEurotoken", "Sending eurotokens back to some address: ${block.transaction.get("receive") as String}")
                             sendTransferProposal((block.transaction.get("receive") as String).hexToBytes(), 0)
                         }
                     } else {

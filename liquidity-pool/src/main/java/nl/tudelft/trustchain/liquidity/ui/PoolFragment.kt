@@ -1,21 +1,24 @@
 package nl.tudelft.trustchain.liquidity.ui
 
+import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
 import com.google.common.util.concurrent.FutureCallback
 import com.google.common.util.concurrent.Futures
 import kotlinx.android.synthetic.main.fragment_pool.*
-import kotlinx.android.synthetic.main.fragment_pool_join.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -49,7 +52,8 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
     var euroTokenTransaction: TrustChainBlock? = null
     var tradeTransaction: TrustChainBlock? = null
     var status: MutableMap<String, Status> = mutableMapOf("btc" to Status.NOTSEND, "euro" to Status.NOTSEND)
-    val euroLiqWallet = "4c69624e61434c504b3ac47746bf9be225a333f244340792b28df40ace7dcf7407ce36305c7a83e34b56268aeceb137d81541ec8a75aaa17fd75e70130b4948de1a92955174536f0cc1a"
+    lateinit var poolEuroAddress: String
+    lateinit var poolBitcoinAddress: String
     lateinit var selectedSupplyToken: String
     val tokenPair: Map<String, String> = mutableMapOf("BTC" to "Euro Token", "Euro Token" to "BTC")
     val tradeRatio: Float = 1.0F
@@ -62,8 +66,6 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
 
         app = WalletService.getGlobalWallet()
         btcWallet = app.wallet()
@@ -95,6 +97,8 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
 
 
         lifecycleScope.launchWhenStarted {
+            poolBitcoinAddress = sharedPreference.getString("poolBitcoinAddress", "mv7x4cqQMM8ptFgiHwJZTMTQTcTFV5rteU").toString()
+            poolEuroAddress = sharedPreference.getString("poolEuroAddress", "4c69624e61434c504b3a85f8c38cec5caa72c2e23da91d0288d7f49615ee400ca82e97e925e1a2f7ae33460843aea94611d04eb535f463a9857f592a7cb072eb7e0b52f080ef078c7c5f").toString()
             val btcTransferTXID = sharedPreference.getString("btcTransferTXID", null)
             if (btcTransferTXID != null) {
                 btcTransaction = btcWallet.getTransaction(Sha256Hash.wrap(btcTransferTXID))
@@ -112,24 +116,51 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
             }
             /**
              * if transaction is pending from before, disable button
-             * TODO: Should we check other fields as well ? (UNKNOWN etc)
+             * TODO: Uncomment line below when not testing
              */
 
-            if (getTransactionStatus() == "Pending" || status["btc"] == Status.PENDING || status["eur"] == Status.PENDING) {
- //               convert_tokens.isEnabled = false
- //               convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
-            }
+//            if (getTransactionStatus() == "Pending" || status["btc"] == Status.PENDING || status["eur"] == Status.PENDING) {
+//                convert_tokens.isEnabled = false
+//                convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
+//            }
 
             convert_tokens.setOnClickListener {
                 // TODO grey out button when disabled
-   //             convert_tokens.isEnabled = false
-   //             convert_tokens.setBackgroundColor(Color.parseColor("#808080"));
+//                convert_tokens.isEnabled = false
+//                convert_tokens.setBackgroundColor(Color.parseColor("#808080"));
                 if(selectedSupplyToken == "BTC") {
                     btcTransaction(suppliedAmount)
                 }
                 if(selectedSupplyToken == "Euro Token") {
                     euroTokenTransaction(suppliedAmount)
                 }
+            }
+
+            poolSettingsButton.setOnClickListener {
+                val builder = AlertDialog.Builder(requireContext())
+                builder.setTitle("Liquidity Pool Addresses")
+                val inputEuro = EditText(requireContext())
+                inputEuro.inputType = InputType.TYPE_CLASS_TEXT
+                inputEuro.hint = "Liquidity Pool Eurotoken Address\n${poolEuroAddress}"
+                val inputBtc = EditText(requireContext())
+                inputBtc.inputType = InputType.TYPE_CLASS_TEXT
+                inputBtc.hint = "Liquidity Pool Bitcoin Address\n${poolBitcoinAddress}"
+                val layout = LinearLayout(requireContext())
+                layout.orientation = LinearLayout.VERTICAL
+                layout.addView(inputEuro)
+                layout.addView(inputBtc)
+                builder.setView(layout)
+                builder.setPositiveButton("OK") { _, _ ->
+                    poolEuroAddress = inputEuro.text.toString()
+                    poolBitcoinAddress = inputBtc.text.toString()}
+                builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
+
+                val editor = sharedPreference.edit()
+                editor.putString("poolEuroAddress", poolEuroAddress)
+                editor.putString("poolBitcoinAddress", poolBitcoinAddress)
+                editor.apply()
+
+                builder.show()
             }
 
             while (isActive) {
@@ -144,13 +175,13 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
                 }
 
                 // TODO: do we have to check other states? Unknown for example?
-      /*          if (getTransactionStatus() == "Pending") {
-                    convert_tokens.isEnabled = false
-                    convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
-                } else {
-                    convert_tokens.isEnabled = true
-                    convert_tokens.setBackgroundColor(Color.parseColor("#2962FF"))
-                }*/
+//                if (getTransactionStatus() == "Pending") {
+//                    convert_tokens.isEnabled = false
+//                    convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
+//                } else {
+//                    convert_tokens.isEnabled = true
+//                    convert_tokens.setBackgroundColor(Color.parseColor("#2962FF"))
+//                }
 
                 bitcoin_status.text = "BTC Status: " + getStatusString("btc")
                 euro_status.text = "EUR Status: " + getStatusString("euro")
@@ -165,8 +196,8 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
     private fun btcTransaction(suppliedAmount: Float) {
         val params = RegTestParams.get()
 
-        val satoshiAmount = (suppliedAmount*100000000/2).toLong()
-        val sendRequest = SendRequest.to(Address.fromString(params, "mh4GL8HU5Da5qWfJLnmijX66KkeBJftkk7"), Coin.valueOf(satoshiAmount))
+        val satoshiAmount = (suppliedAmount*100000000).toLong()
+        val sendRequest = SendRequest.to(Address.fromString(params, poolBitcoinAddress), Coin.valueOf(satoshiAmount))
         val sendRes = btcWallet.sendCoins(sendRequest)
         status["btc"] = Status.SEND
         // TODO: Make it such we can still get the result even if the user closes the fragment before the callback is made.
@@ -191,7 +222,7 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
 
     private fun euroTokenTransaction(suppliedAmount: Float) {
         status["euro"] = Status.SEND
-        val proposalBlock: TrustChainBlock? = euroWallet.sendTokens(euroLiqWallet.hexToBytes(), (suppliedAmount/2).toLong())
+        val proposalBlock: TrustChainBlock? = euroWallet.sendTokens(poolEuroAddress.hexToBytes(), suppliedAmount.toLong())
         if(proposalBlock != null) {
             status["euro"] = Status.PENDING
             euroTokenTransaction = proposalBlock
@@ -210,11 +241,11 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
         var tradeProposalBlock: TrustChainBlock? = null
 
         if (btcTransaction != null) {
-            tradeProposalBlock = euroWallet.tradeTokens(euroLiqWallet.hexToBytes(),
+            tradeProposalBlock = euroWallet.tradeTokens(poolEuroAddress.hexToBytes(),
                 btcTransaction!!.txId.toString(), "eurotoken", euroWallet.getPublicKey().keyToBin().toHex())
         }
         if (euroTokenTransaction != null){
-            tradeProposalBlock = euroWallet.tradeTokens(euroLiqWallet.hexToBytes(),
+            tradeProposalBlock = euroWallet.tradeTokens(poolEuroAddress.hexToBytes(),
                 euroTokenTransaction!!.calculateHash().toHex(), "bitcoin", btcWallet.currentReceiveAddress().toString())
         }
         if(tradeProposalBlock != null) {
