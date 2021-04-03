@@ -59,7 +59,7 @@ class SharedWalletListAdapter(
         inWallet.text = inWalletText
         yourVotes.text = votes
         clickToJoin.text = listButtonText
-        balance.text = walletManager.getMultiSigOutput(previousTransaction).value.toFriendlyString()
+        balance.text = walletManager.getMuSigOutput(previousTransaction).value.toFriendlyString()
 
         if (this.disableOnUserJoined!! && isUserInWallet) {
             clickToJoin.isEnabled = false

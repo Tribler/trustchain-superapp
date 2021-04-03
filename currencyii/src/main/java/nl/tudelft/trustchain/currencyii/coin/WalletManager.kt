@@ -7,6 +7,8 @@ import info.blockchain.api.APIException
 import info.blockchain.api.blockexplorer.BlockExplorer
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.currencyii.util.taproot.Address
+import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
 import org.bitcoinj.core.*
 import org.bitcoinj.core.DumpedPrivateKey
 import org.bitcoinj.core.ECKey.ECDSASignature
@@ -28,6 +30,7 @@ import java.io.File
 import java.net.InetAddress
 import java.net.UnknownHostException
 import java.util.*
+import kotlin.experimental.and
 
 const val TEST_NET_WALLET_NAME = "forwarding-service-testnet"
 const val REG_TEST_WALLET_NAME = "forwarding-service-regtest"
@@ -184,7 +187,7 @@ class WalletManager(
      * we are part of.
      * @return hex representation of our address
      */
-    fun protocolAddress(): Address {
+    fun protocolAddress(): org.bitcoinj.core.Address {
         return kit.wallet().issuedReceiveAddresses[0]
     }
 
@@ -209,6 +212,9 @@ class WalletManager(
     /**
      * (1) When you are creating a multi-sig wallet for yourself alone
      * as the genesis (wallet).
+     *
+     * Calculates the MuSig address and sends the entrance fee to it.
+     *
      * @param entranceFee the entrance fee you are sending
      * @return TransactionPackage
      */
@@ -218,19 +224,25 @@ class WalletManager(
         Log.i("Coin", "Coin: (safeCreationAndSendGenesisWallet start).")
 
         Log.i("Coin", "Coin: we are making a new genesis wallet for us alone.")
-        val keys = listOf(ECKey.fromPublicOnly(networkPublicECKeyHex().hexToBytes()))
-        val threshold = 1
 
-        Log.i("Coin", "Coin: we will now make a ${keys.size}/$threshold wallet")
+        Log.i("Coin", "Coin: we will now make a 1/1 wallet")
+
+        val (_, aggPubKey) = MuSig.generate_musig_key(listOf(protocolECKey()))
+
+        val pubKeyDataMusig = aggPubKey.getEncoded(true)
+        val programMusig = byteArrayOf(pubKeyDataMusig[0] and 1.toByte()).plus(pubKeyDataMusig.drop(1)).toHex()
+        val version = 1
+        val addressMuSig = Address.program_to_witness(version, programMusig.hexToBytes())
+
+        Log.i("YEET ADDRESS", programMusig)
+        Log.i("YEET PROGRAM", addressMuSig)
+
         val transaction = Transaction(params)
-
-        // Create the locking multi-sig script for the output.
-        val script = ScriptBuilder.createMultiSigOutputScript(threshold, keys)
-
-        // Add an output with the entrance fee & script.
-        transaction.addOutput(entranceFee, script)
+        // Add an output with the entrance fee & MuSig address.
+        transaction.addOutput(entranceFee, org.bitcoinj.core.Address.fromString(params, addressMuSig))
 
         Log.i("Coin", "Coin: use SendRequest to add our entranceFee input & change address.")
+
         val req = SendRequest.forTx(transaction)
         req.changeAddress = protocolAddress()
         kit.wallet().completeTx(req)
@@ -257,7 +269,7 @@ class WalletManager(
 
         Log.i("Coin", "Coin: making a transaction with you in it for everyone to sign.")
         val newTransaction = Transaction(params)
-        val oldMultiSignatureOutput = getMultiSigOutput(oldTransaction).unsignedOutput
+        val oldMultiSignatureOutput = getMuSigOutput(oldTransaction).unsignedOutput
 
         Log.i("Coin", "Coin: output (1) -> we are adding the final new multi-sig output.")
         val newKeys = networkPublicHexKeys.map { publicHexKey: String ->
@@ -303,7 +315,7 @@ class WalletManager(
     ): ECDSASignature {
         Log.i("Coin", "Coin: (safeSigningJoinWalletTransaction start).")
 
-        val oldMultiSignatureOutput = getMultiSigOutput(oldTransaction).unsignedOutput
+        val oldMultiSignatureOutput = getMuSigOutput(oldTransaction).unsignedOutput
         val sighash: Sha256Hash = newTransaction.hashForSignature(
             0,
             oldMultiSignatureOutput.scriptPubKey,
@@ -330,7 +342,7 @@ class WalletManager(
         oldTransaction: Transaction
     ): TransactionBroadcast {
         Log.i("Coin", "Coin: (safeSendingJoinWalletTransaction start).")
-        val oldMultiSigOutput = getMultiSigOutput(oldTransaction).unsignedOutput
+        val oldMultiSigOutput = getMuSigOutput(oldTransaction).unsignedOutput
 
         Log.i("Coin", "Coin: make the new final transaction for the new wallet.")
         Log.i("Coin", "Coin: using ${signaturesOfOldOwners.size} signatures.")
@@ -368,7 +380,7 @@ class WalletManager(
     fun safeSigningTransactionFromMultiSig(
         transaction: Transaction,
         myPrivateKey: ECKey,
-        receiverAddress: Address,
+        receiverAddress: org.bitcoinj.core.Address,
         paymentAmount: Coin
     ): ECDSASignature {
         Log.i("Coin", "Coin: (safeSigningTransactionFromMultiSig start).")
@@ -376,7 +388,7 @@ class WalletManager(
         Log.i("Coin", "Coin: a transaction will be signed from one of our multi-sig outputs.")
         // Retrieve the multi-signature contract.
         val previousMultiSigOutput: TransactionOutput =
-            getMultiSigOutput(transaction).unsignedOutput
+            getMuSigOutput(transaction).unsignedOutput
 
         // Create the transaction which will have the multisig output as input,
         // The outputs will be the receiver address and another one for residual funds
@@ -404,14 +416,14 @@ class WalletManager(
     fun safeSendingTransactionFromMultiSig(
         transaction: Transaction,
         signatures: List<ECDSASignature>,
-        receiverAddress: Address,
+        receiverAddress: org.bitcoinj.core.Address,
         paymentAmount: Coin
     ): TransactionBroadcast {
         Log.i("Coin", "Coin: (safeSendingTransactionFromMultiSig start).")
 
         // Retrieve the multi-sig output. Will become the input of this tx
         val previousMultiSigOutput: TransactionOutput =
-            getMultiSigOutput(transaction).unsignedOutput
+            getMuSigOutput(transaction).unsignedOutput
 
         Log.i("Coin", "Coin: creating the input script to unlock the multi-sig input.")
         // Create the script that combines the signatures (to spend the multi-signature output).
@@ -446,7 +458,7 @@ class WalletManager(
     private fun sendTransaction(transaction: Transaction): TransactionBroadcast {
         Log.i("Coin", "Coin: (sendTransaction start).")
         Log.i("Coin", "Coin: txId: ${transaction.txId}")
-        printTransactionInformation(transaction)
+//        printTransactionInformation(transaction)
 
         Log.i("Coin", "Waiting for $MIN_BLOCKCHAIN_PEERS peers")
         Log.i("Coin", "There are currently ${kit.peerGroup().connectedPeers.size} peers")
@@ -465,25 +477,18 @@ class WalletManager(
      * @param transaction transaction with multi-sig output.
      * @return the multi-sig output
      */
-    fun getMultiSigOutput(transaction: Transaction): MultiSigOutputMeta {
+    fun getMuSigOutput(transaction: Transaction): MuSigOutputMeta {
         val multiSigOutputs = mutableListOf<TransactionOutput>()
         transaction.outputs.forEach { output ->
-            if (ScriptPattern.isSentToMultisig(output.scriptPubKey)) {
-                multiSigOutputs.add(output)
-            }
+            multiSigOutputs.add(output)
         }
 
-        if (multiSigOutputs.size != 1) {
-            Log.i("Coin", "Coin: (getMultiSigOutput) the multi-sig output not available.")
-        }
-
+        // TODO check if program in multisig is same as program of musig agg pubkey
         val multiSigOutput = multiSigOutputs[0]
 
-        return MultiSigOutputMeta(
+        return MuSigOutputMeta(
             multiSigOutput.value,
-            multiSigOutput.scriptPubKey.pubKeys,
             multiSigOutput.index,
-            multiSigOutput.scriptPubKey.numberOfSignaturesRequiredToSpend,
             multiSigOutput
         )
     }
@@ -531,11 +536,7 @@ class WalletManager(
             Log.i("Coin", "Coin:    multi-sig ${ScriptPattern.isSentToMultisig(it.scriptPubKey)}")
         }
         Log.i("Coin", "Coin: multi-sig output::")
-        val a = getMultiSigOutput(transaction)
-        a.owners.forEach {
-            Log.i("Coin", "Coin: key -> ${it.publicKeyAsHex}")
-        }
-        Log.i("Coin", "Coin:    # needed -> ${a.threshold}")
+        val a = getMuSigOutput(transaction)
         Log.i("Coin", "Coin:    value -> ${a.value}")
         Log.i("Coin", "Coin: ============ Transaction Information ===============")
     }
@@ -555,7 +556,7 @@ class WalletManager(
      *  created using signatures (TransactionSignature) of a transaction made with this method.
      */
     private fun createMultiSigPaymentTransaction(
-        receiverAddress: Address,
+        receiverAddress: org.bitcoinj.core.Address,
         paymentAmount: Coin,
         previousMultiSigOutput: TransactionOutput,
         inputScriptSig: Script? = null
@@ -604,7 +605,7 @@ class WalletManager(
      * @param previousMultiSigOutput: the MultiSig output of the shared wallet, used as new input
      */
     fun createMultiSigPaymentTx(
-        receiverAddress: Address,
+        receiverAddress: org.bitcoinj.core.Address,
         paymentAmount: Coin,
         previousMultiSigOutput: TransactionOutput
     ): Transaction {
@@ -625,7 +626,7 @@ class WalletManager(
      *  created using signatures (TransactionSignature) of a transaction made with this method.
      */
     fun createMultiSigPaymentTxWithInputSig(
-        receiverAddress: Address,
+        receiverAddress: org.bitcoinj.core.Address,
         paymentAmount: Coin,
         previousMultiSigOutput: TransactionOutput,
         inputScriptSig: Script
@@ -789,11 +790,9 @@ class WalletManager(
         val serializedTransaction: String
     )
 
-    data class MultiSigOutputMeta(
+    data class MuSigOutputMeta(
         val value: Coin,
-        val owners: MutableList<ECKey>,
         val index: Int,
-        val threshold: Int,
         val unsignedOutput: TransactionOutput
     )
 }

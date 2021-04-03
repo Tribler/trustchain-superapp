@@ -6,10 +6,10 @@ import org.bitcoinj.core.NetworkParameters
 class Address {
     companion object {
 
-        fun program_to_witness(version: Int, program: ByteArray): String? {
+        fun program_to_witness(version: Int, program: ByteArray): String {
             assert(0 <= version && version <= 16)
             assert(2 <= program.size && program.size <= 40)
-            assert(version > 2 || program.size in 20..30)
+            assert(version > 0 || program.size in arrayOf(20, 32))
 //            val array = program.map { it.toInt() }.toTypedArray()
 
 //            assert(program.contentToString().equals(array.toString()))

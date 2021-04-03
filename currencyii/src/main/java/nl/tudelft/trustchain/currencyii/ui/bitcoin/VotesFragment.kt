@@ -356,7 +356,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val newTransaction = Transaction(walletManager.params, newTransactionSerialized.hexToBytes())
         val oldTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
 
-        val oldMultiSignatureOutput = walletManager.getMultiSigOutput(oldTransaction).unsignedOutput
+        val oldMultiSignatureOutput = walletManager.getMuSigOutput(oldTransaction).unsignedOutput
 
         val sighash: Sha256Hash = newTransaction.hashForSignature(
             0,
@@ -404,7 +404,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val receiverAddress = Address.fromString(walletManager.params, blockData.SW_TRANSFER_FUNDS_TARGET_SERIALIZED)
 
         val previousMultiSigOutput: TransactionOutput =
-            walletManager.getMultiSigOutput(previousTransaction).unsignedOutput
+            walletManager.getMuSigOutput(previousTransaction).unsignedOutput
 
         // Create the transaction which will have the multisig output as input,
         // The outputs will be the receiver address and another one for residual funds

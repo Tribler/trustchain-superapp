@@ -75,7 +75,7 @@ class ProposalListAdapter(
                 CoinUtil.TxPriority.LOW_PRIORITY
             )
             val previousMultiSigOutput: TransactionOutput =
-                walletManager.getMultiSigOutput(previousTransaction).unsignedOutput
+                walletManager.getMuSigOutput(previousTransaction).unsignedOutput
             // Make sure that the fee does not exceed the amount of funds available
             val calculatedFee =
                 Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT)).value))
@@ -91,7 +91,7 @@ class ProposalListAdapter(
             signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
-            balance.text = walletManager.getMultiSigOutput(previousTransaction).value.toFriendlyString()
+            balance.text = walletManager.getMuSigOutput(previousTransaction).value.toFriendlyString()
             fee.text = calculatedFee.toFriendlyString()
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()

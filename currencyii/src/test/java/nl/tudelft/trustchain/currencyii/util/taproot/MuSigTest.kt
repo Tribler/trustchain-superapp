@@ -7,6 +7,7 @@ import org.junit.Test
 
 import org.junit.Assert.*
 import java.math.BigInteger
+import kotlin.experimental.and
 
 class MuSigTest {
 
@@ -50,9 +51,33 @@ class MuSigTest {
         val key2 = ECKey.fromPrivate(BigInteger("11756621930195768229168784074199362003209438395325908648574429387730312779458"))
 
         val expected = "023dd5fc3c1766d0a73466a5997da83efcc529107c9ecd0c56e2a28519f0eb3104"
-        val actual = MuSig.generate_musig_key(listOf(key1, key2)).second.getEncoded(true).toHex()
+        val (cMap, actual) = MuSig.generate_musig_key(listOf(key1, key2))
 
-        assertEquals(expected, actual)
+        assertEquals(expected, actual.getEncoded(true).toHex())
+
+        val expectedPrivChallenge1 = BigInteger("1831054192583883058098689099279726084283766354549572339919052854814308263405")
+        val expectedPrivChallenge2 = BigInteger("102505784576051217526024106275692022993285503780642991935683834028794254508839")
+        val expectedPubChallenge1 = "027018cf68d40bae2a6c2b3dcee830b2f02c11586cfbd21955ba3e6a3f1d0da05b"
+        val expectedPubChallenge2 = "0288fd645aca21c03b53abbe67f5cfb62fe65da0fd9277f9b4a00b0dee64e9eb1f"
+
+        val actualPrivChallenge1 = key1.privKey.multiply(BigInteger(1, cMap[key1])).mod(Schnorr.n)
+        val actualPrivChallenge2 = key2.privKey.multiply(BigInteger(1, cMap[key2])).mod(Schnorr.n)
+        val actualPubChallenge1 = key1.pubKeyPoint.multiply(BigInteger(1, cMap[key1])).getEncoded(true).toHex()
+        val actualPubChallenge2 = key2.pubKeyPoint.multiply(BigInteger(1, cMap[key2])).getEncoded(true).toHex()
+
+        assertEquals(expectedPrivChallenge1, actualPrivChallenge1)
+        assertEquals(expectedPrivChallenge2, actualPrivChallenge2)
+        assertEquals(expectedPubChallenge1, actualPubChallenge1)
+        assertEquals(expectedPubChallenge2, actualPubChallenge2)
+
+        val pubkeyDataMuSig = actual.getEncoded(true)
+        val programMusig = byteArrayOf(pubkeyDataMuSig[0] and 1.toByte()).plus(pubkeyDataMuSig.drop(1))
+        val version = 1
+
+        val expectedAddress = "bcrt1pqq7atlpuzandpfe5v6jejldg8m7v22gs0j0v6rzku23g2x0savcsgwp82mv"
+        val actualAddress = Address.program_to_witness(version, programMusig)
+
+        assertEquals(expectedAddress, actualAddress)
     }
 
     @Test

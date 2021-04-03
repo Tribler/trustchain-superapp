@@ -85,7 +85,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             walletManager.params,
             walletData.SW_TRANSACTION_SERIALIZED.hexToBytes()
         )
-        return walletManager.getMultiSigOutput(previousTransaction).value
+        return walletManager.getMuSigOutput(previousTransaction).value
     }
 
     private fun transferFundsClicked() {
