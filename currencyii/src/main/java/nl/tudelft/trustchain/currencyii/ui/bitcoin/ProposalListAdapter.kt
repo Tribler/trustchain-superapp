@@ -101,7 +101,7 @@ class ProposalListAdapter(
             val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).encodeToDER().toHex()
+            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).toByteArray().toHex()
             if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
                 votedButton.visibility = View.VISIBLE
             }

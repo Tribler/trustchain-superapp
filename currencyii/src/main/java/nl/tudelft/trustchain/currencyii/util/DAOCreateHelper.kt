@@ -76,15 +76,18 @@ class DAOCreateHelper {
         entranceFee: Long,
         votingThreshold: Int
     ) {
-        val bitcoinPublicKey = WalletManagerAndroid.getInstance().networkPublicECKeyHex()
+        val walletManager = WalletManagerAndroid.getInstance()
+        val bitcoinPublicKey = walletManager.networkPublicECKeyHex()
         val trustChainPk = myPeer.publicKey.keyToBin()
+        val noncePoint = walletManager.nonceECPointHex()
 
         val blockData = SWJoinBlockTransactionData(
             entranceFee,
             transactionSerialized,
             votingThreshold,
             arrayListOf(trustChainPk.toHex()),
-            arrayListOf(bitcoinPublicKey)
+            arrayListOf(bitcoinPublicKey),
+            arrayListOf(noncePoint)
         )
 
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)

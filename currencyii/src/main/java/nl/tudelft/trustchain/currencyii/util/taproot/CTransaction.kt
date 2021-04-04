@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
+import com.google.gson.Gson
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
@@ -14,7 +15,7 @@ class CTransaction(
     val nVersion: Int = 1,
     val vin: Array<CTxIn> = arrayOf(),
     val vout: Array<CTxOut> = arrayOf(),
-    val wit: CTxWitness = CTxWitness(),
+    var wit: CTxWitness = CTxWitness(),
     val nLockTime: Int = 0,
     val sha256: UInt? = null,
     val hash: UInt? = null
@@ -54,6 +55,116 @@ class CTransaction(
         r += littleEndian(nLockTime.toUInt())
 
         return r
+    }
+
+    companion object {
+        public fun deserialize(bytes: ByteArray): CTransaction {
+            print(bytes)
+            return CTransaction()
+        }
+
+        public fun TaprootSignatureHash(
+            txTo: CTransaction,
+            spentUtxos: Array<CTxOut>,
+            hash_type: Byte,
+            input_index: Short = 0,
+            scriptpath: Boolean = false,
+            tapscript: CScript = CScript(),
+            codeseparator_pos: Int = -1,
+            annex: ByteArray? = null,
+            tapscript_ver: Byte = DEFAULT_TAPSCRIPT_VER
+        ): ByteArray {
+            assert(txTo.vin.size == spentUtxos.size)
+            assert((hash_type in 0..3) || (hash_type in 0x81..0x83))
+            assert(input_index < txTo.vin.size)
+
+            val spk = spentUtxos[input_index.toInt()].scriptPubKey
+
+            var ssBuf: ByteArray = byteArrayOf(0, hash_type)
+            ssBuf += littleEndian(txTo.nVersion)
+            ssBuf += littleEndian(txTo.nLockTime)
+
+            if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
+                ssBuf += sha256(txTo.vin.map { it.prevout.serialize() }[0])
+
+                var temp: ByteArray = byteArrayOf()
+                for (u in spentUtxos) {
+                    temp += littleEndian(u.nValue)
+                }
+                ssBuf += sha256(temp)
+
+                temp = byteArrayOf()
+                for (i in txTo.vin) {
+                    temp += littleEndian(i.nSequence.toUInt())
+                }
+                ssBuf += sha256(temp)
+            }
+
+            if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
+                ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
+            }
+
+            var spendType = 0
+            if (isPayToScriptHash(spk)) {
+                spendType = 1
+            } else {
+                assert(isPayToTaproot(spk))
+            }
+
+            if (annex != null) {
+                assert(annex[0] == ANNEX_TAG)
+                spendType = spendType or 2
+            }
+
+            if (scriptpath) {
+                assert(tapscript.size() > 0)
+                assert(codeseparator_pos >= -1)
+                spendType = spendType or 4
+            }
+
+            ssBuf += byteArrayOf(spendType.toByte())
+            ssBuf += Messages.serString(spk)
+
+            if (hash_type and SIGHASH_ANYONECANPAY == 1.toByte()) {
+                // not tested, not needed for the transactions we make now.
+                // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
+                ssBuf += txTo.vin[input_index.toInt()].prevout.serialize()
+                ssBuf += byteArrayOf(spentUtxos[input_index.toInt()].nValue.toByte())
+                ssBuf += byteArrayOf(txTo.vin[input_index.toInt()].nSequence.toByte())
+            } else {
+                ssBuf += littleEndian(input_index.toUShort())
+            }
+
+            if ((spendType and 2) == 1) {
+                // not tested, not needed for the transactions we make now.
+                ssBuf += sha256(Messages.serString(annex!!))
+            }
+
+            if ((hash_type and 3) == SIGHASH_SINGLE) {
+                // not tested, not needed for the transactions we make now.
+                assert(input_index < txTo.vout.size)
+                ssBuf += sha256(txTo.vout[input_index.toInt()].serialize())
+            }
+
+            if (scriptpath) {
+                // not tested, not needed for the transactions we make now.
+                // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
+                ssBuf += taggedHash(
+                    "TapLeaf",
+                    byteArrayOf(tapscript_ver) + Messages.serString(tapscript.bytes)
+                )
+                ssBuf += byteArrayOf(0x02)
+                ssBuf += byteArrayOf(codeseparator_pos.toShort().toByte())
+            }
+
+            assert(
+                ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
+                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(spk))
+                    1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
+            )
+
+            return taggedHash("TapSighash", ssBuf)
+        }
     }
 }
 
@@ -279,107 +390,4 @@ fun littleEndian(uShort: UShort): ByteArray {
     bb.order(ByteOrder.LITTLE_ENDIAN)
     bb.put(uShort.toByte())
     return bb.array()
-}
-
-fun TaprootSignatureHash(
-    txTo: CTransaction,
-    spentUtxos: Array<CTxOut>,
-    hash_type: Byte,
-    input_index: Short = 0,
-    scriptpath: Boolean = false,
-    tapscript: CScript = CScript(),
-    codeseparator_pos: Int = -1,
-    annex: ByteArray? = null,
-    tapscript_ver: Byte = DEFAULT_TAPSCRIPT_VER
-): ByteArray {
-    assert(txTo.vin.size == spentUtxos.size)
-    assert((hash_type in 0..3) || (hash_type in 0x81..0x83))
-    assert(input_index < txTo.vin.size)
-
-    val spk = spentUtxos[input_index.toInt()].scriptPubKey
-
-    var ssBuf: ByteArray = byteArrayOf(0, hash_type)
-    ssBuf += littleEndian(txTo.nVersion)
-    ssBuf += littleEndian(txTo.nLockTime)
-
-    if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
-        ssBuf += sha256(txTo.vin.map { it.prevout.serialize() }[0])
-
-        var temp: ByteArray = byteArrayOf()
-        for (u in spentUtxos) {
-            temp += littleEndian(u.nValue)
-        }
-        ssBuf += sha256(temp)
-
-        temp = byteArrayOf()
-        for (i in txTo.vin) {
-            temp += littleEndian(i.nSequence.toUInt())
-        }
-        ssBuf += sha256(temp)
-    }
-
-    if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
-        ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
-    }
-
-    var spendType = 0
-    if (isPayToScriptHash(spk)) {
-        spendType = 1
-    } else {
-        assert(isPayToTaproot(spk))
-    }
-
-    if (annex != null) {
-        assert(annex[0] == ANNEX_TAG)
-        spendType = spendType or 2
-    }
-
-    if (scriptpath) {
-        assert(tapscript.size() > 0)
-        assert(codeseparator_pos >= -1)
-        spendType = spendType or 4
-    }
-
-    ssBuf += byteArrayOf(spendType.toByte())
-    ssBuf += Messages.serString(spk)
-
-    if (hash_type and SIGHASH_ANYONECANPAY == 1.toByte()) {
-        // not tested, not needed for the transactions we make now.
-        // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
-        ssBuf += txTo.vin[input_index.toInt()].prevout.serialize()
-        ssBuf += byteArrayOf(spentUtxos[input_index.toInt()].nValue.toByte())
-        ssBuf += byteArrayOf(txTo.vin[input_index.toInt()].nSequence.toByte())
-    } else {
-        ssBuf += littleEndian(input_index.toUShort())
-    }
-
-    if ((spendType and 2) == 1) {
-        // not tested, not needed for the transactions we make now.
-        ssBuf += sha256(Messages.serString(annex!!))
-    }
-
-    if ((hash_type and 3) == SIGHASH_SINGLE) {
-        // not tested, not needed for the transactions we make now.
-        assert(input_index < txTo.vout.size)
-        ssBuf += sha256(txTo.vout[input_index.toInt()].serialize())
-    }
-
-    if (scriptpath) {
-        // not tested, not needed for the transactions we make now.
-        // this is probably wrong though, need to use little endian instead of big endian when adding to ssBuf
-        ssBuf += taggedHash(
-            "TapLeaf",
-            byteArrayOf(tapscript_ver) + Messages.serString(tapscript.bytes)
-        )
-        ssBuf += byteArrayOf(0x02)
-        ssBuf += byteArrayOf(codeseparator_pos.toShort().toByte())
-    }
-
-    assert(
-        ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
-            (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(spk))
-            1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
-    )
-
-    return taggedHash("TapSighash", ssBuf)
 }

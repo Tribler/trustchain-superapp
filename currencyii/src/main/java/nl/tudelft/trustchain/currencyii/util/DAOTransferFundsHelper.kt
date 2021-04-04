@@ -154,6 +154,7 @@ class DAOTransferFundsHelper {
             walletData.SW_VOTING_THRESHOLD,
             walletData.SW_TRUSTCHAIN_PKS,
             walletData.SW_BITCOIN_PKS,
+            walletData.SW_NONCE_PKS,
             walletData.SW_UNIQUE_ID
         )
 

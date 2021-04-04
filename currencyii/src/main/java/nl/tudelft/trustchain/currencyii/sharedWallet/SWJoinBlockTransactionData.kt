@@ -11,7 +11,8 @@ data class SWJoinBlockTD(
     var SW_TRANSACTION_SERIALIZED: String,
     var SW_VOTING_THRESHOLD: Int,
     var SW_TRUSTCHAIN_PKS: ArrayList<String>,
-    var SW_BITCOIN_PKS: ArrayList<String>
+    var SW_BITCOIN_PKS: ArrayList<String>,
+    var SW_NONCE_PKS: ArrayList<String>
 )
 
 class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
@@ -33,6 +34,12 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
         jsonData = SWUtil.objectToJsonObject(data)
     }
 
+    fun addNoncePk(publicKey: String) {
+        val data = getData()
+        data.SW_NONCE_PKS.add(publicKey)
+        jsonData = SWUtil.objectToJsonObject(data)
+    }
+
     fun setTransactionSerialized(serializedTransaction: String) {
         val data = getData()
         data.SW_TRANSACTION_SERIALIZED = serializedTransaction
@@ -45,6 +52,7 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
         votingThreshold: Int,
         trustChainPks: ArrayList<String>,
         bitcoinPks: ArrayList<String>,
+        noncePks: ArrayList<String>,
         uniqueId: String = SWUtil.randomUUID()
     ) : this(
         SWUtil.objectToJsonObject(
@@ -54,7 +62,8 @@ class SWJoinBlockTransactionData(data: JsonObject) : SWBlockTransactionData(
                 transactionSerialized,
                 votingThreshold,
                 trustChainPks,
-                bitcoinPks
+                bitcoinPks,
+                noncePks
             )
         )
     )

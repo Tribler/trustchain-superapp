@@ -29,7 +29,7 @@ class CTransactionTest {
         val expected =
             "c58660789cf1bbd4c265823168ccdc2e13a5f97c4d2e8742e08e16ee21d0929a"
         val actual =
-            TaprootSignatureHash(
+            CTransaction.TaprootSignatureHash(
                 spending_tx,
                 arrayOf(txVout),
                 SIGHASH_ALL_TAPROOT,
