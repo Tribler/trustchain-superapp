@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeString
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeStringVector
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeVector
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.read
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.serCompactSize
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -59,13 +60,13 @@ class CTransaction(
         return r
     }
 
-    fun deserialize(bytes: ByteArray): CTransaction {
-        nVersion =
-            ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+    fun deserialize(b: ByteArray): CTransaction {
+        val bytes = b.iterator()
+        nVersion = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
         vin = deserializeVector(bytes, CTxIn())
         var flags: Char = 0.toChar()
         if (vin.isEmpty()) {
-            flags = ByteBuffer.wrap(bytes.copyOfRange(1, 2)).order(ByteOrder.LITTLE_ENDIAN).char
+            flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).char
             if (flags != 0.toChar()) {
                 vin = deserializeVector(bytes, CTxIn())
                 vout = deserializeVector(bytes, CTxOut())
@@ -79,7 +80,7 @@ class CTransaction(
         } else {
             wit = CTxWitness()
         }
-        nLockTime = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        nLockTime = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
         sha256 = null
         hash = null
         return this
@@ -213,7 +214,7 @@ class CTxInWitness(
         return Messages.serStringVector(scriptWitness.stack)
     }
 
-    fun derialize(bytes: ByteArray) {
+    fun deserialize(bytes: ByteIterator) {
         this.scriptWitness.stack = deserializeStringVector(bytes)
     }
 }
@@ -231,12 +232,12 @@ class CTxIn(
         return r
     }
 
-    fun deserialize(bytes: ByteArray): CTxIn {
+    fun deserialize(bytes: ByteIterator): CTxIn {
         this.prevout = COutPoint()
         this.prevout.deserialize(bytes)
         this.scriptSig = deserializeString(bytes)
         this.nSequence =
-            ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+            ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
         return this
     }
 }
@@ -252,9 +253,9 @@ class CTxOut(
         return r
     }
 
-    fun deserialize(bytes: ByteArray): CTxOut {
+    fun deserialize(bytes: ByteIterator): CTxOut {
         this.nValue =
-            ByteBuffer.wrap(bytes.copyOfRange(8, 16)).order(ByteOrder.LITTLE_ENDIAN).long
+            ByteBuffer.wrap(read(bytes, 8)).order(ByteOrder.LITTLE_ENDIAN).long
         this.scriptPubKey = deserializeString(bytes)
         return this
     }
@@ -291,9 +292,9 @@ class CTxWitness(
         return true
     }
 
-    fun deserialize(bytes: ByteArray): CTxWitness {
+    fun deserialize(bytes: ByteIterator): CTxWitness {
         for (i in 0..vtxinwit.size) {
-            this.vtxinwit[i].derialize(bytes)
+            this.vtxinwit[i].deserialize(bytes)
         }
         return this
     }
@@ -317,9 +318,9 @@ class COutPoint(
         return r
     }
 
-    fun deserialize(bytes: ByteArray): COutPoint {
+    fun deserialize(bytes: ByteIterator): COutPoint {
         this.hash = Messages.deserializeUInt256(bytes)
-        this.n = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        this.n = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
         return this
     }
 }
