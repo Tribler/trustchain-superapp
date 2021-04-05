@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
+import nl.tudelft.ipv8.util.toHex
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -74,19 +75,13 @@ class Messages {
             return read(bytes, nit)
         }
 
-        // TODO: This thing goes wrong
         fun deserializeCompactSize(bytes: ByteIterator): Long {
-            // "<B", f.read(1)
-
             var nit: Long = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).get().toLong()
             if (nit == 253L) {
-                // "<H", f.read(2)
                 nit = ByteBuffer.wrap(read(bytes, 2)).order(ByteOrder.LITTLE_ENDIAN).short.toLong()
             } else if (nit == 254L) {
-                // "<I", f.read(4)
                 nit = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int.toLong()
             } else if (nit == 255L) {
-                // "<Q", f.read(8)
                 nit = ByteBuffer.wrap(read(bytes, 8)).order(ByteOrder.LITTLE_ENDIAN).long
             }
             return nit
@@ -95,8 +90,8 @@ class Messages {
         fun deserializeUInt256(bytes: ByteIterator): String {
             var r = ""
             for (i in 0 until 8) {
-                val t = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int.toUInt()
-                r += t.shl(i * 32)
+                val t = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
+                r = t.shl(i * 32).toBigInteger().toByteArray().toHex() + r
             }
             return r
         }
