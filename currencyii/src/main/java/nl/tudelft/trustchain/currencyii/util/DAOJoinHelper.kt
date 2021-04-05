@@ -8,7 +8,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_AGREEMENT_BLOCK
 import nl.tudelft.trustchain.currencyii.CoinCommunity.Companion.SIGNATURE_ASK_BLOCK
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
@@ -20,9 +19,7 @@ import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.Transaction
-import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
-import java.util.concurrent.TimeUnit
 
 class DAOJoinHelper {
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -145,7 +142,7 @@ class DAOJoinHelper {
         val (status, serializedTransaction) = walletManager.safeSendingJoinWalletTransaction(
             signaturesOfOldOwners,
             aggregateNoncePoint,
-            CTransaction.deserialize(newTransactionProposal)
+            CTransaction().deserialize(newTransactionProposal)
         )
 
         if (status) {
@@ -211,9 +208,9 @@ class DAOJoinHelper {
             val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
             val signature = walletManager.safeSigningJoinWalletTransaction(
                 Transaction(walletManager.params, oldTransactionSerialized.hexToBytes()),
-                CTransaction.deserialize(newTransactionSerialized.hexToBytes()),
-                joinBlock.SW_BITCOIN_PKS.map{ECKey.fromPublicOnly(it.hexToBytes())},
-                joinBlock.SW_NONCE_PKS.map{ECKey.fromPublicOnly(it.hexToBytes())},
+                CTransaction().deserialize(newTransactionSerialized.hexToBytes()),
+                joinBlock.SW_BITCOIN_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
+                joinBlock.SW_NONCE_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
                 walletManager.protocolECKey()
             )
 

@@ -1,9 +1,11 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
-import com.google.gson.Gson
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeString
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeStringVector
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeVector
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.serCompactSize
 import java.math.BigInteger
 import java.nio.ByteBuffer
@@ -12,13 +14,13 @@ import kotlin.experimental.and
 import kotlin.reflect.KProperty1
 
 class CTransaction(
-    val nVersion: Int = 1,
-    val vin: Array<CTxIn> = arrayOf(),
-    val vout: Array<CTxOut> = arrayOf(),
+    var nVersion: Int = 1,
+    var vin: Array<CTxIn> = arrayOf(),
+    var vout: Array<CTxOut> = arrayOf(),
     var wit: CTxWitness = CTxWitness(),
-    val nLockTime: Int = 0,
-    val sha256: UInt? = null,
-    val hash: UInt? = null
+    var nLockTime: Int = 0,
+    var sha256: UInt? = null,
+    var hash: UInt? = null
 ) {
     fun serialize(): ByteArray {
         return serializeWithWitness()
@@ -57,13 +59,35 @@ class CTransaction(
         return r
     }
 
-    companion object {
-        public fun deserialize(bytes: ByteArray): CTransaction {
-            print(bytes)
-            return CTransaction()
+    fun deserialize(bytes: ByteArray): CTransaction {
+        nVersion =
+            ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        vin = deserializeVector(bytes, CTxIn())
+        var flags: Char = 0.toChar()
+        if (vin.isEmpty()) {
+            flags = ByteBuffer.wrap(bytes.copyOfRange(1, 2)).order(ByteOrder.LITTLE_ENDIAN).char
+            if (flags != 0.toChar()) {
+                vin = deserializeVector(bytes, CTxIn())
+                vout = deserializeVector(bytes, CTxOut())
+            }
+        } else {
+            vout = deserializeVector(bytes, CTxOut())
         }
+        if (flags != 0.toChar()) {
+            wit.vtxinwit = Array(vin.size) { CTxInWitness() }
+            wit.deserialize(bytes)
+        } else {
+            wit = CTxWitness()
+        }
+        nLockTime = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        sha256 = null
+        hash = null
+        return this
+    }
 
-        public fun TaprootSignatureHash(
+    companion object {
+
+        fun TaprootSignatureHash(
             txTo: CTransaction,
             spentUtxos: Array<CTxOut>,
             hash_type: Byte,
@@ -159,7 +183,10 @@ class CTransaction(
 
             assert(
                 ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
-                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(spk))
+                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(
+                        spk
+                    )
+                )
                     1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
             )
 
@@ -185,12 +212,16 @@ class CTxInWitness(
     fun serialize(): ByteArray {
         return Messages.serStringVector(scriptWitness.stack)
     }
+
+    fun derialize(bytes: ByteArray) {
+        this.scriptWitness.stack = deserializeStringVector(bytes)
+    }
 }
 
 class CTxIn(
-    val prevout: COutPoint = COutPoint(),
-    val scriptSig: ByteArray = byteArrayOf(),
-    val nSequence: Int = 0
+    var prevout: COutPoint = COutPoint(),
+    var scriptSig: ByteArray = byteArrayOf(),
+    var nSequence: Int = 0
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
@@ -199,17 +230,33 @@ class CTxIn(
         r += littleEndian(nSequence.toUInt())
         return r
     }
+
+    fun deserialize(bytes: ByteArray): CTxIn {
+        this.prevout = COutPoint()
+        this.prevout.deserialize(bytes)
+        this.scriptSig = deserializeString(bytes)
+        this.nSequence =
+            ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        return this
+    }
 }
 
 class CTxOut(
-    val nValue: Long = 0,
-    val scriptPubKey: ByteArray = byteArrayOf()
+    var nValue: Long = 0,
+    var scriptPubKey: ByteArray = byteArrayOf()
 ) {
     fun serialize(): ByteArray {
         var r: ByteArray = byteArrayOf()
         r += littleEndian(nValue)
         r += Messages.serString(scriptPubKey)
         return r
+    }
+
+    fun deserialize(bytes: ByteArray): CTxOut {
+        this.nValue =
+            ByteBuffer.wrap(bytes.copyOfRange(8, 16)).order(ByteOrder.LITTLE_ENDIAN).long
+        this.scriptPubKey = deserializeString(bytes)
+        return this
     }
 }
 
@@ -243,6 +290,13 @@ class CTxWitness(
         }
         return true
     }
+
+    fun deserialize(bytes: ByteArray): CTxWitness {
+        for (i in 0..vtxinwit.size) {
+            this.vtxinwit[i].derialize(bytes)
+        }
+        return this
+    }
 }
 
 fun littleEndian(uint: UInt): ByteArray {
@@ -261,6 +315,12 @@ class COutPoint(
         r += serUint256(BigInteger(1, hash.hexToBytes()))
         r += littleEndian(n.toUInt())
         return r
+    }
+
+    fun deserialize(bytes: ByteArray): COutPoint {
+        this.hash = Messages.deserializeUInt256(bytes)
+        this.n = ByteBuffer.wrap(bytes.copyOfRange(4, 8)).order(ByteOrder.LITTLE_ENDIAN).int
+        return this
     }
 }
 

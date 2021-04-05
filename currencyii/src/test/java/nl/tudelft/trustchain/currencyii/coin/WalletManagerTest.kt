@@ -1,19 +1,19 @@
-//package nl.tudelft.trustchain.currencyii.coin
+// package nl.tudelft.trustchain.currencyii.coin
 //
-//import nl.tudelft.ipv8.util.hexToBytes
-//import org.bitcoinj.core.Coin
-//import org.bitcoinj.core.ECKey
-//import org.bitcoinj.core.LegacyAddress
-//import org.bitcoinj.core.Sha256Hash
-//import org.bitcoinj.params.MainNetParams
-//import org.bitcoinj.script.ScriptPattern
-//import org.junit.Assert.assertFalse
-//import org.junit.Assert.assertTrue
-//import org.junit.BeforeClass
-//import org.junit.Test
-//import java.io.File
+// import nl.tudelft.ipv8.util.hexToBytes
+// import org.bitcoinj.core.Coin
+// import org.bitcoinj.core.ECKey
+// import org.bitcoinj.core.LegacyAddress
+// import org.bitcoinj.core.Sha256Hash
+// import org.bitcoinj.params.MainNetParams
+// import org.bitcoinj.script.ScriptPattern
+// import org.junit.Assert.assertFalse
+// import org.junit.Assert.assertTrue
+// import org.junit.BeforeClass
+// import org.junit.Test
+// import java.io.File
 //
-//class WalletManagerTest {
+// class WalletManagerTest {
 //
 //    companion object {
 //        lateinit var walletManager: WalletManager
@@ -29,7 +29,7 @@
 //        }
 //    }
 //
-////    @Test
+// //    @Test
 //    fun testEntranceFeeTransactionWithWitnessTx() {
 //        val params = MainNetParams.get()
 //
@@ -52,7 +52,7 @@
 //        assertFalse("The entrance fee should be payed", entranceFeePayed)
 //    }
 //
-////    @Test
+// //    @Test
 //    fun testEntranceFeeTransactionWithInvalidTx() {
 //        val params = MainNetParams.get()
 //
@@ -75,7 +75,7 @@
 //        assertFalse("The entrance fee should be payed", entranceFeePayed)
 //    }
 //
-////    @Test
+// //    @Test
 //    fun testEntranceFeeTransactionValidUnconfirmedTx() {
 //        val params = MainNetParams.get()
 //
@@ -193,4 +193,4 @@
 //
 //        WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
 //    }
-//}
+// }
