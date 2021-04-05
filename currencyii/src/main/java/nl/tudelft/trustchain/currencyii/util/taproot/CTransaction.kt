@@ -66,7 +66,7 @@ class CTransaction(
         vin = deserializeVector(bytes, CTxIn())
         var flags: Char = 0.toChar()
         if (vin.isEmpty()) {
-            flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).char
+            flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).get().toChar()
             if (flags != 0.toChar()) {
                 vin = deserializeVector(bytes, CTxIn())
                 vout = deserializeVector(bytes, CTxOut())
@@ -293,8 +293,8 @@ class CTxWitness(
     }
 
     fun deserialize(bytes: ByteIterator): CTxWitness {
-        for (i in 0..vtxinwit.size) {
-            this.vtxinwit[i].deserialize(bytes)
+        for (element in vtxinwit) {
+            element.deserialize(bytes)
         }
         return this
     }
