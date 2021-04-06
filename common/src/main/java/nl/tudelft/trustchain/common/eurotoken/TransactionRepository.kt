@@ -291,7 +291,12 @@ class TransactionRepository(
      * Sends a proposal block to trade with the liquidity pool by specifying the direction you want to trade in (i.e. which currency you want to receive),
      * a hash of a transaction in the opposing currency, as well as an address where you would like to receive the currency specified in the direction.
      */
-    fun sendTradeProposal(recipient: ByteArray, hash: String, direction: String, receiveAddress: String): TrustChainBlock? {
+    fun sendTradeProposal(
+        recipient: ByteArray,
+        hash: String,
+        direction: String,
+        receiveAddress: String
+    ): TrustChainBlock? {
         val transaction = mapOf(
             "hash" to hash,
             "receive" to receiveAddress,
@@ -509,7 +514,7 @@ class TransactionRepository(
         var btcConfirmed = false
         var euroConfirmed = false
         // Traverse the chain while the corresponding btc/euro transfer blocks are not found
-        while(!euroConfirmed || !btcConfirmed) {
+        while (!euroConfirmed || !btcConfirmed) {
             // For eurotoken blocks check the linked block for the correct hash
             if (latestBlock.type.equals(BLOCK_TYPE_TRANSFER)) {
                 if (trustChainCommunity.database.getLinked(latestBlock)?.calculateHash()?.toHex().equals(euroHash)) {
@@ -520,7 +525,7 @@ class TransactionRepository(
                     }
                     euroConfirmed = true
                 }
-            } else if (latestBlock.type.equals("bitcoin_transfer")) { //For bitcoin blocks check the value in the transactions of the block
+            } else if (latestBlock.type.equals("bitcoin_transfer")) { // For bitcoin blocks check the value in the transactions of the block
                 if (latestBlock.transaction.get("bitcoin_tx")!!.equals(btcHash)) {
                     btcConfirmed = true
                 }
@@ -531,7 +536,7 @@ class TransactionRepository(
             }
             latestBlock = trustChainCommunity.database.getBlockWithHash(latestBlock.previousHash)!!
         }
-        Log.d("VerifyJoinTransactions", "btc: ${btcConfirmed}, euro: ${euroConfirmed}")
+        Log.d("VerifyJoinTransactions", "btc: $btcConfirmed, euro: $euroConfirmed")
 
         if (btcConfirmed && euroConfirmed) {
             Log.d("JoinPool", "Pool joined!")

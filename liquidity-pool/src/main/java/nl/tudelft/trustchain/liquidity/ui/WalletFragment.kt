@@ -14,7 +14,6 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
-import nl.tudelft.trustchain.liquidity.data.BitcoinLiquidityWallet
 import nl.tudelft.trustchain.liquidity.data.EuroTokenWallet
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.Wallet
@@ -39,10 +38,9 @@ class WalletFragment : BaseFragment(R.layout.fragment_pool_wallet) {
         val btcWallet = app.wallet()
 
         // Technically only necessary for the liquidity pool owner
-        val btcLiqWallet = BitcoinLiquidityWallet(btcWallet, app, transactionRepository, getIpv8().myPeer.publicKey)
-        btcLiqWallet.initializePool()
+        WalletService.initializePool(transactionRepository, getIpv8().myPeer.publicKey)
 
-        val euroWallet = EuroTokenWallet(transactionRepository, getIpv8().myPeer.publicKey);
+        val euroWallet = EuroTokenWallet(transactionRepository, getIpv8().myPeer.publicKey)
 
         val clipboard = getSystemService(requireContext(), ClipboardManager::class.java) as ClipboardManager
 

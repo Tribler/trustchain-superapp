@@ -16,7 +16,6 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
 import nl.tudelft.trustchain.liquidity.data.EuroTokenWallet
 
-
 /**
  * A simple [Fragment] subclass.
  * Use the [PoolOwnerFragment.newInstance] factory method to
@@ -29,13 +28,13 @@ class PoolOwnerFragment : BaseFragment(R.layout.fragment_pool_owner) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val list: LinearLayout = requireView().findViewById<View>(R.id.list) as LinearLayout
-        val euroWallet = EuroTokenWallet(transactionRepository, getIpv8().myPeer.publicKey);
+        val euroWallet = EuroTokenWallet(transactionRepository, getIpv8().myPeer.publicKey)
 
         lifecycleScope.launchWhenStarted {
 
@@ -53,8 +52,11 @@ class PoolOwnerFragment : BaseFragment(R.layout.fragment_pool_owner) {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_pool_owner, container, false)
     }

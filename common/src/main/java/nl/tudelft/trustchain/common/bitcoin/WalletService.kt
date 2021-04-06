@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.common.bitcoin
 
+import android.util.Log
 import com.google.common.util.concurrent.Service
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.PeerAddress
 import org.bitcoinj.kits.WalletAppKit
@@ -86,6 +89,22 @@ class WalletService {
             walletStore[name] = app
 
             return app
+        }
+
+        /**
+         * Initializes the bitcoin side of the liquidity pool
+         */
+        fun initializePool(transactionRepository: TransactionRepository, publicKey: PublicKey) {
+
+            // TODO: Look into different listeners, this event is called before the transfer is verified, not sure if this will be an issue
+            globalWallet.wallet().addCoinsReceivedEventListener { wallet, tx, _, _ ->
+                val transaction = mapOf(
+                    "bitcoin_tx" to tx!!.txId.toString(),
+                    "amount" to tx.getValueSentToMe(wallet).toFriendlyString()
+                )
+                Log.d("bitcoin_received", "Bitcoins received making a note on my chain")
+                transactionRepository.trustChainCommunity.createProposalBlock("bitcoin_transfer", transaction, publicKey.keyToBin())
+            }
         }
     }
 }
