@@ -22,10 +22,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
 
-    private val gatewayStore by lazy {
-        GatewayStore.getInstance(requireContext())
-    }
-
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
             transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
@@ -83,19 +79,17 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
                 ContactStore.getInstance(requireContext())
                     .addContact(key, newName)
             }
-            transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
-                ?: return@setOnClickListener Toast.makeText(
+            val success = transactionRepository.sendTransferProposal(publicKey.hexToBytes(), amount)
+            if(!success) {
+                return@setOnClickListener Toast.makeText(
                     requireContext(),
                     "Insufficient balance",
                     Toast.LENGTH_LONG
                 ).show()
+            }
             findNavController().navigate(R.id.action_sendMoneyFragment_to_transactionsFragment)
         }
 
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
     companion object {

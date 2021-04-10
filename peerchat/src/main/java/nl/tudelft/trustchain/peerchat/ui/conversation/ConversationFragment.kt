@@ -50,7 +50,7 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
     }
 
     private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
+        TransactionRepository(getTrustChainCommunity(), gatewayStore)
     }
 
     private val publicKeyBin by lazy {

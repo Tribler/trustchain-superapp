@@ -34,6 +34,7 @@ import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.SqlGatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
@@ -78,7 +79,6 @@ class TrustChainApplication : Application() {
     private fun initTrustChain() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
-
         val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
         tr.initTrustChainCommunity() // register eurotoken listners
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
@@ -159,7 +159,7 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         val store = GatewayStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(this, store),
+            EuroTokenCommunity.Factory(store),
             listOf(randomWalk)
         )
     }
