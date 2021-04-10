@@ -19,17 +19,17 @@ class EuroTokenRollBackValidator(transactionRepository: TransactionRepository) :
         if (rolled_back.transaction["amount"] != block.transaction["amount"]) {
             throw InvalidTransaction("associated transaction amount does not match")
         }
-        return //Valid
+        return // Valid
     }
-    class MissingAmount(message: String): Invalid(message) {
+    class MissingAmount(message: String) : Invalid(message) {
         override val TYPE: String = "MissingAmount"
     }
 
-    class MissingTransactionHash(message: String): Invalid(message) {
+    class MissingTransactionHash(message: String) : Invalid(message) {
         override val TYPE: String = "MissingTransactionHash"
     }
 
-    class InvalidTransaction(message: String): Invalid(message) {
+    class InvalidTransaction(message: String) : Invalid(message) {
         override val TYPE: String = "InvalidTransaction"
     }
 }

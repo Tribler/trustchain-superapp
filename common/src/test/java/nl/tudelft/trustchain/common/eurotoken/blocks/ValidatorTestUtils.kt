@@ -16,27 +16,27 @@ import java.math.BigInteger
 import java.util.*
 
 val validatorMappings = mapOf(
-    TransactionRepository.BLOCK_TYPE_CHECKPOINT to EuroTokenCheckpointValidator( mockk(relaxed = true) ),
-    TransactionRepository.BLOCK_TYPE_TRANSFER to EuroTokenTransferValidator( mockk(relaxed = true) ),
-    TransactionRepository.BLOCK_TYPE_CREATE to EuroTokenCreationValidator( mockk(relaxed = true) ),
-    TransactionRepository.BLOCK_TYPE_ROLLBACK to EuroTokenRollBackValidator( mockk(relaxed = true) ),
-    TransactionRepository.BLOCK_TYPE_DESTROY to EuroTokenDestructionValidator( mockk(relaxed = true) )
+    TransactionRepository.BLOCK_TYPE_CHECKPOINT to EuroTokenCheckpointValidator(mockk(relaxed = true)),
+    TransactionRepository.BLOCK_TYPE_TRANSFER to EuroTokenTransferValidator(mockk(relaxed = true)),
+    TransactionRepository.BLOCK_TYPE_CREATE to EuroTokenCreationValidator(mockk(relaxed = true)),
+    TransactionRepository.BLOCK_TYPE_ROLLBACK to EuroTokenRollBackValidator(mockk(relaxed = true)),
+    TransactionRepository.BLOCK_TYPE_DESTROY to EuroTokenDestructionValidator(mockk(relaxed = true))
 )
 
 @ExperimentalUnsignedTypes
 fun getWalletBlockWithBalance(balance: Long, db: TrustChainSQLiteStore, gateway: PrivateKey): TrustChainBlock {
     val new = TestWallet()
-    val before = TestBlock(// not really verified or added to DB, the checkpoint should "hide" it
+    val before = TestBlock( // not really verified or added to DB, the checkpoint should "hide" it
         key = new,
         block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
-        transaction=mapOf(
+        transaction = mapOf(
             TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(balance),
             TransactionRepository.KEY_BALANCE to 0L
         ),
         linked = TestBlock(
             key = gateway,
             block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(balance),
                 TransactionRepository.KEY_BALANCE to 0L
             )
@@ -45,18 +45,18 @@ fun getWalletBlockWithBalance(balance: Long, db: TrustChainSQLiteStore, gateway:
     val req = TestBlock(
         key = new,
         block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-        transaction=mapOf(
+        transaction = mapOf(
             TransactionRepository.KEY_BALANCE to balance
         ),
-        previous=before,
-        links=gateway.pub()
+        previous = before,
+        links = gateway.pub()
     )
     db.addBlock(req)
     db.addBlock(
         TestBlock(
             key = gateway,
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to balance
             ),
             linked = req
@@ -87,7 +87,14 @@ fun validate(block: TrustChainBlock, database: TrustChainStore): ValidationResul
 }
 
 @ExperimentalUnsignedTypes
-fun TestBlock(block_type: String, key: PrivateKey?=null, transaction: Map<String, Any>?=null, links: PublicKey?=null, linked: TrustChainBlock?=null, previous: TrustChainBlock?=null): TrustChainBlock {
+fun TestBlock(
+    block_type: String,
+    key: PrivateKey? = null,
+    transaction: Map<String, Any>? = null,
+    links: PublicKey? = null,
+    linked: TrustChainBlock? = null,
+    previous: TrustChainBlock? = null
+): TrustChainBlock {
     val pkey = key ?: TestWallet()
     val block = TrustChainBlock(
         linked?.type ?: block_type,
@@ -110,4 +117,3 @@ fun Database(): TrustChainSQLiteStore {
     val database = nl.tudelft.ipv8.sqldelight.Database(driver)
     return TrustChainSQLiteStore(database)
 }
-

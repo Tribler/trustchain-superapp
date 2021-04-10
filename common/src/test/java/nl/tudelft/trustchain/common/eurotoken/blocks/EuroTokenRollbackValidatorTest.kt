@@ -11,29 +11,29 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_init() {
-        TestBlock( block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK)
+        TestBlock(block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK)
     }
 
     @Test
     fun test_valid_rollback() {
-        //Test Valid rollback after receiving
+        // Test Valid rollback after receiving
         val db = Database()
 
         // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         db.addBlock(A1)
@@ -43,8 +43,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
@@ -57,24 +57,24 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_valid_rollback_missing_transaction() {
-        //Test Valid rollback after receiving
+        // Test Valid rollback after receiving
         val db = Database()
 
         // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         db.addBlock(A1)
@@ -84,8 +84,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to "ABCD"
@@ -98,24 +98,24 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_missing_amount() {
-        //Test Valid send after receiving
+        // Test Valid send after receiving
         val db = Database()
 
-        //Receive money
+        // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         db.addBlock(A1)
@@ -125,8 +125,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
             ),
@@ -139,24 +139,24 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_missing_hash() {
-        //Test Valid rollback after receiving
+        // Test Valid rollback after receiving
         val db = Database()
 
         // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         db.addBlock(A1)
@@ -166,8 +166,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
@@ -180,24 +180,24 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_missing_previous() {
-        //Test Valid rollback after receiving
+        // Test Valid rollback after receiving
         val db = Database()
 
         // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         // db.addBlock(A1)
@@ -207,8 +207,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
@@ -221,24 +221,24 @@ class EuroTokenRollbackValidatorTest {
 
     @Test
     fun test_invalid_amount() {
-        //Test amount doesnt match rolled back transaction
+        // Test amount doesnt match rolled back transaction
         val db = Database()
 
         // Receive money
         val B1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             )
         )
         val A1 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            linked=B1
+            linked = B1
         )
         db.addBlock(B1)
         db.addBlock(A1)
@@ -248,8 +248,8 @@ class EuroTokenRollbackValidatorTest {
 
         // roll back the transaction
         val A2 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_ROLLBACK,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_ROLLBACK,
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5),
                 TransactionRepository.KEY_BALANCE to 5L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()

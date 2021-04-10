@@ -10,12 +10,12 @@ import java.math.BigInteger
 class EuroTokenCheckpointValidatorTest {
     @Test
     fun test_init() {
-        TestBlock(block_type=TransactionRepository.BLOCK_TYPE_CHECKPOINT)
+        TestBlock(block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT)
     }
 
     @Test
     fun test_missing_checkpoint_links() {
-        //Test validating a block that points towards a previous block
+        // Test validating a block that points towards a previous block
         val db = Database()
 
         val gatewayStore = TestGatewayStore()
@@ -26,16 +26,16 @@ class EuroTokenCheckpointValidatorTest {
         val G1 = TestBlock(
             key = G,
             block_type = TransactionRepository.BLOCK_TYPE_CREATE,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
-            links=A.pub()
+            links = A.pub()
             )
 
         val A1 = TestBlock(
             key = A,
             block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
             linked = G1
@@ -45,11 +45,11 @@ class EuroTokenCheckpointValidatorTest {
 
         val A2 = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 10L
             ),
-            previous=A1,
-            links=G.pub()
+            previous = A1,
+            links = G.pub()
         )
 
         var result = validate(A2, db)
@@ -58,35 +58,34 @@ class EuroTokenCheckpointValidatorTest {
 
         val G2 = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CREATE,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
-            previous=G1,
-            links=A.pub()
+            previous = G1,
+            links = A.pub()
         )
         db.addBlock(G2)
 
         val A3 = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CREATE,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
-            previous=A2,
-            linked=G2
+            previous = A2,
+            linked = G2
         )
 
         result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
         db.addBlock(A3)
 
-
         val A4 = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 20L
             ),
-            previous=A3,
-            links=G.pub()
+            previous = A3,
+            links = G.pub()
         )
 
         result = validate(A4, db)
@@ -94,8 +93,8 @@ class EuroTokenCheckpointValidatorTest {
         db.addBlock(A4)
 
         val A5 = TestBlock(
-            block_type=TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction=mapOf(
+            block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(20)
             ),
@@ -107,11 +106,11 @@ class EuroTokenCheckpointValidatorTest {
 
         val G3 = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction=mapOf(
+            transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 10L
             ),
-            previous=G2,
-            linked=A2
+            previous = G2,
+            linked = A2
         )
         db.addBlock(G3)
 

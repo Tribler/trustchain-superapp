@@ -1,21 +1,11 @@
 package nl.tudelft.trustchain.common.eurotoken
 
-import android.util.Log
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.IPv4Address
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
-import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.blocks.*
-import java.lang.Math.abs
 import java.math.BigInteger
-import kotlin.system.exitProcess
 
 fun verifyGatewayIdentity(publicKey: ByteArray, gatewayStore: GatewayStore): ValidationResult {
     if (gatewayStore.getGatewayFromPublicKey(publicKey) != null) {
@@ -26,7 +16,7 @@ fun verifyGatewayIdentity(publicKey: ByteArray, gatewayStore: GatewayStore): Val
 
 fun getBalanceChangeForBlock(block: TrustChainBlock?): Long {
     if (block == null) return 0
-    return if ( block.isProposal ) { // block is sending money
+    return if (block.isProposal) { // block is sending money
         -((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
     } else { // block is receiving money
         ((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
@@ -47,9 +37,9 @@ fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore
 
     if (block.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT && block.isProposal) {
         val linked = database.getLinked(block)
-        if (linked != null) { //Found full checkpoint
+        if (linked != null) { // Found full checkpoint
             return (block.transaction[TransactionRepository.KEY_BALANCE] as Long)
-        } else { //Found half checkpoint ignore and recurse
+        } else { // Found half checkpoint ignore and recurse
             val blockBefore = database.getBlockWithHash(block.previousHash) ?: return null
             return getVerifiedBalanceForBlock(blockBefore, database) // recurse
         }

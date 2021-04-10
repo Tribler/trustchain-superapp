@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.common.eurotoken
 
-import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.*
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.blocks.*
@@ -19,7 +17,7 @@ class TransactionRepository(
     val trustChainCommunity: TrustChainCommunity,
     val gatewayStore: GatewayStore
 ) {
-    private val scope = CoroutineScope(Dispatchers.IO )
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     fun getGatewayPeer(): Peer? {
         return gatewayStore.getPreferred().getOrNull(0)?.peer
@@ -41,7 +39,7 @@ class TransactionRepository(
         if (getMyVerifiedBalance() - amount < 0) {
             return false
         }
-        scope.launch{
+        scope.launch {
             sendTransferProposalSync(recipient, amount)
         }
         return true
@@ -209,8 +207,8 @@ class TransactionRepository(
         })
 
         trustChainCommunity.addListener(BLOCK_TYPE_TRANSFER, object : BlockListener {
-            override  fun onBlockReceived(block: TrustChainBlock) {
-                //Auto verifyBalance
+            override fun onBlockReceived(block: TrustChainBlock) {
+                // Auto verifyBalance
                 if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
                     verifyBalance()
                 }

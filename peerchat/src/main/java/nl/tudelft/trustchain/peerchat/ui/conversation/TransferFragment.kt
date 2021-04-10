@@ -10,7 +10,6 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -32,7 +31,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     }
 
     private val transactionRepository by lazy {
-        TransactionRepository(getTrustChainCommunity(), GatewayStore.getInstance(requireContext()) )
+        TransactionRepository(getTrustChainCommunity(), GatewayStore.getInstance(requireContext()))
     }
 
     private val publicKeyBin by lazy {
@@ -60,7 +59,7 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     private fun sendMoneyMessage(amount: Long, message: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val block = transactionRepository.sendTransferProposalSync(publicKey.keyToBin(), amount)
-            if(block == null) {
+            if (block == null) {
                 Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
             } else {
                 getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)

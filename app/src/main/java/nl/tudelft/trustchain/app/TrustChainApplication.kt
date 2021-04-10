@@ -34,7 +34,6 @@ import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.SqlGatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity

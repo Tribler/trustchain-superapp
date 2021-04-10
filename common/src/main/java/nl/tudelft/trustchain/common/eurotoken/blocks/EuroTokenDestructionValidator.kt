@@ -9,17 +9,17 @@ class EuroTokenDestructionValidator(transactionRepository: TransactionRepository
         if (!block.transaction.containsKey(TransactionRepository.KEY_AMOUNT)) {
             throw MissingAmount("Missing amount")
         }
-        if ( !block.transaction.containsKey(TransactionRepository.KEY_PAYMENT_ID) &&
-            !block.transaction.containsKey( TransactionRepository.KEY_IBAN )) {
+        if (!block.transaction.containsKey(TransactionRepository.KEY_PAYMENT_ID) &&
+            !block.transaction.containsKey(TransactionRepository.KEY_IBAN)) {
             throw MissingPaymentIDorIBAN("Missing Payment id or IBAN")
         }
         super.validateEuroTokenProposal(block, database)
-        return //Valid
+        return // Valid
     }
-    class MissingAmount(message: String): Invalid(message) {
+    class MissingAmount(message: String) : Invalid(message) {
         override val TYPE: String = "MissingAmount"
     }
-    class MissingPaymentIDorIBAN(message: String): Invalid(message) {
+    class MissingPaymentIDorIBAN(message: String) : Invalid(message) {
         override val TYPE: String = "MissingPaymentIDorIBAN"
     }
 }

@@ -13,9 +13,9 @@ class EuroTokenCreationValidator(transactionRepository: TransactionRepository) :
         }
         Log.w("EuroTokenBlockCreate", "Is valid proposal")
         verifyGatewayIdentity(block.publicKey, transactionRepository.gatewayStore)
-        return //Valid
+        return // Valid
     }
-    class MissingAmount(message: String): Invalid(message) {
+    class MissingAmount(message: String) : Invalid(message) {
         override val TYPE: String = "MissingAmount"
     }
 }

@@ -6,8 +6,7 @@ import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 
-open class GatewayStore(val database: Database)
-{
+open class GatewayStore(val database: Database) {
     fun addGateway(
         publicKey: PublicKey,
         name: String,
@@ -115,6 +114,5 @@ open class GatewayStore(val database: Database)
 }
 
 class SqlGatewayStore(context: Context) : GatewayStore(
-    Database( AndroidSqliteDriver(Database.Schema, context, "common.db") )
-) {
-}
+    Database(AndroidSqliteDriver(Database.Schema, context, "common.db"))
+)

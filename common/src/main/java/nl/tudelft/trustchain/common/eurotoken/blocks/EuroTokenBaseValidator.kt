@@ -14,7 +14,7 @@ import nl.tudelft.trustchain.common.eurotoken.getVerifiedBalanceForBlock
 @OptIn(ExperimentalUnsignedTypes::class)
 open class EuroTokenBaseValidator(val transactionRepository: TransactionRepository) : TransactionValidator {
 
-    private fun getBlockBeforeOrRaise(block: TrustChainBlock, database: TrustChainStore) : TrustChainBlock? {
+    private fun getBlockBeforeOrRaise(block: TrustChainBlock, database: TrustChainStore): TrustChainBlock? {
         if (block.isGenesis) {
             return null
         }
@@ -45,31 +45,31 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         }
     }
 
-    private fun getUnlinkedCheckpointBlockRanges(block: TrustChainBlock, database: TrustChainStore) : List<BlockRange> {
+    private fun getUnlinkedCheckpointBlockRanges(block: TrustChainBlock, database: TrustChainStore): List<BlockRange> {
         val blockBefore = getBlockBeforeOrRaise(block, database) ?: return listOf()
         if (blockBefore.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT) {
             if (database.getLinked(blockBefore) != null) {
-                //Found last valid checkpoint
+                // Found last valid checkpoint
                 return listOf()
             } else {
-                //Found un-validated valid checkpoint, add to range and recurse
-                return getUnlinkedCheckpointBlockRanges(blockBefore, database) + listOf( BlockRange( blockBefore.publicKey, LongRange( blockBefore.sequenceNumber.toLong(), blockBefore.sequenceNumber.toLong())))
+                // Found un-validated valid checkpoint, add to range and recurse
+                return getUnlinkedCheckpointBlockRanges(blockBefore, database) + listOf(BlockRange(blockBefore.publicKey, LongRange(blockBefore.sequenceNumber.toLong(), blockBefore.sequenceNumber.toLong())))
             }
         } else {
             return getUnlinkedCheckpointBlockRanges(blockBefore, database)
         }
     }
 
-    private fun verifyBalanceAvailable(block: TrustChainBlock, database: TrustChainStore ) {
+    private fun verifyBalanceAvailable(block: TrustChainBlock, database: TrustChainStore) {
         val balance = getVerifiedBalanceForBlock(block, database) ?: throw PartialPrevious("Missing previous blocks")
         if (balance < 0) {
             // the validated balance is not enough, but it could be the case we're missing some
             // checkpoint links
             val unConfirmed = getUnlinkedCheckpointBlockRanges(block, database)
-            if (unConfirmed.isNotEmpty()) { //There are some checkpoints without linked blocks
+            if (unConfirmed.isNotEmpty()) { // There are some checkpoints without linked blocks
                 // crawl these missing linked blocks
                 throw MissingBlocks(unConfirmed)
-            } else { //last checkpoint is full, spendable balance is invalid
+            } else { // last checkpoint is full, spendable balance is invalid
                 throw InsufficientValidatedBalance(
                     "Insufficient balance ($balance) for amount (${
                         getBalanceChangeForBlock(
@@ -88,10 +88,10 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
     }
 
     open fun validateEuroTokenAcceptance(block: TrustChainBlock, database: TrustChainStore) {
-        //Most validations in the checkpoints
+        // Most validations in the checkpoints
     }
 
-    fun validateEuroToken( block: TrustChainBlock, database: TrustChainStore ) {
+    fun validateEuroToken(block: TrustChainBlock, database: TrustChainStore) {
         if (block.isProposal) {
             validateEuroTokenProposal(block, database)
         } else {
@@ -112,35 +112,35 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         return ValidationResult.Valid
     }
 
-    abstract class ValidationResultException(message: String): Exception(message) {
+    abstract class ValidationResultException(message: String) : Exception(message) {
         abstract val TYPE: String
     }
 
-    class PartialPrevious(message: String): ValidationResultException(message) {
+    class PartialPrevious(message: String) : ValidationResultException(message) {
         override val TYPE: String = "PartialPrevious"
     }
 
-    abstract class Invalid(message: String): ValidationResultException(message)
+    abstract class Invalid(message: String) : ValidationResultException(message)
 
-    class MissingBalance(message: String): Invalid(message){
+    class MissingBalance(message: String) : Invalid(message) {
         override val TYPE: String = "MissingBalance"
     }
 
-    class InsufficientBalance(message: String): Invalid(message) {
+    class InsufficientBalance(message: String) : Invalid(message) {
         override val TYPE: String = "InsufficientBalance"
     }
 
-    class InsufficientValidatedBalance(message: String): Invalid(message) {
+    class InsufficientValidatedBalance(message: String) : Invalid(message) {
         override val TYPE: String = "InsufficientValidatedBalanceBalance"
     }
 
-    class InvalidBalance(message: String): Invalid(message){
+    class InvalidBalance(message: String) : Invalid(message) {
         override val TYPE: String = "InvalidBalance"
     }
 
-    class MissingBlocks(val blockRanges: List<BlockRange>): ValidationResultException(
+    class MissingBlocks(val blockRanges: List<BlockRange>) : ValidationResultException(
         "MissingBlocks (" + blockRanges.joinToString(", ") + ")"
-    ){
+    ) {
         override val TYPE: String = "MissingBlocks"
     }
 }
