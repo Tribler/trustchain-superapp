@@ -78,7 +78,6 @@ class TrustChainApplication : Application() {
     private fun initTrustChain() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
-
         val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
         tr.initTrustChainCommunity() // register eurotoken listners
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
@@ -159,7 +158,7 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         val store = GatewayStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(this, store),
+            EuroTokenCommunity.Factory(store),
             listOf(randomWalk)
         )
     }

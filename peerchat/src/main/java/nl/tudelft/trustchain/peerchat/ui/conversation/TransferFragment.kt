@@ -7,6 +7,9 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -27,12 +30,8 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
             ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
-    private val gatewayStore by lazy {
-        GatewayStore.getInstance(requireContext())
-    }
-
     private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
+        TransactionRepository(getTrustChainCommunity(), GatewayStore.getInstance(requireContext()))
     }
 
     private val publicKeyBin by lazy {
@@ -58,12 +57,14 @@ class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
     }
 
     private fun sendMoneyMessage(amount: Long, message: String) {
-        val block = transactionRepository.sendTransferProposal(publicKey.keyToBin(), amount)
-            ?: return Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG)
-                .show()
-        // if (message.isNotEmpty()) {
-        getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)
-        // }
+        CoroutineScope(Dispatchers.IO).launch {
+            val block = transactionRepository.sendTransferProposalSync(publicKey.keyToBin(), amount)
+            if (block == null) {
+                Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
+            } else {
+                getPeerChatCommunity().sendMessageWithTransaction(message, block.calculateHash(), publicKey)
+            }
+        }
     }
 
     private fun requestMoney(amount: Long) {

@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.eurotoken.community
 
-import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Community
@@ -15,8 +14,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
 class EuroTokenCommunity(
-    private val context: Context,
-    private val store: GatewayStore
+    store: GatewayStore
 ) : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
@@ -76,11 +74,10 @@ class EuroTokenCommunity(
     }
 
     class Factory(
-        private val context: Context,
         private val store: GatewayStore
     ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
-            return EuroTokenCommunity(context, store)
+            return EuroTokenCommunity(store)
         }
     }
 }
