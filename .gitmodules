@@ -1,3 +1,6 @@
 [submodule "kotlin-ipv8"]
 	path = kotlin-ipv8
 	url = https://github.com/Tribler/kotlin-ipv8.git
+[submodule "gossipML/superapp-essentia"]
+	path = gossipML/superapp-essentia
+	url = https://github.com/Tribler/superapp-essentia.git

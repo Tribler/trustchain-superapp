@@ -1,0 +1,21 @@
+CREATE TABLE unseen_features (
+    key TEXT NOT NULL,
+    songFeatures TEXT,
+    PRIMARY KEY (key)
+);
+
+addFeature:
+REPLACE INTO unseen_features (key, songFeatures)
+VALUES(?, ?);
+
+getFeature:
+SELECT * FROM unseen_features WHERE key = ? LIMIT 1;
+
+getSongIds:
+SELECT key FROM unseen_features;
+
+getAllFeatures:
+SELECT * FROM unseen_features;
+
+deleteAllFeatures:
+DELETE FROM unseen_features;
