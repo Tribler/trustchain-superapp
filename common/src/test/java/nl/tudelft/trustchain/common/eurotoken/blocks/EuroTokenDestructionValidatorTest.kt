@@ -2,9 +2,9 @@ package nl.tudelft.trustchain.common.eurotoken.blocks
 
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.junit.Assert.*
 import java.math.BigInteger
 
 @ExperimentalUnsignedTypes
@@ -32,7 +32,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_PAYMENT_ID to "ID"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
@@ -55,7 +56,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
@@ -77,7 +79,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
@@ -100,7 +103,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
@@ -125,7 +129,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 10L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)

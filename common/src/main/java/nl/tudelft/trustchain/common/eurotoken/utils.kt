@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.common.eurotoken
 
-import kotlinx.coroutines.*
-import nl.tudelft.ipv8.attestation.trustchain.*
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.trustchain.common.eurotoken.blocks.*
 import java.math.BigInteger
 
 fun verifyGatewayIdentity(publicKey: ByteArray, gatewayStore: GatewayStore): ValidationResult {

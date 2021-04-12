@@ -101,7 +101,7 @@ class DebugFragment : BaseFragment(R.layout.fragment_debug) {
                 append(")")
             }
 
-            appendln()
+            append("\n")
             bold {
                 append("Total: ")
             }

@@ -71,16 +71,19 @@ class AddNearbyFragment : BaseFragment(R.layout.fragment_add_nearby) {
             }
         }
 
-        publicKeyBin.observe(viewLifecycleOwner, Observer { publicKeyBin ->
-            binding.txtContactPublicKey.text = publicKeyBin
+        publicKeyBin.observe(
+            viewLifecycleOwner,
+            Observer { publicKeyBin ->
+                binding.txtContactPublicKey.text = publicKeyBin
 
-            lifecycleScope.launch {
-                val bitmap = if (publicKeyBin != null) withContext(Dispatchers.Default) {
-                    qrCodeUtils.createQR(publicKeyBin)
-                } else null
-                binding.contactQr.setImageBitmap(bitmap)
+                lifecycleScope.launch {
+                    val bitmap = if (publicKeyBin != null) withContext(Dispatchers.Default) {
+                        qrCodeUtils.createQR(publicKeyBin)
+                    } else null
+                    binding.contactQr.setImageBitmap(bitmap)
+                }
             }
-        })
+        )
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

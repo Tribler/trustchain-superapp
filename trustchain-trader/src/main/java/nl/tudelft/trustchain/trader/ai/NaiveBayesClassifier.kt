@@ -145,9 +145,11 @@ class NaiveBayesClassifier<F, C>(
             (nbc.k1 + nbc.population.count { it.category == category && feature in it.features }) /
                 (nbc.k2 + nbc.population.count { it.category == category })
 
-        val notProbability = (nbc.k1 + nbc.population.count {
-            it.category != category && feature in it.features
-        }) / (nbc.k2 + nbc.population.count { it.category != category })
+        val notProbability = (
+            nbc.k1 + nbc.population.count {
+                it.category != category && feature in it.features
+            }
+            ) / (nbc.k2 + nbc.population.count { it.category != category })
 
         data class Key<F, C>(val feature: F, val category: C)
     }

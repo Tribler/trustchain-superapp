@@ -481,7 +481,8 @@ class WalletManager(
             return serializedTransaction
         } else {
             Log.i(
-                "Coin", "Coin: (attemptToGetTransactionAndSerialize) " +
+                "Coin",
+                "Coin: (attemptToGetTransactionAndSerialize) " +
                     "the transaction $transaction could not be found in your wallet."
             )
             return null

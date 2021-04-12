@@ -3,10 +3,11 @@ package nl.tudelft.trustchain.common.eurotoken.blocks
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.eurotoken.getBalanceForBlock
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-
-import org.junit.Assert.*
 import java.math.BigInteger
+
 @ExperimentalUnsignedTypes
 class EuroTokenBaseValidatorTest {
 
@@ -21,7 +22,8 @@ class EuroTokenBaseValidatorTest {
         val db = Database()
         val block = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction = mapOf(TransactionRepository.KEY_BALANCE to 0L))
+            transaction = mapOf(TransactionRepository.KEY_BALANCE to 0L)
+        )
         val result = validate(block, db)
         assertEquals(ValidationResult.Valid, result)
     }
@@ -32,9 +34,11 @@ class EuroTokenBaseValidatorTest {
         val db = Database()
         val block = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_TRANSFER,
-            transaction = mapOf(TransactionRepository.KEY_BALANCE to 1L,
+            transaction = mapOf(
+                TransactionRepository.KEY_BALANCE to 1L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(5)
-            ))
+            )
+        )
         val result = validate(block, db)
         assertTrue(result is ValidationResult.Invalid)
         assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InvalidBalance("").TYPE)
@@ -46,7 +50,8 @@ class EuroTokenBaseValidatorTest {
         val db = Database()
         val block = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
-            transaction = mapOf())
+            transaction = mapOf()
+        )
         val result = validate(block, db)
         assertTrue(result is ValidationResult.Invalid)
         assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.MissingBalance("").TYPE)
@@ -98,7 +103,8 @@ class EuroTokenBaseValidatorTest {
         // Test validating a block that points towards a previous block
         val db = Database()
 
-        val prev = TestBlock(block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
+        val prev = TestBlock(
+            block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
             transaction = mapOf(TransactionRepository.KEY_BALANCE to 0L)
         )
         var result = validate(prev, db)
@@ -108,7 +114,8 @@ class EuroTokenBaseValidatorTest {
         val block = TestBlock(
             block_type = TransactionRepository.BLOCK_TYPE_CHECKPOINT,
             transaction = mapOf(TransactionRepository.KEY_BALANCE to 0L),
-            previous = prev)
+            previous = prev
+        )
         result = validate(block, db)
         assertEquals(result, ValidationResult.Valid)
     }

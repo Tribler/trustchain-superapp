@@ -15,10 +15,12 @@ class DashboardActivity : AppCompatActivity() {
     private val adapter = ItemAdapter()
 
     init {
-        adapter.registerRenderer(DashboardItemRenderer {
-            val intent = Intent(this, it.app.activity)
-            startActivity(intent)
-        })
+        adapter.registerRenderer(
+            DashboardItemRenderer {
+                val intent = Intent(this, it.app.activity)
+                startActivity(intent)
+            }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

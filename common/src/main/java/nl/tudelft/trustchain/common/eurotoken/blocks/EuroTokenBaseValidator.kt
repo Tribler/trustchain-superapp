@@ -72,9 +72,9 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
             } else { // last checkpoint is full, spendable balance is invalid
                 throw InsufficientValidatedBalance(
                     "Insufficient balance ($balance) for amount (${
-                        getBalanceChangeForBlock(
-                            block
-                        )
+                    getBalanceChangeForBlock(
+                        block
+                    )
                     })"
                 )
             }

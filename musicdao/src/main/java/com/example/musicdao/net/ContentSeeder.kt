@@ -34,22 +34,24 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
         // A maximum of maxTorrentThreads torrents are seeded, with LIFO ordering
         Arrays.sort(fileList) { a, b -> a.lastModified().compareTo(b.lastModified()) }
 
-        sessionManager.addListener(object : AlertListener {
-            override fun types(): IntArray {
-                return intArrayOf(AlertType.PEER_CONNECT.swig())
-            }
+        sessionManager.addListener(
+            object : AlertListener {
+                override fun types(): IntArray {
+                    return intArrayOf(AlertType.PEER_CONNECT.swig())
+                }
 
-            override fun alert(alert: Alert<*>) {
-                when (alert.type()) {
-                    AlertType.PEER_CONNECT -> {
-                        val handle = (alert as PeerConnectAlert).handle()
-                        updateSwarmHealth(handle)
-                    }
-                    else -> {
+                override fun alert(alert: Alert<*>) {
+                    when (alert.type()) {
+                        AlertType.PEER_CONNECT -> {
+                            val handle = (alert as PeerConnectAlert).handle()
+                            updateSwarmHealth(handle)
+                        }
+                        else -> {
+                        }
                     }
                 }
             }
-        })
+        )
 
         if (!sessionManager.isRunning) {
             sessionManager.start()

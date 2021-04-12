@@ -2,7 +2,8 @@ package nl.tudelft.trustchain.common.eurotoken.blocks
 
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.math.BigInteger
 
@@ -30,7 +31,7 @@ class EuroTokenCheckpointValidatorTest {
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
             links = A.pub()
-            )
+        )
 
         val A1 = TestBlock(
             key = A,
@@ -98,7 +99,8 @@ class EuroTokenCheckpointValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(20)
             ),
-            previous = A4)
+            previous = A4
+        )
 
         result = validate(A5, db)
         assertTrue(result is ValidationResult.MissingBlocks)

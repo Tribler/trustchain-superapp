@@ -229,7 +229,7 @@ class MusicService : AppCompatActivity() {
         val sessionManager = sessionManager ?: return "Starting torrent client..."
         if (!sessionManager.isRunning) return "Starting torrent client..."
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
-            Util.readableBytes(sessionManager.downloadRate())
+        Util.readableBytes(sessionManager.downloadRate())
         }, dht nodes (torrent): ${sessionManager.dhtNodes()}"
     }
 
@@ -246,7 +246,8 @@ class MusicService : AppCompatActivity() {
                 override fun onSignatureRequest(block: TrustChainBlock) {
                     musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
                 }
-            })
+            }
+        )
     }
 
     /**

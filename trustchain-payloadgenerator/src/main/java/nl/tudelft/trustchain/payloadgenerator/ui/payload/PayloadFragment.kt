@@ -37,18 +37,20 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(PayloadItemRenderer {
+        adapter.registerRenderer(
+            PayloadItemRenderer {
 
-            trustchain.createAcceptTxProposalBlock(
-                it.primaryCurrency,
-                it.secondaryCurrency,
-                it.amount?.toFloat(),
-                it.price?.toFloat(),
-                it.type,
-                it.publicKey
-            )
-            Log.d("PayloadFragment", "TX block send to: ${it.publicKey}!")
-        })
+                trustchain.createAcceptTxProposalBlock(
+                    it.primaryCurrency,
+                    it.secondaryCurrency,
+                    it.amount?.toFloat(),
+                    it.price?.toFloat(),
+                    it.type,
+                    it.publicKey
+                )
+                Log.d("PayloadFragment", "TX block send to: ${it.publicKey}!")
+            }
+        )
     }
 
     @InternalCoroutinesApi

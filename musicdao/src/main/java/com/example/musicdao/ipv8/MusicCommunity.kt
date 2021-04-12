@@ -126,6 +126,7 @@ class MusicCommunity(
      * @return the amount of blocks that were sent
      */
     fun communicateReleaseBlocks(): Int {
+        Log.i("Music Community", "Communicating blocks")
         val peer = pickRandomPeer() ?: return 0
         val releaseBlocks = database.getBlocksWithType("publish_release")
         val maxBlocks = 3
@@ -133,7 +134,7 @@ class MusicCommunity(
         releaseBlocks.shuffled().withIndex().forEach {
             count += 1
             if (it.index >= maxBlocks) return count
-            sendBlock(it.value, peer)
+            sendBlock(it.value, peer, ttl = 3)
         }
         return count
     }

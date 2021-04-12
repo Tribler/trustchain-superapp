@@ -24,7 +24,8 @@ import org.bitcoinj.core.NetworkParameters
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
+class BitcoinFragment :
+    BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -94,24 +95,30 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
-            Handler().postDelayed({
-                try {
-                    bitcoin_refresh_swiper.isRefreshing = false
-                } catch (e: IllegalStateException) {
-                }
-            }, 1500)
+            Handler().postDelayed(
+                {
+                    try {
+                        bitcoin_refresh_swiper.isRefreshing = false
+                    } catch (e: IllegalStateException) {
+                    }
+                },
+                1500
+            )
         }
     }
 
     private fun refresh(animation: Boolean? = false) {
         if (animation!!) {
             bitcoin_refresh_swiper.isRefreshing = true
-            Handler().postDelayed({
-                try {
-                    bitcoin_refresh_swiper.isRefreshing = false
-                } catch (e: IllegalStateException) {
-                }
-            }, 1500)
+            Handler().postDelayed(
+                {
+                    try {
+                        bitcoin_refresh_swiper.isRefreshing = false
+                    } catch (e: IllegalStateException) {
+                    }
+                },
+                1500
+            )
         }
 
         if (!WalletManagerAndroid.isRunning) {
@@ -172,8 +179,8 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
                 Toast.makeText(
                     this.requireContext(),
                     "Something went wrong while initializing the new wallet. ${
-                        t.message
-                            ?: "No further information"
+                    t.message
+                        ?: "No further information"
                     }.",
                     Toast.LENGTH_SHORT
                 ).show()
@@ -186,9 +193,12 @@ class BitcoinFragment : BaseFragment(R.layout.fragment_bitcoin),
 
     override fun onImportDone() {
         this.refresh(true)
-        Handler().postDelayed({
-            findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
-        }, 1500)
+        Handler().postDelayed(
+            {
+                findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())
+            },
+            1500
+        )
     }
 
     fun copyToClipboard(text: String) {
