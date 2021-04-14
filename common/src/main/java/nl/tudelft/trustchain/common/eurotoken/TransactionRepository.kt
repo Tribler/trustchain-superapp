@@ -1,17 +1,11 @@
 package nl.tudelft.trustchain.common.eurotoken
 
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.BlockListener
-import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
@@ -19,10 +13,10 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.bitcoin.WalletService
-import nl.tudelft.trustchain.common.eurotoken.blocks.*
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.wallet.SendRequest
+import nl.tudelft.trustchain.common.eurotoken.blocks.*
 import java.lang.Math.abs
 import java.math.BigInteger
 
@@ -72,7 +66,7 @@ class TransactionRepository(
         if (blocks.isEmpty()) return null // No connection partial previous
         return blocks.find { // linked block
             it.publicKey.contentEquals(block.linkPublicKey) &&
-            it.sequenceNumber == block.linkSequenceNumber
+                it.sequenceNumber == block.linkSequenceNumber
         } ?: block // no linked block exists
     }
 
@@ -308,7 +302,7 @@ class TransactionRepository(
         )
     }
 
-    fun sendCheckpointProposal(peer: Peer) {
+    fun sendCheckpointProposal(peer: Peer): TrustChainBlock {
         Log.w("EuroTokenBlockCheck", "Creating check...")
         val transaction = mapOf(
             KEY_BALANCE to BigInteger.valueOf(getMyBalance()).toLong()
@@ -320,6 +314,7 @@ class TransactionRepository(
         scope.launch {
             trustChainCommunity.sendBlock(block, peer)
         }
+        return block
     }
 
     fun attemptRollback(peer: Peer?, blockHash: ByteArray) {
@@ -653,9 +648,9 @@ class TransactionRepository(
                             return ValidationResult.Invalid(
                                 listOf(
                                     "Linked transaction doesn't match (${block.transaction}, ${
-                                    database.getLinked(
-                                        block
-                                    )?.transaction ?: "MISSING"
+                                        database.getLinked(
+                                            block
+                                        )?.transaction ?: "MISSING"
                                     })"
                                 )
                             )
@@ -670,9 +665,9 @@ class TransactionRepository(
                 }
             })
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRADE, object : BlockSigner {
+        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_JOIN, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
+                Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
                 // agree if validated
                 trustChainCommunity.sendBlock(
                     trustChainCommunity.createAgreementBlock(
@@ -683,9 +678,9 @@ class TransactionRepository(
             }
         })
 
-        trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
+        trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockTrade", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }
@@ -716,7 +711,7 @@ class TransactionRepository(
                             wallet.sendCoins(sendRequest)
                         } else if ((block.transaction.get("direction") as String).equals("eurotoken")) {
                             Log.d("TradeEurotoken", "Sending eurotokens back to some address: ${block.transaction.get("receive") as String}")
-                            sendTransferProposal((block.transaction.get("receive") as String).hexToBytes(), 0)
+                            sendTransferProposal((block.transaction.get("receive") as String).hexToBytes(), 100)
                         }
                     } else {
                         Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
@@ -724,9 +719,9 @@ class TransactionRepository(
                             return ValidationResult.Invalid(
                                 listOf(
                                     "Linked transaction doesn't match (${block.transaction}, ${
-                                    database.getLinked(
-                                        block
-                                    )?.transaction ?: "MISSING"
+                                        database.getLinked(
+                                            block
+                                        )?.transaction ?: "MISSING"
                                     })"
                                 )
                             )
@@ -736,9 +731,9 @@ class TransactionRepository(
                 }
             })
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_JOIN, object : BlockSigner {
+        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRADE, object : BlockSigner {
             override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
+                Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
                 // agree if validated
                 trustChainCommunity.sendBlock(
                     trustChainCommunity.createAgreementBlock(
@@ -749,9 +744,9 @@ class TransactionRepository(
             }
         })
 
-        trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
+        trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                Log.d("EuroTokenBlockTrade", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }

@@ -39,7 +39,7 @@ class EuroTokenWallet(private val transactionRepository: TransactionRepository, 
     }
 
     fun sendTokens(recipient: ByteArray, amount: Long): TrustChainBlock? {
-        return transactionRepository.sendTransferProposal(recipient, amount)
+        return transactionRepository.sendTransferProposalSync(recipient, amount)
     }
 
     fun tradeTokens(recipient: ByteArray, hash: String, direction: String, receiveAddress: String): TrustChainBlock? {
