@@ -40,22 +40,20 @@ class Messages {
             return r
         }
 
-        fun deserializeVector(bytes: ByteIterator, cTxIn: CTxIn): Array<CTxIn> {
+        fun deserializeVectorCTxIn(bytes: ByteIterator): Array<CTxIn> {
             val nit = deserializeCompactSize(bytes)
             var r: Array<CTxIn> = arrayOf()
             for (i in 0 until nit) {
-                cTxIn.deserialize(bytes)
-                r += cTxIn
+                r += CTxIn().deserialize(bytes)
             }
             return r
         }
 
-        fun deserializeVector(bytes: ByteIterator, cTxOut: CTxOut): Array<CTxOut> {
+        fun deserializeVectorCTxOut(bytes: ByteIterator): Array<CTxOut> {
             val nit = deserializeCompactSize(bytes)
             var r: Array<CTxOut> = arrayOf()
             for (i in 0 until nit) {
-                cTxOut.deserialize(bytes)
-                r += cTxOut
+                r += CTxOut().deserialize(bytes)
             }
             return r
         }

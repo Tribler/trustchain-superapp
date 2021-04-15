@@ -5,7 +5,8 @@ import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeString
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeStringVector
-import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeVector
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeVectorCTxIn
+import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.deserializeVectorCTxOut
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.read
 import nl.tudelft.trustchain.currencyii.util.taproot.Messages.Companion.serCompactSize
 import java.math.BigInteger
@@ -63,16 +64,16 @@ class CTransaction(
     fun deserialize(b: ByteArray): CTransaction {
         val bytes = b.iterator()
         nVersion = ByteBuffer.wrap(read(bytes, 4)).order(ByteOrder.LITTLE_ENDIAN).int
-        vin = deserializeVector(bytes, CTxIn())
+        vin = deserializeVectorCTxIn(bytes)
         var flags: Char = 0.toChar()
         if (vin.isEmpty()) {
             flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).get().toChar()
             if (flags != 0.toChar()) {
-                vin = deserializeVector(bytes, CTxIn())
-                vout = deserializeVector(bytes, CTxOut())
+                vin = deserializeVectorCTxIn(bytes)
+                vout = deserializeVectorCTxOut(bytes)
             }
         } else {
-            vout = deserializeVector(bytes, CTxOut())
+            vout = deserializeVectorCTxOut(bytes)
         }
         if (flags != 0.toChar()) {
             wit.vtxinwit = Array(vin.size) { CTxInWitness() }
