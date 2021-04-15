@@ -127,7 +127,11 @@ class CTransaction(
             }
 
             if ((hash_type and 3) != SIGHASH_SINGLE && (hash_type and 3) != SIGHASH_NONE) {
-                ssBuf += sha256(txTo.vout.map { it.serialize() }[0])
+                var toHash = byteArrayOf()
+                for (v in txTo.vout) {
+                    toHash += v.serialize()
+                }
+                ssBuf += sha256(toHash)
             }
 
             var spendType = 0
