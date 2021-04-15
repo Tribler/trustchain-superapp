@@ -2,16 +2,16 @@
 
 This repository contains a collection of Online models built on top of [IPv8](https://github.com/MattSkala/kotlin-ipv8)
 
-**First Time Launch Screens**
-
-Every time a user open music dao, they are asked to realod the page in order to get recommendations. This is done with the sole purpose of getting recommendations on request and avoid recommending meaningless data when there is a lack of local songs (training data).
-<br />
-<img src="docs/imgs/start_recommendations.png" width="200px">
-
 **Recommendations**
 
 <br />
 <img src="docs/imgs/recommendations.png" width="200px">
+
+**Short Presentation**
+
+Every time a user open music dao, they are asked to realod the page in order to get recommendations. This is done with the sole purpose of getting recommendations on request and avoid recommending meaningless data when there is a lack of local songs (training data).
+<br />
+<img src="docs/etc/recording.gif" width="200px">
 
 **Overview**
 
@@ -43,6 +43,15 @@ More formally, learning rule for Pegasos is defined as:
 And learning rule for Adaline is defined as:
 <img src="docs/imgs/ada_rule.png" width="200px">
 
+***Collaborative filtering models***
+
+Matrix Factorization model is collaborative filtering model that bases recommendations on private logs of user activity (song history) by means of low-rank matrix decomposition
+In the private model, every matrix row corresponds to some user private information on music history.
+This private matrix is then approximatelly decomposed inti X and Y transpose matrices with Y shared among the users.
+The general error that the model tries to minimize is:
+<img src="docs/imgs/mf.png" width="400px">
+where bias represents average scores, and X and Y represent relative differences.
+
 **Model performance**
 
 So far, MatrixFactorization model showed to be pretty reliable on example tests. Unfortunatelly, feature-based models still lack proper pre-training/fine-tuning.
@@ -52,3 +61,7 @@ One thing that we have observed during testing is that upon merging global walki
 Thus, contrary to the paper, we bag 2 models with ration 9:1 (9 for local model) in order to keep local models tuned to local data.
 
 Essentia feature statistics for test albums in src/test/res can be found under docs/etc.
+
+**Code diagram**
+
+ <img src="docs/imgs/gossipML_diagram.png" width="800px">

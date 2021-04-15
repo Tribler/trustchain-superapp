@@ -43,9 +43,9 @@ object RatingSerializer : KSerializer<SortedMap<String, Double>> {
 }
 
 /**
- * TODO
+ * Publicly avaliable part of matrix factarization model
  *
- * @property peerFeatures
+ * @property peerFeatures amount of peer features
  */
 @Serializable
 data class PublicMatrixFactorization(
@@ -54,11 +54,11 @@ data class PublicMatrixFactorization(
 ) : Model("PublicMatrixFactorization")
 
 /**
- * TODO
+ * Class that represents song features for matrix factorization model
  *
- * @property age
- * @property feature
- * @property bias
+ * @property age song age
+ * @property feature normal song features
+ * @property bias song bias
  */
 @Serializable
 data class SongFeature(
@@ -89,7 +89,7 @@ fun songFeaturesFromArrays(age: Array<Double>, features: Array<Array<Double>>, b
 }
 
 /**
- * TODO
+ * General matrix factorization model
  *
  * @property ratings
  */
@@ -126,18 +126,18 @@ open class MatrixFactorization(
     }
 
     /**
-     * TODO
+     * Initalize feature
      *
-     * @return
+     * @return initialized feature
      */
     private fun initFeat(): Double {
         return nextDouble() * sqrt((maxR - minR) / k)
     }
 
     /**
-     * TODO
+     * Predict most fitting song
      *
-     * @return
+     * @return name of most relevant song
      */
     fun predict(): String {
         var bestSong = ""
@@ -158,9 +158,9 @@ open class MatrixFactorization(
     }
 
     /**
-     * TODO
+     * Updates matrix ratings
      *
-     * @param newRatings
+     * @param newRatings new ratings to be merged with old ones
      */
     fun updateRatings(newRatings: SortedMap<String, Double>) {
         for ((name, rating) in newRatings) {
@@ -173,7 +173,7 @@ open class MatrixFactorization(
     }
 
     /**
-     * TODO
+     * Update helper method to update songs features
      *
      */
     override fun update() {
@@ -202,7 +202,7 @@ open class MatrixFactorization(
     }
 
     /**
-     * TODO
+     * Open function to merge matrix fatorization models
      *
      * @param peerModel
      */
@@ -211,9 +211,9 @@ open class MatrixFactorization(
     }
 
     /**
-     * TODO
+     * Actual merging function
      *
-     * @param peerFeatures
+     * @param peerFeatures features to be merged with
      */
     open fun merge(peerFeatures: SortedMap<String, SongFeature>) {
         if (peerFeatures.keys.toSet() != songFeatures.keys) {
@@ -251,20 +251,24 @@ open class MatrixFactorization(
     }
 
     private fun compress(map: SortedMap<String, SongFeature>): SortedMap<String, SongFeature> {
-        /* TODO compress things before sending
+        /*
          from paper: subsample songFeatures to a fixed number of rows instead of whole thing
          maybe also compress with lz4 or something?
          */
         return map
     }
 
-    // the function used during automatic serialization in model exchange messages
-    // don't serialize private ratings matrix
+    /**
+     * the function used during automatic serialization in model exchange messages
+     * don't serialize private ratings matrix
+     */
     override fun serialize(): String {
         return this.serialize(private = false)
     }
 
-    // the function used during serialization for local database storage
+    /**
+     * the function used during serialization for local database storage
+     */
     fun serialize(private: Boolean): String {
         Log.i(
             "Recommend",
