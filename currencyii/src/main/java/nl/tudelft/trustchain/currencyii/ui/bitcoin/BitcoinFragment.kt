@@ -207,7 +207,7 @@ class BitcoinFragment :
      */
     private fun addBTC(address: String) {
         val queue = Volley.newRequestQueue(context)
-        val url = "http://$REG_TEST_FAUCET_IP:$REG_TEST_FAUCET_PORT/addBTC?address=$address"
+        val url = "https://$REG_TEST_FAUCET_IP/addBTC?address=$address"
 
         val stringRequest = StringRequest(
             Request.Method.GET, url,

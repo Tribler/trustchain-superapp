@@ -128,7 +128,7 @@ class DAOJoinHelper {
         val walletManager = WalletManagerAndroid.getInstance()
 
         val signaturesOfOldOwners = signatures.map {
-            BigInteger(it)
+            BigInteger(1, it.hexToBytes())
         }
 
         val noncePoints = oldWalletBlockData.getData().SW_NONCE_PKS.map {
