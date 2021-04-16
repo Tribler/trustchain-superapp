@@ -11,12 +11,18 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_blockchain_download.*
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.currencyii.NONCE_KEY
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.Key
+import org.bitcoinj.core.ECKey
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.params.TestNet3Params
+import org.bouncycastle.math.ec.ECPoint
 import kotlin.concurrent.thread
 
 /**
@@ -28,6 +34,8 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
+
+        setNonceKey()
 
         // TODO: The routing is cleaner to do via the previously displayed fragment.
         bitcoin_progress_continue.setOnClickListener {
@@ -53,6 +61,25 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
                     navController.navigate(args.parent)
                 }
             }
+        }
+    }
+
+    private fun setNonceKey() {
+        val nonceKeyData = activity?.getSharedPreferences("nonce_key", 0)!!
+        val hasKey = nonceKeyData.getBoolean("has_key", false)
+
+        if (!hasKey) {
+            NONCE_KEY = Key.generate_schnorr_nonce()
+            Log.i("NONCE_KEY", NONCE_KEY.toString())
+            val editor = nonceKeyData.edit()
+            editor.putBoolean("has_key", true)
+            editor.putString("privkey", NONCE_KEY.first.privKey.toByteArray().toHex())
+            editor.apply()
+        } else {
+            val privKeyString = nonceKeyData.getString("privkey", "")!!
+            val key = ECKey.fromPrivate(privKeyString.hexToBytes())
+            NONCE_KEY = Pair(key, key.pubKeyPoint)
+            Log.i("NONCE_KEY", NONCE_KEY.toString())
         }
     }
 
