@@ -16,8 +16,8 @@ class Key {
          * See https://github.com/bitcoinops/bips/blob/v0.1/bip-schnorr.mediawiki#Signing.
          * This implementation ensures the y-coordinate of the nonce point is a quadratic residue modulo the field size.
          */
-        fun generate_schnorr_nonce(): Pair<ECKey, ECPoint> {
-            val nonce_key = ECKey()
+        fun generate_schnorr_nonce(privateKey: ByteArray): Pair<ECKey, ECPoint> {
+            val nonce_key = ECKey.fromPrivate(privateKey)
             var R = nonce_key.pubKeyPoint
             R = R.normalize()
 

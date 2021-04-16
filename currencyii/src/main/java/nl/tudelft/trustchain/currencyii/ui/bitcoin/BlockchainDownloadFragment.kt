@@ -22,7 +22,6 @@ import org.bitcoinj.core.ECKey
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.params.TestNet3Params
-import org.bouncycastle.math.ec.ECPoint
 import kotlin.concurrent.thread
 
 /**
@@ -69,7 +68,8 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
         val hasKey = nonceKeyData.getBoolean("has_key", false)
 
         if (!hasKey) {
-            NONCE_KEY = Key.generate_schnorr_nonce()
+            NONCE_KEY = Key.generate_schnorr_nonce(ECKey().privKeyBytes)
+            Log.i("NONCE_KEY", "New key created")
             Log.i("NONCE_KEY", NONCE_KEY.toString())
             val editor = nonceKeyData.edit()
             editor.putBoolean("has_key", true)
@@ -77,8 +77,7 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
             editor.apply()
         } else {
             val privKeyString = nonceKeyData.getString("privkey", "")!!
-            val key = ECKey.fromPrivate(privKeyString.hexToBytes())
-            NONCE_KEY = Pair(key, key.pubKeyPoint)
+            NONCE_KEY = Key.generate_schnorr_nonce(privKeyString.hexToBytes())
             Log.i("NONCE_KEY", NONCE_KEY.toString())
         }
     }

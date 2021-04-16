@@ -18,7 +18,6 @@ import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.Transaction
 import java.math.BigInteger
 
 class DAOJoinHelper {
