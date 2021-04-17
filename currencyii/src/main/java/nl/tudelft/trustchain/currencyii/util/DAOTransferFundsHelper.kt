@@ -96,10 +96,10 @@ class DAOTransferFundsHelper {
         walletBlockData: TrustChainTransaction,
         blockData: SWTransferFundsAskBlockTD,
         signatures: List<String>,
-        receiverAddress: org.bitcoinj.core.Address,
+        receiverAddress: String,
         paymentAmount: Long
     ) {
-        val oldWalletBlockData = SWTransferFundsAskTransactionData(walletBlockData)
+        val oldWalletBlockData = SWTransferDoneTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
 
         val walletManager = WalletManagerAndroid.getInstance()
@@ -119,7 +119,7 @@ class DAOTransferFundsHelper {
             signaturesOfOldOwners,
             aggregateNoncePoint,
             CTransaction().deserialize(newTransactionProposal),
-            receiverAddress,
+            org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddress),
             paymentAmount
         )
 
@@ -137,7 +137,7 @@ class DAOTransferFundsHelper {
      */
     private fun broadcastTransferFundSuccessful(
         myPeer: Peer,
-        oldBlockData: SWTransferFundsAskTransactionData,
+        oldBlockData: SWTransferDoneTransactionData,
         serializedTransaction: String
     ) {
         val newData = SWTransferDoneTransactionData(oldBlockData.jsonData)
@@ -162,7 +162,7 @@ class DAOTransferFundsHelper {
         fun transferFundsBlockReceived(
             oldTransactionSerialized: String,
             block: TrustChainBlock,
-            transferBlock: SWTransferFundsAskBlockTD,
+            transferBlock: SWTransferDoneBlockTD,
             myPublicKey: ByteArray,
             votedInFavor: Boolean
         ) {

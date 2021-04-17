@@ -98,10 +98,11 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
+
         val swJoinBlock: TrustChainBlock =
             getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
-        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+//        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
 
         if (getBalance().minus(Coin.valueOf(satoshiTransferAmount)).isNegative) {
             activity?.runOnUiThread {
@@ -131,12 +132,11 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         val signatures = collectSignatures(transferFundsData)
         try {
             getCoinCommunity().transferFunds(
-                transferFundsData,
-                walletData,
+                swJoinBlock.transaction,
+                transferFundsData.getData(),
                 signatures,
                 bitcoinPublicKey,
-                satoshiTransferAmount,
-                ::updateAlertLabel
+                satoshiTransferAmount
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"
