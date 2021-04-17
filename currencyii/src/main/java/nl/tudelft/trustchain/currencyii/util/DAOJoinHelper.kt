@@ -192,10 +192,7 @@ class DAOJoinHelper {
 
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
 
-            Log.i(
-                "Coin",
-                "Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}"
-            )
+            Log.i("Coin","Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}")
 
             if (blockData.SW_RECEIVER_PK != myPublicKey.toHex()) {
                 return
