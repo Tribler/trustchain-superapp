@@ -136,7 +136,8 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 transferFundsData.getData(),
                 signatures,
                 bitcoinPublicKey,
-                satoshiTransferAmount
+                satoshiTransferAmount,
+                requireContext()
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"

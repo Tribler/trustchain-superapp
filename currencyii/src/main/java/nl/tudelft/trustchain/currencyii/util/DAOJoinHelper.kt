@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util
 
+import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -121,7 +122,8 @@ class DAOJoinHelper {
         myPeer: Peer,
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
-        signatures: List<String>
+        signatures: List<String>,
+        context: Context
     ) {
         val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -142,7 +144,8 @@ class DAOJoinHelper {
         val (status, serializedTransaction) = walletManager.safeSendingJoinWalletTransaction(
             signaturesOfOldOwners,
             aggregateNoncePoint,
-            CTransaction().deserialize(newTransactionProposal)
+            CTransaction().deserialize(newTransactionProposal),
+            context
         )
 
         if (status) {

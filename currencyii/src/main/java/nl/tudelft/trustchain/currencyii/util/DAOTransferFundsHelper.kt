@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util
 
+import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -92,7 +93,8 @@ class DAOTransferFundsHelper {
         blockData: SWTransferFundsAskBlockTD,
         signatures: List<String>,
         receiverAddress: String,
-        paymentAmount: Long
+        paymentAmount: Long,
+        context: Context
     ) {
         val oldWalletBlockData = SWTransferDoneTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -114,7 +116,8 @@ class DAOTransferFundsHelper {
             aggregateNoncePoint,
             newTransactionSerialized,
             org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddress),
-            paymentAmount
+            paymentAmount,
+            context
         )
 
         if (status) {
