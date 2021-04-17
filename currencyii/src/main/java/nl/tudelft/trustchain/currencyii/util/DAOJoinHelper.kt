@@ -47,7 +47,8 @@ class DAOJoinHelper {
             createBitcoinSharedWalletForJoining(blockData).serializedTransaction
 
         val total = blockData.SW_BITCOIN_PKS.size
-        val requiredSignatures = total
+        val requiredSignatures =
+            SWUtil.percentageToIntThreshold(total, blockData.SW_VOTING_THRESHOLD)
 
         val proposalIDSignature = SWUtil.randomUUID()
 
@@ -189,10 +190,9 @@ class DAOJoinHelper {
             votedInFavor: Boolean
         ) {
             val trustchain = TrustChainHelper(IPv8Android.getInstance().getOverlay() ?: return)
-
             val blockData = SWSignatureAskTransactionData(block.transaction).getData()
 
-            Log.i("Coin","Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}")
+            Log.i("Coin", "Signature request for joining: ${blockData.SW_RECEIVER_PK}, me: ${myPublicKey.toHex()}")
 
             if (blockData.SW_RECEIVER_PK != myPublicKey.toHex()) {
                 return
