@@ -140,8 +140,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             list_view.setOnItemClickListener { _, view, position, id ->
                 lifecycleScope.launch {
                     withContext(Dispatchers.IO) {
-                        joinSharedWalletClicked(fetchedWallets[position])
                         Log.i("Coin", "Clicked: $view, $position, $id")
+                        joinSharedWalletClicked(uniqueWallets[position])
                     }
                 }
             }
