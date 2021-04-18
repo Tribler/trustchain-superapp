@@ -98,13 +98,13 @@ class ProposalListAdapter(
             // Get favor votes
             val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+//            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).toByteArray().toHex()
-            if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
-                votedButton.visibility = View.VISIBLE
-            }
+//            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).toByteArray().toHex()
+//            if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
+//                votedButton.visibility = View.VISIBLE
+//            }
 
             // If the proposal can't be met anymore, draw a red border
             if (!context.getCoinCommunity().canWinJoinRequest(data)) {
