@@ -111,9 +111,15 @@ class CTransaction(
             ssBuf += littleEndian(txTo.nLockTime)
 
             if ((hash_type and SIGHASH_ANYONECANPAY) != 1.toByte()) {
-                ssBuf += sha256(txTo.vin.map { it.prevout.serialize() }[0])
-
                 var temp: ByteArray = byteArrayOf()
+
+                for (i in txTo.vin) {
+                    temp += i.prevout.serialize()
+                }
+
+                ssBuf += sha256(temp)
+
+                temp = byteArrayOf()
                 for (u in spentUtxos) {
                     temp += littleEndian(u.nValue)
                 }
