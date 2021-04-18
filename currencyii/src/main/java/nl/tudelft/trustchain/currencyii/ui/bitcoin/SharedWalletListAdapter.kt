@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Transaction
 
@@ -45,12 +46,7 @@ class SharedWalletListAdapter(
         val users = "${trustchainPks.size} user(s) in this shared wallet"
         val inWalletText = "$isUserInWallet"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"
-
-        val walletManager = WalletManagerAndroid.getInstance()
-        val previousTransaction = Transaction(
-            walletManager.params,
-            blockData.SW_TRANSACTION_SERIALIZED.hexToBytes()
-        )
+        val previousTransaction = CTransaction().deserialize(blockData.SW_TRANSACTION_SERIALIZED.hexToBytes())
 
         walletId.text = walletIdText
         votingThreshold.text = votingThresholdText
@@ -59,7 +55,7 @@ class SharedWalletListAdapter(
         inWallet.text = inWalletText
         yourVotes.text = votes
         clickToJoin.text = listButtonText
-        balance.text = walletManager.getMuSigOutput(previousTransaction).value.toFriendlyString()
+        balance.text = Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue).toFriendlyString()
 
         if (this.disableOnUserJoined!! && isUserInWallet) {
             clickToJoin.isEnabled = false
