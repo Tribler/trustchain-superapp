@@ -12,8 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
 /**
@@ -41,8 +45,9 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
             val uniqueProposals: ArrayList<TrustChainBlock> = ArrayList()
             val proposalCopy = arrayListOf<TrustChainBlock>()
             proposalCopy.addAll(proposals)
+
             for (proposal in proposalCopy) {
-                if (!uniqueProposals.contains(proposal)) uniqueProposals.add(proposal)
+                if (!uniqueProposals.contains(proposal) && isUserInWallet(proposal)) uniqueProposals.add(proposal)
             }
             val adaptor = ProposalListAdapter(this, uniqueProposals)
             proposal_list_view.adapter = adaptor
@@ -67,6 +72,23 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 }
             }
         }
+    }
+
+    private fun isUserInWallet(proposal: TrustChainBlock): Boolean {
+        val walletID = if (proposal.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
+            SWSignatureAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+        } else {
+            SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
+        }
+        Log.i("Steven", getUserWalletIds().contains(walletID).toString() + " : " + walletID)
+        return getUserWalletIds().contains(walletID)
+    }
+
+    private fun getUserWalletIds(): List<String> {
+        val myPublicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
+        val wallets = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks().map { SWJoinBlockTransactionData(it.transaction).getData() }
+        val userWallets = wallets.filter { it.SW_TRUSTCHAIN_PKS.contains(myPublicKey) }
+        return userWallets.map { it.SW_UNIQUE_ID }
     }
 
     /**
