@@ -56,20 +56,19 @@ class TransactionsFragment : EurotokenBaseFragment(R.layout.fragment_transaction
         }
 
         fun payBack(transaction: Transaction) {
-            if (transaction.block.isAgreement) {
+            val success: Boolean = if (transaction.block.isAgreement) {
                 transactionRepository.sendTransferProposal(
                     recipient = transaction.block.linkPublicKey,
                     amount = transaction.amount
-                ) ?: return Toast.makeText(
-                    requireContext(),
-                    "Insufficient balance",
-                    Toast.LENGTH_LONG
-                ).show()
+                )
             } else {
                 transactionRepository.sendTransferProposal(
                     recipient = transaction.block.publicKey,
                     amount = transaction.amount
                 )
+            }
+            if (!success) {
+                return Toast.makeText( requireContext(), "Insufficient balance", Toast.LENGTH_LONG ).show()
             }
         }
 

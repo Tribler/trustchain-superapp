@@ -9,10 +9,7 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Gateway
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.common.eurotoken.*
 import nl.tudelft.trustchain.eurotoken.R
 import java.text.SimpleDateFormat
 
@@ -27,7 +24,7 @@ class TransactionItemRenderer(
     override fun bindView(item: TransactionItem, view: View) = with(view) {
         if (item.transaction.type == TransactionRepository.BLOCK_TYPE_CHECKPOINT) {
             txtAmount.text = TransactionRepository.prettyAmount(
-                transactionRepository.getBalanceForBlock(
+                getBalanceForBlock(
                     item.transaction.block,
                     transactionRepository.trustChainCommunity.database
                 )!!
@@ -74,7 +71,7 @@ class TransactionItemRenderer(
         if (item.transaction.block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) {
             txtType.text = "Rollback of seq: "
             txtProp.text =
-                "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION] as String).hexToBytes())!!.sequenceNumber})"
+                "(${transactionRepository.trustChainCommunity.database.getBlockWithHash((item.transaction.block.transaction[TransactionRepository.KEY_TRANSACTION_HASH] as String).hexToBytes())!!.sequenceNumber})"
         } else if (item.transaction.block.isProposal) {
             if (transactionRepository.trustChainCommunity.database.getLinked(item.transaction.block) != null) {
                 txtProp.text = "P+A"
@@ -94,7 +91,7 @@ class TransactionItemRenderer(
         }
 
         txtBalance.text = "Balance: " + TransactionRepository.prettyAmount(
-            transactionRepository.getBalanceForBlock(
+            getBalanceForBlock(
                 item.transaction.block,
                 transactionRepository.trustChainCommunity.database
             )!!

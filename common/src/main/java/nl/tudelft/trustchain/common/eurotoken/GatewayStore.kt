@@ -6,10 +6,7 @@ import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 
-class GatewayStore(context: Context) {
-    private val driver = AndroidSqliteDriver(Database.Schema, context, "common.db")
-    private val database = Database(driver)
-
+open class GatewayStore(val database: Database) {
     fun addGateway(
         publicKey: PublicKey,
         name: String,
@@ -66,6 +63,20 @@ class GatewayStore(context: Context) {
         }.executeAsList()
     }
 
+    fun getGatewayFromPublicKey(publicKey: ByteArray): Gateway? {
+        val gateway =
+            database.dbGatewayQueries.getGateway(publicKey).executeAsOneOrNull()
+        return if (gateway != null) {
+            Gateway(
+                gateway.name,
+                defaultCryptoProvider.keyFromPublicBin(gateway.public_key),
+                gateway.ip,
+                gateway.port,
+                gateway.preferred == 1L
+            )
+        } else null
+    }
+
     fun getGatewayFromPublicKey(publicKey: PublicKey): Gateway? {
         val gateway =
             database.dbGatewayQueries.getGateway(publicKey.keyToBin()).executeAsOneOrNull()
@@ -95,9 +106,13 @@ class GatewayStore(context: Context) {
         private lateinit var instance: GatewayStore
         fun getInstance(context: Context): GatewayStore {
             if (!Companion::instance.isInitialized) {
-                instance = GatewayStore(context)
+                instance = SqlGatewayStore(context)
             }
             return instance
         }
     }
 }
+
+class SqlGatewayStore(context: Context) : GatewayStore(
+    Database(AndroidSqliteDriver(Database.Schema, context, "common.db"))
+)

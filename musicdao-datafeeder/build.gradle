@@ -23,6 +23,7 @@ dependencies {
 
 application {
     mainClassName = 'com.example.musicdao_datafeeder.DataFeederKt'
+//    mainClassName = 'com.example.musicdao_datafeeder.DataPropagatorKt'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
