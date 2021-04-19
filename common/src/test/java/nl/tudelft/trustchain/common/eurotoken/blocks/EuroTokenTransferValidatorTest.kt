@@ -30,7 +30,8 @@ class EuroTokenTransferValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
@@ -51,11 +52,15 @@ class EuroTokenTransferValidatorTest {
             transaction = mapOf(
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenTransferValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenTransferValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -74,11 +79,15 @@ class EuroTokenTransferValidatorTest {
                 TransactionRepository.KEY_BALANCE to 10L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InvalidBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InvalidBalance("").TYPE
+        )
     }
 
     @Test
@@ -94,6 +103,9 @@ class EuroTokenTransferValidatorTest {
         )
         val result = validate(A1, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InsufficientBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InsufficientBalance("").TYPE
+        )
     }
 }

@@ -32,7 +32,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_PAYMENT_ID to "ID"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
@@ -55,7 +56,8 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertEquals(result, ValidationResult.Valid)
@@ -77,11 +79,15 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenDestructionValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenDestructionValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -100,11 +106,15 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenDestructionValidator.MissingPaymentIDorIBAN("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenDestructionValidator.MissingPaymentIDorIBAN("").TYPE
+        )
     }
 
     @Test
@@ -125,11 +135,15 @@ class EuroTokenDestructionValidatorTest {
                 TransactionRepository.KEY_BALANCE to 10L,
                 TransactionRepository.KEY_IBAN to "IBAN"
             ),
-            previous = A2)
+            previous = A2
+        )
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InvalidBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InvalidBalance("").TYPE
+        )
     }
 
     @Test
@@ -148,6 +162,9 @@ class EuroTokenDestructionValidatorTest {
 
         val result = validate(A1, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InsufficientBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InsufficientBalance("").TYPE
+        )
     }
 }

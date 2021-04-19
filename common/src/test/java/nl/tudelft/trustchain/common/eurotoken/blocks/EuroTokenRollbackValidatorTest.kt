@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.common.eurotoken.blocks
+
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -49,7 +50,8 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertEquals(result, ValidationResult.Valid)
@@ -90,7 +92,8 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to "ABCD"
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertEquals(result, ValidationResult.Valid)
@@ -130,11 +133,15 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -171,11 +178,15 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10),
                 TransactionRepository.KEY_BALANCE to 0L
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.MissingTransactionHash("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.MissingTransactionHash("").TYPE
+        )
     }
 
     @Test
@@ -213,7 +224,8 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.PartialPrevious)
@@ -254,10 +266,14 @@ class EuroTokenRollbackValidatorTest {
                 TransactionRepository.KEY_BALANCE to 5L,
                 TransactionRepository.KEY_TRANSACTION_HASH to A1.calculateHash().toHex()
             ),
-            previous = A1)
+            previous = A1
+        )
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.InvalidTransaction("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.InvalidTransaction("").TYPE
+        )
     }
 }
