@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.liquidity.data
 
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
-import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 
 class BitcoinMultiSigWallet(
