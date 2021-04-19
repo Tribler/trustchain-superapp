@@ -96,6 +96,7 @@ class TransactionRepository(
             KEY_AMOUNT to amount,
             KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount.toLong()).toLong())
         )
+        @Suppress("CAST_NEVER_SUCCEEDS")
         Log.d("EuroTokenBlockRollback", (transaction[KEY_BALANCE] as Long).toString())
         scope.launch {
             trustChainCommunity.createProposalBlock(
@@ -193,28 +194,34 @@ class TransactionRepository(
             EuroTokenTransferValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRANSFER, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockTransfer", "sig request ${block.transaction}")
-                // agree if validated
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_TRANSFER,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    Log.w("EuroTokenBlockTransfer", "sig request ${block.transaction}")
+                    // agree if validated
+                    trustChainCommunity.sendBlock(
+                        trustChainCommunity.createAgreementBlock(
+                            block,
+                            block.transaction
+                        )
                     )
-                )
-            }
-        })
-
-        trustChainCommunity.addListener(BLOCK_TYPE_TRANSFER, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                // Auto verifyBalance
-                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                    verifyBalance()
                 }
-                Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
-        })
+        )
+
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_TRANSFER,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    // Auto verifyBalance
+                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                        verifyBalance()
+                    }
+                    Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                }
+            }
+        )
     }
 
     private fun addCreationListeners() {
@@ -223,30 +230,36 @@ class TransactionRepository(
             EuroTokenCreationValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_CREATE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockCreate", "sig request")
-                // only gateways should sign creations
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_CREATE,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    Log.w("EuroTokenBlockCreate", "sig request")
+                    // only gateways should sign creations
+                    trustChainCommunity.sendBlock(
+                        trustChainCommunity.createAgreementBlock(
+                            block,
+                            block.transaction
+                        )
                     )
-                )
-            }
-        })
-
-        trustChainCommunity.addListener(BLOCK_TYPE_CREATE, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                    verifyBalance()
                 }
-                Log.w(
-                    "EuroTokenBlockCreate",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
             }
-        })
+        )
+
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_CREATE,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                        verifyBalance()
+                    }
+                    Log.w(
+                        "EuroTokenBlockCreate",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
+            }
+        )
     }
 
     private fun addDestructionListeners() {
@@ -255,20 +268,26 @@ class TransactionRepository(
             EuroTokenDestructionValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_DESTROY, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                // only gateways should sign destructions
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_DESTROY,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    // only gateways should sign destructions
+                }
             }
-        })
+        )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_DESTROY, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d(
-                    "EuroTokenBlockDestroy",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_DESTROY,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    Log.d(
+                        "EuroTokenBlockDestroy",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
             }
-        })
+        )
     }
 
     private fun addCheckpointListeners() {
@@ -277,20 +296,26 @@ class TransactionRepository(
             EuroTokenCheckpointValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_CHECKPOINT, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                // only gateways should sign checkpoints
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_CHECKPOINT,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    // only gateways should sign checkpoints
+                }
             }
-        })
+        )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_CHECKPOINT, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d(
-                    "EuroTokenBlockCheck",
-                    "onBlockReceived: ${block.isProposal} ${block.blockId} ${block.transaction}"
-                )
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_CHECKPOINT,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    Log.d(
+                        "EuroTokenBlockCheck",
+                        "onBlockReceived: ${block.isProposal} ${block.blockId} ${block.transaction}"
+                    )
+                }
             }
-        })
+        )
     }
 
     private fun addRollbackListeners() {
@@ -299,20 +324,26 @@ class TransactionRepository(
             EuroTokenRollBackValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_ROLLBACK, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                // rollbacks don't need to be signed, their existence is a declaration of forfeit
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_ROLLBACK,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    // rollbacks don't need to be signed, their existence is a declaration of forfeit
+                }
             }
-        })
+        )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_ROLLBACK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d(
-                    "EuroTokenBlockRollback",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_ROLLBACK,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    Log.d(
+                        "EuroTokenBlockRollback",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
             }
-        })
+        )
     }
 
     fun initTrustChainCommunity() {

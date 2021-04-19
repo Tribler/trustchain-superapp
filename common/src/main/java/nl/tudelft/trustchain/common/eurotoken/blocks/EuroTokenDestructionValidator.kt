@@ -10,7 +10,8 @@ class EuroTokenDestructionValidator(transactionRepository: TransactionRepository
             throw MissingAmount("Missing amount")
         }
         if (!block.transaction.containsKey(TransactionRepository.KEY_PAYMENT_ID) &&
-            !block.transaction.containsKey(TransactionRepository.KEY_IBAN)) {
+            !block.transaction.containsKey(TransactionRepository.KEY_IBAN)
+        ) {
             throw MissingPaymentIDorIBAN("Missing Payment id or IBAN")
         }
         super.validateEuroTokenProposal(block, database)
