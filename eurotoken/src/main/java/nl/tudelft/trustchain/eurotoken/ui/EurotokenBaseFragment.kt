@@ -46,6 +46,15 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         }
     }
 
+    private val onReceiveListener = object : BlockListener {
+        override fun onBlockReceived(block: TrustChainBlock) {
+            if (block.isAgreement && block.publicKey.contentEquals(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                playMoneySound()
+                makeMoneyToast()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

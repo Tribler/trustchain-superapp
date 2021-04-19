@@ -83,7 +83,7 @@
                         android:padding="5dp"
                         android:text="@string/wallet_balance"
                         android:textAlignment="textStart"
-                        android:textSize="21sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>
@@ -137,8 +137,7 @@
                                 android:id="@+id/euroTokenAddress"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:textAlignment="textStart"
-                                android:textSize="9sp" />
+                                android:textAlignment="textStart" />
 
                         </LinearLayout>
 
@@ -157,7 +156,7 @@
                         android:padding="5dp"
                         android:text="@string/wallet_balance"
                         android:textAlignment="textStart"
-                        android:textSize="21sp"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                 </LinearLayout>

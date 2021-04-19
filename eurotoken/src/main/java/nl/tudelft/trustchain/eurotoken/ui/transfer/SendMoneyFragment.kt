@@ -20,6 +20,10 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
 
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
             transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
