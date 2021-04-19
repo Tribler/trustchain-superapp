@@ -12,7 +12,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.*
-import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import nl.tudelft.trustchain.currencyii.util.taproot.MuSig
 import org.bitcoinj.core.ECKey
 import java.math.BigInteger
@@ -93,11 +92,11 @@ class DAOTransferFundsHelper {
         blockData: SWTransferFundsAskBlockTD,
         signatures: List<String>,
         receiverAddress: String,
-        paymentAmount: Long,
-        context: Context
+        paymentAmount: Long//,
+        //context: Context
     ) {
         val oldWalletBlockData = SWTransferDoneTransactionData(walletBlockData)
-        val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
+        val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
 
         val walletManager = WalletManagerAndroid.getInstance()
 
@@ -112,12 +111,13 @@ class DAOTransferFundsHelper {
         val (aggregateNoncePoint, _) = MuSig.aggregate_schnorr_nonces(noncePoints)
 
         val (status, serializedTransaction) = walletManager.safeSendingTransactionFromMultiSig(
+            oldWalletBlockData.getData().SW_BITCOIN_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
             signaturesOfOldOwners,
             aggregateNoncePoint,
-            newTransactionSerialized,
+            oldTransactionSerialized,
             org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddress),
-            paymentAmount,
-            context
+            paymentAmount//,
+//            context
         )
 
         if (status) {
@@ -176,10 +176,9 @@ class DAOTransferFundsHelper {
 
             val walletManager = WalletManagerAndroid.getInstance()
 
-            val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
+//            val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
             val signature = walletManager.safeSigningTransactionFromMultiSig(
                 oldTransactionSerialized,
-                CTransaction().deserialize(newTransactionSerialized.hexToBytes()),
                 transferBlock.SW_BITCOIN_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
                 transferBlock.SW_NONCE_PKS.map { ECKey.fromPublicOnly(it.hexToBytes()) },
                 walletManager.protocolECKey(),

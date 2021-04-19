@@ -209,8 +209,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             getCoinCommunity().joinBitcoinWallet(
                 mostRecentSWBlock.transaction,
                 proposeBlockData,
-                signatures,
-                requireContext()
+                signatures//,
+                //requireContext()
             )
         } catch (t: Throwable) {
             Log.i("Coin", "Joining failed. ${t.message ?: "No further information"}.")

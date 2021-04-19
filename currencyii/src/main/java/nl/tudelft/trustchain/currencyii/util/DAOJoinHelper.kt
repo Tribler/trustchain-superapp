@@ -122,8 +122,8 @@ class DAOJoinHelper {
         myPeer: Peer,
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
-        signatures: List<String>,
-        context: Context
+        signatures: List<String>//,
+        //context: Context
     ) {
         val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -144,8 +144,8 @@ class DAOJoinHelper {
         val (status, serializedTransaction) = walletManager.safeSendingJoinWalletTransaction(
             signaturesOfOldOwners,
             aggregateNoncePoint,
-            CTransaction().deserialize(newTransactionProposal),
-            context
+            CTransaction().deserialize(newTransactionProposal)//,
+            //context
         )
 
         if (status) {
