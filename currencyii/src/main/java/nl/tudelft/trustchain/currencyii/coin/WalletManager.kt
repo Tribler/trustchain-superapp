@@ -293,6 +293,7 @@ class WalletManager(
         printTransactionInformation(req.tx)
         req.changeAddress = protocolAddress()
         kit.wallet().completeTx(req)
+        //todo fuck the fees, laten we dit gwn beunen zoals ik bij transfer funds doe
 
         return TransactionPackage(
             req.tx.txId.toString(),
