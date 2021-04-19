@@ -100,7 +100,7 @@ enum class AppDefinition(
         EuroTokenMainActivity::class.java
     ),
     LIQUIDITY(
-        R.drawable.ic_add_black_24dp,
+        R.drawable.ic_pool,
         "Liquidity Pool",
         R.color.blue,
         LiquidityPoolMainActivity::class.java

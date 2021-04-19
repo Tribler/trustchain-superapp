@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.common.eurotoken
 
 import android.util.Log
 import kotlinx.coroutines.*
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -66,7 +67,7 @@ class TransactionRepository(
         if (blocks.isEmpty()) return null // No connection partial previous
         return blocks.find { // linked block
             it.publicKey.contentEquals(block.linkPublicKey) &&
-                it.sequenceNumber == block.linkSequenceNumber
+            it.sequenceNumber == block.linkSequenceNumber
         } ?: block // no linked block exists
     }
 
@@ -345,6 +346,31 @@ class TransactionRepository(
                 rolledBackBlock.publicKey
             )
         }
+    }
+
+    fun sendDestroyProposalWithIBAN(
+        iban: String,
+        amount: Long
+    ): TrustChainBlock? {
+        Log.w("EuroTokenBlockDestroy", "Creating destroy...")
+        val peer = getGatewayPeer() ?: return null
+
+        if (getMyVerifiedBalance() - amount < 0) {
+            return null
+        }
+
+        val transaction = mapOf(
+            KEY_IBAN to iban,
+            KEY_AMOUNT to BigInteger.valueOf(amount),
+            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
+        )
+        val block = trustChainCommunity.createProposalBlock(
+            BLOCK_TYPE_DESTROY, transaction,
+            peer.publicKey.keyToBin()
+        )
+
+        trustChainCommunity.sendBlock(block, peer)
+        return block
     }
 
     fun sendDestroyProposalWithIBAN(
@@ -680,12 +706,149 @@ class TransactionRepository(
 
         trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                ensureCheckpointLinks(block, trustChainCommunity.database)
+                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                    verifyBalance()
+                }
+                Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+    }
+
+    private fun addJoinListeners() {
+        trustChainCommunity.registerTransactionValidator(
+            BLOCK_TYPE_JOIN,
+            object : TransactionValidator {
+                override fun validate(
+                    block: TrustChainBlock,
+                    database: TrustChainStore
+                ): ValidationResult {
+                    val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
+
+                    if (block.publicKey.toHex() == mykey.toHex() && block.isProposal) return ValidationResult.Valid
+
+                    if (block.isProposal) {
+                        Log.d("RecvProp", "Received Proposal Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
+
+                        if (!block.transaction.containsKey("btcHash") || !block.transaction.containsKey("euroHash")) return ValidationResult.Invalid(
+                            listOf("Missing hashes")
+                        )
+                        Log.d("EuroTokenBlockJoin", "Received join request with hashes\nBTC: ${block.transaction.get("btcHash")}\nEuro: ${block.transaction.get("euroHash")}")
+                        // Check if hashes are valid by searching in own chain
+                        return verifyJoinTransactions(block.transaction.get("btcHash") as String,
+                            block.transaction.get("euroHash") as String,
+                            block.publicKey
+                        )
+                    } else {
+                        Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
+                        if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) {
+                            return ValidationResult.Invalid(
+                                listOf(
+                                    "Linked transaction doesn't match (${block.transaction}, ${
+                                    database.getLinked(
+                                        block
+                                    )?.transaction ?: "MISSING"
+                                    })"
+                                )
+                            )
+                        }
+                    }
+                    if (block.isProposal)
+                        Log.d("RecvProp", "Received Proposal Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
+                    else
+                        Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
+
+                    return ValidationResult.Valid
+                }
+            })
+
+        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRADE, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
+                // agree if validated
+                trustChainCommunity.sendBlock(
+                    trustChainCommunity.createAgreementBlock(
+                        block,
+                        block.transaction
+                    )
+                )
+            }
+        })
+
+        trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("EuroTokenBlockTrade", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
         })
     }
 
     private fun addTradeListeners() {
+        trustChainCommunity.registerTransactionValidator(
+            BLOCK_TYPE_TRADE,
+            object : TransactionValidator {
+                override fun validate(
+                    block: TrustChainBlock,
+                    database: TrustChainStore
+                ): ValidationResult {
+                    val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
+                    if (block.publicKey.toHex() == mykey.toHex() && block.isProposal) return ValidationResult.Valid
+
+                    if (block.isProposal) {
+                        // Check if hash is valid for the corresponding direction
+                        val result = verifyTradeTransactions(block.transaction.get("hash") as String, block.transaction.get("direction") as String, euroAddress = block.publicKey)
+                        if (result != ValidationResult.Valid) {
+                            return result
+                        }
+                        Log.d("Trade", "Valid trade")
+                        // It is valid, so we need to send some funds back
+                        if ((block.transaction.get("direction") as String).equals("bitcoin")) {
+                            Log.d("TradeBitcoin", "Sending bitcoins back to some address: ${block.transaction.get("receive") as String}")
+                            val wallet = WalletService.getGlobalWallet().wallet()
+                            val sendRequest = SendRequest.to(Address.fromString(WalletService.params, block.transaction.get("receive") as String), Coin.valueOf(10000000))
+                            wallet.sendCoins(sendRequest)
+                        } else if ((block.transaction.get("direction") as String).equals("eurotoken")) {
+                            Log.d("TradeEurotoken", "Sending eurotokens back to some address: ${block.transaction.get("receive") as String}")
+                            sendTransferProposal((block.transaction.get("receive") as String).hexToBytes(), 0)
+                        }
+                    } else {
+                        Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
+                        if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) {
+                            return ValidationResult.Invalid(
+                                listOf(
+                                    "Linked transaction doesn't match (${block.transaction}, ${
+                                    database.getLinked(
+                                        block
+                                    )?.transaction ?: "MISSING"
+                                    })"
+                                )
+                            )
+                        }
+                    }
+                    return ValidationResult.Valid
+                }
+            })
+
+        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_JOIN, object : BlockSigner {
+            override fun onSignatureRequest(block: TrustChainBlock) {
+                Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
+                // agree if validated
+                trustChainCommunity.sendBlock(
+                    trustChainCommunity.createAgreementBlock(
+                        block,
+                        block.transaction
+                    )
+                )
+            }
+        })
+
+        trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+            }
+        })
+    }
+
+    private fun addCreationListeners() {
         trustChainCommunity.registerTransactionValidator(
             BLOCK_TYPE_TRADE,
             object : TransactionValidator {
@@ -746,28 +909,31 @@ class TransactionRepository(
 
         trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
             override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockTrade", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                ensureCheckpointLinks(block, trustChainCommunity.database)
+                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                    verifyBalance()
+                }
+                Log.w(
+                    "EuroTokenBlockCreate",
+                    "onBlockReceived: ${block.blockId} ${block.transaction}"
+                )
             }
         })
     }
 
     private fun addCreationListeners() {
         trustChainCommunity.registerTransactionValidator(
-            BLOCK_TYPE_CREATE,
-            EuroTokenCreationValidator(this)
-        )
-
-        trustChainCommunity.registerBlockSigner(
-            BLOCK_TYPE_CREATE,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    Log.w("EuroTokenBlockCreate", "sig request")
-                    // only gateways should sign creations
-                    trustChainCommunity.sendBlock(
-                        trustChainCommunity.createAgreementBlock(
-                            block,
-                            block.transaction
-                        )
+            BLOCK_TYPE_DESTROY,
+            object : TransactionValidator {
+                override fun validate(
+                    block: TrustChainBlock,
+                    database: TrustChainStore
+                ): ValidationResult {
+                    if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(
+                        listOf("Missing amount")
+                    )
+                    if (!block.transaction.containsKey(KEY_PAYMENT_ID) && !block.transaction.containsKey(KEY_IBAN)) return ValidationResult.Invalid(
+                        listOf("Missing Payment id")
                     )
                 }
             }
@@ -804,15 +970,13 @@ class TransactionRepository(
             }
         )
 
-        trustChainCommunity.addListener(
-            BLOCK_TYPE_DESTROY,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "EuroTokenBlockDestroy",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
+        trustChainCommunity.addListener(BLOCK_TYPE_DESTROY, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                ensureCheckpointLinks(block, trustChainCommunity.database)
+                Log.d(
+                    "EuroTokenBlockDestroy",
+                    "onBlockReceived: ${block.blockId} ${block.transaction}"
+                )
             }
         )
     }
@@ -860,15 +1024,13 @@ class TransactionRepository(
             }
         )
 
-        trustChainCommunity.addListener(
-            BLOCK_TYPE_ROLLBACK,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d(
-                        "EuroTokenBlockRollback",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
+        trustChainCommunity.addListener(BLOCK_TYPE_ROLLBACK, object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                ensureCheckpointLinks(block, trustChainCommunity.database)
+                Log.d(
+                    "EuroTokenBlockRollback",
+                    "onBlockReceived: ${block.blockId} ${block.transaction}"
+                )
             }
         )
     }

@@ -91,6 +91,15 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    repositories {
+        jcenter()
+        flatDir {
+            dirs '../common/libs'
+        }
+    }
+}
+
 dependencies {
     implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')

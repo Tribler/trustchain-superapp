@@ -16,11 +16,16 @@
     <fragment
         android:id="@+id/poolFragment"
         android:name="nl.tudelft.trustchain.liquidity.ui.PoolFragment"
-        android:label="Pool"
+        android:label="Pool (BTC-EUR)"
         tools:layout="@layout/fragment_pool" />
     <fragment
         android:id="@+id/poolOwnerFragment"
         android:name="nl.tudelft.trustchain.liquidity.ui.PoolOwnerFragment"
         android:label="Pool Owners"
         tools:layout="@layout/fragment_pool_owner" />
+    <fragment
+        android:id="@+id/poolBitcoinEthereumFragment"
+        android:name="nl.tudelft.trustchain.liquidity.ui.PoolBitcoinEthereumFragment"
+        android:label="Pool (BTC-ETH)"
+        tools:layout="@layout/fragment_pool_bitcoin_ethereum" />
 </navigation>
