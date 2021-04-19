@@ -8,12 +8,10 @@ import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
-import org.bitcoinj.core.Transaction
 
 class SharedWalletListAdapter(
     private val context: BaseFragment,

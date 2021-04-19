@@ -80,7 +80,6 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
         } else {
             SWTransferFundsAskTransactionData(proposal.transaction).getData().SW_UNIQUE_ID
         }
-        Log.i("Steven", getUserWalletIds().contains(walletID).toString() + " : " + walletID)
         return getUserWalletIds().contains(walletID)
     }
 

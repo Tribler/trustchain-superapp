@@ -15,13 +15,12 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
-import org.bitcoinj.core.Transaction
 import java.lang.NumberFormatException
 
 /**
@@ -80,12 +79,8 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
         val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
 
-        val walletManager = WalletManagerAndroid.getInstance()
-        val previousTransaction = Transaction(
-            walletManager.params,
-            walletData.SW_TRANSACTION_SERIALIZED.hexToBytes()
-        )
-        return walletManager.getMuSigOutput(previousTransaction).value
+        val previousTransaction = CTransaction().deserialize(walletData.SW_TRANSACTION_SERIALIZED.hexToBytes())
+        return Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue)
     }
 
     private fun transferFundsClicked() {
