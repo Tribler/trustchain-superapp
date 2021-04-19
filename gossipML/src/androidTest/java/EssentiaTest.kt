@@ -10,10 +10,10 @@ class EssentiaTest {
 
     @Test
     fun testEssentia() {
-        var filepath = File("src/androidTest/assets/GrayMicRecords-LofiDream.mp3").absolutePath
+        var filepath = File("superapp-essentia/test/assets/GrayMicRecords-LofiDream.mp3").absolutePath
         assertEquals(0, Essentia.extractData(filepath, filepath.replace(".mp3", ".json")))
 
-        filepath = File("src/androidTest/assets/Helen&Shanna-Saudades.mp3").absolutePath
+        filepath = File("superapp-essentia/test/assets/Helen&Shanna-Saudades.mp3").absolutePath
         assertEquals(0, Essentia.extractData(filepath, filepath.replace(".mp3", ".json")))
     }
 }

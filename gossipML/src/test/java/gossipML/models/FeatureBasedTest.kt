@@ -181,7 +181,7 @@ class FeatureBasedTest {
         val mutFeatures: MutableList<Array<Double>> = mutableListOf()
         var c = 0
         var f = 0
-        File("src/test/res").listFiles()!!.forEach { classDir ->
+        File("superapp-essentia/test/res").listFiles()!!.forEach { classDir ->
             classRanges[c] = f
             classDir.listFiles()!!.forEach { jsonFile ->
                 mutFeatures.add(featuresFromJson(jsonFile))
