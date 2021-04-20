@@ -17,7 +17,6 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
@@ -27,7 +26,6 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.*
 
 /**
@@ -156,8 +154,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val requestToJoinId = sw.publicKey.toHex()
 
         // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // Recalculate the signatures to the PKs
         val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
@@ -197,7 +195,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send yes vote
-                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true)
+                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true, requireContext())
                 Log.i("Coin", "Voted yes on joining of: ${block.transaction}")
             }
 
@@ -215,7 +213,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send no vote
-                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false)
+                getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false, requireContext())
                 Log.i("Coin", "Voted no on joining of: ${block.transaction}")
             }
             builder.show()
@@ -237,19 +235,18 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val walletId = data.SW_UNIQUE_ID
         val priceString = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
 
-        // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
         // Get information about the shared wallet
         val sw = getCoinCommunity().discoverSharedWallets()
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
         // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK } )
-        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK } )
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
 
         // Set the voters so that they are visible in the different kind of tabs
         setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
@@ -294,7 +291,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send yes vote
-                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true)
+                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true, requireContext())
                 Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
             }
 
@@ -312,7 +309,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 updateTabNames()
 
                 // Send no vote
-                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, false)
+                getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, false, requireContext())
                 Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
             }
             builder.show()

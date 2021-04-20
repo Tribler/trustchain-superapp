@@ -5,12 +5,12 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.util.taproot.Key
 import org.bitcoinj.core.Coin
-import java.util.concurrent.TimeUnit
+import org.bitcoinj.core.ECKey
 
 class DAOCreateHelper {
     private fun getTrustChainCommunity(): TrustChainCommunity {
@@ -39,22 +39,24 @@ class DAOCreateHelper {
     fun createBitcoinGenesisWallet(
         myPeer: Peer,
         entranceFee: Long,
-        threshold: Int
-    ) {
+        threshold: Int,
+        context: Context
+    ): SWJoinBlockTransactionData {
         val walletManager = WalletManagerAndroid.getInstance()
         val (success, serializedTransaction) = walletManager.safeCreationAndSendGenesisWallet(
             Coin.valueOf(entranceFee)
         )
 
         print(success)
-        //todo do something if success = false
+        // todo do something if success = false
 
         // Broadcast on trust chain if no errors are thrown in the previous step.
-        broadcastCreatedSharedWallet(
+        return broadcastCreatedSharedWallet(
             myPeer,
             serializedTransaction,
             entranceFee,
-            threshold
+            threshold,
+            context
         )
     }
 
@@ -66,12 +68,14 @@ class DAOCreateHelper {
         myPeer: Peer,
         transactionSerialized: String,
         entranceFee: Long,
-        votingThreshold: Int
-    ) {
+        votingThreshold: Int,
+        context: Context
+    ): SWJoinBlockTransactionData {
         val walletManager = WalletManagerAndroid.getInstance()
         val bitcoinPublicKey = walletManager.networkPublicECKeyHex()
         val trustChainPk = myPeer.publicKey.keyToBin()
-        val noncePoint = walletManager.nonceECPointHex()
+        val nonceKey = Key.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val noncePoint = nonceKey.second.getEncoded(true).toHex()
 
         val blockData = SWJoinBlockTransactionData(
             entranceFee,
@@ -82,6 +86,9 @@ class DAOCreateHelper {
             arrayListOf(noncePoint)
         )
 
+        walletManager.storeNonceKey(blockData.getData().SW_UNIQUE_ID, context, nonceKey.first.privKeyBytes.toHex())
+
         trustchain.createProposalBlock(blockData.getJsonString(), trustChainPk, blockData.blockType)
+        return blockData
     }
 }

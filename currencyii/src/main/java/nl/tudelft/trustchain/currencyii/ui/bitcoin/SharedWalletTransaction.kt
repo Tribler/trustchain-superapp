@@ -16,6 +16,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
@@ -123,15 +124,16 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             }
             return
         }
-
-        val signatures = collectSignatures(transferFundsData)
+        val context = requireContext()
+        val responses = collectResponses(transferFundsData)
         try {
             getCoinCommunity().transferFunds(
                 swJoinBlock.transaction,
                 transferFundsData.getData(),
-                signatures,
+                responses,
                 bitcoinPublicKey,
-                satoshiTransferAmount
+                satoshiTransferAmount,
+                context
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"
@@ -145,45 +147,45 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
     }
 
-    private fun collectSignatures(data: SWTransferFundsAskTransactionData): List<String> {
-        var signatures: List<String>? = null
+    private fun collectResponses(data: SWTransferFundsAskTransactionData): List<SWResponseSignatureBlockTD> {
+        var responses: List<SWResponseSignatureBlockTD>? = null
         activity?.runOnUiThread {
             alert_view.text = "Loading... This might take some time."
         }
 
-        while (signatures == null) {
-            signatures =
-                checkSufficientWalletSignatures(data, data.getData().SW_SIGNATURES_REQUIRED)
-            if (signatures == null) {
+        while (responses == null) {
+            responses =
+                checkSufficientResponses(data, data.getData().SW_SIGNATURES_REQUIRED)
+            if (responses == null) {
                 Thread.sleep(1_000)
             }
         }
 
-        return signatures
+        return responses
     }
 
-    private fun checkSufficientWalletSignatures(
+    private fun checkSufficientResponses(
         data: SWTransferFundsAskTransactionData,
         requiredSignatures: Int
-    ): List<String>? {
+    ): List<SWResponseSignatureBlockTD>? {
         val blockData = data.getData()
-        val signatures =
-            getCoinCommunity().fetchProposalSignatures(
+        val responses =
+            getCoinCommunity().fetchProposalResponses(
                 blockData.SW_UNIQUE_ID,
                 blockData.SW_UNIQUE_PROPOSAL_ID
             )
         Log.i(
             "Coin",
-            "Signatures for ${blockData.SW_UNIQUE_ID}.${blockData.SW_UNIQUE_PROPOSAL_ID}: ${signatures.size}/$requiredSignatures"
+            "Responses for ${blockData.SW_UNIQUE_ID}.${blockData.SW_UNIQUE_PROPOSAL_ID}: ${responses.size}/$requiredSignatures"
         )
 
         activity?.runOnUiThread {
             alert_view?.text =
-                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+                "Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         }
 
-        if (signatures.size >= requiredSignatures) {
-            return signatures.map { it.SW_SIGNATURE_SERIALIZED }
+        if (responses.size >= requiredSignatures) {
+            return responses
         }
         return null
     }

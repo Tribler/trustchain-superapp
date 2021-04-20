@@ -9,7 +9,8 @@ data class SWResponseSignatureBlockTD(
     var SW_UNIQUE_ID: String,
     var SW_UNIQUE_PROPOSAL_ID: String,
     var SW_SIGNATURE_SERIALIZED: String,
-    var SW_BITCOIN_PK: String
+    var SW_BITCOIN_PK: String,
+    var SW_NONCE: String
 )
 
 class SWResponseSignatureTransactionData(data: JsonObject) : SWBlockTransactionData(
@@ -28,14 +29,16 @@ class SWResponseSignatureTransactionData(data: JsonObject) : SWBlockTransactionD
         uniqueId: String,
         uniqueProposalId: String,
         signatureSerialized: String,
-        bitcoinPk: String
+        bitcoinPk: String,
+        nonce: String
     ) : this(
         SWUtil.objectToJsonObject(
             SWResponseSignatureBlockTD(
                 uniqueId,
                 uniqueProposalId,
                 signatureSerialized,
-                bitcoinPk
+                bitcoinPk,
+                nonce
             )
         )
     )

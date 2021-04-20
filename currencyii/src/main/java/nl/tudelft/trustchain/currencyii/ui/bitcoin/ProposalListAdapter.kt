@@ -17,7 +17,6 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Transaction
-import org.bitcoinj.core.TransactionOutput
 import java.text.SimpleDateFormat
 
 class ProposalListAdapter(
@@ -49,12 +48,12 @@ class ProposalListAdapter(
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureTransaction(data).toByteArray().toHex()
+            val mySignatureSerialized = context.getCoinCommunity().getMySignatureTransaction(data, context.requireContext()).toByteArray().toHex()
             if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
                 votedButton.visibility = View.VISIBLE
             }
@@ -95,12 +94,12 @@ class ProposalListAdapter(
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).toByteArray().toHex()
+            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data, context.requireContext()).toByteArray().toHex()
             if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
                 votedButton.visibility = View.VISIBLE
             }

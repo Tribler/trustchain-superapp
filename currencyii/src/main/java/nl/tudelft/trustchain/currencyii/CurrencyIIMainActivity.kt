@@ -4,10 +4,6 @@ import android.util.Log
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import nl.tudelft.trustchain.common.BaseActivity
-import org.bitcoinj.core.ECKey
-import org.bouncycastle.math.ec.ECPoint
-
-lateinit var NONCE_KEY: Pair<ECKey, ECPoint>
 
 class CurrencyIIMainActivity : BaseActivity() {
     private var topLevelDestinationIds = setOf(R.id.blockchainDownloadFragment, R.id.daoLoginChoice)

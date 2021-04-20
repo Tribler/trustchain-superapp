@@ -11,14 +11,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_blockchain_download.*
-import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.currencyii.NONCE_KEY
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
-import nl.tudelft.trustchain.currencyii.util.taproot.Key
-import org.bitcoinj.core.ECKey
 import org.bitcoinj.params.MainNetParams
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.params.TestNet3Params
@@ -33,8 +28,6 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        setNonceKey()
 
         // TODO: The routing is cleaner to do via the previously displayed fragment.
         bitcoin_progress_continue.setOnClickListener {
@@ -60,25 +53,6 @@ class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_d
                     navController.navigate(args.parent)
                 }
             }
-        }
-    }
-
-    private fun setNonceKey() {
-        val nonceKeyData = activity?.getSharedPreferences("nonce_key", 0)!!
-        val hasKey = nonceKeyData.getBoolean("has_key", false)
-
-        if (!hasKey) {
-            NONCE_KEY = Key.generate_schnorr_nonce(ECKey().privKeyBytes)
-            Log.i("NONCE_KEY", "New key created")
-            Log.i("NONCE_KEY", NONCE_KEY.toString())
-            val editor = nonceKeyData.edit()
-            editor.putBoolean("has_key", true)
-            editor.putString("privkey", NONCE_KEY.first.privKey.toByteArray().toHex())
-            editor.apply()
-        } else {
-            val privKeyString = nonceKeyData.getString("privkey", "")!!
-            NONCE_KEY = Key.generate_schnorr_nonce(privKeyString.hexToBytes())
-            Log.i("NONCE_KEY", NONCE_KEY.toString())
         }
     }
 
