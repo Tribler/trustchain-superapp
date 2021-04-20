@@ -45,7 +45,7 @@ class DAOJoinHelper {
         val blockData = SWJoinBlockTransactionData(mostRecentWalletBlock.transaction).getData()
 
         val serializedTransaction =
-            createBitcoinSharedWalletForJoining(blockData).serializedTransaction
+            createBitcoinSharedWalletForJoining(blockData)
 
         val total = blockData.SW_BITCOIN_PKS.size
         val requiredSignatures =
@@ -96,7 +96,7 @@ class DAOJoinHelper {
      *  - It takes some time before the shared wallet is accepted on the bitcoin blockchain.
      * @param sharedWalletData data of the shared wallet that you want to join.
      */
-    private fun createBitcoinSharedWalletForJoining(sharedWalletData: SWJoinBlockTD): WalletManager.TransactionPackage {
+    private fun createBitcoinSharedWalletForJoining(sharedWalletData: SWJoinBlockTD): String {
         val walletManager = WalletManagerAndroid.getInstance()
 
         val oldTransaction = sharedWalletData.SW_TRANSACTION_SERIALIZED
@@ -122,8 +122,7 @@ class DAOJoinHelper {
         myPeer: Peer,
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
-        signatures: List<String>//,
-        //context: Context
+        signatures: List<String>
     ) {
         val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -144,10 +143,10 @@ class DAOJoinHelper {
         val (status, serializedTransaction) = walletManager.safeSendingJoinWalletTransaction(
             signaturesOfOldOwners,
             aggregateNoncePoint,
-            CTransaction().deserialize(newTransactionProposal)//,
-            //context
+            CTransaction().deserialize(newTransactionProposal)
         )
 
+        // todo do something with status (show a toast?)
         if (status) {
             Log.i("Coin", "succesfully submitted taproot transaction to server")
         } else {
@@ -218,7 +217,8 @@ class DAOJoinHelper {
                 val agreementData = SWResponseSignatureTransactionData(
                     blockData.SW_UNIQUE_ID,
                     blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized
+                    signatureSerialized,
+                    walletManager.protocolECKey().publicKeyAsHex
                 )
 
                 trustchain.createProposalBlock(
@@ -230,7 +230,8 @@ class DAOJoinHelper {
                 val negativeResponseData = SWResponseNegativeSignatureTransactionData(
                     blockData.SW_UNIQUE_ID,
                     blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized
+                    signatureSerialized,
+                    walletManager.protocolECKey().publicKeyAsHex
                 )
 
                 trustchain.createProposalBlock(

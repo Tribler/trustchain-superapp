@@ -14,6 +14,7 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.TransactionOutput
@@ -48,9 +49,9 @@ class ProposalListAdapter(
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
 
             // Check if I voted
             val mySignatureSerialized = context.getCoinCommunity().getMySignatureTransaction(data).toByteArray().toHex()
@@ -63,22 +64,20 @@ class ProposalListAdapter(
                 view.setBackgroundResource(R.drawable.border)
             }
 
-            val previousTransaction = Transaction(
-                walletManager.params,
+            val previousTransaction = CTransaction().deserialize(
                 data.SW_TRANSACTION_SERIALIZED.hexToBytes()
             )
 
             // Calculate fee and set the change output corresponding to calculated fee
             val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(
-                previousTransaction,
+                Transaction(walletManager.params, data.SW_TRANSACTION_SERIALIZED.hexToBytes()),
                 walletManager.params,
                 CoinUtil.TxPriority.LOW_PRIORITY
             )
-            val previousMultiSigOutput: TransactionOutput =
-                walletManager.getMuSigOutput(previousTransaction).unsignedOutput
+            val previousMultiSigOutput = previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]
             // Make sure that the fee does not exceed the amount of funds available
             val calculatedFee =
-                Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.value - Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT)).value))
+                Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.nValue - Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).value)))
             balanceText.visibility = View.VISIBLE
             balance.visibility = View.VISIBLE
             feeText.visibility = View.VISIBLE
@@ -91,14 +90,14 @@ class ProposalListAdapter(
             signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
-            balance.text = walletManager.getMuSigOutput(previousTransaction).value.toFriendlyString()
+            balance.text = Coin.valueOf(previousMultiSigOutput.nValue).toFriendlyString()
             fee.text = calculatedFee.toFriendlyString()
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val signatures = ArrayList(context.getCoinCommunity().fetchProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
 
             // Check if I voted
             val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data).toByteArray().toHex()

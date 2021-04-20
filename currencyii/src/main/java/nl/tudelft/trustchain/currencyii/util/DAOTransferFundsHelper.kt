@@ -92,8 +92,7 @@ class DAOTransferFundsHelper {
         blockData: SWTransferFundsAskBlockTD,
         signatures: List<String>,
         receiverAddress: String,
-        paymentAmount: Long//,
-        //context: Context
+        paymentAmount: Long
     ) {
         val oldWalletBlockData = SWTransferDoneTransactionData(walletBlockData)
         val oldTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -116,10 +115,10 @@ class DAOTransferFundsHelper {
             aggregateNoncePoint,
             oldTransactionSerialized,
             org.bitcoinj.core.Address.fromString(walletManager.params, receiverAddress),
-            paymentAmount//,
-//            context
+            paymentAmount
         )
 
+        // todo show toast based on status or something else
         if (status) {
             Log.i("Coin", "succesfully submitted taproot transaction to server")
         } else {
@@ -192,7 +191,8 @@ class DAOTransferFundsHelper {
                 val agreementData = SWResponseSignatureTransactionData(
                     blockData.SW_UNIQUE_ID,
                     blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized
+                    signatureSerialized,
+                    walletManager.protocolECKey().publicKeyAsHex
                 )
 
                 trustchain.createProposalBlock(
@@ -204,7 +204,8 @@ class DAOTransferFundsHelper {
                 val negativeResponseData = SWResponseNegativeSignatureTransactionData(
                     blockData.SW_UNIQUE_ID,
                     blockData.SW_UNIQUE_PROPOSAL_ID,
-                    signatureSerialized
+                    signatureSerialized,
+                    walletManager.protocolECKey().publicKeyAsHex
                 )
 
                 trustchain.createProposalBlock(

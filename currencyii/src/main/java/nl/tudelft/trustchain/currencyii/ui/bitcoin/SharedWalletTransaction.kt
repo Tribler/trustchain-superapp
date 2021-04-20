@@ -131,8 +131,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 transferFundsData.getData(),
                 signatures,
                 bitcoinPublicKey,
-                satoshiTransferAmount//,
-                //requireContext()
+                satoshiTransferAmount
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"
@@ -142,19 +141,6 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             resetWalletInitializationValues()
             activity?.runOnUiThread {
                 alert_view.text = t.message ?: "Unexpected error occurred. Try again"
-            }
-        }
-    }
-
-    private fun updateAlertLabel(progress: Double) {
-        Log.i("Coin", "Coin: broadcast of transfer funds transaction progress: $progress.")
-
-        activity?.runOnUiThread {
-            if (progress >= 1) {
-                alert_view?.text = "Transfer funds progress: completed!"
-            } else {
-                val progressString = "%.0f".format(progress * 100)
-                alert_view.text = "Transfer funds progress: $progressString%..."
             }
         }
     }
@@ -197,7 +183,7 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
 
         if (signatures.size >= requiredSignatures) {
-            return signatures
+            return signatures.map { it.SW_SIGNATURE_SERIALIZED }
         }
         return null
     }

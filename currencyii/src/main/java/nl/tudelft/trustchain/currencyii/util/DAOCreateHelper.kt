@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.currencyii.util
 
+import android.content.Context
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
@@ -38,24 +39,15 @@ class DAOCreateHelper {
     fun createBitcoinGenesisWallet(
         myPeer: Peer,
         entranceFee: Long,
-        threshold: Int,
-        progressCallback: ((progress: Double) -> Unit)? = null,
-        timeout: Long = CoinCommunity.DEFAULT_BITCOIN_MAX_TIMEOUT
+        threshold: Int
     ) {
         val walletManager = WalletManagerAndroid.getInstance()
-        val transactionBroadcast = walletManager.safeCreationAndSendGenesisWallet(
+        val (success, serializedTransaction) = walletManager.safeCreationAndSendGenesisWallet(
             Coin.valueOf(entranceFee)
         )
 
-        if (progressCallback != null) {
-            transactionBroadcast.setProgressCallback { progress ->
-                progressCallback(progress)
-            }
-        }
-
-        // Try to broadcast the bitcoin transaction.
-        val transaction = transactionBroadcast.broadcast().get(timeout, TimeUnit.SECONDS)
-        val serializedTransaction = CoinCommunity.getSerializedTransaction(transaction)
+        print(success)
+        //todo do something if success = false
 
         // Broadcast on trust chain if no errors are thrown in the previous step.
         broadcastCreatedSharedWallet(

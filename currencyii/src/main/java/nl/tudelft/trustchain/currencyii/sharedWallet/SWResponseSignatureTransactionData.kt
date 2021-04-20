@@ -8,7 +8,8 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 data class SWResponseSignatureBlockTD(
     var SW_UNIQUE_ID: String,
     var SW_UNIQUE_PROPOSAL_ID: String,
-    var SW_SIGNATURE_SERIALIZED: String
+    var SW_SIGNATURE_SERIALIZED: String,
+    var SW_BITCOIN_PK: String
 )
 
 class SWResponseSignatureTransactionData(data: JsonObject) : SWBlockTransactionData(
@@ -26,16 +27,17 @@ class SWResponseSignatureTransactionData(data: JsonObject) : SWBlockTransactionD
     constructor(
         uniqueId: String,
         uniqueProposalId: String,
-        signatureSerialized: String
+        signatureSerialized: String,
+        bitcoinPk: String
     ) : this(
         SWUtil.objectToJsonObject(
             SWResponseSignatureBlockTD(
                 uniqueId,
                 uniqueProposalId,
-                signatureSerialized
+                signatureSerialized,
+                bitcoinPk
             )
         )
-
     )
 
     constructor(transaction: TrustChainTransaction) : this(SWUtil.parseTransaction(transaction))

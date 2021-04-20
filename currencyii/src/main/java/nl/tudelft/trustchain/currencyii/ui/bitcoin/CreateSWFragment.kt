@@ -58,8 +58,7 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
             // Try to create the bitcoin DAO
             getCoinCommunity().createBitcoinGenesisWallet(
                 currentEntranceFee,
-                currentThreshold,
-                ::updateProgressStatus
+                currentThreshold
             )
             enableInputFields()
             alert_label.text = "Wallet created successfully!"

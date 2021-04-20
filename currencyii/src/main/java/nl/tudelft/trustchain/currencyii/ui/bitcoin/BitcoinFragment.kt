@@ -12,9 +12,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.android.volley.Request
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
 import nl.tudelft.trustchain.currencyii.R
@@ -23,8 +20,13 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.wallet.Wallet
+import java.io.IOException
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.*
 
-const val BALANCE_THRESHOLD = "10"
+const val BALANCE_THRESHOLD = "5"
 /**
  * A simple [Fragment] subclass.
  * Use the [BitcoinFragment.newInstance] factory method to
@@ -152,7 +154,16 @@ class BitcoinFragment :
         add_btc.setOnClickListener {
             if (!getBitcoinPressed) {
                 getBitcoinPressed = true
-                addBTC(walletManager.protocolAddress().toString())
+
+                if (!addBTC(walletManager.protocolAddress().toString())) {
+                    Toast.makeText(this.requireContext(), "Something went wrong, please delete system32", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this.requireContext(), "Successfully added 10 BTC", Toast.LENGTH_SHORT).show()
+
+                    Thread.sleep(1000)
+
+                    Toast.makeText(this.requireContext(), "It can take up to a minute to register in your balance", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()
             }
@@ -205,26 +216,29 @@ class BitcoinFragment :
      * Add bitcoin to the wallet
      * @param address - The address where I have to send the BTC to.
      */
-    private fun addBTC(address: String) {
-        val queue = Volley.newRequestQueue(context)
-        val url = "https://$REG_TEST_FAUCET_IP/addBTC?address=$address"
+    private fun addBTC(address: String): Boolean {
+        val executor: ExecutorService = Executors.newCachedThreadPool(Executors.defaultThreadFactory())
+        val future: Future<Boolean>
 
-        val stringRequest = StringRequest(
-            Request.Method.GET, url,
-            {
-                Log.i("Coin", "Successfully added bitcoin to $address")
-                Toast.makeText(context, "Successfully added bitcoin", Toast.LENGTH_SHORT).show()
-                getBitcoinPressed = false
-                Thread.sleep(500)
-                this.refresh(true)
-            },
-            { error ->
-                Log.i("Coin", "Failed to add bitcoin to $address; error: $error")
-                Toast.makeText(context, "Failed to add bitcoin", Toast.LENGTH_SHORT).show()
-                getBitcoinPressed = false
-            })
+        val url = URL("https://$REG_TEST_FAUCET_DOMAIN/addBTC?address=$address")
 
-        queue.add(stringRequest)
+        future = executor.submit(object : Callable<Boolean> {
+            override fun call(): Boolean {
+                val connection = url.openConnection() as HttpURLConnection
+
+                try {
+                    return connection.responseCode == 200
+                } finally {
+                    connection.disconnect()
+                }
+            }
+        })
+
+        return try {
+            future.get(10, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun onCreateView(

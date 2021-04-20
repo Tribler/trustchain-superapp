@@ -27,6 +27,7 @@ import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.*
 
 /**
@@ -159,8 +160,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
-        val againstPKs = ArrayList(negativeSignatures.map { getPKJoin(it, swData.SW_BITCOIN_PKS, block) })
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
 
         // Set the voters so that they are visible in the different kind of tabs
         setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
@@ -247,8 +248,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalSignatures(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
 
         // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
-        val againstPKs = ArrayList(negativeSignatures.map { getPKTransfer(it, swData.SW_BITCOIN_PKS, block) })
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK } )
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK } )
 
         // Set the voters so that they are visible in the different kind of tabs
         setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
@@ -326,104 +327,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         if (!voters[2].contains(myPublicBitcoinKey)) {
             voteFab.visibility = View.GONE
         }
-    }
-
-    /**
-     * Get the primary corresponding to the signature.
-     * @param signature - The signature string that signed the message
-     * @param bitcoin_pks - A list with all the bitcoin primary keys to compare the signature with
-     * @param block - The Trustchainblock
-     * @return String - Public Key
-     */
-    private fun getPKJoin(
-        signature: String,
-        bitcoin_pks: ArrayList<String>,
-        block: TrustChainBlock
-    ): String {
-        val signatureKey: ECKey.ECDSASignature = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
-
-        val latestHash = SWSignatureAskTransactionData(block.transaction).getData()
-            .SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-            ?: throw IllegalStateException("Most recent DAO block not found")
-        val oldTransactionSerialized = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
-            .SW_TRANSACTION_SERIALIZED
-
-        val walletManager = WalletManagerAndroid.getInstance()
-        val blockData = SWSignatureAskTransactionData(block.transaction).getData()
-
-        val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
-        val newTransaction = Transaction(walletManager.params, newTransactionSerialized.hexToBytes())
-        val oldTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
-
-        val oldMultiSignatureOutput = walletManager.getMuSigOutput(oldTransaction).unsignedOutput
-
-        val sighash: Sha256Hash = newTransaction.hashForSignature(
-            0,
-            oldMultiSignatureOutput.scriptPubKey,
-            Transaction.SigHash.ALL,
-            false
-        )
-
-        for (pk in bitcoin_pks) {
-            val key = ECKey.fromPublicOnly(pk.hexToBytes())
-            val result = key.verify(sighash, signatureKey)
-            if (result) {
-                return pk
-            }
-        }
-        return "Unrecognized signature received"
-    }
-
-    /**
-     * Get the primary corresponding to the signature.
-     * @param signature - The signature string that signed the message
-     * @param bitcoin_pks - A list with all the bitcoin primary keys to compare the signature with
-     * @param block - The Trustchainblock
-     * @return String - Public Key
-     */
-    private fun getPKTransfer(
-        signature: String,
-        bitcoin_pks: ArrayList<String>,
-        block: TrustChainBlock
-    ): String {
-        val signatureKey: ECKey.ECDSASignature = ECKey.ECDSASignature.decodeFromDER(signature.hexToBytes())
-
-        val latestHash = SWTransferFundsAskTransactionData(block.transaction).getData()
-            .SW_PREVIOUS_BLOCK_HASH
-        val mostRecentSWBlock = getCoinCommunity().fetchLatestSharedWalletBlock(latestHash.hexToBytes())
-            ?: throw IllegalStateException("Most recent DAO block not found")
-        val oldTransactionSerialized = SWJoinBlockTransactionData(mostRecentSWBlock.transaction).getData()
-            .SW_TRANSACTION_SERIALIZED
-
-        val walletManager = WalletManagerAndroid.getInstance()
-        val blockData = SWTransferFundsAskTransactionData(block.transaction).getData()
-
-        val satoshiAmount = Coin.valueOf(blockData.SW_TRANSFER_FUNDS_AMOUNT)
-        val previousTransaction = Transaction(walletManager.params, oldTransactionSerialized.hexToBytes())
-        val receiverAddress = Address.fromString(walletManager.params, blockData.SW_TRANSFER_FUNDS_TARGET_SERIALIZED)
-
-        val previousMultiSigOutput: TransactionOutput =
-            walletManager.getMuSigOutput(previousTransaction).unsignedOutput
-
-        // Create the transaction which will have the multisig output as input,
-        // The outputs will be the receiver address and another one for residual funds
-        val spendTx =
-            walletManager.createMultiSigPaymentTx(receiverAddress, satoshiAmount, previousMultiSigOutput)
-
-        // Sign the transaction and return it.
-        val multiSigScript = previousMultiSigOutput.scriptPubKey
-        val sighash: Sha256Hash =
-            spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
-
-        for (pk in bitcoin_pks) {
-            val key = ECKey.fromPublicOnly(pk.hexToBytes())
-            val result = key.verify(sighash, signatureKey)
-            if (result) {
-                return pk
-            }
-        }
-        return "Unrecognized signature received"
     }
 
     /**
