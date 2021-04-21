@@ -21,7 +21,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * Use the [CreateSWFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
+class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 

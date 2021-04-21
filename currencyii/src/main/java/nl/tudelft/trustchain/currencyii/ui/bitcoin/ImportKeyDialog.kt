@@ -75,11 +75,11 @@ class ImportKeyDialog : DialogFragment() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun isAddressValid(address: String): Boolean {
+    private fun isAddressValid(address: String): Boolean {
         return address.length in 26..35
     }
 
-    fun isPrivateKeyValid(privateKey: String): Boolean {
+    private fun isPrivateKeyValid(privateKey: String): Boolean {
         return privateKey.length in 51..52 || privateKey.length == 64
     }
 }

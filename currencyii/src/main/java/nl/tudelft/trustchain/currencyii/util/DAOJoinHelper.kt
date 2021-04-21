@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.currencyii.util
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -115,7 +116,11 @@ class DAOJoinHelper {
      *
      * Note:
      * There should be enough sufficient signatures, based on the multisig wallet data.
-     * **Throws** exceptions if something goes wrong with creating or broadcasting bitcoin transaction.
+     * @throws - exceptions if something goes wrong with creating or broadcasting bitcoin transaction.
+     * @param myPeer - Peer, the user that wants to join the wallet
+     * @param walletBlockData - TrustChainTransaction, describes the wallet that is joined
+     * @param blockData - SWSignatureAskBlockTD, the block where the other users are voting on
+     * @param responses - the positive responses for your request to join the wallet
      */
     fun joinBitcoinWallet(
         myPeer: Peer,
@@ -148,11 +153,12 @@ class DAOJoinHelper {
             CTransaction().deserialize(newTransactionProposal)
         )
 
-        // todo do something with status (show a toast?)
         if (status) {
-            Log.i("Coin", "succesfully submitted taproot transaction to server")
+            Log.i("Coin", "successfully submitted taproot transaction to server")
+            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
         } else {
             Log.e("Coin", "taproot transaction submission to server failed")
+            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
         }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces

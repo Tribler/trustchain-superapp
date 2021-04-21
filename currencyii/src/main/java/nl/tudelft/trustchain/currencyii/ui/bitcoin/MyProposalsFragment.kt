@@ -125,8 +125,8 @@ class MyProposalsFragment : BaseFragment(R.layout.fragment_my_proposals) {
                 val crawlResult = trustchain
                     .getChainByUser(peer.publicKey.keyToBin())
                     .filter {
-                        it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
-                            it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK
+                        (it.type == CoinCommunity.SIGNATURE_ASK_BLOCK ||
+                            it.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) && !getCoinCommunity().checkEnoughFavorSignatures(it)
                     }
                 Log.i(
                     "Coin",

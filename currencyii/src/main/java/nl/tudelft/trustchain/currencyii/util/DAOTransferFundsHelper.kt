@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.currencyii.util
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -29,6 +30,11 @@ class DAOTransferFundsHelper {
     /**
      * 3.1 Send a proposal block on trustchain to ask for the signatures.
      * Assumed that people agreed to the transfer.
+     * @param myPeer - Peer, the user that wants to join the wallet
+     * @param mostRecentWalletBlock - TrustChainBlock, describes the wallet where the transfer is from
+     * @param receiverAddressSerialized - String, the address where the transaction needs to go
+     * @param satoshiAmount - Long, the amount that needs to be transferred
+     * @return the proposal block
      */
     fun proposeTransferFunds(
         myPeer: Peer,
@@ -121,11 +127,12 @@ class DAOTransferFundsHelper {
             paymentAmount
         )
 
-        // todo show toast based on status or something else
         if (status) {
-            Log.i("Coin", "succesfully submitted taproot transaction to server")
+            Log.i("Coin", "successfully submitted taproot transaction to server")
+            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
         } else {
             Log.e("Coin", "taproot transaction submission to server failed")
+            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
         }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces

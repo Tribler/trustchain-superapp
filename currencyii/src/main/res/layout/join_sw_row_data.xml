@@ -57,7 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
-                    android:text="Your votes:" />
+                    android:text="Your entries:" />
 
                 <TextView
                     android:layout_width="match_parent"

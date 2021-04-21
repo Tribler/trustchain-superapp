@@ -24,7 +24,7 @@ import kotlin.concurrent.thread
  * Use the [BlockchainDownloadFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class BlockchainDownloadFragment() : BaseFragment(R.layout.fragment_blockchain_download) {
+class BlockchainDownloadFragment : BaseFragment(R.layout.fragment_blockchain_download) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

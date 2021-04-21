@@ -38,7 +38,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     private lateinit var tabsAdapter: TabsAdapter
     private lateinit var viewPager: ViewPager2
 
-    private val TAB_NAMES = arrayOf("Upvotes", "Downvotes", "Not voted")
+    private val tabNames = arrayOf("Upvotes", "Downvotes", "Not voted")
 
     // From the layout class
     private var voters: Array<ArrayList<String>> = arrayOf(ArrayList(), ArrayList(), ArrayList())
@@ -94,7 +94,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      */
     private fun updateTabNames() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = TAB_NAMES[position] + " (" + voters[position].size + ")"
+            tab.text = tabNames[position] + " (" + voters[position].size + ")"
         }.attach()
     }
 
@@ -104,7 +104,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * @return TrustChainBlock
      */
     private fun getSelectedBlock(blockId: String): TrustChainBlock? {
-        // TODO: Check if this is the correct way to fetch all proposal blocks, because sometimes it crashes?
         var allBlocks: List<TrustChainBlock> = getCoinCommunity().fetchProposalBlocks()
 
         val allUsers = getDemoCommunity().getPeers()
@@ -144,7 +143,6 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
         val walletId = data.SW_UNIQUE_ID
 
-        // TODO: Crashes when user has no wallet, but that isn't possible otherwise he shouldn't see the proposal at the first place.
         // Get information about the shared wallet
         val sw = getCoinCommunity().discoverSharedWallets()
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]

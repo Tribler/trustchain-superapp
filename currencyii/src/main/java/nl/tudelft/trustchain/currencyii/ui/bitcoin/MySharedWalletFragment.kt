@@ -18,7 +18,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * Use the [MySharedWalletFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class MySharedWalletFragment() : BaseFragment(R.layout.fragment_my_shared_wallets) {
+class MySharedWalletFragment : BaseFragment(R.layout.fragment_my_shared_wallets) {
 
     private fun initListView() {
         val sharedWalletBlocks = getCoinCommunity().fetchLatestJoinedSharedWalletBlocks()

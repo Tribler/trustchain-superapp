@@ -6,7 +6,6 @@ import android.widget.BaseAdapter
 import android.widget.TextView
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.coin.CoinUtil
@@ -48,13 +47,13 @@ class ProposalListAdapter(
         if (block.type == CoinCommunity.TRANSFER_FUNDS_ASK_BLOCK) {
             val data = SWTransferFundsAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val favorVotes = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_BITCOIN_PK }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val negativeVotes = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_BITCOIN_PK }
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureTransaction(data, context.requireContext()).toByteArray().toHex()
-            if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
+            val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
+            if (favorVotes.contains(myPublicBitcoinKey) || negativeVotes.contains(myPublicBitcoinKey)) {
                 votedButton.visibility = View.VISIBLE
             }
 
@@ -86,7 +85,7 @@ class ProposalListAdapter(
             createdAt.text = formatter.format(block.timestamp)
             daoId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
+            signaturesRequired.text = "${favorVotes.size}/${data.SW_SIGNATURES_REQUIRED}"
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
             balance.text = Coin.valueOf(previousMultiSigOutput.nValue).toFriendlyString()
@@ -94,13 +93,13 @@ class ProposalListAdapter(
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
             // Get favor votes
-            val signatures = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val favorVotes = ArrayList(context.getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_BITCOIN_PK }
             // Get against votes
-            val negativeSignatures = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_SIGNATURE_SERIALIZED }
+            val negativeVotes = ArrayList(context.getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID)).map { it.SW_BITCOIN_PK }
 
             // Check if I voted
-            val mySignatureSerialized = context.getCoinCommunity().getMySignatureJoinRequest(data, context.requireContext()).toByteArray().toHex()
-            if (signatures.contains(mySignatureSerialized) || negativeSignatures.contains(mySignatureSerialized)) {
+            val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
+            if (favorVotes.contains(myPublicBitcoinKey) || negativeVotes.contains(myPublicBitcoinKey)) {
                 votedButton.visibility = View.VISIBLE
             }
 
@@ -113,7 +112,7 @@ class ProposalListAdapter(
             createdAt.text = formatter.format(block.timestamp)
             daoId.text = data.SW_UNIQUE_ID
             proposalId.text = data.SW_UNIQUE_PROPOSAL_ID
-            signaturesRequired.text = "${signatures.size}/${data.SW_SIGNATURES_REQUIRED}"
+            signaturesRequired.text = "${favorVotes.size}/${data.SW_SIGNATURES_REQUIRED}"
             // Hide the components only used for transfer funds
             hideTransferProposalComponents(view)
         }
