@@ -162,6 +162,7 @@ class BitcoinFragment :
                     Thread.sleep(1000)
 
                     Toast.makeText(this.requireContext(), "It can take up to a minute to register in your balance", Toast.LENGTH_SHORT).show()
+                    this.refresh(true)
                 }
             } else {
                 Toast.makeText(this.requireContext(), "You are already given an amount of BTC, please wait a little longer", Toast.LENGTH_SHORT).show()

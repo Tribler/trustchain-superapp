@@ -175,7 +175,7 @@ class DAOJoinHelper {
         newData.addBitcoinPk(walletManager.networkPublicECKeyHex())
         newData.addTrustChainPk(myPeer.publicKey.keyToBin().toHex())
         newData.setTransactionSerialized(serializedTransaction)
-        newData.addNoncePk(walletManager.getNonceKey(oldBlockData.getData().SW_UNIQUE_ID, context).second.getEncoded(true).toHex())
+        newData.addNoncePk(walletManager.addNewNonceKey(oldBlockData.getData().SW_UNIQUE_ID, context).second.getEncoded(true).toHex())
 
         trustchain.createProposalBlock(
             newData.getJsonString(),
