@@ -10,7 +10,7 @@ class KeyTest {
 
     @Test
     fun generate_schnorr_nonce() {
-        val nonce = Key.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val nonce = TaprootUtil.generate_schnorr_nonce(ECKey().privKeyBytes)
 
         val expected = BigInteger.ONE
         val actual = Schnorr.jacobi(nonce.second.affineYCoord.toBigInteger())

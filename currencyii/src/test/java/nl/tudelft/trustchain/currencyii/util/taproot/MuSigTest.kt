@@ -7,7 +7,6 @@ import org.junit.Test
 
 import org.junit.Assert.*
 import java.math.BigInteger
-import kotlin.experimental.and
 
 class MuSigTest {
 
@@ -73,7 +72,7 @@ class MuSigTest {
         val pubkeyDataMuSig = actual.getEncoded(true)
 
         val expectedAddress = "bcrt1pqq7atlpuzandpfe5v6jejldg8m7v22gs0j0v6rzku23g2x0savcsgwp82mv"
-        val actualAddress = SegwitAddressUtil.key_to_witness(pubkeyDataMuSig)
+        val actualAddress = TaprootUtil.key_to_witness(pubkeyDataMuSig)
 
         assertEquals(expectedAddress, actualAddress)
     }

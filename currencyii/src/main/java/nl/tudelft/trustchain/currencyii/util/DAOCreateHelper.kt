@@ -8,7 +8,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.currencyii.TrustChainHelper
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.trustchain.currencyii.util.taproot.Key
+import nl.tudelft.trustchain.currencyii.util.taproot.TaprootUtil
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
 
@@ -74,7 +74,7 @@ class DAOCreateHelper {
         val walletManager = WalletManagerAndroid.getInstance()
         val bitcoinPublicKey = walletManager.networkPublicECKeyHex()
         val trustChainPk = myPeer.publicKey.keyToBin()
-        val nonceKey = Key.generate_schnorr_nonce(ECKey().privKeyBytes)
+        val nonceKey = TaprootUtil.generate_schnorr_nonce(ECKey().privKeyBytes)
         val noncePoint = nonceKey.second.getEncoded(true).toHex()
 
         val blockData = SWJoinBlockTransactionData(
