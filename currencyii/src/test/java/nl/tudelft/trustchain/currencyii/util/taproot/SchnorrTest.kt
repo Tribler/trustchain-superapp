@@ -6,7 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.math.BigInteger
 
-
+/**
+ * Test was written using code and csv provided on: https://github.com/miketwk/bip-schnorr-java/
+ */
 class SchnorrTest {
 
     @ParameterizedTest
@@ -15,8 +17,13 @@ class SchnorrTest {
         numLinesToSkip = 1
     )
     fun schnorrTestCSVFile(
-        index: Int, secKey: String?, publicKey: String, message: String,
-        signature: String, result: Boolean, comment: String?
+        index: Int,
+        secKey: String?,
+        publicKey: String,
+        message: String,
+        signature: String,
+        result: Boolean,
+        comment: String?
     ) {
         val msg = hexStringToByteArray(message)
         val pubKey = hexStringToByteArray(publicKey)
