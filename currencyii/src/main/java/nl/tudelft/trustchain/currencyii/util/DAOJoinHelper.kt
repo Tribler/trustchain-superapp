@@ -152,14 +152,16 @@ class DAOJoinHelper {
             aggregateNoncePoint,
             CTransaction().deserialize(newTransactionProposal)
         )
+        print(status)
 
-        if (status) {
-            Log.i("Coin", "successfully submitted taproot transaction to server")
-            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
-        } else {
-            Log.e("Coin", "taproot transaction submission to server failed")
-            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-        }
+        // TODO toast crashes for some stupid reason
+//        if (status) {
+//            Log.i("Coin", "successfully submitted taproot transaction to server")
+//            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
+//        } else {
+//            Log.e("Coin", "taproot transaction submission to server failed")
+//            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
+//        }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces
 
