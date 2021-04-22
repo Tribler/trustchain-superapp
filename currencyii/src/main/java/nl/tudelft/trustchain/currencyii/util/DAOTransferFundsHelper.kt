@@ -127,13 +127,16 @@ class DAOTransferFundsHelper {
             paymentAmount
         )
 
-        if (status) {
-            Log.i("Coin", "successfully submitted taproot transaction to server")
-            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
-        } else {
-            Log.e("Coin", "taproot transaction submission to server failed")
-            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-        }
+        print(status)
+        print(context)
+
+//        if (status) {
+//            Log.i("Coin", "successfully submitted taproot transaction to server")
+//            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
+//        } else {
+//            Log.e("Coin", "taproot transaction submission to server failed")
+//            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
+//        }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces
 
