@@ -269,10 +269,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                 getString(
                     R.string.bounty_payout_message,
                     priceString,
-                    walletId,
-                    voters[0].size,
-                    voters[1].size,
-                    voters[2].size
+                    data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
                 )
             )
             builder.setPositiveButton("YES") { _, _ ->

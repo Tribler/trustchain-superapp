@@ -22,10 +22,9 @@
     <string name="vote">Vote</string>
     <string name="voteUser">Vote</string>
     <string name="bounty_payout">Pay %1$s from our common funds to address: %2$s?</string>
-    <string name="bounty_payout_message">Do you agree on paying %1$s from our common funds to transaction id: %2$s?\nThere are already %3$d upvotes, %4$d downvotes, and %5$d" undecided votes</string>
-    <string name="bounty_payout_upvoted">You voted in favor of paying %1$s from our common funds to transaction id: %2$s</string>
-    <string name="bounty_payout_downvoted">You voted against paying %1$s from our common funds to transaction id: %2$s</string>
-    <string name="bounty_payout_all_voted">The majority voted, based on the majority we decided to pay the transaction</string>
+    <string name="bounty_payout_message">Do you agree on paying %1$s from our common funds to address: %2$s?</string>
+    <string name="bounty_payout_upvoted">You voted in favor of paying %1$s from our common funds to address: %2$s</string>
+    <string name="bounty_payout_downvoted">You voted against paying %1$s from our common funds to address: %2$s</string>
 
     <string name="vote_join_request_title">Join Request</string>
     <string name="vote_join_request_message">Allow %1$s into our shared wallet with id: %2$s?</string>
