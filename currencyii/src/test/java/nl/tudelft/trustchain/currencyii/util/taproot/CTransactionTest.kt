@@ -106,4 +106,40 @@ class CTransactionTest {
 
         Assert.assertEquals(expected, actual)
     }
+
+    @Test
+    fun cScriptGetSizeEmpty() {
+        val tapScript = CScript()
+        Assert.assertEquals(tapScript.size(), 0)
+    }
+
+    @Test
+    fun cScriptGetSizeNotEmpty() {
+        val tapScript = CScript("aa".toByteArray())
+        Assert.assertEquals(tapScript.size(), 2)
+    }
+
+    @Test
+    fun cScriptToHexEmpty() {
+        val tapScript = CScript()
+        Assert.assertEquals(tapScript.toHex(), "")
+    }
+
+    @Test
+    fun cScriptToHexNotEmpty() {
+        val tapScript = CScript("aa".toByteArray())
+        Assert.assertEquals(tapScript.toHex(), "6161")
+    }
+
+    @Test
+    fun cScriptOpHasCode() {
+        val cScriptOp = CScriptOp(1)
+        Assert.assertEquals(cScriptOp.hashCode(), 1)
+    }
+
+    @Test
+    fun cTXWitnessIsNull() {
+        val cTxWitness = CTxWitness()
+        Assert.assertEquals(cTxWitness.isNull(), true)
+    }
 }
