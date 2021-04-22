@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.currencyii.util
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
