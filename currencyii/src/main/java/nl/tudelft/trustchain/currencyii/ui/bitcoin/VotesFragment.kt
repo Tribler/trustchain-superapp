@@ -15,16 +15,14 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.common.ui.TabsAdapter
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
-import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.*
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.*
 
@@ -83,10 +81,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         if (voters.isEmpty()) return
 
         // Set the tabs with the helper class in common
-        tabsAdapter = TabsAdapter(this, voters)
-        viewPager.adapter = tabsAdapter
-
-        updateTabNames()
+        updateTabsAdapter(0)
     }
 
     /**
@@ -151,16 +146,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         // Get the id of the person that wants to join
         val requestToJoinId = sw.publicKey.toHex()
 
-        // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-
-        // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
-        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
-
         // Set the voters so that they are visible in the different kind of tabs
-        setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
+        setVoters(swData.SW_BITCOIN_PKS, data)
 
         // Check if I have already voted
         userHasAlreadyVoted(myPublicBitcoinKey)
@@ -186,11 +173,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Update the GUI
                 userHasAlreadyVoted(myPublicBitcoinKey)
-                tabsAdapter = TabsAdapter(this, voters)
-                viewPager.adapter = tabsAdapter
-                viewPager.currentItem = 0
+                updateTabsAdapter(0)
                 Toast.makeText(v.context, getString(R.string.vote_join_request_upvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
-                updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, true, requireContext())
@@ -204,11 +188,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Update the GUI
                 userHasAlreadyVoted(myPublicBitcoinKey)
-                tabsAdapter = TabsAdapter(this, voters)
-                viewPager.adapter = tabsAdapter
-                viewPager.currentItem = 1
+                updateTabsAdapter(1)
                 Toast.makeText(v.context, getString(R.string.vote_join_request_downvoted, requestToJoinId, walletId), Toast.LENGTH_SHORT).show()
-                updateTabNames()
 
                 // Send no vote
                 getCoinCommunity().joinAskBlockReceived(block, myPublicKey, false, requireContext())
@@ -216,6 +197,69 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             }
             builder.show()
         }
+
+        // Live showing new votes
+        GlobalScope.launch {
+            while (true) {
+                if (areVotesUpdated(data)) {
+                    Log.i("Votes", "Votes are updated")
+                    withContext(Dispatchers.Main) {
+                        setVoters(swData.SW_BITCOIN_PKS, data)
+                        updateTabsAdapter(viewPager.currentItem)
+                        // Check if I have already voted
+                        userHasAlreadyVoted(myPublicBitcoinKey)
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+
+    /**
+     * Update the tabs adapter
+     * Note:
+     * tabsAdapter.notifyDataSetChanges() doesn't work somehow, this is hacky, but works.
+     */
+    private fun updateTabsAdapter(i: Int) {
+        tabsAdapter = TabsAdapter(this, voters)
+        viewPager.adapter = tabsAdapter
+        viewPager.currentItem = i
+
+        updateTabNames()
+    }
+
+    /**
+     * Check if the votes for the transfer ask block are updated by collecting the new signatures
+     * and comparing them to the current ones.
+     * @param data - the data about the transfer funds block
+     */
+    private fun areVotesUpdated(data: SWSignatureAskBlockTD): Boolean {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
+    }
+
+    /**
+     * Check if the votes for the transfer ask block are updated by collecting the new signatures
+     * and comparing them to the current ones.
+     * @param data - the data about the transfer funds block
+     */
+    private fun areVotesUpdated(data: SWTransferFundsAskBlockTD): Boolean {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
     }
 
     /**
@@ -238,16 +282,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
             .filter { b -> SWJoinBlockTransactionData(b.transaction).getData().SW_UNIQUE_ID == walletId }[0]
         val swData = SWJoinBlockTransactionData(sw.transaction).getData()
 
-        // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-
-        // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
-        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
-
         // Set the voters so that they are visible in the different kind of tabs
-        setVoters(swData.SW_BITCOIN_PKS, favorPKs, againstPKs)
+        setVoters(swData.SW_BITCOIN_PKS, data)
 
         // Check if I have already voted
         userHasAlreadyVoted(myPublicBitcoinKey)
@@ -279,11 +315,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Update the GUI
                 userHasAlreadyVoted(myPublicBitcoinKey)
-                tabsAdapter = TabsAdapter(this, voters)
-                viewPager.adapter = tabsAdapter
-                viewPager.currentItem = 0
+                updateTabsAdapter(0)
                 Toast.makeText(v.context, getString(R.string.bounty_payout_upvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
-                updateTabNames()
 
                 // Send yes vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, true, requireContext())
@@ -297,17 +330,29 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
 
                 // Update the GUI
                 userHasAlreadyVoted(myPublicBitcoinKey)
-                tabsAdapter = TabsAdapter(this, voters)
-                viewPager.adapter = tabsAdapter
-                viewPager.currentItem = 1
+                updateTabsAdapter(1)
                 Toast.makeText(v.context, getString(R.string.bounty_payout_downvoted, priceString, walletId), Toast.LENGTH_SHORT).show()
-                updateTabNames()
 
                 // Send no vote
                 getCoinCommunity().transferFundsBlockReceived(block, myPublicKey, false, requireContext())
                 Log.i("Coin", "Voted yes on transferring funds of: ${block.transaction}")
             }
             builder.show()
+        }
+
+        // Live showing new votes
+        GlobalScope.launch {
+            while (true) {
+                if (areVotesUpdated(data)) {
+                    withContext(Dispatchers.Main) {
+                        setVoters(swData.SW_BITCOIN_PKS, data)
+                        updateTabsAdapter(viewPager.currentItem)
+                        // Check if I have already voted
+                        userHasAlreadyVoted(myPublicBitcoinKey)
+                    }
+                }
+                delay(1000)
+            }
         }
     }
 
@@ -324,13 +369,50 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     /**
      * Set the voters, ordered by if they voted in favor, against or not.
      * @param participants - All the participants of the DAO.
-     * @param favorPKs - All the primary keys of people that already voted in favor.
-     * @param againstPKs - All the primary keys of people that already voted against.
+     * @param data - The data about the proposal block
      */
     private fun setVoters(
         participants: ArrayList<String>,
+        data: SWSignatureAskBlockTD
+    ) {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        updateVotersList(favorPKs, againstPKs, participants)
+    }
+
+    /**
+     * Set the voters, ordered by if they voted in favor, against or not.
+     * @param participants - All the participants of the DAO.
+     * @param data - The data about the proposal block
+     */
+    private fun setVoters(participants: ArrayList<String>, data: SWTransferFundsAskBlockTD) {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        updateVotersList(favorPKs, againstPKs, participants)
+    }
+
+    /**
+     * Set the voters in the correct position of the voters list
+     * @param favorPKs - The list of Bitcoin PKs that have voted in favor of the proposal
+     * @param againstPKs - The list of Bitcoin PKs that have voted against the proposal
+     * @param participants - The list of Bitcoin PKs that are in total in the DAO
+     */
+    private fun updateVotersList(
         favorPKs: ArrayList<String>,
-        againstPKs: ArrayList<String>
+        againstPKs: ArrayList<String>,
+        participants: ArrayList<String>
     ) {
         voters[0] = favorPKs
         voters[1] = againstPKs
