@@ -3,9 +3,9 @@ package nl.tudelft.trustchain.currencyii.util.taproot
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.ECKey
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
-import org.junit.Assert.*
 import java.math.BigInteger
 
 class MuSigTest {

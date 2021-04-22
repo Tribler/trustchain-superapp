@@ -2,8 +2,8 @@ package nl.tudelft.trustchain.currencyii.util.taproot
 
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 
 class CTransactionTest {
 
@@ -36,7 +36,7 @@ class CTransactionTest {
                 input_index = 0
             ).toHex()
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -50,7 +50,7 @@ class CTransactionTest {
             "5d99fe623d942b06e92677cec55ef86c2033bfb40d98a319d2d766348946ba92000000000000000000"
         val actual = ctxIn.serialize().toHex()
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -72,7 +72,7 @@ class CTransactionTest {
         val expected = "01000000000101c8aa8f792696c9d6eaadd92764f9e02ebbb6c3b1c577933c5d1f2db4e1b610980000000000000000000180f0fa020000000016001420501761e7ba8b479cc516488d47e8f5d02e52d701407bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf4f058be84a536603799b4acce1f0eeb048c634d740aa38351cb18b7465e4b12500000000"
         val actual = spending_tx.serialize().toHex()
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -80,7 +80,7 @@ class CTransactionTest {
         val expected = "01000000000101c8aa8f792696c9d6eaadd92764f9e02ebbb6c3b1c577933c5d1f2db4e1b610980000000000000000000180f0fa020000000016001420501761e7ba8b479cc516488d47e8f5d02e52d701407bdd007a2ada0fbf18fe8ea7858398e2775195db1a2cef127ef38eef861027bf4f058be84a536603799b4acce1f0eeb048c634d740aa38351cb18b7465e4b12500000000"
         val actual = CTransaction().deserialize(expected.hexToBytes()).serialize().toHex()
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
@@ -104,42 +104,42 @@ class CTransactionTest {
         val expected = "010000000001015d99fe623d942b06e92677cec55ef86c2033bfb40d98a319d2d766348946ba920000000000000000000140db1c0400000000160014062b4b39acb17d358f130b15ca3e92acfe1604d60140475ecd0cfdbbadb8fa891e7c341e6290a0ceb13f16d9943d57600bc93c26b7b5efdd37da69d86fe73d38331d407521e08c2dcde0400cdb8cb5938e7e7d83153600000000"
         val actual = cTransaction.serialize().toHex()
 
-        Assert.assertEquals(expected, actual)
+        assertEquals(expected, actual)
     }
 
     @Test
     fun cScriptGetSizeEmpty() {
         val tapScript = CScript()
-        Assert.assertEquals(tapScript.size(), 0)
+        assertEquals(tapScript.size(), 0)
     }
 
     @Test
     fun cScriptGetSizeNotEmpty() {
         val tapScript = CScript("aa".toByteArray())
-        Assert.assertEquals(tapScript.size(), 2)
+        assertEquals(tapScript.size(), 2)
     }
 
     @Test
     fun cScriptToHexEmpty() {
         val tapScript = CScript()
-        Assert.assertEquals(tapScript.toHex(), "")
+        assertEquals(tapScript.toHex(), "")
     }
 
     @Test
     fun cScriptToHexNotEmpty() {
         val tapScript = CScript("aa".toByteArray())
-        Assert.assertEquals(tapScript.toHex(), "6161")
+        assertEquals(tapScript.toHex(), "6161")
     }
 
     @Test
     fun cScriptOpHasCode() {
         val cScriptOp = CScriptOp(1)
-        Assert.assertEquals(cScriptOp.hashCode(), 1)
+        assertEquals(cScriptOp.hashCode(), 1)
     }
 
     @Test
     fun cTXWitnessIsNull() {
         val cTxWitness = CTxWitness()
-        Assert.assertEquals(cTxWitness.isNull(), true)
+        assertEquals(cTxWitness.isNull(), true)
     }
 }

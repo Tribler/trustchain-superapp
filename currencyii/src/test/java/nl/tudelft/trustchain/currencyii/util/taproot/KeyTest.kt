@@ -1,9 +1,8 @@
 package nl.tudelft.trustchain.currencyii.util.taproot
 
 import org.bitcoinj.core.ECKey
-import org.junit.Test
-
-import org.junit.Assert.*
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Test
 import java.math.BigInteger
 
 class KeyTest {
