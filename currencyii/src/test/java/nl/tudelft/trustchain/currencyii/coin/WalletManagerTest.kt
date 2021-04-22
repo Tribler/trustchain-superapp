@@ -1,35 +1,39 @@
-// package nl.tudelft.trustchain.currencyii.coin
-//
-// import nl.tudelft.ipv8.util.hexToBytes
-// import org.bitcoinj.core.Coin
-// import org.bitcoinj.core.ECKey
-// import org.bitcoinj.core.LegacyAddress
-// import org.bitcoinj.core.Sha256Hash
-// import org.bitcoinj.params.MainNetParams
-// import org.bitcoinj.script.ScriptPattern
-// import org.junit.Assert.assertFalse
-// import org.junit.Assert.assertTrue
-// import org.junit.BeforeClass
-// import org.junit.Test
-// import java.io.File
-//
-// class WalletManagerTest {
-//
-//    companion object {
-//        lateinit var walletManager: WalletManager
-//
-//        @BeforeClass
-//        @JvmStatic
-//        fun setup() {
-//            val config = WalletManagerConfiguration(BitcoinNetworkOptions.PRODUCTION)
-//            walletManager = WalletManager(
-//                config,
-//                File(".")
-//            )
-//        }
-//    }
-//
-// //    @Test
+package nl.tudelft.trustchain.currencyii.coin
+
+import org.bitcoinj.core.LegacyAddress
+import org.bitcoinj.params.MainNetParams
+import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
+import java.io.File
+
+class WalletManagerTest {
+
+    companion object {
+        lateinit var walletManager: WalletManager
+
+        @BeforeAll
+        @JvmStatic
+        fun setup() {
+            val config = WalletManagerConfiguration(BitcoinNetworkOptions.PRODUCTION)
+            walletManager = WalletManager(
+                config,
+                File(".")
+            )
+        }
+    }
+
+    @Test
+    fun testProtocolAddress() {
+        val params = MainNetParams.get()
+
+        val expected =
+            LegacyAddress.fromString(params, "15MioYXJGX3A3EhSAgv6W7Z3eT1qr21v7G")
+        val actual = walletManager.protocolAddress()
+
+        assertEquals(expected, actual)
+    }
+//    //    @Test
 //    fun testEntranceFeeTransactionWithWitnessTx() {
 //        val params = MainNetParams.get()
 //
@@ -42,7 +46,7 @@
 //            LegacyAddress.fromString(params, "1K6BWqtaXpDiZ4PEiPR3pNyXb4ZveKRWqm")
 //        val entranceFee = 0.01831933
 //
-//        val entranceFeePayed = WalletManager.checkEntranceFeeTransaction(
+//        val entranceFeePayed = WalletManagers.safeCreationJoinWalletTransaction(
 //            userBitcoinPk,
 //            transactionHash,
 //            sharedWalletBitcoinPk,
@@ -51,8 +55,8 @@
 //
 //        assertFalse("The entrance fee should be payed", entranceFeePayed)
 //    }
-//
-// //    @Test
+
+//    //    @Test
 //    fun testEntranceFeeTransactionWithInvalidTx() {
 //        val params = MainNetParams.get()
 //
@@ -75,7 +79,7 @@
 //        assertFalse("The entrance fee should be payed", entranceFeePayed)
 //    }
 //
-// //    @Test
+//    //    @Test
 //    fun testEntranceFeeTransactionValidUnconfirmedTx() {
 //        val params = MainNetParams.get()
 //
@@ -123,7 +127,7 @@
 //
 //        assertTrue("The entrance fee should be payed", entranceFeePayed)
 //    }
-//
+
 //    @Test
 //    fun testCreateMultiSignatureWallet2of3MultiSigCorrect() {
 //        val key1 = ECKey()
@@ -193,4 +197,4 @@
 //
 //        WalletManager.createMultiSignatureWallet(publicKeys, entranceFee, threshold)
 //    }
-// }
+}
