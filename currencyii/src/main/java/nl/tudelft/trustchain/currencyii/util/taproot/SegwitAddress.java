@@ -169,6 +169,30 @@ public class SegwitAddress extends Address {
         }
     }
 
+//    /**
+//     * Construct a {@link org.bitcoinj.core.SegwitAddress} from a byte array.
+//     *
+//     * @param version the version of SegWit, usually 1.
+//     * @param program program
+//     * @return
+//     */
+//    public static String key_to_witness(byte[] program) {
+//        programMusig =
+//            byteArrayOf(pubKeyDataMuSig[0] and 1.toByte()).plus(pubKeyDataMuSig.drop(1)).toHex().hexToBytes();
+//
+//        assert(2 <= program.length && program.length <= 40);
+//        assert(program.length == 20 || program.length == 32);
+//
+//        return new SegwitAddress(NetworkParameters.fromPmtProtocolID("regtest"), 0x01, program).toString();
+//    }
+//    private fun program_to_witness(version: Int, program: ByteArray): String {
+//        assert(0 <= version && version <= 16)
+//        assert(2 <= program.size && program.size <= 40)
+//        assert(version > 0 || program.size in arrayOf(20, 32))
+//
+//        return SegwitAddress(NetworkParameters.fromPmtProtocolID("regtest"), 0x01, program).toString()
+//    }
+
     /**
      * Construct a {@link org.bitcoinj.core.SegwitAddress} that represents the given hash, which is either a pubkey hash or a script hash.
      * The resulting address will be either a P2WPKH or a P2WSH type of address.

@@ -71,11 +71,9 @@ class MuSigTest {
         assertEquals(expectedPubChallenge2, actualPubChallenge2)
 
         val pubkeyDataMuSig = actual.getEncoded(true)
-        val programMusig = byteArrayOf(pubkeyDataMuSig[0] and 1.toByte()).plus(pubkeyDataMuSig.drop(1))
-        val version = 1
 
         val expectedAddress = "bcrt1pqq7atlpuzandpfe5v6jejldg8m7v22gs0j0v6rzku23g2x0savcsgwp82mv"
-        val actualAddress = Address.program_to_witness(version, programMusig)
+        val actualAddress = SegwitAddressUtil.key_to_witness(pubkeyDataMuSig)
 
         assertEquals(expectedAddress, actualAddress)
     }
