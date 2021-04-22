@@ -1,7 +1,5 @@
 package nl.tudelft.trustchain.currencyii.coin
 
-import org.bitcoinj.core.LegacyAddress
-import org.bitcoinj.params.MainNetParams
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -15,7 +13,7 @@ class WalletManagerTest {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val config = WalletManagerConfiguration(BitcoinNetworkOptions.PRODUCTION)
+            val config = WalletManagerConfiguration(BitcoinNetworkOptions.REG_TEST)
             walletManager = WalletManager(
                 config,
                 File(".")
@@ -23,15 +21,16 @@ class WalletManagerTest {
         }
     }
 
+    /**
+     * Wallet address should be correct format (same regex as used on regtest server).
+     */
     @Test
     fun testProtocolAddress() {
-        val params = MainNetParams.get()
-
-        val expected =
-            LegacyAddress.fromString(params, "15MioYXJGX3A3EhSAgv6W7Z3eT1qr21v7G")
+        val addressRegex = Regex("[a-km-zA-HJ-NP-Z1-9]{25,50}$")
         val actual = walletManager.protocolAddress()
-
-        assertEquals(expected, actual)
+        print(actual.toString())
+        val matches: Boolean = actual.toString().matches(addressRegex)
+        assertTrue(matches)
     }
 //    //    @Test
 //    fun testEntranceFeeTransactionWithWitnessTx() {
