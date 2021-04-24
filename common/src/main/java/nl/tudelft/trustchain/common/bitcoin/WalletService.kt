@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.common.bitcoin
 import android.util.Log
 import com.google.common.util.concurrent.Service
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.BuildConfig
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import org.bitcoinj.core.ECKey
 import org.bitcoinj.core.PeerAddress
@@ -16,7 +17,6 @@ class WalletService {
 
     companion object {
         private lateinit var globalWallet: WalletAppKit
-        private val bitcoinFaucetEndpoint = "http://134.122.59.107:3000"
         private val walletStore: MutableMap<String, WalletAppKit> = mutableMapOf()
         val params: RegTestParams = RegTestParams.get()
         private lateinit var lastDir: File
@@ -72,12 +72,18 @@ class WalletService {
 
                     if (wallet().balance.isZero) {
                         val address = wallet().issuedReceiveAddresses.first().toString()
-                        URL("$bitcoinFaucetEndpoint?id=$address").readBytes()
+                        URL("${BuildConfig.BITCOIN_FAUCET}?id=$address").readBytes()
                     }
                 }
             }
 
-            app.setPeerNodes(PeerAddress(params, InetAddress.getByName("134.122.59.107"), params.port))
+            app.setPeerNodes(
+                PeerAddress(
+                    params,
+                    InetAddress.getByName(BuildConfig.BITCOIN_DEFAULT_PEER),
+                    params.port
+                )
+            )
 
             app.setAutoSave(true)
             app.setBlockingStartup(false)
@@ -103,7 +109,11 @@ class WalletService {
                     "amount" to tx.getValueSentToMe(wallet).toFriendlyString()
                 )
                 Log.d("bitcoin_received", "Bitcoins received making a note on my chain")
-                transactionRepository.trustChainCommunity.createProposalBlock("bitcoin_transfer", transaction, publicKey.keyToBin())
+                transactionRepository.trustChainCommunity.createProposalBlock(
+                    "bitcoin_transfer",
+                    transaction,
+                    publicKey.keyToBin()
+                )
             }
         }
     }

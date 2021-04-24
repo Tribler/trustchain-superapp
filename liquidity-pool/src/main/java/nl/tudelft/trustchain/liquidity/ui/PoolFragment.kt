@@ -28,6 +28,7 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.liquidity.BuildConfig
 import nl.tudelft.trustchain.liquidity.R
 import nl.tudelft.trustchain.liquidity.data.EuroTokenWallet
 import org.bitcoinj.core.*
@@ -96,8 +97,8 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
         }
 
         lifecycleScope.launchWhenStarted {
-            poolBitcoinAddress = sharedPreference.getString("poolBitcoinAddress", "mv7x4cqQMM8ptFgiHwJZTMTQTcTFV5rteU").toString()
-            poolEuroAddress = sharedPreference.getString("poolEuroAddress", "4c69624e61434c504b3a85f8c38cec5caa72c2e23da91d0288d7f49615ee400ca82e97e925e1a2f7ae33460843aea94611d04eb535f463a9857f592a7cb072eb7e0b52f080ef078c7c5f").toString()
+            poolBitcoinAddress = sharedPreference.getString("poolBitcoinAddress", BuildConfig.DEFAULT_BTC_POOL_ADDR).toString()
+            poolEuroAddress = sharedPreference.getString("poolEuroAddress", BuildConfig.DEFAULT_EURO_POOL_ADDR).toString()
             val btcTransferTXID = sharedPreference.getString("btcTransferTXID", null)
             if (btcTransferTXID != null) {
                 btcTransaction = btcWallet.getTransaction(Sha256Hash.wrap(btcTransferTXID))
@@ -113,19 +114,8 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
                 // tradeTransaction is the last trade that has occurred
                 tradeTransaction = transactionRepository.getTransactionWithHash(tradeTXID.hexToBytes())
             }
-            /**
-             * if transaction is pending from before, disable button
-             * TODO: Uncomment line below when not testing
-             */
-//            if (getTransactionStatus() == "Pending" || status["btc"] == Status.PENDING || status["eur"] == Status.PENDING) {
-//                convert_tokens.isEnabled = false
-//                convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
-//            }
 
             convert_tokens.setOnClickListener {
-                // TODO grey out button when disabled
-//                convert_tokens.isEnabled = false
-//                convert_tokens.setBackgroundColor(Color.parseColor("#808080"));
                 if (selectedSupplyToken == "BTC") {
                     btcTransaction(suppliedAmount)
                 }
@@ -171,15 +161,6 @@ class PoolFragment : BaseFragment(R.layout.fragment_pool) {
                 if (transactionStatus["btc"] == TransactionStatus.VERIFIED || transactionStatus["euro"] == TransactionStatus.VERIFIED) {
                     completeTransaction()
                 }
-
-                // TODO: do we have to check other states? Unknown for example?
-//                if (getTransactionStatus() == "Pending") {
-//                    convert_tokens.isEnabled = false
-//                    convert_tokens.setBackgroundColor(Color.parseColor("#808080"))
-//                } else {
-//                    convert_tokens.isEnabled = true
-//                    convert_tokens.setBackgroundColor(Color.parseColor("#2962FF"))
-//                }
 
                 bitcoin_status.text = "BTC Status: " + getStatusString("btc")
                 euro_status.text = "EUR Status: " + getStatusString("euro")
