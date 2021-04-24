@@ -27,6 +27,14 @@ android {
 
         consumerProguardFiles "consumer-rules.pro"
 
+        // The address of the MultiSig wallet deployed on the goerli test network.
+        buildConfigField "String", "ETH_TEST_MULTISIG_ADDR", "\"0x2DfEecF7d2f5363149cC73cAb96C00575c732170\""
+
+        // The default bitcoin/eurotoken wallet address that is filled in for the pool at startup. This address
+        // is mostly used for testing and should be replaced with a real address as soon as a real pool
+        // is up and running.
+        buildConfigField "String", "DEFAULT_EURO_POOL_ADDR", "\"4c69624e61434c504b3a85f8c38cec5caa72c2e23da91d0288d7f49615ee400ca82e97e925e1a2f7ae33460843aea94611d04eb535f463a9857f592a7cb072eb7e0b52f080ef078c7c5f\""
+        buildConfigField "String", "DEFAULT_BTC_POOL_ADDR", "\"mv7x4cqQMM8ptFgiHwJZTMTQTcTFV5rteU\""
     }
 
     buildTypes {
@@ -99,10 +107,10 @@ dependencies {
 
     // Wallet libraries
     implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
-    implementation (group: 'org.web3j', name: 'core', version: '4.6.0-android') {
+    implementation(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }
-    implementation group: 'org.ethereum', name:'geth-android-all-1.10.1-c2d2f4ed', ext:'aar'
+    implementation group: 'org.ethereum', name: 'geth-android-all-1.10.1-c2d2f4ed', ext: 'aar'
 
     // Testing
     testImplementation "junit:junit:4.12"
