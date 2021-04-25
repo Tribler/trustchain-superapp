@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?selectableItemBackground">
+
+    <TextView
+        android:text="@string/verifyRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/headerText"
+        android:padding="10dp"
+        android:background="@color/android_green"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:textAlignment="center"
+        android:gravity="center" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="From client"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView4"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/peerMIDTextView"
+            android:padding="2dp" />
+
+        <TextView
+            android:text="Metadata"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/metadataHeaderText"
+            android:gravity="center"
+            android:textStyle="bold" />
+
+        <TextView
+            android:text="TextView"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/metadataTextView" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:text="@string/allow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/positiveButton"
+                android:layout_weight="1"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored" />
+
+            <Button
+                android:text="@string/deny"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/negativeButton"
+                android:layout_weight="1"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:textColor="@color/red"
+                android:padding="2dp" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

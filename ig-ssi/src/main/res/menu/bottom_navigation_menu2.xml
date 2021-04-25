@@ -17,4 +17,9 @@
         android:id="@+id/peersFragment2"
         android:icon="@drawable/ic_baseline_network_check_24"
         android:title="Users" />
+
+    <item
+        android:id="@+id/requestsFragment"
+        android:icon="@drawable/ic_round_notifications_24"
+        android:title="Requests" />
 </menu>

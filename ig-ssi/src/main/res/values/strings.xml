@@ -8,4 +8,12 @@
     <string name="peer_address">Peer address and port</string>
     <string name="unsupported_attestation">This attestation appears to be malformed. Please request a reissue from the issuing authority.</string>
     <string name="attestation_qr_code_content_description">Attestation QR Code</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="attest">Attest</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="allow">Allow</string>
+    <string name="deny">Deny</string>
+    <string name="verifyRequest">Verify Request for </string>
+    <string name="attestationRequest">Attestation Request for </string>
 </resources>
