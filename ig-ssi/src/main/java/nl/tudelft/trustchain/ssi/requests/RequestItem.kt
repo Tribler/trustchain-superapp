@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.ssi.requests
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.PrivateAttestationBlob
 
 // RecyclerView apparently does not allow inheritance, hence awkward manual type definitions.
 class RequestItem(
@@ -12,6 +11,10 @@ class RequestItem(
     val attributeName: String,
     val metadata: String? = null
 ) : Item() {
+    override fun equals(other: Any?): Boolean {
+        return other is RequestItem && this.index == other.index && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata
+    }
+
     override fun areItemsTheSame(other: Item): Boolean {
         return other is RequestItem && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata
     }

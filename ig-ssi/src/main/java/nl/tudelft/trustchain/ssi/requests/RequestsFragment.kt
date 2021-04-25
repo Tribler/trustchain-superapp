@@ -71,7 +71,10 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
                 Log.i("ig-ssi", "Signing attestation.")
                 channel.attest(item.peer, item.attributeName, value.toByteArray(Charsets.US_ASCII))
             }
-            NewAttestationValueDialog(item.attributeName, idFormat, ::callBack).show(parentFragmentManager, "ig-ssi")
+            NewAttestationValueDialog(item.attributeName, idFormat, ::callBack).show(
+                parentFragmentManager,
+                "ig-ssi"
+            )
         }
     }
 
@@ -117,9 +120,12 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
                     )
                 }
 
-                adapter.updateItems(items)
-                imgEmpty.isVisible = items.isEmpty()
-                delay(5000)
+                if (items != adapter.items) {
+                    adapter.updateItems(items)
+                    imgEmpty.isVisible = items.isEmpty()
+                }
+
+                delay(100)
             }
         }
     }
