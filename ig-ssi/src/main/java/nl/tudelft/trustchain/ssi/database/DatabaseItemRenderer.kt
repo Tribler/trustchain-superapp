@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.ssi.database
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_database.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.R
-import org.json.JSONObject
 
 class DatabaseItemRenderer(
     private val onItemClick: (DatabaseItem) -> Unit,
@@ -18,17 +16,17 @@ class DatabaseItemRenderer(
 
     @SuppressLint("SetTextI18n")
     override fun bindView(item: DatabaseItem, view: View) = with(view) {
-        if (item.attestationBlob.metadata != null) {
-            val metadata = JSONObject(item.attestationBlob.metadata!!)
-            attributeNameAndValue.text =
-                metadata.optString("attribute") + ": " + metadata.optString("value")
-        } else {
-            attributeNameAndValue.text = "MALFORMED ATTESTATION"
-            attributeNameAndValue.setTextColor(Color.RED)
-        }
-        hash.text = item.attestationBlob.attestationHash.copyOfRange(0, 20).toHex()
-        idformat.text = item.attestationBlob.idFormat
-        blob.text = item.attestationBlob.blob.copyOfRange(0, 20).toHex()
+        val attestation = item.attestation
+        // if (attestation.attributeValue != null) {
+        attributeNameAndValue.text =
+            attestation.attributeName + ": " + attestation.attributeValue
+        // } else {
+        //     attributeNameAndValue.text = "MALFORMED ATTESTATION"
+        //     attributeNameAndValue.setTextColor(Color.RED)
+        // }
+        hash.text = attestation.attributeHash.toHex()
+        idformat.text = attestation.idFormat
+        blob.text = "Remove this"
 
         removeButton.setOnClickListener {
             onRemoveButtonClick(item)

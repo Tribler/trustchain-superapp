@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.ssi.database
 
-import android.content.DialogInterface
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Handler
@@ -8,12 +8,9 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -24,16 +21,18 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
-import nl.tudelft.ipv8.attestation.schema.SchemaManager
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.identity.DEFAULT_METADATA
+import nl.tudelft.ipv8.util.defaultEncodingUtils
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.attestationRequestCompleteCallback
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
-import nl.tudelft.trustchain.ssi.dialogs.PresentAttestationDialog
+import nl.tudelft.trustchain.ssi.dialogs.attestation.PresentAttestationDialog
+import nl.tudelft.trustchain.ssi.dialogs.attestation.RemoveAttestationDialog
 import org.json.JSONObject
 
 class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
@@ -51,6 +50,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         adapter.registerRenderer(
             DatabaseItemRenderer(
                 {
@@ -64,10 +64,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 }
             )
         )
-        IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-            .setAttestationRequestCompleteCallback(
-                ::databaseAttestationRequestCompleteCallback
-            )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,10 +77,10 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 LinearLayout.VERTICAL
             )
         )
-        binding.myPublicKey.text = getIpv8().myPeer.mid
+        binding.myPublicKey.text = Communication.load().myPeer.mid
         setQRCode()
         setFABs()
-        loadDatabaseEntries()
+        loadDatabaseEntriesOnLoop()
     }
 
     private fun loadDatabaseEntriesOnLoop() {
@@ -97,16 +93,10 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
     }
 
     private fun loadDatabaseEntries() {
-        val attestationCommunity =
-            IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-        val entries = attestationCommunity.database.getAllAttestations()
-            .mapIndexed { index, blob -> DatabaseItem(index, blob) }.sortedBy {
-                if (it.attestationBlob.metadata != null) {
-                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString("attribute")
-                } else {
-                    return@sortedBy ""
-                }
-            }
+        val channel =
+            Communication.load()
+        val entries = channel.getOfflineVerifiableAttributes()
+            .mapIndexed { index, blob -> DatabaseItem(index, blob) }
 
         adapter.updateItems(entries)
         databaseTitle.text = "Attestations"
@@ -118,13 +108,9 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
     }
 
     private fun setDatabaseItemAction(it: DatabaseItem) {
-        var attributeName = "unknown attribute"
-        var attributeValue = "unknown attribute"
-        if (it.attestationBlob.metadata != null) {
-            val parsedMetadata = JSONObject(it.attestationBlob.metadata!!)
-            attributeName = parsedMetadata.optString("attribute", "unknown attribute")
-            attributeValue = parsedMetadata.optString("value", "unknown value")
-        }
+        val attributeName = it.attestation.attributeName
+        val attributeValue = it.attestation.attributeValue
+
         val dialog = PresentAttestationDialog(
             attributeName,
             attributeValue
@@ -134,44 +120,49 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             tag
         )
 
+        // TODO: Optional signatures.
         // If the attestation contains no signature, show an error.
-        if (it.attestationBlob.signature == null) {
-            lifecycleScope.launch {
-                // Give ample time for the dialog to be rendered.
-                delay(500)
-                dialog.showError()
-            }
-        } else {
-            lifecycleScope.launch {
-                val metadata = it.attestationBlob.metadata
-                val manager = SchemaManager()
-                manager.registerDefaultSchemas()
-                val attestation =
-                    manager.deserialize(it.attestationBlob.blob, it.attestationBlob.idFormat)
+        // if (it.attestation.signature == null) {
+        //     lifecycleScope.launch {
+        //         // Give ample time for the dialog to be rendered.
+        //         delay(500)
+        //         dialog.showError()
+        //     }
+        // } else {
+        lifecycleScope.launch {
+            val data = JSONObject()
+            val channel = Communication.load()
+            val (timestamp, challenge) = channel.generateChallenge()
+            // TODO: Definitions.
+            data.put("presentation", "attestation")
+            data.put("challenge", defaultEncodingUtils.encodeBase64ToString(challenge))
+            data.put("timestamp", timestamp)
+            data.put("metadata", it.attestation.metadataString)
+            data.put("attestationHash", it.attestation.attributeHash.toHex())
+            data.put("signature", defaultEncodingUtils.encodeBase64ToString(it.attestation.signature))
+            data.put("attestor", it.attestation.attestorKeys[0])
+            data.put(
+                "subject",
+                defaultEncodingUtils.encodeBase64ToString(channel.myPeer.publicKey.keyToBin())
+            )
 
-                val signature = it.attestationBlob.signature!!.toHex()
-                val attestorKey = it.attestationBlob.attestorKey!!.keyToBin().toHex()
-                val key = IPv8Android.getInstance().myPeer.publicKey.keyToBin().toHex()
-
-                val data = JSONObject()
-                data.put("presentation", "attestation")
-                data.put("metadata", metadata)
-                data.put("attestationHash", attestation.getHash().toHex())
-                data.put("signature", signature)
-                data.put("signee_key", key)
-                data.put("attestor_key", attestorKey)
-                Log.d(
-                    "ig-ssi",
-                    "Presenting Attestation as QRCode: Size ${data.toString().length}, Data: $data"
-                )
-                val bitmap = withContext(Dispatchers.Default) {
-                    qrCodeUtils.createQR(data.toString())!!
-                }
-                dialog.setQRCode(bitmap)
+            val output =
+                defaultEncodingUtils.encodeBase64ToString(data.toString().toByteArray())
+            Log.d(
+                "ig-ssi",
+                "Presenting Attestation as QRCode: Size ${
+                    output.length
+                }, Data: $data"
+            )
+            val bitmap = withContext(Dispatchers.Default) {
+                qrCodeUtils.createQR(output)!!
             }
+            dialog.setQRCode(bitmap)
         }
+        // }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun setFABs() {
         binding.addAttestationFab.visibility = View.GONE
         binding.addAuthorityFab.visibility = View.GONE
@@ -231,7 +222,8 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 val data = JSONObject()
                 data.put("presentation", "authority")
                 val myPeer = IPv8Android.getInstance().myPeer
-                val publicKey = myPeer.publicKey.keyToBin().toHex()
+                val publicKey =
+                    defaultEncodingUtils.encodeBase64ToString(myPeer.publicKey.keyToBin())
                 data.put("public_key", publicKey)
                 IPv8Android.getInstance()
 
@@ -288,47 +280,5 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 // We're no longer in this screen.
             }
         }
-    }
-}
-
-class RemoveAttestationDialog(val item: DatabaseItem, val callback: (() -> Unit) = {}) :
-    DialogFragment() {
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
-        return activity?.let {
-            // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it)
-            builder.setView(view)
-                .setPositiveButton(
-                    "Delete Attestation",
-                    DialogInterface.OnClickListener { _, _ ->
-                        IPv8Android.getInstance()
-                            .getOverlay<AttestationCommunity>()!!.database.deleteAttestationByHash(
-                            item.attestationBlob.attestationHash
-                        )
-                        Toast.makeText(
-                            requireContext(),
-                            "Successfully deleted attestation",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        callback()
-                    }
-                )
-                .setNegativeButton(
-                    R.string.cancel,
-                    DialogInterface.OnClickListener { _, _ ->
-                        Toast.makeText(
-                            requireContext(),
-                            "Cancelled deletion",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                )
-                .setTitle("Delete Attestation permanently?")
-                .setIcon(R.drawable.ic_round_warning_amber_24)
-                .setMessage("Note: this action cannot be undone.")
-            // Create the AlertDialog object and return it
-            builder.create()
-        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
