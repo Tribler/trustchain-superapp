@@ -8,6 +8,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -21,7 +22,6 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
-import nl.tudelft.ipv8.attestation.identity.DEFAULT_METADATA
 import nl.tudelft.ipv8.util.defaultEncodingUtils
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -98,7 +98,12 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         val entries = channel.getOfflineVerifiableAttributes()
             .mapIndexed { index, blob -> DatabaseItem(index, blob) }
 
-        adapter.updateItems(entries)
+        val areEqual = entries == adapter.items
+        if (!areEqual) {
+            Log.d("ig-ssi", "EQUAL: ${areEqual}")
+            adapter.updateItems(entries)
+        }
+
         databaseTitle.text = "Attestations"
         txtAttestationCount.text = "${entries.size} entries"
         val textColorResId = if (entries.isNotEmpty()) R.color.green else R.color.red

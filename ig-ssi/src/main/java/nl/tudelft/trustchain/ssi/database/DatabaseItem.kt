@@ -4,6 +4,11 @@ import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.attestation.PrivateAttestationBlob
 
 class DatabaseItem(val index: Int, val attestation: PrivateAttestationBlob) : Item() {
+
+    override fun equals(other: Any?): Boolean {
+        return other is DatabaseItem && this.index == other.index && this.attestation == other.attestation
+    }
+
     override fun areItemsTheSame(other: Item): Boolean {
         return other is DatabaseItem && this.attestation.attributeHash.contentEquals(other.attestation.attributeHash)
     }

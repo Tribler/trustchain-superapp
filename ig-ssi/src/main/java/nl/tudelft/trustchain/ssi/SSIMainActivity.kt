@@ -117,7 +117,6 @@ class SSIMainActivity : BaseActivity() {
             else -> input.toByteArray()
         }
     }
-
 }
 
 @Suppress("UNUSED_PARAMETER")
