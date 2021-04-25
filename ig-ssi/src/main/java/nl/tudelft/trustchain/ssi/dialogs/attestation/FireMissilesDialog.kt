@@ -14,7 +14,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_BIG
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_HUGE
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import java.util.*
 
@@ -25,14 +25,14 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
             // Use the Builder class for convenient dialog construction
             val builder = AlertDialog.Builder(it)
             val inflater = requireActivity().layoutInflater
-            val attestationCommunity =
-                IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+            val channel =
+                Communication.load()
             val view = inflater.inflate(R.layout.request_attestation_dialog, null)
             val spinner = view.findViewById<Spinner>(R.id.idFormatSpinner)
             val arrayAdapter = ArrayAdapter(
                 requireContext(),
                 R.layout.support_simple_spinner_dropdown_item,
-                attestationCommunity.schemaManager.getSchemaNames().sorted()
+                channel.attestationOverlay.schemaManager.getSchemaNames().sorted()
             )
             arrayAdapter.setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
             spinner.adapter = arrayAdapter
@@ -74,12 +74,11 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .show()
                         } else {
-                            attestationCommunity.requestAttestation(
+                            channel.requestAttestation(
                                 peer,
+                                idFormat,
                                 attrInput.text.toString().toUpperCase(Locale.getDefault()),
-                                key,
-                                hashMapOf("id_format" to idFormat),
-                                true
+                                hashMapOf(),
                             )
                             Log.d(
                                 "ig-ssi",
