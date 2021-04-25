@@ -56,7 +56,7 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                     val attrInput = view.findViewById<TextInputEditText>(R.id.attribute_input)
                     if (attrInput.text.toString() != "") {
                         val idFormat = spinner.selectedItem.toString()
-                        val myPeer = IPv8Android.getInstance().myPeer
+                        val myPeer = Communication.load().myPeer
                         val key = when (idFormat) {
                             ID_METADATA_BIG -> myPeer.identityPrivateKeyBig
                             ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge
