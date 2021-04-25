@@ -6,26 +6,52 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.*
+import androidx.lifecycle.lifecycleScope
 import com.jaredrummler.blockingdialog.BlockingDialogManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
 import nl.tudelft.ipv8.attestation.schema.*
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.ssi.dialogs.AttestationValueDialog
+import nl.tudelft.trustchain.ssi.dialogs.attestation.AttestationValueDialog
 import org.json.JSONObject
 
 class SSIMainActivity : BaseActivity() {
+    override val navigationGraph = R.navigation.nav_graph_ssi
+    override val bottomNavigationMenu = R.menu.bottom_navigation_menu2
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val community = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-        community.setAttestationRequestCallback(::attestationRequestCallback)
-        community.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
-        community.setAttestationChunkCallback(::attestationChunkCallback)
+        val channel = Communication.load()
+
+        // TODO: add callbacks for user update.
+        // community.setAttestationRequestCallback(::attestationRequestCallback)
+        // community.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
+        // community.setAttestationChunkCallback(::attestationChunkCallback)
 
         // Register own key as trusted authority.
-        community.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
+        channel.attestationOverlay.authorityManager.addTrustedAuthority(channel.myPeer.publicKey)
+
+        this.notificationHandler()
+    }
+
+    private fun notificationHandler() {
+        Handler(Looper.getMainLooper()).post {
+            lifecycleScope.launchWhenCreated {
+                while (isActive) {
+                    val channel = Communication.load()
+
+                    val notificationAmount =
+                        channel.verifyRequests.size + channel.attestationRequests.size
+                    val notificationBadge = bottomNavigation.getOrCreateBadge(R.id.requestsFragment)
+                    notificationBadge.number = notificationAmount
+                    notificationBadge.isVisible = notificationBadge.number > 0
+
+                    delay(100)
+                }
+            }
+        }
     }
 
     private fun attestationChunkCallback(peer: Peer, i: Int) {
@@ -92,8 +118,6 @@ class SSIMainActivity : BaseActivity() {
         }
     }
 
-    override val navigationGraph = R.navigation.nav_graph_ssi
-    override val bottomNavigationMenu = R.menu.bottom_navigation_menu2
 }
 
 @Suppress("UNUSED_PARAMETER")
