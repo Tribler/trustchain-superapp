@@ -18,13 +18,16 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
+import nl.tudelft.ipv8.attestation.AuthorityManager
+import nl.tudelft.ipv8.attestation.CommunicationManager
+import nl.tudelft.ipv8.attestation.identity.database.IdentitySQLiteStore
+import nl.tudelft.ipv8.attestation.revocation.AuthoritySQLiteStore
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.ipv8.keyvault.PrivateKey
@@ -46,6 +49,7 @@ import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.ssi.Communication
 
 import nl.tudelft.trustchain.voting.VotingCommunity
 
@@ -67,7 +71,6 @@ class TrustChainApplication : Application() {
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
                 createDemoCommunity(),
-                createWalletCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createVotingCommunity(),
@@ -82,6 +85,7 @@ class TrustChainApplication : Application() {
             .setServiceClass(TrustChainService::class.java)
             .init()
 
+        initCommunicationManager()
         initWallet()
         initTrustChain()
     }
@@ -94,6 +98,26 @@ class TrustChainApplication : Application() {
             ipv8.myPeer.identityPrivateKeyBig = getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY)
             ipv8.myPeer.identityPrivateKeyHuge = getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY)
         }
+    }
+
+    private fun initCommunicationManager() {
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
+        val database = Database(driver)
+        val authorityStore = AuthoritySQLiteStore(database)
+        val attestationStore = AttestationSQLiteStore(database)
+        val identityStore = IdentitySQLiteStore(database)
+
+        val authorityManager = AuthorityManager(authorityStore)
+        val communicationManager = CommunicationManager(
+            IPv8Android.getInstance(),
+            attestationStore,
+            identityStore,
+            authorityManager,
+            ::storePseudonym,
+            ::loadPseudonym
+        )
+
+        Communication.Factory(communicationManager)
     }
 
     private fun initTrustChain() {
@@ -157,18 +181,6 @@ class TrustChainApplication : Application() {
                     Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
                 }
             }
-        )
-    }
-
-    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
-        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
-        val database = Database(driver)
-        val store = AttestationSQLiteStore(database)
-        val randomWalk = RandomWalk.Factory()
-
-        return OverlayConfiguration(
-            AttestationCommunity.Factory(store),
-            listOf(randomWalk)
         )
     }
 
@@ -311,6 +323,23 @@ class TrustChainApplication : Application() {
         } else {
             AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
         }
+    }
+
+    private fun loadPseudonym(name: String): PrivateKey? {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(name, null)
+        return if (privateKey == null) {
+            null
+        } else {
+            AndroidCryptoProvider.keyFromPrivateBin(privateKey.hexToBytes())
+        }
+    }
+
+    private fun storePseudonym(name: String, privateKey: PrivateKey) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        prefs.edit()
+            .putString(name, privateKey.keyToBin().toHex())
+            .apply()
     }
 
     companion object {
