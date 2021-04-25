@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_ssi"
     app:startDestination="@id/databaseFragment">
 
@@ -53,4 +54,9 @@
             app:popUpTo="@id/databaseFragment"
             app:popUpToInclusive="false" />
     </fragment>
+    <fragment
+        android:id="@+id/requestsFragment"
+        android:name="nl.tudelft.trustchain.ssi.requests.RequestsFragment"
+        android:label="Requests"
+        tools:layout="@layout/fragment_requests" />
 </navigation>
