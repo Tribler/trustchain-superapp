@@ -1,10 +1,9 @@
-package nl.tudelft.trustchain.ssi.dialogs
+package nl.tudelft.trustchain.ssi.dialogs.attestation
 
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.text.Html
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -13,6 +12,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.parseHtml
+import java.util.Locale
 
 class PresentAttestationDialog(
     private val attributeName: String,
@@ -32,24 +33,12 @@ class PresentAttestationDialog(
             mView = view
             builder.setView(mView)
 
-            val dialog: Dialog
-            val title = "Attestation for <font color='#EE0000'>${attributeName.capitalize()}</font>"
+            val title =
+                "Attestation for <font color='#EE0000'>${attributeName.capitalize(Locale.getDefault())}</font>"
             val message = "<b>$attributeName:</b> $attributeValue"
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                builder.setTitle(Html.fromHtml(title, Html.FROM_HTML_MODE_LEGACY))
-                dialog = builder.create()
-                dialog.setMessage(
-                    Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY)
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                builder.setTitle(Html.fromHtml(title))
-                dialog = builder.create()
-                @Suppress("DEPRECATION")
-                dialog.setMessage(
-                    Html.fromHtml(message)
-                )
-            }
+            builder.setTitle(parseHtml(title))
+            val dialog = builder.create()
+            dialog.setMessage(parseHtml(message))
             dialog
         } ?: throw IllegalStateException("Activity cannot be null")
     }

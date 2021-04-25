@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs
+package nl.tudelft.trustchain.ssi.dialogs.attestation
 
 import android.app.Dialog
 import android.content.DialogInterface
@@ -76,8 +76,8 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                         } else {
                             channel.requestAttestation(
                                 peer,
-                                idFormat,
                                 attrInput.text.toString().toUpperCase(Locale.getDefault()),
+                                idFormat,
                                 hashMapOf(),
                             )
                             Log.d(
