@@ -8,7 +8,6 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -78,6 +77,15 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             )
         )
         binding.myPublicKey.text = Communication.load().myPeer.mid
+
+        binding.publicKeyQRCode.setOnClickListener {
+            if (it.scaleX > 1) {
+                it.animate().scaleX(1f).scaleY(1f)
+            } else {
+                it.animate().scaleX(1.2f).scaleY(1.2f)
+            }
+        }
+
         setQRCode()
         setFABs()
         loadDatabaseEntriesOnLoop()
@@ -87,7 +95,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
                 loadDatabaseEntries()
-                delay(1500)
+                delay(100)
             }
         }
     }
@@ -226,7 +234,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             lifecycleScope.launch {
                 val data = JSONObject()
                 data.put("presentation", "authority")
-                val myPeer = IPv8Android.getInstance().myPeer
+                val myPeer = Communication.load().myPeer
                 val publicKey =
                     defaultEncodingUtils.encodeBase64ToString(myPeer.publicKey.keyToBin())
                 data.put("public_key", publicKey)
@@ -245,14 +253,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         } else {
             binding.qrCodePlaceHolder.visibility = View.GONE
             binding.publicKeyQRCode.setImageBitmap(bitmap)
-        }
-
-        binding.publicKeyQRCode.setOnClickListener {
-            if (it.scaleX > 1) {
-                it.animate().scaleX(1f).scaleY(1f)
-            } else {
-                it.animate().scaleX(1.2f).scaleY(1.2f)
-            }
         }
     }
 
