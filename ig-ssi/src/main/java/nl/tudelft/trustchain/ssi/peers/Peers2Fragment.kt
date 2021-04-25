@@ -1,17 +1,15 @@
 package nl.tudelft.trustchain.ssi.peers
 
+import nl.tudelft.trustchain.ssi.dialogs.authority.RemoveAuthorityDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,13 +18,13 @@ import kotlinx.android.synthetic.main.fragment_peers2.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
-import nl.tudelft.trustchain.ssi.dialogs.FireMissilesDialog
+import nl.tudelft.trustchain.ssi.dialogs.attestation.FireMissilesDialog
 
 class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 
@@ -109,15 +107,18 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val demoCommunity = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-                val peers = demoCommunity.getPeers()
+                // TODO: Clean up.
+                val channel = Communication.load()
+                val peers = channel.peers
+                // val demoCommunity = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+                // val peers = demoCommunity.getPeers()
+                //
+                val discoveredAddresses = channel.identityOverlay.network
+                    .getWalkableAddresses(channel.identityOverlay.serviceId)
 
-                val discoveredAddresses = demoCommunity.network
-                    .getWalkableAddresses(demoCommunity.serviceId)
-
-                val discoveredBluetoothAddresses = demoCommunity.network
-                    .getNewBluetoothPeerCandidates()
-                    .map { it.address }
+                // val discoveredBluetoothAddresses = demoCommunity.network
+                //     .getNewBluetoothPeerCandidates()
+                //     .map { it.address }
 
                 val peerItems = peers.map {
                     PeerItem(
@@ -126,26 +127,26 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
                 }
 
                 val addressItems = discoveredAddresses.map { address ->
-//                    val contacted = demoCommunity.discoveredAddressesContacted[address]
+                   // val contacted = channel.identityOverlay.discoveredAddressesContacted[address]
                     AddressItem(
                         address,
                         null,
                         null
                     )
                 }
+//
+//                 val bluetoothAddressItems = discoveredBluetoothAddresses.map { address ->
+//                     AddressItem(
+//                         address,
+//                         null,
+//                         null
+//                     )
+//                 }
 
-                val bluetoothAddressItems = discoveredBluetoothAddresses.map { address ->
-                    AddressItem(
-                        address,
-                        null,
-                        null
-                    )
-                }
-
-                val items = peerItems + bluetoothAddressItems + addressItems
+                val items = peerItems + addressItems // + bluetoothAddressItems
 
                 adapterClients.updateItems(items)
-                txtCommunityName.text = demoCommunity.javaClass.simpleName
+                txtCommunityName.text = "IG-SSI"// demoCommunity.javaClass.simpleName
                 txtPeerCount.text = "${peers.size} peers"
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
@@ -167,54 +168,11 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
     }
 
     private fun loadAuthorities() {
-        val authorities = IPv8Android.getInstance()
-            .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.getAuthorities()
-            .map { AuthorityItem(it.publicKey, it.hash, "lorem ipsum") }
+        val authorities =
+            Communication.getInstance().authorityManager.getTrustedAuthorities()
+                .map { AuthorityItem(it.publicKey!!, it.hash.toHex(), "lorem ipsum") }
         imgEmpty.isVisible = authorities.isEmpty()
         binding.txtAuthoritiesCount.text = "${authorities.size} authorities"
         adapterAuthorities.updateItems(authorities)
-    }
-}
-
-class RemoveAuthorityDialog(val item: AuthorityItem, val callback: (() -> Unit) = { }) :
-    DialogFragment() {
-
-    override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog {
-        return activity?.let {
-            // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it)
-            builder.setView(view)
-                .setPositiveButton(
-                    "Delete Authority",
-                    DialogInterface.OnClickListener { _, _ ->
-                        IPv8Android.getInstance()
-                            .getOverlay<AttestationCommunity>()!!.trustedAuthorityManager.deleteTrustedAuthority(
-                            item.publicKeyHash
-                        )
-                        Toast.makeText(
-                            requireContext(),
-                            "Successfully deleted authority",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        callback()
-                    }
-                )
-                .setNegativeButton(
-                    R.string.cancel,
-                    DialogInterface.OnClickListener { _, _ ->
-                        Toast.makeText(
-                            requireContext(),
-                            "Cancelled deletion",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        callback()
-                    }
-                )
-                .setTitle("Delete Authority permanently?")
-                .setIcon(R.drawable.ic_round_warning_amber_24)
-                .setMessage("Note: this action cannot be undone.")
-            // Create the AlertDialog object and return it
-            builder.create()
-        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
