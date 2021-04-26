@@ -210,9 +210,21 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                         userHasAlreadyVoted(myPublicBitcoinKey)
                     }
                 }
+                if (enoughVotes(data.SW_SIGNATURES_REQUIRED)) {
+                    sendEnoughVotes()
+                }
                 delay(1000)
             }
         }
+    }
+
+    private fun enoughVotes(votesRequired: Int): Boolean {
+        return voters[0].size == votesRequired
+    }
+
+    private fun sendEnoughVotes() {
+        Toast.makeText(this.requireContext(), "Enough votes in favor of the proposal, transaction submitted", Toast.LENGTH_SHORT).show()
+        findNavController().navigateUp()
     }
 
     /**
@@ -350,6 +362,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
                         // Check if I have already voted
                         userHasAlreadyVoted(myPublicBitcoinKey)
                     }
+                }
+                if (enoughVotes(data.SW_SIGNATURES_REQUIRED)) {
+                    sendEnoughVotes()
                 }
                 delay(1000)
             }
