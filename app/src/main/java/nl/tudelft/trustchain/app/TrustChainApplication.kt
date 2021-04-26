@@ -8,10 +8,7 @@ import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
-<<<<<<< HEAD
-=======
 import com.squareup.sqldelight.db.SqlDriver
->>>>>>> upstream/master
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
@@ -79,10 +76,7 @@ class TrustChainApplication : Application() {
                 createCoinCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
-<<<<<<< HEAD
                 createRecommenderCommunity()
-=======
->>>>>>> upstream/master
             ),
             walkerInterval = 5.0
         )
@@ -122,17 +116,10 @@ class TrustChainApplication : Application() {
                     block: TrustChainBlock,
                     database: TrustChainStore
                 ): ValidationResult {
-<<<<<<< HEAD
                     return if (block.transaction["message"] != null || block.isAgreement) {
                         ValidationResult.Valid
                     } else {
                         ValidationResult.Invalid(listOf("Proposal must have a message"))
-=======
-                    if (block.transaction["message"] != null || block.isAgreement) {
-                        return ValidationResult.Valid
-                    } else {
-                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
->>>>>>> upstream/master
                     }
                 }
             }
@@ -163,14 +150,10 @@ class TrustChainApplication : Application() {
             CoinCommunity.JOIN_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
-<<<<<<< HEAD
                     Log.d(
                         "Coin",
                         "onBlockReceived: ${block.blockId} ${block.transaction}"
                     )
-=======
-                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
->>>>>>> upstream/master
                 }
             }
         )
@@ -179,16 +162,10 @@ class TrustChainApplication : Application() {
             CoinCommunity.SIGNATURE_ASK_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
-<<<<<<< HEAD
                     Log.d(
                         "Coin",
                         "onBlockReceived: ${block.blockId} ${block.transaction}"
                     )
-                }
-            }
-        )
-=======
-                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
                 }
             }
         )
@@ -204,7 +181,6 @@ class TrustChainApplication : Application() {
             AttestationCommunity.Factory(store),
             listOf(randomWalk)
         )
->>>>>>> upstream/master
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -313,7 +289,6 @@ class TrustChainApplication : Application() {
         )
     }
 
-<<<<<<< HEAD
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
@@ -328,7 +303,8 @@ class TrustChainApplication : Application() {
             RecommenderCommunity.Factory(recommendStore, settings, musicStore),
             listOf(randomWalk)
         )
-=======
+    }
+
     private fun getIdAlgorithmKey(idFormat: String): BonehPrivateKey {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
         val privateKey = prefs.getString(idFormat, null)
@@ -346,7 +322,6 @@ class TrustChainApplication : Application() {
         } else {
             BonehPrivateKey.deserialize(privateKey.hexToBytes())!!
         }
->>>>>>> upstream/master
     }
 
     private fun getPrivateKey(): PrivateKey {
