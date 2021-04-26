@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.currencyii.util
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
@@ -126,7 +128,8 @@ class DAOJoinHelper {
         walletBlockData: TrustChainTransaction,
         blockData: SWSignatureAskBlockTD,
         responses: List<SWResponseSignatureBlockTD>,
-        context: Context
+        context: Context,
+        activity: Activity
     ) {
         val oldWalletBlockData = SWJoinBlockTransactionData(walletBlockData)
         val newTransactionSerialized = blockData.SW_TRANSACTION_SERIALIZED
@@ -151,16 +154,18 @@ class DAOJoinHelper {
             aggregateNoncePoint,
             CTransaction().deserialize(newTransactionProposal)
         )
-        print(status)
 
-        // TODO toast crashes for some stupid reason
-//        if (status) {
-//            Log.i("Coin", "successfully submitted taproot transaction to server")
-//            Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
-//        } else {
-//            Log.e("Coin", "taproot transaction submission to server failed")
-//            Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
-//        }
+        if (status) {
+            Log.i("Coin", "Successfully submitted taproot transaction to server")
+            activity.runOnUiThread {
+                Toast.makeText(context, "Successfully submitted the transaction", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Log.e("Coin", "Taproot transaction submission to server failed")
+            activity.runOnUiThread {
+                Toast.makeText(context, "Failed to submit the transaction to the server", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         oldWalletBlockData.getData().SW_NONCE_PKS = newNonces
 

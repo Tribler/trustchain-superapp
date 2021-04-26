@@ -199,7 +199,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         }
 
         val context = requireContext()
-
+        val activityRequired = requireActivity()
         // Wait and collect signatures
         var signatures: List<SWResponseSignatureBlockTD>? = null
         while (signatures == null) {
@@ -214,7 +214,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 mostRecentSWBlock.transaction,
                 proposeBlockData,
                 signatures,
-                context
+                context,
+                activityRequired
             )
             // Add new nonceKey after joining a DAO
             WalletManagerAndroid.getInstance().addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)

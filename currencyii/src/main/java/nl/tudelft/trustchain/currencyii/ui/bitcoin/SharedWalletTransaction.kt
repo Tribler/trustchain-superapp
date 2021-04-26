@@ -125,6 +125,8 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             return
         }
         val context = requireContext()
+        val activityRequired = requireActivity()
+
         val responses = collectResponses(transferFundsData)
         try {
             getCoinCommunity().transferFunds(
@@ -134,7 +136,8 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
                 responses,
                 bitcoinPublicKey,
                 satoshiTransferAmount,
-                context
+                context,
+                activityRequired
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"

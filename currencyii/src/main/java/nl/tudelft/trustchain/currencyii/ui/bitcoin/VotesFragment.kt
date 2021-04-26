@@ -223,8 +223,10 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     }
 
     private fun sendEnoughVotes() {
-        Toast.makeText(this.requireContext(), "Enough votes in favor of the proposal, transaction submitted", Toast.LENGTH_SHORT).show()
-        findNavController().navigateUp()
+        activity?.runOnUiThread {
+                Toast.makeText(this.requireContext(), "Enough votes in favor of the proposal, transaction submitted", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
+        }
     }
 
     /**

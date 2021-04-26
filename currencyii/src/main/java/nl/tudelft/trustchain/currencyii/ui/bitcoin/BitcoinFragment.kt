@@ -155,6 +155,7 @@ class BitcoinFragment :
                 getBitcoinPressed = true
 
                 if (!addBTC(walletManager.protocolAddress().toString())) {
+                    Log.i("Coin", "The server response is failing")
                     Toast.makeText(this.requireContext(), "Something went wrong, please delete system32", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(this.requireContext(), "Successfully added 10 BTC", Toast.LENGTH_SHORT).show()
@@ -227,6 +228,9 @@ class BitcoinFragment :
                 val connection = URL(url).openConnection() as HttpURLConnection
 
                 try {
+                    // If it fails, check if there is enough balance available on the server
+                    // Otherwise reset the bitcoin network on the server (there is only 15k BTC available).
+                    // Also check if the Python server is still running!
                     Log.i("Coin", url)
                     Log.i("Coin", connection.responseMessage)
                     return connection.responseCode == 200
