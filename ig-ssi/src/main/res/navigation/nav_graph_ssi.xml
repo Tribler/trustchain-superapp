@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph_ssi"
+    app:startDestination="@id/databaseFragment">
+
+    <fragment
+        android:id="@+id/peersFragment2"
+        android:name="nl.tudelft.trustchain.ssi.peers.Peers2Fragment"
+        android:label="SSI Clients" />
+    <fragment
+        android:id="@+id/databaseFragment"
+        android:name="nl.tudelft.trustchain.ssi.database.DatabaseFragment"
+        android:label="Home Screen" >
+        <action
+            android:id="@+id/action_databaseFragment_to_verificationFragment"
+            app:destination="@id/verificationFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/verificationFragment"
+        android:name="nl.tudelft.trustchain.ssi.verifier.VerificationFragment"
+        android:label="Verification">
+        <action
+            android:id="@+id/action_verificationFragment_to_databaseFragment"
+            app:destination="@id/databaseFragment"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:launchSingleTop="false"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/nav_graph_ssi"
+            app:popUpToInclusive="true" />
+        <argument
+            android:name="qrCodeHint"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="intent"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_verificationFragment_to_peersFragment2"
+            app:destination="@id/peersFragment2"
+            app:enterAnim="@anim/fragment_fade_enter"
+            app:exitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fragment_fade_enter"
+            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popUpTo="@id/databaseFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+</navigation>

@@ -38,12 +38,18 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         val walletService = WalletService.getInstance(walletDir, (activity as MusicService))
 
         builder.setView(dialogView)
-            .setPositiveButton("Confirm", DialogInterface.OnClickListener { _, _ ->
-                val amount = amountEditText?.text.toString()
-                walletService.sendCoins(publicKey, amount)
-            }).setNegativeButton("Cancel", DialogInterface.OnClickListener { _, _ ->
-                dialog?.cancel()
-            })
+            .setPositiveButton(
+                "Confirm",
+                DialogInterface.OnClickListener { _, _ ->
+                    val amount = amountEditText?.text.toString()
+                    walletService.sendCoins(publicKey, amount)
+                }
+            ).setNegativeButton(
+                "Cancel",
+                DialogInterface.OnClickListener { _, _ ->
+                    dialog?.cancel()
+                }
+            )
 
         return builder.create()
     }

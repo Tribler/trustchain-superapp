@@ -45,16 +45,21 @@ class FeedFragment : BaseFragment(R.layout.fragment_feed) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(PostItemRenderer({
-            if (!postRepository.likePost(it.block)) {
-                Toast.makeText(requireContext(), "You already liked this post", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }, {
-            val args = Bundle()
-            args.putString(NewPostFragment.ARG_HASH, it.block.calculateHash().toHex())
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment, args)
-        }))
+        adapter.registerRenderer(
+            PostItemRenderer(
+                {
+                    if (!postRepository.likePost(it.block)) {
+                        Toast.makeText(requireContext(), "You already liked this post", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                },
+                {
+                    val args = Bundle()
+                    args.putString(NewPostFragment.ARG_HASH, it.block.calculateHash().toHex())
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment, args)
+                }
+            )
+        )
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
@@ -83,9 +88,12 @@ class FeedFragment : BaseFragment(R.layout.fragment_feed) {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
-        items.observe(viewLifecycleOwner, Observer {
-            adapter.updateItems(it)
-            binding.imgEmpty.isVisible = it.isEmpty()
-        })
+        items.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapter.updateItems(it)
+                binding.imgEmpty.isVisible = it.isEmpty()
+            }
+        )
     }
 }

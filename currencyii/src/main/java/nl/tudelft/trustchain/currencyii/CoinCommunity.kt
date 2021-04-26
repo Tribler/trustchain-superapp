@@ -162,7 +162,7 @@ class CoinCommunity : Community() {
         return fromBlocks
             .filter { it.type == JOIN_BLOCK } // make sure the blocks have the correct type!
             .filter { SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID == walletId }
-            .maxBy { it.timestamp.time }
+            .maxByOrNull { it.timestamp.time }
     }
 
     /**

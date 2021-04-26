@@ -220,11 +220,13 @@ class VotingActivity : AppCompatActivity() {
                     "<i>" + date + "</i></small>" +
                     castedString +
                     "<br><br>" +
-                    "<small><b>" + (if (vh.votingIsComplete(
-                        block,
-                        VotingCommunity.threshold
-                    )
-                ) "Final result" else "Current tally") + "</b>:" +
+                    "<small><b>" + (
+                    if (vh.votingIsComplete(
+                            block,
+                            VotingCommunity.threshold
+                        )
+                    ) "Final result" else "Current tally"
+                    ) + "</b>:" +
                     "<br>" +
                     when (votingMode) {
                         VotingMode.YESNO -> {

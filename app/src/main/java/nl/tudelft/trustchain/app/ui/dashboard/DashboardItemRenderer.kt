@@ -15,7 +15,9 @@ class DashboardItemRenderer(
         val context = binding.root.context
         val color = ResourcesCompat.getColor(context.resources, item.app.color, null)
         binding.imgIcon.setImageResource(item.app.icon)
-        binding.imgIcon.imageTintList = ColorStateList.valueOf(color)
+        if (!item.app.disableImageTint) {
+            binding.imgIcon.imageTintList = ColorStateList.valueOf(color)
+        }
         binding.txtAppName.text = item.app.appName
         binding.txtAppName.setTextColor(color)
         binding.root.setOnClickListener {

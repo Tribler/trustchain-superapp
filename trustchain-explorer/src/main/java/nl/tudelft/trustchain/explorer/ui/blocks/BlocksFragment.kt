@@ -50,22 +50,24 @@ open class BlocksFragment : BaseFragment(R.layout.fragment_blocks) {
             }
         }
 
-        adapter.registerRenderer(BlockItemRenderer(
-            onExpandClick = {
-                val blockId = it.block.blockId
-                if (expandedBlocks.contains(blockId)) {
-                    expandedBlocks.remove(blockId)
-                } else {
-                    expandedBlocks.add(blockId)
+        adapter.registerRenderer(
+            BlockItemRenderer(
+                onExpandClick = {
+                    val blockId = it.block.blockId
+                    if (expandedBlocks.contains(blockId)) {
+                        expandedBlocks.remove(blockId)
+                    } else {
+                        expandedBlocks.add(blockId)
+                    }
+                    lifecycleScope.launch {
+                        updateView()
+                    }
+                },
+                onSignClick = {
+                    createAgreementBlock(it.block)
                 }
-                lifecycleScope.launch {
-                    updateView()
-                }
-            },
-            onSignClick = {
-                createAgreementBlock(it.block)
-            }
-        ))
+            )
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

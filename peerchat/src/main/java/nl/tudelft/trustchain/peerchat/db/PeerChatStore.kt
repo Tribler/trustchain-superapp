@@ -22,17 +22,17 @@ class PeerChatStore(context: Context) {
     val contactsStore = ContactStore.getInstance(context)
 
     private val messageMapper = { id: String,
-                                  message: String,
-                                  senderPk: ByteArray,
-                                  receipientPk: ByteArray,
-                                  outgoing: Long,
-                                  timestamp: Long,
-                                  ack: Long,
-                                  read: Long, attachmentType: String?,
-                                  attachmentSize: Long?,
-                                  attachmentContent: ByteArray?,
-                                  attachmentFetched: Long,
-                                  transaction_hash: ByteArray?
+        message: String,
+        senderPk: ByteArray,
+        receipientPk: ByteArray,
+        outgoing: Long,
+        timestamp: Long,
+        ack: Long,
+        read: Long, attachmentType: String?,
+        attachmentSize: Long?,
+        attachmentContent: ByteArray?,
+        attachmentFetched: Long,
+        transaction_hash: ByteArray?
         ->
         ChatMessage(
             id,

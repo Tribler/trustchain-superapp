@@ -26,17 +26,21 @@ class PeersFragment : BaseFragment(R.layout.fragment_peers) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(PeerItemRenderer {
-            findNavController().navigate(
-                PeersFragmentDirections.actionPeersFragmentToBlocksFragment(
-                    it.peer.publicKey.keyToBin().toHex()
+        adapter.registerRenderer(
+            PeerItemRenderer {
+                findNavController().navigate(
+                    PeersFragmentDirections.actionPeersFragmentToBlocksFragment(
+                        it.peer.publicKey.keyToBin().toHex()
+                    )
                 )
-            )
-        })
+            }
+        )
 
-        adapter.registerRenderer(AddressItemRenderer {
-            // NOOP
-        })
+        adapter.registerRenderer(
+            AddressItemRenderer {
+                // NOOP
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

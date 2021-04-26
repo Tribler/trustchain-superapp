@@ -28,11 +28,13 @@ class UsersFragment : BaseFragment(R.layout.fragment_users) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(UserItemRenderer {
-            findNavController().navigate(
-                UsersFragmentDirections.actionUsersFragmentToBlocksFragment(it.publicKey)
-            )
-        })
+        adapter.registerRenderer(
+            UserItemRenderer {
+                findNavController().navigate(
+                    UsersFragmentDirections.actionUsersFragmentToBlocksFragment(it.publicKey)
+                )
+            }
+        )
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

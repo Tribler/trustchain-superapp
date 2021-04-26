@@ -6,11 +6,12 @@ import androidx.annotation.DrawableRes
 import com.example.musicdao.MusicService
 import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
+import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
-import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
+import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -20,8 +21,16 @@ enum class AppDefinition(
     @DrawableRes val icon: Int,
     val appName: String,
     @ColorRes val color: Int,
-    val activity: Class<out Activity>
+    val activity: Class<out Activity>,
+    val disableImageTint: Boolean = false
 ) {
+    EIGHTEEN_PLUS(
+        R.drawable.ic_18_plus,
+        "18+",
+        R.color.red,
+        SSIMainActivity::class.java,
+        true,
+    ),
     PEERCHAT(
         R.drawable.ic_chat_black_24dp,
         "PeerChat",

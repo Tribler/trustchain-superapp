@@ -4,6 +4,9 @@
     <color name="colorPrimaryDark">#0D47A1</color>
     <color name="colorAccent">#D81B60</color>
 
+    <color name="colorPrimarySSI">#810000</color>
+    <color name="colorPrimaryDarkSSI">#570000</color>
+
     <color name="text_primary">#000000</color>
     <color name="text_secondary">#666666</color>
     <color name="text_tertiary">#AAAAAA</color>

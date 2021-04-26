@@ -15,10 +15,12 @@ class DashboardActivity : AppCompatActivity() {
     private val adapter = ItemAdapter()
 
     init {
-        adapter.registerRenderer(DashboardItemRenderer {
-            val intent = Intent(this, it.app.activity)
-            startActivity(intent)
-        })
+        adapter.registerRenderer(
+            DashboardItemRenderer {
+                val intent = Intent(this, it.app.activity)
+                startActivity(intent)
+            }
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,7 +32,8 @@ class DashboardActivity : AppCompatActivity() {
         binding.recyclerView.layoutManager = layoutManager
         binding.recyclerView.adapter = adapter
 
-        adapter.updateItems(getAppList())
+        val appList = getAppList().sortedBy { it.app.appName }
+        adapter.updateItems(appList)
     }
 
     private fun getAppList(): List<DashboardItem> {

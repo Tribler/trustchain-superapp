@@ -41,14 +41,18 @@ class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOvervi
         // Pass null as the parent view because its going in the dialog layout
         builder.setView(dialogView)
             // Add action buttons
-            .setPositiveButton("Submit",
+            .setPositiveButton(
+                "Submit",
                 DialogInterface.OnClickListener { _, _ ->
                     submitRelease()
-                })
-            .setNegativeButton("Cancel",
+                }
+            )
+            .setNegativeButton(
+                "Cancel",
                 DialogInterface.OnClickListener { _, _ ->
                     dialog?.cancel()
-                })
+                }
+            )
         return builder.create()
     }
 

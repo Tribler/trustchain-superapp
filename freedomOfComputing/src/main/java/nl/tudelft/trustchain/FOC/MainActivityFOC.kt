@@ -211,17 +211,20 @@ class MainActivityFOC : AppCompatActivity() {
         s.start(params)
 
         val timer = Timer()
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                val nodes = s.stats().dhtNodes()
-                // wait for at least 10 nodes in the DHT.
-                if (nodes >= 10) {
-                    Log.i("personal", "DHT contains $nodes nodes")
-                    // signal.countDown();
-                    timer.cancel()
+        timer.schedule(
+            object : TimerTask() {
+                override fun run() {
+                    val nodes = s.stats().dhtNodes()
+                    // wait for at least 10 nodes in the DHT.
+                    if (nodes >= 10) {
+                        Log.i("personal", "DHT contains $nodes nodes")
+                        // signal.countDown();
+                        timer.cancel()
+                    }
                 }
-            }
-        }, 0, 1000)
+            },
+            0, 1000
+        )
 
         printToast("Starting download, please wait...")
 
@@ -475,7 +478,7 @@ class MainActivityFOC : AppCompatActivity() {
             var containsItem = false
             for (i in 0..adapterLV.count - 1) {
                 if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!
-                        .startsWith(torrentName)
+                    .startsWith(torrentName)
                 ) {
                     containsItem = true
                     break

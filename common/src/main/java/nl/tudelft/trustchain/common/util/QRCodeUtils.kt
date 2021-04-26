@@ -12,6 +12,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.integration.android.IntentIntegrator
 import nl.tudelft.trustchain.common.R
+import nl.tudelft.trustchain.common.ui.QRCodeActivityPortrait
 
 /**
  * Helper class for creating
@@ -21,9 +22,17 @@ class QRCodeUtils(private val context: Context) {
     /**
      * Start the QR scanner, which if successful, calls onActivityResult() on the fragment
      */
-    fun startQRScanner(fragment: Fragment) {
+    fun startQRScanner(fragment: Fragment, promptText: String? = null, vertical: Boolean = false) {
         run {
-            FragmentIntentIntegrator(fragment).initiateScan()
+            val integrator = FragmentIntentIntegrator(fragment)
+                .setPrompt(promptText ?: "Scan QR Code")
+                .setOrientationLocked(false)
+                .setBeepEnabled(true)
+                .setCameraId(0)
+            if (vertical) {
+                integrator.captureActivity = QRCodeActivityPortrait::class.java
+            }
+            integrator.initiateScan()
         }
     }
 
@@ -35,12 +44,12 @@ class QRCodeUtils(private val context: Context) {
      * from: https://demonuts.com/kotlin-generate-qr-code/
      * Creates a QR code from text
      */
-    fun createQR(text: String): Bitmap? {
+    fun createQR(text: String, size: Int = QRCodeSize): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
         } else {
             try {
-                return textToImageEncode(text)
+                return textToImageEncode(text, size)
             } catch (e: WriterException) {
                 e.printStackTrace()
             }
@@ -52,14 +61,14 @@ class QRCodeUtils(private val context: Context) {
      * Encode the text into a bitmap
      */
     @Throws(WriterException::class)
-    private fun textToImageEncode(Value: String): Bitmap? {
+    private fun textToImageEncode(value: String, size: Int = QRCodeSize): Bitmap? {
         val bitMatrix: BitMatrix
         try {
             bitMatrix = MultiFormatWriter().encode(
-                Value,
+                value,
                 BarcodeFormat.QR_CODE,
-                QRCodeSize,
-                QRCodeSize, null
+                size,
+                size, null
             )
         } catch (IllegalArgumentException: IllegalArgumentException) {
             return null
@@ -80,7 +89,7 @@ class QRCodeUtils(private val context: Context) {
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
 
-        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight)
+        bitmap.setPixels(pixels, 0, bitMatrixWidth, 0, 0, bitMatrixWidth, bitMatrixHeight)
         return bitmap
     }
 

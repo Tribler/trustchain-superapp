@@ -67,14 +67,19 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(ContactItemRenderer({
-            val args = Bundle()
-            args.putString(ConversationFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-            args.putString(ConversationFragment.ARG_NAME, it.name)
-            findNavController().navigate(R.id.action_contactsFragment_to_conversationFragment, args)
-        }, {
-            showOptions(it)
-        }))
+        adapter.registerRenderer(
+            ContactItemRenderer(
+                {
+                    val args = Bundle()
+                    args.putString(ConversationFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                    args.putString(ConversationFragment.ARG_NAME, it.name)
+                    findNavController().navigate(R.id.action_contactsFragment_to_conversationFragment, args)
+                },
+                {
+                    showOptions(it)
+                }
+            )
+        )
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
@@ -108,10 +113,13 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
             fab.collapse()
         }
 
-        items.observe(viewLifecycleOwner, Observer {
-            adapter.updateItems(it)
-            binding.imgEmpty.isVisible = it.isEmpty()
-        })
+        items.observe(
+            viewLifecycleOwner,
+            Observer {
+                adapter.updateItems(it)
+                binding.imgEmpty.isVisible = it.isEmpty()
+            }
+        )
     }
 
     private fun createItems(

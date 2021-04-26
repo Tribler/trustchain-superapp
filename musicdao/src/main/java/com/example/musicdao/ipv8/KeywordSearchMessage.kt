@@ -39,7 +39,8 @@ class KeywordSearchMessage(
                     originPublicKey,
                     ttl,
                     keyword.toString(Charsets.US_ASCII)
-                ), localOffset
+                ),
+                localOffset
             )
         }
     }

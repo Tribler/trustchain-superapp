@@ -30,7 +30,7 @@ class EuroTokenCheckpointValidatorTest {
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(10)
             ),
             links = A.pub()
-            )
+        )
 
         val A1 = TestBlock(
             key = A,
@@ -98,7 +98,8 @@ class EuroTokenCheckpointValidatorTest {
                 TransactionRepository.KEY_BALANCE to 0L,
                 TransactionRepository.KEY_AMOUNT to BigInteger.valueOf(20)
             ),
-            previous = A4)
+            previous = A4
+        )
 
         result = validate(A5, db)
         assertTrue(result is ValidationResult.MissingBlocks)
