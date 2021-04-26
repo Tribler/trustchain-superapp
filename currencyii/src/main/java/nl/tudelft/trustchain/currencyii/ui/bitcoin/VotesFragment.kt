@@ -58,6 +58,8 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * When the view is created it puts the correct data on it.
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        tabsAdapter = TabsAdapter(this, voters)
+
         title = view.findViewById(R.id.title)
         subTitle = view.findViewById(R.id.sub_title)
         requiredVotes = view.findViewById(R.id.required_votes)
@@ -235,7 +237,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * tabsAdapter.notifyDataSetChanges() doesn't work somehow, this is hacky, but works.
      */
     private fun updateTabsAdapter(i: Int) {
-        tabsAdapter = TabsAdapter(this, voters)
+        tabsAdapter.notifyDataSetChanged()
         viewPager.adapter = tabsAdapter
         viewPager.currentItem = i
 
