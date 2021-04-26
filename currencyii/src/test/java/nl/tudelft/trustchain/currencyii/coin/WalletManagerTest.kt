@@ -28,7 +28,6 @@ class WalletManagerTest {
     fun testProtocolAddress() {
         val addressRegex = Regex("[a-km-zA-HJ-NP-Z1-9]{25,50}$")
         val actual = walletManager.protocolAddress()
-        print(actual.toString())
         val matches: Boolean = actual.toString().matches(addressRegex)
         assertTrue(matches)
     }
