@@ -58,7 +58,10 @@ class EuroTokenTransferValidatorTest {
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenTransferValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenTransferValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -82,7 +85,10 @@ class EuroTokenTransferValidatorTest {
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InvalidBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InvalidBalance("").TYPE
+        )
     }
 
     @Test
@@ -98,6 +104,9 @@ class EuroTokenTransferValidatorTest {
         )
         val result = validate(A1, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InsufficientBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InsufficientBalance("").TYPE
+        )
     }
 }

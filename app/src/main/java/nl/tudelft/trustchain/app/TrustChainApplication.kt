@@ -8,6 +8,10 @@ import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
+<<<<<<< HEAD
+=======
+import com.squareup.sqldelight.db.SqlDriver
+>>>>>>> upstream/master
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
@@ -17,11 +21,15 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
+import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainSQLiteStore
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.wallet.AttestationSQLiteStore
+import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
@@ -43,6 +51,7 @@ import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -65,11 +74,15 @@ class TrustChainApplication : Application() {
                 createEuroTokenCommunity(),
                 createTFTPCommunity(),
                 createDemoCommunity(),
+                createWalletCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
+<<<<<<< HEAD
                 createRecommenderCommunity()
+=======
+>>>>>>> upstream/master
             ),
             walkerInterval = 5.0
         )
@@ -80,14 +93,25 @@ class TrustChainApplication : Application() {
             .setServiceClass(TrustChainService::class.java)
             .init()
 
+        initWallet()
         initTrustChain()
+    }
+
+    private fun initWallet() {
+        GlobalScope.launch {
+            // Generate keys in a coroutine as this significantly impacts first launch.
+            val ipv8 = IPv8Android.getInstance()
+            ipv8.myPeer.identityPrivateKeySmall = getIdAlgorithmKey(PREF_ID_METADATA_KEY)
+            ipv8.myPeer.identityPrivateKeyBig = getIdAlgorithmKey(PREF_ID_METADATA_BIG_KEY)
+            ipv8.myPeer.identityPrivateKeyHuge = getIdAlgorithmKey(PREF_ID_METADATA_HUGE_KEY)
+        }
     }
 
     private fun initTrustChain() {
         val ipv8 = IPv8Android.getInstance()
         val trustchain = ipv8.getOverlay<TrustChainCommunity>()!!
         val tr = TransactionRepository(trustchain, GatewayStore.getInstance(this))
-        tr.initTrustChainCommunity() // register eurotoken listners
+        tr.initTrustChainCommunity() // register eurotoken listeners
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
         euroTokenCommunity.setTransactionRepository(tr)
 
@@ -98,10 +122,17 @@ class TrustChainApplication : Application() {
                     block: TrustChainBlock,
                     database: TrustChainStore
                 ): ValidationResult {
+<<<<<<< HEAD
                     return if (block.transaction["message"] != null || block.isAgreement) {
                         ValidationResult.Valid
                     } else {
                         ValidationResult.Invalid(listOf("Proposal must have a message"))
+=======
+                    if (block.transaction["message"] != null || block.isAgreement) {
+                        return ValidationResult.Valid
+                    } else {
+                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
+>>>>>>> upstream/master
                     }
                 }
             }
@@ -132,10 +163,14 @@ class TrustChainApplication : Application() {
             CoinCommunity.JOIN_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
+<<<<<<< HEAD
                     Log.d(
                         "Coin",
                         "onBlockReceived: ${block.blockId} ${block.transaction}"
                     )
+=======
+                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+>>>>>>> upstream/master
                 }
             }
         )
@@ -144,6 +179,7 @@ class TrustChainApplication : Application() {
             CoinCommunity.SIGNATURE_ASK_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
+<<<<<<< HEAD
                     Log.d(
                         "Coin",
                         "onBlockReceived: ${block.blockId} ${block.transaction}"
@@ -151,6 +187,24 @@ class TrustChainApplication : Application() {
                 }
             }
         )
+=======
+                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                }
+            }
+        )
+    }
+
+    private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
+        val driver: SqlDriver = AndroidSqliteDriver(Database.Schema, this, "wallet.db")
+        val database = Database(driver)
+        val store = AttestationSQLiteStore(database)
+        val randomWalk = RandomWalk.Factory()
+
+        return OverlayConfiguration(
+            AttestationCommunity.Factory(store),
+            listOf(randomWalk)
+        )
+>>>>>>> upstream/master
     }
 
     private fun createDiscoveryCommunity(): OverlayConfiguration<DiscoveryCommunity> {
@@ -259,6 +313,7 @@ class TrustChainApplication : Application() {
         )
     }
 
+<<<<<<< HEAD
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
@@ -273,6 +328,25 @@ class TrustChainApplication : Application() {
             RecommenderCommunity.Factory(recommendStore, settings, musicStore),
             listOf(randomWalk)
         )
+=======
+    private fun getIdAlgorithmKey(idFormat: String): BonehPrivateKey {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val privateKey = prefs.getString(idFormat, null)
+
+        val schemaManager = SchemaManager()
+        schemaManager.registerDefaultSchemas()
+
+        return if (privateKey == null) {
+            // Generate a new key on the first launch
+            val newKey = schemaManager.getAlgorithmInstance(idFormat).generateSecretKey()
+            prefs.edit()
+                .putString(idFormat, newKey.serialize().toHex())
+                .apply()
+            newKey
+        } else {
+            BonehPrivateKey.deserialize(privateKey.hexToBytes())!!
+        }
+>>>>>>> upstream/master
     }
 
     private fun getPrivateKey(): PrivateKey {
@@ -293,6 +367,10 @@ class TrustChainApplication : Application() {
 
     companion object {
         private const val PREF_PRIVATE_KEY = "private_key"
+        private const val PREF_ID_METADATA_KEY = "id_metadata"
+        private const val PREF_ID_METADATA_BIG_KEY = "id_metadata_big"
+        private const val PREF_ID_METADATA_HUGE_KEY = "id_metadata_huge"
+        private const val PREF_ID_METADATA_RANGE_18PLUS_KEY = "id_metadata_range_18plus"
         private const val BLOCK_TYPE = "demo_block"
     }
 }

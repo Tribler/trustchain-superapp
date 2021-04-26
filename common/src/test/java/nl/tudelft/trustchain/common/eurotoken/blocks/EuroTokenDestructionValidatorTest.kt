@@ -84,7 +84,10 @@ class EuroTokenDestructionValidatorTest {
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenDestructionValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenDestructionValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -108,7 +111,10 @@ class EuroTokenDestructionValidatorTest {
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenDestructionValidator.MissingPaymentIDorIBAN("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenDestructionValidator.MissingPaymentIDorIBAN("").TYPE
+        )
     }
 
     @Test
@@ -134,7 +140,10 @@ class EuroTokenDestructionValidatorTest {
 
         val result = validate(A3, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InvalidBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InvalidBalance("").TYPE
+        )
     }
 
     @Test
@@ -153,6 +162,9 @@ class EuroTokenDestructionValidatorTest {
 
         val result = validate(A1, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenBaseValidator.InsufficientBalance("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenBaseValidator.InsufficientBalance("").TYPE
+        )
     }
 }

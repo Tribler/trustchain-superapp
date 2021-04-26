@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/removeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:background="@android:color/holo_red_dark"
+            android:minWidth="30dp"
+            android:scaleType="fitCenter"
+            android:tint="@color/white"
+            app:srcCompat="@drawable/ic_round_delete_forever_24" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/authorityHash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:typeface="monospace"
+                tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
+
+            <TextView
+                android:id="@+id/authorityKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:maxLines="1"
+                android:typeface="monospace"
+                tools:text="D3751D33F9CD5049C4AF2B462735457E4D3BAF130BCBB87F389E349FBAEB20B9" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

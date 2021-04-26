@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.common.eurotoken.blocks
+
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -138,7 +139,10 @@ class EuroTokenRollbackValidatorTest {
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.MissingAmount("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.MissingAmount("").TYPE
+        )
     }
 
     @Test
@@ -180,7 +184,10 @@ class EuroTokenRollbackValidatorTest {
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.MissingTransactionHash("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.MissingTransactionHash("").TYPE
+        )
     }
 
     @Test
@@ -265,6 +272,9 @@ class EuroTokenRollbackValidatorTest {
 
         result = validate(A2, db)
         assertTrue(result is ValidationResult.Invalid)
-        assertEquals((result as ValidationResult.Invalid).errors[0], EuroTokenRollBackValidator.InvalidTransaction("").TYPE)
+        assertEquals(
+            (result as ValidationResult.Invalid).errors[0],
+            EuroTokenRollBackValidator.InvalidTransaction("").TYPE
+        )
     }
 }

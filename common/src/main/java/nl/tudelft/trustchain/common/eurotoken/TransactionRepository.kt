@@ -101,7 +101,8 @@ class TransactionRepository(
             KEY_AMOUNT to amount,
             KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount.toLong()).toLong())
         )
-        Log.d("EuroTokenBlockRollback", transaction[KEY_BALANCE].toString())
+        @Suppress("CAST_NEVER_SUCCEEDS")
+        Log.d("EuroTokenBlockRollback", (transaction[KEY_BALANCE] as Long).toString())
         scope.launch {
             trustChainCommunity.createProposalBlock(
                 BLOCK_TYPE_ROLLBACK, transaction,
