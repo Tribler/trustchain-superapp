@@ -70,14 +70,6 @@
                     android:text="Balance:" />
 
                 <TextView
-                    android:id="@+id/fee_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingRight="10px"
-                    android:visibility="gone"
-                    android:text="Fee:" />
-
-                <TextView
                     android:id="@+id/transfer_target"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -135,14 +127,6 @@
 
                 <TextView
                     android:id="@+id/dao_balance_tv"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:visibility="gone"
-                    android:text="-" />
-
-                <TextView
-                    android:id="@+id/transfer_fee_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"

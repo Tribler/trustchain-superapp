@@ -28,6 +28,7 @@ class SharedWalletListAdapter(
 
         val walletId = view.findViewById<TextView>(R.id.sw_id_item_t)
         val votingThreshold = view.findViewById<TextView>(R.id.sw_threshold_vt)
+        val entranceFee = view.findViewById<TextView>(R.id.sw_entrance_fee_vt)
         val nrOfUsers = view.findViewById<TextView>(R.id.nr_of_users_tv)
         val inWallet = view.findViewById<TextView>(R.id.you_joined_tv)
         val yourVotes = view.findViewById<TextView>(R.id.your_votes_tv)
@@ -39,6 +40,7 @@ class SharedWalletListAdapter(
 
         val walletIdText = "${blockData.SW_UNIQUE_ID}"
         val votingThresholdText = "${blockData.SW_VOTING_THRESHOLD} %"
+        val entranceFeeText = Coin.valueOf(blockData.SW_ENTRANCE_FEE).toFriendlyString()
         val users = "${trustchainPks.size} user(s) in this shared wallet"
         val inWalletText = "$isUserInWallet"
         val votes = "${trustchainPks.filter { it == myPublicKey }.size}"
@@ -46,6 +48,7 @@ class SharedWalletListAdapter(
 
         walletId.text = walletIdText
         votingThreshold.text = votingThresholdText
+        entranceFee.text = entranceFeeText
         nrOfUsers.text = users
         inWallet.text = inWalletText
         yourVotes.text = votes

@@ -8,14 +8,12 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.currencyii.R
-import nl.tudelft.trustchain.currencyii.coin.CoinUtil
 import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWSignatureAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
 import org.bitcoinj.core.Coin
-import org.bitcoinj.core.Transaction
 import java.text.SimpleDateFormat
 
 class ProposalListAdapter(
@@ -37,10 +35,8 @@ class ProposalListAdapter(
         val transferReceiver = view.findViewById<TextView>(R.id.transfer_target_tv)
         val transferAmount = view.findViewById<TextView>(R.id.transfer_amount_tv)
         val votedButton = view.findViewById<TextView>(R.id.voted_button)
-        val fee = view.findViewById<TextView>(R.id.transfer_fee_tv)
         val balance = view.findViewById<TextView>(R.id.dao_balance_tv)
         val balanceText = view.findViewById<TextView>(R.id.balance_tv)
-        val feeText = view.findViewById<TextView>(R.id.fee_tv)
 
         val walletManager = WalletManagerAndroid.getInstance()
 
@@ -66,20 +62,10 @@ class ProposalListAdapter(
                 data.SW_TRANSACTION_SERIALIZED.hexToBytes()
             )
 
-            // Calculate fee and set the change output corresponding to calculated fee
-            val calculatedFeeValue = CoinUtil.calculateEstimatedTransactionFee(
-                Transaction(walletManager.params, data.SW_TRANSACTION_SERIALIZED.hexToBytes()),
-                walletManager.params,
-                CoinUtil.TxPriority.LOW_PRIORITY
-            )
             val previousMultiSigOutput = previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]
-            // Make sure that the fee does not exceed the amount of funds available
-            val calculatedFee =
-                Coin.valueOf(calculatedFeeValue.coerceAtMost((previousMultiSigOutput.nValue - Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).value)))
+
             balanceText.visibility = View.VISIBLE
             balance.visibility = View.VISIBLE
-            feeText.visibility = View.VISIBLE
-            fee.visibility = View.VISIBLE
 
             about.text = "Transfer funds request"
             createdAt.text = formatter.format(block.timestamp)
@@ -89,7 +75,6 @@ class ProposalListAdapter(
             transferReceiver.text = data.SW_TRANSFER_FUNDS_TARGET_SERIALIZED
             transferAmount.text = Coin.valueOf(data.SW_TRANSFER_FUNDS_AMOUNT).toFriendlyString()
             balance.text = Coin.valueOf(previousMultiSigOutput.nValue).toFriendlyString()
-            fee.text = calculatedFee.toFriendlyString()
         } else if (block.type == CoinCommunity.SIGNATURE_ASK_BLOCK) {
             val data = SWSignatureAskTransactionData(block.transaction).getData()
             // Get favor votes
