@@ -22,7 +22,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * Use the [BitcoinFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
+class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     private var adapter: SharedWalletListAdapter? = null
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
@@ -92,7 +92,10 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     }
 
     private fun updateSharedWallets(newWallets: List<TrustChainBlock>) {
-        val walletIds = fetchedWallets.map {
+        // This copy prevents the ConcurrentModificationException
+        val walletsCopy = arrayListOf<TrustChainBlock>()
+        walletsCopy.addAll(fetchedWallets)
+        val walletIds = walletsCopy.map {
             SWJoinBlockTransactionData(it.transaction).getData().SW_UNIQUE_ID
         }
         val distinctById = newWallets
@@ -120,11 +123,17 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
     private fun updateSharedWalletsUI() {
         lifecycleScope.launchWhenStarted {
             val publicKey = getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex()
-
+            val uniqueWallets: ArrayList<TrustChainBlock> = ArrayList()
+            // This copy prevents the ConcurrentModificationException
+            val walletCopy = arrayListOf<TrustChainBlock>()
+            walletCopy.addAll(fetchedWallets)
+            for (wallet in walletCopy) {
+                if (!uniqueWallets.contains(wallet)) uniqueWallets.add(wallet)
+            }
             // Update the list view with the found shared wallets
             adapter = SharedWalletListAdapter(
                 this@JoinDAOFragment,
-                fetchedWallets,
+                uniqueWallets,
                 publicKey,
                 "Click to join",
                 disableOnUserJoined = true
@@ -155,13 +164,14 @@ class JoinDAOFragment() : BaseFragment(R.layout.fragment_join_network) {
 
         for (peer in allUsers) {
             try {
-                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
-                    trustchain.crawlChain(peer)
-                    val crawlResult = trustchain
-                        .getChainByUser(peer.publicKey.keyToBin())
+                // TODO: Commented this line out, it causes the app to crash
+//                withTimeout(SW_CRAWLING_TIMEOUT_MILLI) {
+                trustchain.crawlChain(peer)
+                val crawlResult = trustchain
+                    .getChainByUser(peer.publicKey.keyToBin())
 
-                    updateSharedWallets(crawlResult)
-                }
+                updateSharedWallets(crawlResult)
+//                }
             } catch (t: Throwable) {
                 val message = t.message ?: "No further information"
                 Log.i("Coin", "Crawling failed for: ${peer.publicKey}. $message.")
