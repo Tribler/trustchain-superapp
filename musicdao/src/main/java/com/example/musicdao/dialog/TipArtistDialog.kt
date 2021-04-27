@@ -40,17 +40,15 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
 
         builder.setView(dialogView)
             .setPositiveButton(
-                "Confirm",
-                DialogInterface.OnClickListener { _, _ ->
-                    val amount = amountEditText?.text.toString()
-                    walletService.sendCoins(publicKey, amount)
-                }
-            ).setNegativeButton(
-                "Cancel",
-                DialogInterface.OnClickListener { _, _ ->
-                    dialog?.cancel()
-                }
-            )
+                "Confirm"
+            ) { _, _ ->
+                val amount = amountEditText?.text.toString()
+                walletService.sendCoins(publicKey, amount)
+            }.setNegativeButton(
+                "Cancel"
+            ) { _, _ ->
+                dialog?.cancel()
+            }
 
         return builder.create()
     }

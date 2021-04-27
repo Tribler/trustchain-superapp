@@ -35,7 +35,7 @@ class BitcoinFragment :
     BaseFragment(R.layout.fragment_bitcoin),
     ImportKeyDialog.ImportKeyDialogListener {
 
-        private var getBitcoinPressed = false
+    private var getBitcoinPressed = false
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

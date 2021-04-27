@@ -195,11 +195,13 @@ class CTransaction(
 
             assert(
                 ssBuf.size == 177 - (hash_type and SIGHASH_ANYONECANPAY) * 50 -
-                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (if (isPayToScriptHash(
-                        spk
+                    (if (hash_type and 3 == SIGHASH_NONE) 1 else 0) * 32 - (
+                    if (isPayToScriptHash(
+                            spk
+                        )
                     )
-                )
-                    1 else 0) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
+                        1 else 0
+                    ) * 12 + (if (annex != null) 1 else 0) * 32 + (if (scriptpath) 1 else 0) * 35
             )
 
             return taggedHash("TapSighash", ssBuf)

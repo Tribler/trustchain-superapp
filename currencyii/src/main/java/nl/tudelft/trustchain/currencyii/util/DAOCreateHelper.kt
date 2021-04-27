@@ -26,14 +26,7 @@ class DAOCreateHelper {
     /**
      * 1.1 Create a shared wallet block.
      * The bitcoin transaction may take some time to finish.
-     * If the transaction     private fun getTrustChainCommunity(): TrustChainCommunity {
-     return IPv8Android.getInstance().getOverlay()
-     ?: throw IllegalStateException("TrustChainCommunity is not configured")
-     }
-
-     private val trustchain: TrustChainHelper by lazy {
-     TrustChainHelper(getTrustChainCommunity())
-     }is valid, the result is broadcasted on trust chain.
+     * If the transaction is valid, the result is broadcasted on trust chain.
      * **Throws** exceptions if something goes wrong with creating or broadcasting bitcoin transaction.
      */
     fun createBitcoinGenesisWallet(
@@ -43,12 +36,9 @@ class DAOCreateHelper {
         context: Context
     ): SWJoinBlockTransactionData {
         val walletManager = WalletManagerAndroid.getInstance()
-        val (success, serializedTransaction) = walletManager.safeCreationAndSendGenesisWallet(
+        val (_, serializedTransaction) = walletManager.safeCreationAndSendGenesisWallet(
             Coin.valueOf(entranceFee)
         )
-
-        print(success)
-        // todo do something if success = false
 
         // Broadcast on trust chain if no errors are thrown in the previous step.
         return broadcastCreatedSharedWallet(

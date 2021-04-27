@@ -61,10 +61,7 @@ repositories {
 }
 
 dependencies {
-    api(project(':ipv8-android')){
-        exclude group: 'net.java.dev.jna'
-        exclude group: 'org.bouncycastle'
-    }
+    implementation project(':ipv8-android')
     implementation project(':common')
 
     // AndroidX
