@@ -42,6 +42,16 @@ const val REG_TEST_FAUCET_IP = "131.180.27.224"
 const val REG_TEST_FAUCET_PORT = "8000"
 
 var MIN_BLOCKCHAIN_PEERS = MIN_BLOCKCHAIN_PEERS_TEST_NET
+<<<<<<< HEAD
+=======
+
+// TODO only allow one proposal at a time (not multiple transfers or multiple joins)
+
+// TODO bug with UI: need to switch tabs after join/transaction to refresh the number of dao users and balance
+
+// TODO create new tab in app with previous DAO transactions/joins
+
+>>>>>>> 9e7d024d (more logging and some todos for next group)
 /**
  * The wallet manager which encapsulates the functionality of all possible interactions
  * with bitcoin wallets (including multi-signature wallets).
@@ -243,8 +253,18 @@ class WalletManager(
 
         Log.i("Coin", "Coin: use SendRequest to add our entranceFee input & change address.")
 
+<<<<<<< HEAD
         val req = SendRequest.forTx(transaction)
         req.changeAddress = protocolAddress()
+=======
+        // no fees since we are in a test network and this is a proof of concept still
+        // TODO all transactions in this class should use fees to make it more realistic
+        // (and to make it able to run on MAINNET or TESTNET once they allow taproot transactions)
+        val req = SendRequest.forTx(transaction)
+        req.changeAddress = protocolAddress()
+        req.feePerKb = Coin.valueOf(0)
+        req.ensureMinRequiredFee = false
+>>>>>>> 9e7d024d (more logging and some todos for next group)
         kit.wallet().completeTx(req)
 
         return sendTransaction(req.tx)
@@ -295,10 +315,26 @@ class WalletManager(
         kit.wallet().completeTx(req)
         //todo fuck the fees, laten we dit gwn beunen zoals ik bij transfer funds doe
 
+<<<<<<< HEAD
         return TransactionPackage(
             req.tx.txId.toString(),
             req.tx.bitcoinSerialize().toHex()
         )
+=======
+        // BitcoinJ erroneously does not count the multisig input when determining how much to return to our own wallet.
+        // Therefore, we add the entranceFee to not lose any bitcoins
+        val changeOutput = req.tx.outputs.filter { it.scriptBytes.size != 35 }[0]
+        changeOutput.value = changeOutput.value.add(Coin.valueOf(oldMultiSignatureOutput))
+
+        kit.wallet().signTransaction(req)
+
+        Log.i("Coin", "Joining DAO - newtxid: " + newTransaction.txId.toString())
+        Log.i("Coin", "Joining DAO - serialized new tx without signatures: " + newTransaction.bitcoinSerialize().toHex())
+
+        // TODO there is probably a bug if multiple vins are required by our own wallet (for example, multiple small txin's combined to 1 big vout)
+
+        return req.tx.bitcoinSerialize().toHex()
+>>>>>>> 9e7d024d (more logging and some todos for next group)
     }
 
     /**
@@ -365,7 +401,30 @@ class WalletManager(
             throw IllegalStateException("The join bitcoin DAO transaction script is invalid")
         }
 
+<<<<<<< HEAD
         return sendTransaction(newTransaction)
+=======
+        val aggregateSignature =
+            MuSig.aggregate_musig_signatures(signaturesOfOldOwners, aggregateNonce)
+
+        val index =
+            newTransaction.vin.indexOf(newTransaction.vin.filter { it.scriptSig.isEmpty() }[0])
+
+        val cTxInWitness = CTxInWitness(arrayOf(aggregateSignature))
+        val cTxWitness = CTxWitness(
+            arrayOf(
+                CTxInWitness(),
+                CTxInWitness()
+            )
+        ) // our transactions only have 2 inputs
+        cTxWitness.vtxinwit[index] = cTxInWitness
+
+        newTransaction.wit = cTxWitness
+
+        Log.i("Coin", "Joining DAO - serialized new tx with signatures: " + newTransaction.serialize().toHex())
+
+        return Pair(sendTaprootTransaction(newTransaction), newTransaction.serialize().toHex())
+>>>>>>> 9e7d024d (more logging and some todos for next group)
     }
 
     /**
@@ -379,6 +438,7 @@ class WalletManager(
      * @return ECDSASignature
      */
     fun safeSigningTransactionFromMultiSig(
+<<<<<<< HEAD
         transaction: Transaction,
         myPrivateKey: ECKey,
         receiverAddress: org.bitcoinj.core.Address,
@@ -402,6 +462,50 @@ class WalletManager(
             spendTx.hashForSignature(0, multiSigScript, Transaction.SigHash.ALL, false)
 
         return myPrivateKey.sign(sighash)
+=======
+        oldTransactionSerialized: String,
+        publicKeys: List<ECKey>,
+        nonces: List<ECKey>,
+        key: ECKey,
+        receiverAddress: Address,
+        paymentAmount: Long,
+        walletId: String,
+        context: Context
+    ): BigInteger {
+        val detKey = key as DeterministicKey
+
+        val (cMap, aggPubKey) = MuSig.generate_musig_key(publicKeys)
+        val pubKeyDataMuSig = aggPubKey.getEncoded(true)
+
+        val (oldTransaction, newTransaction) = constructNewTransaction(
+            oldTransactionSerialized,
+            pubKeyDataMuSig,
+            paymentAmount,
+            receiverAddress
+        )
+
+        Log.i("Coin", "Transfer funds DAO - serialized new tx without signature: " + newTransaction.serialize().toHex())
+
+        val privChallenge =
+            detKey.privKey.multiply(BigInteger(1, cMap[key.decompress()])).mod(Schnorr.n)
+
+        val sighashMuSig = CTransaction.TaprootSignatureHash(
+            newTransaction,
+            arrayOf(oldTransaction.vout.filter { it.scriptPubKey.size == 35 }[0]),
+            SIGHASH_ALL_TAPROOT,
+            input_index = 0
+        )
+
+        return MuSig.sign_musig(
+            ECKey.fromPrivate(privChallenge),
+            getNonceKey(walletId, context).first,
+            MuSig.aggregate_schnorr_nonces(
+                nonces
+            ).first,
+            aggPubKey,
+            sighashMuSig
+        )
+>>>>>>> 9e7d024d (more logging and some todos for next group)
     }
 
     /**
@@ -449,7 +553,15 @@ class WalletManager(
         input.verify(previousMultiSigOutput)
         Log.i("Coin", "Coin: script is valid.")
 
+<<<<<<< HEAD
         return sendTransaction(spendTx)
+=======
+        newTransaction.wit = cTxWitness
+
+        Log.i("Coin", "Transfer funds DAO - final serialized new tx with signature: " + newTransaction.serialize().toHex())
+
+        return Pair(sendTaprootTransaction(newTransaction), newTransaction.serialize().toHex())
+>>>>>>> 9e7d024d (more logging and some todos for next group)
     }
 
     /**
