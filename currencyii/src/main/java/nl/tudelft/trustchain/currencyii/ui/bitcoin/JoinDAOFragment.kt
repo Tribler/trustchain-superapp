@@ -173,7 +173,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
 //                }
             } catch (t: Throwable) {
                 val message = t.message ?: "No further information"
-                Log.i("Coin", "Crawling failed for: ${peer.publicKey}. $message.")
+                Log.e("Coin", "Crawling failed for: ${peer.publicKey}. $message.")
             }
         }
         disableRefresher()
@@ -193,7 +193,7 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
                 mostRecentSWBlock
             ).getData()
         } catch (t: Throwable) {
-            Log.i("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
+            Log.e("Coin", "Join wallet proposal failed. ${t.message ?: "No further information"}.")
             setAlertText(t.message ?: "Unexpected error occurred. Try again")
             return
         }
@@ -220,24 +220,13 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
             // Add new nonceKey after joining a DAO
             WalletManagerAndroid.getInstance().addNewNonceKey(proposeBlockData.SW_UNIQUE_ID, context)
         } catch (t: Throwable) {
-            Log.i("Coin", "Joining failed. ${t.message ?: "No further information"}.")
+            Log.e("Coin", "Joining failed. ${t.message ?: "No further information"}.")
             setAlertText(t.message ?: "Unexpected error occurred. Try again")
         }
 
         // Update wallets UI list
         fetchSharedWalletsAndUpdateUI()
         setAlertText("You joined ${proposeBlockData.SW_UNIQUE_ID}!")
-    }
-
-    private fun updateAlertLabel(progress: Double) {
-        Log.i("Coin", "Coin: broadcast of create genesis wallet transaction progress: $progress.")
-
-        if (progress >= 1) {
-            setAlertText("Join wallet progress: completed!")
-        } else {
-            val progressString = "%.0f".format(progress * 100)
-            setAlertText("Join wallet progress: $progressString%...")
-        }
     }
 
     /**

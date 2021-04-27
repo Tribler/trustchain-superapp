@@ -220,66 +220,9 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
         }
     }
 
-    private fun enoughVotes(votesRequired: Int): Boolean {
-        return voters[0].size == votesRequired
-    }
-
-    private fun sendEnoughVotes() {
-        activity?.runOnUiThread {
-                Toast.makeText(this.requireContext(), "Enough votes in favor of the proposal, transaction submitted", Toast.LENGTH_SHORT).show()
-                findNavController().navigateUp()
-        }
-    }
-
-    /**
-     * Update the tabs adapter
-     * Note:
-     * tabsAdapter.notifyDataSetChanges() doesn't work somehow, this is hacky, but works.
-     */
-    private fun updateTabsAdapter(i: Int) {
-        tabsAdapter.notifyDataSetChanged()
-        viewPager.adapter = tabsAdapter
-        viewPager.currentItem = i
-
-        updateTabNames()
-    }
-
-    /**
-     * Check if the votes for the transfer ask block are updated by collecting the new signatures
-     * and comparing them to the current ones.
-     * @param data - the data about the transfer funds block
-     */
-    private fun areVotesUpdated(data: SWSignatureAskBlockTD): Boolean {
-        // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-
-        // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
-        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
-
-        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
-    }
-
-    /**
-     * Check if the votes for the transfer ask block are updated by collecting the new signatures
-     * and comparing them to the current ones.
-     * @param data - the data about the transfer funds block
-     */
-    private fun areVotesUpdated(data: SWTransferFundsAskBlockTD): Boolean {
-        // Get the favor and against votes
-        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
-
-        // Recalculate the signatures to the PKs
-        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
-        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
-
-        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
-    }
-
     /**
      * The method for setting the data for transfer funds requests
+     * @param blockId
      */
     private fun transferFundsAskBlockVotes(blockId: String) {
         val walletManager = WalletManagerAndroid.getInstance()
@@ -376,8 +319,76 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     }
 
     /**
+     * Check if a proposal has enough votes
+     * @param votesRequired - Int, the number of required votes
+     * @return Boolean - if enough votes for the proposal
+     */
+    private fun enoughVotes(votesRequired: Int): Boolean {
+        return voters[0].size == votesRequired
+    }
+
+    /**
+     * If enough votes do go back to all proposals
+     */
+    private fun sendEnoughVotes() {
+        activity?.runOnUiThread {
+            Toast.makeText(this.requireContext(), "Enough votes in favor of the proposal, transaction submitted", Toast.LENGTH_SHORT).show()
+            findNavController().navigateUp()
+        }
+    }
+
+    /**
+     * Update the tabs adapter and move to the correct page after voting
+     * @param currentItem - the current page of the tabs
+     */
+    private fun updateTabsAdapter(currentItem: Int) {
+        tabsAdapter.notifyDataSetChanged()
+        viewPager.adapter = tabsAdapter
+        viewPager.currentItem = currentItem
+
+        updateTabNames()
+    }
+
+    /**
+     * Check if the votes for the transfer ask block are updated by collecting the new signatures
+     * and comparing them to the current ones.
+     * @param data - the data about the transfer funds block
+     * @return Boolean - if there are new votes
+     */
+    private fun areVotesUpdated(data: SWSignatureAskBlockTD): Boolean {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
+    }
+
+    /**
+     * Check if the votes for the transfer ask block are updated by collecting the new signatures
+     * and comparing them to the current ones.
+     * @param data - the data about the transfer funds block
+     * @return Boolean - if there are new votes
+     */
+    private fun areVotesUpdated(data: SWTransferFundsAskBlockTD): Boolean {
+        // Get the favor and against votes
+        val signatures = ArrayList(getCoinCommunity().fetchProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+        val negativeSignatures = ArrayList(getCoinCommunity().fetchNegativeProposalResponses(data.SW_UNIQUE_ID, data.SW_UNIQUE_PROPOSAL_ID))
+
+        // Recalculate the signatures to the PKs
+        val favorPKs = ArrayList(signatures.map { it.SW_BITCOIN_PK })
+        val againstPKs = ArrayList(negativeSignatures.map { it.SW_BITCOIN_PK })
+
+        return !(voters[0].size == favorPKs.size && voters[1].size == againstPKs.size)
+    }
+
+    /**
      * When the user has already voted, or made a vote
      * It hides the vote button and maybe something more in the future.
+     * @param myPublicBitcoinKey
      */
     private fun userHasAlreadyVoted(myPublicBitcoinKey: String) {
         if (!voters[2].contains(myPublicBitcoinKey)) {
