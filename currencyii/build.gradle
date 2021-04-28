@@ -61,7 +61,10 @@ repositories {
 }
 
 dependencies {
-    implementation project(':ipv8-android')
+    api(project(':ipv8-android')){
+        exclude group: 'net.java.dev.jna'
+        exclude group: 'org.bouncycastle'
+    }
     implementation project(':common')
 
     // AndroidX
@@ -90,7 +93,7 @@ dependencies {
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
 
-    implementation 'com.mattskala:itemadapter:0.3'
+    implementation 'com.mattskala:itemadapter:0.4'
 
     // Testing
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -100,7 +103,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // BitcoinJ
-    implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
+    implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
     // Google Core
 //    implementation "com.google.guava:guava:28.2-android"

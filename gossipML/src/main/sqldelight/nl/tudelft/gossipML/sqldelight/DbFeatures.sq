@@ -1,0 +1,22 @@
+CREATE TABLE features (
+    key TEXT NOT NULL,
+    songFeatures TEXT,
+    count INTEGER NOT NULL,
+    PRIMARY KEY (key)
+);
+
+addFeature:
+REPLACE INTO features (key, songFeatures, count)
+VALUES(?, ?, ?);
+
+getFeature:
+SELECT * FROM features WHERE key = ? LIMIT 1;
+
+getSongIds:
+SELECT key FROM features;
+
+getAllFeatures:
+SELECT * FROM features;
+
+deleteAllFeatures:
+DELETE FROM features;

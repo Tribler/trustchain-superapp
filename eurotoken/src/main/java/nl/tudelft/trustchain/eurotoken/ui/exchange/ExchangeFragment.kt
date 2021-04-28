@@ -19,14 +19,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
 import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
-import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment.Companion.addDecimalLimiter
 import org.json.JSONException
 import org.json.JSONObject
 

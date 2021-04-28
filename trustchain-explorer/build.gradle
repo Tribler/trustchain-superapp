@@ -80,7 +80,7 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
     implementation 'com.github.tony19:logback-android:2.0.0'
 
-    implementation 'com.mattskala:itemadapter:0.3'
+    implementation 'com.mattskala:itemadapter:0.4'
 
     // Testing
     testImplementation 'junit:junit:4.12'

@@ -63,21 +63,23 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
     fun start() {
         if (started) return
         app.setBlockingStartup(false)
-        app.setDownloadListener(object : DownloadProgressTracker() {
-            override fun progress(
-                pct: Double,
-                blocksSoFar: Int,
-                date: Date?
-            ) {
-                super.progress(pct, blocksSoFar, date)
-                percentageSynced = pct.toInt()
-            }
+        app.setDownloadListener(
+            object : DownloadProgressTracker() {
+                override fun progress(
+                    pct: Double,
+                    blocksSoFar: Int,
+                    date: Date?
+                ) {
+                    super.progress(pct, blocksSoFar, date)
+                    percentageSynced = pct.toInt()
+                }
 
-            override fun doneDownload() {
-                super.doneDownload()
-                percentageSynced = 100
+                override fun doneDownload() {
+                    super.doneDownload()
+                    percentageSynced = 100
+                }
             }
-        })
+        )
         if (params == RegTestParams.get()) {
             try {
                 // This is a bootstrap node (a digitalocean droplet, running a full bitcoin regtest

@@ -7,6 +7,7 @@ import androidx.core.text.HtmlCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.musicdao.MusicBaseFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
 import com.example.musicdao.dialog.TipArtistDialog
@@ -40,7 +41,7 @@ class ReleaseFragment(
     private val publisher: String,
     private val torrentInfoName: String?,
     private val sessionManager: SessionManager
-) : Fragment(R.layout.fragment_release) {
+) : MusicBaseFragment(R.layout.fragment_release) {
     private var metadata: FileStorage? = null
     private var tracks: MutableMap<Int, TrackFragment> = hashMapOf()
     private var currentFileIndex = -1
@@ -297,6 +298,7 @@ class ReleaseFragment(
         // It is not a streaming torrent, and therefore we can conclude we already have
         // it locally so we can just start playing it
         if (fileToPlay.isFile && fileToPlay.length() > 200 * 1024) {
+            GlobalScope.launch { getRecommenderCommunity().recommendStore.updateLocalFeatures(fileToPlay) }
             startPlaying(fileToPlay, currentFileIndex)
         } else {
             AudioPlayer.getInstance()

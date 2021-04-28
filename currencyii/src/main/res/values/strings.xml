@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TrustChain Currency</string>
+    <string name="app_name">TrustChain - Creating Trust</string>
 
     <plurals name="x_peers">
         <item quantity="one">%d peer</item>

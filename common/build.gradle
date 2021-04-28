@@ -56,8 +56,15 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
+}
+
 dependencies {
-    api project(':ipv8-android')
+    api(project(':ipv8-android')){
+        exclude group: 'net.java.dev.jna'
+        exclude group: 'org.bouncycastle'
+    }
 
     api 'com.google.guava:guava:30.0-android'
 
@@ -91,7 +98,7 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
     //implementation 'com.github.tony19:logback-android:2.0.0'
 
-    implementation 'com.mattskala:itemadapter:0.3'
+    implementation 'com.mattskala:itemadapter:0.4'
 
     // BitTorrent
     api files('libs/jlibtorrent-1.2.10.0.jar')
@@ -108,7 +115,7 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
-    testImplementation "com.goterl.lazycode:lazysodium-java:4.2.4"
+    testImplementation "com.goterl.lazycode:lazysodium-java:4.3.2"
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
 }
 

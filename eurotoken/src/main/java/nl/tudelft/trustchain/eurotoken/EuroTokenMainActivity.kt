@@ -1,9 +1,6 @@
 package nl.tudelft.trustchain.eurotoken
 
-import android.media.MediaPlayer
-import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 
 class EuroTokenMainActivity : BaseActivity() {
 
