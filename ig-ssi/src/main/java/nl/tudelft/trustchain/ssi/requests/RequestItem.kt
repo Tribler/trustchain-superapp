@@ -9,14 +9,15 @@ class RequestItem(
     val requestType: Int,
     val peer: Peer,
     val attributeName: String,
-    val metadata: String? = null
+    val metadata: String? = null,
+    val requestedValue: String? = null,
 ) : Item() {
     override fun equals(other: Any?): Boolean {
-        return other is RequestItem && this.index == other.index && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata
+        return other is RequestItem && this.index == other.index && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata && this.requestedValue == other.requestedValue
     }
 
     override fun areItemsTheSame(other: Item): Boolean {
-        return other is RequestItem && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata
+        return other is RequestItem && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata && this.requestedValue == other.requestedValue
     }
 
     override fun areContentsTheSame(other: Item): Boolean {

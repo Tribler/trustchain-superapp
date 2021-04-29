@@ -71,7 +71,12 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
                 Log.i("ig-ssi", "Signing attestation.")
                 channel.attest(item.peer, item.attributeName, value.toByteArray(Charsets.US_ASCII))
             }
-            NewAttestationValueDialog(item.attributeName, idFormat, ::callBack).show(
+            NewAttestationValueDialog(
+                item.attributeName,
+                idFormat,
+                item.requestedValue,
+                callback = ::callBack
+            ).show(
                 parentFragmentManager,
                 "ig-ssi"
             )
@@ -87,7 +92,7 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
             )
             channel.disallowVerification(item.peer, item.attributeName)
         } else if (item.isAttestationRequest()) {
-            channel.dismissAttestionRequest(item.peer, item.attributeName)
+            channel.dismissAttestationRequest(item.peer, item.attributeName)
         }
     }
 
@@ -102,21 +107,27 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
 
                 val items = mutableListOf<RequestItem>()
                 attestationRequests.keys.forEachIndexed { index, attributePointer ->
-                    items += RequestItem(
-                        index,
-                        ATTESTATION_REQUEST_ITEM,
-                        attributePointer.peer,
-                        attributePointer.attributeName,
-                        attestationRequests[attributePointer]!!.second
+                    val request = attestationRequests[attributePointer]!!
+                    items.add(
+                        RequestItem(
+                            index,
+                            ATTESTATION_REQUEST_ITEM,
+                            attributePointer.peer,
+                            attributePointer.attributeName,
+                            request.second,
+                            request.third
+                        )
                     )
                 }
 
                 verificationRequests.keys.forEachIndexed { index, attributePointer ->
-                    items += RequestItem(
-                        index,
-                        VERIFY_REQUEST_ITEM,
-                        attributePointer.peer,
-                        attributePointer.attributeName
+                    items.add(
+                        RequestItem(
+                            index,
+                            VERIFY_REQUEST_ITEM,
+                            attributePointer.peer,
+                            attributePointer.attributeName
+                        )
                     )
                 }
 

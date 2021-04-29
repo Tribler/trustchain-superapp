@@ -5,6 +5,7 @@ import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_request.view.*
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.parseHtml
 import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
 import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
 
@@ -21,13 +22,18 @@ class RequestRenderer(
         when (item.requestType) {
             VERIFY_REQUEST_ITEM -> {
                 headerText.text =
-                    resources.getText(R.string.verifyRequest).toString() + item.attributeName
+                    parseHtml(
+                        resources.getText(R.string.verifyRequest)
+                            .toString() + " <b>${item.attributeName}</b>"
+                    )
                 positiveButton.text = resources.getText(R.string.allow)
                 negativeButton.text = resources.getText(R.string.deny)
             }
             ATTESTATION_REQUEST_ITEM -> {
-                headerText.text = resources.getText(R.string.attestationRequest)
-                    .toString() + item.attributeName
+                headerText.text = parseHtml(
+                    resources.getText(R.string.attestationRequest)
+                        .toString() + " <b>${item.attributeName}</b>"
+                )
                 metadataHeaderText.visibility = View.VISIBLE
                 metadataTextView.text = item.metadata
                 metadataTextView.visibility = View.VISIBLE
@@ -40,7 +46,6 @@ class RequestRenderer(
         }
 
         peerMIDTextView.text = item.peer.mid
-
         positiveButton.setOnClickListener {
             onPositive(item)
         }
