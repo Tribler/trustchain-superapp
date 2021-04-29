@@ -19,7 +19,7 @@ import nl.tudelft.ipv8.android.keyvault.AndroidCryptoProvider
 import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.attestation.AuthorityManager
-import nl.tudelft.ipv8.attestation.CommunicationManager
+import nl.tudelft.ipv8.attestation.communication.CommunicationManager
 import nl.tudelft.ipv8.attestation.identity.database.IdentitySQLiteStore
 import nl.tudelft.ipv8.attestation.revocation.AuthoritySQLiteStore
 import nl.tudelft.ipv8.attestation.schema.SchemaManager

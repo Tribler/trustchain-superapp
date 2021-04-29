@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.ssi
 
-import nl.tudelft.ipv8.attestation.CommunicationChannel
-import nl.tudelft.ipv8.attestation.CommunicationManager
+import nl.tudelft.ipv8.attestation.communication.CommunicationChannel
+import nl.tudelft.ipv8.attestation.communication.CommunicationManager
 
 const val DEFAULT_PSEUDONYM = "MY_PEER"
 val DEFAULT_RENDEZVOUS_TOKEN = null
@@ -20,7 +20,10 @@ object Communication {
             ?: throw IllegalStateException("CommunicationManager is not initialized.")
     }
 
-    fun load(pseudonym: String = getActivePseudonym(), rendezvous: String? = getActiveRendezvousToken()): CommunicationChannel {
+    fun load(
+        pseudonym: String = getActivePseudonym(),
+        rendezvous: String? = getActiveRendezvousToken()
+    ): CommunicationChannel {
         var rendezvousToken = rendezvous
         if (rendezvousToken == "") {
             rendezvousToken = DEFAULT_RENDEZVOUS_TOKEN
@@ -47,7 +50,7 @@ object Communication {
     }
 
     fun setActiveRendezvousToken(token: String?) {
-        synchronized(pseudonymLock) {
+        synchronized(tokenLock) {
             this.activeRendezvousToken = token
         }
     }
