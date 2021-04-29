@@ -37,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/peerMIDTextView"
+            android:gravity="center"
             android:padding="2dp" />
 
         <TextView
@@ -53,6 +54,7 @@
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:id="@+id/metadataTextView" />
 
         <LinearLayout
@@ -66,7 +68,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/positiveButton"
                 android:layout_weight="1"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored" />
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:textColor="@color/green" />
 
             <Button
                 android:text="@string/deny"

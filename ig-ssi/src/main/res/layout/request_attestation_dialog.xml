@@ -1,19 +1,63 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/attribute_input"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/select_attribute"
+        android:id="@+id/textView" />
+
+    <Spinner
+        android:id="@+id/attributeNameSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/name_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
         android:backgroundTint="@android:color/holo_red_dark"
         android:hint="@string/attribute_name"
         android:textCursorDrawable="@null" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_proof_type"
+        android:id="@+id/textView1" />
 
     <Spinner
         android:id="@+id/idFormatSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/value_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:hint="@string/requested_value"
+        android:textCursorDrawable="@null" />
+
+    <Button
+        android:text="@string/select_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/select_image_button" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:srcCompat="@tools:sample/avatars"
+        android:visibility="gone"
+        android:id="@+id/id_picture_view" />
+
 
 </LinearLayout>

@@ -16,4 +16,9 @@
     <string name="deny">Deny</string>
     <string name="verifyRequest">Verify Request for </string>
     <string name="attestationRequest">Attestation Request for </string>
+    <string name="select_attribute">Select attribute</string>
+    <string name="select_proof_type">Select proof type</string>
+    <string name="requested_value">Request value (e.g. 42)</string>
+    <string name="select_image">Select Image</string>
+    <string name="id_picture">ID Picture</string>
 </resources>
