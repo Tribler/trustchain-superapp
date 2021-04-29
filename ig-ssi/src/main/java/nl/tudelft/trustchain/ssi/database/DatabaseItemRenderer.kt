@@ -6,6 +6,11 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_database.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.decodeImage
+import nl.tudelft.trustchain.ssi.dialogs.attestation.ID_PICTURE
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DatabaseItemRenderer(
     private val onItemClick: (DatabaseItem) -> Unit,
@@ -18,15 +23,22 @@ class DatabaseItemRenderer(
     override fun bindView(item: DatabaseItem, view: View) = with(view) {
         val attestation = item.attestation
         // if (attestation.attributeValue != null) {
+        if (attestation.attributeName == ID_PICTURE.toUpperCase(Locale.getDefault())) {
+            pictureView.setImageBitmap(decodeImage(String(attestation.attributeValue)))
+            pictureView.visibility = View.VISIBLE
+        }
         attributeNameAndValue.text =
-            attestation.attributeName + ": " + attestation.attributeValue
+            attestation.attributeName + ": " + String(attestation.attributeValue)
         // } else {
         //     attributeNameAndValue.text = "MALFORMED ATTESTATION"
         //     attributeNameAndValue.setTextColor(Color.RED)
         // }
         hash.text = attestation.attributeHash.toHex()
         idformat.text = attestation.idFormat
-        blob.text = "Remove this"
+        blob.text = SimpleDateFormat(
+            "MM/dd/yyyy",
+            Locale.getDefault()
+        ).format(Date(attestation.signDate.toLong() * 1000)).toString()
 
         removeButton.setOnClickListener {
             onRemoveButtonClick(item)

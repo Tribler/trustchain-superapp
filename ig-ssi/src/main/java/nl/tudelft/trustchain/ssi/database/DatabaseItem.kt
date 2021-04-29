@@ -1,9 +1,9 @@
 package nl.tudelft.trustchain.ssi.database
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.ipv8.attestation.PrivateAttestationBlob
+import nl.tudelft.ipv8.attestation.communication.AttestationPresentation
 
-class DatabaseItem(val index: Int, val attestation: PrivateAttestationBlob) : Item() {
+class DatabaseItem(val index: Int, val attestation: AttestationPresentation) : Item() {
 
     override fun equals(other: Any?): Boolean {
         return other is DatabaseItem && this.index == other.index && this.attestation == other.attestation

@@ -8,6 +8,8 @@ import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import androidmads.library.qrgenearator.QRGContents
+import androidmads.library.qrgenearator.QRGEncoder
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -19,10 +21,9 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
-import nl.tudelft.ipv8.util.defaultEncodingUtils
-import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.ipv8.attestation.communication.AttestationPresentation
+import nl.tudelft.ipv8.attestation.communication.DEFAULT_TIME_OUT
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -30,9 +31,15 @@ import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.attestationRequestCompleteCallback
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
+import nl.tudelft.trustchain.ssi.dialogs.attestation.ID_PICTURE
 import nl.tudelft.trustchain.ssi.dialogs.attestation.PresentAttestationDialog
 import nl.tudelft.trustchain.ssi.dialogs.attestation.RemoveAttestationDialog
+import nl.tudelft.trustchain.ssi.encodeB64
+import org.json.JSONArray
 import org.json.JSONObject
+import java.util.Locale
+
+const val QR_CODE_VALUE_LIMIT = 2
 
 class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
@@ -108,7 +115,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
         val areEqual = entries == adapter.items
         if (!areEqual) {
-            Log.d("ig-ssi", "EQUAL: ${areEqual}")
             adapter.updateItems(entries)
         }
 
@@ -126,7 +132,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
         val dialog = PresentAttestationDialog(
             attributeName,
-            attributeValue
+            String(attributeValue)
         )
         dialog.show(
             parentFragmentManager,
@@ -143,34 +149,56 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         //     }
         // } else {
         lifecycleScope.launch {
-            val data = JSONObject()
-            val channel = Communication.load()
-            val (timestamp, challenge) = channel.generateChallenge()
-            // TODO: Definitions.
-            data.put("presentation", "attestation")
-            data.put("challenge", defaultEncodingUtils.encodeBase64ToString(challenge))
-            data.put("timestamp", timestamp)
-            data.put("metadata", it.attestation.metadataString)
-            data.put("attestationHash", it.attestation.attributeHash.toHex())
-            data.put("signature", defaultEncodingUtils.encodeBase64ToString(it.attestation.signature))
-            data.put("attestor", it.attestation.attestorKeys[0])
-            data.put(
-                "subject",
-                defaultEncodingUtils.encodeBase64ToString(channel.myPeer.publicKey.keyToBin())
-            )
+            while (isActive) {
+                val channel = Communication.load()
+                val challenge = channel.generateChallenge()
 
-            val output =
-                defaultEncodingUtils.encodeBase64ToString(data.toString().toByteArray())
-            Log.d(
-                "ig-ssi",
-                "Presenting Attestation as QRCode: Size ${
-                    output.length
-                }, Data: $data"
-            )
-            val bitmap = withContext(Dispatchers.Default) {
-                qrCodeUtils.createQR(output)!!
+                var secondaryQRCode: Bitmap? = null
+                val presentation: String
+                if (it.attestation.attributeValue.size > QR_CODE_VALUE_LIMIT) {
+                    presentation =
+                        formatAttestationToJSON(it.attestation, channel.myPeer.publicKey, challenge)
+                    val secondaryPresentation =
+                        formatValueToJSON(
+                            it.attestation.attributeValue,
+                            challenge,
+                            encode = attributeName != ID_PICTURE.toUpperCase(
+                                Locale.getDefault()
+                            )
+                        )
+                    secondaryQRCode =
+                        QRGEncoder(
+                            secondaryPresentation,
+                            null,
+                            QRGContents.Type.TEXT,
+                            1000
+                        ).bitmap
+                } else {
+                    presentation = formatAttestationToJSON(
+                        it.attestation,
+                        channel.myPeer.publicKey,
+                        challenge,
+                        it.attestation.attributeValue
+                    )
+                }
+
+                Log.d(
+                    "ig-ssi",
+                    "Presenting Attestation as QRCode: Size ${
+                        presentation.length
+                    }, Data: $presentation"
+                )
+                // val bitmap = withContext(Dispatchers.Default) {
+                //     qrCodeUtils.createQR(presentation, 1000)!!
+                // }
+                val bitmap = withContext(Dispatchers.Default) {
+                    QRGEncoder(presentation, null, QRGContents.Type.TEXT, 1000).bitmap
+                }
+
+                dialog.setQRCodes(bitmap, secondaryQRCode)
+                dialog.startTimeout(DEFAULT_TIME_OUT)
+                delay(DEFAULT_TIME_OUT)
             }
-            dialog.setQRCode(bitmap)
         }
         // }
     }
@@ -236,9 +264,8 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 data.put("presentation", "authority")
                 val myPeer = Communication.load().myPeer
                 val publicKey =
-                    defaultEncodingUtils.encodeBase64ToString(myPeer.publicKey.keyToBin())
+                    encodeB64(myPeer.publicKey.keyToBin())
                 data.put("public_key", publicKey)
-                IPv8Android.getInstance()
 
                 bitmap = withContext(Dispatchers.Default) {
                     qrCodeUtils.createQR(data.toString(), 300)!!
@@ -254,6 +281,88 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             binding.qrCodePlaceHolder.visibility = View.GONE
             binding.publicKeyQRCode.setImageBitmap(bitmap)
         }
+    }
+
+    private fun formatValueToJSON(
+        value: ByteArray,
+        challengePair: Pair<Long, ByteArray>,
+        encode: Boolean = true
+    ): String {
+        val data = JSONObject()
+        data.put("presentation", "attestation")
+
+        // Challenge
+        val challenge = JSONObject()
+        val (challengeValue, challengeSignature) = challengePair
+        challenge.put("timestamp", challengeValue)
+        challenge.put("signature", encodeB64(challengeSignature))
+        data.put("challenge", challenge)
+
+        // Value
+        val valueString = if (encode) encodeB64(value) else String(value)
+        data.put("value", valueString)
+
+        return data.toString()
+    }
+
+    private fun formatAttestationToJSON(
+        attestation: AttestationPresentation,
+        subjectKey: nl.tudelft.ipv8.keyvault.PublicKey,
+        challengePair: Pair<Long, ByteArray>,
+        value: ByteArray? = null
+    ): String {
+        val data = JSONObject()
+        data.put("presentation", "attestation")
+
+        // TODO: Definitions.
+        // AttestationHash
+        data.put("attestationHash", encodeB64(attestation.attributeHash))
+
+        // Metadata
+        val metadata = JSONObject()
+        val (pointer, signature, serializedMD) = attestation.metadata.toDatabaseTuple()
+        metadata.put("pointer", encodeB64(pointer))
+        metadata.put("signature", encodeB64(signature))
+        metadata.put(
+            "metadata", String(serializedMD)
+        )
+        data.put("metadata", metadata)
+
+        // Subject
+        data.put(
+            "subject",
+            encodeB64(subjectKey.keyToBin())
+        )
+
+        // Challenge
+        val challenge = JSONObject()
+        val (challengeValue, challengeSignature) = challengePair
+        challenge.put("timestamp", challengeValue)
+        challenge.put("signature", encodeB64(challengeSignature))
+        data.put("challenge", challenge)
+
+        // Attestors
+        val attestors = JSONArray()
+        for (attestor in attestation.attestors) {
+            val attestorJSON = JSONObject()
+            attestorJSON.put(
+                "keyHash",
+                encodeB64(attestor.first)
+            )
+            attestorJSON.put(
+                "signature",
+                encodeB64(attestor.second)
+            )
+            attestors.put(attestorJSON)
+        }
+        data.put("attestors", attestors)
+
+        // Value
+        if (value != null) {
+            data.put("value", encodeB64(value))
+        }
+
+        return data.toString()
     }
 
     @Suppress("UNUSED_PARAMETER")
