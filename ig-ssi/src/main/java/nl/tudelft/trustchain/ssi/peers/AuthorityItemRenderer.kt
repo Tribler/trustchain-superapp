@@ -4,10 +4,8 @@ import android.annotation.SuppressLint
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_authority.view.*
-import kotlinx.android.synthetic.main.item_peer.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.R
-import java.util.*
 
 class AuthorityItemRenderer(
     private val onItemClick: (AuthorityItem) -> Unit,
