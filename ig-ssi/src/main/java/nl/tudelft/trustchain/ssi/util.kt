@@ -1,9 +1,13 @@
 package nl.tudelft.trustchain.ssi
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.text.Html
 import android.text.SpannableString
 import android.text.Spanned
+import nl.tudelft.ipv8.util.defaultEncodingUtils
+import java.io.ByteArrayOutputStream
 
 @Suppress("DEPRECATION")
 fun parseHtml(html: String?): Spanned? {
@@ -21,4 +25,26 @@ fun parseHtml(html: String?): Spanned? {
             Html.fromHtml(html)
         }
     }
+}
+
+fun encodeB64(buffer: ByteArray): String {
+    return defaultEncodingUtils.encodeBase64ToString(buffer)
+}
+
+fun decodeB64(string: String): ByteArray {
+    return defaultEncodingUtils.decodeBase64FromString(string)
+}
+
+fun encodeImage(image: Bitmap): String {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    image.compress(Bitmap.CompressFormat.JPEG, 1, byteArrayOutputStream)
+    val byteArray = byteArrayOutputStream.toByteArray()
+    return encodeB64(byteArray)
+}
+
+fun decodeImage(string: String): Bitmap {
+    val decodedBytes = decodeB64(
+        string
+    )
+    return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
 }
