@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.verifier
+package nl.tudelft.trustchain.ssi.ui.verifier
 
 import android.content.Intent
 import android.os.Bundle
@@ -19,11 +19,11 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.decodeB64
-import nl.tudelft.trustchain.ssi.dialogs.attestation.AttestationConfirmationDialog
-import nl.tudelft.trustchain.ssi.dialogs.attestation.FireMissilesDialog
-import nl.tudelft.trustchain.ssi.dialogs.authority.AuthorityConfirmationDialog
-import nl.tudelft.trustchain.ssi.dialogs.misc.ScanIntentDialog
+import nl.tudelft.trustchain.ssi.util.decodeB64
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationConfirmationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.misc.ScanIntentDialog
 import org.json.JSONObject
 
 const val REQUEST_ATTESTATION_INTENT = 0
@@ -100,29 +100,28 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         val rendezvousToken = attestationPresentation.optString("rendezvous")
         when (this.intent) {
             REQUEST_ATTESTATION_INTENT -> {
+                val dialog = FireMissilesDialog()
+                dialog.show(parentFragmentManager, "ig-ssi")
                 GlobalScope.launch {
-                    val channel = Communication.load(rendezvous = rendezvousToken)
-                    var peer: Peer? = null
+                    val channel =
+                        Communication.load(rendezvous = rendezvousToken)
                     try {
+                        var peer: Peer? = null
                         withTimeout(30_000) {
                             while (peer == null) {
                                 peer =
-                                    channel.peers.find { it.publicKey == authorityKey }
-                                delay(50L)
+                                    channel.peers.find { it1 ->
+                                        it1.publicKey.keyToHash()
+                                            .contentEquals(authorityKey.keyToHash())
+                                    }
+                                delay(100)
                             }
                         }
+                        dialog.setPeer(peer!!)
                     } catch (e: TimeoutCancellationException) {
-                        Toast.makeText(
-                            requireContext(),
-                            "Could not locate peer",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        dialog.cancel()
                     }
-                    FireMissilesDialog(
-                        peer!!
-                    ).show(parentFragmentManager, tag)
                 }
-                findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
             }
             ADD_AUTHORITY_INTENT -> AuthorityConfirmationDialog(authorityKey).show(
                 parentFragmentManager,
