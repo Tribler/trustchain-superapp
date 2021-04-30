@@ -7,11 +7,11 @@
 
     <fragment
         android:id="@+id/peersFragment2"
-        android:name="nl.tudelft.trustchain.ssi.peers.Peers2Fragment"
+        android:name="nl.tudelft.trustchain.ssi.ui.peers.Peers2Fragment"
         android:label="SSI Clients" />
     <fragment
         android:id="@+id/databaseFragment"
-        android:name="nl.tudelft.trustchain.ssi.database.DatabaseFragment"
+        android:name="nl.tudelft.trustchain.ssi.ui.database.DatabaseFragment"
         android:label="Home Screen" >
         <action
             android:id="@+id/action_databaseFragment_to_verificationFragment"
@@ -23,7 +23,7 @@
     </fragment>
     <fragment
         android:id="@+id/verificationFragment"
-        android:name="nl.tudelft.trustchain.ssi.verifier.VerificationFragment"
+        android:name="nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragment"
         android:label="Verification">
         <action
             android:id="@+id/action_verificationFragment_to_databaseFragment"
@@ -56,7 +56,7 @@
     </fragment>
     <fragment
         android:id="@+id/requestsFragment"
-        android:name="nl.tudelft.trustchain.ssi.requests.RequestsFragment"
+        android:name="nl.tudelft.trustchain.ssi.ui.requests.RequestsFragment"
         android:label="Requests"
         tools:layout="@layout/fragment_requests" />
 </navigation>

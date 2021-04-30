@@ -3,8 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center_horizontal">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
 
     <ImageView
@@ -20,8 +22,8 @@
 
     <ImageView
         android:id="@+id/qrCodeView"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -71,6 +73,7 @@
         app:layout_constraintTop_toBottomOf="@id/qrCodeView"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/timeoutProgressBar"
         android:text="Switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
