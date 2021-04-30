@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
@@ -20,8 +20,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.decodeImage
-import nl.tudelft.trustchain.ssi.parseHtml
+import nl.tudelft.trustchain.ssi.util.decodeImage
+import nl.tudelft.trustchain.ssi.util.parseHtml
 import java.util.Locale
 
 class PresentAttestationDialog(
@@ -90,10 +90,14 @@ class PresentAttestationDialog(
             progressBar.visibility = View.GONE
         }
         val imageView = mView!!.findViewById<ImageView>(R.id.qrCodeView)
-        imageView.setImageBitmap(mainQRCode)
 
         if (secondaryQRCode != null) {
             val switch = mView!!.findViewById<Switch>(R.id.QRSwitch)
+            if (switch.isChecked) {
+                imageView.setImageBitmap(secondaryQRCode)
+            } else {
+                imageView.setImageBitmap(mainQRCode)
+            }
             switch.visibility = View.VISIBLE
             switch.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
@@ -102,6 +106,8 @@ class PresentAttestationDialog(
                     imageView.setImageBitmap(mainQRCode)
                 }
             }
+        } else {
+            imageView.setImageBitmap(mainQRCode)
         }
     }
 
