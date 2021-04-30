@@ -50,8 +50,12 @@ object Communication {
     }
 
     fun setActiveRendezvousToken(token: String?) {
+        if (activeRendezvousToken != token)
         synchronized(tokenLock) {
+            val manager = getInstance()
+            manager.unload(getActivePseudonym())
             this.activeRendezvousToken = token
+            this.load()
         }
     }
 
