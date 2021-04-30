@@ -1,12 +1,15 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createScaledBitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -14,9 +17,11 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.GlobalScope
@@ -24,7 +29,7 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.encodeImage
+import nl.tudelft.trustchain.ssi.util.encodeImage
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.util.Locale
@@ -38,9 +43,18 @@ val DEFAULT_ATTRIBUTE_NAMES = arrayOf(AGE, NAME, ID_PICTURE, CUSTOM)
 const val PICK_IMAGE = 1
 
 @SuppressLint("ClickableViewAccessibility")
-class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
+class FireMissilesDialog(peer: Peer? = null) :
+    DialogFragment() {
     private lateinit var mView: View
+    private lateinit var mContext: Context
+    private lateinit var peer: Peer
     private var image: Bitmap? = null
+
+    init {
+        if (peer != null) {
+            this.peer = peer
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == PICK_IMAGE) {
@@ -68,6 +82,14 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
 
             val view = inflater.inflate(R.layout.request_attestation_dialog, null)
             this.mView = view
+            this.mContext = requireContext()
+
+            val contentView = view.findViewById<LinearLayout>(R.id.content)
+            val loaderView = view.findViewById<ConstraintLayout>(R.id.findPeerContent)
+            if (this::peer.isInitialized) {
+                contentView.visibility = View.VISIBLE
+                loaderView.visibility = View.GONE
+            }
 
             val attributeNameSpinner = view.findViewById<Spinner>(R.id.attributeNameSpinner)
             val attributeNameAdapter = ArrayAdapter(
@@ -153,6 +175,9 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
             val dialog = builder.create()
             dialog.setOnShowListener {
                 val posBtn = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                if (!this::peer.isInitialized) {
+                    posBtn.visibility = View.GONE
+                }
                 posBtn.setOnClickListener {
                     if (attributeNameSpinner.selectedItem != CUSTOM || attributeNameInput.text.toString() != "") {
                         val idFormat = idFormatSpinner.selectedItem.toString()
@@ -216,5 +241,22 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
             }
             dialog
         } ?: throw IllegalStateException("Activity cannot be null")
+    }
+
+    fun setPeer(peer: Peer) {
+        Handler(Looper.getMainLooper()).post {
+            this.peer = peer
+            mView.findViewById<ConstraintLayout>(R.id.findPeerContent).visibility = View.GONE
+            mView.findViewById<LinearLayout>(R.id.content).visibility = View.VISIBLE
+            (this.dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE).visibility =
+                View.VISIBLE
+        }
+    }
+
+    fun cancel() {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(requireContext(), "Failed to locate peer", Toast.LENGTH_LONG).show()
+            this.dismiss()
+        }
     }
 }
