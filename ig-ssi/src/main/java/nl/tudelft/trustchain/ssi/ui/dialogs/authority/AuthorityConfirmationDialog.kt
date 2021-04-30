@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.authority
+package nl.tudelft.trustchain.ssi.ui.dialogs.authority
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -13,7 +13,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.verifier.VerificationFragmentDirections
+import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 
 class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogFragment() {
 

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -19,9 +19,9 @@ import com.jaredrummler.blockingdialog.BlockingDialogFragment
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_18PLUS
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_UNDERAGE
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.decodeImage
-import nl.tudelft.trustchain.ssi.encodeImage
-import nl.tudelft.trustchain.ssi.parseHtml
+import nl.tudelft.trustchain.ssi.util.decodeImage
+import nl.tudelft.trustchain.ssi.util.encodeImage
+import nl.tudelft.trustchain.ssi.util.parseHtml
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.util.Locale

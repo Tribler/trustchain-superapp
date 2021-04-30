@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import android.app.Dialog
 import android.content.DialogInterface

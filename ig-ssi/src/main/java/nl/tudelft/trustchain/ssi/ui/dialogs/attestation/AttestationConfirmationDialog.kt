@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import SuccessDialog
 import android.app.AlertDialog
@@ -9,7 +9,7 @@ import nl.tudelft.ipv8.attestation.identity.Metadata
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.Communication
-import nl.tudelft.trustchain.ssi.dialogs.status.DangerDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.status.DangerDialog
 
 class AttestationConfirmationDialog(
     private val attestationHash: ByteArray,
@@ -27,7 +27,7 @@ class AttestationConfirmationDialog(
             builder.setTitle("Attestation Found")
                 .setMessage("Attestation presented by: ${subjectKey.keyToHash().toHex()}")
                 .setPositiveButton(
-                    "Verify"
+                    "Quick Verification"
                 ) { _, _ ->
                     val channel = Communication.load()
 

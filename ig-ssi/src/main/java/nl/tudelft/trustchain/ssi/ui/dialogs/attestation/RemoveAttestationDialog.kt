@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.attestation
+package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.database.DatabaseItem
+import nl.tudelft.trustchain.ssi.ui.database.DatabaseItem
 
 class RemoveAttestationDialog(val item: DatabaseItem, val callback: (() -> Unit) = {}) :
     DialogFragment() {

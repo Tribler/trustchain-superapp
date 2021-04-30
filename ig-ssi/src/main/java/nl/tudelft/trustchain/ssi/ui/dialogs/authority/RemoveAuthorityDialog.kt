@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.dialogs.authority
+package nl.tudelft.trustchain.ssi.ui.dialogs.authority
 
 import android.content.DialogInterface
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.fragment.app.DialogFragment
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.peers.AuthorityItem
+import nl.tudelft.trustchain.ssi.ui.peers.AuthorityItem
 
 class RemoveAuthorityDialog(val item: AuthorityItem, val callback: (() -> Unit) = { }) :
     DialogFragment() {
