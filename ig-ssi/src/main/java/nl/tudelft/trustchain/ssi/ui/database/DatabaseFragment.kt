@@ -1,11 +1,12 @@
-package nl.tudelft.trustchain.ssi.database
+package nl.tudelft.trustchain.ssi.ui.database
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import androidmads.library.qrgenearator.QRGContents
@@ -20,26 +21,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.WalletAttestation
-import nl.tudelft.ipv8.attestation.communication.AttestationPresentation
 import nl.tudelft.ipv8.attestation.communication.DEFAULT_TIME_OUT
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.attestationRequestCompleteCallback
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
-import nl.tudelft.trustchain.ssi.dialogs.attestation.ID_PICTURE
-import nl.tudelft.trustchain.ssi.dialogs.attestation.PresentAttestationDialog
-import nl.tudelft.trustchain.ssi.dialogs.attestation.RemoveAttestationDialog
-import nl.tudelft.trustchain.ssi.encodeB64
-import org.json.JSONArray
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.PresentAttestationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RemoveAttestationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.misc.RendezvousDialog
+import nl.tudelft.trustchain.ssi.util.encodeB64
+import nl.tudelft.trustchain.ssi.util.formatAttestationToJSON
+import nl.tudelft.trustchain.ssi.util.formatValueToJSON
 import org.json.JSONObject
-import java.util.Locale
 
-const val QR_CODE_VALUE_LIMIT = 2
+const val QR_CODE_VALUE_LIMIT = 200
 
 class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
@@ -48,15 +44,11 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
     lateinit var bitmap: Bitmap
 
-    private val qrCodeUtils by lazy {
-        QRCodeUtils(requireContext())
-    }
-
     private var areFABsVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        setHasOptionsMenu(true)
         adapter.registerRenderer(
             DatabaseItemRenderer(
                 {
@@ -72,9 +64,34 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         )
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
+        inflater.inflate(R.menu.database_options_menu, menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_settings -> {
+                RendezvousDialog(callback = this::setPeerInfo).show(parentFragmentManager, "ig-ssi")
+                return true
+            }
+            else -> {
+
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setListView()
+        setPeerInfo()
+        setFABs()
+        loadDatabaseEntriesOnLoop()
+    }
 
+    private fun setListView() {
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.addItemDecoration(
@@ -83,19 +100,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                 LinearLayout.VERTICAL
             )
         )
-        binding.myPublicKey.text = Communication.load().myPeer.mid
-
-        binding.publicKeyQRCode.setOnClickListener {
-            if (it.scaleX > 1) {
-                it.animate().scaleX(1f).scaleY(1f)
-            } else {
-                it.animate().scaleX(1.2f).scaleY(1.2f)
-            }
-        }
-
-        setQRCode()
-        setFABs()
-        loadDatabaseEntriesOnLoop()
     }
 
     private fun loadDatabaseEntriesOnLoop() {
@@ -138,19 +142,9 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             parentFragmentManager,
             tag
         )
-
-        // TODO: Optional signatures.
-        // If the attestation contains no signature, show an error.
-        // if (it.attestation.signature == null) {
-        //     lifecycleScope.launch {
-        //         // Give ample time for the dialog to be rendered.
-        //         delay(500)
-        //         dialog.showError()
-        //     }
-        // } else {
+        val channel = Communication.load()
         lifecycleScope.launch {
             while (isActive) {
-                val channel = Communication.load()
                 val challenge = channel.generateChallenge()
 
                 var secondaryQRCode: Bitmap? = null
@@ -161,10 +155,7 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                     val secondaryPresentation =
                         formatValueToJSON(
                             it.attestation.attributeValue,
-                            challenge,
-                            encode = attributeName != ID_PICTURE.toUpperCase(
-                                Locale.getDefault()
-                            )
+                            challenge
                         )
                     secondaryQRCode =
                         QRGEncoder(
@@ -181,26 +172,25 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                         it.attestation.attributeValue
                     )
                 }
-
                 Log.d(
                     "ig-ssi",
                     "Presenting Attestation as QRCode: Size ${
                         presentation.length
                     }, Data: $presentation"
                 )
-                // val bitmap = withContext(Dispatchers.Default) {
-                //     qrCodeUtils.createQR(presentation, 1000)!!
-                // }
                 val bitmap = withContext(Dispatchers.Default) {
-                    QRGEncoder(presentation, null, QRGContents.Type.TEXT, 1000).bitmap
+                    QRGEncoder(
+                        presentation,
+                        null,
+                        QRGContents.Type.TEXT,
+                        1000
+                    ).bitmap
                 }
-
                 dialog.setQRCodes(bitmap, secondaryQRCode)
                 dialog.startTimeout(DEFAULT_TIME_OUT)
                 delay(DEFAULT_TIME_OUT)
             }
         }
-        // }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -257,141 +247,31 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         }
     }
 
-    private fun setQRCode() {
-        if (!this::bitmap.isInitialized) {
-            lifecycleScope.launch {
-                val data = JSONObject()
-                data.put("presentation", "authority")
-                val myPeer = Communication.load().myPeer
-                val publicKey =
-                    encodeB64(myPeer.publicKey.keyToBin())
-                data.put("public_key", publicKey)
-
-                bitmap = withContext(Dispatchers.Default) {
-                    qrCodeUtils.createQR(data.toString(), 300)!!
-                }
-                try {
-                    binding.qrCodePlaceHolder.visibility = View.GONE
-                    binding.publicKeyQRCode.setImageBitmap(bitmap)
-                } catch (e: IllegalStateException) {
-                    // This happens if we already switched screens.
-                }
+    private fun setPeerInfo() {
+        binding.myPublicKey.text = Communication.load().myPeer.mid
+        binding.publicKeyQRCode.setOnClickListener {
+            if (it.scaleX > 1) {
+                it.animate().scaleX(1f).scaleY(1f)
+            } else {
+                it.animate().scaleX(1.2f).scaleY(1.2f)
             }
-        } else {
-            binding.qrCodePlaceHolder.visibility = View.GONE
-            binding.publicKeyQRCode.setImageBitmap(bitmap)
-        }
-    }
-
-    private fun formatValueToJSON(
-        value: ByteArray,
-        challengePair: Pair<Long, ByteArray>,
-        encode: Boolean = true
-    ): String {
-        val data = JSONObject()
-        data.put("presentation", "attestation")
-
-        // Challenge
-        val challenge = JSONObject()
-        val (challengeValue, challengeSignature) = challengePair
-        challenge.put("timestamp", challengeValue)
-        challenge.put("signature", encodeB64(challengeSignature))
-        data.put("challenge", challenge)
-
-        // Value
-        val valueString = if (encode) encodeB64(value) else String(value)
-        data.put("value", valueString)
-
-        return data.toString()
-    }
-
-    private fun formatAttestationToJSON(
-        attestation: AttestationPresentation,
-        subjectKey: nl.tudelft.ipv8.keyvault.PublicKey,
-        challengePair: Pair<Long, ByteArray>,
-        value: ByteArray? = null
-    ): String {
-        val data = JSONObject()
-        data.put("presentation", "attestation")
-
-        // TODO: Definitions.
-        // AttestationHash
-        data.put("attestationHash", encodeB64(attestation.attributeHash))
-
-        // Metadata
-        val metadata = JSONObject()
-        val (pointer, signature, serializedMD) = attestation.metadata.toDatabaseTuple()
-        metadata.put("pointer", encodeB64(pointer))
-        metadata.put("signature", encodeB64(signature))
-        metadata.put(
-            "metadata", String(serializedMD)
-        )
-        data.put("metadata", metadata)
-
-        // Subject
-        data.put(
-            "subject",
-            encodeB64(subjectKey.keyToBin())
-        )
-
-        // Challenge
-        val challenge = JSONObject()
-        val (challengeValue, challengeSignature) = challengePair
-        challenge.put("timestamp", challengeValue)
-        challenge.put("signature", encodeB64(challengeSignature))
-        data.put("challenge", challenge)
-
-        // Attestors
-        val attestors = JSONArray()
-        for (attestor in attestation.attestors) {
-            val attestorJSON = JSONObject()
-            attestorJSON.put(
-                "keyHash",
-                encodeB64(attestor.first)
-            )
-            attestorJSON.put(
-                "signature",
-                encodeB64(attestor.second)
-            )
-            attestors.put(attestorJSON)
-        }
-        data.put("attestors", attestors)
-
-        // Value
-        if (value != null) {
-            data.put("value", encodeB64(value))
         }
 
-        return data.toString()
-    }
+        lifecycleScope.launch {
+            val data = JSONObject()
+            data.put("presentation", "authority")
+            val myPeer = Communication.load().myPeer
+            val publicKey =
+                encodeB64(myPeer.publicKey.keyToBin())
+            data.put("public_key", publicKey)
+            data.put("rendezvous", Communication.getActiveRendezvousToken())
 
-    @Suppress("UNUSED_PARAMETER")
-    private fun databaseAttestationRequestCompleteCallback(
-        forPeer: Peer,
-        attributeName: String,
-        attestation: WalletAttestation,
-        attributeHash: ByteArray,
-        idFormat: String,
-        fromPeer: Peer?,
-        metaData: String?,
-        signature: ByteArray?
-    ) {
-        attestationRequestCompleteCallback(
-            forPeer,
-            attributeName,
-            attestation,
-            attributeHash,
-            idFormat,
-            fromPeer,
-            metaData,
-            signature,
-            requireContext()
-        )
-        Handler(Looper.getMainLooper()).post {
+            bitmap = QRGEncoder(data.toString(), null, QRGContents.Type.TEXT, 1000).bitmap
             try {
-                loadDatabaseEntries()
-            } catch (e: NullPointerException) {
-                // We're no longer in this screen.
+                binding.qrCodePlaceHolder.visibility = View.GONE
+                binding.publicKeyQRCode.setImageBitmap(bitmap)
+            } catch (e: IllegalStateException) {
+                // This happens if we already switched screens.
             }
         }
     }

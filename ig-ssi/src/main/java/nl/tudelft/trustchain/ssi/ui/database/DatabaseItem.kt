@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.database
+package nl.tudelft.trustchain.ssi.ui.database
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.attestation.communication.AttestationPresentation

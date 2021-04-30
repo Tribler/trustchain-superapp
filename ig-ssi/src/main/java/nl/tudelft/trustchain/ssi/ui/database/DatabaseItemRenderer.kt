@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.database
+package nl.tudelft.trustchain.ssi.ui.database
 
 import android.annotation.SuppressLint
 import android.view.View
@@ -6,8 +6,8 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_database.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.decodeImage
-import nl.tudelft.trustchain.ssi.dialogs.attestation.ID_PICTURE
+import nl.tudelft.trustchain.ssi.util.decodeImage
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.ID_PICTURE
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
