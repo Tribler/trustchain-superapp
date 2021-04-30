@@ -1,6 +1,6 @@
-package nl.tudelft.trustchain.ssi.peers
+package nl.tudelft.trustchain.ssi.ui.peers
 
-import nl.tudelft.trustchain.ssi.dialogs.authority.RemoveAuthorityDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.authority.RemoveAuthorityDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -24,7 +24,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
-import nl.tudelft.trustchain.ssi.dialogs.attestation.FireMissilesDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
 
 class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 

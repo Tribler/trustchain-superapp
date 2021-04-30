@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi
+package nl.tudelft.trustchain.ssi.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

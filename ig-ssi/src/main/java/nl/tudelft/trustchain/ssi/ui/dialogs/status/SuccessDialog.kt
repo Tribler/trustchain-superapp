@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.verifier.VerificationFragmentDirections
+import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 
 class SuccessDialog : DialogFragment() {
 

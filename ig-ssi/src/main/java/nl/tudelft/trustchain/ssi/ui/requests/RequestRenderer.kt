@@ -1,13 +1,13 @@
-package nl.tudelft.trustchain.ssi.requests
+package nl.tudelft.trustchain.ssi.ui.requests
 
 import android.annotation.SuppressLint
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_request.view.*
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.parseHtml
-import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
-import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
+import nl.tudelft.trustchain.ssi.util.parseHtml
+import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
+import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
 
 class RequestRenderer(
     private val onPositive: (RequestItem) -> Unit,

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.peers
+package nl.tudelft.trustchain.ssi.ui.peers
 
 import android.annotation.SuppressLint
 import android.view.View

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.peers
+package nl.tudelft.trustchain.ssi.ui.peers
 
 import com.mattskala.itemadapter.Item
 import nl.tudelft.ipv8.Peer

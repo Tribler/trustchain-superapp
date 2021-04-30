@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.verifier
+package nl.tudelft.trustchain.ssi.ui.verifier
 
 import org.json.JSONObject
 

@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.ssi.requests
+package nl.tudelft.trustchain.ssi.ui.requests
 
 import android.os.Bundle
 import android.util.Log
@@ -18,9 +18,9 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentRequestsBinding
-import nl.tudelft.trustchain.ssi.dialogs.attestation.NewAttestationValueDialog
-import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
-import nl.tudelft.trustchain.ssi.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.NewAttestationValueDialog
+import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
+import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
 import org.json.JSONObject
 
 class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
