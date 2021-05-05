@@ -139,6 +139,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
     private fun handleAttestation(data: JSONObject) {
         val challengeJSON = data.getJSONObject("challenge")
         val timestamp = challengeJSON.getLong("timestamp")
+        val rendezvousToken = data.optString("rendezvous")
         val presentations = VerificationHelper.getInstance().presentation
 
         if (!presentations.containsKey(timestamp)) {
@@ -193,18 +194,22 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                 attestors.add(Pair(keyHash, signature))
             }
 
-            val attributeName =
-                JSONObject(String(metadata.serializedMetadata)).getString("name")
+            val attMetadata = JSONObject(String(metadata.serializedMetadata))
+            val attributeName = attMetadata.getString("name")
+            val idFormat = attMetadata.getString("schema")
+
             val proposedAttributeValue = decodeB64(data.optString("value", ""))
 
             AttestationConfirmationDialog(
                 attestationHash,
                 attributeName,
                 proposedAttributeValue,
+                idFormat,
                 metadata,
                 subjectKey,
                 challengePair,
-                attestors
+                attestors,
+                rendezvousToken
             ).show(parentFragmentManager, this.tag)
         }
     }

@@ -2,7 +2,7 @@ package nl.tudelft.trustchain.ssi.ui.verifier
 
 import org.json.JSONObject
 
-class VerificationHelper() {
+class VerificationHelper {
 
     var presentation = hashMapOf<Long, JSONObject>()
 
