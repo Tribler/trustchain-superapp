@@ -45,7 +45,6 @@ class ScanIntentDialog(
                                                     it1.publicKey.keyToHash()
                                                         .contentEquals(authorityKey.keyToHash())
                                                 }
-                                            println("PEERS: ${channel.peers.size}")
                                             delay(100)
                                         }
                                     }
