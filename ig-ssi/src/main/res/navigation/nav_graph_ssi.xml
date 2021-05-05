@@ -12,7 +12,7 @@
     <fragment
         android:id="@+id/databaseFragment"
         android:name="nl.tudelft.trustchain.ssi.ui.database.DatabaseFragment"
-        android:label="Home Screen" >
+        android:label="Home Screen">
         <action
             android:id="@+id/action_databaseFragment_to_verificationFragment"
             app:destination="@id/verificationFragment"
@@ -59,4 +59,9 @@
         android:name="nl.tudelft.trustchain.ssi.ui.requests.RequestsFragment"
         android:label="Requests"
         tools:layout="@layout/fragment_requests" />
+    <fragment
+        android:id="@+id/sentAttestationsFragment"
+        android:name="nl.tudelft.trustchain.ssi.ui.sent.SentAttestationsFragment"
+        android:label="Sent Attestations"
+        tools:layout="@layout/fragment_sent_attestations" />
 </navigation>

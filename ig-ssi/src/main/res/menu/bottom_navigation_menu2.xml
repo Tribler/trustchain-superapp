@@ -8,6 +8,11 @@
 
 
     <item
+        android:id="@+id/sentAttestationsFragment"
+        android:icon="@drawable/ic_round_send_24"
+        android:title="Sent Attestations" />
+
+    <item
         android:id="@+id/verificationFragment"
         android:icon="@drawable/ic_baseline_camera_24"
         android:title="Scanner" />

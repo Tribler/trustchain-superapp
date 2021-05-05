@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="?selectableItemBackground">
+
+    <TextView
+        android:id="@+id/publicKey"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_primary"
+        android:typeface="monospace"
+        android:ellipsize="end"
+        android:lines="1"
+        tools:text="FJASFFEWASD123i9112" />
+
+    <TextView
+        android:id="@+id/attributeName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        tools:text="130.161.211.254:1873" />
+
+    <TextView
+        android:id="@+id/metadata"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        tools:text="{}" />
+
+    <Button
+        android:text="Revoke"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/revokeButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:textColor="#D50000" />
+
+
+</LinearLayout>
