@@ -23,6 +23,7 @@
     <string name="id_picture">ID Picture</string>
     <string name="settings">Settings</string>
     <string name="rendezvous_token">Rendezvous Token</string>
-    <string name="locating_client">Locating client ...</string>
+    <string name="locating_client">Locating client …</string>
     <string name="failed_to_locate_client">Failed to locate client.</string>
+    <string name="challenging_client">Challenging Client …</string>
 </resources>
