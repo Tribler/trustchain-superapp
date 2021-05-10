@@ -1,7 +1,10 @@
-package nl.tudelft.trustchain.ssi.ui.verifier
+ package nl.tudelft.trustchain.ssi.ui.verifier
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -15,15 +18,16 @@ import kotlinx.coroutines.withTimeout
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.identity.Metadata
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.util.decodeB64
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationConfirmationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.misc.ScanIntentDialog
+import nl.tudelft.trustchain.ssi.util.decodeB64
 import org.json.JSONObject
 
 const val REQUEST_ATTESTATION_INTENT = 0
@@ -69,6 +73,9 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                     }
                     "attestation" -> {
                         handleAttestation(attestationPresentation)
+                    }
+                    "presentation_request" -> {
+                        handlePresentationRequest(attestationPresentation)
                     }
                     else -> throw RuntimeException("Encountered invalid presentation format $format.")
                 }
@@ -134,6 +141,86 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                 )
             }
         }
+    }
+
+    private fun handlePresentationRequest(attestationPresentation: JSONObject) {
+        val authorityKey =
+            defaultCryptoProvider.keyFromPublicBin(
+                decodeB64(
+                    attestationPresentation.getString("public_key")
+                )
+            )
+
+        val rendezvousToken: String? = attestationPresentation.optString("rendezvous")
+        val id = attestationPresentation.getString("id")
+        val requestedAttribute = attestationPresentation.getString("name")
+
+        AlertDialog.Builder(context)
+            .setTitle("Attribute Disclosure Request")
+            .setMessage(
+                "Authority ${
+                    authorityKey.keyToHash().toHex()
+                } has requested your attribute $requestedAttribute"
+            )
+            .setPositiveButton(
+                android.R.string.yes
+            ) { _, _ ->
+                val channel = Communication.load(rendezvous = rendezvousToken)
+                val result = channel.getAttributeByName(requestedAttribute)
+                if (result != null) {
+                    val (hash, credential, value) = result
+                    GlobalScope.launch {
+                        var peer: Peer? = null
+                        try {
+                            withTimeout(30_000) {
+                                while (peer == null) {
+                                    peer =
+                                        channel.peers.find { it1 ->
+                                            it1.publicKey.keyToHash()
+                                                .contentEquals(authorityKey.keyToHash())
+                                        }
+                                    delay(100)
+                                }
+                            }
+                            channel.presentAttestation(
+                                peer!!,
+                                id,
+                                hash,
+                                value,
+                                credential
+                            )
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Successfully sent attestation",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        } catch (e: TimeoutCancellationException) {
+                            Handler(Looper.getMainLooper()).post {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Failed to find client.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    }
+                } else {
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            requireContext(),
+                            "Attribute missing.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+
+                // Continue with delete operation
+            } // A null listener allows the button to dismiss the dialog and take no further action.
+            .setNegativeButton(android.R.string.no, null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show()
     }
 
     private fun handleAttestation(data: JSONObject) {
