@@ -10,10 +10,16 @@ class DatabaseItem(val index: Int, val attestation: AttestationPresentation) : I
     }
 
     override fun areItemsTheSame(other: Item): Boolean {
-        return other is DatabaseItem && this.attestation.attributeHash.contentEquals(other.attestation.attributeHash)
+        return this == other
     }
 
     override fun areContentsTheSame(other: Item): Boolean {
-        return false
+        return this == other
+    }
+
+    override fun hashCode(): Int {
+        var result = index
+        result = 31 * result + attestation.hashCode()
+        return result
     }
 }
