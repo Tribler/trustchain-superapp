@@ -20,7 +20,7 @@ class SuccessDialog : DialogFragment() {
         val view = inflater.inflate(R.layout.success_dialog, container, false)
         view.setOnClickListener {
             mDialog.dismiss()
-            findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+            findNavController().navigateUp()
         }
         return view
     }

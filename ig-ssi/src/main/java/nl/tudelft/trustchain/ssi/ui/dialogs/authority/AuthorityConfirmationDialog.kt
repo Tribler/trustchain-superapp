@@ -17,6 +17,11 @@ import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 
 class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogFragment() {
 
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        findNavController().navigateUp()
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             // Use the Builder class for convenient dialog construction

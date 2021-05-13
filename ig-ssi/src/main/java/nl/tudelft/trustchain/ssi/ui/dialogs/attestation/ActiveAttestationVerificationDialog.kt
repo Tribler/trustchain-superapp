@@ -21,7 +21,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.ui.dialogs.status.DangerDialog
 
-class ActiveVerificationDialog :
+class ActiveAttestationVerificationDialog :
     DialogFragment() {
     private lateinit var mView: View
     private lateinit var mContext: Context

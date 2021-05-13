@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.ssi.ui.dialogs.misc
 import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.findNavController
@@ -14,13 +15,17 @@ import kotlinx.coroutines.withTimeout
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.ssi.Communication
-import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
-import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RequestAttestationDialog
 
 class ScanIntentDialog(
     private val authorityKey: PublicKey,
     private val rendezvousToken: String?,
 ) : DialogFragment() {
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        findNavController().navigateUp()
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let { it ->
@@ -31,7 +36,7 @@ class ScanIntentDialog(
                 ) { _, which ->
                     when (which) {
                         0 -> {
-                            val dialog = FireMissilesDialog()
+                            val dialog = RequestAttestationDialog()
                             dialog.show(parentFragmentManager, "ig-ssi")
                             GlobalScope.launch {
                                 val channel =
@@ -53,7 +58,6 @@ class ScanIntentDialog(
                                     dialog.cancel()
                                 }
                             }
-                            findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
                         }
                         1 -> {
                             AuthorityConfirmationDialog(authorityKey).show(

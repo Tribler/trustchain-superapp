@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Bitmap.createScaledBitmap
@@ -45,7 +46,7 @@ val DEFAULT_ATTRIBUTE_NAMES = arrayOf(AGE, NAME, ID_PICTURE, CUSTOM)
 const val PICK_IMAGE = 1
 
 @SuppressLint("ClickableViewAccessibility")
-class FireMissilesDialog(peer: Peer? = null) :
+class RequestAttestationDialog(peer: Peer? = null) :
     DialogFragment() {
     private lateinit var mView: View
     private lateinit var mContext: Context
@@ -56,6 +57,11 @@ class FireMissilesDialog(peer: Peer? = null) :
         if (peer != null) {
             this.peer = peer
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        findNavController().navigateUp()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -263,6 +269,6 @@ class FireMissilesDialog(peer: Peer? = null) :
             Toast.makeText(requireContext(), "Failed to locate peer", Toast.LENGTH_LONG).show()
             this.dismiss()
         }
-        findNavController().navigate(R.id.databaseFragment)
+        findNavController().navigateUp()
     }
 }
