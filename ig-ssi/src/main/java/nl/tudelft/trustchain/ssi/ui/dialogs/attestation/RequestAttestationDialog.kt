@@ -23,12 +23,14 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 import nl.tudelft.trustchain.ssi.util.encodeImage
 import java.io.BufferedInputStream
 import java.io.InputStream
@@ -169,7 +171,9 @@ class FireMissilesDialog(peer: Peer? = null) :
                 )
                 .setNegativeButton(
                     R.string.cancel
-                ) { _, _ -> }
+                ) { _, _ ->
+                    findNavController().navigateUp()
+                }
                 .setTitle("Request Attestation")
             // Create the AlertDialog object and return it
             val dialog = builder.create()
@@ -234,6 +238,7 @@ class FireMissilesDialog(peer: Peer? = null) :
                             Toast.LENGTH_LONG
                         ).show()
                         // }
+                        findNavController().navigateUp()
                     } else {
                         attributeNameInput.error = "Please enter a claim name."
                     }
@@ -258,5 +263,6 @@ class FireMissilesDialog(peer: Peer? = null) :
             Toast.makeText(requireContext(), "Failed to locate peer", Toast.LENGTH_LONG).show()
             this.dismiss()
         }
+        findNavController().navigate(R.id.databaseFragment)
     }
 }
