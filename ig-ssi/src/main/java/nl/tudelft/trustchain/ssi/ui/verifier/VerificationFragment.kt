@@ -1,4 +1,4 @@
- package nl.tudelft.trustchain.ssi.ui.verifier
+package nl.tudelft.trustchain.ssi.ui.verifier
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -23,8 +23,8 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationConfirmationDialog
-import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationVerificationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RequestAttestationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.misc.ScanIntentDialog
 import nl.tudelft.trustchain.ssi.util.decodeB64
@@ -107,7 +107,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         val rendezvousToken = attestationPresentation.optString("rendezvous")
         when (this.intent) {
             REQUEST_ATTESTATION_INTENT -> {
-                val dialog = FireMissilesDialog()
+                val dialog = RequestAttestationDialog()
                 dialog.show(parentFragmentManager, "ig-ssi")
                 GlobalScope.launch {
                     val channel =
@@ -129,6 +129,7 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                         dialog.cancel()
                     }
                 }
+                // findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
             }
             ADD_AUTHORITY_INTENT -> AuthorityConfirmationDialog(authorityKey).show(
                 parentFragmentManager,
@@ -285,9 +286,12 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             val attributeName = attMetadata.getString("name")
             val idFormat = attMetadata.getString("schema")
 
-            val proposedAttributeValue = decodeB64(data.optString("value", ""))
+            var proposedAttributeValue: ByteArray? = null
+            if (data.has("value")) {
+                proposedAttributeValue = decodeB64(data.getString("value"))
+            }
 
-            AttestationConfirmationDialog(
+            AttestationVerificationDialog(
                 attestationHash,
                 attributeName,
                 proposedAttributeValue,
