@@ -64,6 +64,17 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         )
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setListView()
+        setPeerInfo()
+        setFABs()
+        loadDatabaseEntriesOnLoop()
+        binding.refreshLayout.setOnRefreshListener {
+            loadDatabaseEntries()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu.clear()
         inflater.inflate(R.menu.database_options_menu, menu)
@@ -81,14 +92,6 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        setListView()
-        setPeerInfo()
-        setFABs()
-        loadDatabaseEntriesOnLoop()
     }
 
     private fun setListView() {
@@ -117,17 +120,14 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         val entries = channel.getOfflineVerifiableAttributes()
             .mapIndexed { index, blob -> DatabaseItem(index, blob) }
 
-        val areEqual = entries == adapter.items
-        if (!areEqual) {
-            adapter.updateItems(entries)
-        }
-
-        databaseTitle.text = "Attestations"
+        adapter.updateItems(entries)
+        databaseTitle.text = getString(R.string.credentials)
         txtAttestationCount.text = "${entries.size} entries"
         val textColorResId = if (entries.isNotEmpty()) R.color.green else R.color.red
         val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
         txtAttestationCount.setTextColor(textColor)
         imgEmpty.isVisible = entries.isEmpty()
+        refreshLayout.isRefreshing = false
     }
 
     private fun setDatabaseItemAction(it: DatabaseItem) {
@@ -144,6 +144,8 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
         )
         val channel = Communication.load()
         lifecycleScope.launch {
+            var firstRun = true
+            var waitDisabled = false
             while (isActive) {
                 val challenge = channel.generateChallenge()
 
@@ -186,9 +188,18 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
                         1000
                     ).bitmap
                 }
+                if (!firstRun && !waitDisabled) {
+                    delay(DEFAULT_TIME_OUT)
+                } else {
+                    waitDisabled = false
+                }
                 dialog.setQRCodes(bitmap, secondaryQRCode)
                 dialog.startTimeout(DEFAULT_TIME_OUT)
-                delay(DEFAULT_TIME_OUT)
+                if (firstRun) {
+                    firstRun = false
+                    waitDisabled = true
+                    delay(DEFAULT_TIME_OUT)
+                }
             }
         }
     }
