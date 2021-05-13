@@ -7,6 +7,9 @@ import android.graphics.Bitmap
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -66,48 +69,57 @@ class PresentAttestationDialog(
     }
 
     fun startTimeout(duration: Long) {
-        val progressBar = mView!!.findViewById<ProgressBar>(R.id.timeoutProgressBar)
-        progressBar.visibility = View.VISIBLE
-        lifecycleScope.launch {
-            ObjectAnimator.ofInt(
-                progressBar,
-                "progress",
-                100, 0
+        Handler(Looper.getMainLooper()).post {
+            val animatorScale = Settings.Global.getFloat(
+                requireContext().contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1.0f
             )
-                .setDuration(duration)
-                .start()
-            while (isActive && progressBar.progress >= 0) {
-                progressBar.progressDrawable.colorFilter =
-                    translateValueToColor(progressBar.progress)
-                delay(100)
+            val progressBar = mView!!.findViewById<ProgressBar>(R.id.timeoutProgressBar)
+            progressBar.visibility = View.VISIBLE
+            lifecycleScope.launch {
+                ObjectAnimator.ofInt(
+                    progressBar,
+                    "progress",
+                    100, 0
+                )
+                    .setDuration(duration * (1 / animatorScale).toLong())
+                    .start()
+                while (isActive && progressBar.progress >= 0) {
+                    progressBar.progressDrawable.colorFilter =
+                        translateValueToColor(progressBar.progress)
+                    delay(100)
+                }
             }
         }
     }
 
     fun setQRCodes(mainQRCode: Bitmap, secondaryQRCode: Bitmap? = null) {
-        val progressBar = mView!!.findViewById<ProgressBar>(R.id.progressBar)
-        if (progressBar.isVisible) {
-            progressBar.visibility = View.GONE
-        }
-        val imageView = mView!!.findViewById<ImageView>(R.id.qrCodeView)
-
-        if (secondaryQRCode != null) {
-            val switch = mView!!.findViewById<Switch>(R.id.QRSwitch)
-            if (switch.isChecked) {
-                imageView.setImageBitmap(secondaryQRCode)
-            } else {
-                imageView.setImageBitmap(mainQRCode)
+        Handler(Looper.getMainLooper()).post {
+            val progressBar = mView!!.findViewById<ProgressBar>(R.id.progressBar)
+            if (progressBar.isVisible) {
+                progressBar.visibility = View.GONE
             }
-            switch.visibility = View.VISIBLE
-            switch.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
+            val imageView = mView!!.findViewById<ImageView>(R.id.qrCodeView)
+
+            if (secondaryQRCode != null) {
+                val switch = mView!!.findViewById<Switch>(R.id.QRSwitch)
+                if (switch.isChecked) {
                     imageView.setImageBitmap(secondaryQRCode)
                 } else {
                     imageView.setImageBitmap(mainQRCode)
                 }
+                switch.visibility = View.VISIBLE
+                switch.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        imageView.setImageBitmap(secondaryQRCode)
+                    } else {
+                        imageView.setImageBitmap(mainQRCode)
+                    }
+                }
+            } else {
+                imageView.setImageBitmap(mainQRCode)
             }
-        } else {
-            imageView.setImageBitmap(mainQRCode)
         }
     }
 
