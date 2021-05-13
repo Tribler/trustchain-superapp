@@ -26,4 +26,9 @@
     <string name="locating_client">Locating client …</string>
     <string name="failed_to_locate_client">Failed to locate client.</string>
     <string name="challenging_client">Challenging Client …</string>
+    <string name="credentials">Credentials</string>
+    <string name="qr_code">QR Code</string>
+    <string name="switch_str">Switch</string>
+    <string name="display_first_qr_code">Display first QR code</string>
+    <string name="credential_image">Credential image</string>
 </resources>
