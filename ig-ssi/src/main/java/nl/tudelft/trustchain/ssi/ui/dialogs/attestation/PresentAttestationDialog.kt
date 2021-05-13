@@ -34,6 +34,7 @@ class PresentAttestationDialog(
     DialogFragment() {
 
     private var mView: View? = null
+    private var animatorScale: Float = 1.0f
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
@@ -44,6 +45,11 @@ class PresentAttestationDialog(
             val view = inflater.inflate(R.layout.present_attestation_dialog, null)!!
             mView = view
             builder.setView(mView)
+            animatorScale = Settings.Global.getFloat(
+                requireContext().contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1.0f
+            )
 
             val title =
                 "Attestation for <font color='#EE0000'>${attributeName.capitalize(Locale.getDefault())}</font>"
@@ -69,27 +75,20 @@ class PresentAttestationDialog(
     }
 
     fun startTimeout(duration: Long) {
-        Handler(Looper.getMainLooper()).post {
-            val animatorScale = Settings.Global.getFloat(
-                requireContext().contentResolver,
-                Settings.Global.ANIMATOR_DURATION_SCALE,
-                1.0f
+        val progressBar = mView!!.findViewById<ProgressBar>(R.id.timeoutProgressBar)
+        progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            ObjectAnimator.ofInt(
+                progressBar,
+                "progress",
+                100, 0
             )
-            val progressBar = mView!!.findViewById<ProgressBar>(R.id.timeoutProgressBar)
-            progressBar.visibility = View.VISIBLE
-            lifecycleScope.launch {
-                ObjectAnimator.ofInt(
-                    progressBar,
-                    "progress",
-                    100, 0
-                )
-                    .setDuration(duration * (1 / animatorScale).toLong())
-                    .start()
-                while (isActive && progressBar.progress >= 0) {
-                    progressBar.progressDrawable.colorFilter =
-                        translateValueToColor(progressBar.progress)
-                    delay(100)
-                }
+                .setDuration(duration * (1 / animatorScale).toLong())
+                .start()
+            while (isActive && progressBar.progress >= 0) {
+                progressBar.progressDrawable.colorFilter =
+                    translateValueToColor(progressBar.progress)
+                delay(100)
             }
         }
     }
