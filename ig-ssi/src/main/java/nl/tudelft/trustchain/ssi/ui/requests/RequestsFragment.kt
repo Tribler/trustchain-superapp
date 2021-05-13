@@ -44,7 +44,6 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.recyclerViewRequests.adapter = adapter
         binding.recyclerViewRequests.layoutManager = LinearLayoutManager(context)
         binding.recyclerViewRequests.addItemDecoration(
@@ -53,8 +52,10 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
                 LinearLayout.VERTICAL
             )
         )
-
-        this.loadRequestEntries()
+        binding.refreshLayout.setOnRefreshListener {
+            loadRequestEntries()
+        }
+        this.loadRequestEntriesOnLoop()
     }
 
     private fun onPositiveClick(item: RequestItem) {
@@ -96,48 +97,51 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
         }
     }
 
-    private fun loadRequestEntries() {
+    private fun loadRequestEntriesOnLoop() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val channel =
-                    Communication.load()
-
-                val attestationRequests = channel.attestationRequests
-                val verificationRequests = channel.verifyRequests
-
-                val items = mutableListOf<RequestItem>()
-                attestationRequests.keys.forEachIndexed { index, attributePointer ->
-                    val request = attestationRequests[attributePointer]!!
-                    items.add(
-                        RequestItem(
-                            index,
-                            ATTESTATION_REQUEST_ITEM,
-                            attributePointer.peer,
-                            attributePointer.attributeName,
-                            request.second,
-                            request.third
-                        )
-                    )
-                }
-
-                verificationRequests.keys.forEachIndexed { index, attributePointer ->
-                    items.add(
-                        RequestItem(
-                            index,
-                            VERIFY_REQUEST_ITEM,
-                            attributePointer.peer,
-                            attributePointer.attributeName
-                        )
-                    )
-                }
-
-                if (items != adapter.items) {
-                    adapter.updateItems(items)
-                    imgEmpty.isVisible = items.isEmpty()
-                }
-
+                loadRequestEntries()
                 delay(100)
             }
         }
+    }
+
+    private fun loadRequestEntries() {
+        val channel =
+            Communication.load()
+
+        val attestationRequests = channel.attestationRequests
+        val verificationRequests = channel.verifyRequests
+
+        val items = mutableListOf<RequestItem>()
+        attestationRequests.keys.forEachIndexed { index, attributePointer ->
+            val request = attestationRequests[attributePointer]!!
+            items.add(
+                RequestItem(
+                    index,
+                    ATTESTATION_REQUEST_ITEM,
+                    attributePointer.peer,
+                    attributePointer.attributeName,
+                    request.second,
+                    request.third
+                )
+            )
+        }
+
+        verificationRequests.keys.forEachIndexed { index, attributePointer ->
+            items.add(
+                RequestItem(
+                    index,
+                    VERIFY_REQUEST_ITEM,
+                    attributePointer.peer,
+                    attributePointer.attributeName
+                )
+            )
+        }
+
+        adapter.updateItems(items)
+        imgEmpty.isVisible = items.isEmpty()
+
+        refreshLayout.isRefreshing = false
     }
 }
