@@ -25,39 +25,37 @@ class VerifyAttestationDialog(private val databaseBlob: AttestationBlob) : Dialo
             val view = inflater.inflate(R.layout.verify_attestation_dialog, null)
             builder.setView(view)
                 .setPositiveButton(
-                    R.string.fire,
-                    DialogInterface.OnClickListener { _, _ ->
-                        val addressInput =
-                            view.findViewById<TextInputEditText>(R.id.peer_address_input).text.toString()
-                        val attributeName =
-                            view.findViewById<TextInputEditText>(R.id.attribute_name_input).text.toString()
-                        val input = addressInput.split(":").toTypedArray()
-                        val ip = input[0]
-                        val port = input[1].toInt()
-                        var address: IPv4Address? = null
-                        for (peer in attestationCommunity.getPeers()) {
-                            if (peer.address.toString() == addressInput) {
-                                address = IPv4Address(ip, port)
-                            }
+                    R.string.fire
+                ) { _, _ ->
+                    val addressInput =
+                        view.findViewById<TextInputEditText>(R.id.peer_address_input).text.toString()
+                    val attributeName =
+                        view.findViewById<TextInputEditText>(R.id.attribute_name_input).text.toString()
+                    val input = addressInput.split(":").toTypedArray()
+                    val ip = input[0]
+                    val port = input[1].toInt()
+                    var address: IPv4Address? = null
+                    for (peer in attestationCommunity.getPeers()) {
+                        if (peer.address.toString() == addressInput) {
+                            address = IPv4Address(ip, port)
                         }
-                        if (address == null) {
-                            throw RuntimeException("IPv4 Address not found")
-                        }
-                        Log.d("ig-ssi", "Sending verify request")
-                        attestationCommunity.verifyAttestationValues(
-                            address,
-                            databaseBlob.attestationHash,
-                            arrayListOf(attributeName.toByteArray()),
-                            ::verifyComplete,
-                            databaseBlob.idFormat
-                        )
                     }
-                )
+                    if (address == null) {
+                        throw RuntimeException("IPv4 Address not found")
+                    }
+                    Log.d("ig-ssi", "Sending verify request")
+                    attestationCommunity.verifyAttestationValues(
+                        address,
+                        databaseBlob.attestationHash,
+                        arrayListOf(attributeName.toByteArray()),
+                        ::verifyComplete,
+                        databaseBlob.idFormat
+                    )
+                }
 
                 .setNegativeButton(
-                    R.string.cancel,
-                    DialogInterface.OnClickListener { _, _ -> }
-                )
+                    R.string.cancel
+                ) { _, _ -> }
                 .setTitle("Request Attestation")
             // Create the AlertDialog object and return it
             builder.create()
