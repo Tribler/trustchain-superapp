@@ -29,47 +29,45 @@ class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogF
             builder.setTitle("Authority Found")
                 .setMessage("Address: ${authorityKey.keyToHash().toHex()}")
                 .setPositiveButton(
-                    "Add",
-                    DialogInterface.OnClickListener { _, _ ->
-                        val authorityManager =
-                            Communication.load().attestationOverlay.authorityManager
-                        if (!authorityManager.contains(authorityKey.keyToHash())) {
-                            authorityManager.addTrustedAuthority(
-                                authorityKey
-                            )
+                    "Add"
+                ) { _, _ ->
+                    val authorityManager =
+                        Communication.load().authorityManager
+                    if (!authorityManager.containsAuthority(authorityKey.keyToHash())) {
+                        authorityManager.addTrustedAuthority(
+                            authorityKey
+                        )
 
-                            Handler(Looper.getMainLooper()).post {
-                                Toast.makeText(
-                                    context,
-                                    "Successfully added new Authority",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        } else {
-                            Handler(Looper.getMainLooper()).post {
-                                Toast.makeText(
-                                    context,
-                                    "Authority already added",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                        }
-                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToPeersFragment2())
-                    }
-                )
-                .setNegativeButton(
-                    R.string.cancel,
-                    DialogInterface.OnClickListener { _, _ ->
                         Handler(Looper.getMainLooper()).post {
                             Toast.makeText(
                                 context,
-                                "Cancelled new Authority",
+                                "Successfully added new Authority",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
-                        findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
+                    } else {
+                        Handler(Looper.getMainLooper()).post {
+                            Toast.makeText(
+                                context,
+                                "Authority already added",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
                     }
-                )
+                    findNavController().navigateUp()
+                }
+                .setNegativeButton(
+                    R.string.cancel
+                ) { _, _ ->
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(
+                            context,
+                            "Cancelled new Authority",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    findNavController().navigateUp()
+                }
 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
