@@ -24,7 +24,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
-import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.FireMissilesDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RequestAttestationDialog
 
 class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 
@@ -38,7 +38,7 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
         adapterClients.registerRenderer(
             PeerItemRenderer(
                 {
-                    FireMissilesDialog(it.peer).show(parentFragmentManager, this.tag)
+                    RequestAttestationDialog(it.peer).show(parentFragmentManager, this.tag)
                 },
                 {
                     copyToClipboard(it.peer)
