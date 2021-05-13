@@ -3,8 +3,10 @@ package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 import SuccessDialog
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
@@ -18,10 +20,11 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.ipv8.util.toKey
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.ui.dialogs.status.DangerDialog
+import nl.tudelft.trustchain.ssi.util.parseHtml
 
 const val VERIFICATION_THRESHOLD = 0.9
 
-class AttestationConfirmationDialog(
+class AttestationVerificationDialog(
     private val attestationHash: ByteArray,
     private val attestationName: String,
     private val attestationValue: ByteArray?,
@@ -33,11 +36,31 @@ class AttestationConfirmationDialog(
     private val rendezvousToken: String
 ) : DialogFragment() {
 
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        findNavController().navigateUp()
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
+            var parsedValue = ""
+            if (attestationValue != null) {
+                parsedValue = if (attestationValue.size > 100) String(
+                    attestationValue.copyOfRange(
+                        0,
+                        100
+                    )
+                ) else String(attestationValue)
+            }
             val builder = AlertDialog.Builder(it)
             builder.setTitle("Attestation Found")
-                .setMessage("Attestation presented by: ${subjectKey.keyToHash().toHex()}")
+                .setMessage(
+                    parseHtml(
+                        "Attestation presented by: ${
+                            subjectKey.keyToHash().toHex()
+                        }\n<b>${attestationName}</b>: $parsedValue"
+                    )
+                )
                 .setPositiveButton(
                     "Quick Verification"
                 ) { _, _ ->
@@ -62,7 +85,7 @@ class AttestationConfirmationDialog(
                 .setNegativeButton(
                     "Active Verification"
                 ) { _, _ ->
-                    val dialog = ActiveVerificationDialog()
+                    val dialog = ActiveAttestationVerificationDialog()
                     dialog.show(parentFragmentManager, "ig-ssi")
                     GlobalScope.launch {
                         val channel =
