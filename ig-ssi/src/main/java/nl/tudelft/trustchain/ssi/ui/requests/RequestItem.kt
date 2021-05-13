@@ -17,11 +17,11 @@ class RequestItem(
     }
 
     override fun areItemsTheSame(other: Item): Boolean {
-        return other is RequestItem && this.requestType == other.requestType && this.peer.mid == other.peer.mid && this.attributeName == other.attributeName && this.metadata == other.metadata && this.requestedValue == other.requestedValue
+        return this == other
     }
 
     override fun areContentsTheSame(other: Item): Boolean {
-        return false
+        return this == other
     }
 
     fun isVerifyRequest(): Boolean {
