@@ -6,4 +6,9 @@
         android:icon="@drawable/ic_baseline_settings_24"
         android:title="@string/settings"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_drop"
+        android:icon="@drawable/ic_bug_report_black_24dp"
+        android:title="@string/clear_identity" />
 </menu>

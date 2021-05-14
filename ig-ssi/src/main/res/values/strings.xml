@@ -31,4 +31,5 @@
     <string name="switch_str">Switch</string>
     <string name="display_first_qr_code">Display first QR code</string>
     <string name="credential_image">Credential image</string>
+    <string name="clear_identity">Clear Identity</string>
 </resources>

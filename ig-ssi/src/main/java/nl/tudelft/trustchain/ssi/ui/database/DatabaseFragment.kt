@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.ssi.ui.database
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
@@ -9,6 +10,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidmads.library.qrgenearator.QRGContents
 import androidmads.library.qrgenearator.QRGEncoder
 import androidx.core.content.res.ResourcesCompat
@@ -20,7 +22,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_database.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.communication.DEFAULT_TIME_OUT
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -33,6 +39,7 @@ import nl.tudelft.trustchain.ssi.ui.dialogs.misc.RendezvousDialog
 import nl.tudelft.trustchain.ssi.util.encodeB64
 import nl.tudelft.trustchain.ssi.util.formatAttestationToJSON
 import nl.tudelft.trustchain.ssi.util.formatValueToJSON
+import nl.tudelft.trustchain.ssi.util.parseHtml
 import org.json.JSONObject
 
 const val QR_CODE_VALUE_LIMIT = 200
@@ -86,6 +93,34 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
             R.id.action_settings -> {
                 RendezvousDialog(callback = this::setPeerInfo).show(parentFragmentManager, "ig-ssi")
                 return true
+            }
+            R.id.action_drop -> {
+                val channel = Communication.load()
+                AlertDialog.Builder(context)
+                    .setTitle("Delete Identity")
+                    .setMessage(parseHtml("Are you sure you want to <font color='#EE0000'>delete</font> your identity?\n This action <font color='#EE0000'>cannot</font> be undone.")) // Specifying a listener allows you to take an action before dismissing the dialog.
+                    .setPositiveButton(
+                        android.R.string.yes
+                    ) { _, _ ->
+                        channel.deleteIdentity()
+                        Toast.makeText(
+                            requireContext(),
+                            "Successfully cleared all attestations.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .setNegativeButton(
+                        android.R.string.no
+                    ) { _, _ ->
+                        Toast.makeText(
+                            requireContext(),
+                            "Cancelled deletion.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show()
+                channel.deleteIdentity()
             }
             else -> {
 
