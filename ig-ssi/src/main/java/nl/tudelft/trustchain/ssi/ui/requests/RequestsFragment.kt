@@ -12,7 +12,7 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_requests.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.attestation.schema.ID_METADATA
+import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication

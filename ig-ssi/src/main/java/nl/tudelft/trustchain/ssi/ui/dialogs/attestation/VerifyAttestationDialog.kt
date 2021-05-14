@@ -9,8 +9,8 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.wallet.store.AttestationBlob
 import nl.tudelft.trustchain.ssi.R
 
 class VerifyAttestationDialog(private val databaseBlob: AttestationBlob) : DialogFragment() {

@@ -13,7 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.identity.Metadata
+import nl.tudelft.ipv8.attestation.identity.datastructures.Metadata
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.stripSHA1Padding
 import nl.tudelft.ipv8.util.toHex

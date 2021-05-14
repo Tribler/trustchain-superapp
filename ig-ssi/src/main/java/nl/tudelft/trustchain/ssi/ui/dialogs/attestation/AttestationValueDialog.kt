@@ -16,8 +16,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.textfield.TextInputEditText
 import com.jaredrummler.blockingdialog.BlockingDialogFragment
-import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_18PLUS
-import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_UNDERAGE
+import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_18PLUS
+import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA_RANGE_UNDERAGE
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.util.decodeImage
 import nl.tudelft.trustchain.ssi.util.encodeImage
