@@ -25,6 +25,7 @@ import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentPeers2Binding
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RequestAttestationDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
 
 class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
 
@@ -41,7 +42,7 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
                     RequestAttestationDialog(it.peer).show(parentFragmentManager, this.tag)
                 },
                 {
-                    copyToClipboard(it.peer)
+                    promptAuthority(it.peer)
                 }
             )
         )
@@ -90,10 +91,15 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
         loadNetworkInfo()
     }
 
+    private fun promptAuthority(peer: Peer): Boolean {
+        AuthorityConfirmationDialog(peer.publicKey, false).show(parentFragmentManager, "ig-ssi")
+        return true
+    }
+
     private fun copyToClipboard(peer: Peer): Boolean {
         val clipboard =
             requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("RANDOM UUID", peer.address.toString())
+        val clip = ClipData.newPlainText("Peer Address", peer.address.toString())
         clipboard.setPrimaryClip(clip)
 
         val text = "Copied address to clipboard!"
@@ -146,7 +152,7 @@ class Peers2Fragment : BaseFragment(R.layout.fragment_peers2) {
                 val items = peerItems + addressItems // + bluetoothAddressItems
 
                 adapterClients.updateItems(items)
-                txtCommunityName.text = "IG-SSI"// demoCommunity.javaClass.simpleName
+                txtCommunityName.text = getString(R.string.identity_network)
                 txtPeerCount.text = "${peers.size} peers"
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)

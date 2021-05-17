@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.identity.datastructures.IdentityAttestation
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 
@@ -21,14 +22,23 @@ class SSIMainActivity : BaseActivity() {
         val channel = Communication.load()
         channel.revocationOverlay.setRevocationUpdateCallback(this::revocationUpdateCallback)
 
-        // TODO: add callbacks for user update.
-        // community.setAttestationRequestCallback(::attestationRequestCallback)
-        // community.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
-        // community.setAttestationChunkCallback(::attestationChunkCallback)
+        Communication.getInstance().setAttestationCallback(this::attestationCallback)
 
         // Register own key as trusted authority.
         channel.authorityManager.addTrustedAuthority(channel.myPeer.publicKey)
         this.notificationHandler()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun attestationCallback(peer: Peer, attestation: IdentityAttestation) {
+        Handler(Looper.getMainLooper()).post {
+            Toast.makeText(
+                applicationContext,
+                "Successfully received attestation from ${peer.mid}.",
+                Toast.LENGTH_LONG
+            )
+                .show()
+        }
     }
 
     private fun notificationHandler() {
