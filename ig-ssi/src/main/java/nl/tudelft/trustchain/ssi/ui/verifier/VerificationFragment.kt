@@ -16,13 +16,32 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.attestation.identity.consts.Metadata.ID
+import nl.tudelft.ipv8.attestation.identity.consts.Metadata.NAME
+import nl.tudelft.ipv8.attestation.identity.consts.Metadata.SCHEMA
+import nl.tudelft.ipv8.attestation.identity.consts.Metadata.VALUE
 import nl.tudelft.ipv8.attestation.identity.datastructures.Metadata
+import nl.tudelft.ipv8.attestation.wallet.consts.Metadata.PUBLIC_KEY
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTATION
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTATION_HASH
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTORS
+import nl.tudelft.trustchain.ssi.attestations.Metadata.AUTHORITY
+import nl.tudelft.trustchain.ssi.attestations.Metadata.CHALLENGE
+import nl.tudelft.trustchain.ssi.attestations.Metadata.KEY_HASH
+import nl.tudelft.trustchain.ssi.attestations.Metadata.METADATA
+import nl.tudelft.trustchain.ssi.attestations.Metadata.POINTER
+import nl.tudelft.trustchain.ssi.attestations.Metadata.PRESENTATION
+import nl.tudelft.trustchain.ssi.attestations.Metadata.PRESENTATION_REQUEST
+import nl.tudelft.trustchain.ssi.attestations.Metadata.RENDEZVOUS
+import nl.tudelft.trustchain.ssi.attestations.Metadata.SIGNATURE
+import nl.tudelft.trustchain.ssi.attestations.Metadata.SUBJECT
+import nl.tudelft.trustchain.ssi.attestations.Metadata.TIMESTAMP
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationVerificationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RequestAttestationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.authority.AuthorityConfirmationDialog
@@ -36,13 +55,13 @@ const val SCAN_ATTESTATION_INTENT = 2
 
 val REQUIRED_QR_FIELDS =
     arrayOf(
-        "presentation",
-        "attestationHash",
-        "metadata",
-        "subject",
-        "challenge",
-        "attestors",
-        "value"
+        PRESENTATION,
+        ATTESTATION_HASH,
+        METADATA,
+        SUBJECT,
+        CHALLENGE,
+        ATTESTORS,
+        VALUE
     )
 
 class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
@@ -67,28 +86,22 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             try {
                 val attestationPresentation = JSONObject(attestationPresentationString)
                 Log.d("ig-ssi", "Found the following data: $attestationPresentation")
-                when (val format = attestationPresentation.get("presentation")) {
-                    "authority" -> {
+                when (val format = attestationPresentation.get(PRESENTATION)) {
+                    AUTHORITY -> {
                         handleAuthority(attestationPresentation)
                     }
-                    "attestation" -> {
+                    ATTESTATION -> {
                         handleAttestation(attestationPresentation)
                     }
-                    "presentation_request" -> {
+                    PRESENTATION_REQUEST -> {
                         handlePresentationRequest(attestationPresentation)
                     }
                     else -> throw RuntimeException("Encountered invalid presentation format $format.")
                 }
-                // qrCodeUtils.startQRScanner(this, args.qrCodeHint, vertical = true)
             } catch (e: Exception) {
                 e.printStackTrace()
                 Toast.makeText(requireContext(), "Invalid data found", Toast.LENGTH_LONG).show()
                 Log.d("ig-ssi", "STRING: $attestationPresentationString")
-                // Log.d(
-                //     "ig-ssi", "STRING: ${
-                //         String(decodeB64(attestationPresentationString))
-                //     }"
-                // )
                 qrCodeUtils.startQRScanner(this, args.qrCodeHint, vertical = true)
             }
         } else {
@@ -129,7 +142,6 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                         dialog.cancel()
                     }
                 }
-                // findNavController().navigate(VerificationFragmentDirections.actionVerificationFragmentToDatabaseFragment())
             }
             ADD_AUTHORITY_INTENT -> AuthorityConfirmationDialog(authorityKey).show(
                 parentFragmentManager,
@@ -148,13 +160,13 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         val authorityKey =
             defaultCryptoProvider.keyFromPublicBin(
                 decodeB64(
-                    attestationPresentation.getString("public_key")
+                    attestationPresentation.getString(PUBLIC_KEY)
                 )
             )
 
-        val rendezvousToken: String? = attestationPresentation.optString("rendezvous")
-        val id = attestationPresentation.getString("id")
-        val requestedAttribute = attestationPresentation.getString("name")
+        val rendezvousToken: String? = attestationPresentation.optString(RENDEZVOUS)
+        val id = attestationPresentation.getString(ID)
+        val requestedAttribute = attestationPresentation.getString(NAME)
 
         AlertDialog.Builder(context)
             .setTitle("Attribute Disclosure Request")
@@ -216,18 +228,16 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
                         ).show()
                     }
                 }
-
-                // Continue with delete operation
-            } // A null listener allows the button to dismiss the dialog and take no further action.
+            }
             .setNegativeButton(android.R.string.no, null)
             .setIcon(android.R.drawable.ic_dialog_alert)
             .show()
     }
 
     private fun handleAttestation(data: JSONObject) {
-        val challengeJSON = data.getJSONObject("challenge")
-        val timestamp = challengeJSON.getLong("timestamp")
-        val rendezvousToken = data.optString("rendezvous")
+        val challengeJSON = data.getJSONObject(CHALLENGE)
+        val timestamp = challengeJSON.getLong(TIMESTAMP)
+        val rendezvousToken = data.optString(RENDEZVOUS)
         val presentations = VerificationHelper.getInstance().presentation
 
         if (!presentations.containsKey(timestamp)) {
@@ -237,9 +247,6 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
             presentations[timestamp]!!.put(it, data.get(it))
         }
 
-        // if (this.presentations[timestamp]!!.asMap().filterKeys { it !in REQUIRED_QR_FIELDS }
-        //         .isNotEmpty())
-
         if (REQUIRED_QR_FIELDS.any { !presentations[timestamp]!!.has(it) }) {
             Toast.makeText(requireContext(), "Please scan the next QR Code.", Toast.LENGTH_LONG)
                 .show()
@@ -247,48 +254,48 @@ class VerificationFragment : BaseFragment(R.layout.fragment_verification) {
         } else {
             @Suppress("NAME_SHADOWING") val data = presentations.remove(timestamp)!!
             // Attestation hash
-            val attestationHash = decodeB64(data.getString("attestationHash"))
+            val attestationHash = decodeB64(data.getString(ATTESTATION_HASH))
 
             // Metadata
-            val mdJSON = data.getJSONObject("metadata")
-            val mdPointer = decodeB64(mdJSON.getString("pointer"))
-            val mdSign = decodeB64(mdJSON.getString("signature"))
-            val mdMetadata = mdJSON.getString("metadata").toByteArray()
+            val mdJSON = data.getJSONObject(METADATA)
+            val mdPointer = decodeB64(mdJSON.getString(POINTER))
+            val mdSign = decodeB64(mdJSON.getString(SIGNATURE))
+            val mdMetadata = mdJSON.getString(METADATA).toByteArray()
             val metadata = Metadata.fromDatabaseTuple(mdPointer, mdSign, mdMetadata)
 
             // Subject
             val subjectKey = defaultCryptoProvider.keyFromPublicBin(
                 decodeB64(
                     data.getString(
-                        "subject"
+                        SUBJECT
                     )
                 )
             )
 
             // Challenge
-            @Suppress("NAME_SHADOWING") val challengeJSON = data.getJSONObject("challenge")
+            @Suppress("NAME_SHADOWING") val challengeJSON = data.getJSONObject(CHALLENGE)
             val challengePair = Pair(
-                decodeB64(challengeJSON.getString("signature")),
-                challengeJSON.getLong("timestamp")
+                decodeB64(challengeJSON.getString(SIGNATURE)),
+                challengeJSON.getLong(TIMESTAMP)
             )
 
             // Attestors
             val attestors = mutableListOf<Pair<ByteArray, ByteArray>>()
-            val attestorsArray = data.getJSONArray("attestors")
+            val attestorsArray = data.getJSONArray(ATTESTORS)
             for (i in 0 until attestorsArray.length()) {
                 val entry = attestorsArray.getJSONObject(i)
-                val keyHash = decodeB64(entry.getString("keyHash"))
-                val signature = decodeB64(entry.getString("signature"))
+                val keyHash = decodeB64(entry.getString(KEY_HASH))
+                val signature = decodeB64(entry.getString(SIGNATURE))
                 attestors.add(Pair(keyHash, signature))
             }
 
             val attMetadata = JSONObject(String(metadata.serializedMetadata))
-            val attributeName = attMetadata.getString("name")
-            val idFormat = attMetadata.getString("schema")
+            val attributeName = attMetadata.getString(NAME)
+            val idFormat = attMetadata.getString(SCHEMA)
 
             var proposedAttributeValue: ByteArray? = null
-            if (data.has("value")) {
-                proposedAttributeValue = decodeB64(data.getString("value"))
+            if (data.has(VALUE)) {
+                proposedAttributeValue = decodeB64(data.getString(VALUE))
             }
 
             AttestationVerificationDialog(

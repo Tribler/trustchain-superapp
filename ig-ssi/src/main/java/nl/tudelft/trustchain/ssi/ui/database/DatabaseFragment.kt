@@ -28,10 +28,14 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.attestation.communication.DEFAULT_TIME_OUT
+import nl.tudelft.ipv8.attestation.wallet.consts.Metadata.PUBLIC_KEY
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
+import nl.tudelft.trustchain.ssi.attestations.Metadata.AUTHORITY
+import nl.tudelft.trustchain.ssi.attestations.Metadata.PRESENTATION
+import nl.tudelft.trustchain.ssi.attestations.Metadata.RENDEZVOUS
 import nl.tudelft.trustchain.ssi.databinding.FragmentDatabaseBinding
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.PresentAttestationDialog
 import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.RemoveAttestationDialog
@@ -305,12 +309,12 @@ class DatabaseFragment : BaseFragment(R.layout.fragment_database) {
 
         lifecycleScope.launch {
             val data = JSONObject()
-            data.put("presentation", "authority")
+            data.put(PRESENTATION, AUTHORITY)
             val myPeer = Communication.load().myPeer
             val publicKey =
                 encodeB64(myPeer.publicKey.keyToBin())
-            data.put("public_key", publicKey)
-            data.put("rendezvous", Communication.getActiveRendezvousToken())
+            data.put(PUBLIC_KEY, publicKey)
+            data.put(RENDEZVOUS, Communication.getActiveRendezvousToken())
 
             bitmap = QRGEncoder(data.toString(), null, QRGContents.Type.TEXT, 1000).bitmap
             try {
