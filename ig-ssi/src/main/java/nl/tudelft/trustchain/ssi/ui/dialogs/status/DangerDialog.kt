@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.ssi.ui.dialogs.status
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +15,11 @@ class DangerDialog : DialogFragment() {
 
     lateinit var mDialog: Dialog
 
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        findNavController().navigateUp()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -22,7 +28,6 @@ class DangerDialog : DialogFragment() {
         val view = inflater.inflate(R.layout.danger_dialog, container, false)
         view.setOnClickListener {
             mDialog.dismiss()
-            findNavController().navigateUp()
         }
         return view
     }

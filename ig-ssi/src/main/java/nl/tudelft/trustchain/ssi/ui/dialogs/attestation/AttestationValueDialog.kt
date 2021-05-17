@@ -27,7 +27,7 @@ import java.io.InputStream
 import java.util.Locale
 
 @SuppressLint("ValidFragment")
-class AttestationValueDialog(private val attributeName: String, private val idFormat: String) :
+class DirectAttestationValueDialog(private val attributeName: String, private val idFormat: String) :
     BlockingDialogFragment<String>() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): AlertDialog? {
@@ -74,7 +74,7 @@ class AttestationValueDialog(private val attributeName: String, private val idFo
     }
 }
 
-class NewAttestationValueDialog(
+class AttestationValueDialog(
     private val attributeName: String,
     private val idFormat: String,
     private val requestedValue: String? = null,

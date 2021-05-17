@@ -15,11 +15,16 @@ import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 
-class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogFragment() {
+class AuthorityConfirmationDialog(
+    private val authorityKey: PublicKey,
+    private val navigateUp: Boolean = true
+) : DialogFragment() {
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        findNavController().navigateUp()
+        if (navigateUp) {
+            findNavController().navigateUp()
+        }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -41,7 +46,7 @@ class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogF
                         Handler(Looper.getMainLooper()).post {
                             Toast.makeText(
                                 context,
-                                "Successfully added new Authority",
+                                "Successfully acknowledged Authority.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
@@ -49,12 +54,11 @@ class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogF
                         Handler(Looper.getMainLooper()).post {
                             Toast.makeText(
                                 context,
-                                "Authority already added",
+                                "Authority already acknowledged.",
                                 Toast.LENGTH_LONG
                             ).show()
                         }
                     }
-                    findNavController().navigateUp()
                 }
                 .setNegativeButton(
                     R.string.cancel
@@ -62,11 +66,10 @@ class AuthorityConfirmationDialog(private val authorityKey: PublicKey) : DialogF
                     Handler(Looper.getMainLooper()).post {
                         Toast.makeText(
                             context,
-                            "Cancelled new Authority",
+                            "Cancelled acknowledging Authority.",
                             Toast.LENGTH_LONG
                         ).show()
                     }
-                    findNavController().navigateUp()
                 }
 
             builder.create()

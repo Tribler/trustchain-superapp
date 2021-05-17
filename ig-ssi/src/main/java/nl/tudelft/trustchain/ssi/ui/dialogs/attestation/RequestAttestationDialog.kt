@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.ssi.ui.dialogs.attestation
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
@@ -31,7 +30,6 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
-import nl.tudelft.trustchain.ssi.ui.verifier.VerificationFragmentDirections
 import nl.tudelft.trustchain.ssi.util.encodeImage
 import java.io.BufferedInputStream
 import java.io.InputStream
@@ -45,8 +43,7 @@ val DEFAULT_ATTRIBUTE_NAMES = arrayOf(AGE, NAME, ID_PICTURE, CUSTOM)
 
 const val PICK_IMAGE = 1
 
-@SuppressLint("ClickableViewAccessibility")
-class RequestAttestationDialog(peer: Peer? = null) :
+class RequestAttestationDialog(peer: Peer? = null, private val navigateUp: Boolean = true) :
     DialogFragment() {
     private lateinit var mView: View
     private lateinit var mContext: Context
@@ -61,7 +58,9 @@ class RequestAttestationDialog(peer: Peer? = null) :
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-        findNavController().navigateUp()
+        if (navigateUp) {
+            findNavController().navigateUp()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -177,9 +176,7 @@ class RequestAttestationDialog(peer: Peer? = null) :
                 )
                 .setNegativeButton(
                     R.string.cancel
-                ) { _, _ ->
-                    findNavController().navigateUp()
-                }
+                ) { _, _ -> }
                 .setTitle("Request Attestation")
             // Create the AlertDialog object and return it
             val dialog = builder.create()
@@ -223,7 +220,6 @@ class RequestAttestationDialog(peer: Peer? = null) :
                             else
                                 this.image?.let { it1 -> encodeImage(it1) }
 
-
                         Log.d(
                             "ig-ssi",
                             "Sending attestation for ${attributeNameInput.text} to ${peer.mid}"
@@ -240,11 +236,10 @@ class RequestAttestationDialog(peer: Peer? = null) :
                         dialog.dismiss()
                         Toast.makeText(
                             requireContext(),
-                            "Requested attestation for ${attributeNameInput.text} from ${peer.mid}",
+                            "Requested attestation for $attributeName from ${peer.mid}.",
                             Toast.LENGTH_LONG
                         ).show()
                         // }
-                        findNavController().navigateUp()
                     } else {
                         attributeNameInput.error = "Please enter a claim name."
                     }
@@ -269,6 +264,5 @@ class RequestAttestationDialog(peer: Peer? = null) :
             Toast.makeText(requireContext(), "Failed to locate peer", Toast.LENGTH_LONG).show()
             this.dismiss()
         }
-        findNavController().navigateUp()
     }
 }

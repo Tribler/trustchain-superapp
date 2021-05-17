@@ -8,6 +8,7 @@ import android.widget.Toast
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.wallet.cryptography.WalletAttestation
 
+
 @Suppress("UNUSED_PARAMETER")
 fun attestationRequestCompleteCallback(
     forPeer: Peer,

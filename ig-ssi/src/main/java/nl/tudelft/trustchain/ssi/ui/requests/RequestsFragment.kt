@@ -13,12 +13,13 @@ import kotlinx.android.synthetic.main.fragment_requests.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.attestation.common.consts.SchemaConstants.ID_METADATA
+import nl.tudelft.ipv8.attestation.wallet.consts.Metadata.ID_FORMAT
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.ssi.Communication
 import nl.tudelft.trustchain.ssi.R
 import nl.tudelft.trustchain.ssi.databinding.FragmentRequestsBinding
-import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.NewAttestationValueDialog
+import nl.tudelft.trustchain.ssi.ui.dialogs.attestation.AttestationValueDialog
 import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.ATTESTATION_REQUEST_ITEM
 import nl.tudelft.trustchain.ssi.ui.requests.RequestItem.Companion.VERIFY_REQUEST_ITEM
 import org.json.JSONObject
@@ -61,18 +62,18 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
     private fun onPositiveClick(item: RequestItem) {
         val channel = Communication.load()
         if (item.isVerifyRequest()) {
-            Log.d("IG-SSI", "Allowing verification from ${item.peer.mid} for ${item.attributeName}")
+            Log.d("ig-ssi", "Allowing verification from ${item.peer.mid} for ${item.attributeName}")
             channel.allowVerification(item.peer, item.attributeName)
         } else if (item.isAttestationRequest()) {
             val parsedMetadata = JSONObject(item.metadata!!)
-            val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
+            val idFormat = parsedMetadata.optString(ID_FORMAT, ID_METADATA)
 
             // val activity = weakActivity!!.get()
             fun callBack(value: String) {
                 Log.i("ig-ssi", "Signing attestation.")
                 channel.attest(item.peer, item.attributeName, value.toByteArray(Charsets.US_ASCII))
             }
-            NewAttestationValueDialog(
+            AttestationValueDialog(
                 item.attributeName,
                 idFormat,
                 item.requestedValue,
@@ -88,7 +89,7 @@ class RequestsFragment : BaseFragment(R.layout.fragment_requests) {
         val channel = Communication.load()
         if (item.isVerifyRequest()) {
             Log.d(
-                "IG-SSI",
+                "ig-ssi",
                 "Disallowing verification from ${item.peer.mid} for ${item.attributeName}"
             )
             channel.disallowVerification(item.peer, item.attributeName)
