@@ -1,6 +1,18 @@
 package nl.tudelft.trustchain.ssi.util
 
 import nl.tudelft.ipv8.attestation.communication.AttestationPresentation
+import nl.tudelft.ipv8.attestation.identity.consts.Metadata.VALUE
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTATION
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTATION_HASH
+import nl.tudelft.trustchain.ssi.attestations.Metadata.ATTESTORS
+import nl.tudelft.trustchain.ssi.attestations.Metadata.CHALLENGE
+import nl.tudelft.trustchain.ssi.attestations.Metadata.KEY_HASH
+import nl.tudelft.trustchain.ssi.attestations.Metadata.METADATA
+import nl.tudelft.trustchain.ssi.attestations.Metadata.POINTER
+import nl.tudelft.trustchain.ssi.attestations.Metadata.PRESENTATION
+import nl.tudelft.trustchain.ssi.attestations.Metadata.SIGNATURE
+import nl.tudelft.trustchain.ssi.attestations.Metadata.SUBJECT
+import nl.tudelft.trustchain.ssi.attestations.Metadata.TIMESTAMP
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -11,54 +23,53 @@ fun formatAttestationToJSON(
     value: ByteArray? = null
 ): String {
     val data = JSONObject()
-    data.put("presentation", "attestation")
+    data.put(PRESENTATION, ATTESTATION)
 
-    // TODO: Definitions.
     // AttestationHash
-    data.put("attestationHash", encodeB64(attestation.attributeHash))
+    data.put(ATTESTATION_HASH, encodeB64(attestation.attributeHash))
 
     // Metadata
     val metadata = JSONObject()
     val (pointer, signature, serializedMD) = attestation.metadata.toDatabaseTuple()
-    metadata.put("pointer", encodeB64(pointer))
-    metadata.put("signature", encodeB64(signature))
+    metadata.put(POINTER, encodeB64(pointer))
+    metadata.put(SIGNATURE, encodeB64(signature))
     metadata.put(
-        "metadata", String(serializedMD)
+        METADATA, String(serializedMD)
     )
-    data.put("metadata", metadata)
+    data.put(METADATA, metadata)
 
     // Subject
     data.put(
-        "subject",
+        SUBJECT,
         encodeB64(subjectKey.keyToBin())
     )
 
     // Challenge
     val challenge = JSONObject()
     val (challengeValue, challengeSignature) = challengePair
-    challenge.put("timestamp", challengeValue)
-    challenge.put("signature", encodeB64(challengeSignature))
-    data.put("challenge", challenge)
+    challenge.put(TIMESTAMP, challengeValue)
+    challenge.put(SIGNATURE, encodeB64(challengeSignature))
+    data.put(CHALLENGE, challenge)
 
     // Attestors
     val attestors = JSONArray()
     for (attestor in attestation.attestors) {
         val attestorJSON = JSONObject()
         attestorJSON.put(
-            "keyHash",
+            KEY_HASH,
             encodeB64(attestor.first)
         )
         attestorJSON.put(
-            "signature",
+            SIGNATURE,
             encodeB64(attestor.second)
         )
         attestors.put(attestorJSON)
     }
-    data.put("attestors", attestors)
+    data.put(ATTESTORS, attestors)
 
     // Value
     if (value != null) {
-        data.put("value", encodeB64(value))
+        data.put(VALUE, encodeB64(value))
     }
     return data.toString()
 }
@@ -68,18 +79,18 @@ fun formatValueToJSON(
     challengePair: Pair<Long, ByteArray>,
 ): String {
     val data = JSONObject()
-    data.put("presentation", "attestation")
+    data.put(PRESENTATION, ATTESTATION)
 
     // Challenge
     val challenge = JSONObject()
     val (challengeValue, challengeSignature) = challengePair
-    challenge.put("timestamp", challengeValue)
-    challenge.put("signature", encodeB64(challengeSignature))
-    data.put("challenge", challenge)
+    challenge.put(TIMESTAMP, challengeValue)
+    challenge.put(SIGNATURE, encodeB64(challengeSignature))
+    data.put(CHALLENGE, challenge)
 
     // Value
     val valueString = encodeB64(value)
-    data.put("value", valueString)
+    data.put(VALUE, valueString)
 
     return data.toString()
 }
