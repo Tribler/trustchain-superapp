@@ -98,7 +98,7 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
     //implementation 'com.github.tony19:logback-android:2.0.0'
 
-    implementation 'com.mattskala:itemadapter:0.4'
+    implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
 
     // BitTorrent
     api files('libs/jlibtorrent-1.2.10.0.jar')
@@ -115,7 +115,7 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation 'org.json:json:20190722'
     testImplementation "com.squareup.sqldelight:sqlite-driver:$sqldelight_version"
-    testImplementation "com.goterl.lazycode:lazysodium-java:4.3.2"
+    testImplementation "com.goterl:lazysodium-java:5.0.1"
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
 }
 

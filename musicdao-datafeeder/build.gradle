@@ -7,7 +7,7 @@ dependencies {
 //    implementation project(':common')
     api(project(':ipv8-jvm')){
         exclude group: 'org.slf4j'
-        exclude group: 'com.goterl.lazycode'
+        exclude group: 'com.goterl'
         exclude group: 'org.bouncycastle'
     }
 

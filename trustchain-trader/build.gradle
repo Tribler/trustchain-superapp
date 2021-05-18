@@ -71,7 +71,7 @@ dependencies {
     // Animation
     implementation 'com.airbnb.android:lottie:3.4.0'
 
-    implementation 'com.mattskala:itemadapter:0.4'
+    implementation 'com.github.MattSkala:recyclerview-itemadapter:0.4'
 
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
