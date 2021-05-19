@@ -20,10 +20,10 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.NetworkParameters
 import org.bitcoinj.wallet.Wallet
-import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.*
+import kotlin.Exception
 
 const val BALANCE_THRESHOLD = "5"
 /**
@@ -57,7 +57,7 @@ class BitcoinFragment :
         // TODO: Try catch not too nice.
         try {
             WalletManagerAndroid.getInstance()
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
             Log.w("Coin", "Wallet Manager not initialized.")
             return
         }
@@ -106,7 +106,7 @@ class BitcoinFragment :
                 {
                     try {
                         bitcoin_refresh_swiper.isRefreshing = false
-                    } catch (e: IllegalStateException) {
+                    } catch (e: Exception) {
                     }
                 },
                 1500
@@ -178,7 +178,7 @@ class BitcoinFragment :
                 {
                     try {
                         bitcoin_refresh_swiper.isRefreshing = false
-                    } catch (e: IllegalStateException) {
+                    } catch (e: Exception) {
                     }
                 },
                 1500

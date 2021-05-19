@@ -55,14 +55,14 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
         try {
             this.isFetching = true
             join_dao_refresh_swiper.isRefreshing = true
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
         }
     }
 
     private fun disableRefresher() {
         try {
             join_dao_refresh_swiper.isRefreshing = false
-        } catch (e: IllegalStateException) {
+        } catch (e: Exception) {
         }
     }
 
