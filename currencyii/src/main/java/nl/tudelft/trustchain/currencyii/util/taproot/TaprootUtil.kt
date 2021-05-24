@@ -21,7 +21,6 @@ class TaprootUtil {
             val program = byteArrayOf(pubKeyData[0] and 1.toByte()).plus(pubKeyData.drop(1))
 
             assert(2 <= program.size && program.size <= 40)
-//            assert(program.size in arrayOf(20, 32))
 
             return SegwitAddress(NetworkParameters.fromPmtProtocolID("regtest"), 0x01, program).toString()
         }
