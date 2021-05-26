@@ -47,18 +47,21 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
+import nl.tudelft.trustchain.gossipML.RecommenderCommunity
+import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.ssi.Communication
 
 import nl.tudelft.trustchain.voting.VotingCommunity
+import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
+@ExperimentalUnsignedTypes
 class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
         defaultCryptoProvider = AndroidCryptoProvider
-
         initIPv8()
     }
 
@@ -75,6 +78,7 @@ class TrustChainApplication : Application() {
                 createCoinCommunity(),
                 createVotingCommunity(),
                 createMusicCommunity(),
+                createRecommenderCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -135,10 +139,10 @@ class TrustChainApplication : Application() {
                     block: TrustChainBlock,
                     database: TrustChainStore
                 ): ValidationResult {
-                    if (block.transaction["message"] != null || block.isAgreement) {
-                        return ValidationResult.Valid
+                    return if (block.transaction["message"] != null || block.isAgreement) {
+                        ValidationResult.Valid
                     } else {
-                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
+                        ValidationResult.Invalid(listOf("Proposal must have a message"))
                     }
                 }
             }
@@ -169,7 +173,10 @@ class TrustChainApplication : Application() {
             CoinCommunity.JOIN_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                    Log.d(
+                        "Coin",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
                 }
             }
         )
@@ -178,7 +185,10 @@ class TrustChainApplication : Application() {
             CoinCommunity.SIGNATURE_ASK_BLOCK,
             object : BlockListener {
                 override fun onBlockReceived(block: TrustChainBlock) {
-                    Log.d("Coin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                    Log.d(
+                        "Coin",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
                 }
             }
         )
@@ -286,6 +296,22 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             MusicCommunity.Factory(settings, store),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
+        val settings = TrustChainSettings()
+        val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        val musicStore = TrustChainSQLiteStore(Database(musicDriver))
+        val driver = AndroidSqliteDriver(MLDatabase.Schema, this, "recommend.db")
+        val database = MLDatabase(driver)
+
+        val recommendStore = RecommenderStore.getInstance(musicStore, database)
+        recommendStore.essentiaJob = GlobalScope.launch { recommendStore.addAllLocalFeatures() }
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            RecommenderCommunity.Factory(recommendStore, settings, musicStore),
             listOf(randomWalk)
         )
     }

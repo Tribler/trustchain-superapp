@@ -14,8 +14,13 @@ class ReleaseFragmentTest {
         val sessionManager = mockk<SessionManager>()
         val releaseFragment = spyk(
             ReleaseFragment(
-                "magnet", "artists", "title", "10-10-2010",
-                "publisherKey", "RFBMP", sessionManager
+                "magnet",
+                "artists",
+                "title",
+                "10-10-2010",
+                "publisherKey",
+                "RFBMP",
+                sessionManager
             )
         )
         val resources = File("./src/test/resources")

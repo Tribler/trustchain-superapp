@@ -56,7 +56,8 @@ class PlaylistsOverviewFragmentTest {
     fun showAllReleases() {
         val releaseOverviewFragment = PlaylistsOverviewFragment()
         val releaseBlocks = mapOf<TrustChainBlock, Int>(
-            wellStructuredBlock to 0, wrongStructuredBlock to 0
+            wellStructuredBlock to 0,
+            wrongStructuredBlock to 0
         )
         Assert.assertEquals(
             1,

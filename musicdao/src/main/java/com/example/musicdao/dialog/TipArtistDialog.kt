@@ -2,7 +2,6 @@ package com.example.musicdao.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import android.widget.TextView
@@ -33,23 +32,23 @@ class TipArtistDialog(private val publicKey: String) : DialogFragment() {
         val instructionText = dialogView?.findViewById<TextView>(R.id.instructionText)
         instructionText?.text = "Sending a tip to artist(s), with public key: $publicKey"
 
+        // Todo: Create proposal
+
         val amountEditText = dialogView?.findViewById<EditText>(R.id.amount)
         val walletDir = context?.cacheDir ?: throw Error("CacheDir not found")
         val walletService = WalletService.getInstance(walletDir, (activity as MusicService))
 
         builder.setView(dialogView)
             .setPositiveButton(
-                "Confirm",
-                DialogInterface.OnClickListener { _, _ ->
-                    val amount = amountEditText?.text.toString()
-                    walletService.sendCoins(publicKey, amount)
-                }
-            ).setNegativeButton(
-                "Cancel",
-                DialogInterface.OnClickListener { _, _ ->
-                    dialog?.cancel()
-                }
-            )
+                "Confirm"
+            ) { _, _ ->
+                val amount = amountEditText?.text.toString()
+                walletService.sendCoins(publicKey, amount)
+            }.setNegativeButton(
+                "Cancel"
+            ) { _, _ ->
+                dialog?.cancel()
+            }
 
         return builder.create()
     }

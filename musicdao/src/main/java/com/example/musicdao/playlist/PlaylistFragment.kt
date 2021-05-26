@@ -26,7 +26,13 @@ class PlaylistFragment : MusicBaseFragment(R.layout.fragment_playlist) {
             if (magnet != null) {
                 val transaction = childFragmentManager.beginTransaction()
                 val release = ReleaseFragment(
-                    magnet, artists, title, date, publisher, torrentInfoName, sessionManager
+                    magnet,
+                    artists,
+                    title,
+                    date,
+                    publisher,
+                    torrentInfoName,
+                    sessionManager
                 )
                 transaction.add(R.id.trackListLinearLayout, release, "release")
                 transaction.commit()

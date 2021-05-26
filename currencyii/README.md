@@ -1,6 +1,9 @@
 # luxury-communism
 <img src="docs/images/logo.png" width=140px style="float:left; z-index:1; margin-right:15px"/>
 
+**NOTE**
+We seperated this document in two versions. The first version of Luxury Communism uses the classic approach of Multisig transactions, the second version uses Taproot to improve it. Since everything, except for the Multisig part, is the same between the two versions, we decided to keep the first version's documentation for reference.
+## Version 1
 Luxury communism is an Android application built on top of [IPv8](https://github.com/Tribler/kotlin-ipv8) and [Trustchain](https://github.com/Tribler/kotlin-ipv8/blob/master/doc/TrustChainCommunity.md), and is integrated into the [Trustchain Superapp](https://github.com/Tribler/trustchain-superapp). It is a proof-of-concept implementation of a DAO system using Trustchain and Bitcoin. Trustchain is used for communication and bookkeeping while the Bitcoin blockchain is used to have collective multi-signature wallets for each DAO. The content of the app is split up in several tabs:
 * **First Time Launch**: The first time the app is launched, the user must setup his bitcoin wallet. Afterwhich the chain will sync and he is routed to the main screens.
 * **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
@@ -281,8 +284,51 @@ To follow up on space efficiency, the serialized Bitcoin transaction should be s
 
 The voting protocol can be improved to properly use proposal and agreement halfblocks. We decided not to due to the limited development time that we have. Directly sending it to other DAO users (and not the entire community) reduces the number of messages in trustchain.
 
+## Version 2
+The second version of Luxury Communism throws out the old way of multi-sig, but the integration and communication with trustchain is still the same. Please note that at the time of writing, Taproot was still unreleased. This means that we had to run our own Bitcoin Regtest network to make it possible to use Taproot. Production and TestNet networks are thus disabled in this version until Taproot is officially released.
+
+Instead of explaining what Taproot exactly is and what it can do ourselves, we will give several resources which can do a much better job at that.
+
+For starters, work through the following workshop: [Workshop](https://github.com/bitcoinops/taproot-workshop). This workshop explains the old way of doing multisig transactions and how Taproot improves it. Furthermore, it explains all of Taproot's features in a fun and easy way with code examples for each of the features. And a high-level explanation of Taproot and what it means for Bitcoin is given here: [Bitcoinmagazine](https://bitcoinmagazine.com/technical/taproot-coming-what-it-and-how-it-will-benefit-bitcoin).
+
+Now that you know what Taproot is, make sure to read the following documents:
+- [Threshold Signatures](https://suredbits.com/schnorr-applications-threshold-signatures/)
+- [Schnorr Applications Frost](https://suredbits.com/schnorr-applications-frost/)
+
+These documents explain the different ways of constructing multisig transactions with Taproot. At the time of writing, MuSig (which is n-n, meaning n users need to commit n valid signatures) was the only feasable option to implement. It was acadamically reviewed, had libraries and several code reviews and did not have any major risks exposed with it's protocol. Ideally, we want t-n, meaning only t &lt;= n users need to commit a valid signature. We identified FROST (which can be seen as the brother of MuSig) as the best candidate at that time. But FROST was not acadamically reviewed yet and the ZCash foundation (by which the protocol was developed) did not have a security audit for the protocol yet. We found implementing FROST therefore too much of a risk, but are hoping that in the future (maybe when you read this) it is reviewed and secure for implementation.
+
+t-n transactions allow the DAO to fullful it's actual purpose: only a percentage of users need to approve a transaction (and share their signatures) to allow a transaction to happen. Furthermore, when configured by the original DAO creator, it also allows n-n. This means that you have full flexibility, which MuSig does not have.
+
+To keep track of more information regarding Taproot and its current status and activation status, check out the following link: https://taprootactivation.com/.
+
+## System architecture
 
 
+### Voting functionality
+We also added the functionality to vote in favour or against a proposal. One can access this voting screen via the proposal list by clicking 'See votes'. Here you see all the participants of the proposal, and you can see who already voted and what their vote was. When a new ballot comes in, it automatically updates and shows the latest polls in the UI. After enough favour votes have arrived, the screen automatically goes to the proposal list again, and the proposal has been approved. When there are not enough favour votes left to succeed the proposal, it shows a red border and a red text saying that the proposal can't be met anymore. When you voted, you see a 'Voted' stamp on the concerning proposal. 
 
+<p float="left">
+<img src="https://user-images.githubusercontent.com/23526224/111478102-0c54dc00-8730-11eb-9fbb-3cd65e2ee7ad.gif" width="200"/>
+<img src="https://user-images.githubusercontent.com/23526224/111478323-42925b80-8730-11eb-9bb9-d90b703385a3.jpeg" width="200"/>
+<img src="https://user-images.githubusercontent.com/23526224/111479002-e2e88000-8730-11eb-9246-dc487e5268b4.jpeg" width="200"/>
+</p>
+<br />
 
+https://user-images.githubusercontent.com/23526224/116259903-85efd900-a776-11eb-93b1-384936d215c4.mp4
 
+### Application architecture
+
+The application consists of two main parts, the android app and the regtest server. As we are expanding upon the previous group we will only discuss the added regtest server and how it is integrated into the app. The app makes several connections to our regtest server. First, to add bitcoin to the wallet of a user. When the user clicks on the UI button "getBTC" we call the https://taproot.tribler.org/addBTC?address="yourwalletaddres" where the python server validates the adres and transfers 10 BTC from a "bank" account to desired wallet by calling RPC commands via bash to the bitcoind regtest server. We make sure that the "bank" account has plenty resources via a cronjob which adds bitcoins every 15 minutes to the address. This setup was chosen as we can now directly transfer funds to a user rather than first mining the blocks everytime the HTTPS requests is received, which would result in much slower respond times. The balance is updated in the UI via BitcoinJ, which connects to our regtest server directly to retrieve the wallet balance. This is the onlything BitcoinJ does: keep track of balance and UTXOs. Since BitcoinJ did not have Taproot support at the time of writing, this was the only way to make it work. We wrote our own Taproot library, which can be found in the codebase, and create transactions using this library. Hopefully, BitcoinJ has Taproot support when you read this, and if so, we highly suggest refactoring the code to use that instead of our own library. Lastly, the request to https://taproot.tribler.org/generateBlock?tx_id="transaction_in_hex" can be made. This HTTPS request is made by the app once we have collected enough signature to process the transaction. 
+    
+For the Regtest server, you can use the following [repository](https://github.com/StefanWeegink/Bitcoin-Regtest-Server). This repository contains our implementation for the server and contains several scripts to keep it running. Please read the documentation there to understand how to setup the server and how to maintain it. Also note that this server is only required when running on Regtest network, once Taproot is activated, you can use Testnet or Production network without our server.
+
+The server uses Letsencrypt to retrieve a certificate for HTTPS. This certificate is automatically renewed via cronjob which runs on the first day of the month. To receive the signature ACME identification is needed, while this could be done via DNS, HTTP was easier for us. So also you will find code in the python server that performs the response to an ACME challenge. The code for server (and bash history for help) is all on the github linked above. All code and scripts are fully documented. In addition, our own library, as well as all other code, is fully documented. Please check out the code with the documentation to understand the flow in the app and how everything works together. A high-level diagram of the added taproot functionalities on top of version 1 can be seen in the figure below:
+
+![architecture diagram](https://user-images.githubusercontent.com/25341744/118876646-ca8e1080-b8ed-11eb-95b7-14e18899f6b5.png)
+
+## Future work
+In the codebase, we left several TODOs (especially inside WalletManager) with potential improvements and extensions to the current application.
+
+Next to those TODOs, we highlighted before to use FROST instead of MuSig (or another threshold scheme), port the code to Production and TestNet once possible and use BitcoinJ when they add Taproot support. Lastly, we highly recommend to further refactor the codebase.
+    
+For future work related to the server part, please check out the corresponding repository.

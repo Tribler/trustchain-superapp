@@ -118,17 +118,7 @@
                     android:textSize="24sp"
                     android:textStyle="bold" />
 
-                <Switch
-                    android:id="@+id/production_testnet_input"
-                    style="@style/TextAppearance.AppCompat.Small"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:gravity="center|left"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:switchPadding="20dp"
-                    android:text="TestNet" />
+                <include layout="@layout/bitcoin_networks"/>
 
             </LinearLayout>
 

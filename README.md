@@ -86,11 +86,23 @@ We build a DAO for a better world. Luxury communism is an Android application bu
 * **My DAO's**: A list of all DAO's that the user participates in. Selecting a DAO will allow a user to create a transfer proposal from that DAO.
 * **All DAO's**: A list of all discovered DAO's in the network which the user can propose to join.
 * **Proposals**: A list of all proposals that the user can vote on. This can either be join proposals or proposals from someone else to transfer funds from one of the DAO's.
-* **My Wallet**: Overview of the used Bitcoin wallet and the ability to chane this to another.
-* **Duplicate Wallet**: In case the user has wallet files for both TestNet and Production, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
+* **My Wallet**: Overview of the used Bitcoin wallet and the ability to chain this to another.
+* **Duplicate Wallet**: In case the user has wallet files for TestNet, Production or Regtest, the user is allowed to select which one to keep. After the user selected either one, the files belonging to other network type are backed up. This, thus, ensures that the wallet is not lost.
+
+Currently, the Luxury Communism app only allows Regtest, since it uses a future update of Bitcoin called Taproot. Once Taproot is officially released, the app can support TestNet or Production again. Taproot allows the DAO to scale to thousands or even millions of users. The beauty of Taproot is that it uses Schnorr signatures for each transaction. This enables transaction sizes that are equal independent of the number of users in a DAO, since each user combines their signature collaberatively into one for the whole DAO. This also ensures privacy, since it is no longer possible to tell if a transaction's is from a single person, or a million of persons.
 
 <img src="currencyii/docs/images/screenshot_7.png" width="200px"> <img src="currencyii/docs/images/screenshot_6.png" width="200px"> <img src="currencyii/docs/images/screenshot_10.png" width="200px">
 <br />
+
+<p float="left">
+<img src="https://user-images.githubusercontent.com/23526224/111478102-0c54dc00-8730-11eb-9fbb-3cd65e2ee7ad.gif" width="200"/>
+<img src="https://user-images.githubusercontent.com/23526224/111478323-42925b80-8730-11eb-9bb9-d90b703385a3.jpeg" width="200"/>
+<img src="https://user-images.githubusercontent.com/23526224/111479002-e2e88000-8730-11eb-9246-dc487e5268b4.jpeg" width="200"/>
+</p>
+<br />
+
+https://user-images.githubusercontent.com/23526224/116259903-85efd900-a776-11eb-93b1-384936d215c4.mp4
+
 
 [More about Luxury Communism](currencyii/README.md)
 
@@ -133,6 +145,16 @@ Video 1: <a href="doc/musicdao/thesis2.mp4">Load example.</a> This uses a defaul
 
 Video 2: <a href="doc/musicdao/thesis3.mp4">Share track.</a> Note: as a fresh magnet link is generated in this video, there is only 1 peer. For this reason it will be difficult to obtain the metadata of the magnet link (cold start issue, write about this in thesis) so the video stops there.
 
+### Federated, privacy-preserving music recommendations via gossiping
+ 
+This is a demonstration of machine learning which relies exclusively on edge computing. Music recommendation inside the MusicDAO is used to demonstrate gossip-based machine learning. 
+ 
+Every time a user opens MusicDAO, they are asked to reload the page in order to get recommendations. The recommendation engine yields two recommendations made by two different models: a musical feature-based model and a collaborative filtering model. The collaborative filtering model is based on federated matrix factorization as introduced in [this paper](https://dmle.iais.fraunhofer.de/papers/hegedus2019decentralized.pdf). The feature-based models are from this [paper](https://arxiv.org/pdf/1109.1396.pdf), called Adaline and Pegasos. These models are trained on audio features extracted from music files with the [Essentia library](https://essentia.upf.edu/).
+<img src="gossipML/docs/imgs/overview.png" height="400px">
+ 
+The feature-based models are gossiped along random walks through the network. At each peer they are merged and re-trained on peer's local data. The matrix factorization model seeks to learn a factorization of the user-song matrix. This means that one of the two factors contains only information on how users generally rate each song. This matrix can then be gossiped around the network while a user's personal vector as well as their listening history are kept private.
+ - [More about federated machine learning using gossiping for music recommendations](gossipML/README.md)
+ 
 ### Do you want to add your own app?
 
 - [Adding your own app to the TrustChain Super App](doc/AppTutorial.md)

@@ -3,9 +3,9 @@ package nl.tudelft.trustchain.common.eurotoken.blocks
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.eurotoken.getBalanceForBlock
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
-
-import org.junit.Assert.*
 import java.math.BigInteger
 
 @ExperimentalUnsignedTypes

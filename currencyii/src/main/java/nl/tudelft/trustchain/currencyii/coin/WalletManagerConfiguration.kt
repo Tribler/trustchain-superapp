@@ -11,11 +11,11 @@ data class AddressPrivateKeyPair(
 )
 
 enum class BitcoinNetworkOptions {
-    PRODUCTION, TEST_NET
+    PRODUCTION, REG_TEST, TEST_NET
 }
 
 class WalletManagerConfiguration(
-    val network: BitcoinNetworkOptions = BitcoinNetworkOptions.TEST_NET,
+    val network: BitcoinNetworkOptions,
     val key: SerializedDeterministicKey? = null,
     val addressPrivateKeyPair: AddressPrivateKeyPair? = null
 )

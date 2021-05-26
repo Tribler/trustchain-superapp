@@ -40,15 +40,23 @@
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight=".5"
+                android:layout_weight=".33"
                 android:text="Production" />
+
+            <Button
+                android:id="@+id/load_regtest_wallet"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight=".33"
+                android:text="RegTest" />
 
             <Button
                 android:id="@+id/load_testnet_wallet"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight=".5"
+                android:layout_weight=".33"
                 android:text="TestNet" />
         </LinearLayout>
 

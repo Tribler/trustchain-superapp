@@ -5,7 +5,11 @@ plugins {
 
 dependencies {
 //    implementation project(':common')
-    implementation project(':ipv8-jvm')
+    api(project(':ipv8-jvm')){
+        exclude group: 'org.slf4j'
+        exclude group: 'com.goterl'
+        exclude group: 'org.bouncycastle'
+    }
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -16,7 +20,7 @@ dependencies {
     implementation 'com.mpatric:mp3agic:0.9.1'
     implementation 'com.turn:ttorrent-core:1.5'
     implementation "com.squareup.sqldelight:coroutines-extensions:$sqldelight_version"
-    implementation 'org.bitcoinj:bitcoinj-core:0.15.7'
+    implementation 'org.bitcoinj:bitcoinj-core:0.15.10'
 
     implementation files('libs/jlibtorrent-1.2.10.0.jar')
 }
@@ -29,6 +33,5 @@ application {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
         "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-Werror" // Set Kotlin compiler warnings as errors
     ]
 }

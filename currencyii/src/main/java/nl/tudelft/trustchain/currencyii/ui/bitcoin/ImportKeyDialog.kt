@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.currencyii.ui.bitcoin
 
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -13,7 +12,7 @@ class ImportKeyDialog : DialogFragment() {
     private lateinit var listener: ImportKeyDialogListener
 
     interface ImportKeyDialogListener {
-        fun onImport(address: String, privateKey: String, testNet: Boolean)
+        fun onImport(address: String, privateKey: String)
         fun onImportDone()
     }
 
@@ -40,7 +39,6 @@ class ImportKeyDialog : DialogFragment() {
 
                     val ad = view.findViewById<TextView>(R.id.address_input)
                     val sk = view.findViewById<TextView>(R.id.private_key_input)
-                    val netSwitch = view.findViewById<Switch>(R.id.net_switch)
 
                     val address = ad.text.toString()
                     val privateKey = sk.text.toString()
@@ -49,10 +47,9 @@ class ImportKeyDialog : DialogFragment() {
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
                     if (addressValid && privateKeyValid) {
-                        listener.onImport(address, privateKey, netSwitch.isChecked)
+                        listener.onImport(address, privateKey)
                         ad.text = ""
                         sk.text = ""
-                        netSwitch.isSelected = true
 
                         listener.onImportDone()
                         Toast.makeText(
@@ -78,11 +75,11 @@ class ImportKeyDialog : DialogFragment() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
-    fun isAddressValid(address: String): Boolean {
+    private fun isAddressValid(address: String): Boolean {
         return address.length in 26..35
     }
 
-    fun isPrivateKeyValid(privateKey: String): Boolean {
+    private fun isPrivateKeyValid(privateKey: String): Boolean {
         return privateKey.length in 51..52 || privateKey.length == 64
     }
 }

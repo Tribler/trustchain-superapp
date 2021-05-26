@@ -68,7 +68,12 @@
         android:id="@+id/joinNetworkFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.JoinDAOFragment"
         android:label="Join DAO"
-        tools:layout="@layout/fragment_join_network" />
+        tools:layout="@layout/fragment_join_network">
+    </fragment>
+    <fragment
+        android:id="@+id/votesFragment"
+        android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.VotesFragment"
+        android:label="Votes" />
     <fragment
         android:id="@+id/createSWFragment"
         android:name="nl.tudelft.trustchain.currencyii.ui.bitcoin.CreateSWFragment"
