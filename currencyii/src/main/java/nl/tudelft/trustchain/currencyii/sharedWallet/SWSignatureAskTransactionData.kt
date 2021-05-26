@@ -27,7 +27,7 @@ open class SWSignatureAskTransactionData(data: JsonObject) : SWBlockTransactionD
         previousBlockHash: String,
         requiredSignatures: Int,
         receiverPk: String,
-        uniqueProposalId: String = SWUtil.randomUUID()
+        uniqueProposalId: String
     ) : this(
         SWUtil.objectToJsonObject(
             SWSignatureAskBlockTD(

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:padding="26px">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -38,7 +40,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
-                    android:text="DOA ID:" />
+                    android:text="DAO ID:" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -60,11 +62,20 @@
                     android:text="Transfer amount:" />
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="10px"
+                    android:id="@+id/balance_tv"
+                    android:visibility="gone"
+                    android:text="Balance:" />
+
+                <TextView
                     android:id="@+id/transfer_target"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingRight="10px"
                     android:text="Transfer address:" />
+
             </LinearLayout>
 
             <LinearLayout
@@ -115,11 +126,20 @@
                     android:text="-" />
 
                 <TextView
+                    android:id="@+id/dao_balance_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:visibility="gone"
+                    android:text="-" />
+
+                <TextView
                     android:id="@+id/transfer_target_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:text="-" />
+
             </LinearLayout>
 
         </LinearLayout>
@@ -132,9 +152,24 @@
             android:clickable="false"
             android:enabled="false"
             android:focusable="false"
-            android:text="vote yes"
+            android:text="See Votes"
             android:textColor="@color/colorAccent" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/voted_button"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:background="@drawable/border"
+        android:clickable="false"
+        android:enabled="false"
+        android:focusable="false"
+        android:text="Voted"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

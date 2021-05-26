@@ -27,6 +27,10 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
             loadWallet(BitcoinNetworkOptions.PRODUCTION)
         }
 
+        load_regtest_wallet.setOnClickListener {
+            loadWallet(BitcoinNetworkOptions.REG_TEST)
+        }
+
         load_testnet_wallet.setOnClickListener {
             loadWallet(BitcoinNetworkOptions.TEST_NET)
         }
@@ -38,12 +42,11 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
             WalletManagerAndroid.close()
         }
 
+        val hideWallets = arrayListOf(BitcoinNetworkOptions.TEST_NET, BitcoinNetworkOptions.PRODUCTION, BitcoinNetworkOptions.REG_TEST)
+        hideWallets.remove(params)
+
         // Make sure to hide any other wallets that exists, when creating a new wallet
-        val walletToHide = when (params) {
-            BitcoinNetworkOptions.PRODUCTION -> BitcoinNetworkOptions.TEST_NET
-            BitcoinNetworkOptions.TEST_NET -> BitcoinNetworkOptions.PRODUCTION
-        }
-        hideWalletFiles(walletToHide)
+        hideWalletFiles(hideWallets)
 
         // Initialize wallet manager
         val config = WalletManagerConfiguration(params)
@@ -78,7 +81,7 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
     /**
      * This function "hides" stored wallets of a certain network type by renaming them.
      */
-    private fun hideWalletFiles(walletToHide: BitcoinNetworkOptions) {
+    private fun hideWalletFiles(walletToHide: ArrayList<BitcoinNetworkOptions>) {
         val vWalletFileMainNet = File(
             this.requireContext().applicationContext.filesDir,
             "$MAIN_NET_WALLET_NAME.wallet"
@@ -95,43 +98,41 @@ class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) 
             this.requireContext().applicationContext.filesDir,
             "$TEST_NET_WALLET_NAME.spvchain"
         )
+        val vWalletFileRegTest = File(
+            this.requireContext().applicationContext.filesDir,
+            "$REG_TEST_WALLET_NAME.wallet"
+        )
+        val vChainFileRegTest = File(
+            this.requireContext().applicationContext.filesDir,
+            "$REG_TEST_WALLET_NAME.spvchain"
+        )
 
         val fileSuffix = System.currentTimeMillis()
 
-        if (walletToHide == BitcoinNetworkOptions.PRODUCTION) {
+        if (walletToHide.contains(BitcoinNetworkOptions.PRODUCTION)) {
             if (vWalletFileMainNet.exists()) {
-                vWalletFileMainNet.renameTo(
-                    File(
-                        this.requireContext().applicationContext.filesDir,
-                        "${MAIN_NET_WALLET_NAME}_backup_main_net_wallet_$fileSuffix.wallet"
-                    )
-                )
+                vWalletFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${MAIN_NET_WALLET_NAME}_backup_main_net_wallet_$fileSuffix.wallet"))
             }
             if (vChainFileMainNet.exists()) {
-                vChainFileMainNet.renameTo(
-                    File(
-                        this.requireContext().applicationContext.filesDir,
-                        "${MAIN_NET_WALLET_NAME}_backup_main_net_spvchain_$fileSuffix.spvchain"
-                    )
-                )
+                vChainFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${MAIN_NET_WALLET_NAME}_backup_main_net_spvchain_$fileSuffix.spvchain"))
             }
             Log.w("Coin", "Renamed MainNet file")
-        } else {
+        }
+        if (walletToHide.contains(BitcoinNetworkOptions.REG_TEST)) {
+            if (vWalletFileRegTest.exists()) {
+                vWalletFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${REG_TEST_WALLET_NAME}_backup_reg_test_wallet_$fileSuffix.wallet"))
+            }
+            if (vChainFileRegTest.exists()) {
+                vChainFileMainNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${REG_TEST_WALLET_NAME}_backup_reg_test_spvchain_$fileSuffix.spvchain"))
+            }
+            Log.w("Coin", "Renamed RegTest file")
+        }
+        if (walletToHide.contains(BitcoinNetworkOptions.TEST_NET)) {
             if (vWalletFileTestNet.exists()) {
-                vWalletFileTestNet.renameTo(
-                    File(
-                        this.requireContext().applicationContext.filesDir,
-                        "${TEST_NET_WALLET_NAME}_backup_test_net_wallet_$fileSuffix.wallet"
-                    )
-                )
+                vWalletFileTestNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${TEST_NET_WALLET_NAME}_backup_test_net_wallet_$fileSuffix.wallet"))
             }
             if (vChainFileTestNet.exists()) {
-                vChainFileTestNet.renameTo(
-                    File(
-                        this.requireContext().applicationContext.filesDir,
-                        "${TEST_NET_WALLET_NAME}_backup_test_net_spvchain_$fileSuffix.spvchain"
-                    )
-                )
+                vChainFileTestNet.renameTo(File(this.requireContext().applicationContext.filesDir, "${TEST_NET_WALLET_NAME}_backup_test_net_spvchain_$fileSuffix.spvchain"))
             }
             Log.w("Coin", "Renamed TestNet file")
         }

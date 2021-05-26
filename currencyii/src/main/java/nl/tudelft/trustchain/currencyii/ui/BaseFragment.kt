@@ -30,7 +30,7 @@ abstract class BaseFragment(@LayoutRes contentLayoutId: Int = 0) : Fragment(cont
             ?: throw IllegalStateException("DemoCommunity is not configured")
     }
 
-    protected fun getCoinCommunity(): CoinCommunity {
+    fun getCoinCommunity(): CoinCommunity {
         return getIpv8().getOverlay()
             ?: throw IllegalStateException("CoinCommunity is not configured")
     }

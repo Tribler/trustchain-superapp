@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.currencyii.R
+import nl.tudelft.trustchain.currencyii.coin.WalletManagerAndroid
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
 
@@ -20,7 +21,7 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * Use the [CreateSWFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
+class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -56,11 +57,14 @@ class CreateSWFragment() : BaseFragment(R.layout.fragment_create_sw) {
 
         try {
             // Try to create the bitcoin DAO
-            getCoinCommunity().createBitcoinGenesisWallet(
+            val newDAO = getCoinCommunity().createBitcoinGenesisWallet(
                 currentEntranceFee,
                 currentThreshold,
-                ::updateProgressStatus
+                requireContext()
             )
+            val walletManager = WalletManagerAndroid.getInstance()
+            walletManager.addNewNonceKey(newDAO.getData().SW_UNIQUE_ID, requireContext())
+
             enableInputFields()
             alert_label.text = "Wallet created successfully!"
         } catch (t: Throwable) {

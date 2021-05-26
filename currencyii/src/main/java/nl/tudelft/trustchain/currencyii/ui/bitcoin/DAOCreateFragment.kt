@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_dao_wallet_load_form.*
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.currencyii.R
@@ -55,9 +56,14 @@ class DAOCreateFragment : BaseFragment() {
         }
 
         generate_new_seed.setOnClickListener {
-            val params = when (production_testnet_input.isChecked) {
-                true -> BitcoinNetworkOptions.TEST_NET
-                false -> BitcoinNetworkOptions.PRODUCTION
+            val params = when (bitcoin_network_radio_group.checkedRadioButtonId) {
+                R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+                R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+                R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+                else -> {
+                    Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
             }
             val seed = WalletManager.generateRandomDeterministicSeed(params)
             seed_word_input.setText(seed.seed)
@@ -78,9 +84,14 @@ class DAOCreateFragment : BaseFragment() {
         val seed = seed_word_input.text.toString()
         val creationNumberText = seed_number_input.text.toString()
         val privateKeys = private_keys_input.text.lines()
-        val params = when (production_testnet_input.isChecked) {
-            true -> BitcoinNetworkOptions.TEST_NET
-            false -> BitcoinNetworkOptions.PRODUCTION
+        val params = when (bitcoin_network_radio_group.checkedRadioButtonId) {
+            R.id.production_radiobutton -> BitcoinNetworkOptions.PRODUCTION
+            R.id.testnet_radiobutton -> BitcoinNetworkOptions.TEST_NET
+            R.id.regtest_radiobutton -> BitcoinNetworkOptions.REG_TEST
+            else -> {
+                Toast.makeText(this.requireContext(), "Please select a bitcoin network first", Toast.LENGTH_SHORT).show()
+                return
+            }
         }
 
         // Simple validation guards.
@@ -204,6 +215,14 @@ class DAOCreateFragment : BaseFragment() {
             this.requireContext().applicationContext.filesDir,
             "$TEST_NET_WALLET_NAME.spvchain"
         )
+        val vWalletFileRegTest = File(
+            this.requireContext().applicationContext.filesDir,
+            "$REG_TEST_WALLET_NAME.wallet"
+        )
+        val vChainFileRegTest = File(
+            this.requireContext().applicationContext.filesDir,
+            "$REG_TEST_WALLET_NAME.spvchain"
+        )
 
         val fileSuffix = System.currentTimeMillis()
 
@@ -245,6 +264,26 @@ class DAOCreateFragment : BaseFragment() {
                 )
             )
             Log.w("Coin", "Renamed TestNet chain file")
+        }
+
+        if (vWalletFileRegTest.exists()) {
+            vWalletFileRegTest.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${REG_TEST_WALLET_NAME}_backup_reg_test_wallet_$fileSuffix.wallet"
+                )
+            )
+            Log.w("Coin", "Renamed RegTest wallet file")
+        }
+
+        if (vChainFileRegTest.exists()) {
+            vChainFileRegTest.renameTo(
+                File(
+                    this.requireContext().applicationContext.filesDir,
+                    "${REG_TEST_WALLET_NAME}_backup_reg_test_spvchain_$fileSuffix.spvchain"
+                )
+            )
+            Log.w("Coin", "Renamed RegTest chain file")
         }
     }
 }

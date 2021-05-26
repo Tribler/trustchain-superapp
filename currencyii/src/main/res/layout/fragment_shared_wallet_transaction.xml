@@ -55,6 +55,12 @@
                     android:layout_height="wrap_content"
                     android:text="[ voting threshold ]" />
 
+                <TextView
+                    android:id="@+id/dao_balance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[ Balance ]" />
+
             </LinearLayout>
 
             <View

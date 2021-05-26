@@ -16,9 +16,12 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.currencyii.R
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWJoinBlockTransactionData
+import nl.tudelft.trustchain.currencyii.sharedWallet.SWResponseSignatureBlockTD
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWTransferFundsAskTransactionData
 import nl.tudelft.trustchain.currencyii.sharedWallet.SWUtil
 import nl.tudelft.trustchain.currencyii.ui.BaseFragment
+import nl.tudelft.trustchain.currencyii.util.taproot.CTransaction
+import org.bitcoinj.core.Coin
 import java.lang.NumberFormatException
 
 /**
@@ -51,18 +54,34 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             inflater.inflate(R.layout.fragment_shared_wallet_transaction, container, false)
         val args = SharedWalletTransactionArgs.fromBundle(requireArguments())
 
+        blockHash = args.trustChainBlockHash.hexToBytes()
+
         fragment.findViewById<TextView>(R.id.users_proposal).text =
             "${args.users} user(s) in this shared wallet"
         fragment.findViewById<TextView>(R.id.public_key_proposal).text =
             "Wallet ID: ${args.publicKey}"
         fragment.findViewById<TextView>(R.id.entrance_fee_proposal).text =
-            "Entrance fee: ${args.entranceFee} Satoshi"
+            "Entrance fee: ${Coin.valueOf(args.entranceFee).toFriendlyString()}"
         fragment.findViewById<TextView>(R.id.voting_threshold_proposal).text =
             "Voting threshold: ${args.votingThreshold}%"
-
-        blockHash = args.trustChainBlockHash.hexToBytes()
+        fragment.findViewById<TextView>(R.id.dao_balance).text =
+            "Balance: ${getBalance().toFriendlyString()}"
 
         return fragment
+    }
+
+    /**
+     * Get the balance of the current wallet
+     * @return current balance
+     */
+    private fun getBalance(): Coin {
+        val swJoinBlock: TrustChainBlock =
+            getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
+                ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
+        val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+
+        val previousTransaction = CTransaction().deserialize(walletData.SW_TRANSACTION_SERIALIZED.hexToBytes())
+        return Coin.valueOf(previousTransaction.vout.filter { it.scriptPubKey.size == 35 }[0].nValue)
     }
 
     private fun transferFundsClicked() {
@@ -75,10 +94,19 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
         val bitcoinPublicKey = input_bitcoin_public_key.text.toString()
         val satoshiTransferAmount = input_satoshi_amount.text.toString().toLong()
+
         val swJoinBlock: TrustChainBlock =
             getCoinCommunity().fetchLatestSharedWalletBlock(blockHash!!)
                 ?: throw IllegalStateException("Shared Wallet not found given the hash: ${blockHash!!}")
         val walletData = SWJoinBlockTransactionData(swJoinBlock.transaction).getData()
+
+        if (getBalance().minus(Coin.valueOf(satoshiTransferAmount)).isNegative) {
+            activity?.runOnUiThread {
+                alert_view.text =
+                    "Failed: Transfer amount should be smaller than the current balance"
+            }
+            return
+        }
 
         val transferFundsData = try {
             getCoinCommunity().proposeTransferFunds(
@@ -96,16 +124,20 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
             }
             return
         }
+        val context = requireContext()
+        val activityRequired = requireActivity()
 
-        val signatures = collectSignatures(transferFundsData)
+        val responses = collectResponses(transferFundsData)
         try {
             getCoinCommunity().transferFunds(
-                transferFundsData,
                 walletData,
-                signatures,
+                swJoinBlock.transaction,
+                transferFundsData.getData(),
+                responses,
                 bitcoinPublicKey,
                 satoshiTransferAmount,
-                ::updateAlertLabel
+                context,
+                activityRequired
             )
             activity?.runOnUiThread {
                 alert_view.text = "Funds transfered!"
@@ -119,58 +151,45 @@ class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_tra
         }
     }
 
-    private fun updateAlertLabel(progress: Double) {
-        Log.i("Coin", "Coin: broadcast of transfer funds transaction progress: $progress.")
-
-        activity?.runOnUiThread {
-            if (progress >= 1) {
-                alert_view?.text = "Transfer funds progress: completed!"
-            } else {
-                val progressString = "%.0f".format(progress * 100)
-                alert_view.text = "Transfer funds progress: $progressString%..."
-            }
-        }
-    }
-
-    private fun collectSignatures(data: SWTransferFundsAskTransactionData): List<String> {
-        var signatures: List<String>? = null
+    private fun collectResponses(data: SWTransferFundsAskTransactionData): List<SWResponseSignatureBlockTD> {
+        var responses: List<SWResponseSignatureBlockTD>? = null
         activity?.runOnUiThread {
             alert_view.text = "Loading... This might take some time."
         }
 
-        while (signatures == null) {
-            signatures =
-                checkSufficientWalletSignatures(data, data.getData().SW_SIGNATURES_REQUIRED)
-            if (signatures == null) {
+        while (responses == null) {
+            responses =
+                checkSufficientResponses(data, data.getData().SW_SIGNATURES_REQUIRED)
+            if (responses == null) {
                 Thread.sleep(1_000)
             }
         }
 
-        return signatures
+        return responses
     }
 
-    private fun checkSufficientWalletSignatures(
+    private fun checkSufficientResponses(
         data: SWTransferFundsAskTransactionData,
         requiredSignatures: Int
-    ): List<String>? {
+    ): List<SWResponseSignatureBlockTD>? {
         val blockData = data.getData()
-        val signatures =
-            getCoinCommunity().fetchProposalSignatures(
+        val responses =
+            getCoinCommunity().fetchProposalResponses(
                 blockData.SW_UNIQUE_ID,
                 blockData.SW_UNIQUE_PROPOSAL_ID
             )
         Log.i(
             "Coin",
-            "Signatures for ${blockData.SW_UNIQUE_ID}.${blockData.SW_UNIQUE_PROPOSAL_ID}: ${signatures.size}/$requiredSignatures"
+            "Responses for ${blockData.SW_UNIQUE_ID}.${blockData.SW_UNIQUE_PROPOSAL_ID}: ${responses.size}/$requiredSignatures"
         )
 
         activity?.runOnUiThread {
             alert_view?.text =
-                "Collecting signatures: ${signatures.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
+                "Collecting signatures: ${responses.size}/${blockData.SW_SIGNATURES_REQUIRED} received!"
         }
 
-        if (signatures.size >= requiredSignatures) {
-            return signatures
+        if (responses.size >= requiredSignatures) {
+            return responses
         }
         return null
     }
