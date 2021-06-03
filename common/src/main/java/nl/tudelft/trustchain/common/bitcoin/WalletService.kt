@@ -11,7 +11,6 @@ import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
 import java.io.File
 import java.net.InetAddress
-import java.net.URL
 
 class WalletService {
 
@@ -53,10 +52,10 @@ class WalletService {
             // If a wallet app-kit was already stored and not terminated, retrieve it.
             if (walletStore.containsKey(name) &&
                 !setOf(
-                    Service.State.TERMINATED,
-                    Service.State.STOPPING,
-                    Service.State.FAILED
-                ).contains(walletStore[name]?.state())
+                        Service.State.TERMINATED,
+                        Service.State.STOPPING,
+                        Service.State.FAILED
+                    ).contains(walletStore[name]?.state())
             ) {
                 walletStore[name]!!.awaitRunning()
 
@@ -73,7 +72,8 @@ class WalletService {
                     if (wallet().balance.isZero) {
                         val address = wallet().issuedReceiveAddresses.first().toString()
                         println("Address:$address")
-//                        URL("${BuildConfig.BITCOIN_FAUCET}?id=$address").readBytes()
+                        // TODO: Fix the faucet
+                        // URL("${BuildConfig.BITCOIN_FAUCET}?id=$address").readBytes()
                     }
                 }
             }

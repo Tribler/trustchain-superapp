@@ -67,7 +67,7 @@ class TransactionRepository(
         if (blocks.isEmpty()) return null // No connection partial previous
         return blocks.find { // linked block
             it.publicKey.contentEquals(block.linkPublicKey) &&
-            it.sequenceNumber == block.linkSequenceNumber
+                it.sequenceNumber == block.linkSequenceNumber
         } ?: block // no linked block exists
     }
 
@@ -101,7 +101,8 @@ class TransactionRepository(
             return getVerifiedBalanceForBlock(
                 database.getBlockWithHash(
                     block.previousHash
-                ), database
+                ),
+                database
             )
         }
         if (BLOCK_TYPE_CHECKPOINT == block.type && block.isProposal) {
@@ -154,15 +155,18 @@ class TransactionRepository(
         if (!EUROTOKEN_TYPES.contains(block.type)) return getBalanceForBlock(
             database.getBlockWithHash(
                 block.previousHash
-            ), database
+            ),
+            database
         )
         return if ( // block contains balance (base case)
-            (listOf(
-                BLOCK_TYPE_TRANSFER,
-                BLOCK_TYPE_DESTROY,
-                BLOCK_TYPE_CHECKPOINT,
-                BLOCK_TYPE_ROLLBACK
-            ).contains(block.type) && block.isProposal)
+            (
+                listOf(
+                    BLOCK_TYPE_TRANSFER,
+                    BLOCK_TYPE_DESTROY,
+                    BLOCK_TYPE_CHECKPOINT,
+                    BLOCK_TYPE_ROLLBACK
+                ).contains(block.type) && block.isProposal
+                )
         ) {
             (block.transaction[KEY_BALANCE] as Long)
         } else if (listOf(
@@ -196,7 +200,8 @@ class TransactionRepository(
             return getPoolOwnersForBlock(
                 database.getBlockWithHash(
                     block.previousHash
-                ), database
+                ),
+                database
             )
         }
         val temp = getPoolOwnersForBlock(database.getBlockWithHash(block.previousHash), database)
@@ -457,9 +462,9 @@ class TransactionRepository(
             return ValidationResult.Invalid(
                 listOf(
                     "Insufficient balance ($balance) for amount (${
-                        getBalanceChangeForBlock(
-                            block
-                        )
+                    getBalanceChangeForBlock(
+                        block
+                    )
                     })"
                 )
             )
@@ -639,7 +644,8 @@ class TransactionRepository(
                         )
                         Log.d("EuroTokenBlockJoin", "Received join request with hashes\nBTC: ${block.transaction.get("btcHash")}\nEuro: ${block.transaction.get("euroHash")}")
                         // Check if hashes are valid by searching in own chain
-                        return verifyJoinTransactions(block.transaction.get("btcHash") as String,
+                        return verifyJoinTransactions(
+                            block.transaction.get("btcHash") as String,
                             block.transaction.get("euroHash") as String,
                             block.publicKey
                         )
@@ -649,9 +655,9 @@ class TransactionRepository(
                             return ValidationResult.Invalid(
                                 listOf(
                                     "Linked transaction doesn't match (${block.transaction}, ${
-                                        database.getLinked(
-                                            block
-                                        )?.transaction ?: "MISSING"
+                                    database.getLinked(
+                                        block
+                                    )?.transaction ?: "MISSING"
                                     })"
                                 )
                             )
@@ -664,30 +670,37 @@ class TransactionRepository(
 
                     return ValidationResult.Valid
                 }
-            })
+            }
+        )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_JOIN, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
-                // agree if validated
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_JOIN,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
+                    // agree if validated
+                    trustChainCommunity.sendBlock(
+                        trustChainCommunity.createAgreementBlock(
+                            block,
+                            block.transaction
+                        )
                     )
-                )
-            }
-        })
-
-        trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                ensureCheckpointLinks(block, trustChainCommunity.database)
-                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                    verifyBalance()
                 }
-                Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
             }
-        })
+        )
+
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_JOIN,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    ensureCheckpointLinks(block, trustChainCommunity.database)
+                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                        verifyBalance()
+                    }
+                    Log.d("EuroTokenBlock", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                }
+            }
+        )
     }
 
     private fun addTradeListeners() {
@@ -734,26 +747,33 @@ class TransactionRepository(
                     }
                     return ValidationResult.Valid
                 }
-            })
+            }
+        )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_JOIN, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
-                // agree if validated
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_JOIN,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    Log.w("EuroTokenBlockJoin", "sig request ${block.transaction}")
+                    // agree if validated
+                    trustChainCommunity.sendBlock(
+                        trustChainCommunity.createAgreementBlock(
+                            block,
+                            block.transaction
+                        )
                     )
-                )
+                }
             }
-        })
+        )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_JOIN, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_JOIN,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    Log.d("EuroTokenBlockJoin", "onBlockReceived: ${block.blockId} ${block.transaction}")
+                }
             }
-        })
+        )
     }
 
     private fun addCreationListeners() {
@@ -790,9 +810,9 @@ class TransactionRepository(
                             return ValidationResult.Invalid(
                                 listOf(
                                     "Linked transaction doesn't match (${block.transaction}, ${
-                                        database.getLinked(
-                                            block
-                                        )?.transaction ?: "MISSING"
+                                    database.getLinked(
+                                        block
+                                    )?.transaction ?: "MISSING"
                                     })"
                                 )
                             )
@@ -800,33 +820,40 @@ class TransactionRepository(
                     }
                     return ValidationResult.Valid
                 }
-            })
+            }
+        )
 
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRADE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
-                // agree if validated
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
+        trustChainCommunity.registerBlockSigner(
+            BLOCK_TYPE_TRADE,
+            object : BlockSigner {
+                override fun onSignatureRequest(block: TrustChainBlock) {
+                    Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
+                    // agree if validated
+                    trustChainCommunity.sendBlock(
+                        trustChainCommunity.createAgreementBlock(
+                            block,
+                            block.transaction
+                        )
                     )
-                )
-            }
-        })
-
-        trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                ensureCheckpointLinks(block, trustChainCommunity.database)
-                if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                    verifyBalance()
                 }
-                Log.w(
-                    "EuroTokenBlockCreate",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
             }
-        })
+        )
+
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_TRADE,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    ensureCheckpointLinks(block, trustChainCommunity.database)
+                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                        verifyBalance()
+                    }
+                    Log.w(
+                        "EuroTokenBlockCreate",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
+            }
+        )
     }
 
 //    private fun addCreationListeners() {
@@ -879,15 +906,18 @@ class TransactionRepository(
             }
         )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_DESTROY, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                ensureCheckpointLinks(block, trustChainCommunity.database)
-                Log.d(
-                    "EuroTokenBlockDestroy",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_DESTROY,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    ensureCheckpointLinks(block, trustChainCommunity.database)
+                    Log.d(
+                        "EuroTokenBlockDestroy",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
             }
-        })
+        )
     }
 
     private fun addCheckpointListeners() {
@@ -933,15 +963,18 @@ class TransactionRepository(
             }
         )
 
-        trustChainCommunity.addListener(BLOCK_TYPE_ROLLBACK, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                ensureCheckpointLinks(block, trustChainCommunity.database)
-                Log.d(
-                    "EuroTokenBlockRollback",
-                    "onBlockReceived: ${block.blockId} ${block.transaction}"
-                )
+        trustChainCommunity.addListener(
+            BLOCK_TYPE_ROLLBACK,
+            object : BlockListener {
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    ensureCheckpointLinks(block, trustChainCommunity.database)
+                    Log.d(
+                        "EuroTokenBlockRollback",
+                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+                    )
+                }
             }
-        })
+        )
     }
 
     fun initTrustChainCommunity() {

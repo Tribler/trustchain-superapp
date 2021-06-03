@@ -44,7 +44,8 @@ class EthereumGethWallet(val nodeConfig: NodeConfig, keyFile: String, nodeDirect
             amount, // Amount.
             10000000, // Gas limit.
             BigInt(1), // Gas price.
-            ByteArray(0)) // Data.
+            ByteArray(0)
+        ) // Data.
         val signedTransaction = sign(transaction)
         send(signedTransaction)
     }

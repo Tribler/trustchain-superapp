@@ -57,12 +57,16 @@ class WalletFragment : BaseFragment(R.layout.fragment_pool_wallet) {
 
             while (isActive) {
                 bitCoinAddress.text = btcWallet.currentReceiveAddress().toString()
-                bitcoinBalance.text = getString(R.string.wallet_balance_conf_est,
+                bitcoinBalance.text = getString(
+                    R.string.wallet_balance_conf_est,
                     btcWallet.balance.toFriendlyString(),
-                    btcWallet.getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString())
+                    btcWallet.getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+                )
                 euroTokenAddress.text = euroWallet.getWalletAddress()
-                euroTokenBalance.text = getString(R.string.wallet_balance_conf,
-                    TransactionRepository.prettyAmount(euroWallet.getBalance()))
+                euroTokenBalance.text = getString(
+                    R.string.wallet_balance_conf,
+                    TransactionRepository.prettyAmount(euroWallet.getBalance())
+                )
 
                 delay(1000)
             }

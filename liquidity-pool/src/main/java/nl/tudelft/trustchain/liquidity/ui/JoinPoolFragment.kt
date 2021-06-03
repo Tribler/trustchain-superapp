@@ -94,23 +94,27 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
                 val sendRes = btcWallet.sendCoins(sendRequest)
                 transactionStatus["btc"] = TransactionStatus.SENT
                 // TODO: Make it such we can still get the result even if the user closes the fragment before the callback is made.
-                Futures.addCallback(sendRes.broadcastComplete, object : FutureCallback<Transaction> {
-                    override fun onSuccess(result: Transaction?) {
-                        Log.d("BitcoinTransaction", "Transaction success")
-                        transactionStatus["btc"] = TransactionStatus.PENDING
-                        btcTransaction = result
-                        val txid = btcTransaction!!.txId.toString()
-                        Log.d("LiquidityPool", "TXID: $txid")
-                        val editor = sharedPreference.edit()
-                        editor.putString("btcTXID", btcTransaction!!.txId.toString())
-                        editor.apply()
-                        checkBtcStatus()
-                    }
+                Futures.addCallback(
+                    sendRes.broadcastComplete,
+                    object : FutureCallback<Transaction> {
+                        override fun onSuccess(result: Transaction?) {
+                            Log.d("BitcoinTransaction", "Transaction success")
+                            transactionStatus["btc"] = TransactionStatus.PENDING
+                            btcTransaction = result
+                            val txid = btcTransaction!!.txId.toString()
+                            Log.d("LiquidityPool", "TXID: $txid")
+                            val editor = sharedPreference.edit()
+                            editor.putString("btcTXID", btcTransaction!!.txId.toString())
+                            editor.apply()
+                            checkBtcStatus()
+                        }
 
-                    override fun onFailure(t: Throwable) {
-                        Log.d("LiquidityPool", "Broadcasting BTC transaction failed")
-                    }
-                }, Threading.USER_THREAD)
+                        override fun onFailure(t: Throwable) {
+                            Log.d("LiquidityPool", "Broadcasting BTC transaction failed")
+                        }
+                    },
+                    Threading.USER_THREAD
+                )
             }
 
             sendEuro.setOnClickListener {
@@ -158,7 +162,8 @@ class JoinPoolFragment : BaseFragment(R.layout.fragment_pool_join) {
                 builder.setView(layout)
                 builder.setPositiveButton("OK") { _, _ ->
                     poolEuroAddress = inputEuro.text.toString()
-                    poolBitcoinAddress = inputBtc.text.toString() }
+                    poolBitcoinAddress = inputBtc.text.toString()
+                }
                 builder.setNegativeButton("Cancel") { dialog, _ -> dialog.cancel() }
 
                 val editor = sharedPreference.edit()

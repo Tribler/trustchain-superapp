@@ -111,18 +111,21 @@ class TrustChainApplication : Application() {
 
         WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
 
-        trustchain.registerTransactionValidator(BLOCK_TYPE, object : TransactionValidator {
-            override fun validate(
-                block: TrustChainBlock,
-                database: TrustChainStore
-            ): ValidationResult {
-                if (block.transaction["message"] != null || block.isAgreement) {
-                    return ValidationResult.Valid
-                } else {
-                    return ValidationResult.Invalid(listOf("Proposal must have a message"))
+        trustchain.registerTransactionValidator(
+            BLOCK_TYPE,
+            object : TransactionValidator {
+                override fun validate(
+                    block: TrustChainBlock,
+                    database: TrustChainStore
+                ): ValidationResult {
+                    if (block.transaction["message"] != null || block.isAgreement) {
+                        return ValidationResult.Valid
+                    } else {
+                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
+                    }
                 }
             }
-        })
+        )
 
         trustchain.registerBlockSigner(
             BLOCK_TYPE,
