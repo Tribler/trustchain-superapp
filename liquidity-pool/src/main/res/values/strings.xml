@@ -1,0 +1,22 @@
+<resources>
+    <string name="bitcoin">Bitcoin</string>
+    <string name="euro_token">Euro Token</string>
+
+    <string name="wallet_public_key">Wallet public key:</string>
+    <string name="wallet_balance">Wallet balance:</string>
+
+    <string name="wallet_balance_conf_est">Wallet balance (confirmed): %1$s\nWallet balance (estimated): %2$s</string>
+    <string name="wallet_balance_conf">Wallet balance (estimated): %1$s</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="pool_join_explained">To join a liquidity pool,
+        first send the necessary Bitcoin and Euro token funds by clicking the buttons.
+        When the transactions are verified you can join the pool.
+    </string>
+    <string name="transaction_status">Status: %1$s</string>
+    <string-array name="pool_tokens">
+        <item>BTC</item>
+        <item>Euro Token</item>
+    </string-array>
+</resources>

@@ -91,6 +91,24 @@ repositories {
     mavenCentral()
 }
 
+allprojects {
+    repositories {
+        jcenter()
+        flatDir {
+            dirs '../common/libs'
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        flatDir {
+            dirs '../common/libs'
+        }
+    }
+}
+
 dependencies {
     implementation project(':trustchain-voter')
     implementation project(':trustchain-explorer')
@@ -102,6 +120,7 @@ dependencies {
     implementation project(':peerchat')
     implementation project(':eurotoken')
     implementation project(':ig-ssi')
+    implementation project(':liquidity-pool')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }

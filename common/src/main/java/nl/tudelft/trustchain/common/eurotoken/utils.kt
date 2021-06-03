@@ -14,15 +14,17 @@ fun verifyGatewayIdentity(publicKey: ByteArray, gatewayStore: GatewayStore): Val
 
 fun getBalanceChangeForBlock(block: TrustChainBlock?): Long {
     if (block == null) return 0
+    if (block.transaction[TransactionRepository.KEY_AMOUNT]?.toString()?.contains("BTC") == true) return 0
     return if (block.isProposal) { // block is sending money
-        -((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
+        -(block.transaction[TransactionRepository.KEY_AMOUNT]?.toString() ?: "0").toLong()
     } else { // block is receiving money
-        ((block.transaction[TransactionRepository.KEY_AMOUNT] ?: BigInteger.valueOf(0)) as BigInteger).toLong()
+        (block.transaction[TransactionRepository.KEY_AMOUNT]?.toString() ?: "0").toLong()
     }
 }
 
 fun getVerifiedBalanceChangeForBlock(block: TrustChainBlock?): Long {
     if (block == null) return 0
+    if (block.transaction[TransactionRepository.KEY_AMOUNT]?.toString()?.contains("BTC") == true) return 0
     if (block.isAgreement || block.type == TransactionRepository.BLOCK_TYPE_ROLLBACK) { // block is receiving money, dont add
         return 0
     } else { // block is sending money
@@ -50,7 +52,7 @@ fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore
 
 fun getBalanceForBlock(block: TrustChainBlock, database: TrustChainStore): Long? {
     if (TransactionRepository.EUROTOKEN_TYPES.contains(block.type)) {
-        if (block.isProposal)
+        if (block.isProposal && block.transaction[TransactionRepository.KEY_BALANCE] != null)
             return (block.transaction[TransactionRepository.KEY_BALANCE] as Long)
         if (block.isGenesis)
             return getBalanceChangeForBlock(block)

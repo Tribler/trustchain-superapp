@@ -40,6 +40,7 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
+import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
@@ -108,6 +109,8 @@ class TrustChainApplication : Application() {
         val euroTokenCommunity = ipv8.getOverlay<EuroTokenCommunity>()!!
         euroTokenCommunity.setTransactionRepository(tr)
 
+        WalletService.createGlobalWallet(this.cacheDir ?: throw Error("CacheDir not found"))
+
         trustchain.registerTransactionValidator(
             BLOCK_TYPE,
             object : TransactionValidator {
@@ -115,10 +118,10 @@ class TrustChainApplication : Application() {
                     block: TrustChainBlock,
                     database: TrustChainStore
                 ): ValidationResult {
-                    return if (block.transaction["message"] != null || block.isAgreement) {
-                        ValidationResult.Valid
+                    if (block.transaction["message"] != null || block.isAgreement) {
+                        return ValidationResult.Valid
                     } else {
-                        ValidationResult.Invalid(listOf("Proposal must have a message"))
+                        return ValidationResult.Invalid(listOf("Proposal must have a message"))
                     }
                 }
             }
@@ -205,7 +208,8 @@ class TrustChainApplication : Application() {
     }
 
     private fun createTrustChainCommunity(): OverlayConfiguration<TrustChainCommunity> {
-        val settings = TrustChainSettings()
+        val blockTypesBcDisabled: Set<String> = setOf("eurotoken_join", "eurotoken_trade")
+        val settings = TrustChainSettings(blockTypesBcDisabled)
         val driver = AndroidSqliteDriver(Database.Schema, this, "trustchain.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
