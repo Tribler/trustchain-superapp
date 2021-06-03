@@ -373,31 +373,6 @@ class TransactionRepository(
         return block
     }
 
-    fun sendDestroyProposalWithIBAN(
-        iban: String,
-        amount: Long
-    ): TrustChainBlock? {
-        Log.w("EuroTokenBlockDestroy", "Creating destroy...")
-        val peer = getGatewayPeer() ?: return null
-
-        if (getMyVerifiedBalance() - amount < 0) {
-            return null
-        }
-
-        val transaction = mapOf(
-            KEY_IBAN to iban,
-            KEY_AMOUNT to BigInteger.valueOf(amount),
-            KEY_BALANCE to (BigInteger.valueOf(getMyBalance() - amount).toLong())
-        )
-        val block = trustChainCommunity.createProposalBlock(
-            BLOCK_TYPE_DESTROY, transaction,
-            peer.publicKey.keyToBin()
-        )
-
-        trustChainCommunity.sendBlock(block, peer)
-        return block
-    }
-
     fun sendDestroyProposalWithPaymentID(
         recipient: ByteArray,
         ip: String,
@@ -715,73 +690,6 @@ class TransactionRepository(
         })
     }
 
-    private fun addJoinListeners() {
-        trustChainCommunity.registerTransactionValidator(
-            BLOCK_TYPE_JOIN,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    val mykey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
-
-                    if (block.publicKey.toHex() == mykey.toHex() && block.isProposal) return ValidationResult.Valid
-
-                    if (block.isProposal) {
-                        Log.d("RecvProp", "Received Proposal Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
-
-                        if (!block.transaction.containsKey("btcHash") || !block.transaction.containsKey("euroHash")) return ValidationResult.Invalid(
-                            listOf("Missing hashes")
-                        )
-                        Log.d("EuroTokenBlockJoin", "Received join request with hashes\nBTC: ${block.transaction.get("btcHash")}\nEuro: ${block.transaction.get("euroHash")}")
-                        // Check if hashes are valid by searching in own chain
-                        return verifyJoinTransactions(block.transaction.get("btcHash") as String,
-                            block.transaction.get("euroHash") as String,
-                            block.publicKey
-                        )
-                    } else {
-                        Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
-                        if (database.getLinked(block)?.transaction?.equals(block.transaction) != true) {
-                            return ValidationResult.Invalid(
-                                listOf(
-                                    "Linked transaction doesn't match (${block.transaction}, ${
-                                    database.getLinked(
-                                        block
-                                    )?.transaction ?: "MISSING"
-                                    })"
-                                )
-                            )
-                        }
-                    }
-                    if (block.isProposal)
-                        Log.d("RecvProp", "Received Proposal Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
-                    else
-                        Log.d("AgreementProp", "Received Agreement Block!" + "from : " + block.publicKey.toHex() + " our key : " + mykey.toHex())
-
-                    return ValidationResult.Valid
-                }
-            })
-
-        trustChainCommunity.registerBlockSigner(BLOCK_TYPE_TRADE, object : BlockSigner {
-            override fun onSignatureRequest(block: TrustChainBlock) {
-                Log.w("EuroTokenBlockTrade", "sig request ${block.transaction}")
-                // agree if validated
-                trustChainCommunity.sendBlock(
-                    trustChainCommunity.createAgreementBlock(
-                        block,
-                        block.transaction
-                    )
-                )
-            }
-        })
-
-        trustChainCommunity.addListener(BLOCK_TYPE_TRADE, object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                Log.d("EuroTokenBlockTrade", "onBlockReceived: ${block.blockId} ${block.transaction}")
-            }
-        })
-    }
-
     private fun addTradeListeners() {
         trustChainCommunity.registerTransactionValidator(
             BLOCK_TYPE_TRADE,
@@ -921,39 +829,40 @@ class TransactionRepository(
         })
     }
 
-    private fun addCreationListeners() {
-        trustChainCommunity.registerTransactionValidator(
-            BLOCK_TYPE_DESTROY,
-            object : TransactionValidator {
-                override fun validate(
-                    block: TrustChainBlock,
-                    database: TrustChainStore
-                ): ValidationResult {
-                    if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(
-                        listOf("Missing amount")
-                    )
-                    if (!block.transaction.containsKey(KEY_PAYMENT_ID) && !block.transaction.containsKey(KEY_IBAN)) return ValidationResult.Invalid(
-                        listOf("Missing Payment id")
-                    )
-                }
-            }
-        )
-
-        trustChainCommunity.addListener(
-            BLOCK_TYPE_CREATE,
-            object : BlockListener {
-                override fun onBlockReceived(block: TrustChainBlock) {
-                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                        verifyBalance()
-                    }
-                    Log.w(
-                        "EuroTokenBlockCreate",
-                        "onBlockReceived: ${block.blockId} ${block.transaction}"
-                    )
-                }
-            }
-        )
-    }
+//    private fun addCreationListeners() {
+//        trustChainCommunity.registerTransactionValidator(
+//            BLOCK_TYPE_DESTROY,
+//            object : TransactionValidator {
+//                override fun validate(
+//                    block: TrustChainBlock,
+//                    database: TrustChainStore
+//                ): ValidationResult {
+//                    if (!block.transaction.containsKey(KEY_AMOUNT)) return ValidationResult.Invalid(
+//                        listOf("Missing amount")
+//                    )
+//                    if (!block.transaction.containsKey(KEY_PAYMENT_ID) && !block.transaction.containsKey(KEY_IBAN)) return ValidationResult.Invalid(
+//                        listOf("Missing Payment id")
+//                    )
+//                    return ValidationResult.Valid
+//                }
+//            }
+//        )
+//
+//        trustChainCommunity.addListener(
+//            BLOCK_TYPE_CREATE,
+//            object : BlockListener {
+//                override fun onBlockReceived(block: TrustChainBlock) {
+//                    if (block.isAgreement && block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+//                        verifyBalance()
+//                    }
+//                    Log.w(
+//                        "EuroTokenBlockCreate",
+//                        "onBlockReceived: ${block.blockId} ${block.transaction}"
+//                    )
+//                }
+//            }
+//        )
+//    }
 
     private fun addDestructionListeners() {
         trustChainCommunity.registerTransactionValidator(
@@ -978,7 +887,7 @@ class TransactionRepository(
                     "onBlockReceived: ${block.blockId} ${block.transaction}"
                 )
             }
-        )
+        })
     }
 
     private fun addCheckpointListeners() {
@@ -1032,7 +941,7 @@ class TransactionRepository(
                     "onBlockReceived: ${block.blockId} ${block.transaction}"
                 )
             }
-        )
+        })
     }
 
     fun initTrustChainCommunity() {

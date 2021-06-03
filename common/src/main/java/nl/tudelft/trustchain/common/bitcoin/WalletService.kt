@@ -72,7 +72,8 @@ class WalletService {
 
                     if (wallet().balance.isZero) {
                         val address = wallet().issuedReceiveAddresses.first().toString()
-                        URL("${BuildConfig.BITCOIN_FAUCET}?id=$address").readBytes()
+                        println("Address:$address")
+//                        URL("${BuildConfig.BITCOIN_FAUCET}?id=$address").readBytes()
                     }
                 }
             }

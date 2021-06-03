@@ -26,7 +26,6 @@ import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
 import nl.tudelft.trustchain.eurotoken.ui.transactions.TransactionItem
-import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment
 import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment.Companion.addDecimalLimiter
 import org.json.JSONException
 import org.json.JSONObject

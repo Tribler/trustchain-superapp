@@ -122,7 +122,7 @@ class TrustChainApplication : Application() {
                     return ValidationResult.Invalid(listOf("Proposal must have a message"))
                 }
             }
-        )
+        })
 
         trustchain.registerBlockSigner(
             BLOCK_TYPE,
