@@ -48,9 +48,9 @@ android {
     signingConfigs {
         release {
             keyAlias "trustchain"
-            keyPassword "ageoftrust"
-            storeFile file("trustchain-superapp.jks")
-            storePassword "ageoftrust"
+            keyPassword "N/A"
+            storeFile file("build.keystore")
+            storePassword "N/A"
         }
     }
 
