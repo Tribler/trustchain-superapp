@@ -3,14 +3,29 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_gravity="center_horizontal">
+    android:layout_height="wrap_content"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:minHeight="300dp"
+    android:clipToPadding="false">
 
+    <ImageView
+        app:layout_constraintBottom_toTopOf="@id/qrCodeView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:srcCompat="@tools:sample/avatars"
+        android:visibility="gone"
+        android:id="@+id/pictureValueView"
+        android:contentDescription="@string/credential_image" />
 
     <ImageView
         android:id="@+id/qrCodeView"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -37,11 +52,38 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
+        android:layout_marginLeft="-10dp"
+        android:layout_marginRight="-10dp"
         android:indeterminateTint="@android:color/holo_red_dark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/timeoutProgressBar"
+        android:visibility="gone"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/qrCodeView"
+        android:padding="10dp"
+        android:progress="100" />
+
+    <Switch
+        app:layout_constraintTop_toBottomOf="@id/qrCodeView"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/timeoutProgressBar"
+        android:text="@string/switch_str"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/QRSwitch"
+        android:visibility="gone"
+        android:textOff="@string/display_first_qr_code" />
 
     <View
         android:layout_width="0dp"

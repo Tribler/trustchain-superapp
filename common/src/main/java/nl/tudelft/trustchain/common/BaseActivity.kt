@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.common
 
 import android.os.Bundle
+import android.view.View
 import androidx.annotation.MenuRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -9,6 +10,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import nl.tudelft.trustchain.common.databinding.ActivityBaseBinding
 import nl.tudelft.trustchain.common.util.viewBinding
 
@@ -18,6 +20,8 @@ abstract class BaseActivity : AppCompatActivity() {
     protected open val appBarConfiguration: AppBarConfiguration by lazy {
         AppBarConfiguration(setOf())
     }
+
+    protected lateinit var bottomNavigation: BottomNavigationView
 
     /**
      * The resource ID of the navigation graph.
@@ -39,6 +43,7 @@ abstract class BaseActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        bottomNavigation = binding.bottomNavigation
         navController.setGraph(navigationGraph)
 
         // Setup ActionBar
