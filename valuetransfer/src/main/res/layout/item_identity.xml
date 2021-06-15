@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="8dp">
+
+    <TextView
+        android:id="@+id/tvIdentityGivenNames"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="John"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvIdentitySurname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Doe"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:layout_marginStart="4dp"
+        app:layout_constraintStart_toEndOf="@+id/tvIdentityGivenNames"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvIdentityPublicKey"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:lines="1"
+        android:text="94648544349a3a68691cf759efa0461221d81fa1"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:typeface="monospace"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/tvIdentityType"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvIdentityGivenNames" />
+
+
+    <TextView
+        android:id="@+id/tvIdentityType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/light_gray"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="4dp"
+        android:text="Personal"
+        android:textSize="11dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+
+<!--    <?xml version="1.0" encoding="utf-8"?>-->
+<!--<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:padding="12dp"-->
+<!--app:layout_constraintTop_toTopOf="parent">-->
+
+<!--<LinearLayout-->
+<!--    android:id="@+id/ownInfoLayout"-->
+<!--    android:layout_width="0dp"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:layout_marginRight="12dp"-->
+<!--    android:orientation="vertical"-->
+<!--    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--    app:layout_constraintEnd_toStartOf="@id/identityType"-->
+<!--    app:layout_constraintStart_toStartOf="parent"-->
+<!--    app:layout_constraintTop_toTopOf="parent">-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/nameText"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="John Doe"-->
+<!--        android:textSize="16dp"-->
+<!--        android:textStyle="bold" />-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/publicKeyText"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:ellipsize="end"-->
+<!--        android:lines="1"-->
+<!--        android:text="94648544349a3a68691cf759efa0461221d81fa1"-->
+<!--        android:textSize="14dp"-->
+<!--        android:textStyle="italic"-->
+<!--        android:typeface="monospace" />-->
+
+<!--</LinearLayout>-->
+
+<!--<TextView-->
+<!--    android:id="@+id/identityType"-->
+<!--    android:layout_width="wrap_content"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    android:background="@drawable/pill_rounded"-->
+<!--    android:backgroundTint="@color/light_gray"-->
+<!--    android:paddingHorizontal="8dp"-->
+<!--    android:paddingVertical="2dp"-->
+<!--    android:text="Personal"-->
+<!--    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--    app:layout_constraintEnd_toEndOf="parent"-->
+<!--    app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--</androidx.constraintlayout.widget.ConstraintLayout>-->

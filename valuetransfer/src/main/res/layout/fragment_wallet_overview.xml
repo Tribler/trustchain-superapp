@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fcvIdentities"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletIdentitiesFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/rvCategories"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        tools:listitem="@layout/list_header"-->
+<!--        tools:itemCount="2">-->
+
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/rvIdentities"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        tools:listitem="@layout/item_identity"-->
+<!--        tools:itemCount="2"-->
+<!--        />-->
+    <!--    </androidx.recyclerview.widget.RecyclerView>-->
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/sections"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="vertical"-->
+<!--        android:padding="0dp"-->
+<!--        >-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/identitySection"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:gravity="center_vertical"-->
+<!--            android:orientation="vertical">-->
+<!--            >-->
+
+<!--            <LinearLayout-->
+<!--                android:id="@+id/identityHeader"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="64dp"-->
+<!--                android:background="@color/light_gray"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:paddingHorizontal="16dp">-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/identityIcon"-->
+<!--                    android:layout_width="40dp"-->
+<!--                    android:layout_height="40dp"-->
+<!--                    app:srcCompat="@drawable/ic_identity"-->
+<!--                    android:tint="@color/colorGreen"/>-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/identityText"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:text="Identity"-->
+<!--                    android:textColor="@color/colorPrimaryValueTransfer"-->
+<!--                    android:textSize="18dp"-->
+<!--                    android:layout_marginStart="16dp" />-->
+
+<!--                <LinearLayout-->
+<!--                    android:layout_width="fill_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:gravity="right"-->
+<!--                    android:orientation="horizontal">-->
+
+<!--                    <Button-->
+<!--                        android:id="@+id/searchImageButton"-->
+<!--                        android:layout_width="20dp"-->
+<!--                        android:layout_height="20dp"-->
+<!--                        android:layout_alignParentRight="true"-->
+<!--                        android:background="@drawable/ic_arrow_right"-->
+<!--                        android:backgroundTint="@color/colorPrimaryValueTransfer" />-->
+<!--                </LinearLayout>-->
+<!--            </LinearLayout>-->
+
+<!--            -->
+
+<!--        </LinearLayout>-->
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/socialSection"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="64dp"-->
+<!--        android:background="@color/light_gray"-->
+<!--        android:layout_below="@id/identitySection"-->
+<!--        android:gravity="center_vertical"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:paddingHorizontal="16dp">-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/socialIcon"-->
+<!--            android:layout_width="48dp"-->
+<!--            android:layout_height="48dp"-->
+<!--            app:srcCompat="@drawable/ic_social"-->
+<!--            android:tint="@color/colorGreen"/>-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/socialText"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Social"-->
+<!--            android:textColor="@color/colorPrimaryValueTransfer"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textSize="20dp"-->
+<!--            android:layout_marginStart="16dp"-->
+<!--            tools:layout_editor_absoluteY="0dp" />-->
+<!--    </LinearLayout>-->
+<!--    </LinearLayout>-->
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

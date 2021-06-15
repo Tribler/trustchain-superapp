@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/light_gray"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivCategoryIcon"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:tint="@color/colorGreen"
+            app:layout_constraintStart_toStartOf="@+id/clHeader"
+            app:layout_constraintTop_toTopOf="@+id/clHeader"
+            app:srcCompat="@drawable/ic_identity" />
+
+        <TextView
+            android:id="@+id/tvCategoryTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="My Identities"
+            android:textColor="@color/colorPrimaryValueTransfer"
+            android:textSize="16sp"
+            android:textStyle="italic|bold"
+            app:layout_constraintBottom_toBottomOf="@+id/clHeader"
+            app:layout_constraintStart_toEndOf="@+id/ivCategoryIcon"
+            app:layout_constraintTop_toTopOf="@+id/clHeader" />
+
+        <ImageView
+            android:id="@+id/ivCategoryNavigateIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/ic_arrow_right"
+            android:backgroundTint="@color/colorPrimaryValueTransfer"
+            app:layout_constraintBottom_toBottomOf="@+id/clHeader"
+            app:layout_constraintEnd_toEndOf="@+id/clHeader"
+            app:layout_constraintTop_toTopOf="@+id/clHeader" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvIdentities"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/clHeader"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_identity" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

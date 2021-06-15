@@ -1,0 +1,43 @@
+CREATE TABLE identities (
+    id TEXT NOT NULL,
+    public_key BLOB NOT NULL,
+    type INTEGER NOT NULL,
+    name TEXT,
+    surname TEXT,
+    gender INTEGER,
+    date_of_birth INTEGER,
+    place_of_birth TEXT,
+    nationality TEXT,
+    personal_number INTEGER,
+    document_number TEXT,
+    residence TEXT,
+    area_of_expertise TEXT,
+    added INTEGER NOT NULL,
+    modified INTEGER NOT NULL,
+    PRIMARY KEY (id)
+);
+
+addIdentity:
+INSERT INTO identities (id, public_key, type, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, residence, area_of_expertise, added, modified)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?);
+
+removeIdentity:
+DELETE FROM identities WHERE id = ?;
+
+getAll:
+SELECT * FROM identities ORDER BY added ASC;
+
+getPersonalIdentity:
+SELECT * FROM identities WHERE type = 0 LIMIT 1;
+
+getAllPersonalIdentities:
+SELECT * FROM identities WHERE type = 0;
+
+getAllBusinessIdentities:
+SELECT * FROM identities WHERE type = 1;
+
+getIdentityByPublicKey:
+SELECT * FROM identities WHERE public_key = ?;
+
+getIdentityByID:
+SELECT * FROM identities WHERE id = ?;

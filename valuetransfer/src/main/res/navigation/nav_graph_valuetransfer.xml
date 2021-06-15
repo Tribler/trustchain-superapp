@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_valuetransfer"
+    app:startDestination="@id/walletOverviewFragment">
+
+    <fragment
+        android:id="@+id/walletOverviewFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment"
+        android:label="Wallet"
+        tools:layout="@layout/fragment_wallet_overview" />
+        <action
+            android:id="@+id/action_identityOverview_to_identityView"
+            app:destination="@id/identityFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+    <fragment
+        android:id="@+id/identityFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.IdentityFragment"
+        android:label="Identities"
+        tools:layout="@layout/fragment_identity" />
+
+    <fragment
+        android:id="@+id/socialFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.SocialFragment"
+        android:label="Social"
+        tools:layout="@layout/fragment_social" />
+
+    <fragment
+        android:id="@+id/walletExchangeFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.WalletExchangeFragment"
+        android:label="Exchange"
+        tools:layout="@layout/fragment_wallet_exchange" />
+
+</navigation>

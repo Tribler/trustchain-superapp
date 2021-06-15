@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/walletOverviewFragment"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Wallet" />
+
+    <item
+        android:id="@+id/identityFragment"
+        android:icon="@drawable/ic_identity"
+        android:title="Identities" />
+
+    <item
+        android:id="@+id/socialFragment"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Social" />
+
+    <item
+        android:id="@+id/walletExchangeFragment"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Exchange" />
+</menu>

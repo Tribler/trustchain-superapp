@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme" />
+
+    <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimaryValueTransfer</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkValueTransfer</item>
+    </style>
+
+    <style name="MenuLabelStyle">
+        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>
