@@ -11,14 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="1">
+        android:weightSum="1"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteX="12dp">
 
         <LinearLayout
             android:id="@+id/llColOne"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:layout_weight="0.36"
+            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="@id/llColTwo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -89,8 +91,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:orientation="vertical"
             android:layout_weight="0.39"
+            android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -159,8 +161,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:orientation="vertical"
             android:layout_weight="0.25"
+            android:orientation="vertical"
             app:layout_constraintTop_toTopOf="parent">
 
             <TextView
@@ -206,14 +208,14 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/llRowTwo"
-        android:layout_width="match_parent"
+        android:id="@+id/llColOneRowTwo"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llRowOne">
+        app:layout_constraintTop_toBottomOf="@+id/llRowOne"
+        app:layout_constraintEnd_toStartOf="@+id/btnPersonalQRCode">
 
         <TextView
             android:id="@+id/tvPersonalPublicKeyTitle"
@@ -228,49 +230,71 @@
         <TextView
             android:id="@+id/tvPersonalPublicKeyValue"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:text="a1d5fffdef41ae2d6c2253ae0ab1e6fd16d950aa1d5fffdef41ae2d6c2253ae0ab1e6fd16d950a"
+            android:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3"
             android:textSize="12sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/tvPersonalPublicKeyTitle" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/llRowButtons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="horizontal"
-        android:weightSum="2"
+    <Button
+        android:id="@+id/btnPersonalQRCode"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/ic_qr_code_scan"
+        app:layout_constraintEnd_toStartOf="@+id/btnPersonalCopyPublicKey"
+        app:layout_constraintStart_toEndOf="@+id/llColOneRowTwo"
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"/>
+
+    <Button
+        android:id="@+id/btnPersonalCopyPublicKey"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/ic_copy_public_key"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llRowTwo">
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"/>
 
-        <Button
-            android:id="@+id/btnQRCode"
-            android:layout_width="0dp"
-            android:layout_height="35dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:background="@drawable/button_rounded"
-            android:backgroundTint="@color/colorPrimaryValueTransfer"
-            android:text="Show QR-code"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
 
-        <Button
-            android:id="@+id/btnCopyPublicKey"
-            android:layout_width="0dp"
-            android:layout_height="35dp"
-            android:layout_weight="1"
-            android:background="@drawable/button_rounded"
-            android:backgroundTint="@color/colorPrimaryValueTransfer"
-            android:paddingVertical="4dp"
-            android:text="Copy Public Key"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
+<!--    <LinearLayout-->
+<!--        android:id="@+id/llRowButtons"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="12dp"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:weightSum="2"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/llRowTwo">-->
 
-    </LinearLayout>
+<!--        <Button-->
+<!--            android:id="@+id/btnPersonalQRCode"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="35dp"-->
+<!--            android:layout_marginEnd="4dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:background="@drawable/button_rounded"-->
+<!--            android:backgroundTint="@color/colorPrimaryValueTransfer"-->
+<!--            android:text="Show QR-code"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="12sp" />-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnPersonalCopyPublicKey"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="35dp"-->
+<!--            android:layout_weight="1"-->
+<!--            android:background="@drawable/button_rounded"-->
+<!--            android:backgroundTint="@color/colorPrimaryValueTransfer"-->
+<!--            android:paddingVertical="4dp"-->
+<!--            android:text="Copy Public Key"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="12sp" />-->
+
+<!--    </LinearLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

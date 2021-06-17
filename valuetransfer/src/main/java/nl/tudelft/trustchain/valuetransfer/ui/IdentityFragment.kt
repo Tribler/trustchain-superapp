@@ -1,11 +1,15 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
@@ -14,10 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.flow.map
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentIdentityBinding
@@ -25,13 +28,12 @@ import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.IdentityItem
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.IdentityItemRenderer
+import org.json.JSONObject
 
 class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
     private val binding by viewBinding(FragmentIdentityBinding::bind)
-
     private val adapterPersonal = ItemAdapter()
-
     private val adapterBusiness = ItemAdapter()
 
     private val itemsPersonal: LiveData<List<Item>> by lazy {
@@ -50,28 +52,30 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         IdentityStore.getInstance(requireContext())
     }
 
-    private val publicKeyBin by lazy {
-        requireArguments().getString(ARG_PUBLIC_KEY)!!
-    }
-
-    private val publicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-    }
-
-    private val name by lazy {
-        requireArguments().getString(ARG_NAME)!!
+    private val qrCodeUtils by lazy {
+        QRCodeUtils(requireContext())
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapterPersonal.registerRenderer(IdentityItemRenderer(
-            1
-        ) {
-            Log.d("CLICKED",it.publicKey.keyToBin().toHex())
-        })
-
-        Log.d("ITEMS", itemsPersonal.toString())
+        adapterPersonal.registerRenderer(
+            IdentityItemRenderer(
+                1,
+                {
+                    Log.d("CLICKED", it.publicKey.keyToBin().toHex())
+                }, {
+                    Log.d("LONG", "CLICK")
+                }, {
+                    Log.d("CLICKED", "QR Code for personal item "+ it.publicKey.keyToBin().toHex())
+                    qrCodeDialog("Personal Public Key", "Show QR-code to other party", it.publicKey.keyToBin().toHex())
+                }, {
+                    addToClipboard(it.publicKey.keyToBin().toHex(), "Public Key")
+                    Toast.makeText(this.context,"Public key copied to clipboard",Toast.LENGTH_SHORT).show()
+                    Log.d("CLICKED", "Copy Public Key for personal item "+ it.publicKey.keyToBin().toHex())
+                }
+            )
+        )
 
         itemsPersonal.observe(
             this,
@@ -84,11 +88,23 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             }
         )
 
-        adapterBusiness.registerRenderer(IdentityItemRenderer(
-            2
-        ) {
-            Log.d("CLICKED",it.publicKey.keyToBin().toHex())
-        })
+        adapterBusiness.registerRenderer(
+            IdentityItemRenderer(
+            2,
+                {
+                    Log.d("CLICKED", it.publicKey.keyToBin().toHex())
+                }, {
+                   Log.d("LONG", "CLICK")
+                }, {
+                    qrCodeDialog("Business Public Key", "Show QR-code to other party", it.publicKey.keyToBin().toHex())
+                    Log.d("CLICKED", "QR Code for business item "+ it.publicKey.keyToBin().toHex())
+                }, {
+                    addToClipboard(it.publicKey.keyToBin().toHex(), "Public Key")
+                    Toast.makeText(this.context,"Public key copied to clipboard",Toast.LENGTH_SHORT).show()
+                    Log.d("CLICKED", "Copy Public Key for personal item "+ it.publicKey.keyToBin().toHex())
+                }
+            )
+        )
 
         itemsBusiness.observe(
             this,
@@ -160,6 +176,57 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         )
     }
 
+    private fun createBitmap(attributes: Map<String,String>): Bitmap {
+        val data = JSONObject()
+        for((key, value) in attributes) {
+            data.put(key, value)
+        }
+
+        return qrCodeUtils.createQR(data.toString())!!
+    }
+
+    private fun qrCodeDialog(title: String, subtitle: String, publicKey: String) {
+
+        val builder = AlertDialog.Builder(requireContext())
+        val view = layoutInflater.inflate(R.layout.dialog_qrcode, null)
+
+        val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
+        val tvSubTitle = view.findViewById<TextView>(R.id.tvSubTitle)
+        val ivQRCode = view.findViewById<ImageView>(R.id.ivQRCode)
+        val btnCloseDialog = view.findViewById<Button>(R.id.btnCloseDialog)
+
+        builder.setView(view)
+        val dialog : AlertDialog = builder.create()
+
+        btnCloseDialog.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+
+        Handler().postDelayed(
+            Runnable {
+                view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).visibility = View.GONE
+                tvTitle.text = title
+                tvSubTitle.text = subtitle
+                btnCloseDialog.visibility = View.VISIBLE
+
+                val map = mapOf(
+                    "public_key" to publicKey,
+                    "message" to "TEST"
+                )
+
+                ivQRCode.setImageBitmap(createBitmap(map))
+            }, 100)
+
+    }
+
+    private fun addToClipboard(text: String, label: String) {
+        val clipboard = ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
+        val clip = ClipData.newPlainText(label, text)
+        clipboard?.setPrimaryClip(clip)
+    }
+
     private fun createItems(identities: List<Identity>): List<Item> {
         return identities.mapIndexed { _, identity ->
             IdentityItem(
@@ -167,13 +234,4 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             )
         }
     }
-
-    companion object {
-        const val ARG_PUBLIC_KEY = "public_key"
-        const val ARG_NAME = "name"
-
-        private const val GROUP_TIME_LIMIT = 60 * 1000
-        private const val PICK_IMAGE = 10
-    }
-
 }

@@ -15,7 +15,9 @@ import java.text.SimpleDateFormat
 class IdentityItemRenderer(
     private val layoutType: Int,
     private val onItemClick: (Identity) -> Unit,
-//    private val onItemLongClick: (Contact) -> Unit
+    private val onLongItemClick: (Identity) -> Unit,
+    private val onQRButtonClick: (Identity) -> Unit,
+    private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
 ) : ItemLayoutRenderer<IdentityItem, View>(
     IdentityItem::class.java
 ) {
@@ -25,7 +27,7 @@ class IdentityItemRenderer(
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
         if(layoutType == 0) {
-            tvIdentityPublicKey.text = item.identity.publicKey.toString()
+            tvIdentityPublicKey.text = item.identity.publicKey.keyToBin().toHex()
             tvIdentityType.text = item.identity.type
 
             if(item.identity.type == "Personal") {
@@ -37,8 +39,9 @@ class IdentityItemRenderer(
                 tvIdentityGivenNames.text = content.companyName
             }
 
-            setOnClickListener {
-                onItemClick(item.identity)
+            setOnLongClickListener {
+                onLongItemClick(item.identity)
+                true
             }
         }else if(layoutType == 1) {
             val content = item.identity.content as PersonalIdentity
@@ -50,23 +53,48 @@ class IdentityItemRenderer(
             tvPlaceOfBirthValue.text = content.placeOfBirth
             tvPersonalNumberValue.text = content.personalNumber.toString()
             tvDocumentNumberValue.text = content.documentNumber
-            tvPersonalPublicKeyValue.text = item.identity.publicKey.toString()
+            tvPersonalPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
+
+            btnPersonalQRCode.setOnClickListener {
+                onQRButtonClick(item.identity)
+            }
+
+            btnPersonalCopyPublicKey.setOnClickListener {
+                onCopyPublicKeyButtonClick(item.identity)
+            }
+
+            setOnLongClickListener {
+                onLongItemClick(item.identity)
+                true
+            }
 
 //            setOnClickListener {
 //                onItemClick(item.identity)
 //            }
 
-            btnQRCode.
         }else if(layoutType == 2) {
             val content = item.identity.content as BusinessIdentity
             tvCompanyNameValue.text = content.companyName
             tvESTValue.text = yearFormat.format(content.dateOfBirth)
             tvResidenceValue.text = content.residence
             tvAreaOfExpertiseValue.text = content.areaOfExpertise
-            tvBusinessPublicKeyValue.text = item.identity.publicKey.toString()
+            tvBusinessPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
 
             setOnClickListener {
                 onItemClick(item.identity)
+            }
+
+            setOnLongClickListener {
+                onLongItemClick(item.identity)
+                true
+            }
+
+            btnBusinessQRCode.setOnClickListener {
+                onQRButtonClick(item.identity)
+            }
+
+            btnBusinessCopyPublicKey.setOnClickListener {
+                onCopyPublicKeyButtonClick(item.identity)
             }
         }
 //

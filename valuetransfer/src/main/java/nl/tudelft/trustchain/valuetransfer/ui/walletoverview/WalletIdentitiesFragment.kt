@@ -43,13 +43,20 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
         Log.d("TEST:", store.getPersonalIdentity().publicKey.toString())
         Log.d("TEST:", store.hasPersonalIdentity().toString())
 
-        adapter.registerRenderer(IdentityItemRenderer(
-            0
-        ) {
-            Log.d("CLICKED", it.publicKey.keyToBin().toHex())
-        })
-
-        Log.d("ITEMS", items.toString())
+        adapter.registerRenderer(
+            IdentityItemRenderer(
+            0,
+                {
+                    Log.d("CLICKED", it.publicKey.keyToBin().toHex())
+                }, {
+                    Log.d("LONG", "CLICK")
+                }, {
+                    Log.d("CLICKED:", "no button to click")
+                }, {
+                    Log.d("CLICKED:", "no button to click")
+                }
+            )
+        )
 
         items.observe(
             this,
