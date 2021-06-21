@@ -11,6 +11,9 @@ import nl.tudelft.trustchain.valuetransfer.entity.BusinessIdentity
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityContent
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class IdentityCommunity(
@@ -38,38 +41,48 @@ class IdentityCommunity(
         return store.getPersonalIdentity()
     }
 
-    fun createIdentity(type: String) : Identity {
+    fun createPersonalIdentity(givenNames: String, surname: String, placeOfBirth: String, dateOfBirth: Long, nationality: String, gender: String, personalNumber: Long, documentNumber: String) : Identity{
         val id = UUID.randomUUID().toString()
 
-        var content = when(type) {
-            "Personal" -> PersonalIdentity(
-                    givenNames = "John Michael",
-                    surname = "Doe",
-                    gender = "Male",
-                    dateOfBirth = Date(),
-                    placeOfBirth = "Sillicon Valley",
-                    nationality = "American",
-                    personalNumber = 149720602,
-                    documentNumber = "2NH98IU7FG",
-                )
-            "Business" -> BusinessIdentity(
-                    companyName = "Alpha Chips Industries",
-                    dateOfBirth = Date(),
-                    residence = "Los Angeles",
-                    areaOfExpertise = "Electronics",
-                )
-            else -> throw IllegalArgumentException("Only personal or business identities allowed")
-        }
+        var content = PersonalIdentity(
+            givenNames,
+            surname,
+            gender,
+            Date(dateOfBirth),
+            placeOfBirth,
+            nationality,
+            personalNumber,
+            documentNumber
+        )
 
         return Identity(
             id = id,
             publicKey = myPeer.publicKey,
-            type = type,
+            type = "Personal",
             content = content,
             added = Date(),
-            modified = Date(),
+            modified = Date()
+        )
+    }
+
+    fun createBusinessIdentity(companyName: String, established: Long, residence: String, areaOfExpertise: String) : Identity{
+        val id = UUID.randomUUID().toString()
+
+        var content = BusinessIdentity(
+            companyName,
+            Date(established),
+            residence,
+            areaOfExpertise
         )
 
+        return Identity(
+            id = id,
+            publicKey = myPeer.publicKey,
+            type = "Business",
+            content = content,
+            added = Date(),
+            modified = Date()
+        )
     }
 
     fun deleteDatabase(context: Context) {

@@ -8,42 +8,42 @@ data class PersonalIdentity(
     /**
      * Given Names  of the identity or name of the business.
      */
-    val givenNames: String,
+    var givenNames: String,
 
     /**
      * Surname  of the identity.
      */
-    val surname: String,
+    var surname: String,
 
     /**
      * Gender of the identity.
      */
-    val gender: String,
+    var gender: String,
 
     /**
      * Date of birth of the identity.
      */
-    val dateOfBirth: Date,
+    var dateOfBirth: Date,
 
     /**
      * Place of birth of the identity.
      */
-    val placeOfBirth: String,
+    var placeOfBirth: String,
 
     /**
      * Nationality of the identity.
      */
-    val nationality: String,
+    var nationality: String,
 
     /**
      * Personal number of the identity.
      */
-    val personalNumber: Long,
+    var personalNumber: Long,
 
     /**
      * Document number of the identity.
      */
-    val documentNumber: String,
+    var documentNumber: String,
 )  : IdentityContent {
 
     override fun toString() : String {
@@ -56,22 +56,22 @@ data class BusinessIdentity(
     /**
      * Given Names  of the identity or name of the business.
      */
-    val companyName: String,
+    var companyName: String,
 
     /**
      * Established since.
      */
-    val dateOfBirth: Date,
+    var dateOfBirth: Date,
 
     /**
      * Surname  of the identity.
      */
-    val residence: String,
+    var residence: String,
 
     /**
      * Gender of the identity.
      */
-    val areaOfExpertise: String,
+    var areaOfExpertise: String,
 )  : IdentityContent {
 
     override fun toString() : String {

@@ -32,5 +32,5 @@ data class Identity(
     /**
      * Identity modified on date.
      */
-    val modified: Date,
+    var modified: Date,
 )

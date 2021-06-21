@@ -21,11 +21,20 @@ addIdentity:
 INSERT INTO identities (id, public_key, type, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, residence, area_of_expertise, added, modified)
 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?);
 
-removeIdentity:
+updatePersonalIdentity:
+UPDATE identities SET public_key = ?, name = ?, surname = ?, gender = ?, date_of_birth = ?, place_of_birth = ?, nationality = ?, personal_number = ?, document_number = ?, modified = ? WHERE id = ?;
+
+updateBusinessIdentity:
+UPDATE identities SET public_key = ?, name = ?, date_of_birth = ?, residence = ?, area_of_expertise = ?, modified = ? WHERE id = ?;
+
+deleteIdentity:
 DELETE FROM identities WHERE id = ?;
 
+deleteIdentityByPublicKey:
+DELETE FROM identities WHERE public_key = ?;
+
 getAll:
-SELECT * FROM identities ORDER BY added ASC;
+SELECT * FROM identities ORDER BY type ASC, added ASC;
 
 getPersonalIdentity:
 SELECT * FROM identities WHERE type = 0 LIMIT 1;
