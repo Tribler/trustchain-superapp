@@ -14,7 +14,7 @@ import java.text.SimpleDateFormat
 
 class IdentityItemRenderer(
     private val layoutType: Int,
-    private val onItemClick: (Identity) -> Unit,
+//    private val onItemClick: (Identity) -> Unit,
     private val onLongItemClick: (Identity) -> Unit,
     private val onQRButtonClick: (Identity) -> Unit,
     private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
@@ -22,7 +22,7 @@ class IdentityItemRenderer(
     IdentityItem::class.java
 ) {
 
-    private val dateFormat = SimpleDateFormat("dd-MM-yyyy")
+    private val dateFormat = SimpleDateFormat("MMMM d, yyyy")
     private val yearFormat = SimpleDateFormat("yyyy")
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
@@ -80,9 +80,9 @@ class IdentityItemRenderer(
             tvAreaOfExpertiseValue.text = content.areaOfExpertise
             tvBusinessPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
 
-            setOnClickListener {
-                onItemClick(item.identity)
-            }
+//            setOnClickListener {
+//                onItemClick(item.identity)
+//            }
 
             setOnLongClickListener {
                 onLongItemClick(item.identity)

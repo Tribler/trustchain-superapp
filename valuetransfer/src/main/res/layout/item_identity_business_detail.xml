@@ -28,7 +28,7 @@
                 android:id="@+id/tvCompanyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Business Name"
+                android:text="Company Name"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -179,26 +179,27 @@
 
     <Button
         android:id="@+id/btnBusinessQRCode"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/ic_qr_code_scan"
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowThree"
         app:layout_constraintEnd_toStartOf="@+id/btnBusinessCopyPublicKey"
         app:layout_constraintStart_toEndOf="@+id/llColOneRowThree"
-        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowThree"/>
+        app:layout_constraintTop_toTopOf="@+id/llColOneRowThree" />
 
     <Button
         android:id="@+id/btnBusinessCopyPublicKey"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginTop="8dp"
-        android:layout_marginStart="12dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/ic_copy_public_key"
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowThree"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowThree"/>
+        app:layout_constraintTop_toTopOf="@+id/llColOneRowThree" />
 
 
 

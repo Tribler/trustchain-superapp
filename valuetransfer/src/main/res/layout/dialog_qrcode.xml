@@ -46,6 +46,8 @@
         android:id="@+id/pbLoadingSpinner"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:maxHeight="50dp"
+        android:maxWidth="50dp"
         app:layout_constraintDimensionRatio="H,1:1"
         android:layout_gravity="center"
         android:indeterminateTint="@color/colorPrimaryValueTransfer"

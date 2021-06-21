@@ -240,24 +240,26 @@
 
     <Button
         android:id="@+id/btnPersonalQRCode"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@drawable/ic_qr_code_scan"
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"
         app:layout_constraintEnd_toStartOf="@+id/btnPersonalCopyPublicKey"
         app:layout_constraintStart_toEndOf="@+id/llColOneRowTwo"
-        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"/>
+        app:layout_constraintTop_toTopOf="@+id/llColOneRowTwo" />
 
     <Button
         android:id="@+id/btnPersonalCopyPublicKey"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/ic_copy_public_key"
+        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/llColOneRowTwo"/>
+        app:layout_constraintTop_toTopOf="@+id/llColOneRowTwo" />
 
 
 <!--    <LinearLayout-->

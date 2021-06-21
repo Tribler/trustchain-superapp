@@ -40,15 +40,10 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("TEST:", store.getPersonalIdentity().publicKey.toString())
-        Log.d("TEST:", store.hasPersonalIdentity().toString())
-
         adapter.registerRenderer(
             IdentityItemRenderer(
             0,
                 {
-                    Log.d("CLICKED", it.publicKey.keyToBin().toHex())
-                }, {
                     Log.d("LONG", "CLICK")
                 }, {
                     Log.d("CLICKED:", "no button to click")
@@ -61,11 +56,7 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
         items.observe(
             this,
             Observer {
-                val oldCount = adapter.itemCount
                 adapter.updateItems(it)
-                if (adapter.itemCount != oldCount) {
-                    binding.rvIdentities.scrollToPosition(adapter.itemCount - 1)
-                }
             }
         )
     }

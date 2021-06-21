@@ -1,4 +1,10 @@
 <resources>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array
+        name="gender_list">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Neutral</item>
+    </string-array>
 </resources>
