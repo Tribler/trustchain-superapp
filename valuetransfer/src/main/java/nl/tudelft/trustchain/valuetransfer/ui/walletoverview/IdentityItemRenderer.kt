@@ -3,7 +3,7 @@ package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity.view.*
-import kotlinx.android.synthetic.main.item_identity_personal_detail.view.*
+import kotlinx.android.synthetic.main.item_identity_detail.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
@@ -63,7 +63,7 @@ class IdentityItemRenderer(
     override fun getLayoutResourceId(): Int {
         when (layoutType) {
             0 -> return R.layout.item_identity
-            1 -> return R.layout.item_identity_personal_detail
+            1 -> return R.layout.item_identity_detail
         }
 
         return R.layout.item_identity

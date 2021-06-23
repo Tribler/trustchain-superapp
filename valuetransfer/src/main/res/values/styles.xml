@@ -37,8 +37,6 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-<!--    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog" />-->
-
     <style name="ButtonRounded" >
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">35dp</item>
@@ -57,9 +55,20 @@
         <item name="android:textColor">@color/colorPrimaryValueTransfer</item>
     </style>
 
+    <style name="ButtonGreenRounded" parent="ButtonRounded">
+        <item name="backgroundTint">@color/colorPrimaryValueTransfer</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <style name="ButtonDarkGreenRounded" parent="ButtonRounded">
         <item name="backgroundTint">@color/colorPrimaryDarkValueTransfer</item>
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="DatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorAccent">@color/colorPrimaryValueTransfer</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/ButtonGreenRounded</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/ButtonWhiteRounded</item>
     </style>
 
 </resources>

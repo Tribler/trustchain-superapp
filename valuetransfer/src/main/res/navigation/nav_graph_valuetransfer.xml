@@ -21,7 +21,7 @@
     <fragment
         android:id="@+id/identityFragment"
         android:name="nl.tudelft.trustchain.valuetransfer.ui.IdentityFragment"
-        android:label="Identities"
+        android:label="Identity"
         tools:layout="@layout/fragment_identity" />
 
     <fragment

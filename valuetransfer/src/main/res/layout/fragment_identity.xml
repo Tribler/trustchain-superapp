@@ -10,137 +10,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:id="@+id/clHeaderAddIdentity"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:background="@color/light_gray"-->
-<!--        android:paddingHorizontal="12dp"-->
-<!--        android:paddingVertical="8dp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent">-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/ivAddIdentityIcon"-->
-<!--            android:layout_width="35dp"-->
-<!--            android:layout_height="35dp"-->
-<!--            android:tint="@color/colorGreen"-->
-<!--            app:layout_constraintStart_toStartOf="@+id/clHeaderAddIdentity"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/clHeaderAddIdentity"-->
-<!--            app:srcCompat="@drawable/ic_add_black_24dp" />-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/tvivAddIdentityTitle"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="16dp"-->
-<!--            android:text="Add Identity"-->
-<!--            android:textColor="@color/colorPrimaryValueTransfer"-->
-<!--            android:textSize="16sp"-->
-<!--            android:textStyle="italic|bold"-->
-<!--            app:layout_constraintBottom_toBottomOf="@+id/clHeaderAddIdentity"-->
-<!--            app:layout_constraintStart_toEndOf="@+id/ivAddIdentityIcon"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/clHeaderAddIdentity" />-->
-
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
-
-<!--    <TextView-->
-<!--        android:id="@+id/tvAddIdentityDescription"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginHorizontal="12dp"-->
-<!--        android:layout_marginVertical="12dp"-->
-<!--        android:textStyle="italic"-->
-<!--        android:textSize="12dp"-->
-<!--        android:text="To add a new identity scan the QR-code or look for a wireless connection."-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/llAddIdentityContent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/clHeaderAddIdentity" />-->
-
-
-<!--    <LinearLayout-->
-<!--        android:id="@+id/llAddIdentityContent"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="12dp"-->
-<!--        android:orientation="horizontal"-->
-<!--        android:weightSum="1"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/tvAddIdentityDescription">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btnScanQRCode"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="35dp"-->
-<!--            android:layout_marginEnd="4dp"-->
-<!--            android:layout_weight="0.5"-->
-<!--            android:background="@drawable/button_rounded"-->
-<!--            android:backgroundTint="@color/colorPrimaryValueTransfer"-->
-<!--            android:text="Scan QR-code"-->
-<!--            android:textColor="@color/white"-->
-<!--            android:textSize="12sp" />-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btnScanWireless"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="35dp"-->
-<!--            android:layout_marginStart="4dp"-->
-<!--            android:layout_weight="0.5"-->
-<!--            android:background="@drawable/button_rounded"-->
-<!--            android:backgroundTint="@color/colorPrimaryValueTransfer"-->
-<!--            android:paddingVertical="4dp"-->
-<!--            android:text="Network Scan"-->
-<!--            android:textColor="@color/white"-->
-<!--            android:textSize="12sp" />-->
-
-<!--    </LinearLayout>-->
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clHeaderPersonalIdentities"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/light_gray"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/ivPersonalIdentitiesIcon"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:tint="@color/colorGreen"
-            app:layout_constraintStart_toStartOf="@+id/clHeaderPersonalIdentities"
-            app:layout_constraintTop_toTopOf="@+id/clHeaderPersonalIdentities"
-            app:srcCompat="@drawable/ic_identities_personal" />
-
-        <TextView
-            android:id="@+id/tvPersonalIdentitiesTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="My Personal Identity"
-            android:textColor="@color/colorPrimaryValueTransfer"
-            android:textSize="16sp"
-            android:textStyle="italic|bold"
-            app:layout_constraintBottom_toBottomOf="@+id/clHeaderPersonalIdentities"
-            app:layout_constraintStart_toEndOf="@+id/ivPersonalIdentitiesIcon"
-            app:layout_constraintTop_toTopOf="@+id/clHeaderPersonalIdentities" />
-
-        <Button
-            android:id="@+id/btnAddPersonalIdentity"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/ic_baseline_add_24"
-            android:backgroundTint="@color/colorPrimaryValueTransfer"
-            app:layout_constraintBottom_toBottomOf="@+id/clHeaderPersonalIdentities"
-            app:layout_constraintEnd_toEndOf="@+id/clHeaderPersonalIdentities"
-            app:layout_constraintTop_toTopOf="@+id/clHeaderPersonalIdentities" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
         <TextView
             android:id="@+id/tvNoPersonalIdentity"
             android:layout_width="match_parent"
@@ -152,7 +21,7 @@
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/clHeaderPersonalIdentities" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPersonalIdentities"
@@ -160,7 +29,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/tvNoPersonalIdentity"
         tools:itemCount="1"
-        tools:listitem="@layout/item_identity_personal_detail" />
+        tools:listitem="@layout/item_identity_detail" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
