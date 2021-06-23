@@ -1,7 +1,6 @@
 CREATE TABLE identities (
     id TEXT NOT NULL,
     public_key BLOB NOT NULL,
-    type INTEGER NOT NULL,
     name TEXT,
     surname TEXT,
     gender INTEGER,
@@ -10,22 +9,17 @@ CREATE TABLE identities (
     nationality TEXT,
     personal_number INTEGER,
     document_number TEXT,
-    residence TEXT,
-    area_of_expertise TEXT,
     added INTEGER NOT NULL,
     modified INTEGER NOT NULL,
     PRIMARY KEY (id)
 );
 
 addIdentity:
-INSERT INTO identities (id, public_key, type, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, residence, area_of_expertise, added, modified)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?);
+INSERT INTO identities (id, public_key, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, added, modified)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 updatePersonalIdentity:
 UPDATE identities SET public_key = ?, name = ?, surname = ?, gender = ?, date_of_birth = ?, place_of_birth = ?, nationality = ?, personal_number = ?, document_number = ?, modified = ? WHERE id = ?;
-
-updateBusinessIdentity:
-UPDATE identities SET public_key = ?, name = ?, date_of_birth = ?, residence = ?, area_of_expertise = ?, modified = ? WHERE id = ?;
 
 deleteIdentity:
 DELETE FROM identities WHERE id = ?;
@@ -34,16 +28,10 @@ deleteIdentityByPublicKey:
 DELETE FROM identities WHERE public_key = ?;
 
 getAll:
-SELECT * FROM identities ORDER BY type ASC, added ASC;
+SELECT * FROM identities ORDER BY added ASC;
 
 getPersonalIdentity:
-SELECT * FROM identities WHERE type = 0 LIMIT 1;
-
-getAllPersonalIdentities:
-SELECT * FROM identities WHERE type = 0;
-
-getAllBusinessIdentities:
-SELECT * FROM identities WHERE type = 1;
+SELECT * FROM identities LIMIT 1;
 
 getIdentityByPublicKey:
 SELECT * FROM identities WHERE public_key = ?;

@@ -3,18 +3,14 @@ package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 import android.view.View
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity.view.*
-import kotlinx.android.synthetic.main.item_identity_business_detail.view.*
 import kotlinx.android.synthetic.main.item_identity_personal_detail.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.entity.BusinessIdentity
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
-import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import java.text.SimpleDateFormat
 
 class IdentityItemRenderer(
     private val layoutType: Int,
-//    private val onItemClick: (Identity) -> Unit,
     private val onLongItemClick: (Identity) -> Unit,
     private val onQRButtonClick: (Identity) -> Unit,
     private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
@@ -23,28 +19,21 @@ class IdentityItemRenderer(
 ) {
 
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy")
-    private val yearFormat = SimpleDateFormat("yyyy")
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
         if(layoutType == 0) {
             tvIdentityPublicKey.text = item.identity.publicKey.keyToBin().toHex()
-            tvIdentityType.text = item.identity.type
 
-            if(item.identity.type == "Personal") {
-                val content = item.identity.content as PersonalIdentity
-                tvIdentityGivenNames.text = content.givenNames
-                tvIdentitySurname.text = content.surname
-            }else if(item.identity.type == "Business") {
-                val content = item.identity.content as BusinessIdentity
-                tvIdentityGivenNames.text = content.companyName
-            }
+            val content = item.identity.content
+            tvIdentityGivenNames.text = content.givenNames
+            tvIdentitySurname.text = content.surname
 
             setOnLongClickListener {
                 onLongItemClick(item.identity)
                 true
             }
         }else if(layoutType == 1) {
-            val content = item.identity.content as PersonalIdentity
+            val content = item.identity.content
             tvGivenNamesValue.text = content.givenNames
             tvSurnameValue.text = content.surname
             tvGenderValue.text = content.gender
@@ -68,47 +57,13 @@ class IdentityItemRenderer(
                 true
             }
 
-//            setOnClickListener {
-//                onItemClick(item.identity)
-//            }
-
-        }else if(layoutType == 2) {
-            val content = item.identity.content as BusinessIdentity
-            tvCompanyNameValue.text = content.companyName
-            tvESTValue.text = yearFormat.format(content.dateOfBirth)
-            tvResidenceValue.text = content.residence
-            tvAreaOfExpertiseValue.text = content.areaOfExpertise
-            tvBusinessPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
-
-//            setOnClickListener {
-//                onItemClick(item.identity)
-//            }
-
-            setOnLongClickListener {
-                onLongItemClick(item.identity)
-                true
-            }
-
-            btnBusinessQRCode.setOnClickListener {
-                onQRButtonClick(item.identity)
-            }
-
-            btnBusinessCopyPublicKey.setOnClickListener {
-                onCopyPublicKeyButtonClick(item.identity)
-            }
         }
-//
-//        setOnLongClickListener {
-//            onItemLongClick(item.identity)
-//            true
-//        }
     }
 
     override fun getLayoutResourceId(): Int {
         when (layoutType) {
             0 -> return R.layout.item_identity
             1 -> return R.layout.item_identity_personal_detail
-            2 -> return R.layout.item_identity_business_detail
         }
 
         return R.layout.item_identity

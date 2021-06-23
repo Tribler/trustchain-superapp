@@ -15,14 +15,9 @@ data class Identity(
     val publicKey: PublicKey,
 
     /**
-     * Type of the identity: 0 for personal, 1 for business identity.
-     */
-    val type: String,
-
-    /**
      * Content of the identity, depending on type.
      */
-    val content: IdentityContent?,
+    val content: PersonalIdentity,
 
     /**
      * Identity added on date.
@@ -34,3 +29,49 @@ data class Identity(
      */
     var modified: Date,
 )
+
+data class PersonalIdentity(
+    /**
+     * Given Names  of the identity or name of the business.
+     */
+    var givenNames: String,
+
+    /**
+     * Surname  of the identity.
+     */
+    var surname: String,
+
+    /**
+     * Gender of the identity.
+     */
+    var gender: String,
+
+    /**
+     * Date of birth of the identity.
+     */
+    var dateOfBirth: Date,
+
+    /**
+     * Place of birth of the identity.
+     */
+    var placeOfBirth: String,
+
+    /**
+     * Nationality of the identity.
+     */
+    var nationality: String,
+
+    /**
+     * Personal number of the identity.
+     */
+    var personalNumber: Long,
+
+    /**
+     * Document number of the identity.
+     */
+    var documentNumber: String,
+) {
+    override fun toString() : String {
+        return "$givenNames $surname ($gender) born on $dateOfBirth at $placeOfBirth as $nationality. Personal number $personalNumber, document number $documentNumber"
+    }
+}
