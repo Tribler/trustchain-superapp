@@ -1,238 +1,424 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp">
+    android:paddingTop="12dp"
+    android:backgroundTint="@color/colorPrimaryValueTransfer">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Personal Identity Details"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
         <LinearLayout
+            android:id="@+id/llRowOne"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent">
+            android:weightSum="2"
+            app:layout_constraintTop_toBottomOf="@+id/llRowZero">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Given Names"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginEnd="6dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Given Names"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etGivenNames"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="14sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Surname"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginStart="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Surname"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etSurname"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="14sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llRowTwo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toTopOf="@+id/llRowOne">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:autofillHints=""
-                android:background="@android:color/transparent"
-                android:hint="Place of Birth"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginEnd="6dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Place of Birth"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etPlaceOfBirth"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="14sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Date of Birth"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginStart="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Date of Birth"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etDateOfBirth"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:focusable="false"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
+                    android:textSize="14sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llRowThree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toTopOf="@+id/llRowTwo">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="7dp"
-                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Nationality"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginEnd="6dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Nationality"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etNationality"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="14sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Gender"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginStart="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <AutoCompleteTextView
-                    android:id="@+id/ddGender"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="false"
-                    android:inputType="none" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:text="Gender"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/btnGenderGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    app:singleSelection="true"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnMale"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:insetBottom="0dp"
+                        android:insetTop="0dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/white"
+                        android:text="Male"
+                        android:textAllCaps="false"
+                        android:textSize="12sp"
+                        android:textColor="@color/colorPrimaryValueTransfer"
+                        app:shapeAppearance="@style/Rounded" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnFemale"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:insetBottom="0dp"
+                        android:insetTop="0dp"
+                        android:text="Female"
+                        app:shapeAppearance="@style/Rounded"
+                        android:backgroundTint="@color/white"
+                        android:textSize="12sp"
+                        android:textColor="@color/colorPrimaryValueTransfer"
+                        android:textAllCaps="false"
+                        android:layout_weight="1" />
+
+<!--                    <com.google.android.material.button.MaterialButton-->
+<!--                        android:id="@+id/btnMale"-->
+<!--                        style="@style/Widget.MaterialComponents.Button.TextButton"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="40dp"-->
+<!--                        android:text="Male"-->
+<!--                        app:shapeAppearance="@style/Rounded"-->
+<!--                        android:backgroundTint="@color/white"-->
+<!--                        android:layout_margin="0dp"-->
+<!--                        android:padding="0dp"-->
+<!--                        android:textSize="12sp"-->
+<!--                        android:textAllCaps="false"-->
+<!--                        android:layout_weight="1"/>-->
+
+<!--                    <com.google.android.material.button.MaterialButton-->
+<!--                        android:id="@+id/btnFemale"-->
+<!--                        style="@style/Widget.MaterialComponents.Button.TextButton"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="40dp"-->
+<!--                        android:text="Female"-->
+<!--                        app:shapeAppearance="@style/Rounded"-->
+<!--                        android:backgroundTint="@color/white"-->
+<!--                        android:layout_margin="0dp"-->
+<!--                        android:padding="0dp"-->
+<!--                        android:textSize="12sp"-->
+<!--                        android:textAllCaps="false"-->
+<!--                        android:layout_weight="1"/>-->
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
+<!--                <AutoCompleteTextView-->
+<!--                    android:id="@+id/ddGender"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/pill_rounded"-->
+<!--                    android:backgroundTint="@color/white"-->
+<!--                    android:paddingVertical="8dp"-->
+<!--                    android:paddingStart="8dp"-->
+<!--                    android:clickable="true"-->
+<!--                    android:focusable="true"-->
+<!--                    android:focusableInTouchMode="false"-->
+<!--                    android:inputType="none"-->
+<!--                    android:textSize="14sp"/>-->
+
+<!--                <EditText-->
+<!--                    android:id="@+id/etGender"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="1"-->
+<!--                    android:background="@drawable/pill_rounded"-->
+<!--                    android:backgroundTint="@color/white"-->
+<!--                    android:paddingVertical="8dp"-->
+<!--                    android:paddingStart="8dp"-->
+<!--                    android:inputType="textCapWords"-->
+<!--                    android:textSize="14sp" />-->
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/llRowFour"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toTopOf="@+id/llRowThree">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Personal Number"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginEnd="6dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Personal Number"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etPersonalNumber"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="number"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:textSize="14sp" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:orientation="vertical"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Document Number"
-                app:boxBackgroundColor="@android:color/transparent"
-                app:expandedHintEnabled="false"
-                app:hintTextColor="@color/colorPrimaryValueTransfer">
+                android:layout_marginStart="6dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Document Number"
+                    android:paddingStart="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:textColor="@color/white"
+                    android:textStyle="italic"
+                    android:textSize="12sp"/>
 
                 <EditText
                     android:id="@+id/etDocumentNumber"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="@color/white"
+                    android:paddingVertical="8dp"
+                    android:paddingStart="8dp"
                     android:inputType="textCapCharacters"
-                    android:textSize="12sp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
+                    android:textSize="14sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <Button
             android:id="@+id/btnSavePersonalIdentity"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="12dp"
-            android:background="@drawable/button_rounded"
-            android:backgroundTint="@color/colorPrimaryValueTransfer"
+            style="@style/ButtonDarkGreenRounded"
             android:enabled="false"
-            android:paddingVertical="4dp"
-            android:text="Save"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
+            android:layout_marginTop="12dp"
+            android:text="Save" />
 
     </LinearLayout>
 
