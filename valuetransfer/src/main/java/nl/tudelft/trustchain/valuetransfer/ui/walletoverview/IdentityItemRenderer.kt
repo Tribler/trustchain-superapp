@@ -11,7 +11,6 @@ import java.text.SimpleDateFormat
 
 class IdentityItemRenderer(
     private val layoutType: Int,
-    private val onLongItemClick: (Identity) -> Unit,
     private val onQRButtonClick: (Identity) -> Unit,
     private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
 ) : ItemLayoutRenderer<IdentityItem, View>(
@@ -28,10 +27,6 @@ class IdentityItemRenderer(
             tvIdentityGivenNames.text = content.givenNames
             tvIdentitySurname.text = content.surname
 
-            setOnLongClickListener {
-                onLongItemClick(item.identity)
-                true
-            }
         }else if(layoutType == 1) {
             val content = item.identity.content
             tvGivenNamesValue.text = content.givenNames
@@ -51,12 +46,6 @@ class IdentityItemRenderer(
             btnPersonalCopyPublicKey.setOnClickListener {
                 onCopyPublicKeyButtonClick(item.identity)
             }
-
-            setOnLongClickListener {
-                onLongItemClick(item.identity)
-                true
-            }
-
         }
     }
 

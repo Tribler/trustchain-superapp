@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimaryValueTransfer</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkValueTransfer</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryValueTransfer</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

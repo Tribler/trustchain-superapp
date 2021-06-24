@@ -58,7 +58,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_overview) {
 
         Log.d("BALANCE",transactionRepository.getMyVerifiedBalance().toString())
 
-//        getCommunity().deleteDatabase(this.context)
+//        getCommunity().deleteDatabase(requireContext())
 //        this.context?.deleteDatabase("identities-vt.db")
     }
 

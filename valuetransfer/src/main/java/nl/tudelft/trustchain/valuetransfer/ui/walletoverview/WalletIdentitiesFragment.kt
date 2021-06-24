@@ -12,9 +12,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.fragment_wallet_identities.*
 import kotlinx.coroutines.flow.map
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
@@ -44,8 +42,6 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
             IdentityItemRenderer(
             0,
                 {
-                    Log.d("LONG", "CLICK")
-                }, {
                     Log.d("CLICKED:", "no button to click")
                 }, {
                     Log.d("CLICKED:", "no button to click")
