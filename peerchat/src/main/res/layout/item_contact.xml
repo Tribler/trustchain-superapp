@@ -1,96 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?selectableItemBackground"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
-    <nl.tudelft.trustchain.peerchat.ui.contacts.AvatarView
-        android:id="@+id/avatar"
-        android:layout_width="@dimen/avatar_size"
-        android:layout_height="@dimen/avatar_size"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/nameContainer"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/txtPeerId"
-        app:layout_constraintStart_toEndOf="@id/avatar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed">
+        android:background="?selectableItemBackground"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <nl.tudelft.trustchain.peerchat.ui.contacts.AvatarView
+            android:id="@+id/avatar"
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/nameContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/txtPeerId"
+            app:layout_constraintStart_toEndOf="@id/avatar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed">
+
+            <TextView
+                android:id="@+id/txtName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:lines="1"
+                android:paddingEnd="8dp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                tools:text="Matt" />
+
+            <ImageView
+                android:id="@+id/imgWifi"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_wifi_black_24dp"
+                android:tint="@color/green" />
+
+            <ImageView
+                android:id="@+id/imgBluetooth"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_bluetooth_black_24dp"
+                android:tint="@color/green" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/txtName"
+            android:id="@+id/txtDate"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#AAAAAA"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@id/nameContainer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/nameContainer"
+            tools:text="10:00" />
+
+        <TextView
+            android:id="@+id/txtPeerId"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:lines="1"
-            android:paddingEnd="8dp"
             android:textColor="@color/text_primary"
-            android:textStyle="bold"
-            tools:text="Matt" />
+            android:typeface="monospace"
+            app:layout_constraintBottom_toTopOf="@id/txtMessage"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/nameContainer"
+            app:layout_constraintTop_toBottomOf="@id/nameContainer"
+            tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
 
-        <ImageView
-            android:id="@+id/imgWifi"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_wifi_black_24dp"
-            android:tint="@color/green" />
-
-        <ImageView
-            android:id="@+id/imgBluetooth"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:src="@drawable/ic_bluetooth_black_24dp"
-            android:tint="@color/green" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/txtDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#AAAAAA"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@id/nameContainer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/nameContainer"
-        tools:text="10:00" />
-
-    <TextView
-        android:id="@+id/txtPeerId"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:lines="1"
-        android:textColor="@color/text_primary"
-        android:typeface="monospace"
-        app:layout_constraintBottom_toTopOf="@id/txtMessage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/nameContainer"
-        app:layout_constraintTop_toBottomOf="@id/nameContainer"
-        tools:text="4nmZNbpULdgYtjC2CW4NMveU8N6d4WW6" />
-
-    <TextView
-        android:id="@+id/txtMessage"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:ellipsize="end"
-        android:lines="1"
-        android:textColor="@color/text_secondary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/nameContainer"
-        app:layout_constraintTop_toBottomOf="@id/txtPeerId"
-        tools:text="Hello World!" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/txtMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:textColor="@color/text_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/nameContainer"
+            app:layout_constraintTop_toBottomOf="@id/txtPeerId"
+            tools:text="Hello World!" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

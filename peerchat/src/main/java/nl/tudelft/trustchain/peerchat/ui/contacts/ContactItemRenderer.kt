@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.ui.contacts
 
 import android.graphics.Typeface
+import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
@@ -17,6 +18,8 @@ class ContactItemRenderer(
     ContactItem::class.java
 ) {
     private val dateFormat = SimpleDateFormat.getDateTimeInstance()
+    private var selectedItem: ContactItem? = null
+    private var selectedContainer: View? = null
 
     override fun bindView(item: ContactItem, view: View) = with(view) {
         txtName.text = item.contact.name
@@ -29,7 +32,8 @@ class ContactItemRenderer(
             txtMessage.isVisible = false
             imgWifi.isVisible = false
             imgBluetooth.isVisible = false
-            //container.setBackgroundResource(R.drawable.bg_selectable_item)
+            container.setBackgroundResource(R.drawable.bg_selectable_container)
+            container.isSelected = selectedItem?.areItemsTheSame(item) ?: false
         } else {
             val lastMessageDate = item.lastMessage?.timestamp
             txtDate.isVisible = lastMessageDate != null
@@ -43,7 +47,14 @@ class ContactItemRenderer(
         }
 
         setOnClickListener {
-            //it.isSelected = true
+            if (selectedContainer != null && selectedItem != null &&
+                !selectedItem!!.areItemsTheSame(item)) {
+                selectedContainer!!.isSelected = false
+            }
+
+            selectedItem = item
+            selectedContainer = container
+            container.isSelected = true
             onItemClick(item.contact)
         }
         setOnLongClickListener {

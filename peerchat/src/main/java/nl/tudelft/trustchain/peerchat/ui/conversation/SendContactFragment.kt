@@ -32,18 +32,12 @@ class SendContactFragment : PeerChatFragment(R.layout.fragment_send_contact) {
         PeerChatStore.getInstance(requireContext())
     }
 
-    private val peers = MutableStateFlow<List<Peer>>(listOf())
-
     private val publicKeyBin by lazy {
         requireArguments().getString(TransferFragment.ARG_PUBLIC_KEY)!!
     }
 
     private val publicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-    }
-
-    private val name by lazy {
-        requireArguments().getString(TransferFragment.ARG_NAME)!!
     }
 
     private val adapter = ItemAdapter()
@@ -74,12 +68,9 @@ class SendContactFragment : PeerChatFragment(R.layout.fragment_send_contact) {
             ContactItemRenderer(
                 {
                     selectedContact = it
-                    // Update selected view
                 }, {}, true
             )
         )
-
-        peers.value = getPeerChatCommunity().getPeers()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -112,7 +103,4 @@ class SendContactFragment : PeerChatFragment(R.layout.fragment_send_contact) {
         )
 
     }
-
-    val DUMMY_CONTACT = Contact("Sharif Dummy",
-        defaultCryptoProvider.generateKey().pub())
 }

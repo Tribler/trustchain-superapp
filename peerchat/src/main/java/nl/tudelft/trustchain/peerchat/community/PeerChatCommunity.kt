@@ -96,11 +96,10 @@ class PeerChatCommunity(
     }
 
     fun sendContact(contact: Contact, recipient: PublicKey) {
-        Log.e("Send Contact","Sending contact")
         val serializedContact = contact.serialize()
         val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT,
             serializedContact.size.toLong(), serializedContact)
-        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+        val chatMessage = createOutgoingChatMessage(contact.name, attachment, null, recipient)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
@@ -200,7 +199,7 @@ class PeerChatCommunity(
 
         if (chatMessage.attachment != null) {
             when (chatMessage.attachment.type) {
-                MessageAttachment.TYPE_CONTACT -> Log.e("","")
+                MessageAttachment.TYPE_CONTACT -> return
                 else -> {
                     // Request attachment
                     sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())

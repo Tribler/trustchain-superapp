@@ -64,6 +64,7 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
         constraintSet.clone(constraintLayout)
         constraintSet.removeFromHorizontalChain(content.id)
         constraintSet.removeFromHorizontalChain(bottomContainer.id)
+        contactLayout.isVisible = false
 
         val attachment = item.chatMessage.attachment
         if (attachment != null && attachment.type == MessageAttachment.TYPE_IMAGE) {
