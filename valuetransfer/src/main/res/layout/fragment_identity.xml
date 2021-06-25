@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/tvNoPersonalIdentity"
         tools:itemCount="1"
-        tools:listitem="@layout/item_identity_detail" />
+        tools:listitem="@layout/item_identity_detail_new" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

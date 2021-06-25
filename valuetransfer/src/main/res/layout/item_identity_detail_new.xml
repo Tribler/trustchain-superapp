@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/square_rounded_dark"
-        android:backgroundTint="@color/colorPrimaryValueTransfer"
         android:padding="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -174,39 +173,32 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:lines="2"
             android:ellipsize="end"
+            android:maxLines="2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btnPersonalQRCode"
             app:layout_constraintTop_toBottomOf="@+id/tvPublicKeyTitle" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnPersonalQRCode"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_qr_code_scan"
+            android:background="@drawable/ic_qr_code_scan"
             android:backgroundTint="@color/white"
-            app:tint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/tvPublicKeyValue"
             app:layout_constraintEnd_toStartOf="@+id/btnPersonalCopyPublicKey"
             app:layout_constraintStart_toEndOf="@+id/tvPublicKeyValue"
             app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnPersonalCopyPublicKey"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_copy_public_key"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/ic_copy_public_key"
             android:backgroundTint="@color/white"
-            app:tint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/tvPublicKeyValue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,57 +5,67 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clHeader"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/tvIdentityTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/light_gray"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="My Identity"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/ivCategoryIcon"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:tint="@color/colorGreen"
-            app:layout_constraintStart_toStartOf="@+id/clHeader"
-            app:layout_constraintTop_toTopOf="@+id/clHeader"
-            app:srcCompat="@drawable/ic_identity" />
-
-        <TextView
-            android:id="@+id/tvCategoryTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="My Identity"
-            android:textColor="@color/colorPrimaryValueTransfer"
-            android:textSize="16sp"
-            android:textStyle="italic|bold"
-            app:layout_constraintBottom_toBottomOf="@+id/clHeader"
-            app:layout_constraintStart_toEndOf="@+id/ivCategoryIcon"
-            app:layout_constraintTop_toTopOf="@+id/clHeader" />
-
-        <ImageView
-            android:id="@+id/ivCategoryNavigateIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:background="@drawable/ic_arrow_right"
-            android:backgroundTint="@color/colorPrimaryValueTransfer"
-            app:layout_constraintBottom_toBottomOf="@+id/clHeader"
-            app:layout_constraintEnd_toEndOf="@+id/clHeader"
-            app:layout_constraintTop_toTopOf="@+id/clHeader" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvIdentities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/clHeader"
+        app:layout_constraintTop_toBottomOf="@+id/tvIdentityTitle"
         tools:itemCount="1"
-        tools:listitem="@layout/item_identity" />
+        tools:listitem="@layout/item_identity_new" />
+
+    <TextView
+        android:id="@+id/tvChatsSocialTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Chats"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rvIdentities"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tvChatsSocialTitle"
+        tools:itemCount="1"
+        tools:listitem="@layout/item_identity_new" />
+
+    <TextView
+        android:id="@+id/tvExchangeTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exchange"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:textSize="32sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rvChats"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvExchange"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/tvExchangeTitle"
+        tools:itemCount="1"
+        tools:listitem="@layout/item_identity_new" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

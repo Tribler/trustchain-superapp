@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.valuetransfer.ui
+package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -9,12 +9,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -29,8 +27,6 @@ import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.IdentityItem
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.IdentityItemRenderer
 
 class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
@@ -62,7 +58,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         adapterPersonal.registerRenderer(
             IdentityItemRenderer(
                 1,
-                { identity ->
+                 { identity ->
                     Log.d(
                         "CLICKED",
                         "QR Code for personal item " + identity.publicKey.keyToBin().toHex()
@@ -72,7 +68,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                         "public_key" to identity.publicKey.keyToBin().toHex(),
                         "message" to "TEST"
                     )
-
                     QRCodeDialog("Personal Public Key", "Show QR-code to other party", map)
                         .show(parentFragmentManager, tag)
                 }, { identity ->
@@ -95,10 +90,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             Observer {
                 adapterPersonal.updateItems(it)
 
-                if (store.hasPersonalIdentity()) {
-                    binding.tvNoPersonalIdentity.visibility = View.GONE
-                } else {
-                    binding.tvNoPersonalIdentity.visibility = View.VISIBLE
+                when (store.hasPersonalIdentity()) {
+                    true -> binding.tvNoPersonalIdentity.visibility = View.GONE
+                    false -> binding.tvNoPersonalIdentity.visibility = View.VISIBLE
                 }
             }
         )
@@ -107,14 +101,45 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+//        when(store.hasPersonalIdentity()) {
+//            true -> {
+//                val identity = store.getPersonalIdentity()
+//
+//
+//
+//                binding.tvPublicKeyValue.setOnClickListener {
+//
+//                }
+//
+//                binding.btnPersonalQRCode.setOnClickListener {
+//                    val map = mapOf(
+//                        "public_key" to identity.publicKey.keyToBin().toHex(),
+//                        "message" to "TEST"
+//                    )
+//
+//                    QRCodeDialog("Personal Public Key", "Show QR-code to other party", map)
+//                        .show(parentFragmentManager, tag)
+//                }
+//
+//                binding.btnPersonalCopyPublicKey.setOnClickListener {
+//                    addToClipboard(identity.publicKey.keyToBin().toHex(), "Public Key")
+//                    Toast.makeText(
+//                        this.context,
+//                        "Public key copied to clipboard",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
+//        }
+
         binding.rvPersonalIdentities.adapter = adapterPersonal
         binding.rvPersonalIdentities.layoutManager = LinearLayoutManager(context)
-        binding.rvPersonalIdentities.addItemDecoration(
-            DividerItemDecoration(
-                context,
-                LinearLayout.VERTICAL
-            )
-        )
+//        binding.rvPersonalIdentities.addItemDecoration(
+//            DividerItemDecoration(
+//                context,
+//                LinearLayout.VERTICAL
+//            )
+//        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

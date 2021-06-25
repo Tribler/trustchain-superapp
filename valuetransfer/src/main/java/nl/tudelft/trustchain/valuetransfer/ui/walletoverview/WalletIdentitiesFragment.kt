@@ -1,14 +1,10 @@
 package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -19,6 +15,8 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletIdentitiesBinding
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItem
+import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItemRenderer
 
 class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identities) {
     private val binding by viewBinding(FragmentWalletIdentitiesBinding::bind)
@@ -42,9 +40,9 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
             IdentityItemRenderer(
             0,
                 {
-                    Log.d("CLICKED:", "no button to click")
+
                 }, {
-                    Log.d("CLICKED:", "no button to click")
+
                 }
             )
         )
@@ -62,16 +60,6 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
 
         binding.rvIdentities.adapter = adapter
         binding.rvIdentities.layoutManager = LinearLayoutManager(context)
-        binding.rvIdentities.addItemDecoration(
-            DividerItemDecoration(
-                context,
-                LinearLayout.VERTICAL
-            )
-        )
-
-        binding.clHeader.setOnClickListener {
-            findNavController().navigate(R.id.action_identityOverview_to_identityView)
-        }
     }
 
     private fun createItems(identities: List<Identity>): List<Item> {

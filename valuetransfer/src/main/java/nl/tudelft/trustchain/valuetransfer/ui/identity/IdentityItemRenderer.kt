@@ -1,9 +1,10 @@
-package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
+package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.view.View
+import androidx.navigation.findNavController
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_identity.view.*
-import kotlinx.android.synthetic.main.item_identity_detail.view.*
+import kotlinx.android.synthetic.main.item_identity_new.view.*
+import kotlinx.android.synthetic.main.item_identity_detail_new.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
@@ -24,20 +25,30 @@ class IdentityItemRenderer(
             tvIdentityPublicKey.text = item.identity.publicKey.keyToBin().toHex()
 
             val content = item.identity.content
-            tvIdentityGivenNames.text = content.givenNames
-            tvIdentitySurname.text = content.surname
+            tvIdentityGivenNamesSurname.text = "${content.givenNames} ${content.surname}"
+
+            ivCategoryNavigateIcon.setOnClickListener {
+                findNavController().navigate(R.id.action_identityOverview_to_identityView)
+            }
 
         }else if(layoutType == 1) {
             val content = item.identity.content
-            tvGivenNamesValue.text = content.givenNames
-            tvSurnameValue.text = content.surname
+
+            tvGivenNamesSurnameValue.text = "${content.givenNames} ${content.surname}"
             tvGenderValue.text = content.gender
+            tvDatePlaceOfBirthValue.text = "${dateFormat.format(content.dateOfBirth)}, ${content.placeOfBirth}"
             tvNationalityValue.text = content.nationality
-            tvDateOfBirthValue.text = dateFormat.format(content.dateOfBirth)
-            tvPlaceOfBirthValue.text = content.placeOfBirth
             tvPersonalNumberValue.text = content.personalNumber.toString()
             tvDocumentNumberValue.text = content.documentNumber
-            tvPersonalPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
+            tvPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
+
+            tvPublicKeyValue.setOnClickListener {
+
+                when(tvPublicKeyValue.lineCount) {
+                    2 -> tvPublicKeyValue.maxLines = 6
+                    else -> tvPublicKeyValue.maxLines = 2
+                }
+            }
 
             btnPersonalQRCode.setOnClickListener {
                 onQRButtonClick(item.identity)
@@ -51,8 +62,8 @@ class IdentityItemRenderer(
 
     override fun getLayoutResourceId(): Int {
         when (layoutType) {
-            0 -> return R.layout.item_identity
-            1 -> return R.layout.item_identity_detail
+            0 -> return R.layout.item_identity_new
+            1 -> return R.layout.item_identity_detail_new
         }
 
         return R.layout.item_identity
