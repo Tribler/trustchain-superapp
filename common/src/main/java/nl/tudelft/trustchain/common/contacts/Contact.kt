@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.common.contacts
 
-import android.util.Log
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Deserializable
@@ -12,7 +11,7 @@ import org.json.JSONObject
 data class Contact(
     val name: String,
     val publicKey: PublicKey
-): Serializable {
+) : Serializable {
     val mid = publicKey.keyToHash().toHex()
 
     override fun equals(other: Any?): Boolean {
@@ -34,7 +33,7 @@ data class Contact(
         return json.toString().toByteArray()
     }
 
-    companion object: Deserializable<Contact> {
+    companion object : Deserializable<Contact> {
         val ARG_PUBLIC_KEY = "public_key"
         val ARG_NAME = "name"
 

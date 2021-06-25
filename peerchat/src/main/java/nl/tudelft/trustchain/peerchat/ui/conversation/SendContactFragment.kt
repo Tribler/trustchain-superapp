@@ -14,9 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_send_contact.*
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.PeerChatFragment
 import nl.tudelft.trustchain.peerchat.R

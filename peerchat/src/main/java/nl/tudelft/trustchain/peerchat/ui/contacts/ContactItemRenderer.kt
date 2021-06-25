@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.peerchat.ui.contacts
 
 import android.graphics.Typeface
-import android.util.Log
 import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer

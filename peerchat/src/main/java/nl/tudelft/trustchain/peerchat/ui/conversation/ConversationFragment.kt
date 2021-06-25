@@ -19,7 +19,6 @@ import kotlinx.android.synthetic.main.fragment_conversation.*
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -48,10 +47,6 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
     private val gatewayStore by lazy {
         GatewayStore.getInstance(requireContext())
-    }
-
-    private val contactStore by lazy {
-        ContactStore.getInstance(requireContext())
     }
 
     private val transactionRepository by lazy {

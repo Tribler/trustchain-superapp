@@ -6,7 +6,6 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -26,17 +25,13 @@ import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_contacts.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.flow.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.PeerChatFragment
 import nl.tudelft.trustchain.peerchat.R
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.FragmentContactsBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
@@ -117,15 +112,6 @@ class ContactsFragment : PeerChatFragment(R.layout.fragment_contacts) {
                 binding.imgEmpty.isVisible = it.isEmpty()
             }
         )
-
-        fun printContacts(list: List<Pair<Contact, ChatMessage?>>){
-            Log.e("Contact", "Before loop")
-            list.forEach { pair ->
-                val (contact, _) = pair
-                Log.e("Contact", contact.mid)
-            }
-            Log.e("Contact", "After loop")
-        }
     }
 
     private fun createItems(

@@ -4,11 +4,9 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.text.format.DateUtils
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -16,10 +14,7 @@ import androidx.fragment.app.findFragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.fragment_add_remote.*
 import kotlinx.android.synthetic.main.item_message.view.*
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
