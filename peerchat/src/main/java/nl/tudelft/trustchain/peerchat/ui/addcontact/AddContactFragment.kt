@@ -25,8 +25,10 @@ class AddContactFragment : BaseFragment(R.layout.fragment_add_contact) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val originalName: String? = requireArguments().getString(ARG_NAME)
         val publicKeyBin = requireArguments().getString(ARG_PUBLIC_KEY)!!
         binding.txtPublicKey.text = publicKeyBin
+        binding.edtName.setText(originalName ?: "")
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
                 QRCodeUtils(requireContext()).createQR(publicKeyBin)
@@ -55,6 +57,7 @@ class AddContactFragment : BaseFragment(R.layout.fragment_add_contact) {
     }
 
     companion object {
+        const val ARG_NAME = "name"
         const val ARG_PUBLIC_KEY = "public_key"
     }
 }

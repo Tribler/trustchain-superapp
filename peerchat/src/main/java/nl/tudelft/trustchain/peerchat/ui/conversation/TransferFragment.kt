@@ -15,20 +15,14 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.peerchat.PeerChatFragment
 import nl.tudelft.trustchain.peerchat.R
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.TransferFragmentBinding
 
-class TransferFragment : BaseFragment(R.layout.transfer_fragment) {
+class TransferFragment : PeerChatFragment(R.layout.transfer_fragment) {
 
     private val binding by viewBinding(TransferFragmentBinding::bind)
-
-    private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay()
-            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
-    }
 
     private val transactionRepository by lazy {
         TransactionRepository(getTrustChainCommunity(), GatewayStore.getInstance(requireContext()))

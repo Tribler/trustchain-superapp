@@ -165,6 +165,17 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
         }
+
+        btnSendContact.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_sendContactsFragment,
+                args
+            )
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

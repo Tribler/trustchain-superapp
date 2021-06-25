@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:enterFadeDuration="@integer/config_navAnimTime"
+    android:exitFadeDuration="@integer/config_navAnimTime">
+    <item
+        android:state_selected="true"
+        android:drawable="@color/green"/>
+    <item
+        android:state_selected="false"
+        android:drawable="@android:color/transparent" />
+</selector>
