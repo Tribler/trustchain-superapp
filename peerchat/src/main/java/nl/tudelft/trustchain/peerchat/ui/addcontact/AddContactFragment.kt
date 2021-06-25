@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.ui.addcontact
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -25,8 +26,10 @@ class AddContactFragment : BaseFragment(R.layout.fragment_add_contact) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val originalName: String? = requireArguments().getString(ARG_NAME)
         val publicKeyBin = requireArguments().getString(ARG_PUBLIC_KEY)!!
         binding.txtPublicKey.text = publicKeyBin
+        binding.edtName.setText(originalName ?: "")
         lifecycleScope.launch {
             val bitmap = withContext(Dispatchers.Default) {
                 QRCodeUtils(requireContext()).createQR(publicKeyBin)
@@ -55,6 +58,7 @@ class AddContactFragment : BaseFragment(R.layout.fragment_add_contact) {
     }
 
     companion object {
+        const val ARG_NAME = "name"
         const val ARG_PUBLIC_KEY = "public_key"
     }
 }

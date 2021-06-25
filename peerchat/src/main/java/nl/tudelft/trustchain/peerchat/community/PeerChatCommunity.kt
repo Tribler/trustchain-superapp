@@ -15,6 +15,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
@@ -91,6 +92,17 @@ class PeerChatCommunity(
         val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
         database.addMessage(chatMessage)
 
+        sendMessage(chatMessage)
+    }
+
+    fun sendContact(contact: Contact, recipient: PublicKey) {
+        Log.e("Send Contact","Sending contact")
+        val serializedContact = contact.serialize()
+        val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT,
+            serializedContact.size.toLong(), serializedContact)
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+
+        database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
@@ -186,9 +198,14 @@ class PeerChatCommunity(
         Log.d("PeerChat", "Sending ack to ${chatMessage.id}")
         sendAck(peer, chatMessage.id)
 
-        // Request attachment
         if (chatMessage.attachment != null) {
-            sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
+            when (chatMessage.attachment.type) {
+                MessageAttachment.TYPE_CONTACT -> Log.e("","")
+                else -> {
+                    // Request attachment
+                    sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
+                }
+            }
         }
     }
 

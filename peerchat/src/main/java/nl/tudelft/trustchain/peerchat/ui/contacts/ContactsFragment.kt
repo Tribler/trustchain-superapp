@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -24,16 +25,16 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_contacts.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.flow.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.peerchat.PeerChatFragment
 import nl.tudelft.trustchain.peerchat.R
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.databinding.FragmentContactsBinding
@@ -42,7 +43,7 @@ import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
+class ContactsFragment : PeerChatFragment(R.layout.fragment_contacts) {
     private val binding by viewBinding(FragmentContactsBinding::bind)
 
     private val adapter = ItemAdapter()
@@ -59,11 +60,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
         }.asLiveData()
     }
 
-    private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay()
-            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -77,7 +73,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
                 },
                 {
                     showOptions(it)
-                }
+                },
+                false
             )
         )
 
@@ -120,6 +117,15 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts) {
                 binding.imgEmpty.isVisible = it.isEmpty()
             }
         )
+
+        fun printContacts(list: List<Pair<Contact, ChatMessage?>>){
+            Log.e("Contact", "Before loop")
+            list.forEach { pair ->
+                val (contact, _) = pair
+                Log.e("Contact", contact.mid)
+            }
+            Log.e("Contact", "After loop")
+        }
     }
 
     private fun createItems(

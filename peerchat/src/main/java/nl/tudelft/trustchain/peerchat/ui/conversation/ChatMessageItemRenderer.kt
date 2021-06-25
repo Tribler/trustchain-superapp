@@ -2,19 +2,30 @@ package nl.tudelft.trustchain.peerchat.ui.conversation
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Bundle
 import android.text.format.DateUtils
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.findFragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
+import kotlinx.android.synthetic.main.fragment_add_remote.*
 import kotlinx.android.synthetic.main.item_message.view.*
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.R
+import nl.tudelft.trustchain.peerchat.ui.addcontact.AddContactFragment
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 
@@ -67,6 +78,27 @@ class ChatMessageItemRenderer : ItemLayoutRenderer<ChatMessageItem, View>(
             image.isVisible = true
             txtMessage.isVisible = false
             txtTransaction.isVisible = false
+        } else if (attachment != null && attachment.type == MessageAttachment.TYPE_CONTACT) {
+            contactLayout.isVisible = true
+            val contact = Contact.deserialize(attachment.content, 0).first
+            contactName.text =contact.name
+            progress.isVisible = false
+            txtMessage.isVisible = false
+            txtTransaction.isVisible = false
+            image.isVisible = false
+            if (!item.chatMessage.outgoing) {
+                contactLayout.setOnClickListener {
+                    val args = Bundle()
+                    val publicKeyBin = contact.publicKey.keyToBin().toHex()
+                    args.putString(AddContactFragment.ARG_NAME, contact.name)
+                    args.putString(AddContactFragment.ARG_PUBLIC_KEY, publicKeyBin)
+                    view.findFragment<ConversationFragment>().
+                    findNavController().navigate(
+                        R.id.action_conversationFragment_to_addContactFragment,
+                        args
+                    )
+                }
+            }
         } else if (item.chatMessage.transactionHash != null) {
             progress.isVisible =
                 item.transaction == null // transaction not yet received via trustchain

@@ -19,6 +19,7 @@ import kotlinx.android.synthetic.main.fragment_conversation.*
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
@@ -47,6 +48,10 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
 
     private val gatewayStore by lazy {
         GatewayStore.getInstance(requireContext())
+    }
+
+    private val contactStore by lazy {
+        ContactStore.getInstance(requireContext())
     }
 
     private val transactionRepository by lazy {
@@ -164,6 +169,17 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
             intent.type = "image/*"
             intent.action = Intent.ACTION_GET_CONTENT
             startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
+        }
+
+        btnSendContact.setOnClickListener {
+            val args = Bundle()
+            fab.collapse()
+            args.putString(TransferFragment.ARG_PUBLIC_KEY, publicKeyBin)
+            args.putString(TransferFragment.ARG_NAME, name)
+            findNavController().navigate(
+                R.id.action_conversationFragment_to_sendContactsFragment,
+                args
+            )
         }
     }
 
