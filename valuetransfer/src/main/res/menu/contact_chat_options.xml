@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionEditContactName"
+        android:title="Rename Contact" />
+    <item
+        android:id="@+id/actionRemoveContact"
+        android:title="Remove Contact" />
+    <item
+        android:id="@+id/actionCopyPublicKey"
+        android:title="Copy Public Key" />
+
+</menu>

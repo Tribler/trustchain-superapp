@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/walletOverviewFragment"
-        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:icon="@drawable/ic_wallet"
         android:title="Wallet" />
 
     <item
@@ -11,12 +11,12 @@
         android:title="Identity" />
 
     <item
-        android:id="@+id/socialFragment"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Social" />
+        android:id="@+id/contactsFragment"
+        android:icon="@drawable/ic_contacts"
+        android:title="Contacts" />
 
     <item
         android:id="@+id/walletExchangeFragment"
-        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:icon="@drawable/ic_exchange"
         android:title="Exchange" />
 </menu>

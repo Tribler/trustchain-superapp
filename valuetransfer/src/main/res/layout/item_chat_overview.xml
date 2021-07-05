@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingBottom="4dp"
+    tools:background="@color/colorPrimaryValueTransfer">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clChatCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:layout_marginRight="4dp"
+        app:layout_constraintEnd_toStartOf="@+id/clContactExchange"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/white">
+
+        <ImageView
+            android:id="@+id/ivChatIconOverview"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/circle"
+            android:backgroundTint="@color/gray"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/clChatContentOverview"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvChatInitialsOverview"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginHorizontal="8dp"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="AA"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/ivChatIconOverview"
+            app:layout_constraintEnd_toEndOf="@+id/ivChatIconOverview"
+            app:layout_constraintStart_toStartOf="@+id/ivChatIconOverview"
+            app:layout_constraintTop_toTopOf="@+id/ivChatIconOverview" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clChatContentOverview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ivChatIconOverview"
+            app:layout_constraintTop_toTopOf="@+id/ivChatIconOverview">
+
+            <TextView
+                android:id="@+id/tvContactNameOverview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ivOnlineStatusOverview"
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/colorPrimaryValueTransfer"
+                app:layout_constraintBottom_toBottomOf="@+id/tvContactNameOverview"
+                app:layout_constraintStart_toEndOf="@+id/tvContactNameOverview"
+                app:layout_constraintTop_toTopOf="@+id/tvContactNameOverview" />
+
+            <ImageView
+                android:id="@+id/ivMessageStatusOverview"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginTop="1dp"
+                android:src="@drawable/ic_check_double"
+                app:tint="@color/black"
+                tools:tint="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
+
+            <TextView
+                android:id="@+id/tvContactMessageOverview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Message"
+                android:textColor="@color/black"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ivMessageStatusOverview"
+                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
+
+            <TextView
+                android:id="@+id/tvContactTimeOverview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:00"
+                android:textSize="12sp"
+                android:typeface="monospace"
+                android:textColor="@color/black"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clContactExchange"
+        android:layout_width="64dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/clChatCard"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/white">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_exchange"
+            android:tint="@color/colorPrimaryValueTransfer" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,18 +4,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp">
+    android:paddingHorizontal="12dp"
+    android:paddingBottom="4dp"
+    android:background="@color/colorPrimaryValueTransfer">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clIdentityCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark"
-        android:padding="20dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:padding="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:background="@drawable/square_rounded_dark">
+        tools:background="@color/white">
 
         <TextView
             android:id="@+id/tvIdentityGivenNamesSurname"
@@ -23,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="John Michael Doe"
             android:textStyle="bold"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -35,22 +38,11 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="12sp"
-            android:layout_marginRight="8dp"
-            app:layout_constraintEnd_toStartOf="@+id/ivCategoryNavigateIcon"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvIdentityGivenNamesSurname" />
-
-        <ImageView
-            android:id="@+id/ivCategoryNavigateIcon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:background="@drawable/ic_arrow_right"
-            android:backgroundTint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/clIdentityCard"
-            app:layout_constraintEnd_toEndOf="@+id/clIdentityCard"
-            app:layout_constraintTop_toTopOf="@+id/clIdentityCard" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

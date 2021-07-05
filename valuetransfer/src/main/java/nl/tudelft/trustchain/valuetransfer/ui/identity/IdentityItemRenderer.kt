@@ -27,7 +27,7 @@ class IdentityItemRenderer(
             val content = item.identity.content
             tvIdentityGivenNamesSurname.text = "${content.givenNames} ${content.surname}"
 
-            ivCategoryNavigateIcon.setOnClickListener {
+            view.setOnClickListener {
                 findNavController().navigate(R.id.action_identityOverview_to_identityView)
             }
 

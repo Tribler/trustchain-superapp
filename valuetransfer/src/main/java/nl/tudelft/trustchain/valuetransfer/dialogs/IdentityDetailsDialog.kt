@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -37,7 +36,7 @@ class IdentityDetailsDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_create_personal_identity, null)
+            val view = layoutInflater.inflate(R.layout.dialog_identity_add, null)
 
             val givenNamesView = view.findViewById<EditText>(R.id.etGivenNames)
             val surnameView = view.findViewById<EditText>(R.id.etSurname)

@@ -4,8 +4,8 @@
     <style name="Theme" />
 
     <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <item name="colorPrimary">@color/colorPrimaryValueTransfer</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDarkValueTransfer</item>
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorPrimaryDark">@color/light_gray</item>
     </style>
 
     <style name="MenuLabelStyle">
@@ -43,8 +43,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">35dp</item>
         <item name="android:layout_gravity">center_horizontal</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginBottom">12dp</item>
+
         <item name="android:background">@drawable/button_rounded</item>
         <item name="backgroundTint">@color/white</item>
         <item name="android:paddingTop">4dp</item>
@@ -71,6 +70,31 @@
         <item name="colorAccent">@color/colorPrimaryValueTransfer</item>
         <item name="android:buttonBarPositiveButtonStyle">@style/ButtonGreenRounded</item>
         <item name="android:buttonBarNegativeButtonStyle">@style/ButtonWhiteRounded</item>
+    </style>
+
+    <style name="ChatMessageItem">
+        <item name="android:ellipsize">end</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">12dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="ChatMessageItemTime">
+        <item name="android:textColor">@color/gray</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:typeface">monospace</item>
+    </style>
+
+    <style name="BottomNavigation">
+        <item name="android:background">@color/colorPrimaryValueTransfer</item>
+        <item name="itemBackground">@color/colorPrimaryValueTransfer</item>
+        <item name="itemIconTint">@drawable/bottom_navigation_color</item>
+        <item name="itemTextColor">@drawable/bottom_navigation_color</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="paddingStart">10dp</item>
+        <item name="paddingEnd">10dp</item>
     </style>
 
 </resources>

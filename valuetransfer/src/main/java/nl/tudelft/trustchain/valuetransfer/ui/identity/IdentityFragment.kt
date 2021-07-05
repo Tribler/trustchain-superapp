@@ -13,12 +13,17 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
+import androidx.navigation.findNavController
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.common.util.copyToClipboard
+import nl.tudelft.trustchain.common.util.mapToJSON
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -59,28 +64,14 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             IdentityItemRenderer(
                 1,
                  { identity ->
-                    Log.d(
-                        "CLICKED",
-                        "QR Code for personal item " + identity.publicKey.keyToBin().toHex()
-                    )
-
                     val map = mapOf(
                         "public_key" to identity.publicKey.keyToBin().toHex(),
                         "message" to "TEST"
                     )
-                    QRCodeDialog("Personal Public Key", "Show QR-code to other party", map)
+                    QRCodeDialog("Personal Public Key", "Show QR-code to other party", mapToJSON(map).toString())
                         .show(parentFragmentManager, tag)
                 }, { identity ->
-                    addToClipboard(identity.publicKey.keyToBin().toHex(), "Public Key")
-                    Toast.makeText(
-                        this.context,
-                        "Public key copied to clipboard",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.d(
-                        "CLICKED",
-                        "Copy Public Key for personal item " + identity.publicKey.keyToBin().toHex()
-                    )
+                    copyToClipboard(requireContext(), identity.publicKey.keyToBin().toHex(), "Public Key")
                 }
             )
         )
@@ -90,9 +81,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             Observer {
                 adapterPersonal.updateItems(it)
 
-                when (store.hasPersonalIdentity()) {
-                    true -> binding.tvNoPersonalIdentity.visibility = View.GONE
-                    false -> binding.tvNoPersonalIdentity.visibility = View.VISIBLE
+                if (store.hasPersonalIdentity()) {
+                    binding.tvNoPersonalIdentity.visibility = View.GONE
+                } else {
+                    binding.tvNoPersonalIdentity.visibility = View.VISIBLE
                 }
             }
         )
@@ -100,6 +92,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.bnvIdentity)
+        val navController = requireActivity().findNavController(R.id.navHostFragment)
+        bottomNavigationView.setupWithNavController(navController)
 
 //        when(store.hasPersonalIdentity()) {
 //            true -> {
@@ -131,6 +127,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 //                }
 //            }
 //        }
+
+        binding.tvNoPersonalIdentity.setOnClickListener {
+            IdentityDetailsDialog(null, getCommunity()).show(parentFragmentManager, tag)
+        }
 
         binding.rvPersonalIdentities.adapter = adapterPersonal
         binding.rvPersonalIdentities.layoutManager = LinearLayoutManager(context)
@@ -164,13 +164,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun addToClipboard(text: String, label: String) {
-        val clipboard =
-            ContextCompat.getSystemService(requireContext(), ClipboardManager::class.java)
-        val clip = ClipData.newPlainText(label, text)
-        clipboard?.setPrimaryClip(clip)
     }
 
     private fun createItems(identities: List<Identity>): List<Item> {

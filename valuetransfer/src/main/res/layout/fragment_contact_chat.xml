@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:itemCount="1"
+        tools:listitem="@layout/item_contact_chat_message"
+        app:layout_constraintBottom_toTopOf="@+id/clMessageInputRow"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clMessageInputRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryValueTransfer"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="12dp"
+        android:elevation="20dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/ivAttachment"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_gravity="center"
+            android:background="@drawable/circle"
+            android:backgroundTint="@color/colorYellow"
+            android:padding="6dp"
+            android:src="@drawable/ic_baseline_attach_file_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/white" />
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="35dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:hint="Type your message"
+            android:inputType="textMultiLine"
+            android:paddingVertical="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:maxLines="4"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@+id/ivAttachment"
+            app:layout_constraintEnd_toStartOf="@+id/btnSendMessage"
+            app:layout_constraintStart_toEndOf="@+id/ivAttachment" />
+
+        <Button
+            android:id="@+id/btnSendMessage"
+            style="@style/ButtonDarkGreenRounded"
+            android:text="Send"
+            android:enabled="false"
+            android:clickable="false"
+            android:alpha="0.5"
+            app:layout_constraintBottom_toBottomOf="@+id/etMessage"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:backgroundTint="@color/colorPrimaryDarkValueTransfer" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

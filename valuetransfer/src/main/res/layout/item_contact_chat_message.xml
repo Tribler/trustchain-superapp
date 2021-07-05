@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingBottom="8dp"
+    android:background="@color/colorPrimaryValueTransfer">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clDateSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvDateSection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/dark_gray"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:text="Tuesday, June 29"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clMessageSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clDateSection">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clMessageIncoming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvChatMessageIncoming"
+            style="@style/ChatMessageItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:text="Message"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvChatMessageTimeIncoming"
+            style="@style/ChatMessageItemTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:text="12:00"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="@+id/tvChatMessageIncoming"
+            app:layout_constraintTop_toBottomOf="@+id/tvChatMessageIncoming" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clMessageOutgoing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvChatMessageOutgoing"
+            style="@style/ChatMessageItem"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/colorPrimaryDarkValueTransfer"
+            android:textColor="@color/white"
+            android:text="Message"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvChatMessageTimeOutgoing"
+            style="@style/ChatMessageItemTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingEnd="4dp"
+            android:text="12:00"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toStartOf="@+id/ivMessageStatus"
+            app:layout_constraintTop_toBottomOf="@+id/tvChatMessageOutgoing" />
+
+        <ImageView
+            android:id="@+id/ivMessageStatus"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="1dp"
+            android:src="@drawable/ic_check_double"
+            app:layout_constraintEnd_toEndOf="@+id/tvChatMessageOutgoing"
+            app:layout_constraintTop_toBottomOf="@+id/tvChatMessageOutgoing"
+            app:tint="@color/white" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clAttachmentPhotoVideoSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clMessageSection">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clAttachmentPhotoVideoIncoming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivAttachmentPhotoVideoIncoming"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="100dp"
+            android:maxHeight="100dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:background="@drawable/pill_rounded"
+            android:src="@drawable/ic_check_single"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/tvChatAttachmentTimeIncoming"
+            style="@style/ChatMessageItemTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:text="12:00"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ivAttachmentPhotoVideoIncoming" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clAttachmentPhotoVideoOutgoing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/ivAttachmentPhotoVideoOutgoing"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="100dp"
+            android:maxHeight="100dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:background="@drawable/pill_rounded"
+            android:src="@drawable/ic_check_single"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/tvChatAttachmentTimeOutgoing"
+            style="@style/ChatMessageItemTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingEnd="4dp"
+            android:text="12:00"
+            android:textColor="@color/white"
+            app:layout_constraintEnd_toStartOf="@+id/ivAttachmentPhotoVideoStatus"
+            app:layout_constraintTop_toBottomOf="@+id/ivAttachmentPhotoVideoOutgoing" />
+
+        <ImageView
+            android:id="@+id/ivAttachmentPhotoVideoStatus"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_marginTop="1dp"
+            android:src="@drawable/ic_check_double"
+            app:tint="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/ivAttachmentPhotoVideoOutgoing"
+            app:layout_constraintTop_toBottomOf="@+id/ivAttachmentPhotoVideoOutgoing" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,6 +13,7 @@ import nl.tudelft.peerchat.sqldelight.Database
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.ui.conversation.ChatMessageItem
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
@@ -121,6 +122,10 @@ class PeerChatStore(context: Context) {
             messageMapper
         )
             .asFlow().mapToList()
+    }
+
+    fun deleteMessage(item: ChatMessageItem) {
+        database.dbMessageQueries.deleteMessage(item.chatMessage.id)
     }
 
     companion object {

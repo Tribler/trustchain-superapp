@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
-
-    <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="match_parent"
+    tools:background="@color/colorPrimaryValueTransfer">
 
-        <TextView
-            android:id="@+id/tvNoPersonalIdentity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="16dp"
-            android:text="Please add a personal identity"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/tvNoPersonalIdentity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="16dp"
+        android:layout_margin="12dp"
+        android:backgroundTint="@color/white"
+        android:background="@drawable/pill_rounded"
+        android:text="CLICK TO ADD PERSONAL IDENTITY DETAILS"
+        android:textStyle="bold"
+        android:textColor="@color/colorPrimaryValueTransfer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvPersonalIdentities"
@@ -31,6 +31,16 @@
         tools:itemCount="1"
         tools:listitem="@layout/item_identity_detail_new" />
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bnvIdentity"
+        style="@style/BottomNavigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="0dp"
+        android:layout_marginEnd="0dp"
+        android:background="@color/colorPrimaryValueTransfer"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/valuetransfer_navigation_menu" />
 </androidx.constraintlayout.widget.ConstraintLayout>
-</ScrollView>
-

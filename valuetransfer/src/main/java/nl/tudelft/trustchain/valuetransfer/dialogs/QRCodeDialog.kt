@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.util.QRCodeUtils
+import nl.tudelft.trustchain.common.util.createBitmap
 import nl.tudelft.trustchain.valuetransfer.R
 import org.json.JSONObject
 import java.lang.IllegalStateException
@@ -18,11 +19,11 @@ import java.lang.IllegalStateException
 class QRCodeDialog(
     private val title: String?,
     private val subtitle: String?,
-    private val map: Map<String, String>
+    private val data: String
 ) : DialogFragment() {
 
     private val qrCodeUtils by lazy {
-        QRCodeUtils(requireContext())
+
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -46,20 +47,18 @@ class QRCodeDialog(
             Handler().postDelayed(
                 Runnable {
                     view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).visibility = View.GONE
-                    ivQRCode.setImageBitmap(createBitmap(map))
+                    ivQRCode.setImageBitmap(
+                        createBitmap(
+                            requireContext(),
+                            data,
+                            R.color.black,
+                            R.color.colorPrimaryValueTransfer
+                        )
+                    )
                 }, 100
             )
 
             bottomSheetDialog
         } ?: throw IllegalStateException("Activity cannot be null")
-    }
-
-    private fun createBitmap(attributes: Map<String, String>): Bitmap {
-        val data = JSONObject()
-        for ((key, value) in attributes) {
-            data.put(key, value)
-        }
-
-        return qrCodeUtils.createQR(data.toString(), pColor = R.color.white, bColor = R.color.colorPrimaryValueTransfer)!!
     }
 }
