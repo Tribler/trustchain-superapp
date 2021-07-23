@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer
 
 import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -9,4 +10,11 @@ class ValueTransferMainActivity : BaseActivity() {
     fun setActionBarTitle(title: String?) {
         supportActionBar!!.title = title
     }
+
+    fun toggleActionBar(state: Boolean) {
+        supportActionBar!!.setDisplayHomeAsUpEnabled(state)
+        supportActionBar!!.setHomeButtonEnabled(state)
+    }
+
+
 }

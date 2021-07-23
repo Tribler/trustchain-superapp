@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletOverviewBinding
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
@@ -39,6 +40,9 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_overview) {
 //        return getIpv8().getOverlay()
 //            ?: throw java.lang.IllegalStateException("IdentityCommunity is not configured")
 //    }
+    private val identityStore by lazy {
+        IdentityStore.getInstance(requireContext())
+    }
 
 //    private val gatewayStore by lazy {
 //        GatewayStore.getInstance(requireContext())
@@ -50,6 +54,8 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_overview) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        identityStore.createAtttributesTable()
 
 //        val community = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
 //        Log.i("PUBLIC KEY:", IPv8Android.getInstance().myPeer.publicKey.toString())

@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.util.QRCodeUtils
-import nl.tudelft.trustchain.common.util.createBitmap
+import nl.tudelft.trustchain.valuetransfer.util.createBitmap
 import nl.tudelft.trustchain.valuetransfer.R
 import org.json.JSONObject
 import java.lang.IllegalStateException
