@@ -1,10 +1,9 @@
 <resources>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string-array
-        name="gender_list">
-        <item>Male</item>
-        <item>Female</item>
-        <item>Neutral</item>
+    <string-array name="identity_attributes">
+        <item>Home Address</item>
+        <item>Zip code</item>
+        <item>City</item>
+        <item>Country</item>
+        <item>Email</item>
     </string-array>
 </resources>

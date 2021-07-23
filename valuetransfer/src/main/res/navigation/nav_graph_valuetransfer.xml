@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/contactChatFragment"
         android:name="nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment"
-        tools:layout="@layout/fragment_contact_chat"
+        tools:layout="@layout/fragment_contacts_chat"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:label="{name}">
         <argument android:name="name" />
@@ -56,9 +56,9 @@
     </fragment>
 
     <fragment
-        android:id="@+id/walletExchangeFragment"
-        android:name="nl.tudelft.trustchain.valuetransfer.ui.WalletExchangeFragment"
+        android:id="@+id/exchangeFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment"
         android:label="Exchange"
-        tools:layout="@layout/fragment_wallet_exchange" />
+        tools:layout="@layout/fragment_exchange_vt" />
 
 </navigation>
