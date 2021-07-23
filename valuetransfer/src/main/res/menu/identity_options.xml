@@ -12,5 +12,13 @@
         android:id="@+id/actionRemovePersonalIdentity"
         android:icon="@drawable/ic_device_hub_black_24dp"
         android:title="Remove Identity" />
+    <item
+        android:id="@+id/actionAddAttestation"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Add Attestation" />
+    <item
+        android:id="@+id/actionAddAttribute"
+        android:icon="@drawable/ic_device_hub_black_24dp"
+        android:title="Add Attribute" />
 
 </menu>

@@ -5,7 +5,7 @@ import java.util.*
 
 data class Identity(
     /**
-     * The unique message ID.
+     * The unique identity ID.
      */
     val id: String,
 

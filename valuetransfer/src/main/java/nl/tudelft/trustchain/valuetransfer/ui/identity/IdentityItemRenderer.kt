@@ -3,8 +3,8 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 import android.view.View
 import androidx.navigation.findNavController
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_identity_new.view.*
-import kotlinx.android.synthetic.main.item_identity_detail_new.view.*
+import kotlinx.android.synthetic.main.item_identity.view.*
+import kotlinx.android.synthetic.main.item_identity_detail.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
@@ -62,8 +62,8 @@ class IdentityItemRenderer(
 
     override fun getLayoutResourceId(): Int {
         when (layoutType) {
-            0 -> return R.layout.item_identity_new
-            1 -> return R.layout.item_identity_detail_new
+            0 -> return R.layout.item_identity
+            1 -> return R.layout.item_identity_detail
         }
 
         return R.layout.item_identity

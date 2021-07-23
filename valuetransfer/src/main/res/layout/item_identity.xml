@@ -1,45 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
-    android:paddingVertical="8dp">
+    android:paddingBottom="4dp">
 
-    <TextView
-        android:id="@+id/tvIdentityGivenNames"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clIdentityCard"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="John"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvIdentitySurname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Doe"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:layout_marginStart="4dp"
-        app:layout_constraintStart_toEndOf="@+id/tvIdentityGivenNames"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvIdentityPublicKey"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:lines="1"
-        android:text="94648544349a3a68691cf759efa0461221d81fa1"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        android:typeface="monospace"
-        android:layout_marginRight="8dp"
+        android:background="@drawable/square_rounded_dark"
+        android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvIdentityGivenNames" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@drawable/square_rounded_dark">
 
+        <TextView
+            android:id="@+id/tvIdentityGivenNamesSurname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="John Michael Doe" />
+
+        <TextView
+            android:id="@+id/tvIdentityPublicKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvIdentityGivenNamesSurname"
+            tools:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

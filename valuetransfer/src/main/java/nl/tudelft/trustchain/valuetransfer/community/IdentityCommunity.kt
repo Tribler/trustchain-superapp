@@ -5,6 +5,7 @@ import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.entity.Attribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import java.util.*
@@ -52,6 +53,18 @@ class IdentityCommunity(
             id = id,
             publicKey = myPeer.publicKey,
             content = content,
+            added = Date(),
+            modified = Date()
+        )
+    }
+
+    fun createAttribute(name: String, value: String) : Attribute {
+        val id = UUID.randomUUID().toString()
+
+        return Attribute(
+            id = id,
+            name = name,
+            value = value,
             added = Date(),
             modified = Date()
         )

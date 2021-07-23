@@ -4,15 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp">
+    android:padding="12dp"
+    tools:background="@color/colorPrimaryValueTransfer">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clIdentityCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/square_rounded_dark"
-        android:backgroundTint="@color/colorPrimaryValueTransfer"
-        android:padding="20dp"
+        android:elevation="4dp"
+        android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -23,11 +24,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Given Names / Surname"
-            android:textStyle="italic"
             android:textColor="@color/white"
             android:textSize="10sp"
+            android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvGenderTitle"
@@ -44,7 +45,7 @@
             android:id="@+id/tvGivenNamesSurnameValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="John Michael Doe"
+            android:text="Jan Jansen"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -66,23 +67,23 @@
             android:id="@+id/tvDatePlaceOfBirthTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Date / Place of Birth"
-            android:textStyle="italic"
             android:textColor="@color/white"
             android:textSize="10sp"
-            android:layout_marginTop="8dp"
+            android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvGivenNamesSurnameValue"/>
+            app:layout_constraintTop_toBottomOf="@+id/tvGivenNamesSurnameValue" />
 
         <TextView
             android:id="@+id/tvNationalityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Nationality"
             android:textColor="@color/white"
             android:textSize="10sp"
             android:textStyle="italic"
-            android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvGenderValue" />
 
@@ -90,7 +91,7 @@
             android:id="@+id/tvDatePlaceOfBirthValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="June 4, 1975, Los Angelos"
+            android:text="March 7, 1975, Amsterdam"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -101,7 +102,7 @@
             android:id="@+id/tvNationalityValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Americain"
+            android:text="Netherlands"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -112,23 +113,23 @@
             android:id="@+id/tvPersonalNumberTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Personal Number"
-            android:textStyle="italic"
             android:textColor="@color/white"
             android:textSize="10sp"
-            android:layout_marginTop="8dp"
+            android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvDatePlaceOfBirthValue"/>
+            app:layout_constraintTop_toBottomOf="@+id/tvDatePlaceOfBirthValue" />
 
         <TextView
             android:id="@+id/tvDocumentNumberTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Document Number"
             android:textColor="@color/white"
             android:textSize="10sp"
             android:textStyle="italic"
-            android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvNationalityValue" />
 
@@ -136,7 +137,7 @@
             android:id="@+id/tvPersonalNumberValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="129123812493"
+            android:text="1065726824"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -147,7 +148,7 @@
             android:id="@+id/tvDocumentNumberValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="U91JDHDH28SJ"
+            android:text="U25GIJH43D2"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -158,55 +159,48 @@
             android:id="@+id/tvPublicKeyTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Public Key"
-            android:textStyle="italic"
             android:textColor="@color/white"
             android:textSize="10sp"
-            android:layout_marginTop="8dp"
+            android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvPersonalNumberValue"/>
+            app:layout_constraintTop_toBottomOf="@+id/tvPersonalNumberValue" />
 
         <TextView
             android:id="@+id/tvPublicKeyValue"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
             android:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:lines="2"
-            android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/btnPersonalQRCode"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPublicKeyTitle" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnPersonalQRCode"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
-            android:src="@drawable/ic_qr_code_scan"
+            android:background="@drawable/ic_qr_code_scan"
             android:backgroundTint="@color/white"
-            app:tint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/tvPublicKeyValue"
             app:layout_constraintEnd_toStartOf="@+id/btnPersonalCopyPublicKey"
             app:layout_constraintStart_toEndOf="@+id/tvPublicKeyValue"
             app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnPersonalCopyPublicKey"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_marginTop="8dp"
-            android:src="@drawable/ic_copy_public_key"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:background="@drawable/ic_copy_public_key"
             android:backgroundTint="@color/white"
-            app:tint="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/tvPublicKeyValue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,31 +10,31 @@
         android:id="@+id/tvIdentityTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
         android:text="Identity"
         android:textColor="@color/white"
         android:textSize="32sp"
-        android:layout_marginStart="28dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvNoPersonalIdentity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
         android:gravity="center"
         android:paddingHorizontal="12dp"
         android:paddingVertical="16dp"
-        android:layout_margin="12dp"
-        android:backgroundTint="@color/white"
-        android:background="@drawable/pill_rounded"
         android:text="CLICK TO ADD PERSONAL IDENTITY DETAILS"
-        android:textStyle="bold"
         android:textColor="@color/colorPrimaryValueTransfer"
+        android:textStyle="bold"
         android:visibility="gone"
-        tools:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvIdentityTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/tvIdentityTitle"
+        tools:visibility="visible" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvIdentities"
@@ -43,6 +43,6 @@
         android:paddingVertical="8dp"
         app:layout_constraintTop_toBottomOf="@+id/tvNoPersonalIdentity"
         tools:itemCount="1"
-        tools:listitem="@layout/item_identity_new" />
+        tools:listitem="@layout/item_identity" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

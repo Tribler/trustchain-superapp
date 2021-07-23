@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.valuetransfer.entity.Attribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import nl.tudelft.valuetransfer.sqldelight.Database
@@ -51,6 +52,21 @@ class IdentityStore(context: Context) {
                     Date(added),
                     Date(modified)
                 )
+    }
+
+    private val attributeMapper = {
+        id: String,
+        name: String,
+        value: String,
+        added: Long,
+        modified: Long
+        -> Attribute(
+            id,
+            name,
+            value,
+            Date(added),
+            Date(modified)
+        )
     }
 
     fun getAllIdentities(): Flow<List<Identity>> {
@@ -124,6 +140,41 @@ class IdentityStore(context: Context) {
 
     fun deleteIdentityByPublicKey(identity: Identity) {
         database.dbIdentityQueries.deleteIdentityByPublicKey(identity.publicKey.keyToBin())
+    }
+
+    fun createAtttributesTable() {
+        return database.dbAttributeQueries.createAttributesTable()
+    }
+
+    fun getAllAttributes(): Flow<List<Attribute>> {
+        return database.dbAttributeQueries.getAllAttributes(attributeMapper)
+            .asFlow().mapToList()
+    }
+
+    fun getAttributeNames(): List<String> {
+        return database.dbAttributeQueries.getAttributeNames().executeAsList()
+    }
+
+    fun addAttribute(attribute: Attribute) {
+        database.dbAttributeQueries.addAttribute(
+            attribute.id,
+            attribute.name,
+            attribute.value,
+            attribute.added.time,
+            attribute.modified.time,
+        )
+    }
+
+    fun editAttribute(attribute: Attribute) {
+        database.dbAttributeQueries.updateAttribute(
+            attribute.value,
+            Date().time,
+            attribute.id
+        )
+    }
+
+    fun deleteAttribute(attribute: Attribute) {
+        database.dbAttributeQueries.deleteAttribute(attribute.id)
     }
 
     companion object {
