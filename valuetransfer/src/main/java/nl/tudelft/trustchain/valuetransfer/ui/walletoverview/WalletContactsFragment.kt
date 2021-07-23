@@ -18,6 +18,8 @@ import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
@@ -26,8 +28,8 @@ import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletContactsBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.TransferMoneyDialog
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItemRenderer
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 
 class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
     private val binding by viewBinding(FragmentWalletContactsBinding::bind)
@@ -42,9 +44,19 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
 
     private val items: LiveData<List<Item>> by lazy {
         combine(peerChatStore.getContactsWithLastMessages(), peers) { contacts, peers ->
-            Log.d("TESTJE", "SIZE: ${contacts.size} ${peers.size}")
-            createItems(contacts, peers)
+            createItems(contacts.filter {
+                it.second?.timestamp != null &&
+                    peerChatStore.contactsStore.getContactFromPublicKey(it.first.publicKey) != null
+            }, peers)
         }.asLiveData()
+    }
+
+    private val gatewayStore by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+
+    private val transactionRepository by lazy {
+        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
     }
 
     private fun getPeerChatCommunity(): PeerChatCommunity {
@@ -62,10 +74,11 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
                     args.putString(WalletContactsFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
                     args.putString(WalletContactsFragment.ARG_NAME, it.name)
                     findNavController().navigate(R.id.action_walletOverviewFragment_to_contactChatFragment, args)
-                }, {
-                    Log.d("TESTJE", "ON EXCHANGE CLICK")
-                },
-                0
+                }, { contact ->
+                    TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
+                }, { contact ->
+                    TransferMoneyDialog(contact, true, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
+                }
             )
         )
 
@@ -85,8 +98,11 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
 
         items.observe(
             viewLifecycleOwner,
-            Observer {
-                adapter.updateItems(it)
+            Observer { list ->
+                if(list.isEmpty()) {
+                    binding.tvNoChats.visibility = View.VISIBLE
+                }
+                adapter.updateItems(list)
             }
         )
     }

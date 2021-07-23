@@ -5,12 +5,11 @@ import android.graphics.Color
 import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_chat.view.*
-import kotlinx.android.synthetic.main.item_chat.view.tvContactName
-import kotlinx.android.synthetic.main.item_chat_overview.view.*
+import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.util.getColorByHash
-import nl.tudelft.trustchain.common.util.getFirstLettersFromString
+import nl.tudelft.trustchain.valuetransfer.util.getFirstLettersFromString
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.valuetransfer.R
 import java.text.SimpleDateFormat
@@ -18,8 +17,8 @@ import java.util.*
 
 class ChatItemRenderer(
     private val onChatClick: (Contact) -> Unit,
-    private val onExchangeClick: (Contact) -> Unit,
-    private val layoutType: Int,
+    private val onRequestClick: (Contact) -> Unit,
+    private val onTransferClick: (Contact) -> Unit,
 ) : ItemLayoutRenderer<ContactItem, View>(
     ContactItem::class.java
 ) {
@@ -43,64 +42,45 @@ class ChatItemRenderer(
         val color = getColorByHash(context, item.contact.publicKey.toString())
         val newColor = Color.argb(100, Color.red(color), Color.green(color), Color.blue(color))
 
-        if(layoutType == 0) {
-            ivChatIconOverview.backgroundTintList = ColorStateList.valueOf(newColor)
-            ivChatIconOverview.setBackgroundResource(R.drawable.circle_stroked)
+        ivChatIconOverview.backgroundTintList = ColorStateList.valueOf(newColor)
+        ivChatIconOverview.setBackgroundResource(R.drawable.circle_stroked)
 
-            if(item.lastMessage?.outgoing!!) {
-                if(item.lastMessage?.ack!!) {
-                    ivMessageStatusOverview.setImageResource(R.drawable.ic_check_double)
-                }else{
-                    ivMessageStatusOverview.setImageResource(R.drawable.ic_check_single)
-                }
-            }else {
-                ivMessageStatusOverview.visibility = View.GONE
+        if(item.lastMessage?.outgoing!!) {
+            if(item.lastMessage?.ack!!) {
+                ivMessageStatusOverview.setImageResource(R.drawable.ic_check_double)
+            }else{
+                ivMessageStatusOverview.setImageResource(R.drawable.ic_check_single)
             }
-
-            tvContactNameOverview.text = item.contact.name
-            tvContactMessageOverview.text = message
-            tvChatInitialsOverview.text = getFirstLettersFromString(if(!item.contact.name.isNullOrEmpty()) item.contact.name else "",2)
-            ivOnlineStatusOverview.isVisible = item.isOnline || item.isBluetooth
-            tvContactTimeOverview.text = contactTime
         }else {
-            ivChatIcon.backgroundTintList = ColorStateList.valueOf(newColor)
-            ivChatIcon.setBackgroundResource(R.drawable.circle_stroked)
-
-            if(item.lastMessage?.outgoing!!) {
-                if(item.lastMessage?.ack!!) {
-                    ivMessageState.setImageResource(R.drawable.ic_check_double)
-                }else{
-                    ivMessageState.setImageResource(R.drawable.ic_check_single)
-                }
-            }else {
-                ivMessageState.visibility = View.GONE
-            }
-
-            tvContactName.text = item.contact.name
-            tvContactMessage.text = message
-            tvChatInitials.text = getFirstLettersFromString(if(!item.contact.name.isNullOrEmpty()) item.contact.name else "",2)
-            ivOnlineStatus.isVisible = item.isOnline || item.isBluetooth
-            tvContactTime.text = contactTime
+            ivMessageStatusOverview.visibility = View.GONE
         }
 
-//        setOnClickListener {
-//            onChatClick(item.contact)
-//        }
+        tvContactNameOverview.text = item.contact.name
+        tvContactMessageOverview.text = message
+
+        if(ContactStore.getInstance(view.context).getContactFromPublicKey(item.contact.publicKey) == null) {
+            clContactExchange.visibility = View.GONE
+            tvChatInitialsOverview.text = ""
+        }else{
+            tvChatInitialsOverview.text = getFirstLettersFromString(if(!item.contact.name.isNullOrEmpty()) item.contact.name else "",2)
+        }
+        ivOnlineStatusOverview.isVisible = item.isOnline || item.isBluetooth
+        tvContactTimeOverview.text = contactTime
 
         clChatCard.setOnClickListener {
             onChatClick(item.contact)
         }
 
-        clContactExchange.setOnClickListener {
-            onExchangeClick(item.contact)
+        ivRequest.setOnClickListener {
+            onRequestClick(item.contact)
+        }
+
+        ivTransfer.setOnClickListener {
+            onTransferClick(item.contact)
         }
     }
 
     override fun getLayoutResourceId(): Int {
-        return when(layoutType) {
-            0 -> R.layout.item_chat_overview
-            1 -> R.layout.item_chat
-            else -> R.layout.item_chat
-        }
+        return R.layout.item_contacts_chat
     }
 }

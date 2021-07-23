@@ -115,8 +115,8 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clScanQRCode"
-        android:layout_width="88dp"
-        android:layout_height="88dp"
+        android:layout_width="78dp"
+        android:layout_height="78dp"
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
         android:paddingHorizontal="16dp"
@@ -142,7 +142,7 @@
     <EditText
         android:id="@+id/etContactPublicKey"
         android:layout_width="0dp"
-        android:layout_height="40dp"
+        android:layout_height="35dp"
         android:layout_weight="1"
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
@@ -163,8 +163,7 @@
     <EditText
         android:id="@+id/etContactName"
         android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_weight="1"
+        android:layout_height="35dp"
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
         android:paddingVertical="8dp"
@@ -176,7 +175,7 @@
         android:textSize="14sp"
         android:hint="Contact name"
         android:importantForAutofill="no"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnAddContact"
         app:layout_constraintStart_toEndOf="@+id/clScanQRCode"
         app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
 
@@ -185,9 +184,10 @@
         style="@style/ButtonDarkGreenRounded"
         android:enabled="false"
         android:text="Add"
-        android:layout_marginTop="12dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etContactName" />
+        app:layout_constraintStart_toEndOf="@+id/etContactName"
+        app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

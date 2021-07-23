@@ -16,11 +16,11 @@
         android:backgroundTint="@color/white"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
-        android:layout_marginRight="4dp"
         app:layout_constraintEnd_toStartOf="@+id/clContactExchange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:background="@color/white">
+        tools:background="@drawable/pill_rounded"
+        tools:backgroundTint="@color/white">
 
         <ImageView
             android:id="@+id/ivChatIconOverview"
@@ -63,9 +63,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Name"
+                android:textColor="@color/black"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -86,11 +86,11 @@
                 android:layout_height="12dp"
                 android:layout_marginTop="1dp"
                 android:src="@drawable/ic_check_double"
-                app:tint="@color/black"
-                tools:tint="@color/black"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
+                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview"
+                app:tint="@color/black"
+                tools:tint="@color/black" />
 
             <TextView
                 android:id="@+id/tvContactMessageOverview"
@@ -111,9 +111,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="12:00"
+                android:textColor="@color/black"
                 android:textSize="12sp"
                 android:typeface="monospace"
-                android:textColor="@color/black"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -123,22 +123,38 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clContactExchange"
-        android:layout_width="64dp"
-        android:layout_height="wrap_content"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_marginStart="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clChatCard"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:background="@color/white">
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:id="@+id/ivRequest"
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/ic_exchange"
-            android:tint="@color/colorPrimaryValueTransfer" />
+            android:layout_height="30dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_baseline_arrow_drop_up_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryValueTransfer"
+            tools:tint="@color/colorPrimaryValueTransfer" />
+
+        <ImageView
+            android:id="@+id/ivTransfer"
+            android:layout_width="40dp"
+            android:layout_height="30dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:src="@drawable/ic_baseline_arrow_drop_down_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/red"
+            tools:tint="@color/red" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

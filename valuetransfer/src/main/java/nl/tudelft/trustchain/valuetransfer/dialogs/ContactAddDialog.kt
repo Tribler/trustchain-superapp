@@ -25,10 +25,8 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.util.QRCodeUtils
-import nl.tudelft.trustchain.common.util.copyToClipboard
-import nl.tudelft.trustchain.common.util.createBitmap
-import nl.tudelft.trustchain.common.util.onFocusChange
+import nl.tudelft.trustchain.common.util.*
+import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.ui.addcontact.AddContactFragment
 import nl.tudelft.trustchain.valuetransfer.R
@@ -45,11 +43,11 @@ class ContactAddDialog(
 
     private var contactPublicKey = MutableLiveData<String>()
 
-    private fun toggleButton(button: Button, contactName: EditText, contactPublicKey: EditText) {
-        button.isEnabled = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
-        button.alpha = if(contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()) 1f else 0.5f
-        button.isClickable = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
-    }
+//    private fun toggleButton(button: Button, contactName: EditText, contactPublicKey: EditText) {
+//        button.isEnabled = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
+//        button.alpha = if(contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()) 1f else 0.5f
+//        button.isClickable = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
+//    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -70,11 +68,13 @@ class ContactAddDialog(
             onFocusChange(contactPublicKeyView, requireContext())
 
             contactNameView.doAfterTextChanged {
-                toggleButton(addContactView, contactNameView, contactPublicKeyView)
+                toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
+//                toggleButton(addContactView, contactNameView, contactPublicKeyView)
             }
 
             contactPublicKeyView.doAfterTextChanged {
-                toggleButton(addContactView, contactNameView, contactPublicKeyView)
+                toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
+//                toggleButton(addContactView, contactNameView, contactPublicKeyView)
             }
 
             copyMyPublicKeyView.setOnClickListener {

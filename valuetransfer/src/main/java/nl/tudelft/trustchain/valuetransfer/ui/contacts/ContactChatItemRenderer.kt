@@ -1,13 +1,23 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
-import android.util.Log
+import android.view.Gravity
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contact_chat_message.view.*
+import kotlinx.android.synthetic.main.fragment_contacts_chat.view.*
+import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.peerchat.ui.conversation.ChatMessageItem
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
+import java.math.BigInteger
 import java.text.SimpleDateFormat
 
 class ContactChatItemRenderer(
@@ -16,78 +26,104 @@ class ContactChatItemRenderer(
     ChatMessageItem::class.java
 ) {
 
+    val dateFormat = SimpleDateFormat("HH:mm")
+
     override fun bindView(item: ChatMessageItem, view: View) = with(view) {
 
         val messageDate = item.chatMessage.timestamp
 
-        if(!item.shouldShowDate) {
-            clDateSection.visibility = View.GONE
-        }else{
-            tvDateSection.text = SimpleDateFormat("EEEE, d MMM").format(messageDate)
-        }
-
-        val dateFormat = SimpleDateFormat("HH:mm")
+        clDateSection.isVisible = item.shouldShowDate
+        tvDateSection.text = SimpleDateFormat("EEEE, d MMM").format(messageDate)
 
         val attachment = item.chatMessage.attachment
-        val transaction = item.transaction?.transaction
 
-        Log.d("TESTJE", "TRANSACTION: ${transaction}")
+        tvChatMessage.text = item.chatMessage.message
+        tvChatItemTime.text = dateFormat.format(messageDate)
+        ivChatItemStatus.isVisible = item.chatMessage.outgoing
 
-        if(item.chatMessage.outgoing) { // OUTGOING
-            if(attachment != null) {
-                when(attachment.type) {
-                    MessageAttachment.TYPE_IMAGE -> {
-                        clMessageSection.visibility = View.GONE
-                        clAttachmentPhotoVideoIncoming.visibility = View.GONE
+        val itemStatusResource = when {
+            item.chatMessage.ack -> R.drawable.ic_check_double
+            else -> R.drawable.ic_check_single
+        }
 
-                        val file = attachment.getFile(view.context)
-                        if (file.exists()) {
-                            Glide.with(view).load(file).into(ivAttachmentPhotoVideoOutgoing)
-                            ivAttachmentPhotoVideoOutgoing.clipToOutline = true
-                        } else {
-                            ivAttachmentPhotoVideoOutgoing.setImageBitmap(null)
-                        }
-                    }
-                }
-            }else{ // MESSAGE
-                tvChatMessageOutgoing.text = item.chatMessage.message
-                tvChatMessageTimeOutgoing.text = dateFormat.format(messageDate)
+        ivChatItemStatus.setImageResource(itemStatusResource)
 
-                clMessageIncoming.visibility = View.GONE
-                clAttachmentPhotoVideoSection.visibility = View.GONE
+        val textColor: Int
+        val backgroundResource: Int
+
+        when {
+            item.chatMessage.outgoing -> {
+                backgroundResource = R.drawable.pill_rounded_dark_green
+                textColor = R.color.white
             }
-
-            if(item.chatMessage.ack) { // SEND AND RECEIVED RECEIPT
-                ivMessageStatus.setImageResource(R.drawable.ic_check_double)
-                ivAttachmentPhotoVideoStatus.setImageResource((R.drawable.ic_check_double))
-            }else{
-                ivMessageStatus.setImageResource(R.drawable.ic_check_single)
-                ivAttachmentPhotoVideoStatus.setImageResource(R.drawable.ic_check_single)
-            }
-        } else { // INCOMING
-            if(attachment != null) {
-                when(attachment.type) {
-                    MessageAttachment.TYPE_IMAGE -> { // ATTACHMENT PHOTO VIDEO
-                        clMessageSection.visibility = View.GONE
-                        clAttachmentPhotoVideoOutgoing.visibility = View.GONE
-
-                        val file = attachment.getFile(view.context)
-                        if (file.exists()) {
-                            Glide.with(view).load(file).into(ivAttachmentPhotoVideoIncoming)
-                            ivAttachmentPhotoVideoIncoming.clipToOutline = true
-                        } else {
-                            ivAttachmentPhotoVideoIncoming.setImageBitmap(null)
-                        }
-                    }
-                }
-            }else{ // MESSAGE
-                tvChatMessageIncoming.text = item.chatMessage.message
-                tvChatMessageTimeIncoming.text = dateFormat.format(messageDate)
-
-                clAttachmentPhotoVideoSection.visibility = View.GONE
-                clMessageOutgoing.visibility = View.GONE
+            else -> {
+                backgroundResource = R.drawable.pill_rounded_white
+                textColor = R.color.black
             }
         }
+
+        clChatMessageTransaction.setBackgroundResource(backgroundResource)
+        tvTransactionTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
+        tvTransaction.setTextColor(ContextCompat.getColor(this.context, textColor))
+        tvChatMessage.setTextColor(ContextCompat.getColor(this.context, textColor))
+
+        when {
+            attachment != null -> {
+                when (attachment.type) {
+                    MessageAttachment.TYPE_IMAGE -> {
+                        clTransaction.isVisible = false
+                        clChatMessageTransaction.isVisible = false
+                        ivAttachmentPhotoVideo.isVisible = true
+
+                        val file = attachment.getFile(view.context)
+                        if (file.exists()) {
+                            Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
+                            ivAttachmentPhotoVideo.clipToOutline = true
+                        } else {
+                            ivAttachmentPhotoVideo.setImageBitmap(null)
+                        }
+
+                        ivAttachmentPhotoVideo.setImageResource(if (item.chatMessage.ack) R.drawable.ic_check_double else R.drawable.ic_check_single)
+                    }
+                }
+            }
+            item.chatMessage.transactionHash != null -> {
+                clTransaction.isVisible = true
+                tvChatMessage.isVisible = item.chatMessage.message.isNotBlank()
+                ivAttachmentPhotoVideo.isVisible = false
+
+                tvTransactionTitle.text = if(item.chatMessage.outgoing) "Transferred" else "Received"
+                tvTransaction.text = TransactionRepository.prettyAmount((item.transaction?.transaction?.get("amount") as BigInteger).toLong())
+
+            }
+            else -> {
+                clTransaction.isVisible = false
+                tvChatMessage.isVisible = true
+                ivAttachmentPhotoVideo.isVisible = false
+            }
+        }
+
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(clItem)
+        constraintSet.removeFromHorizontalChain(flContent.id)
+        constraintSet.removeFromHorizontalChain(llChatItemTimeStatus.id)
+
+        constraintSet.connect(flContent.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
+        constraintSet.connect(flContent.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+
+        val gravityHorizontal = if(item.chatMessage.outgoing) Gravity.END else Gravity.START
+        val constraintGravity = if(item.chatMessage.outgoing) ConstraintSet.END else ConstraintSet.START
+
+        llChatItemTimeStatus.gravity = gravityHorizontal
+        tvTransaction.gravity = gravityHorizontal
+        tvChatMessage.gravity = gravityHorizontal
+
+        flChatItemContent.updateLayoutParams<FrameLayout.LayoutParams> {
+            gravity = gravityHorizontal
+        }
+
+        constraintSet.connect(llChatItemTimeStatus.id, constraintGravity, ConstraintSet.PARENT_ID, constraintGravity)
+        constraintSet.applyTo(clItem)
 
         setOnClickListener {
             onItemClick(item)
@@ -95,6 +131,6 @@ class ContactChatItemRenderer(
     }
 
     override fun getLayoutResourceId(): Int {
-        return R.layout.item_contact_chat_message
+        return R.layout.item_contacts_chat_detail
     }
 }

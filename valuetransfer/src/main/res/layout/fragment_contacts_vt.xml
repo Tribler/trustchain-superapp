@@ -1,140 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryValueTransfer"
-    android:focusableInTouchMode="true"
-    android:clickable="true"
-    android:focusable="true">
+    tools:background="@color/colorPrimaryValueTransfer">
 
-<!--    <Button-->
-<!--        android:id="@+id/ivAddContact"-->
-<!--        style="@style/Widget.MaterialComponents.Button"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="40dp"-->
-<!--        android:layout_marginVertical="12dp"-->
-<!--        android:layout_marginStart="12dp"-->
-<!--        android:layout_marginEnd="8dp"-->
-<!--        android:text="Add"-->
-<!--        android:textSize="12dp"-->
-<!--        android:textColor="@color/colorPrimaryValueTransfer"-->
-<!--        android:textStyle="bold"-->
-<!--        android:background="@drawable/pill_rounded"-->
-<!--        android:backgroundTint="@color/white"-->
-<!--        android:drawableLeft="@drawable/ic_baseline_add_24"-->
-<!--        android:drawableTint="@color/colorPrimaryValueTransfer"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@+id/etSearchContact"/>-->
+    <!--    <ScrollView-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        app:layout_constraintBottom_toTopOf="@+id/bnvContacts"-->
+    <!--        app:layout_constraintTop_toTopOf="parent">-->
 
-
-    <EditText
-        android:id="@+id/etSearchContact"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_margin="12dp"
-        android:paddingStart="45dp"
-        android:paddingEnd="40dp"
-        android:textColor="@color/colorPrimaryValueTransfer"
-        android:singleLine="true"
-        android:inputType="text"
-        android:hint="Search Contact..."
-        android:textSize="12dp"
-        android:backgroundTint="@color/white"
-        android:background="@drawable/pill_rounded"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivSearchBarIcon"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginStart="12dp"
-        android:src="@drawable/ic_baseline_search_24"
-        app:tint="@color/colorPrimaryValueTransfer"
-        app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
-        app:layout_constraintStart_toStartOf="@+id/etSearchContact"
-        app:layout_constraintTop_toTopOf="@+id/etSearchContact" />
-
-    <ImageView
-        android:id="@+id/ivSearchBarCancelIcon"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_baseline_close_24"
-        app:tint="@color/colorPrimaryValueTransfer"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
-        app:layout_constraintEnd_toEndOf="@+id/etSearchContact"
-        app:layout_constraintTop_toTopOf="@+id/etSearchContact" />
+    <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+    <!--            android:layout_width="match_parent"-->
+    <!--            android:layout_height="match_parent"-->
+    <!--            android:clickable="true"-->
+    <!--            android:focusable="true"-->
+    <!--            android:focusableInTouchMode="true">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clSearchResults"
+        android:id="@+id/clContacts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="@drawable/square_rounded_dark"
         android:paddingHorizontal="12dp"
-        android:paddingVertical="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/etSearchContact"
+        android:paddingTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:id="@+id/llContactNew"
-            android:layout_width="70dp"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
+        <ImageView
+            android:id="@+id/ivAddContactButton"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:src="@drawable/ic_add_black_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
+            app:layout_constraintEnd_toStartOf="@+id/etSearchContact"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryValueTransfer"
+            tools:tint="@color/colorPrimaryValueTransfer" />
 
-            <ImageView
-                android:id="@+id/ivContactNew"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="8dp"
-                android:layout_marginTop="8dp"
-                android:padding="11dp"
-                android:background="@drawable/circle_stroked"
-                android:backgroundTint="@color/gray"
-                android:src="@drawable/ic_add_black_24dp"
-                app:tint="@color/white"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <EditText
+            android:id="@+id/etSearchContact"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/light_gray"
+            android:hint="Search Contact..."
+            android:inputType="text"
+            android:paddingStart="45dp"
+            android:paddingEnd="40dp"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textSize="12dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/ivAddContactButton"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvContactNew"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Add"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:ellipsize="end"
-                android:textColor="@color/white"
-                android:gravity="center"
-                android:layout_marginTop="4dp"
-                android:paddingBottom="8dp"
-                app:layout_constraintTop_toBottomOf="@+id/ivContactNew"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"/>
+        <ImageView
+            android:id="@+id/ivSearchBarIcon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="12dp"
+            android:src="@drawable/ic_baseline_search_24"
+            app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
+            app:layout_constraintStart_toStartOf="@+id/etSearchContact"
+            app:layout_constraintTop_toTopOf="@+id/etSearchContact"
+            app:tint="@color/colorPrimaryValueTransfer" />
 
-        </LinearLayout>
+        <ImageView
+            android:id="@+id/ivSearchBarCancelIcon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginEnd="12dp"
+            android:src="@drawable/ic_baseline_close_24"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
+            app:layout_constraintEnd_toEndOf="@+id/etSearchContact"
+            app:layout_constraintTop_toTopOf="@+id/etSearchContact"
+            app:tint="@color/colorPrimaryValueTransfer" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvContacts"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginVertical="2dp"
             android:orientation="horizontal"
-            tools:itemCount="1"
-            tools:listitem="@layout/item_contacts"
-            android:layout_marginStart="4dp"
-            app:layout_constraintStart_toEndOf="@+id/llContactNew"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etSearchContact"
+            tools:itemCount="1"
+            tools:listitem="@layout/item_contacts" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -142,34 +107,141 @@
         android:id="@+id/tvRecentTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
         android:text="Recent"
         android:textColor="@color/white"
-        android:textSize="32sp"
-        android:layout_marginStart="12dp"
+        android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clSearchResults"/>
+        app:layout_constraintTop_toBottomOf="@+id/clContacts" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clTogglePendingChats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvRecentTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tvRecentTitle"
+        tools:backgroundTint="@color/light_gray">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChats"
+        <ImageView
+            android:id="@+id/ivShowHiddenChats"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/ic_eye_show"
+            app:layout_constraintBottom_toBottomOf="@+id/tvShowHiddenChats"
+            app:layout_constraintEnd_toStartOf="@+id/tvShowHiddenChats"
+            app:layout_constraintTop_toTopOf="@+id/tvShowHiddenChats"
+            app:tint="@color/light_gray" />
+
+        <ImageView
+            android:id="@+id/ivHideHiddenChats"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginRight="4dp"
+            android:src="@drawable/ic_eye_hidden"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/tvHideHiddenChats"
+            app:layout_constraintEnd_toStartOf="@+id/tvHideHiddenChats"
+            app:layout_constraintTop_toTopOf="@+id/tvHideHiddenChats"
+            app:tint="@color/light_gray" />
+
+        <TextView
+            android:id="@+id/tvShowHiddenChats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Show hidden chats"
+            android:textColor="@color/light_gray"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvHideHiddenChats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:text="Hide hidden chats"
+            android:textColor="@color/light_gray"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvNoChats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="8dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/gray"
+        android:gravity="center"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="16dp"
+        android:text="NO CHATS (YET)"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvRecentTitle"
-        tools:itemCount="1"
-        tools:listitem="@layout/item_chat_overview" />
+        tools:visibility="visible" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="12dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/bnvContacts"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNoChats">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvHiddenChats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:itemCount="1"
+                tools:listitem="@layout/item_contacts_chat"
+                tools:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvChats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/rvHiddenChats"
+                tools:itemCount="1"
+                tools:listitem="@layout/item_contacts_chat" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+    <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+    <!--    </ScrollView>-->
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bnvChats"
+        android:id="@+id/bnvContacts"
         style="@style/BottomNavigation"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="0dp"
         android:layout_marginEnd="0dp"
         android:background="@color/colorPrimaryValueTransfer"
-        app:menu="@menu/valuetransfer_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/valuetransfer_navigation_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
@@ -36,17 +37,17 @@ class ContactRenameDialog(
             val view = layoutInflater.inflate(R.layout.dialog_contact_rename, null)
 
             val contactNameView = view.findViewById<EditText>(R.id.etContactName)
-            val saveContactNameView = view.findViewById<Button>(R.id.btnSaveContactName)
+            val saveContactNameButton = view.findViewById<Button>(R.id.btnSaveContactName)
 
             contactNameView.setText(contact.name)
 
+            toggleButton(saveContactNameButton, contact.name.isNotEmpty())
+
             contactNameView.doAfterTextChanged { state ->
-                saveContactNameView.isEnabled = state != null && state.isNotEmpty()
-                saveContactNameView.alpha = if(state != null && state.isNotEmpty()) 1f else 0.5f
-                saveContactNameView.isClickable = state != null && state.isNotEmpty()
+                toggleButton(saveContactNameButton, state != null && state.isNotEmpty())
             }
 
-            saveContactNameView.setOnClickListener {
+            saveContactNameButton.setOnClickListener {
                 peerChatStore.contactsStore.updateContact(contact.publicKey, contactNameView.text.toString())
 
                 val intent = Intent()

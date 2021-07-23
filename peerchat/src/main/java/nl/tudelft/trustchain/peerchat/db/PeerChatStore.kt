@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.db
 
 import android.content.Context
+import android.util.Log
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
@@ -9,6 +10,7 @@ import kotlinx.coroutines.flow.combine
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.peerchat.sqldelight.Database
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
@@ -55,7 +57,7 @@ class PeerChatStore(context: Context) {
         )
     }
 
-    private fun getAllMessages(): Flow<List<ChatMessage>> {
+    fun getAllMessages(): Flow<List<ChatMessage>> {
         return database.dbMessageQueries.getAll(messageMapper)
             .asFlow().mapToList()
     }

@@ -7,7 +7,7 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts.view.*
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
-import nl.tudelft.trustchain.common.util.getFirstLettersFromString
+import nl.tudelft.trustchain.valuetransfer.util.getFirstLettersFromString
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.valuetransfer.R
 

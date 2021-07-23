@@ -12,5 +12,14 @@
     <item
         android:id="@+id/actionSendContact"
         android:title="Contact" />
+    <item
+        android:id="@+id/actionSendAttribute"
+        android:title="Identity Attribute" />
+    <item
+        android:id="@+id/actionTransferMoney"
+        android:title="Transfer Money" />
+    <item
+        android:id="@+id/actionRequestMoney"
+        android:title="Request Money" />
 
 </menu>
