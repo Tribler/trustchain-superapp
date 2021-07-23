@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:backgroundTint="@color/colorPrimaryValueTransfer"
+    tools:background="@color/colorPrimaryValueTransfer">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <TextView
+        android:id="@+id/tvTitleTransfer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Transfer Money"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:gravity="center_horizontal"
+        android:textColor="@color/white"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tvTitleRequest"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Request Money"
+        android:textSize="20sp"
+        android:textAlignment="center"
+        android:gravity="center_horizontal"
+        android:textColor="@color/white"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvRecipientTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Select the recipient"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clTitle" />
+
+    <Spinner
+        android:id="@+id/spinnerContact"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:minWidth="150dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingVertical="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/etTransactionAmount"
+        app:layout_constraintTop_toBottomOf="@+id/tvRecipientTitle" />
+
+    <TextView
+        android:id="@+id/tvTransactionAmountTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:paddingStart="8dp"
+        android:text="Enter the transaction amount"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="@+id/etTransactionAmount"
+        app:layout_constraintTop_toBottomOf="@+id/clTitle" />
+
+    <EditText
+        android:id="@+id/etTransactionAmount"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:inputType="numberDecimal"
+        android:paddingVertical="8dp"
+        android:paddingStart="8dp"
+        android:textSize="14sp"
+        android:hint="Balance: 39918,55"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/spinnerContact"
+        app:layout_constraintTop_toBottomOf="@+id/tvTransactionAmountTitle" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:text="ET"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        app:layout_constraintBottom_toBottomOf="@+id/etTransactionAmount"
+        app:layout_constraintEnd_toEndOf="@+id/etTransactionAmount"
+        app:layout_constraintTop_toTopOf="@+id/etTransactionAmount" />
+
+    <EditText
+        android:id="@+id/etTransactionMessage"
+        android:layout_width="match_parent"
+        android:minHeight="40dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingVertical="8dp"
+        android:inputType="text"
+        android:paddingStart="8dp"
+        android:paddingRight="44dp"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp"
+        android:hint="(Optional) message to receiver..."
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spinnerContact" />
+
+    <Button
+        android:id="@+id/btnTransferMoney"
+        style="@style/ButtonDarkGreenRounded"
+        android:layout_marginTop="12dp"
+        android:enabled="false"
+        android:text="Transfer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+
+    <Button
+        android:id="@+id/btnRequestMoneyContact"
+        style="@style/ButtonDarkGreenRounded"
+        android:layout_marginTop="12dp"
+        android:enabled="false"
+        android:text="Request Contact"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+
+    <Button
+        android:id="@+id/btnRequestMoneyQR"
+        style="@style/ButtonDarkGreenRounded"
+        android:layout_marginTop="12dp"
+        android:enabled="false"
+        android:text="Create Request QR"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

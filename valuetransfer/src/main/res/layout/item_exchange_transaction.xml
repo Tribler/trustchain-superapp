@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimaryValueTransfer"
+    android:paddingHorizontal="12dp"
+    android:paddingBottom="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clTransactionCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingVertical="8dp"
+        android:paddingEnd="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/white">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clDirectionIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTransactionDate"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvTransactionType">
+
+            <ImageView
+                android:id="@+id/ivDirectionIconUp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_arrow_drop_up_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/colorPrimaryValueTransfer"
+                tools:tint="@color/colorPrimaryValueTransfer" />
+
+            <ImageView
+                android:id="@+id/ivDirectionIconDown"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_baseline_arrow_drop_down_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/red"
+                tools:tint="@color/red" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tvTransactionType"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/clDirectionIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Buy via EuroToken Exchange" />
+
+        <TextView
+            android:id="@+id/tvTransactionAmount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvTransactionCurrencySymbol"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1150,00" />
+
+        <TextView
+            android:id="@+id/tvTransactionCurrencySymbol"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="ET"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTransactionDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/dark_gray"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/clDirectionIcon"
+            app:layout_constraintTop_toBottomOf="@+id/tvTransactionType"
+            tools:text="July 6, 2021 15:16" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clTransactionBlockStatusColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTransactionBlockStatus"
+            app:layout_constraintEnd_toStartOf="@+id/tvTransactionBlockStatus"
+            app:layout_constraintTop_toTopOf="@+id/tvTransactionBlockStatus">
+
+            <ImageView
+                android:id="@+id/ivTransactionBlockStatusColorWaitingForSignature"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:src="@drawable/circle"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/red"
+                tools:tint="@color/red" />
+
+            <ImageView
+                android:id="@+id/ivTransactionBlockStatusColorSelfSigned"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:src="@drawable/circle"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/colorPrimaryValueTransfer"
+                tools:tint="@color/colorPrimaryValueTransfer" />
+
+            <ImageView
+                android:id="@+id/ivTransactionBlockStatusColorSigned"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:src="@drawable/circle"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/green"
+                tools:tint="@color/green"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/tvTransactionBlockStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Signed"
+            android:textColor="@color/dark_gray"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/tvTransactionDate"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clTransactionContent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tvTransactionDate"
+            app:layout_constraintTop_toBottomOf="@+id/tvTransactionDate"
+            tools:visibility="visible">
+
+            <TextView
+                android:id="@+id/tvTransactionContentTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Transaction Content"
+                android:textColor="@color/dark_gray"
+                android:textSize="10sp"
+                android:textStyle="italic|bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tvTransactionContentText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionContentTitle"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionContentTitle"
+                tools:text="{amount=17500, payment_id=...}" />
+
+            <TextView
+                android:id="@+id/tvTransactionSenderReceiverTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Receiver"
+                android:textColor="@color/dark_gray"
+                android:textSize="10sp"
+                android:textStyle="italic|bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionContentText"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionContentText" />
+
+            <TextView
+                android:id="@+id/tvTransactionSenderReceiverText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionSenderReceiverTitle"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionSenderReceiverTitle"
+                tools:text="4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a" />
+
+            <TextView
+                android:id="@+id/tvTransactionTypeTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Type"
+                android:textColor="@color/dark_gray"
+                android:textSize="10sp"
+                android:textStyle="italic|bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionSenderReceiverText"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionSenderReceiverText" />
+
+            <TextView
+                android:id="@+id/tvTransactionTypeText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionTypeTitle"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionTypeTitle"
+                tools:text="eurotoken_creation" />
+
+            <TextView
+                android:id="@+id/tvTransactionBlockHashTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Block Hash"
+                android:textColor="@color/dark_gray"
+                android:textSize="10sp"
+                android:textStyle="italic|bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionTypeText"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionTypeText" />
+
+            <TextView
+                android:id="@+id/tvTransactionBlockHashText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:textColor="@color/dark_gray"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tvTransactionBlockHashTitle"
+                app:layout_constraintTop_toBottomOf="@+id/tvTransactionBlockHashTitle"
+                tools:text="dbe9ed53dfc4cac92704c9af8068e118352108d9190d859014f9f019cd045fba" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
