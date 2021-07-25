@@ -69,6 +69,10 @@ class IdentityStore(context: Context) {
         )
     }
 
+    fun createIdentitiesTable() {
+        return database.dbIdentityQueries.createIdentitiesTable()
+    }
+
     fun getAllIdentities(): Flow<List<Identity>> {
         return database.dbIdentityQueries.getAll(identityMapper)
             .asFlow().mapToList()
@@ -142,7 +146,7 @@ class IdentityStore(context: Context) {
         database.dbIdentityQueries.deleteIdentityByPublicKey(identity.publicKey.keyToBin())
     }
 
-    fun createAtttributesTable() {
+    fun createAttributesTable() {
         return database.dbAttributeQueries.createAttributesTable()
     }
 
@@ -175,6 +179,10 @@ class IdentityStore(context: Context) {
 
     fun deleteAttribute(attribute: Attribute) {
         database.dbAttributeQueries.deleteAttribute(attribute.id)
+    }
+
+    fun deleteAllAttributes() {
+        database.dbAttributeQueries.deleteAllAttributes()
     }
 
     companion object {

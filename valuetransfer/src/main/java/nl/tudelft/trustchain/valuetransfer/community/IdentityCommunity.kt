@@ -31,6 +31,14 @@ class IdentityCommunity(
 //        }
 //    }
 
+    fun createIdentitiesTable() {
+        store.createIdentitiesTable()
+    }
+
+    fun createAttributesTable() {
+        store.createAttributesTable()
+    }
+
     fun getPersonalIdentity() : Identity {
         return store.getPersonalIdentity()
     }
