@@ -9,7 +9,7 @@
         android:id="@+id/walletOverviewFragment"
         android:name="nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment"
         android:label="Wallet"
-        tools:layout="@layout/fragment_wallet_overview" />
+        tools:layout="@layout/fragment_wallet_vt" />
         <action
             android:id="@+id/action_identityOverview_to_identityView"
             app:destination="@id/identityFragment"
