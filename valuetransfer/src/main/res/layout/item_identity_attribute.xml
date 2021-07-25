@@ -12,14 +12,12 @@
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:background="@drawable/square_rounded_dark"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:background="@color/white">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clChatContentOverview"
@@ -35,7 +33,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@+id/ivAttributeEditButton"
@@ -50,7 +48,7 @@
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/black"
+                android:textColor="@color/white"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@+id/ivAttributeEditButton"
                 app:layout_constraintStart_toStartOf="parent"

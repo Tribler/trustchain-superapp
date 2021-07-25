@@ -2,16 +2,15 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.*
+import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -24,6 +23,7 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.attestation.wallet.cryptography.attest
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
@@ -41,6 +41,7 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
 import nl.tudelft.trustchain.valuetransfer.entity.Attribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
 
 class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
@@ -51,18 +52,18 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     private val adapterAttestations = ItemAdapter()
 
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        store.getAllPersonalIdentities().map { identities ->
+        identityStore.getAllPersonalIdentities().map { identities ->
             createIdentityItems(identities)
         }.asLiveData()
     }
 
     private val itemsAttributes: LiveData<List<Item>> by lazy {
-        store.getAllAttributes().map { attributes ->
+        identityStore.getAllAttributes().map { attributes ->
             createAttributeItems(attributes)
         }.asLiveData()
     }
 
-    private val store by lazy {
+    private val identityStore by lazy {
         IdentityStore.getInstance(requireContext())
     }
 
@@ -80,10 +81,22 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         setHasOptionsMenu(true)
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_identity, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        (requireActivity() as ValueTransferMainActivity).setActionBarTitle("Identity")
+        (requireActivity() as ValueTransferMainActivity).toggleActionBar(false)
+        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(true)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        (activity as ValueTransferMainActivity).toggleActionBar(false)
+        onResume()
 
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
@@ -156,9 +169,16 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.bnvIdentity)
-        val navController = requireActivity().findNavController(R.id.navHostFragment)
-        bottomNavigationView.setupWithNavController(navController)
+        onResume()
+
+        binding.rvIdentities.adapter = adapterIdentity
+        binding.rvIdentities.layoutManager = LinearLayoutManager(context)
+
+        binding.rvAttributes.adapter = adapterAttributes
+        binding.rvAttributes.layoutManager = LinearLayoutManager(context)
+
+        binding.rvAttestations.adapter = adapterAttestations
+        binding.rvAttestations.layoutManager = LinearLayoutManager(context)
 
         itemsIdentity.observe(
             viewLifecycleOwner,
@@ -187,101 +207,98 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             IdentityDetailsDialog(null, identityCommunity()).show(parentFragmentManager, tag)
         }
 
-        binding.tvNoAttributes.setOnClickListener {
-            IdentityAttributeAddDialog(null, getUnusedAttributeNames(), identityCommunity()).show(parentFragmentManager, tag)
+        binding.ivAddAttribute.setOnClickListener {
+            addAttribute()
         }
 
-        binding.tvNoAttestations.setOnClickListener {
-            Log.d("TESTJE", "ADD ATTESTATION")
+        binding.ivAddAttestation.setOnClickListener {
+            addAttestation()
         }
-
-        binding.rvIdentities.adapter = adapterIdentity
-        binding.rvIdentities.layoutManager = LinearLayoutManager(context)
-
-        binding.rvAttributes.adapter = adapterAttributes
-        binding.rvAttributes.layoutManager = LinearLayoutManager(context)
-
-        binding.rvAttestations.adapter = adapterAttestations
-        binding.rvAttestations.layoutManager = LinearLayoutManager(context)
     }
 
     private fun toggleVisibility() {
-        if(store.hasPersonalIdentity()) {
-            binding.tvNoIdentity.visibility = View.GONE
-            binding.tvAttributesTitle.visibility = View.VISIBLE
-            binding.tvAttestationsTitle.visibility = View.VISIBLE
 
-            if(adapterAttestations.itemCount == 0) {
-                binding.tvNoAttestations.visibility = View.VISIBLE
-            }else{
-                binding.tvNoAttestations.visibility = View.GONE
-            }
+        binding.tvNoIdentity.isVisible = !identityStore.hasPersonalIdentity()
+        binding.tvAttributesTitle.isVisible = identityStore.hasPersonalIdentity()
+        binding.tvAttestationsTitle.isVisible = identityStore.hasPersonalIdentity()
 
-            if(adapterAttributes.itemCount == 0) {
-                binding.tvNoAttributes.visibility = View.VISIBLE
-            }else{
-                binding.tvNoAttributes.visibility = View.GONE
-            }
-        }else{
-            binding.tvNoIdentity.visibility = View.VISIBLE
-            binding.tvNoAttributes.visibility = View.GONE
-            binding.tvNoAttestations.visibility = View.GONE
-            binding.tvAttributesTitle.visibility = View.GONE
-            binding.tvAttestationsTitle.visibility = View.GONE
-        }
+        binding.tvNoAttestations.isVisible = identityStore.hasPersonalIdentity() && adapterAttestations.itemCount == 0
+        binding.tvNoAttributes.isVisible = identityStore.hasPersonalIdentity() && adapterAttributes.itemCount == 0
+
+        binding.ivAddAttribute.isVisible = identityStore.hasPersonalIdentity() && getUnusedAttributeNames().isNotEmpty()
+        binding.ivAddAttestation.isVisible = identityStore.hasPersonalIdentity()
+
+        binding.rvAttributes.isVisible = identityStore.hasPersonalIdentity()
+        binding.rvAttestations.isVisible = identityStore.hasPersonalIdentity()
     }
 
     private fun updateAttestations() {
         val oldCount = adapterAttestations.itemCount
         val itemsAttestations = attestationCommunity().database.getAllAttestations()
 
-        toggleVisibility()
-
         if(oldCount != itemsAttestations.size) {
             adapterAttestations.updateItems(
                 createAttestationItems(itemsAttestations)
             )
         }
+
+        toggleVisibility()
+    }
+
+    private fun addAttribute() {
+        IdentityAttributeAddDialog(null, getUnusedAttributeNames(), identityCommunity()).show(parentFragmentManager, tag)
+    }
+
+    private fun addAttestation() {
+        Toast.makeText(requireContext(), "Add attestation (TODO)", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.identity_options, menu)
 
-        menu.getItem(0).isVisible = !store.hasPersonalIdentity()
-        menu.getItem(1).isVisible = store.hasPersonalIdentity()
-        menu.getItem(2).isVisible = store.hasPersonalIdentity()
-        menu.getItem(3).isVisible = store.hasPersonalIdentity()
-        menu.getItem(4).isVisible = store.hasPersonalIdentity() && getUnusedAttributeNames().isNotEmpty()
+        menu.getItem(0).isVisible = !identityStore.hasPersonalIdentity()
+        menu.getItem(1).isVisible = identityStore.hasPersonalIdentity()
+        menu.getItem(2).isVisible = identityStore.hasPersonalIdentity()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
-            R.id.actionAddPersonalIdentity -> {
+            R.id.actionAddIdentity -> {
                 IdentityDetailsDialog(null, identityCommunity()).show(parentFragmentManager, tag)
             }
-            R.id.actionEditPersonalIdentity -> {
-                IdentityDetailsDialog(store.getPersonalIdentity(), identityCommunity()).show(parentFragmentManager, tag)
+            R.id.actionEditIdentity -> {
+                IdentityDetailsDialog(identityStore.getPersonalIdentity(), identityCommunity()).show(parentFragmentManager, tag)
             }
-            R.id.actionRemovePersonalIdentity -> {
+            R.id.actionRemoveIdentity -> {
                 ConfirmDialog("Are you sure to delete your identity?") { dialog ->
                     try {
-                        store.deleteIdentity(store.getPersonalIdentity())
+//                        identityStore.deleteAllAttributes()
+//
+//                        attestationCommunity().database.getAllAttestations().forEach {
+//                            attestationCommunity().database.deleteAttestationByHash(it.attestationHash)
+//                        }
+//
+//                        identityStore.deleteIdentity(identityStore.getPersonalIdentity())
                     }catch(e: Exception) {
                         Toast.makeText(requireContext(), "Identity couldn't be deleted", Toast.LENGTH_SHORT).show()
                     } finally {
                         dialog.dismiss()
-                        activity?.invalidateOptionsMenu()
-                        Toast.makeText(requireContext(), "Identity succesfully deleted", Toast.LENGTH_SHORT).show()
+//                        requireActivity().invalidateOptionsMenu()
+
+//                        (requireActivity() as ValueTransferMainActivity).switchToFragment(ValueTransferMainActivity.walletOverviewFragmentTag)
+//                        (requireActivity() as ValueTransferMainActivity).selectBottomNavigationItem(ValueTransferMainActivity.walletOverviewFragmentTag)
+
+                        Toast.makeText(requireContext(), "Identity successfully deleted. Application initialized.", Toast.LENGTH_SHORT).show()
+//                        (requireActivity() as ValueTransferMainActivity).recreate()
+                        (requireActivity() as ValueTransferMainActivity).reloadActivity()
+
+
+//                        findNavController().popBackStack(this.id, false)
+//                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
                     }
                 }
                     .show(parentFragmentManager, tag)
-            }
-            R.id.actionAddAttestation -> {
-                Toast.makeText(requireContext(), "Add attestation", Toast.LENGTH_SHORT).show()
-            }
-            R.id.actionAddAttribute -> {
-                IdentityAttributeAddDialog(null, getUnusedAttributeNames(), identityCommunity()).show(parentFragmentManager, tag)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -289,7 +306,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
     private fun getUnusedAttributeNames(): List<String> {
         val attributes = resources.getStringArray(R.array.identity_attributes)
-        val currentAttributeNames = store.getAttributeNames()
+        val currentAttributeNames = identityStore.getAttributeNames()
 
         return attributes.filter { name ->
             !currentAttributeNames.contains(name)

@@ -28,7 +28,7 @@ class IdentityItemRenderer(
             tvIdentityGivenNamesSurname.text = "${content.givenNames} ${content.surname}"
 
             view.setOnClickListener {
-                findNavController().navigate(R.id.action_identityOverview_to_identityView)
+                onQRButtonClick(item.identity)
             }
 
         }else if(layoutType == 1) {

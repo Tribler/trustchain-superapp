@@ -9,7 +9,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bnvIdentity"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,13 +22,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:background="@drawable/pill_rounded"
-                android:backgroundTint="@color/white"
+                android:background="@drawable/square_rounded_dark"
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="16dp"
-                android:text="CLICK TO ADD IDENTITY"
-                android:textColor="@color/colorPrimaryValueTransfer"
+                android:text="CLICK HERE TO ADD IDENTITY"
+                android:textColor="@color/white"
                 android:textStyle="bold"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
@@ -44,33 +44,69 @@
 
             <TextView
                 android:id="@+id/tvAttributesTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
                 android:text="Complementary Attributes"
                 android:textColor="@color/white"
                 android:textSize="24sp"
+                app:layout_constraintEnd_toStartOf="@+id/ivAddAttribute"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvIdentities" />
+
+            <ImageView
+                android:id="@+id/ivAddAttribute"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="12dp"
+                android:padding="4dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:src="@drawable/ic_add_black_24dp"
+                tools:background="@drawable/pill_rounded"
+                app:tint="@color/colorPrimaryValueTransfer"
+                tools:tint="@color/colorPrimaryValueTransfer"
+                app:layout_constraintBottom_toBottomOf="@+id/tvAttributesTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvAttributesTitle" />
 
             <TextView
                 android:id="@+id/tvNoAttributes"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="20dp"
                 android:background="@drawable/pill_rounded"
-                android:backgroundTint="@color/white"
-                android:gravity="center"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="16dp"
-                android:text="CLICK TO ADD ATTRIBUTE"
-                android:textColor="@color/colorPrimaryValueTransfer"
-                android:textStyle="bold"
+                android:paddingVertical="4dp"
+                android:text="There are no attributes yet"
+                android:textColor="@color/white"
+                android:textStyle="italic"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvAttributesTitle"
                 tools:visibility="visible" />
+
+<!--            <TextView-->
+<!--                android:id="@+id/tvNoAttributes"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="12dp"-->
+<!--                android:background="@drawable/pill_rounded"-->
+<!--                android:backgroundTint="@color/white"-->
+<!--                android:gravity="center"-->
+<!--                android:paddingHorizontal="12dp"-->
+<!--                android:paddingVertical="16dp"-->
+<!--                android:text="CLICK HERE TO ADD ATTRIBUTE"-->
+<!--                android:textColor="@color/colorPrimaryValueTransfer"-->
+<!--                android:textStyle="bold"-->
+<!--                android:visibility="gone"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/tvAttributesTitle"-->
+<!--                tools:visibility="visible" />-->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvAttributes"
@@ -83,34 +119,68 @@
 
             <TextView
                 android:id="@+id/tvAttestationsTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="4dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="8dp"
                 android:text="Attestations"
                 android:textColor="@color/white"
                 android:textSize="24sp"
+                app:layout_constraintEnd_toStartOf="@+id/ivAddAttestation"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvAttributes" />
+
+            <ImageView
+                android:id="@+id/ivAddAttestation"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="12dp"
+                android:padding="4dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:src="@drawable/ic_add_black_24dp"
+                tools:background="@drawable/pill_rounded"
+                app:tint="@color/colorPrimaryValueTransfer"
+                tools:tint="@color/colorPrimaryValueTransfer"
+                app:layout_constraintBottom_toBottomOf="@+id/tvAttestationsTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvAttestationsTitle" />
 
             <TextView
                 android:id="@+id/tvNoAttestations"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginHorizontal="20dp"
                 android:background="@drawable/pill_rounded"
-                android:backgroundTint="@color/white"
-                android:gravity="center"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="16dp"
-                android:text="CLICK TO ADD ATTESTATION"
-                android:textColor="@color/colorPrimaryValueTransfer"
-                android:textStyle="bold"
+                android:paddingVertical="4dp"
+                android:text="There are no attestations yet"
+                android:textColor="@color/white"
+                android:textStyle="italic"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvAttestationsTitle"
                 tools:visibility="visible" />
+
+<!--            <TextView-->
+<!--                android:id="@+id/tvNoAttestations"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="12dp"-->
+<!--                android:background="@drawable/pill_rounded"-->
+<!--                android:backgroundTint="@color/white"-->
+<!--                android:gravity="center"-->
+<!--                android:paddingHorizontal="12dp"-->
+<!--                android:paddingVertical="16dp"-->
+<!--                android:text="CLICK HERE TO ADD ATTESTATION"-->
+<!--                android:textColor="@color/colorPrimaryValueTransfer"-->
+<!--                android:textStyle="bold"-->
+<!--                android:visibility="gone"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@+id/tvAttestationsTitle"-->
+<!--                tools:visibility="visible" />-->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvAttestations"
@@ -123,16 +193,16 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bnvIdentity"
-        style="@style/BottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:background="@color/colorPrimaryValueTransfer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/valuetransfer_navigation_menu" />
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bnvIdentity"-->
+<!--        style="@style/BottomNavigation"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="0dp"-->
+<!--        android:layout_marginEnd="0dp"-->
+<!--        android:background="@color/colorPrimaryValueTransfer"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:menu="@menu/valuetransfer_navigation_menu" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>
