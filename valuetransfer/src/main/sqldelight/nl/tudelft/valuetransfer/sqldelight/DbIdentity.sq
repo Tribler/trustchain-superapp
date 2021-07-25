@@ -1,4 +1,7 @@
-CREATE TABLE identities (
+
+
+createIdentitiesTable:
+CREATE TABLE IF NOT EXISTS identities (
     id TEXT NOT NULL,
     public_key BLOB NOT NULL,
     name TEXT,

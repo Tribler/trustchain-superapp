@@ -31,3 +31,6 @@ UPDATE attributes SET value = ?, modified = ? WHERE id = ?;
 
 deleteAttribute:
 DELETE FROM attributes WHERE id = ?;
+
+deleteAllAttributes:
+DELETE FROM attributes;
