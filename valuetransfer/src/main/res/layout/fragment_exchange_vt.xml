@@ -231,7 +231,7 @@
         android:id="@+id/tvTransactionsTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:text="Transactions"
         android:textColor="@color/white"
@@ -239,16 +239,33 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clRequest" />
 
+    <TextView
+        android:id="@+id/tvNoTransactions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginHorizontal="20dp"
+        android:background="@drawable/pill_rounded"
+        android:paddingVertical="4dp"
+        android:text="There are no transactions yet"
+        android:textColor="@color/white"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTransactionsTitle"
+        tools:visibility="visible" />
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:fillViewport="true"
         android:layout_marginTop="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/bnvExchange"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTransactionsTitle">
+        app:layout_constraintTop_toBottomOf="@+id/tvNoTransactions">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -272,7 +289,7 @@
                 android:gravity="center"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="8dp"
-                android:text="SHOW MORE TRANSACTIONS"
+                android:text="SHOW MORE TRANSACTIONS..."
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -280,16 +297,14 @@
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bnvExchange"
-        style="@style/BottomNavigation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryValueTransfer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/valuetransfer_navigation_menu" />
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bnvExchange"-->
+<!--        style="@style/BottomNavigation"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@color/colorPrimaryValueTransfer"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:menu="@menu/valuetransfer_navigation_menu" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

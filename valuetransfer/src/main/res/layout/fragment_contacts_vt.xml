@@ -26,7 +26,7 @@
         android:layout_margin="12dp"
         android:background="@drawable/square_rounded_dark"
         android:paddingHorizontal="12dp"
-        android:paddingTop="12dp"
+        android:paddingVertical="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -53,7 +53,7 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/light_gray"
+            android:backgroundTint="@color/white"
             android:hint="Search Contact..."
             android:inputType="text"
             android:paddingStart="45dp"
@@ -62,6 +62,7 @@
             android:textColor="@color/black"
             android:textSize="12dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/tvNoContacts"
             app:layout_constraintStart_toEndOf="@+id/ivAddContactButton"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -88,16 +89,34 @@
             app:layout_constraintTop_toTopOf="@+id/etSearchContact"
             app:tint="@color/colorPrimaryValueTransfer" />
 
+        <TextView
+            android:id="@+id/tvNoContacts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="12dp"
+            android:background="@drawable/pill_rounded"
+            android:gravity="center"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="16dp"
+            android:text="NO CONTACTS YET"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/etSearchContact"
+            tools:visibility="visible" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvContacts"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="2dp"
             android:orientation="horizontal"
+            android:paddingTop="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etSearchContact"
+            app:layout_constraintTop_toBottomOf="@+id/tvNoContacts"
             tools:itemCount="1"
             tools:listitem="@layout/item_contacts" />
 
@@ -107,7 +126,7 @@
         android:id="@+id/tvRecentTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:text="Recent"
         android:textColor="@color/white"
@@ -179,15 +198,13 @@
         android:id="@+id/tvNoChats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginHorizontal="20dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/gray"
-        android:gravity="center"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="16dp"
-        android:text="NO CHATS (YET)"
+        android:paddingVertical="4dp"
+        android:text="There are no conversations with contacts yet"
         android:textColor="@color/white"
-        android:textStyle="bold"
+        android:textStyle="italic"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -200,7 +217,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
         android:fillViewport="true"
-        app:layout_constraintBottom_toTopOf="@+id/bnvContacts"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvNoChats">
@@ -231,17 +248,17 @@
     <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
     <!--    </ScrollView>-->
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bnvContacts"
-        style="@style/BottomNavigation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        android:background="@color/colorPrimaryValueTransfer"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/valuetransfer_navigation_menu" />
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:id="@+id/bnvContacts"-->
+<!--        style="@style/BottomNavigation"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="0dp"-->
+<!--        android:layout_marginEnd="0dp"-->
+<!--        android:background="@color/colorPrimaryValueTransfer"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintLeft_toLeftOf="parent"-->
+<!--        app:layout_constraintRight_toRightOf="parent"-->
+<!--        app:menu="@menu/valuetransfer_navigation_menu" />-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

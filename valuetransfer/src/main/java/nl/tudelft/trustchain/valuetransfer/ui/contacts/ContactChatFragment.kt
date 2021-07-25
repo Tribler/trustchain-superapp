@@ -11,22 +11,16 @@ import android.os.Bundle
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.fragment_contacts_chat.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -39,7 +33,6 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.ChatMessageItem
-import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.peerchat.util.saveFile
 import nl.tudelft.trustchain.valuetransfer.R
@@ -47,27 +40,20 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsChatBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactRenameDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.TransferMoneyDialog
-import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
+import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.scrollToBottom
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.io.File
 import java.text.SimpleDateFormat
 
-
 class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     private val binding by viewBinding(FragmentContactsChatBinding::bind)
 
-    private val adapter = ItemAdapter()
+    private val adapterMessages = ItemAdapter()
 
     private val peerChatStore by lazy {
         PeerChatStore.getInstance(requireContext())
-    }
-
-    private val items: LiveData<List<Item>> by lazy {
-        peerChatStore.getAllByPublicKey(publicKey).map { messages ->
-            createItems(messages)
-        }.asLiveData()
     }
 
     private val gatewayStore by lazy {
@@ -83,28 +69,47 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
+    private val itemsMessages: LiveData<List<Item>> by lazy {
+        peerChatStore.getAllByPublicKey(publicKey).map { messages ->
+            createMessagesItems(messages)
+        }.asLiveData()
+    }
+
     private val publicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
     }
 
     private val publicKeyBin by lazy {
-        requireArguments().getString(ConversationFragment.ARG_PUBLIC_KEY)!!
+        requireArguments().getString(ValueTransferMainActivity.ARG_PUBLIC_KEY)!!
     }
 
-    val name by lazy {
-        requireArguments().getString(ConversationFragment.ARG_NAME)!!
+    private val name by lazy {
+        requireArguments().getString(ValueTransferMainActivity.ARG_NAME)!!
+    }
+
+    private val parentTag by lazy {
+        requireArguments().getString(ValueTransferMainActivity.ARG_PARENT)!!
     }
 
     init {
         setHasOptionsMenu(true)
     }
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_contacts_chat, container, false)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (requireActivity() as ValueTransferMainActivity).toggleActionBar(true)
+        (requireActivity() as ValueTransferMainActivity).setActionBarTitle(name)
+        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(false)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        (activity as ValueTransferMainActivity).toggleActionBar(true)
-
-        adapter.registerRenderer(ContactChatItemRenderer {
+        adapterMessages.registerRenderer(ContactChatItemRenderer {
             val attachment = it.chatMessage.attachment
             if(attachment != null && attachment.type == MessageAttachment.TYPE_IMAGE) {
                 val file = attachment.getFile(requireContext())
@@ -116,10 +121,10 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             }
         })
 
-        items.observe(
+        itemsMessages.observe(
             this,
             Observer {
-                adapter.updateItems(it)
+                adapterMessages.updateItems(it)
                 binding.rvMessages.setItemViewCacheSize(it.size)
                 scrollToBottom(binding.rvMessages)
             }
@@ -144,13 +149,10 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        activity?.findViewById<BottomNavigationView>(R.id.bottomNavigation)!!.isVisible = false
+        onResume()
 
         etMessage.doAfterTextChanged { state ->
             toggleButton(btnSendMessage, state != null && state.isNotEmpty())
-//            btnSendMessage.isEnabled = state != null && state.isNotEmpty()
-//            btnSendMessage.alpha = if(state != null && state.isNotEmpty()) 1f else 0.5f
-//            btnSendMessage.isClickable = state != null && state.isNotEmpty()
         }
 
         btnSendMessage.setOnClickListener {
@@ -166,7 +168,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             optionsMenu.menuInflater.inflate(R.menu.contact_chat_attachments, optionsMenu.menu)
             optionsMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
 
-                val contact = peerChatStore.contactsStore.getContactFromPublicKey(defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes()))
+                val contact = peerChatStore.contactsStore.getContactFromPublicKey(publicKey)
 
                 when(item.itemId) {
                     R.id.actionSendPhotoVideo -> {
@@ -203,7 +205,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         linearLayoutManager.stackFromEnd = true
         linearLayoutManager.reverseLayout = false
 
-        binding.rvMessages.adapter = adapter
+        binding.rvMessages.adapter = adapterMessages
         binding.rvMessages.layoutManager = linearLayoutManager
     }
 
@@ -211,16 +213,31 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.contact_chat_options, menu)
 
-        if(peerChatStore.contactsStore.getContactFromPublicKey(defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())) == null) {
+        if(peerChatStore.contactsStore.getContactFromPublicKey(publicKey) == null) {
             menu.getItem(0).title = "Add contact"
             menu.getItem(1).title = "Remove local conversation"
         }
     }
 
+    fun onBackPressed() {
+        val fragmentTransaction = parentFragmentManager.beginTransaction()
+        val previousFragment = parentFragmentManager.fragments.filter {
+            it.tag == parentTag
+        }
+
+        fragmentTransaction.show(previousFragment[0]).remove(this).commit()
+        previousFragment[0].onResume()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        var contact = peerChatStore.contactsStore.getContactFromPublicKey(defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes()))
+        var contact = peerChatStore.contactsStore.getContactFromPublicKey(publicKey)
 
         when(item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+
+                return true
+            }
             R.id.actionEditContactName -> {
                 if (contact == null) {
                     contact = Contact("", publicKey)
@@ -234,28 +251,21 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             }
             R.id.actionRemoveContact -> {
                 if(contact == null) {
-                    for(chatItem in adapter.items) {
+                    for(chatItem in adapterMessages.items) {
                         peerChatStore.deleteMessage(chatItem as ChatMessageItem)
                     }
-//                    findNavController().popBackStack(requireParentFragment().id, false)
-                    requireActivity().onBackPressed()
                     Toast.makeText(requireContext(), "Local conversation with contact has been removed", Toast.LENGTH_SHORT).show()
+                    onBackPressed()
                 }else{
                     peerChatStore.contactsStore.deleteContact(contact)
                     Toast.makeText(requireContext(), "Contact removed and chat is moved to hidden chats", Toast.LENGTH_LONG).show()
-                    requireActivity().onBackPressed()
+                    onBackPressed()
                 }
             }
             R.id.actionCopyPublicKey -> {
                 copyToClipboard(requireContext(), (contact?.publicKey ?: publicKey).keyToBin().toHex(), "Public Key")
                 Toast.makeText(requireContext(), "Public key copied to clipboard", Toast.LENGTH_SHORT).show()
             }
-//            R.id.actionRemoveLocalConversation -> {
-//                for(chatItem in adapter.items) {
-//                    peerChatStore.deleteMessage(chatItem as ChatMessageItem)
-//                }
-//                findNavController().popBackStack(requireParentFragment().id, false)
-//            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -287,7 +297,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         getPeerChatCommunity().sendImage(file, publicKey)
     }
 
-    private fun createItems(messages: List<ChatMessage>): List<Item> {
+    private fun createMessagesItems(messages: List<ChatMessage>): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
             var shouldShowDate = false
 

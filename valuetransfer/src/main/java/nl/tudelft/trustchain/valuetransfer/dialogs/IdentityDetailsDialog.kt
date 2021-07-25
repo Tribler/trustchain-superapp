@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
@@ -29,7 +30,7 @@ class IdentityDetailsDialog(
 
     private var cal = Calendar.getInstance()
 
-    private val store by lazy {
+    private val identityStore by lazy {
         IdentityStore.getInstance(requireContext())
     }
 
@@ -162,9 +163,15 @@ class IdentityDetailsDialog(
                 val documentNumber = documentNumberView.text.toString()
 
                 if (identity == null) {
-                    val newIdentity = community.createPersonalIdentity(givenNames, surname, placeOfBirth, dateOfBirth, nationality, gender, personalNumber, documentNumber)
-                    store.addIdentity(newIdentity)
-                    Toast.makeText(requireContext(), "Personal identity added", Toast.LENGTH_SHORT).show()
+                    try {
+                        val newIdentity = community.createPersonalIdentity(givenNames, surname, placeOfBirth, dateOfBirth, nationality, gender, personalNumber, documentNumber)
+                        identityStore.addIdentity(newIdentity)
+                        Toast.makeText(requireContext(), "Personal identity added", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
+                    } catch(e: Exception) {
+                        Log.e("ERROR", e.toString())
+                        Toast.makeText(requireContext(), "Personal identity couldn't be added", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     identity.content.givenNames = givenNames
                     identity.content.surname = surname
@@ -175,9 +182,14 @@ class IdentityDetailsDialog(
                     identity.content.personalNumber = personalNumber
                     identity.content.documentNumber = documentNumber
 
-                    store.editPersonalIdentity(identity)
-                    Toast.makeText(requireContext(), "Personal identity updated", Toast.LENGTH_SHORT)
-                        .show()
+                    try {
+                        identityStore.editPersonalIdentity(identity)
+                        Toast.makeText(requireContext(), "Personal identity updated", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
+                    } catch(e: Exception) {
+                        Log.e("ERROR", e.toString())
+                        Toast.makeText(requireContext(), "Personal identity couldn't be updated", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 bottomSheetDialog.dismiss()

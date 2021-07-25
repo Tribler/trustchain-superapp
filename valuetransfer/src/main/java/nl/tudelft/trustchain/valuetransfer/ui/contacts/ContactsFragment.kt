@@ -2,7 +2,9 @@ package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
@@ -43,10 +45,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
     private val binding by viewBinding(FragmentContactsVtBinding::bind)
 
-    private val chatsAdapter = ItemAdapter()
-    private val hiddenChatsAdapter = ItemAdapter()
-    private val contactsAdapter = ItemAdapter()
-
     private val peerChatStore by lazy {
         PeerChatStore.getInstance(requireContext())
     }
@@ -68,11 +66,15 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
     }
 
+    private val chatsAdapter = ItemAdapter()
+    private val hiddenChatsAdapter = ItemAdapter()
+    private val contactsAdapter = ItemAdapter()
+
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
     private val hiddenChatItems: LiveData<List<Item>> by lazy {
-        peerChatStore.getAllMessages().map { messages ->
-            createHiddenChatItems(messages)
+        combine(peerChatStore.getAllMessages(), peers) { messages, peers ->
+            createHiddenChatItems(messages, peers)
         }.asLiveData()
     }
 
@@ -95,18 +97,25 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     private var hiddenChatsShown = false
     private var searchFilter = ""
 
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_contacts_vt, container, false)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        (activity as ValueTransferMainActivity).toggleActionBar(false)
 
         hiddenChatsAdapter.registerRenderer(
             ChatItemRenderer(
                 {
                     val args = Bundle()
-                    args.putString(ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(ARG_NAME, it.name)
-                    findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_chatsFragment_to_contactChatFragment, args)
+                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
+
+//                    val contactChatFragment = ContactChatFragment()
+//                    contactChatFragment.arguments = args
+//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
+                    (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, {
                     Log.d("TESTJE", "ON DEPOSIT CLICK")
                 }, {
@@ -119,9 +128,14 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             ChatItemRenderer(
                 {
                     val args = Bundle()
-                    args.putString(ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(ARG_NAME, it.name)
-                    findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_chatsFragment_to_contactChatFragment, args)
+                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
+
+//                    val contactChatFragment = ContactChatFragment()
+//                    contactChatFragment.arguments = args
+//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
+                    (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, { contact ->
                     TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
                 }, { contact ->
@@ -133,9 +147,14 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         contactsAdapter.registerRenderer(
             ContactsItemRenderer {
                 val args = Bundle()
-                args.putString(ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                args.putString(ARG_NAME, it.name)
-                findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_chatsFragment_to_contactChatFragment, args)
+                args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
+
+//                val contactChatFragment = ContactChatFragment()
+//                contactChatFragment.arguments = args
+//                (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
+                (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
             }
         )
 
@@ -150,21 +169,22 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     override fun onResume() {
         super.onResume()
 
-        (activity as ValueTransferMainActivity).toggleActionBar(false)
-
-        Log.d("TESTJE", "RESUME, ${hiddenChatsAdapter.itemCount} ${hiddenChatItems.value?.size}")
+        (requireActivity() as ValueTransferMainActivity).setActionBarTitle("Contacts")
+        (requireActivity() as ValueTransferMainActivity).toggleActionBar(false)
+        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(true)
 
         observeHiddenChats(viewLifecycleOwner, hiddenChatsAdapter, hiddenChatItems)
         observeChats(viewLifecycleOwner, chatsAdapter, chatItems)
         observeContacts(viewLifecycleOwner, contactsAdapter)
+
+        binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
+        binding.clTogglePendingChats.isVisible = hiddenChatsAdapter.itemCount > 0
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomNavigationView = requireActivity().findViewById<BottomNavigationView>(R.id.bnvContacts)
-        val navController = requireActivity().findNavController(R.id.navHostFragment)
-        bottomNavigationView.setupWithNavController(navController)
+        onResume()
 
         binding.ivSearchBarCancelIcon.setOnClickListener {
             etSearchContact.text = null
@@ -179,11 +199,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             observeContacts(viewLifecycleOwner, contactsAdapter)
         }
 
+        onFocusChange(binding.etSearchContact, requireContext())
+
         binding.ivAddContactButton.setOnClickListener {
             ContactAddDialog(getIpv8().myPeer.publicKey).show(parentFragmentManager, tag)
         }
-
-        onFocusChange(binding.etSearchContact, requireContext())
 
         binding.rvHiddenChats.adapter = hiddenChatsAdapter
         binding.rvHiddenChats.layoutManager = LinearLayoutManager(context)
@@ -206,6 +226,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             binding.ivHideHiddenChats.isVisible = !hiddenChatsShown
             binding.tvHideHiddenChats.isVisible = !hiddenChatsShown
             binding.rvHiddenChats.isVisible = !hiddenChatsShown
+
+            binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
         }
     }
 
@@ -213,12 +235,13 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         items.observe(
             owner,
             Observer { list ->
-                clTogglePendingChats.isVisible = list.isNotEmpty()
-
                 if(list.isEmpty()) {
                     binding.rvHiddenChats.visibility = View.GONE
                     hiddenChatsShown = false
                 }
+
+                binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
+                binding.clTogglePendingChats.isVisible = list.isNotEmpty()
                 adapter.updateItems(list)
             }
         )
@@ -246,6 +269,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                         || item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
                 }
                 adapter.updateItems(list)
+
+                binding.tvNoContacts.isVisible = list.isEmpty()
             }
         )
     }
@@ -272,7 +297,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     }
 
     private fun createHiddenChatItems(
-        messages: List<ChatMessage>
+        messages: List<ChatMessage>,
+        peers: List<Peer>
     ): List<ContactItem> {
         return messages
             .filter {
@@ -287,12 +313,13 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             }
             .map {
                 val publicKey = if(it.outgoing) it.recipient else it.sender
+                val peer = peers.find { it.publicKey == publicKey }
 
                 ContactItem(
                     Contact("Unknown contact", publicKey),
                     it,
-                    isOnline = false,
-                    isBluetooth = false
+                    isOnline = peer != null && !peer.address.isEmpty(),
+                    isBluetooth = peer?.bluetoothAddress != null
                 )
             }
     }
@@ -317,10 +344,5 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                     peer?.bluetoothAddress != null
                 )
             }
-    }
-
-    companion object {
-        const val ARG_PUBLIC_KEY = "public_key"
-        const val ARG_NAME = "name"
     }
 }
