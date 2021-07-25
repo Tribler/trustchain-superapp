@@ -30,6 +30,13 @@
         android:name="nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment"
         android:label="Identity"
         tools:layout="@layout/fragment_identity" />
+    <action
+        android:id="@+id/action_identityFragment_to_walletOverViewFragment"
+        app:destination="@id/walletOverviewFragment"
+        app:enterAnim="@anim/fragment_open_enter"
+        app:exitAnim="@anim/fragment_open_exit"
+        app:popEnterAnim="@anim/fragment_close_enter"
+        app:popExitAnim="@anim/fragment_close_exit" />
 
     <fragment
         android:id="@+id/contactsFragment"
@@ -53,6 +60,7 @@
         android:label="{name}">
         <argument android:name="name" />
         <argument android:name="public_key" />
+        <argument android:name="parent_tag" />
     </fragment>
 
     <fragment
