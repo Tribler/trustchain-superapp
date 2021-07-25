@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -27,9 +25,11 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletContactsBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.TransferMoneyDialog
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItemRenderer
+import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 
 class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
     private val binding by viewBinding(FragmentWalletContactsBinding::bind)
@@ -42,7 +42,7 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
 
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
-    private val items: LiveData<List<Item>> by lazy {
+    private val itemsContacts: LiveData<List<Item>> by lazy {
         combine(peerChatStore.getContactsWithLastMessages(), peers) { contacts, peers ->
             createItems(contacts.filter {
                 it.second?.timestamp != null &&
@@ -71,9 +71,23 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
             ChatItemRenderer(
                 {
                     val args = Bundle()
-                    args.putString(WalletContactsFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(WalletContactsFragment.ARG_NAME, it.name)
-                    findNavController().navigate(R.id.action_walletOverviewFragment_to_contactChatFragment, args)
+                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
+
+                    val contactChatFragment = ContactChatFragment()
+                    contactChatFragment.arguments = args
+
+
+
+                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
+
+//                    findNavController().navigate(R.id.action_walletOverviewFragment_to_contactChatFragment, args)
+
+//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
+//                    childFragmentManager.beginTransaction().add(R.id.container, contactChatFragment).commit()
+//                    parentFragmentManager.beginTransaction().hide(currentFragment!!).addToBackStack(
+//                        ValueTransferMainActivity.walletOverviewFragmentTag).add(R.id.container, contactChatFragment).commit()
                 }, { contact ->
                     TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
                 }, { contact ->
@@ -96,7 +110,7 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
         binding.rvContactChats.adapter = adapter
         binding.rvContactChats.layoutManager = LinearLayoutManager(context)
 
-        items.observe(
+        itemsContacts.observe(
             viewLifecycleOwner,
             Observer { list ->
                 if(list.isEmpty()) {
@@ -131,8 +145,6 @@ class WalletContactsFragment : BaseFragment(R.layout.fragment_wallet_contacts) {
     }
 
     companion object {
-        const val ARG_PUBLIC_KEY = "public_key"
-        const val ARG_NAME = "name"
         private const val MAX_CHATS = 3
     }
 

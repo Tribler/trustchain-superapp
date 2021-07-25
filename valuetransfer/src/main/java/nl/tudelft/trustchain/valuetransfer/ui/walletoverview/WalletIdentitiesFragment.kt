@@ -6,7 +6,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -28,12 +27,12 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
     private val adapter = ItemAdapter()
 
     private val items: LiveData<List<Item>> by lazy {
-        store.getAllIdentities().map { identities ->
+        identityStore.getAllIdentities().map { identities ->
             createItems(identities)
         }.asLiveData()
     }
 
-    private val store by lazy {
+    private val identityStore by lazy {
         IdentityStore.getInstance(requireContext())
     }
 
@@ -53,6 +52,8 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.tvIdentityTitle.isVisible = identityStore.hasPersonalIdentity()
+
         binding.rvIdentities.adapter = adapter
         binding.rvIdentities.layoutManager = LinearLayoutManager(context)
 
@@ -63,10 +64,17 @@ class WalletIdentitiesFragment : BaseFragment(R.layout.fragment_wallet_identitie
         items.observe(
             viewLifecycleOwner,
             Observer {
-                binding.tvNoPersonalIdentity.visibility = if(it.isEmpty()) View.VISIBLE else View.GONE
+                binding.tvNoPersonalIdentityExplanation.isVisible = it.isEmpty()
+                binding.tvNoPersonalIdentity.isVisible = it.isEmpty()
                 adapter.updateItems(it)
             }
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        binding.tvIdentityTitle.isVisible = identityStore.hasPersonalIdentity()
     }
 
     private fun createItems(identities: List<Identity>): List<Item> {
