@@ -25,7 +25,6 @@ class ValueTransferMainActivity : BaseActivity() {
     private val identityFragment = IdentityFragment()
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
-    private var contactChatFragment = ContactChatFragment()
 
     private val fragmentManager = supportFragmentManager
 
@@ -55,13 +54,16 @@ class ValueTransferMainActivity : BaseActivity() {
         finish()
     }
 
+    /**
+     * Define bottom navigation view listeners
+     */
     private fun initListeners() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.walletOverviewFragment -> pushFragment(walletOverviewFragment, walletOverviewFragmentTag)
-                R.id.identityFragment -> pushFragment(identityFragment, identityFragmentTag)
-                R.id.exchangeFragment -> pushFragment(exchangeFragment, exchangeFragmentTag)
-                R.id.contactsFragment -> pushFragment(contactsFragment, contactsFragmentTag)
+                R.id.walletOverviewFragment -> pushFragment(walletOverviewFragment)
+                R.id.identityFragment -> pushFragment(identityFragment)
+                R.id.exchangeFragment -> pushFragment(exchangeFragment)
+                R.id.contactsFragment -> pushFragment(contactsFragment)
             }
             true
         }
@@ -70,36 +72,17 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Controller from fragment to fragment
      */
-    fun pushFragment(fragment: Fragment, tag: String) {
-        val fragmentTransaction = fragmentManager.beginTransaction()
-
+    fun pushFragment(fragment: Fragment) {
         val previousFragment = fragmentManager.fragments.first {
             it.isVisible
         }
 
-        if (fragmentManager.findFragmentByTag(tag) == null) {
-            fragmentTransaction
-                .add(R.id.container, fragment, tag)
-                .hide(previousFragment)
-                .commit()
-        } else {
-            fragmentTransaction
-                .show(fragment)
-                .hide(previousFragment)
-                .commit()
-            fragment.onResume()
-        }
+        fragmentManager.beginTransaction()
+            .show(fragment)
+            .hide(previousFragment)
+            .commit()
+        fragment.onResume()
     }
-
-//    fun switchToFragment(tag: String) {
-//        when (tag) {
-//            walletOverviewFragmentTag -> pushFragment(walletOverviewFragment, tag)
-//            identityFragmentTag -> pushFragment(identityFragment, tag)
-//            exchangeFragmentTag -> pushFragment(exchangeFragment, tag)
-//            contactsFragmentTag -> pushFragment(contactsFragment, tag)
-//            contactChatFragmentTag -> pushFragment(contactChatFragment, tag)
-//        }
-//    }
 
     /**
      * Controller from fragment to detail view fragment
@@ -111,21 +94,13 @@ class ValueTransferMainActivity : BaseActivity() {
 
         when(tag) {
             contactChatFragmentTag -> {
-                if(fragmentManager.findFragmentByTag(contactChatFragmentTag) == null) {
-                    Log.d("TESTJE", "CONTACT CHAT NOT LOADED BEFORE")
+                val contactChatFragment = ContactChatFragment()
+                contactChatFragment.arguments = args
 
-                    contactChatFragment = ContactChatFragment()
-                    contactChatFragment.arguments = args
-
-                    fragmentManager.beginTransaction()
-                        .add(R.id.container, contactChatFragment, contactChatFragmentTag)
-                        .hide(previousFragment)
-                        .commit()
-                }else{
-                    Log.d("TESTJE", "CONTACT CHAT LOADED BEFORE")
-                    contactChatFragment.arguments = args
-                    pushFragment(contactChatFragment, contactChatFragmentTag)
-                }
+                fragmentManager.beginTransaction()
+                    .add(R.id.container, contactChatFragment, contactChatFragmentTag)
+                    .hide(previousFragment)
+                    .commit()
             }
         }
     }
@@ -143,15 +118,24 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Change title of action bar
+     */
     fun setActionBarTitle(title: String?) {
         supportActionBar!!.title = title
     }
 
+    /**
+     * Switch visibility of action bar
+     */
     fun toggleActionBar(state: Boolean) {
         supportActionBar!!.setDisplayHomeAsUpEnabled(state)
         supportActionBar!!.setHomeButtonEnabled(state)
     }
 
+    /**
+     * Switch visibility of bottom navigation view
+     */
     fun toggleBottomNavigation(state: Boolean) {
         bottomNavigationView.isVisible = state
     }
