@@ -17,44 +17,39 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/tvNoIdentity"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="12dp"
-                android:background="@drawable/square_rounded_dark"
-                android:gravity="center"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="16dp"
-                android:text="CLICK HERE TO ADD IDENTITY"
-                android:textColor="@color/white"
-                android:textStyle="bold"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible" />
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvIdentities"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoIdentity"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_identity_detail" />
 
             <TextView
                 android:id="@+id/tvAttributesTitle"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="8dp"
-                android:text="Complementary Attributes"
+                android:text="Identity Attributes"
                 android:textColor="@color/white"
                 android:textSize="24sp"
-                app:layout_constraintEnd_toStartOf="@+id/ivAddAttribute"
+                app:layout_constraintEnd_toStartOf="@+id/ivAttributesInfoIcon"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvIdentities" />
+
+            <ImageView
+                android:id="@+id/ivAttributesInfoIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_info_24"
+                android:tooltipText="Attributes provide extra information about you and your identity"
+                app:layout_constraintBottom_toBottomOf="@+id/tvAttributesTitle"
+                app:layout_constraintStart_toEndOf="@+id/tvAttributesTitle"
+                app:layout_constraintTop_toTopOf="@+id/tvAttributesTitle" />
 
             <ImageView
                 android:id="@+id/ivAddAttribute"
@@ -89,25 +84,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvAttributesTitle"
                 tools:visibility="visible" />
 
-<!--            <TextView-->
-<!--                android:id="@+id/tvNoAttributes"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_margin="12dp"-->
-<!--                android:background="@drawable/pill_rounded"-->
-<!--                android:backgroundTint="@color/white"-->
-<!--                android:gravity="center"-->
-<!--                android:paddingHorizontal="12dp"-->
-<!--                android:paddingVertical="16dp"-->
-<!--                android:text="CLICK HERE TO ADD ATTRIBUTE"-->
-<!--                android:textColor="@color/colorPrimaryValueTransfer"-->
-<!--                android:textStyle="bold"-->
-<!--                android:visibility="gone"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@+id/tvAttributesTitle"-->
-<!--                tools:visibility="visible" />-->
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvAttributes"
                 android:layout_width="match_parent"
@@ -119,16 +95,28 @@
 
             <TextView
                 android:id="@+id/tvAttestationsTitle"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="8dp"
                 android:text="Attestations"
                 android:textColor="@color/white"
                 android:textSize="24sp"
-                app:layout_constraintEnd_toStartOf="@+id/ivAddAttestation"
+                app:layout_constraintEnd_toStartOf="@+id/ivAttestationsInfoIcon"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvAttributes" />
+
+            <ImageView
+                android:id="@+id/ivAttestationsInfoIcon"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="8dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_baseline_info_24"
+                android:tooltipText="Attestations declare that a claim about a piece of information is validated by an authority"
+                app:layout_constraintBottom_toBottomOf="@+id/tvAttestationsTitle"
+                app:layout_constraintStart_toEndOf="@+id/tvAttestationsTitle"
+                app:layout_constraintTop_toTopOf="@+id/tvAttestationsTitle" />
 
             <ImageView
                 android:id="@+id/ivAddAttestation"

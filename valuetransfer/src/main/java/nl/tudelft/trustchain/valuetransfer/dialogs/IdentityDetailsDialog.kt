@@ -10,15 +10,17 @@ import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,96 +36,160 @@ class IdentityDetailsDialog(
         IdentityStore.getInstance(requireContext())
     }
 
+    private fun validateEditTexts(map: Map<String, EditText>): Boolean {
+        return map.none {
+            it.value.text.isEmpty()
+        }
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_identity_add, null)
 
-            val givenNamesView = view.findViewById<EditText>(R.id.etGivenNames)
-            val surnameView = view.findViewById<EditText>(R.id.etSurname)
-            val placeOfBirthView = view.findViewById<EditText>(R.id.etPlaceOfBirth)
-            val dateOfBirthView = view.findViewById<EditText>(R.id.etDateOfBirth)
-            val nationalityView = view.findViewById<EditText>(R.id.etNationality)
-            val personalNumberView = view.findViewById<EditText>(R.id.etPersonalNumber)
-            val documentNumberView = view.findViewById<EditText>(R.id.etDocumentNumber)
-            val saveButton = view.findViewById<Button>(R.id.btnSavePersonalIdentity)
-            saveButton.isEnabled = true
+            val editTexts = mapOf<String, EditText>(
+                "givenNames" to view.findViewById(R.id.etGivenNames),
+                "surname" to view.findViewById(R.id.etSurname),
+                "placeOfBirth" to view.findViewById(R.id.etPlaceOfBirth),
+                "dateOfBirth" to view.findViewById(R.id.etDateOfBirth),
+                "nationality" to view.findViewById(R.id.etNationality),
+                "personalNumber" to view.findViewById(R.id.etPersonalNumber),
+                "documentNumber" to view.findViewById(R.id.etDocumentNumber)
+            )
 
             val genderButtonGroup = view.findViewById<MaterialButtonToggleGroup>(R.id.btnGenderGroup)
+            val btnMale = view.findViewById<MaterialButton>(R.id.btnMale)
+            val btnFemale = view.findViewById<MaterialButton>(R.id.btnFemale)
+
+            val saveButton = view.findViewById<Button>(R.id.btnSaveIdentity)
+            toggleButton(saveButton, identity != null)
+
+            editTexts.forEach { map ->
+                map.value.doAfterTextChanged {
+                    toggleButton(saveButton, validateEditTexts(editTexts) && (btnMale.isChecked || btnFemale.isChecked))
+                }
+            }
 
             if (identity != null) {
-                givenNamesView.setText(identity.content.givenNames)
-                surnameView.setText(identity.content.surname)
-                placeOfBirthView.setText(identity.content.placeOfBirth)
-                dateOfBirthView.setText(SimpleDateFormat("MMMM d, yyyy").format(identity.content.dateOfBirth))
+                editTexts["givenNames"]!!.setText(identity.content.givenNames)
+                editTexts["surname"]!!.setText(identity.content.surname)
+                editTexts["placeOfBirth"]!!.setText(identity.content.placeOfBirth)
+                editTexts["dateOfBirth"]!!.setText(SimpleDateFormat("MMMM d, yyyy").format(identity.content.dateOfBirth))
+
                 val day = SimpleDateFormat("d").format(identity.content.dateOfBirth).toInt()
                 val month = SimpleDateFormat("M").format(identity.content.dateOfBirth).toInt()
                 val year = SimpleDateFormat("yyyy").format(identity.content.dateOfBirth).toInt()
                 cal.set(year, month - 1, day)
 
-                nationalityView.setText(identity.content.nationality)
-                personalNumberView.setText(identity.content.personalNumber.toString())
-                documentNumberView.setText(identity.content.documentNumber)
+                editTexts["nationality"]!!.setText(identity.content.nationality)
+                editTexts["personalNumber"]!!.setText(identity.content.personalNumber.toString())
+                editTexts["documentNumber"]!!.setText(identity.content.documentNumber)
 
                 when(identity.content.gender) {
                     "Male" -> {
-                        view.findViewById<MaterialButton>(R.id.btnMale).isChecked = true
-                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(
+                        btnMale.isChecked = true
+                        btnMale.isCheckable = false
+                        btnMale.setBackgroundColor(
                             ContextCompat.getColor(
                                 requireContext(),
                                 R.color.colorPrimaryDarkValueTransfer
                             )
                         )
-                        view.findViewById<Button>(R.id.btnMale).setTextColor(Color.WHITE)
+                        btnMale.setTextColor(Color.WHITE)
                     }
                     "Female" -> {
-                        view.findViewById<MaterialButton>(R.id.btnFemale).isChecked = true
-                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(
+                        btnFemale.isChecked = true
+                        btnFemale.isCheckable = false
+                        btnFemale.setBackgroundColor(
                             ContextCompat.getColor(
                                 requireContext(),
                                 R.color.colorPrimaryDarkValueTransfer
                             )
                         )
-                        view.findViewById<Button>(R.id.btnFemale).setTextColor(Color.WHITE)
+                        btnFemale.setTextColor(Color.WHITE)
                     }
                 }
             }
 
-            genderButtonGroup.addOnButtonCheckedListener(MaterialButtonToggleGroup.OnButtonCheckedListener { _, checkedId, isChecked ->
-                if (isChecked) {
-                    if (checkedId == R.id.btnMale) {
-                        Log.d("CLICKED", "MALE")
-                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryDarkValueTransfer
+            genderButtonGroup.addOnButtonCheckedListener(MaterialButtonToggleGroup.OnButtonCheckedListener { _, checkedId, _ ->
+//                if (isChecked) {
+                    when(checkedId) {
+                        R.id.btnMale -> {
+                            btnMale.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryDarkValueTransfer
+                                )
                             )
-                        )
-                        view.findViewById<Button>(R.id.btnMale).setTextColor(Color.WHITE)
-                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(Color.WHITE)
-                        view.findViewById<Button>(R.id.btnFemale).setTextColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryValueTransfer
+                            btnMale.setTextColor(Color.WHITE)
+                            btnFemale.setBackgroundColor(Color.WHITE)
+                            btnFemale.setTextColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryValueTransfer
+                                )
                             )
-                        )
-                    } else if(checkedId == R.id.btnFemale) {
-                        Log.d("CLICKED", "FEMALE")
-                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryDarkValueTransfer
+                            btnMale.isCheckable = false
+                            btnFemale.isCheckable = true
+                            toggleButton(saveButton, validateEditTexts(editTexts))
+                            Log.d("TESTJE", "MALE CLICKED")
+                        }
+                        R.id.btnFemale -> {
+                            btnFemale.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryDarkValueTransfer
+                                )
                             )
-                        )
-                        view.findViewById<Button>(R.id.btnFemale).setTextColor(Color.WHITE)
-                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(Color.WHITE)
-                        view.findViewById<Button>(R.id.btnMale).setTextColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryValueTransfer
+                            btnFemale.setTextColor(Color.WHITE)
+                            btnMale.setBackgroundColor(Color.WHITE)
+                            btnMale.setTextColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryValueTransfer
+                                )
                             )
-                        )
-                    }
+                            btnFemale.isCheckable = false
+                            btnMale.isCheckable = true
+                            toggleButton(saveButton, validateEditTexts(editTexts))
+                            Log.d("TESTJE", "FEMALE CLICKED")
+                        }
+//                    }
+//                    if (checkedId == R.id.btnMale && !view.findViewById<MaterialButton>(R.id.btnMale).isChecked) {
+//                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(
+//                            ContextCompat.getColor(
+//                                requireContext(),
+//                                R.color.colorPrimaryDarkValueTransfer
+//                            )
+//                        )
+//                        view.findViewById<Button>(R.id.btnMale).setTextColor(Color.WHITE)
+//                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(Color.WHITE)
+//                        view.findViewById<Button>(R.id.btnFemale).setTextColor(
+//                            ContextCompat.getColor(
+//                                requireContext(),
+//                                R.color.colorPrimaryValueTransfer
+//                            )
+//                        )
+//                        genderChecked = true
+//                        toggleButton(saveButton, validateEditTexts(editTexts))
+//                    } else if(checkedId == R.id.btnFemale && !view.findViewById<MaterialButton>(R.id.btnFemale).isChecked) {
+//                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(
+//                            ContextCompat.getColor(
+//                                requireContext(),
+//                                R.color.colorPrimaryDarkValueTransfer
+//                            )
+//                        )
+//                        view.findViewById<Button>(R.id.btnFemale).setTextColor(Color.WHITE)
+//                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(Color.WHITE)
+//                        view.findViewById<Button>(R.id.btnMale).setTextColor(
+//                            ContextCompat.getColor(
+//                                requireContext(),
+//                                R.color.colorPrimaryValueTransfer
+//                            )
+//                        )
+//                        genderChecked = true
+//                        toggleButton(saveButton, validateEditTexts(editTexts))
+//                    }
                 }
             })
 
@@ -137,11 +203,11 @@ class IdentityDetailsDialog(
                     cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
                     val date = SimpleDateFormat("MMMM d, yyyy").format(cal.time)
-                    dateOfBirthView.setText(date)
+                    editTexts["dateOfBirth"]!!.setText(date)
                 }
             }
 
-            dateOfBirthView.setOnClickListener(object : View.OnClickListener {
+            editTexts["dateOfBirth"]!!.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View) {
                     DatePickerDialog(requireContext(), R.style.DatePickerDialogTheme, dateSetListener, cal.get(Calendar.YEAR), cal.get(
                         Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
@@ -149,28 +215,29 @@ class IdentityDetailsDialog(
             })
 
             saveButton.setOnClickListener {
-                val givenNames = givenNamesView.text.toString()
-                val surname = surnameView.text.toString()
-                val placeOfBirth = placeOfBirthView.text.toString()
-                val dateOfBirth = (SimpleDateFormat("MMMM d, yyyy").parse(dateOfBirthView.text.toString()) as Date).time
-                val nationality = nationalityView.text.toString()
+                val givenNames = editTexts["givenNames"]!!.text.toString()
+                val surname = editTexts["surname"]!!.text.toString()
+                val placeOfBirth = editTexts["placeOfBirth"]!!.text.toString()
+                val dateOfBirth = (SimpleDateFormat("MMMM d, yyyy").parse(editTexts["dateOfBirth"]!!.text.toString()) as Date).time
+                val nationality = editTexts["nationality"]!!.text.toString()
                 val gender = when(genderButtonGroup.checkedButtonId) {
                     R.id.btnMale -> "Male"
                     R.id.btnFemale -> "Female"
                     else -> "Neutral"
                 }
-                val personalNumber = personalNumberView.text.toString().toLong()
-                val documentNumber = documentNumberView.text.toString()
+                val personalNumber = editTexts["personalNumber"]!!.text.toString().toLong()
+                val documentNumber = editTexts["documentNumber"]!!.text.toString()
 
                 if (identity == null) {
                     try {
-                        val newIdentity = community.createPersonalIdentity(givenNames, surname, placeOfBirth, dateOfBirth, nationality, gender, personalNumber, documentNumber)
+                        val newIdentity = community.createIdentity(givenNames, surname, placeOfBirth, dateOfBirth, nationality, gender, personalNumber, documentNumber)
                         identityStore.addIdentity(newIdentity)
-                        Toast.makeText(requireContext(), "Personal identity added", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
                     } catch(e: Exception) {
                         Log.e("ERROR", e.toString())
-                        Toast.makeText(requireContext(), "Personal identity couldn't be added", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Identity couldn't be added", Toast.LENGTH_SHORT).show()
+                    }finally {
+                        Toast.makeText(requireContext(), "Identity added", Toast.LENGTH_SHORT).show()
+                        (requireActivity() as ValueTransferMainActivity).reloadActivity()
                     }
                 } else {
                     identity.content.givenNames = givenNames
@@ -183,12 +250,12 @@ class IdentityDetailsDialog(
                     identity.content.documentNumber = documentNumber
 
                     try {
-                        identityStore.editPersonalIdentity(identity)
-                        Toast.makeText(requireContext(), "Personal identity updated", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
+                        identityStore.editIdentity(identity)
                     } catch(e: Exception) {
                         Log.e("ERROR", e.toString())
-                        Toast.makeText(requireContext(), "Personal identity couldn't be updated", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Identity couldn't be updated", Toast.LENGTH_SHORT).show()
+                    }finally {
+                        Toast.makeText(requireContext(), "Identity updated", Toast.LENGTH_SHORT).show()
                     }
                 }
 

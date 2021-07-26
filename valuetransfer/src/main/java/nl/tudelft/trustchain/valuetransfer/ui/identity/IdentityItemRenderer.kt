@@ -50,11 +50,11 @@ class IdentityItemRenderer(
                 }
             }
 
-            btnPersonalQRCode.setOnClickListener {
+            btnQRCode.setOnClickListener {
                 onQRButtonClick(item.identity)
             }
 
-            btnPersonalCopyPublicKey.setOnClickListener {
+            btnCopyPublicKey.setOnClickListener {
                 onCopyPublicKeyButtonClick(item.identity)
             }
         }

@@ -211,7 +211,7 @@ class TransferMoneyDialog(
                 val map = mapOf(
                     "public_key" to transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex(),
                     "amount" to transactionAmount.toString(),
-                    "name" to IdentityStore.getInstance(requireContext()).getPersonalIdentity().content.givenNames,
+                    "name" to IdentityStore.getInstance(requireContext()).getIdentity()!!.content.givenNames,
                     "type" to "transfer"
                 )
 

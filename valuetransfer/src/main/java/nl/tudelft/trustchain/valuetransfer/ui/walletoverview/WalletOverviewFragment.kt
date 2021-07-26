@@ -102,7 +102,10 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         super.onResume()
         (requireActivity() as ValueTransferMainActivity).setActionBarTitle("Wallet")
         (requireActivity() as ValueTransferMainActivity).toggleActionBar(true)
-        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(true)
+        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(identityStore.hasIdentity())
+
+        binding.clNoIdentity.isVisible = !identityStore.hasIdentity()
+        binding.svHasIdentity.isVisible = identityStore.hasIdentity()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -131,10 +134,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
                     args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                     args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
 
-//                    val contactChatFragment = ContactChatFragment()
-//                    contactChatFragment.arguments = args
-//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
-
                     (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, { contact ->
                     TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
@@ -155,31 +154,26 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onResume()
-
         view.rootView.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorPrimaryValueTransfer))
 
-        // IDENTITY
-        binding.tvIdentityTitle.isVisible = identityStore.hasPersonalIdentity()
+        onResume()
 
+        // IDENTITY
         binding.rvIdentities.adapter = adapterIdentity
         binding.rvIdentities.layoutManager = LinearLayoutManager(context)
 
-        binding.tvNoPersonalIdentity.setOnClickListener {
+        binding.btnCreateIdentity.setOnClickListener {
             IdentityDetailsDialog(null, getIdentityCommunity()).show(parentFragmentManager, tag)
         }
 
         itemsIdentity.observe(
             viewLifecycleOwner,
             Observer {
-                binding.tvNoPersonalIdentityExplanation.isVisible = it.isEmpty()
-                binding.tvNoPersonalIdentity.isVisible = it.isEmpty()
                 adapterIdentity.updateItems(it)
             }
         )
 
         // EXCHANGE
-
         lifecycleScope.launchWhenCreated {
             binding.tvBalanceAmount.text = formatBalance(transactionRepository.getMyVerifiedBalance())
         }
@@ -210,7 +204,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         }
 
         // CONTACTS
-
         binding.rvContactChats.adapter = adapterContacts
         binding.rvContactChats.layoutManager = LinearLayoutManager(context)
 
@@ -223,13 +216,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
                 adapterContacts.updateItems(list)
             }
         )
-
-
-
-//        binding.bnvWalletOverview.isVisible = identityStore.hasPersonalIdentity()
-//        binding.fcvExchange.isVisible = identityStore.hasPersonalIdentity()
-//        binding.fcvContacts.isVisible = identityStore.hasPersonalIdentity()
-
     }
 
     private fun createIdentityItems(identities: List<Identity>): List<Item> {

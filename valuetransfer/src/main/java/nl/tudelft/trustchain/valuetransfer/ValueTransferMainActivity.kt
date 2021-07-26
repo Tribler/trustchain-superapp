@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
 import kotlinx.android.synthetic.main.main_activity_vt.*
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
@@ -59,11 +58,15 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     private fun initListeners() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+            val previousTag = fragmentManager.fragments.first {
+                it.isVisible
+            }.tag
+
             when (menuItem.itemId) {
-                R.id.walletOverviewFragment -> pushFragment(walletOverviewFragment)
-                R.id.identityFragment -> pushFragment(identityFragment)
-                R.id.exchangeFragment -> pushFragment(exchangeFragment)
-                R.id.contactsFragment -> pushFragment(contactsFragment)
+                R.id.walletOverviewFragment -> if(previousTag != walletOverviewFragmentTag) pushFragment(walletOverviewFragment)
+                R.id.identityFragment -> if(previousTag != identityFragmentTag) pushFragment(identityFragment)
+                R.id.exchangeFragment -> if(previousTag != exchangeFragmentTag) pushFragment(exchangeFragment)
+                R.id.contactsFragment -> if(previousTag != contactsFragmentTag) pushFragment(contactsFragment)
             }
             true
         }

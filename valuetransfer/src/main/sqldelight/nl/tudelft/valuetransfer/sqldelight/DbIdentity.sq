@@ -21,7 +21,7 @@ addIdentity:
 INSERT INTO identities (id, public_key, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, added, modified)
 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
-updatePersonalIdentity:
+updateIdentity:
 UPDATE identities SET public_key = ?, name = ?, surname = ?, gender = ?, date_of_birth = ?, place_of_birth = ?, nationality = ?, personal_number = ?, document_number = ?, modified = ? WHERE id = ?;
 
 deleteIdentity:
@@ -33,7 +33,7 @@ DELETE FROM identities WHERE public_key = ?;
 getAll:
 SELECT * FROM identities ORDER BY added ASC;
 
-getPersonalIdentity:
+getIdentity:
 SELECT * FROM identities LIMIT 1;
 
 getIdentityByPublicKey:

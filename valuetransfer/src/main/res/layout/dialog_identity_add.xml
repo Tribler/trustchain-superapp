@@ -14,7 +14,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Personal Identity Details"
+        android:text="Identity Details"
         android:textSize="20sp"
         android:textAlignment="center"
         android:gravity="center_horizontal"
@@ -60,7 +60,8 @@
                     android:layout_marginBottom="4dp"
                     android:textColor="@color/white"
                     android:textStyle="italic"
-                    android:textSize="12sp"/>
+                    android:textSize="12sp"
+                    android:inputType="textCapWords"/>
 
                 <EditText
                     android:id="@+id/etGivenNames"
@@ -72,7 +73,7 @@
                     android:paddingVertical="8dp"
                     android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"/>
 
             </LinearLayout>
 
@@ -362,7 +363,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btnSavePersonalIdentity"
+            android:id="@+id/btnSaveIdentity"
             style="@style/ButtonDarkGreenRounded"
             android:enabled="false"
             android:layout_marginTop="12dp"

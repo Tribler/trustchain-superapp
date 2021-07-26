@@ -4,16 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.*
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
@@ -23,7 +20,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.attestation.wallet.cryptography.attest
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
@@ -41,7 +37,6 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
 import nl.tudelft.trustchain.valuetransfer.entity.Attribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
 
 class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
@@ -52,7 +47,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     private val adapterAttestations = ItemAdapter()
 
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        identityStore.getAllPersonalIdentities().map { identities ->
+        identityStore.getAllIdentities().map { identities ->
             createIdentityItems(identities)
         }.asLiveData()
     }
@@ -203,10 +198,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             }
         )
 
-        binding.tvNoIdentity.setOnClickListener {
-            IdentityDetailsDialog(null, identityCommunity()).show(parentFragmentManager, tag)
-        }
-
         binding.ivAddAttribute.setOnClickListener {
             addAttribute()
         }
@@ -217,19 +208,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     }
 
     private fun toggleVisibility() {
-
-        binding.tvNoIdentity.isVisible = !identityStore.hasPersonalIdentity()
-        binding.tvAttributesTitle.isVisible = identityStore.hasPersonalIdentity()
-        binding.tvAttestationsTitle.isVisible = identityStore.hasPersonalIdentity()
-
-        binding.tvNoAttestations.isVisible = identityStore.hasPersonalIdentity() && adapterAttestations.itemCount == 0
-        binding.tvNoAttributes.isVisible = identityStore.hasPersonalIdentity() && adapterAttributes.itemCount == 0
-
-        binding.ivAddAttribute.isVisible = identityStore.hasPersonalIdentity() && getUnusedAttributeNames().isNotEmpty()
-        binding.ivAddAttestation.isVisible = identityStore.hasPersonalIdentity()
-
-        binding.rvAttributes.isVisible = identityStore.hasPersonalIdentity()
-        binding.rvAttestations.isVisible = identityStore.hasPersonalIdentity()
+        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
+        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
+        binding.ivAddAttribute.isVisible = getUnusedAttributeNames().isNotEmpty()
     }
 
     private fun updateAttestations() {
@@ -257,9 +238,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.identity_options, menu)
 
-        menu.getItem(0).isVisible = !identityStore.hasPersonalIdentity()
-        menu.getItem(1).isVisible = identityStore.hasPersonalIdentity()
-        menu.getItem(2).isVisible = identityStore.hasPersonalIdentity()
+        menu.getItem(0).isVisible = !identityStore.hasIdentity()
+        menu.getItem(1).isVisible = identityStore.hasIdentity()
+        menu.getItem(2).isVisible = identityStore.hasIdentity()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -268,18 +249,21 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                 IdentityDetailsDialog(null, identityCommunity()).show(parentFragmentManager, tag)
             }
             R.id.actionEditIdentity -> {
-                IdentityDetailsDialog(identityStore.getPersonalIdentity(), identityCommunity()).show(parentFragmentManager, tag)
+                IdentityDetailsDialog(identityStore.getIdentity(), identityCommunity()).show(parentFragmentManager, tag)
             }
             R.id.actionRemoveIdentity -> {
                 ConfirmDialog("Are you sure to delete your identity?") { dialog ->
                     try {
-//                        identityStore.deleteAllAttributes()
-//
-//                        attestationCommunity().database.getAllAttestations().forEach {
-//                            attestationCommunity().database.deleteAttestationByHash(it.attestationHash)
-//                        }
-//
-//                        identityStore.deleteIdentity(identityStore.getPersonalIdentity())
+                        identityStore.deleteAllAttributes()
+
+                        attestationCommunity().database.getAllAttestations().forEach {
+                            attestationCommunity().database.deleteAttestationByHash(it.attestationHash)
+                        }
+
+                        val identity = identityStore.getIdentity()
+                        if(identity != null) {
+                            identityStore.deleteIdentity(identity)
+                        }
                     }catch(e: Exception) {
                         Toast.makeText(requireContext(), "Identity couldn't be deleted", Toast.LENGTH_SHORT).show()
                     } finally {
@@ -289,7 +273,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 //                        (requireActivity() as ValueTransferMainActivity).switchToFragment(ValueTransferMainActivity.walletOverviewFragmentTag)
 //                        (requireActivity() as ValueTransferMainActivity).selectBottomNavigationItem(ValueTransferMainActivity.walletOverviewFragmentTag)
 
-                        Toast.makeText(requireContext(), "Identity successfully deleted. Application initialized.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Identity successfully deleted. Application re-initialized.", Toast.LENGTH_SHORT).show()
 //                        (requireActivity() as ValueTransferMainActivity).recreate()
                         (requireActivity() as ValueTransferMainActivity).reloadActivity()
 

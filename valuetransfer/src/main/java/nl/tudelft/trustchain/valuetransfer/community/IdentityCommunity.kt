@@ -39,11 +39,11 @@ class IdentityCommunity(
         store.createAttributesTable()
     }
 
-    fun getPersonalIdentity() : Identity {
-        return store.getPersonalIdentity()
+    fun getIdentity() : Identity? {
+        return store.getIdentity()
     }
 
-    fun createPersonalIdentity(givenNames: String, surname: String, placeOfBirth: String, dateOfBirth: Long, nationality: String, gender: String, personalNumber: Long, documentNumber: String) : Identity{
+    fun createIdentity(givenNames: String, surname: String, placeOfBirth: String, dateOfBirth: Long, nationality: String, gender: String, personalNumber: Long, documentNumber: String) : Identity{
         val id = UUID.randomUUID().toString()
 
         var content = PersonalIdentity(

@@ -8,18 +8,13 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_contacts_vt.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
@@ -112,9 +107,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                     args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                     args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-//                    val contactChatFragment = ContactChatFragment()
-//                    contactChatFragment.arguments = args
-//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
                     (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, {
                     Log.d("TESTJE", "ON DEPOSIT CLICK")
@@ -132,9 +124,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                     args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                     args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-//                    val contactChatFragment = ContactChatFragment()
-//                    contactChatFragment.arguments = args
-//                    (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
                     (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, { contact ->
                     TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
@@ -151,9 +140,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                 args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                 args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-//                val contactChatFragment = ContactChatFragment()
-//                contactChatFragment.arguments = args
-//                (requireActivity() as ValueTransferMainActivity).pushFragment(contactChatFragment, ValueTransferMainActivity.contactChatFragmentTag)
                 (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
             }
         )

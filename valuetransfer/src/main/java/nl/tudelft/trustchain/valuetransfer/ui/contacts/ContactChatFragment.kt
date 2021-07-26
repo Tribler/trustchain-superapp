@@ -219,13 +219,15 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-    fun onBackPressed() {
-        val fragmentTransaction = parentFragmentManager.beginTransaction()
+    private fun onBackPressed() {
         val previousFragment = parentFragmentManager.fragments.filter {
             it.tag == parentTag
         }
 
-        fragmentTransaction.show(previousFragment[0]).remove(this).commit()
+        parentFragmentManager.beginTransaction()
+            .show(previousFragment[0])
+            .remove(this)
+            .commit()
         previousFragment[0].onResume()
     }
 

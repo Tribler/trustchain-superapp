@@ -177,24 +177,24 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/btnPersonalQRCode"
+            app:layout_constraintEnd_toStartOf="@+id/btnQRCode"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPublicKeyTitle" />
 
         <ImageButton
-            android:id="@+id/btnPersonalQRCode"
+            android:id="@+id/btnQRCode"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/ic_qr_code_scan"
             android:backgroundTint="@color/white"
-            app:layout_constraintEnd_toStartOf="@+id/btnPersonalCopyPublicKey"
+            app:layout_constraintEnd_toStartOf="@+id/btnCopyPublicKey"
             app:layout_constraintStart_toEndOf="@+id/tvPublicKeyValue"
             app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
 
         <ImageButton
-            android:id="@+id/btnPersonalCopyPublicKey"
+            android:id="@+id/btnCopyPublicKey"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:background="@drawable/ic_copy_public_key"

@@ -78,20 +78,15 @@ class IdentityStore(context: Context) {
             .asFlow().mapToList()
     }
 
-    fun hasPersonalIdentity(): Boolean {
-        if (database.dbIdentityQueries.getPersonalIdentity(identityMapper).executeAsOneOrNull() == null) {
+    fun hasIdentity(): Boolean {
+        if (database.dbIdentityQueries.getIdentity(identityMapper).executeAsOneOrNull() == null) {
             return false
         }
         return true
     }
 
-    fun getPersonalIdentity(): Identity {
-        return database.dbIdentityQueries.getPersonalIdentity(identityMapper).executeAsOne()
-    }
-
-    fun getAllPersonalIdentities(): Flow<List<Identity>> {
-        return database.dbIdentityQueries.getAll(identityMapper)
-            .asFlow().mapToList()
+    fun getIdentity(): Identity? {
+        return database.dbIdentityQueries.getIdentity(identityMapper).executeAsOneOrNull()
     }
 
     fun getIdentityByPublicKey(publicKey: PublicKey): Flow<List<Identity>> {
@@ -122,8 +117,8 @@ class IdentityStore(context: Context) {
         )
     }
 
-    fun editPersonalIdentity(identity: Identity) {
-        database.dbIdentityQueries.updatePersonalIdentity(
+    fun editIdentity(identity: Identity) {
+        database.dbIdentityQueries.updateIdentity(
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
