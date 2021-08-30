@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +19,6 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
 import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
@@ -34,32 +31,15 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactAddDialog
-import nl.tudelft.trustchain.valuetransfer.dialogs.TransferMoneyDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
 
 class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
     private val binding by viewBinding(FragmentContactsVtBinding::bind)
-
-    private val peerChatStore by lazy {
-        PeerChatStore.getInstance(requireContext())
-    }
-
-    private val contactStore by lazy {
-        ContactStore.getInstance(requireContext())
-    }
-
-    private val gatewayStore by lazy {
-        GatewayStore.getInstance(requireContext())
-    }
-
-    private val transactionRepository by lazy {
-        TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
-    }
-
-    private fun getPeerChatCommunity(): PeerChatCommunity {
-        return getIpv8().getOverlay()
-            ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")
-    }
+    private lateinit var parentActivity: ValueTransferMainActivity
+    private lateinit var peerChatCommunity: PeerChatCommunity
+    private lateinit var peerChatStore: PeerChatStore
+    private lateinit var contactStore: ContactStore
 
     private val chatsAdapter = ItemAdapter()
     private val hiddenChatsAdapter = ItemAdapter()
@@ -68,8 +48,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
     private val hiddenChatItems: LiveData<List<Item>> by lazy {
-        combine(peerChatStore.getAllMessages(), peers) { messages, peers ->
-            createHiddenChatItems(messages, peers)
+        combine(peerChatStore.getAllMessages(), peers, contactStore.getContacts()) { messages, peers, contacts ->
+            createHiddenChatItems(messages, contacts, peers)
         }.asLiveData()
     }
 
@@ -99,6 +79,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        parentActivity = requireActivity() as ValueTransferMainActivity
+        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
+        peerChatStore = parentActivity.getStore(ValueTransferMainActivity.peerChatStoreTag) as PeerChatStore
+        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+
         hiddenChatsAdapter.registerRenderer(
             ChatItemRenderer(
                 {
@@ -107,12 +92,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                     args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                     args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-                    (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
-                }, {
-                    Log.d("TESTJE", "ON DEPOSIT CLICK")
-                }, {
-                    Log.d("TESTJE", "ON WITHDRAW CLICK")
-                }
+                    parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                }, {}, {}
             )
         )
 
@@ -124,11 +105,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                     args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                     args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-                    (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                    parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
                 }, { contact ->
-                    TransferMoneyDialog(contact, false, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
+                    ExchangeTransferMoneyDialog(contact, null, false).show(parentFragmentManager, tag)
                 }, { contact ->
-                    TransferMoneyDialog(contact, true, transactionRepository, getPeerChatCommunity()).show(parentFragmentManager, tag)
+                    ExchangeTransferMoneyDialog(contact, null, true).show(parentFragmentManager, tag)
                 }
             )
         )
@@ -140,13 +121,13 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
                 args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
                 args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-                (requireActivity() as ValueTransferMainActivity).detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
             }
         )
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
-                peers.value = getPeerChatCommunity().getPeers()
+                peers.value = peerChatCommunity.getPeers()
                 delay(1000L)
             }
         }
@@ -155,16 +136,23 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     override fun onResume() {
         super.onResume()
 
-        (requireActivity() as ValueTransferMainActivity).setActionBarTitle("Contacts")
-        (requireActivity() as ValueTransferMainActivity).toggleActionBar(false)
-        (requireActivity() as ValueTransferMainActivity).toggleBottomNavigation(true)
+        parentActivity.setActionBarTitle("Contacts")
+        parentActivity.toggleActionBar(false)
+        parentActivity.toggleBottomNavigation(true)
 
-        observeHiddenChats(viewLifecycleOwner, hiddenChatsAdapter, hiddenChatItems)
-        observeChats(viewLifecycleOwner, chatsAdapter, chatItems)
-        observeContacts(viewLifecycleOwner, contactsAdapter)
+//        lifecycleScope.launchWhenStarted {
+//            while(isActive) {
+//                hiddenChatItems.value = hiddenChatItems.value
+//            }
+//        }
 
-        binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
-        binding.clTogglePendingChats.isVisible = hiddenChatsAdapter.itemCount > 0
+//        hiddenChatsAdapter.updateItems(emptyList())
+//        hiddenChatsAdapter.notifyDataSetChanged()
+//        rvHiddenChats.recycledViewPool.clear()
+
+//        observeHiddenChats(this, hiddenChatsAdapter, hiddenChatItems)
+//        observeChats(this, chatsAdapter, chatItems)
+//        observeContacts(this, contactsAdapter)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -188,7 +176,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         onFocusChange(binding.etSearchContact, requireContext())
 
         binding.ivAddContactButton.setOnClickListener {
-            ContactAddDialog(getIpv8().myPeer.publicKey).show(parentFragmentManager, tag)
+            ContactAddDialog(getTrustChainCommunity().myPeer.publicKey, null, null).show(parentFragmentManager, tag)
         }
 
         binding.rvHiddenChats.adapter = hiddenChatsAdapter
@@ -207,13 +195,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         binding.clTogglePendingChats.setOnClickListener {
             hiddenChatsShown = !hiddenChatsShown
 
-            binding.ivShowHiddenChats.isVisible = hiddenChatsShown
-            binding.tvShowHiddenChats.isVisible = hiddenChatsShown
-            binding.ivHideHiddenChats.isVisible = !hiddenChatsShown
-            binding.tvHideHiddenChats.isVisible = !hiddenChatsShown
-            binding.rvHiddenChats.isVisible = !hiddenChatsShown
+            binding.clShowHiddenChats.isVisible = !hiddenChatsShown
+            binding.clHideHiddenChats.isVisible = hiddenChatsShown
+            binding.rvHiddenChats.isVisible = hiddenChatsShown
 
-            binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
+            binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown == false
         }
     }
 
@@ -222,11 +208,10 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             owner,
             Observer { list ->
                 if(list.isEmpty()) {
-                    binding.rvHiddenChats.visibility = View.GONE
+                    binding.rvHiddenChats.isVisible = false
                     hiddenChatsShown = false
                 }
 
-                binding.tvNoChats.isVisible = chatsAdapter.itemCount == 0 && hiddenChatsShown
                 binding.clTogglePendingChats.isVisible = list.isNotEmpty()
                 adapter.updateItems(list)
             }
@@ -237,9 +222,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         items.observe(
             owner,
             Observer { list ->
-                if(list.isEmpty()) {
-                    binding.tvNoChats.visibility = View.VISIBLE
-                }
+                binding.tvNoChats.isVisible = list.isEmpty() && hiddenChatsShown == false
                 adapter.updateItems(list)
             }
         )
@@ -266,7 +249,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         peers: List<Peer>
     ): List<Item> {
         return contacts.filter {
-                it.publicKey != getIpv8().myPeer.publicKey
+                it.publicKey != getTrustChainCommunity().myPeer.publicKey
             }
             .sortedBy { contact ->
                 contact.name
@@ -284,12 +267,14 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
     private fun createHiddenChatItems(
         messages: List<ChatMessage>,
+        contacts: List<Contact>,
         peers: List<Peer>
-    ): List<ContactItem> {
+    ): List<Item> {
         return messages
-            .filter {
-                val publicKey = if(it.outgoing) it.recipient else it.sender
-                contactStore.getContactFromPublicKey(publicKey) == null
+            .filter { message ->
+                contacts.none { contact ->
+                    contact.publicKey == if(message.outgoing) message.recipient else message.sender
+                }
             }
             .sortedByDescending {
                 it.timestamp.time
@@ -297,13 +282,13 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             .distinctBy {
                 if(it.outgoing) it.recipient else it.sender
             }
-            .map {
-                val publicKey = if(it.outgoing) it.recipient else it.sender
+            .map { message ->
+                val publicKey = if(message.outgoing) message.recipient else message.sender
                 val peer = peers.find { it.publicKey == publicKey }
 
                 ContactItem(
                     Contact("Unknown contact", publicKey),
-                    it,
+                    message,
                     isOnline = peer != null && !peer.address.isEmpty(),
                     isBluetooth = peer?.bluetoothAddress != null
                 )
@@ -315,7 +300,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         peers: List<Peer>
     ): List<Item> {
         return contacts.filter {
-                it.first.publicKey != getIpv8().myPeer.publicKey
+                it.first.publicKey != getTrustChainCommunity().myPeer.publicKey
             }
             .sortedByDescending { item ->
                 item.second?.timestamp?.time
