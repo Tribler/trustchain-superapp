@@ -226,7 +226,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                                 val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
                                 JSONObject(offsetBuffer.decodeToString()).let { json ->
-                                    val description = if(json.getString("description").isNotEmpty()) "Transfer of request: ${json.optString("description")}" else null
+                                    val description = if(it.chatMessage.message.isNotEmpty()) "Transfer of request: ${it.chatMessage.message}" else null
 
                                     if(json.has("amount")) {
                                         val amount = json.getString("amount")
