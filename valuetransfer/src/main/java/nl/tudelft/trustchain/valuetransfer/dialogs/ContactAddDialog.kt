@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.view.isVisible
@@ -20,7 +19,6 @@ import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import org.json.JSONObject
 
 class ContactAddDialog(
@@ -69,7 +67,6 @@ class ContactAddDialog(
             copyMyPublicKeyView.setOnClickListener {
                 copyToClipboard(requireContext(),myPublicKey.keyToBin().toHex(), "Public key")
                 parentActivity.displaySnackbar(requireContext(), "Public key has been copied")
-//                parentActivity.displaySnackbar(view, requireContext(), "Public key has been copied")
             }
 
             scanContactPublicKeyView.setOnClickListener {
@@ -85,16 +82,13 @@ class ContactAddDialog(
                         when {
                             publicKeyBin == myPublicKey.keyToBin().toHex() -> {
                                 parentActivity.displaySnackbar(requireContext(), "You can't add yourself as contact", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                                parentActivity.displaySnackbar(view, requireContext(), "You can't add yourself as contact", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                             }
                             contactStore.getContactFromPublicKey(publicKey) != null -> {
                                 parentActivity.displaySnackbar(requireContext(), "Contact already in address book", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                                parentActivity.displaySnackbar(view, requireContext(), "Contact already in address book", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                             }
                             else -> {
                                 contactStore.addContact(publicKey, contactName)
                                 parentActivity.displaySnackbar(requireContext(), "Contact $contactName added to address book")
-//                                parentActivity.displaySnackbar(containerView, requireContext(), "Contact $contactName added to address book")
                                 bottomSheetDialog.dismiss()
                             }
                         }
@@ -102,7 +96,6 @@ class ContactAddDialog(
                 } catch (e: Exception) {
                     e.printStackTrace()
                     parentActivity.displaySnackbar(requireContext(), "Please provide a valid public key", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                    parentActivity.displaySnackbar(view, requireContext(), "Please provide a valid public key", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 }
             }
 
@@ -145,7 +138,6 @@ class ContactAddDialog(
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                parentActivity.displaySnackbar(dialogView, requireContext(), "Scanned QR code not in JSON format", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             }
         }
     }

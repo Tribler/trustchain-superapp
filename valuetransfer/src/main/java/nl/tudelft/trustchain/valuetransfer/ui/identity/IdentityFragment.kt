@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.core.view.isVisible
@@ -18,23 +17,16 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.SchemaManager
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
@@ -44,10 +36,7 @@ import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import org.json.JSONObject
-import java.text.SimpleDateFormat
-import java.time.Year
 import java.util.*
-import kotlin.system.measureTimeMillis
 
 class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     private val binding by viewBinding(FragmentIdentityBinding::bind)
@@ -102,7 +91,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             IdentityItemRenderer(
                 1,
                  { identity ->
-//                     "name" to identity.content.givenNames
                      val map = mapOf(
                          "public_key" to identity.publicKey.keyToBin().toHex(),
                          "name" to identity.content.givenNames
@@ -128,11 +116,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                             dialog.dismiss()
 
                             parentActivity.displaySnackbar(requireContext(), "Attribute succesfully deleted")
-//                            Toast.makeText(requireContext(), "Attribute succesfully deleted", Toast.LENGTH_SHORT).show()
                         }catch(e: Exception) {
                             e.printStackTrace()
                             parentActivity.displaySnackbar(requireContext(), "Attribute couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                            Toast.makeText(requireContext(), "Attribute couldn't be deleted", Toast.LENGTH_SHORT).show()
                         }
                     }
                         .show(parentFragmentManager, tag)
@@ -185,11 +171,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Attestation couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Attestation couldn't be deleted", Toast.LENGTH_SHORT).show()
             } finally {
                 dialog.dismiss()
                 parentActivity.displaySnackbar(requireContext(), "Attestation succesfully deleted")
-//                        Toast.makeText(requireContext(), "Attestation succesfully deleted", Toast.LENGTH_SHORT).show()
             }
         }
             .show(parentFragmentManager, tag)
@@ -279,17 +263,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.identity_options, menu)
-
-//        menu.getItem(0).isVisible = !identityStore.hasIdentity()
-//        menu.getItem(0).isVisible = identityStore.hasIdentity()
-//        menu.getItem(1).isVisible = identityStore.hasIdentity()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
-//            R.id.actionAddIdentity -> {
-//                IdentityDetailsDialog(null, identityCommunity()).show(parentFragmentManager, tag)
-//            }
             R.id.actionEditIdentity -> {
                 IdentityDetailsDialog(identityStore.getIdentity(), identityCommunity).show(parentFragmentManager, tag)
             }
@@ -309,21 +286,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                     }catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Identity couldn't be deleted", Toast.LENGTH_SHORT).show()
                     } finally {
                         dialog.dismiss()
-//                        requireActivity().invalidateOptionsMenu()
-
-//                        parentActivity.switchToFragment(ValueTransferMainActivity.walletOverviewFragmentTag)
-//                        parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.walletOverviewFragmentTag)
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully deleted. Application re-initialized.", isShort = false)
-//                        Toast.makeText(requireContext(), "Identity successfully deleted. Application re-initialized.", Toast.LENGTH_SHORT).show()
-//                        parentActivity.recreate()
                         parentActivity.reloadActivity()
-
-
-//                        findNavController().popBackStack(this.id, false)
-//                        findNavController().navigate(nl.tudelft.trustchain.valuetransfer.R.id.action_identityFragment_to_walletOverViewFragment)
                     }
                 }
                     .show(parentFragmentManager, tag)
@@ -367,16 +333,13 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                     }catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
                     }
                 }else{
                     parentActivity.displaySnackbar(requireContext(), "No public key found in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                    Toast.makeText(requireContext(), "No public key found in QR-code", Toast.LENGTH_SHORT).show()
                 }
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                Toast.makeText(requireContext(), "Scanned QR code not in JSON format", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -62,7 +62,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-
 class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     private val binding by viewBinding(FragmentContactsChatBinding::bind)
     private lateinit var parentActivity: ValueTransferMainActivity
@@ -168,22 +167,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                                     imageDialog(file)
                                 } else {
                                     parentActivity.displaySnackbar(requireContext(), "File does not exists (yet)", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                                    parentActivity.displaySnackbar(requireView(), requireContext(), "File does not exists (yet)", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                                 }
                             }
                             MessageAttachment.TYPE_FILE -> {
-//                                val file = attachment.getFile(requireContext())
-//                                val absolutePath = file.absolutePath
-//                                val uri = Uri.fromFile(file)
-
-//                                val fileName = it.chatMessage.message
-
                                 selectedFile = attachment.getFile(requireContext())
                                 originalFileName = it.chatMessage.message
-
-//                                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-//                                intent.addCategory(Intent.CATEGORY_DEFAULT)
-//                                startActivityForResult(Intent.createChooser(intent, "Choose directory"), DIRECTORY_CHOOSER)
 
                                 val extension = originalFileName.split(".")[1]
 
@@ -191,96 +179,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                                 Log.d("VTLOG", "EXTENSION: $extension $mime")
 
                                 parentActivity.displaySnackbar(requireContext(), "Save File (TODO)", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-
-//                                val intent = Intent(Intent.ACTION_GET_CONTENT)
-//                                intent.type = "*/*"
-//                                startActivityForResult(Intent.createChooser(intent, "Open file"), DIRECTORY_CHOOSER)
-
-
-//                                file.let { sourceFile ->
-//                                    val downloadFolder = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-////                                    sourceFile.renameTo()
-//
-//                                    val dFolder = requireContext().getExternalFilesDir(Environment.MEDIA_MOUNTED)
-//
-//                                    Log.d("VTLOG", sourceFile.absolutePath)
-//                                    Log.d("VTLOG", downloadFolder!!.absolutePath)
-//                                    Log.d("VTLOG", dFolder!!.absolutePath)
-
-//                                    @Suppress("DEPRECATION") val downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-//                                    Log.d("VTLOG", "${downloadFolder!!.path}")
-//                                    var destinationFile = File(downloadFolder.path + "/NEW" + fileName)
-//                                    var counter = 1
-//                                    while(destinationFile.exists()) {
-//                                        destinationFile = File(downloadFolder.path + "/NEW" + fileName.split(".")[0] + " ($counter)." + fileName.split(".")[1])
-//                                        counter += 1
-//                                    }
-//
-//                                    sourceFile.copyTo(destinationFile)
-
-//                                    val request = DownloadManager.Request(Uri.fromFile(destinationFile))
-//                                    request.addRequestHeader("Accept", "text/plain")
-//                                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, destinationFile.name)
-//
-//                                    val downloadManager = parentActivity.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-//                                    downloadManager.enqueue(request)
-
-//                                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-//                                        addCategory(Intent.CATEGORY_OPENABLE)
-//                                        type = "text/plain"
-//                                        putExtra(DocumentsContract.EXTRA_INITIAL_URI, downloadFolder.toUri())
-//                                    }
-//
-//                                    startActivity(Intent.createChooser(intent, "Open file"))
-
-
-//                                    Log.d("VTLOG", "${destinationFile.path}")
-//
-//                                    val text = FileInputStream(destinationFile).bufferedReader().use { it.readText() }
-//                                    Log.d("VTLOG", text)
-//                                    Log.d("VTLOG", it.chatMessage.message)
-
-//                                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
-//                                    intent.data = Uri.fromFile(destinationFile)
-//                                    intent.type = "text/plain"
-
-//                                    val uri = FileProvider.getUriForFile(
-//                                        requireContext(),
-//                                        requireContext().applicationContext.packageName.toString() + ".provider",
-//                                        destinationFile
-//                                    )
-
-//                                    intent.setDataAndType(Uri.fromFile(destinationFile), "application/pdf")
-//                                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//                                    startActivity(Intent.createChooser(intent, "Open file"))
-//                                    startActivity(intent)
-
-//                                    if (intent.resolveActivity(parentActivity.packageManager) != null)
-//                                        startActivity(Intent.createChooser(intent, "open with"))
-//                                    else
-//                                        Toast.makeText(requireContext(), "No suitable application to open file", Toast.LENGTH_LONG).show()
-
-//                                    if(destinationFile.exists()) {
-//                                        requireContext().startActivity(Intent.createChooser(intent, "Open File"))
-//                                    }else{
-//                                        Toast.makeText(context, "File is corrupted", Toast.LENGTH_LONG).show();
-//                                    }
-
-//                                    try {
-//                                        if(destinationFile.exists()) {
-//                                            requireContext().startActivity(Intent.createChooser(intent, "Open File"))
-//                                        }else{
-//                                            Toast.makeText(context, "File is corrupted", Toast.LENGTH_LONG).show();
-//                                        }
-//                                    } catch (ex: Exception) {
-//                                        Toast.makeText(requireContext(), "No Application is found to open this file.", Toast.LENGTH_LONG).show();
-//                                    }
-//                                }
-//                                try {
-//
-//                                }catch(e: ActivityNotFoundException) {
-//                                    Toast.makeText(requireContext(), "No file manager found or installed", Toast.LENGTH_SHORT).show()
-//                                }
                             }
                             MessageAttachment.TYPE_CONTACT -> {
                                 val contact = Contact.deserialize(attachment.content, 0).first
@@ -318,14 +216,12 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                                         Uri.parse("https://www.google.com/maps/place/$latitude,$longitude")
                                     )
                                     startActivity(browserIntent)
-//                                    parentActivity.displaySnackbar(requireContext(), "Location has been copied to clipboard")
                                 }
                             }
                             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> {
                                 val attributeValue = IdentityAttribute.deserialize(it.chatMessage.attachment!!.content, 0).first
                                 copyToClipboard(requireContext(), attributeValue.value, "Identity attribute")
                                 parentActivity.displaySnackbar(requireContext(), "Identity attribute value has been copied to clipboard")
-//                                parentActivity.displaySnackbar(requireView(), requireContext(), "Identity attribute value has been copied to clipboard")
                             }
                             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                                 val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
@@ -438,7 +334,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             return@OnMenuItemClickListener true
                         }
                         parentActivity.displaySnackbar(requireContext(), "The location could not be retrieved, please grant permissions or try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        parentActivity.displaySnackbar(requireView(), requireContext(), "The location could not be retrieved, please grant permissions or try again", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                     }
                     R.id.actionSendContact -> ContactShareDialog(null, contact).show(parentFragmentManager, tag)
                     R.id.actionSendIdentityAttribute -> IdentityAttributeShareDialog(contact, null).show(parentFragmentManager, tag)
@@ -447,7 +342,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             ExchangeTransferMoneyDialog(contact, null, true).show(parentFragmentManager, tag)
                         } else {
                             parentActivity.displaySnackbar(requireContext(), "Please add contact first to transfer money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                            parentActivity.displaySnackbar(requireView(), requireContext(), "Please add contact first to transfer money", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                         }
                     }
                     R.id.actionRequestMoney -> {
@@ -455,7 +349,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             ExchangeTransferMoneyDialog(contact, null, false).show(parentFragmentManager, tag)
                         } else {
                             parentActivity.displaySnackbar(requireContext(), "Please add contact first to request money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                            parentActivity.displaySnackbar(requireView(), requireContext(), "Please add contact first to request money", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                         }
                     }
                 }
@@ -611,11 +504,9 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             R.id.actionCopyPublicKey -> {
                 copyToClipboard(requireContext(), (contact?.publicKey ?: publicKey).keyToBin().toHex(), "Public key")
                 parentActivity.displaySnackbar(requireContext(), "Public key has been copied to clipboard")
-//                parentActivity.displaySnackbar(requireView(), requireContext(), "Public key has been copied to clipboard")
             }
             R.id.actionShareContact -> ContactShareDialog(contact, null).show(parentFragmentManager, tag)
             R.id.actionSearchFilterChat -> {
-//                binding.clSearchFilter.isVisible = !binding.clSearchFilter.isVisible
                 if(binding.clSearchFilter.isVisible) {
                     binding.clSearchFilter.isVisible = false
                     val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
@@ -681,6 +572,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         val contactChatFragment = ContactChatFragment()
         contactChatFragment.arguments = args
 
+        hideSearchFilterBar()
+
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(0, R.anim.exit_to_left)
             .remove(this)
@@ -708,23 +601,12 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             .commit()
         previousFragment[0].onResume()
     }
-//
-//    fun listFiles(folder: DocumentFile): List<Uri> {
-//        return if (folder.isDirectory) {
-//            folder.listFiles().mapNotNull { file ->
-//                if (file.name != null) file.uri else null
-//            }
-//        } else {
-//            emptyList()
-//        }
-//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             PICK_IMAGE -> if (resultCode == Activity.RESULT_OK && data != null) {
                 val uri = data.data
                 if (uri != null) {
-//                    sendImageFromUri(uri)
                     sendFromUri(uri, TYPE_IMAGE_VIDEO)
                 }
             }
@@ -736,7 +618,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     }else{
                         "unknown"
                     }
-//                    sendFileFromUri(uri, fileName)
                     sendFromUri(uri, TYPE_FILE, fileName)
                 }
             }
@@ -748,73 +629,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 data.data?.let { treeUri ->
                     Log.d("VTLOG", "SELECTED TREE URI: ${treeUri.path}")
                 }
-//                    parentActivity.contentResolver.takePersistableUriPermission(
-//                        treeUri,
-//                        Intent.FLAG_GRANT_READ_URI_PERMISSION or
-//                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-//                    )
-//
-//                    Log.d("VTLOG", treeUri.path!!)
-
-//                    val destinationFile = File(treeUri.path, originalFileName)
-//
-//                    selectedFile.copyTo(destinationFile)
-//                    val tree = DocumentFile.fromTreeUri(requireContext(), treeUri)!!
-//
-//                    val uri = parentActivity.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, selectedFile)
-
-//                    Log.d("VTLOG", tree.uri.path!!)
-//
-//                    val path = tree.uri.path!!
-//
-//                    val destinationFile = File(path, originalFileName)
-//
-//                    selectedFile.copyTo(destinationFile)
-
-//                    listFiles(tree).forEach { uri ->
-//                        Log.d("VTLOG", uri.path!!)
-//
-//                    }
-
-//                }
-//                val destinationURI = data.data
-
-
-//                    Log.d("VTLOG", destinationURI.toString())
-//                    var path = destinationURI.pathSegments.joinToString("/")
-//                    path = path.split(":").joinToString("/")
-//                    Log.d("VTLOG", path)
-
-
-
-//                    val documentFile = DocumentFile.fromTreeUri(requireContext(), destinationURI)
-//
-//                    documentFile?.createFile("text/plain", "testttt.txt")
-
-
-
-
-
-//                    val path = DocumentsContract.buildDocumentUriUsingTree(destinationURI, DocumentsContract.getTreeDocumentId(destinationURI))
-//
-//                    Log.d("VTLOG", path.path!!)
-
-//                    var destinationFile = File(path + "/" + originalFileName)
-//                    var counter = 1
-//                    while (destinationFile.exists()) {
-//                        destinationFile = File(
-//                            path + "/" + originalFileName.split(".")[0] + " ($counter)." + originalFileName.split(".")[1]
-//                        )
-//                        counter += 1
-//                    }
-//
-//                    selectedFile.copyTo(destinationFile).let {
-//                        Log.d("VTLOG", "FILE ${it.name} HAS BEEN SAVED")
-//                    }
-
-
-
-//                Log.d("VTLOG", )
             }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
@@ -829,19 +643,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-//    private fun sendImageFromUri(uri: Uri) {
-//        val file = saveFile(requireContext(), uri)
-//        peerChatCommunity.sendImage(file, publicKey)
-//    }
-//
-//    private fun sendFileFromUri(uri: Uri, fileName: String) {
-//        val file = saveFile(requireContext(), uri)
-//        peerChatCommunity.sendFile(file, fileName, publicKey)
-//    }
-
     private fun createMessagesItems(messages: List<ChatMessage>): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
-//            Log.d("VTLOG", "$index ${chatMessage.attachment?.type}")
             ChatMessageItem(
                 chatMessage,
                 transactionRepository.getTransactionWithHash(chatMessage.transactionHash),
@@ -856,10 +659,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         if (requestCode == LOCATION_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 parentActivity.displaySnackbar(requireContext(), "Permission has been granted")
-//                parentActivity.displaySnackbar(requireView(), requireContext(), "Permission has been granted")
             } else {
                 parentActivity.displaySnackbar(requireContext(), "Permission has been denied", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                parentActivity.displaySnackbar(requireView(), requireContext(), "Permission has been denied", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             }
         }
     }

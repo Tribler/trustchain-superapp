@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.view.View
-import androidx.navigation.findNavController
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contacts.view.*
 import kotlinx.android.synthetic.main.item_identity.view.*
 import kotlinx.android.synthetic.main.item_identity.view.ivIdenticon
 import kotlinx.android.synthetic.main.item_identity_detail.view.*

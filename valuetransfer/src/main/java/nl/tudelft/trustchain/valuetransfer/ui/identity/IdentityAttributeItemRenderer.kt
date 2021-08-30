@@ -1,16 +1,13 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.os.Handler
-import android.util.Log
 import android.view.View
-import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity_attribute.view.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
-
 
 class IdentityAttributeItemRenderer(
     private val onDeleteClick: (IdentityAttribute) -> Unit,

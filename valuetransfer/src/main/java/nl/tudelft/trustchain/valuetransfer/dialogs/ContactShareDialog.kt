@@ -1,12 +1,9 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -20,18 +17,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.util.*
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import org.json.JSONObject
 
 class ContactShareDialog(
     private val contact: Contact?,
@@ -79,11 +70,6 @@ class ContactShareDialog(
                         it.name
                     }
                     .toMutableList()
-
-//                selectedContactView.isVisible = contacts.isEmpty() || selectedContact != null
-//                selectedRecipientView.isVisible = contacts.isEmpty() || selectedRecipient != null
-//                spinnerRecipient.isVisible = contacts.isNotEmpty() && recipient == null
-//                spinnerContact.isVisible = contacts.isNotEmpty() && contact == null
 
                 if(contacts.size > 1) {
                     contacts.add(0, Contact("No contact selected", trustChainCommunity.myPeer.publicKey))

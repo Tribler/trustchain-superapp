@@ -3,29 +3,23 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.view.setPadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
-import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 
 class IdentityAttributeDialog(
     private var attribute: IdentityAttribute?,
-//    private val unusedAttributes: List<String>,
 ) : DialogFragment() {
 
     private lateinit var parentActivity: ValueTransferMainActivity
@@ -103,14 +97,12 @@ class IdentityAttributeDialog(
                     val newAttribute = identityCommunity.createAttribute(selectedName, attributeValue)
                     identityStore.addAttribute(newAttribute)
                     parentActivity.displaySnackbar(requireContext(), "Identity attribute added")
-//                    parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity attribute added")
                 } else {
                     attribute!!.name = selectedName
                     attribute!!.value = attributeValue
 
                     identityStore.editAttribute(attribute!!)
                     parentActivity.displaySnackbar(requireContext(), "Identity attribute updated")
-//                    parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity attribute updated")
                 }
 
                 activity?.invalidateOptionsMenu()

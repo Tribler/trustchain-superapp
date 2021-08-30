@@ -2,34 +2,21 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.*
-import android.widget.CompoundButton
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_exchange_buy.*
-import kotlinx.coroutines.flow.*
-import nl.tudelft.ipv8.IPv8
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
-import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
-
 
 class EuroTokenExchangeDialog(
     private val isCreation: Boolean,
@@ -104,7 +91,6 @@ class EuroTokenExchangeDialog(
                 euroTokenCommunity.connectToGateway(publicKey.keyToBin().toHex(), ip, port, paymentID)
 
                 parentActivity.displaySnackbar(requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
-//                parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
                 bottomSheetDialog.dismiss()
             }
 
@@ -121,14 +107,10 @@ class EuroTokenExchangeDialog(
                     amount!!
                 )
 
-                Log.d("VTLOG", block.toString())
-
                 if(block == null) {
                     parentActivity.displaySnackbar(requireContext(), "Sell of ${formatBalance(amount)} ET did not succeed, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false )
-//                    parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "Sell of ${formatBalance(amount)} ET did not succeed, please try again", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, false)
                 }else{
                     parentActivity.displaySnackbar(requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
-//                    parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
                     bottomSheetDialog.dismiss()
                 }
             }

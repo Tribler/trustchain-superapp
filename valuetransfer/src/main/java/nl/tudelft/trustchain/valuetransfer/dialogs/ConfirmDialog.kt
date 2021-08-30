@@ -1,9 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.app.AlertDialog
-import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment

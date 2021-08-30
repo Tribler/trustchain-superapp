@@ -2,11 +2,8 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.content.Intent
 import android.os.Bundle
-import android.renderscript.Sampler
-import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,10 +12,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.Authority
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.QRCodeUtils
@@ -26,7 +21,6 @@ import nl.tudelft.trustchain.ssi.peers.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.identity.AttestationAuthorityItemRenderer
-import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import org.json.JSONObject
 import java.lang.IllegalStateException
 
@@ -111,16 +105,13 @@ class IdentityAttestationAuthoritiesDialog(
                     }catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                        Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
                     }
                 }else{
                     parentActivity.displaySnackbar(requireContext(), "No public key found in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                    Toast.makeText(requireContext(), "No public key found in QR-code", Toast.LENGTH_SHORT).show()
                 }
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                Toast.makeText(requireContext(), "Scanned QR code not in JSON format", Toast.LENGTH_SHORT).show()
             }
         }
     }

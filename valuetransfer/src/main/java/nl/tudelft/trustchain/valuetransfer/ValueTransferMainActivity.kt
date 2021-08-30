@@ -44,7 +44,6 @@ import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
 
-
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
 
@@ -366,8 +365,6 @@ class ValueTransferMainActivity : BaseActivity() {
         Handler(Looper.getMainLooper()).post {
             displaySnackbar(applicationContext, "Received $i attestation chunks from ${peer.mid}.")
         }
-//            Toast.makeText(applicationContext, "Received attestation chunk $i from ${peer.mid}.", Toast.LENGTH_SHORT).show()
-//        }
     }
 
     /**

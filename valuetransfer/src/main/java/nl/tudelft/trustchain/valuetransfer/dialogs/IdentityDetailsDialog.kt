@@ -32,13 +32,10 @@ class IdentityDetailsDialog(
 ) : DialogFragment() {
 
     private var cal = Calendar.getInstance()
-
-    private val identityStore by lazy {
-        IdentityStore.getInstance(requireContext())
-    }
+    private val dateOfBirthFormat = SimpleDateFormat("MMMM d, yyyy")
 
     private lateinit var parentActivity: ValueTransferMainActivity
-//    private lateinit var identityFragment: IdentityFragment
+    private lateinit var identityStore: IdentityStore
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -46,7 +43,7 @@ class IdentityDetailsDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_add, null)
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-//            identityFragment = parentActivity.getFragmentByTag(ValueTransferMainActivity.identityFragmentTag)!! as IdentityFragment
+            identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
 
             val editTexts = mapOf<String, EditText>(
                 "givenNames" to view.findViewById(R.id.etGivenNames),
@@ -163,7 +160,7 @@ class IdentityDetailsDialog(
                     cal.set(Calendar.MONTH, monthOfYear)
                     cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
-                    val date = SimpleDateFormat("MMMM d, yyyy").format(cal.time)
+                    val date = dateOfBirthFormat.format(cal.time)
                     editTexts["dateOfBirth"]!!.setText(date)
                 }
             }
@@ -179,7 +176,7 @@ class IdentityDetailsDialog(
                 val givenNames = editTexts["givenNames"]!!.text.toString()
                 val surname = editTexts["surname"]!!.text.toString()
                 val placeOfBirth = editTexts["placeOfBirth"]!!.text.toString()
-                val dateOfBirth = (SimpleDateFormat("MMMM d, yyyy").parse(editTexts["dateOfBirth"]!!.text.toString()) as Date).time
+                val dateOfBirth = (dateOfBirthFormat.parse(editTexts["dateOfBirth"]!!.text.toString()) as Date).time
                 val nationality = editTexts["nationality"]!!.text.toString()
                 val gender = when(genderButtonGroup.checkedButtonId) {
                     R.id.btnMale -> "Male"
@@ -196,12 +193,8 @@ class IdentityDetailsDialog(
                     } catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be added", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity couldn't be added", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Identity couldn't be added", Toast.LENGTH_SHORT).show()
                     }finally {
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully added. Application re-initialized.")
-//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity successfully added. Application re-initialized.")
-//                        Toast.makeText(requireContext(), "Identity added", Toast.LENGTH_SHORT).show()
                         parentActivity.reloadActivity()
                     }
                 } else {
@@ -219,15 +212,11 @@ class IdentityDetailsDialog(
                     } catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be updated", view = parentActivity.getView(true), type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity couldn't be updated", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Identity couldn't be updated", Toast.LENGTH_SHORT).show()
                     }finally {
                         bottomSheetDialog.dismiss()
                         parentActivity.invalidateOptionsMenu()
 
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully updated")
-//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity successfully updated")
-//                        Toast.makeText(requireContext(), "Identity updated", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

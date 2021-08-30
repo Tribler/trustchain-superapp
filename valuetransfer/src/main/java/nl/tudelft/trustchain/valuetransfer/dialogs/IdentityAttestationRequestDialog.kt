@@ -7,12 +7,10 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.view.setPadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_BIG
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_HUGE
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity

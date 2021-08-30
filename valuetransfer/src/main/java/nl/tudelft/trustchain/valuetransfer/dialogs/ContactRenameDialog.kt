@@ -3,8 +3,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.core.net.toUri
@@ -14,7 +12,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment

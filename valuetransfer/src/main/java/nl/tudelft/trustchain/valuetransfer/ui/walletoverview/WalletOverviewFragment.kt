@@ -213,7 +213,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
                 TRANSFER_INTENT -> {
                     if(obj.has("payment_id")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a transfer QR-code instead of buy or sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-//                        Toast.makeText(requireContext(), "Please scan a transfer QR-code instead of buy or sell", Toast.LENGTH_LONG).show()
                         return
                     }
                     parentActivity.getQRScanController().transferMoney(obj)
@@ -221,7 +220,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
                 BUY_EXCHANGE_INTENT -> {
                     if(obj.has("amount")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a buy QR-code instead of sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-//                        Toast.makeText(requireContext(), "Please scan a buy QR-code instead of sell", Toast.LENGTH_LONG).show()
                         return
                     }
                     parentActivity.getQRScanController().exchangeMoney(obj, true)
@@ -229,7 +227,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
                 SELL_EXCHANGE_INTENT -> {
                     if(!obj.has("amount")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a sell QR-code instead of buy", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-//                        Toast.makeText(requireContext(), "Please scan a sell QR-code instead of buy", Toast.LENGTH_LONG).show()
                         return
                     }
                     parentActivity.getQRScanController().exchangeMoney(obj, false)

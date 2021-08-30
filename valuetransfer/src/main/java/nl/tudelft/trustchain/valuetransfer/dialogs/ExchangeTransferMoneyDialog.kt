@@ -4,8 +4,6 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.text.Editable
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -13,35 +11,25 @@ import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.setPadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_exchange_transfer.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
-import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
-
 
 class ExchangeTransferMoneyDialog(
     private val recipient: Contact?,
@@ -270,21 +258,14 @@ class ExchangeTransferMoneyDialog(
                     val block = transactionRepository.sendTransferProposalSync(selectedContact!!.publicKey.keyToBin(), transactionAmount)
                     if (block == null) {
                         parentActivity.displaySnackbar(requireContext(), "Insufficient balance", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                        parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "Insufficient balance", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                        Toast.makeText(requireContext(), "Insufficient balance", Toast.LENGTH_LONG).show()
                     } else {
                         peerChatCommunity.sendMessageWithTransaction(transactionMessage, block.calculateHash(), selectedContact!!.publicKey)
                         parentActivity.displaySnackbar(requireContext(), "Transfer of ${transactionAmountView.text} ET to ${selectedContact!!.name}", isShort = false)
-//                        parentActivity.displaySnackbar(parentActivity.getRootView().findViewById(R.id.container), requireContext(), "Transfer of ${transactionAmountView.text} ET to ${selectedContact!!.name}", isShort = false)
-//                        parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "Transfer of ${transactionAmountView.text} ET to ${selectedContact!!.name}", isShort = false)
-//                        Toast.makeText(requireContext(), "Transfer of ${transactionAmountView.text} to ${selectedContact!!.name}", Toast.LENGTH_LONG).show()
                         bottomSheetDialog.dismiss()
                     }
                 } catch(e: Exception) {
                     e.printStackTrace()
                     parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-//                    parentActivity.displaySnackbar(fragment.requireView(), fragment.requireContext(), "Unexpected error occurred", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                    Toast.makeText(requireContext(), "Unexpected error occurred", Toast.LENGTH_SHORT).show()
                 }
                 loadingSpinner.isVisible = false
                 transferButton.isVisible = true

@@ -139,20 +139,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         parentActivity.setActionBarTitle("Contacts")
         parentActivity.toggleActionBar(false)
         parentActivity.toggleBottomNavigation(true)
-
-//        lifecycleScope.launchWhenStarted {
-//            while(isActive) {
-//                hiddenChatItems.value = hiddenChatItems.value
-//            }
-//        }
-
-//        hiddenChatsAdapter.updateItems(emptyList())
-//        hiddenChatsAdapter.notifyDataSetChanged()
-//        rvHiddenChats.recycledViewPool.clear()
-
-//        observeHiddenChats(this, hiddenChatsAdapter, hiddenChatItems)
-//        observeChats(this, chatsAdapter, chatItems)
-//        observeContacts(this, contactsAdapter)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

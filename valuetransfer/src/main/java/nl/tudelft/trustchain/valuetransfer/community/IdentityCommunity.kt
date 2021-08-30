@@ -1,11 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.community
 
 import android.content.Context
-import android.content.res.Resources
-import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
-import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
@@ -67,7 +64,6 @@ class IdentityCommunity(
 
     fun getUnusedAttributeNames(): List<String> {
         val attributes = IdentityAttribute.IDENTITY_ATTRIBUTES
-//        val attributes = resources.getStringArray(R.array.identity_attributes)
         val currentAttributeNames = store.getAttributeNames()
 
         return attributes.filter { name ->

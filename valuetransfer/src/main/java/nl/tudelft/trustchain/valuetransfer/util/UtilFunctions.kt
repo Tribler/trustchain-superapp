@@ -9,12 +9,10 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -155,11 +153,6 @@ fun generateIdenticon(hash: ByteArray, color: Int, resources: Resources, dimensi
     val density = resources.displayMetrics.density
     val w = (resources.getDimension(R.dimen.identiconWidth)*density).toInt()
     val h = (resources.getDimension(R.dimen.identiconHeight)*density).toInt()
-
-//    val bitmap = Bitmap.createBitmap(w, h, identiconBitmap.config)
-//    val canvas = Canvas(bitmap)
-//    identiconBitmap = Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
-//    canvas.drawBitmap(identiconBitmap, 0E1F, 0E1F, null)
 
     return Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
 }

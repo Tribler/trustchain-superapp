@@ -11,14 +11,12 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.util.*
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeVtBinding
@@ -127,9 +125,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         }
 
         binding.clBalanceRow.setOnClickListener(onBalanceClickListener)
-//        binding.tvBalanceVerifiedAmount.setOnClickListener(onBalanceClickListener)
-//        binding.tvBalanceAmount.setOnClickListener(onBalanceClickListener)
-
         binding.rvTransactions.adapter = adapterTransactions
         binding.rvTransactions.layoutManager = LinearLayoutManager(requireContext())
     }
@@ -154,10 +149,8 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         if (gateway != null) {
             transactionRepository.sendCheckpointProposal(gateway)
             parentActivity.displaySnackbar(requireContext(), "Balance verification succeeded")
-//            Toast.makeText(requireContext(), "Balance has been verified", Toast.LENGTH_SHORT).show()
         }else{
             parentActivity.displaySnackbar(requireContext(), "Balance verification failed", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//            Toast.makeText(requireContext(), "Balance verification failed", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -170,7 +163,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                     TRANSFER_INTENT -> {
                         if(obj.has("payment_id")) {
                             parentActivity.displaySnackbar(requireContext(), "Please scan a transfer QR-code instead of buy or sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-//                            Toast.makeText(requireContext(), "Please scan a transfer QR-code instead of buy or sell", Toast.LENGTH_LONG).show()
                             return
                         }
                         parentActivity.getQRScanController().transferMoney(obj)
@@ -178,7 +170,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                     BUY_EXCHANGE_INTENT -> {
                         if(obj.has("amount")) {
                             parentActivity.displaySnackbar(requireContext(), "Please scan a buy QR-code instead of sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-//                            Toast.makeText(requireContext(), "Please scan a buy QR-code instead of sell", Toast.LENGTH_LONG).show()
                             return
                         }
                         parentActivity.getQRScanController().exchangeMoney(obj, true)
@@ -186,7 +177,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                     SELL_EXCHANGE_INTENT -> {
                         if(!obj.has("amount")) {
                             parentActivity.displaySnackbar(requireContext(), "Please scan a sell QR-code instead of buy", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-//                            Toast.makeText(requireContext(), "Please scan a sell QR-code instead of buy", Toast.LENGTH_LONG).show()
                             return
                         }
                         parentActivity.getQRScanController().exchangeMoney(obj, false)
@@ -195,7 +185,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                Toast.makeText(requireContext(), "Scanned QR code not in JSON format", Toast.LENGTH_SHORT).show()
                 QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan again", vertical = true)
             }
 

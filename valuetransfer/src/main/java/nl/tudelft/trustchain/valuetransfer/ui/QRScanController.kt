@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.valuetransfer.ui
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -40,7 +39,6 @@ class QRScanController : BaseFragment() {
         variables.forEach { variable ->
             if(!data.has(variable)) {
                 parentActivity.displaySnackbar(requireContext(), "Missing variable $variable", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                Toast.makeText(requireContext(), "Missing variable $variable", Toast.LENGTH_SHORT).show()
                 return false
             }
         }
@@ -62,7 +60,6 @@ class QRScanController : BaseFragment() {
             IdentityAttestationRequestDialog(peer).show(parentFragmentManager, tag)
         }else{
             parentActivity.displaySnackbar(requireContext(), "Peer could not be located in the network, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//            Toast.makeText(requireContext(), "Peer could not be located in the network, please try again", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -103,7 +100,6 @@ class QRScanController : BaseFragment() {
         }catch(e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//            Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -119,7 +115,6 @@ class QRScanController : BaseFragment() {
 
             if(publicKey == getTrustChainCommunity().myPeer.publicKey) {
                 parentActivity.displaySnackbar(requireContext(), "Cannot transfer money to yourself", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                Toast.makeText(requireContext(), "Cannot transfer money to yourself", Toast.LENGTH_SHORT).show()
                 return
             }
 
@@ -133,7 +128,6 @@ class QRScanController : BaseFragment() {
         }catch(e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//            Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -164,7 +158,6 @@ class QRScanController : BaseFragment() {
         }catch(e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//            Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -185,21 +178,6 @@ class QRScanController : BaseFragment() {
                     }
                     obj.has("presentation") -> {
                         when (obj.optString("presentation")) {
-//                            "authority" -> {
-//                                if (obj.has("public_key")) {
-//                                    try {
-//                                        val publicKey = obj.optString("public_key")
-//                                        defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
-//
-//                                        PublicKeyScanOptionsDialog(obj).show(parentFragmentManager, tag)
-//                                    } catch (e: Exception) {
-//                                        e.printStackTrace()
-//                                        Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
-//                                    }
-//                                } else {
-//                                    Toast.makeText(requireContext(), "No public key found in QR-code", Toast.LENGTH_SHORT).show()
-//                                }
-//                            }
                             "attestation" -> verifyAttestation(obj)
                             else -> throw RuntimeException("Unrecognized presentation value ${obj.get("presentation")} in QR-code")
                         }
@@ -213,7 +191,6 @@ class QRScanController : BaseFragment() {
                         }catch(e: Exception) {
                             e.printStackTrace()
                             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                            Toast.makeText(requireContext(), "Invalid public key in QR-code", Toast.LENGTH_SHORT).show()
                         }
                     }
                     else -> throw RuntimeException("QR code not recognized")
@@ -221,10 +198,8 @@ class QRScanController : BaseFragment() {
             }catch(e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                Toast.makeText(requireContext(), "Scanned QR code not in JSON format", Toast.LENGTH_SHORT).show()
                 initiateScan()
             }
         }
     }
-
 }

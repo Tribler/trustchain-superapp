@@ -1,44 +1,29 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.view.setPadding
-import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_identity_attribute.*
-import kotlinx.android.synthetic.main.dialog_identity_attribute_share.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
-import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
-
 
 class IdentityAttributeShareDialog(
     private val recipient: Contact?,
@@ -83,7 +68,6 @@ class IdentityAttributeShareDialog(
             toggleButton(shareAttributeButton, selectedContact != null && selectedAttribute != null)
 
             contactSpinner.isVisible = selectedContact == null
-//            selectedContactView.isVisible = selectedContact != null
 
             var identityAttributes: List<IdentityAttribute>
 
@@ -241,14 +225,12 @@ class IdentityAttributeShareDialog(
 
                     if(identityAttribute != null) {
                         parentActivity.displaySnackbar(requireContext(), "Identity attribute shared to ${selectedContact!!.name}")
-//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity attribute shared to ${selectedContact!!.name}")
                     }
 
                     bottomSheetDialog.dismiss()
                 } catch(e: Exception) {
                     e.printStackTrace()
                     parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-//                    parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Unexpected error occurred, please try again", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, false)
                 }
             }
 

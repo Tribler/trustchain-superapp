@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Handler
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -11,10 +10,8 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
-import kotlinx.android.synthetic.main.item_identity.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.getColorByHash
@@ -230,12 +227,6 @@ class ContactChatItemRenderer(
                             tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
                             tvAttachmentTransferRequestDescription.text = description
                         }
-//                        if (json.has("description")) {
-//                            json.getString("description").let { description ->
-//                                tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
-//                                tvAttachmentTransferRequestDescription.text = description
-//                            }
-//                        }
 
                         if (!item.chatMessage.outgoing) {
                             ivAttachmentTransferRequestContinueIcon.isVisible = true

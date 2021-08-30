@@ -1,15 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.util.Log
 import android.view.View
-import android.widget.ImageView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contacts.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat.view.ivIdenticon
 import nl.tudelft.trustchain.common.contacts.Contact
@@ -19,10 +12,8 @@ import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.experimental.and
 
 class ChatItemRenderer(
     private val onChatClick: (Contact) -> Unit,
@@ -31,6 +22,10 @@ class ChatItemRenderer(
 ) : ItemLayoutRenderer<ContactItem, View>(
     ContactItem::class.java
 ) {
+
+    private val timeFormat = SimpleDateFormat("HH:mm")
+    private val dayOfWeekFormat = SimpleDateFormat("EEEE")
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy")
 
     override fun bindView(item: ContactItem, view: View) = with(view) {
 
@@ -52,9 +47,9 @@ class ChatItemRenderer(
         }
 
         val contactTime = when {
-            diff <= 24*60*60*1000 -> SimpleDateFormat("HH:mm").format(lastMessageDate)
-            diff <= 7*24*60*60*1000 -> SimpleDateFormat("EEEE").format(lastMessageDate)
-            else -> SimpleDateFormat("dd/MM/yyyy").format(lastMessageDate)
+            diff <= 24*60*60*1000 -> timeFormat.format(lastMessageDate)
+            diff <= 7*24*60*60*1000 -> dayOfWeekFormat.format(lastMessageDate)
+            else -> dateFormat.format(lastMessageDate)
         }
 
         val publicKeyString = item.contact.publicKey.toString()

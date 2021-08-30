@@ -7,7 +7,6 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
@@ -17,8 +16,6 @@ import java.util.*
 class IdentityStore(context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "identities-vt.db")
     private val database = Database(driver)
-
-    val peerChatStore = PeerChatStore.getInstance(context)
 
     private val identityMapper = {
             id: String,

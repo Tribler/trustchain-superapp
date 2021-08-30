@@ -1,21 +1,16 @@
 package nl.tudelft.trustchain.valuetransfer.ui.exchange
 
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
@@ -30,9 +25,7 @@ class ExchangeTransactionItemRenderer(
 
     override fun bindView(item: ExchangeTransactionItem, view: View) = with(view) {
 
-//        val currencyName = view.findViewById<TextView>(R.id.tvTransactionCurrencyTitle)
         val currencyAmount = view.findViewById<TextView>(R.id.tvTransactionAmount)
-//        val currencySymbol = view.findViewById<TextView>(R.id.tvTransactionCurrencySymbol)
         val transactionDirectionUp = view.findViewById<ImageView>(R.id.ivDirectionIconUp)
         val transactionDirectionDown = view.findViewById<ImageView>(R.id.ivDirectionIconDown)
         val transactionDate = view.findViewById<TextView>(R.id.tvTransactionDate)
@@ -49,7 +42,6 @@ class ExchangeTransactionItemRenderer(
         val blockStatusColorWaitingForSignature = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorWaitingForSignature)
         val transactionSignButton = view.findViewById<ConstraintLayout>(R.id.clTransactionSignButton)
         val transactionSignButtonView = view.findViewById<TextView>(R.id.tvTransactionSignButton)
-//        val canSignButton = view.findViewById<TextView>(R.id.tvSignButton)
 
         val outgoing = !item.transaction.outgoing
 
@@ -65,11 +57,8 @@ class ExchangeTransactionItemRenderer(
                 transactionDirectionDown.isVisible = !outgoing
             }
             TransactionRepository.BLOCK_TYPE_TRANSFER -> {
-
-    //            val outgoing = item.transaction.sender == transactionRepository.trustChainCommunity.myPeer.publicKey
-
                 val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
-    //            if(item.transaction.outgoing) {
+
                 transactionType.text = if(outgoing) {
                     "Outgoing transfer to ${contact?.name ?: "unknown contact"}"
                 }else{
@@ -136,7 +125,6 @@ class ExchangeTransactionItemRenderer(
 
         view.setOnClickListener {
             transactionContent.isVisible = !transactionContent.isVisible
-//            transactionContent.visibility = if(transactionContent.visibility == View.GONE) View.VISIBLE else View.GONE
         }
     }
 
