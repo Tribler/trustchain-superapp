@@ -9,3 +9,5 @@ gossipML/.cxx
 **.classpath
 .vscode/
 .DS_Store
+._sync_*
+.owncloudsync*
