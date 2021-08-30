@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="12dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp"
+    android:backgroundTint="@color/colorPrimaryValueTransfer"
+    tools:background="@color/colorPrimaryValueTransfer">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvTitleBuy"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Connect to gateway"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTitleSell"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Sell to gateway"
+            android:textAlignment="center"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clBalanceSellAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clTitle">
+
+        <TextView
+            android:id="@+id/tvBalanceTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Current Balance"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvBalance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="4dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/light_gray"
+            android:paddingVertical="8dp"
+            android:paddingStart="34dp"
+            android:paddingRight="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toStartOf="@+id/tvSellAmount"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvBalanceTitle"
+            tools:text="80,00" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_eurotoken"
+            app:layout_constraintBottom_toBottomOf="@+id/tvBalance"
+            app:layout_constraintStart_toStartOf="@+id/tvBalance"
+            app:layout_constraintTop_toTopOf="@+id/tvBalance"
+            app:tint="@color/black"
+            tools:tint="@color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="ET"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/tvBalance"
+            app:layout_constraintEnd_toEndOf="@+id/tvBalance"
+            app:layout_constraintTop_toTopOf="@+id/tvBalance" />
+
+        <TextView
+            android:id="@+id/tvSellAmountTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Sell Amount"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="@+id/tvSellAmount"
+            app:layout_constraintTop_toTopOf="@+id/tvBalanceTitle" />
+
+        <TextView
+            android:id="@+id/tvSellAmount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="40dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/light_gray"
+            android:paddingVertical="8dp"
+            android:paddingStart="34dp"
+            android:paddingRight="8dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/tvBalance"
+            app:layout_constraintTop_toBottomOf="@+id/tvSellAmountTitle"
+            tools:text="80,00" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_eurotoken"
+            app:layout_constraintBottom_toBottomOf="@+id/tvSellAmount"
+            app:layout_constraintStart_toStartOf="@+id/tvSellAmount"
+            app:layout_constraintTop_toTopOf="@+id/tvSellAmount"
+            app:tint="@color/black"
+            tools:tint="@color/black" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:text="ET"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="@+id/tvSellAmount"
+            app:layout_constraintEnd_toEndOf="@+id/tvSellAmount"
+            app:layout_constraintTop_toTopOf="@+id/tvSellAmount" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvGatewayTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:paddingStart="8dp"
+        android:text="Gateway"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clBalanceSellAmount" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clConnectedGateway"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="12dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/light_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvGatewayTitle">
+
+        <TextView
+            android:id="@+id/tvGatewayName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="Demo Gateway"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:id="@+id/tvGatewayPublicKey"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            tools:text="4c69624e61434c504b3a035fd3252776e03b9d0d10"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/black"
+            android:textSize="12sp"
+            android:typeface="monospace"
+            app:layout_constraintTop_toBottomOf="@+id/tvGatewayName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clSaveGateway"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clConnectedGateway">
+
+        <TextView
+            android:id="@+id/tvSaveGatewayTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Save Gateway"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <Switch
+            android:id="@+id/switchSaveGateway"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clPreferredGateway"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clSaveGateway">
+
+        <TextView
+            android:id="@+id/tvGatewayPreferredTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Prefer Gateway"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <Switch
+            android:id="@+id/switchPreferredGateway"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/btnConnectToGateway"
+        style="@style/ButtonDarkGreenRounded"
+        android:layout_marginTop="12dp"
+        android:text="Connect to Gateway"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
+
+    <Button
+        android:id="@+id/btnContinueSell"
+        style="@style/ButtonDarkGreenRounded"
+        android:layout_marginTop="12dp"
+        android:text="Continue"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

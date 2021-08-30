@@ -67,22 +67,49 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clTitle" />
 
-    <Spinner
-        android:id="@+id/spinnerContact"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clSelectedContact"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:minWidth="150dp"
         android:layout_marginEnd="4dp"
         android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/etTransactionAmount"
+        app:layout_constraintTop_toBottomOf="@+id/tvRecipientTitle">
+
+    <Spinner
+        android:id="@+id/spinnerContact"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
         android:paddingVertical="8dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         android:textSize="14sp"
+        tools:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/etTransactionAmount"
-        app:layout_constraintTop_toBottomOf="@+id/tvRecipientTitle" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvSelectedContact"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:minWidth="150dp"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/white"
+        android:paddingVertical="8dp"
+        android:inputType="text"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingRight="8dp"
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:hint="There are no contacts"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
         android:id="@+id/tvTransactionAmountTitle"
@@ -108,12 +135,23 @@
         android:backgroundTint="@color/white"
         android:inputType="numberDecimal"
         android:paddingVertical="8dp"
-        android:paddingStart="8dp"
+        android:paddingStart="34dp"
         android:textSize="14sp"
-        android:hint="Balance: 39918,55"
+        tools:hint="39918,55 max"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/spinnerContact"
+        app:layout_constraintStart_toEndOf="@+id/clSelectedContact"
         app:layout_constraintTop_toBottomOf="@+id/tvTransactionAmountTitle" />
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_eurotoken"
+        app:layout_constraintBottom_toBottomOf="@+id/etTransactionAmount"
+        app:layout_constraintStart_toStartOf="@+id/etTransactionAmount"
+        app:layout_constraintTop_toTopOf="@+id/etTransactionAmount"
+        app:tint="@color/black"
+        tools:tint="@color/black" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -134,15 +172,48 @@
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
         android:paddingVertical="8dp"
-        android:inputType="text"
+        android:inputType="textCapSentences"
         android:paddingStart="8dp"
-        android:paddingRight="44dp"
+        android:paddingRight="8dp"
         android:layout_marginTop="12dp"
         android:textSize="14sp"
         android:hint="(Optional) message to receiver..."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clSelectedContact" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clAddNewContact"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage">
+
+        <TextView
+            android:id="@+id/tvAddNewContactTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Add contact to address book"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <Switch
+            android:id="@+id/switchAddNewContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button
         android:id="@+id/btnTransferMoney"
@@ -152,17 +223,17 @@
         android:text="Transfer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
 
     <Button
         android:id="@+id/btnRequestMoneyContact"
         style="@style/ButtonDarkGreenRounded"
         android:layout_marginTop="12dp"
         android:enabled="false"
-        android:text="Request Contact"
+        android:text="Send request"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
 
     <Button
         android:id="@+id/btnRequestMoneyQR"
@@ -172,6 +243,22 @@
         android:text="Create Request QR"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etTransactionMessage" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+
+    <ProgressBar
+        android:id="@+id/pbLoadingSpinner"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="12dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/white"
+        android:indeterminateTintMode="src_atop"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -18,6 +18,7 @@ import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.wallet.SendRequest
 import nl.tudelft.trustchain.common.eurotoken.blocks.*
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 import java.lang.Math.abs
 import java.math.BigInteger
 
@@ -227,7 +228,7 @@ class TransactionRepository(
         return getVerifiedBalanceForBlock(latestBlock, trustChainCommunity.database)!!
     }
 
-    private fun getMyBalance(): Long {
+    fun getMyBalance(): Long {
         val myKey = IPv8Android.getInstance().myPeer.publicKey.keyToBin()
         val latestBlock = trustChainCommunity.database.getLatest(myKey) ?: return 0
         return getBalanceForBlock(latestBlock, trustChainCommunity.database)!!
@@ -426,6 +427,52 @@ class TransactionRepository(
                     block.timestamp
                 )
             }
+    }
+
+    fun getLatestBlockOfType(trustchain: TrustChainHelper, allowedTypes: List<String>): TrustChainBlock {
+        return trustchain.getChainByUser(trustchain.getMyPublicKey())
+            .first { block: TrustChainBlock ->
+                allowedTypes.contains(block.type)
+            }
+    }
+
+    fun getLatestNTransactionsOfType(trustchain: TrustChainHelper, limit: Int, allowedTypes: List<String>): List<Transaction> {
+        val myKey = trustChainCommunity.myPeer.publicKey.keyToBin()
+        val blocks = trustChainCommunity.database.getLatestBlocks(myKey, 1000)
+
+        return trustchain.getChainByUser(trustchain.getMyPublicKey())
+            .asSequence()
+            .filter { block: TrustChainBlock ->
+                allowedTypes.contains(block.type)
+            }
+            .filter { block ->
+                val linkedBlock = blocks.find {it.linkedBlockId == block.blockId }
+                val hasLinkedBlock = linkedBlock != null
+                val outgoing = getBalanceChangeForBlock(block) < 0
+
+                val outgoingTransaction = outgoing && hasLinkedBlock && block.type == BLOCK_TYPE_TRANSFER
+                val incomingTransaction = !outgoing && block.type == BLOCK_TYPE_TRANSFER && (blocks.find{ it.blockId == block.linkedBlockId }  != null)
+                val buyFromExchange = !outgoing && block.type == BLOCK_TYPE_CREATE && !block.isAgreement
+                val sellToExchange = outgoing && block.type == BLOCK_TYPE_DESTROY && !block.isAgreement
+
+                buyFromExchange || sellToExchange || outgoingTransaction || incomingTransaction
+            }
+            .take(limit)
+            .map { block: TrustChainBlock ->
+                val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+                Transaction(
+                    block,
+                    sender,
+                    defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey),
+                    if (block.transaction.containsKey(KEY_AMOUNT)) {
+                        (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+                    } else 0L,
+                    block.type,
+                    getBalanceChangeForBlock(block) < 0,
+                    block.timestamp
+                )
+            }
+            .toList()
     }
 
     fun getTransactionWithHash(hash: ByteArray?): TrustChainBlock? {

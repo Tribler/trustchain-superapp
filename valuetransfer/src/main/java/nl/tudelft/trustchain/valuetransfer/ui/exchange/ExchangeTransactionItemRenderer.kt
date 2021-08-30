@@ -1,21 +1,29 @@
 package nl.tudelft.trustchain.valuetransfer.ui.exchange
 
+import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
+import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 
 class ExchangeTransactionItemRenderer(
-    private val onTransactionClick: (Transaction) -> Unit
+    private val onSignClick: (TrustChainBlock) -> Unit,
 ) : ItemLayoutRenderer<ExchangeTransactionItem, View>(
     ExchangeTransactionItem::class.java
 ) {
@@ -39,21 +47,37 @@ class ExchangeTransactionItemRenderer(
         val blockStatusColorSigned = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSigned)
         val blockStatusColorSelfSigned = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorSelfSigned)
         val blockStatusColorWaitingForSignature = view.findViewById<ImageView>(R.id.ivTransactionBlockStatusColorWaitingForSignature)
+        val transactionSignButton = view.findViewById<ConstraintLayout>(R.id.clTransactionSignButton)
+        val transactionSignButtonView = view.findViewById<TextView>(R.id.tvTransactionSignButton)
+//        val canSignButton = view.findViewById<TextView>(R.id.tvSignButton)
 
-        transactionDirectionUp.visibility = if(item.transaction.outgoing) View.GONE else View.VISIBLE
-        transactionDirectionDown.visibility = if(!item.transaction.outgoing) View.GONE else View.VISIBLE
+        val outgoing = !item.transaction.outgoing
 
-        if(item.transaction.type == "eurotoken_creation") {
-            transactionType.text = "Buy from EuroToken Exchange"
-        }else if(item.transaction.type == "eurotoken_destruction") {
-            transactionType.text = "Sell to EuroToken Exchange"
-        }else if(item.transaction.type == "eurotoken_transfer") {
+        when (item.transaction.type) {
+            TransactionRepository.BLOCK_TYPE_CREATE -> {
+                transactionType.text = "Buy from EuroToken Exchange"
+                transactionDirectionUp.isVisible = outgoing
+                transactionDirectionDown.isVisible = !outgoing
+            }
+            TransactionRepository.BLOCK_TYPE_DESTROY -> {
+                transactionType.text = "Sell to EuroToken Exchange"
+                transactionDirectionUp.isVisible = outgoing
+                transactionDirectionDown.isVisible = !outgoing
+            }
+            TransactionRepository.BLOCK_TYPE_TRANSFER -> {
 
-            val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.receiver)
-            if(item.transaction.outgoing) {
-                transactionType.text = "Outgoing transfer to ${contact?.name ?: "unknown contact"}"
-            }else{
-                transactionType.text = "Incoming transfer from ${contact?.name ?: "unknown contact"}"
+    //            val outgoing = item.transaction.sender == transactionRepository.trustChainCommunity.myPeer.publicKey
+
+                val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
+    //            if(item.transaction.outgoing) {
+                transactionType.text = if(outgoing) {
+                    "Outgoing transfer to ${contact?.name ?: "unknown contact"}"
+                }else{
+                    "Incoming transfer from ${contact?.name ?: "unknown contact"}"
+                }
+
+                transactionDirectionUp.isVisible = !outgoing
+                transactionDirectionDown.isVisible = outgoing
             }
         }
 
@@ -62,46 +86,57 @@ class ExchangeTransactionItemRenderer(
 
         val map = item.transaction.block.transaction.toMap()
         if(map.containsKey("amount")) {
-            currencyAmount.text = (map["amount"] as BigInteger).toDouble().div(100).toString()
+            currencyAmount.text = formatBalance((map["amount"] as BigInteger).toLong())
         }else{
             currencyAmount.text = "-"
         }
 
+        blockStatus.text = ""
+
         when(item.status) {
             ExchangeTransactionItem.BlockStatus.SELF_SIGNED -> {
                 blockStatus.text = "Self-Signed"
-                blockStatusColorSelfSigned.visibility = View.VISIBLE
+                blockStatusColorSelfSigned.isVisible = true
             }
             ExchangeTransactionItem.BlockStatus.SIGNED -> {
                 blockStatus.text = "Signed"
-                blockStatusColorSigned.visibility = View.VISIBLE
+                blockStatusColorSigned.isVisible = true
             }
             ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
                 blockStatus.text = "Waiting for signature"
-                blockStatusColorWaitingForSignature.visibility = View.VISIBLE
+                blockStatusColorWaitingForSignature.isVisible = true
             }
             null -> {
                 blockStatus.text = "Status unknown"
             }
         }
 
+        transactionSignButton.isVisible = item.canSign
+
+        transactionSignButton.setOnClickListener {
+            transactionSignButton.background = ContextCompat.getDrawable(this.context, R.drawable.pill_rounded_bottom_orange)
+            transactionSignButtonView.text = "Signing transaction..."
+            Handler().postDelayed(
+                Runnable {
+                    onSignClick(item.transaction.block)
+                }, 2000
+            )
+        }
+
         transactionContentText.text = item.transaction.block.transaction.toString()
 
-        when(item.transaction.outgoing) {
-            true -> {
-                transactionSenderReceiverTitle.text = "Receiver"
-                transactionSenderReceiverText.text = item.transaction.receiver.keyToBin().toHex()
-            }
-            false -> {
-                transactionSenderReceiverTitle.text = "Sender"
-                transactionSenderReceiverText.text = item.transaction.receiver.keyToBin().toHex()
-            }
+        transactionSenderReceiverTitle.text = when {
+            outgoing -> "Receiver"
+                else -> "Sender"
         }
+
+        transactionSenderReceiverText.text = item.transaction.sender.keyToBin().toHex()
         transactionTypeText.text = item.transaction.type
         transactionBlockHash.text = item.transaction.block.calculateHash().toHex()
 
         view.setOnClickListener {
-            transactionContent.visibility = if(transactionContent.visibility == View.GONE) View.VISIBLE else View.GONE
+            transactionContent.isVisible = !transactionContent.isVisible
+//            transactionContent.visibility = if(transactionContent.visibility == View.GONE) View.VISIBLE else View.GONE
         }
     }
 
