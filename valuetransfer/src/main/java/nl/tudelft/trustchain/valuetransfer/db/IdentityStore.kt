@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.valuetransfer.db
 
-import android.app.Person
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
@@ -8,9 +7,8 @@ import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.valuetransfer.entity.Attribute
+import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import nl.tudelft.valuetransfer.sqldelight.Database
@@ -60,7 +58,7 @@ class IdentityStore(context: Context) {
         value: String,
         added: Long,
         modified: Long
-        -> Attribute(
+        -> IdentityAttribute(
             id,
             name,
             value,
@@ -145,7 +143,7 @@ class IdentityStore(context: Context) {
         return database.dbAttributeQueries.createAttributesTable()
     }
 
-    fun getAllAttributes(): Flow<List<Attribute>> {
+    fun getAllAttributes(): Flow<List<IdentityAttribute>> {
         return database.dbAttributeQueries.getAllAttributes(attributeMapper)
             .asFlow().mapToList()
     }
@@ -154,26 +152,26 @@ class IdentityStore(context: Context) {
         return database.dbAttributeQueries.getAttributeNames().executeAsList()
     }
 
-    fun addAttribute(attribute: Attribute) {
+    fun addAttribute(identityAttribute: IdentityAttribute) {
         database.dbAttributeQueries.addAttribute(
-            attribute.id,
-            attribute.name,
-            attribute.value,
-            attribute.added.time,
-            attribute.modified.time,
+            identityAttribute.id,
+            identityAttribute.name,
+            identityAttribute.value,
+            identityAttribute.added.time,
+            identityAttribute.modified.time,
         )
     }
 
-    fun editAttribute(attribute: Attribute) {
+    fun editAttribute(identityAttribute: IdentityAttribute) {
         database.dbAttributeQueries.updateAttribute(
-            attribute.value,
+            identityAttribute.value,
             Date().time,
-            attribute.id
+            identityAttribute.id
         )
     }
 
-    fun deleteAttribute(attribute: Attribute) {
-        database.dbAttributeQueries.deleteAttribute(attribute.id)
+    fun deleteAttribute(identityAttribute: IdentityAttribute) {
+        database.dbAttributeQueries.deleteAttribute(identityAttribute.id)
     }
 
     fun deleteAllAttributes() {

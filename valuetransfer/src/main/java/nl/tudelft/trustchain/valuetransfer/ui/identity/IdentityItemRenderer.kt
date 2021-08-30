@@ -3,11 +3,15 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 import android.view.View
 import androidx.navigation.findNavController
 import com.mattskala.itemadapter.ItemLayoutRenderer
+import kotlinx.android.synthetic.main.item_contacts.view.*
 import kotlinx.android.synthetic.main.item_identity.view.*
+import kotlinx.android.synthetic.main.item_identity.view.ivIdenticon
 import kotlinx.android.synthetic.main.item_identity_detail.view.*
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import java.text.SimpleDateFormat
 
 class IdentityItemRenderer(
@@ -26,6 +30,12 @@ class IdentityItemRenderer(
 
             val content = item.identity.content
             tvIdentityGivenNamesSurname.text = "${content.givenNames} ${content.surname}"
+
+            val publicKeyString = item.identity.publicKey.toString()
+            val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
+            val color = getColorByHash(context, publicKeyString)
+            val identicon = generateIdenticon(input, color , resources)
+            ivIdenticon.setImageBitmap(identicon)
 
             view.setOnClickListener {
                 onQRButtonClick(item.identity)

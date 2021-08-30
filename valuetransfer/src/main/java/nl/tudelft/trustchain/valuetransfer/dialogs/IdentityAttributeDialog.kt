@@ -1,56 +1,55 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.app.DatePickerDialog
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.core.view.setPadding
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
-import kotlinx.android.synthetic.main.dialog_identity_attribute.*
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.entity.Attribute
-import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
+import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
-import java.text.SimpleDateFormat
-import java.util.*
 
-class IdentityAttributeAddDialog(
-    private var attribute: Attribute?,
-    private val unusedAttributes: List<String>,
-    private val community: IdentityCommunity,
+class IdentityAttributeDialog(
+    private var attribute: IdentityAttribute?,
+//    private val unusedAttributes: List<String>,
 ) : DialogFragment() {
 
-    private var selectedName = ""
+    private lateinit var parentActivity: ValueTransferMainActivity
+    private lateinit var identityCommunity: IdentityCommunity
+    private lateinit var identityStore: IdentityStore
 
-    private val store by lazy {
-        IdentityStore.getInstance(requireContext())
-    }
+    private var selectedName = ""
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_identity_attribute, null)
 
+            parentActivity = requireActivity() as ValueTransferMainActivity
+            identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
+            identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
+
+            val unusedAttributes = identityCommunity.getUnusedAttributeNames()
+
             val attributeNameSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeName)
             val attributeNameView = view.findViewById<EditText>(R.id.etAttributeName)
             val attributeValueView = view.findViewById<EditText>(R.id.etAttributeValue)
             val saveButton = view.findViewById<Button>(R.id.btnSaveAttribute)
             toggleButton(saveButton, attribute != null)
-            val deleteButton = view.findViewById<Button>(R.id.btnDeleteAttribute)
-            deleteButton.visibility = if(attribute == null) View.GONE else View.VISIBLE
 
             attributeNameView.visibility = if(attribute == null) View.GONE else View.VISIBLE
             attributeNameSpinner.visibility = if(attribute == null) View.VISIBLE else View.GONE
@@ -59,8 +58,10 @@ class IdentityAttributeAddDialog(
                 val attributeNameAdapter = object: ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
                     override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
                         val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-
-                        textView.setPadding(30)
+                        val params = textView.layoutParams
+                        params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                        textView.layoutParams = params
+                        textView.gravity = Gravity.CENTER_VERTICAL
 
                         if (position == attributeNameSpinner.selectedItemPosition){
                             textView.background = ColorDrawable(Color.LTGRAY)
@@ -99,32 +100,21 @@ class IdentityAttributeAddDialog(
                 val attributeValue = attributeValueView.text.toString()
 
                 if (attribute == null) {
-                    val newAttribute = community.createAttribute(selectedName, attributeValue)
-                    store.addAttribute(newAttribute)
-                    Toast.makeText(requireContext(), "Attribute added", Toast.LENGTH_SHORT).show()
+                    val newAttribute = identityCommunity.createAttribute(selectedName, attributeValue)
+                    identityStore.addAttribute(newAttribute)
+                    parentActivity.displaySnackbar(requireContext(), "Identity attribute added")
+//                    parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity attribute added")
                 } else {
                     attribute!!.name = selectedName
                     attribute!!.value = attributeValue
 
-                    store.editAttribute(attribute!!)
-                    Toast.makeText(requireContext(), "Attribute updated", Toast.LENGTH_SHORT).show()
+                    identityStore.editAttribute(attribute!!)
+                    parentActivity.displaySnackbar(requireContext(), "Identity attribute updated")
+//                    parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity attribute updated")
                 }
 
                 activity?.invalidateOptionsMenu()
                 bottomSheetDialog.dismiss()
-            }
-
-            deleteButton.setOnClickListener {
-                try {
-                    store.deleteAttribute(attribute!!)
-                    Toast.makeText(requireContext(), "Attribute deleted", Toast.LENGTH_SHORT).show()
-
-                    activity?.invalidateOptionsMenu()
-                    bottomSheetDialog.dismiss()
-
-                } catch(exception: Exception) {
-                    Toast.makeText(requireContext(), "Attribute couldn't be deleted", Toast.LENGTH_SHORT).show()
-                }
             }
 
             bottomSheetDialog

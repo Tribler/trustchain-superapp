@@ -1,11 +1,13 @@
 package nl.tudelft.trustchain.valuetransfer.community
 
 import android.content.Context
+import android.content.res.Resources
 import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.entity.Attribute
+import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import java.util.*
@@ -15,21 +17,6 @@ class IdentityCommunity(
     private val context: Context
 ) : Community() {
     override val serviceId = "c86a7db45eb3563ae047639817baec4db2bc7c44"
-
-//    override fun load() {
-//        super.load()
-//
-//        scope.launch {
-//            while (isActive) {
-//                try {
-//                    Log.d("VALUETRANSFER", "COMMUNITY");
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                }
-//                delay(30000L)
-//            }
-//        }
-//    }
 
     fun createIdentitiesTable() {
         store.createIdentitiesTable()
@@ -66,10 +53,10 @@ class IdentityCommunity(
         )
     }
 
-    fun createAttribute(name: String, value: String) : Attribute {
+    fun createAttribute(name: String, value: String) : IdentityAttribute {
         val id = UUID.randomUUID().toString()
 
-        return Attribute(
+        return IdentityAttribute(
             id = id,
             name = name,
             value = value,
@@ -78,12 +65,18 @@ class IdentityCommunity(
         )
     }
 
-    fun deleteDatabase(context: Context) {
-        context.deleteDatabase("identities-vt.db")
+    fun getUnusedAttributeNames(): List<String> {
+        val attributes = IdentityAttribute.IDENTITY_ATTRIBUTES
+//        val attributes = resources.getStringArray(R.array.identity_attributes)
+        val currentAttributeNames = store.getAttributeNames()
+
+        return attributes.filter { name ->
+            !currentAttributeNames.contains(name)
+        }
     }
 
-    fun testCommunity() {
-        Log.d("IDENTITYCOMMUNITY", "test executed")
+    fun deleteDatabase(context: Context) {
+        context.deleteDatabase("identities-vt.db")
     }
 
     class Factory(

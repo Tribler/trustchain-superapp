@@ -20,6 +20,7 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
@@ -36,16 +37,16 @@ class IdentityDetailsDialog(
         IdentityStore.getInstance(requireContext())
     }
 
-    private fun validateEditTexts(map: Map<String, EditText>): Boolean {
-        return map.none {
-            it.value.text.isEmpty()
-        }
-    }
+    private lateinit var parentActivity: ValueTransferMainActivity
+//    private lateinit var identityFragment: IdentityFragment
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_identity_add, null)
+
+            parentActivity = requireActivity() as ValueTransferMainActivity
+//            identityFragment = parentActivity.getFragmentByTag(ValueTransferMainActivity.identityFragmentTag)!! as IdentityFragment
 
             val editTexts = mapOf<String, EditText>(
                 "givenNames" to view.findViewById(R.id.etGivenNames),
@@ -112,85 +113,45 @@ class IdentityDetailsDialog(
             }
 
             genderButtonGroup.addOnButtonCheckedListener(MaterialButtonToggleGroup.OnButtonCheckedListener { _, checkedId, _ ->
-//                if (isChecked) {
-                    when(checkedId) {
-                        R.id.btnMale -> {
-                            btnMale.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.colorPrimaryDarkValueTransfer
-                                )
+                when(checkedId) {
+                    R.id.btnMale -> {
+                        btnMale.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.colorPrimaryDarkValueTransfer
                             )
-                            btnMale.setTextColor(Color.WHITE)
-                            btnFemale.setBackgroundColor(Color.WHITE)
-                            btnFemale.setTextColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.colorPrimaryValueTransfer
-                                )
+                        )
+                        btnMale.setTextColor(Color.WHITE)
+                        btnFemale.setBackgroundColor(Color.WHITE)
+                        btnFemale.setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.colorPrimaryValueTransfer
                             )
-                            btnMale.isCheckable = false
-                            btnFemale.isCheckable = true
-                            toggleButton(saveButton, validateEditTexts(editTexts))
-                            Log.d("TESTJE", "MALE CLICKED")
-                        }
-                        R.id.btnFemale -> {
-                            btnFemale.setBackgroundColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.colorPrimaryDarkValueTransfer
-                                )
+                        )
+                        btnMale.isCheckable = false
+                        btnFemale.isCheckable = true
+                    }
+                    R.id.btnFemale -> {
+                        btnFemale.setBackgroundColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.colorPrimaryDarkValueTransfer
                             )
-                            btnFemale.setTextColor(Color.WHITE)
-                            btnMale.setBackgroundColor(Color.WHITE)
-                            btnMale.setTextColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.colorPrimaryValueTransfer
-                                )
+                        )
+                        btnFemale.setTextColor(Color.WHITE)
+                        btnMale.setBackgroundColor(Color.WHITE)
+                        btnMale.setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.colorPrimaryValueTransfer
                             )
-                            btnFemale.isCheckable = false
-                            btnMale.isCheckable = true
-                            toggleButton(saveButton, validateEditTexts(editTexts))
-                            Log.d("TESTJE", "FEMALE CLICKED")
-                        }
-//                    }
-//                    if (checkedId == R.id.btnMale && !view.findViewById<MaterialButton>(R.id.btnMale).isChecked) {
-//                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(
-//                            ContextCompat.getColor(
-//                                requireContext(),
-//                                R.color.colorPrimaryDarkValueTransfer
-//                            )
-//                        )
-//                        view.findViewById<Button>(R.id.btnMale).setTextColor(Color.WHITE)
-//                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(Color.WHITE)
-//                        view.findViewById<Button>(R.id.btnFemale).setTextColor(
-//                            ContextCompat.getColor(
-//                                requireContext(),
-//                                R.color.colorPrimaryValueTransfer
-//                            )
-//                        )
-//                        genderChecked = true
-//                        toggleButton(saveButton, validateEditTexts(editTexts))
-//                    } else if(checkedId == R.id.btnFemale && !view.findViewById<MaterialButton>(R.id.btnFemale).isChecked) {
-//                        view.findViewById<Button>(R.id.btnFemale).setBackgroundColor(
-//                            ContextCompat.getColor(
-//                                requireContext(),
-//                                R.color.colorPrimaryDarkValueTransfer
-//                            )
-//                        )
-//                        view.findViewById<Button>(R.id.btnFemale).setTextColor(Color.WHITE)
-//                        view.findViewById<Button>(R.id.btnMale).setBackgroundColor(Color.WHITE)
-//                        view.findViewById<Button>(R.id.btnMale).setTextColor(
-//                            ContextCompat.getColor(
-//                                requireContext(),
-//                                R.color.colorPrimaryValueTransfer
-//                            )
-//                        )
-//                        genderChecked = true
-//                        toggleButton(saveButton, validateEditTexts(editTexts))
-//                    }
+                        )
+                        btnFemale.isCheckable = false
+                        btnMale.isCheckable = true
+                    }
                 }
+                toggleButton(saveButton, validateEditTexts(editTexts))
             })
 
             bottomSheetDialog.setContentView(view)
@@ -233,11 +194,15 @@ class IdentityDetailsDialog(
                         val newIdentity = community.createIdentity(givenNames, surname, placeOfBirth, dateOfBirth, nationality, gender, personalNumber, documentNumber)
                         identityStore.addIdentity(newIdentity)
                     } catch(e: Exception) {
-                        Log.e("ERROR", e.toString())
-                        Toast.makeText(requireContext(), "Identity couldn't be added", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                        parentActivity.displaySnackbar(requireContext(), "Identity couldn't be added", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity couldn't be added", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+//                        Toast.makeText(requireContext(), "Identity couldn't be added", Toast.LENGTH_SHORT).show()
                     }finally {
-                        Toast.makeText(requireContext(), "Identity added", Toast.LENGTH_SHORT).show()
-                        (requireActivity() as ValueTransferMainActivity).reloadActivity()
+                        parentActivity.displaySnackbar(requireContext(), "Identity successfully added. Application re-initialized.")
+//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity successfully added. Application re-initialized.")
+//                        Toast.makeText(requireContext(), "Identity added", Toast.LENGTH_SHORT).show()
+                        parentActivity.reloadActivity()
                     }
                 } else {
                     identity.content.givenNames = givenNames
@@ -252,17 +217,27 @@ class IdentityDetailsDialog(
                     try {
                         identityStore.editIdentity(identity)
                     } catch(e: Exception) {
-                        Log.e("ERROR", e.toString())
-                        Toast.makeText(requireContext(), "Identity couldn't be updated", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                        parentActivity.displaySnackbar(requireContext(), "Identity couldn't be updated", view = parentActivity.getView(true), type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity couldn't be updated", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+//                        Toast.makeText(requireContext(), "Identity couldn't be updated", Toast.LENGTH_SHORT).show()
                     }finally {
-                        Toast.makeText(requireContext(), "Identity updated", Toast.LENGTH_SHORT).show()
+                        bottomSheetDialog.dismiss()
+                        parentActivity.invalidateOptionsMenu()
+
+                        parentActivity.displaySnackbar(requireContext(), "Identity successfully updated")
+//                        parentActivity.displaySnackbar(identityFragment.requireView(), identityFragment.requireContext(), "Identity successfully updated")
+//                        Toast.makeText(requireContext(), "Identity updated", Toast.LENGTH_SHORT).show()
                     }
                 }
-
-                bottomSheetDialog.dismiss()
-                activity?.invalidateOptionsMenu()
             }
             bottomSheetDialog
         } ?: throw IllegalStateException("Activity cannot be null")
+    }
+
+    private fun validateEditTexts(map: Map<String, EditText>): Boolean {
+        return map.none {
+            it.value.text.isEmpty()
+        }
     }
 }
