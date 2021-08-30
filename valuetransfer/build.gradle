@@ -19,6 +19,12 @@ sqldelight {
     }
 }
 
+repositories {
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -118,6 +124,9 @@ dependencies {
 //    testImplementation 'junit:junit:4.+'
 //    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
 //    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation 'com.jaredrummler:blocking-dialog:1.0.0'
+    implementation 'com.github.Redman1037:TSnackBar:V2.0.0'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
