@@ -4,9 +4,12 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -16,8 +19,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import nl.tudelft.trustchain.common.util.QRCodeUtils
-import nl.tudelft.trustchain.eurotoken.ui.transfer.TransferFragment.Companion.decimalLimiter
+import nl.tudelft.trustchain.valuetransfer.R
 import org.json.JSONObject
+import java.util.*
 import kotlin.math.abs
 
 fun closeKeyboard(context: Context, view: View) {
@@ -49,28 +53,10 @@ fun scrollToBottom(recyclerView: RecyclerView) {
     }
 }
 
-fun getFirstLettersFromString(text: String, maxLength: Int) : String {
-
-    if(text.isEmpty()) {
-        return ""
-    }
-
-    var result = ""
-    val arr = text.split(" ")
-    val max = arr.size.coerceAtMost(maxLength) -1
-
-    for(ind in 0..max) {
-        result += arr[ind].toCharArray()[0]
-    }
-    return result
-}
-
 fun copyToClipboard(context: Context, text: String, label: String) {
-    val clipboard =
-        ContextCompat.getSystemService(context, ClipboardManager::class.java)
+    val clipboard = ContextCompat.getSystemService(context, ClipboardManager::class.java)
     val clip = ClipData.newPlainText(label, text)
     clipboard?.setPrimaryClip(clip)
-    Toast.makeText(context, "$label copied to clipboard", Toast.LENGTH_SHORT).show()
 }
 
 fun mapToJSON(attributes: Map<String, String?>) : JSONObject {
@@ -94,6 +80,32 @@ fun toggleButton(button: Button, state: Boolean) {
 fun formatBalance(amount: Long): String {
     return (amount / 100).toString() + "," + (abs(amount) % 100).toString()
         .padStart(2, '0')
+}
+
+fun formatAmount(amount: String): Long {
+    val regex = """[^\d]""".toRegex()
+    if (amount.isEmpty()) {
+        return 0L
+    }
+    return regex.replace(amount, "").toLong()
+}
+
+fun getAmount(amount: String): Long {
+    val regex = """[^\d]""".toRegex()
+    if (amount.isEmpty()) {
+        return 0L
+    }
+    return regex.replace(amount, "").toLong()
+}
+
+fun EditText.decimalLimiter(string: String): String {
+
+    var amount = getAmount(string)
+    if (amount == 0L) {
+        return "0,00"
+    }
+
+    return (amount / 100).toString() + "," + (amount % 100).toString().padStart(2, '0')
 }
 
 fun EditText.addDecimalLimiter() {
@@ -122,4 +134,46 @@ fun EditText.addDecimalLimiter() {
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
     })
+}
+
+/**
+ * Identicon generation in Github style avatar. The identicon and its colors is composed of the public key. The dimension must be an odd integer of at least 3.
+ */
+fun generateIdenticon(hash: ByteArray, color: Int, resources: Resources, dimension: Int = 5): Bitmap {
+
+    val foregroundColor = Color.argb(100, Color.red(color), Color.green(color), Color.blue(color))
+    var identiconBitmap = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
+
+    for(x in 0 until dimension) {
+        for(y in 0 until dimension) {
+            if((hash[if(x < (dimension/2)) x else 4 - x].toInt() shr y and 1) == 1) {
+                identiconBitmap.setPixel(x, y, foregroundColor)
+            }
+        }
+    }
+
+    val density = resources.displayMetrics.density
+    val w = (resources.getDimension(R.dimen.identiconWidth)*density).toInt()
+    val h = (resources.getDimension(R.dimen.identiconHeight)*density).toInt()
+
+//    val bitmap = Bitmap.createBitmap(w, h, identiconBitmap.config)
+//    val canvas = Canvas(bitmap)
+//    identiconBitmap = Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
+//    canvas.drawBitmap(identiconBitmap, 0E1F, 0E1F, null)
+
+    return Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
+}
+
+fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
+    val higher = if(first.time >= second.time) first else second
+    val lower = if(first.time < second.time) first else second
+
+    val dayCount = (higher.time - lower.time)/(24*60*60*1000)
+
+    if(days == true) {
+        return dayCount
+    }
+
+    return (dayCount/365)
+
 }
