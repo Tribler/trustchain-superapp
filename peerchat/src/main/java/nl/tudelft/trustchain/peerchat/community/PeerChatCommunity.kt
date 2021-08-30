@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.peerchat.community
 
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+import android.location.Location
+import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -15,9 +17,11 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -82,6 +86,63 @@ class PeerChatCommunity(
         val chatMessage = createOutgoingChatMessage(message, null, null, recipient)
         database.addMessage(chatMessage)
 
+        sendMessage(chatMessage)
+    }
+
+    fun sendIdentityAttribute(serializedAttribute: ByteArray, recipient: PublicKey) {
+        val attachment = MessageAttachment(
+            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
+            serializedAttribute.size.toLong(),
+            serializedAttribute
+        )
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
+    fun sendFile(file: File, fileName: String, recipient: PublicKey) {
+        val hash = file.name.hexToBytes()
+        val attachment = MessageAttachment(MessageAttachment.TYPE_FILE, file.length(), hash)
+        val chatMessage = createOutgoingChatMessage(fileName, attachment, null, recipient)
+
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
+    fun sendLocation(location: Location, addressLine: String, recipient: PublicKey) {
+        val json = JSONObject()
+        json.put("latitude", location.latitude)
+        json.put("longitude", location.longitude)
+        json.put("address_line", addressLine)
+        val serializedLocation = json.toString().toByteArray()
+
+        val attachment = MessageAttachment(MessageAttachment.TYPE_LOCATION, serializedLocation.size.toLong(), serializedLocation)
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
+    fun sendTransferRequest(description: String?, amount: Long, recipient: PublicKey) {
+        val json = JSONObject()
+//        json.put("description", description)
+        json.put("amount", amount)
+        val serializedTransferRequest = json.toString().toByteArray()
+
+        val attachment = MessageAttachment(MessageAttachment.TYPE_TRANSFER_REQUEST, serializedTransferRequest.size.toLong(), serializedTransferRequest)
+        val chatMessage = createOutgoingChatMessage(description ?: "", attachment, null, recipient)
+
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
+    fun sendContact(contact: Contact, recipient: PublicKey) {
+        val serializedContact = contact.serialize()
+        val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT, serializedContact.size.toLong(), serializedContact)
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+
+        database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
@@ -188,7 +249,13 @@ class PeerChatCommunity(
 
         // Request attachment
         if (chatMessage.attachment != null) {
-            sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
+            when(chatMessage.attachment.type) {
+                MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
+                MessageAttachment.TYPE_CONTACT -> return
+                MessageAttachment.TYPE_LOCATION -> return
+                MessageAttachment.TYPE_TRANSFER_REQUEST -> return
+                else -> sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
+            }
         }
     }
 
