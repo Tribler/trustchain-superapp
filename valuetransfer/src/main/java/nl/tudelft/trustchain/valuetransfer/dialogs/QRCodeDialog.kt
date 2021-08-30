@@ -22,10 +22,6 @@ class QRCodeDialog(
     private val data: String
 ) : DialogFragment() {
 
-    private val qrCodeUtils by lazy {
-
-    }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog =

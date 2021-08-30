@@ -1,58 +1,46 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import kotlinx.android.synthetic.main.dialog_contact_add.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.util.*
 import nl.tudelft.trustchain.valuetransfer.util.*
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
-import nl.tudelft.trustchain.peerchat.ui.addcontact.AddContactFragment
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
+import org.json.JSONObject
 
 class ContactAddDialog(
-    private val myPublicKey: PublicKey
+    private val myPublicKey: PublicKey,
+    private val peerPublicKey: PublicKey?,
+    private val name: String?
 ) : DialogFragment() {
 
-    private val peerChatStore by lazy {
-        PeerChatStore.getInstance(requireContext())
-    }
-
-    private var contactPublicKey = MutableLiveData<String>()
-
-//    private fun toggleButton(button: Button, contactName: EditText, contactPublicKey: EditText) {
-//        button.isEnabled = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
-//        button.alpha = if(contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()) 1f else 0.5f
-//        button.isClickable = contactName.text.toString().isNotEmpty() && contactPublicKey.text.toString().isNotEmpty()
-//    }
+    private lateinit var parentActivity: ValueTransferMainActivity
+    private lateinit var contactStore: ContactStore
+    private lateinit var dialogView: View
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_contact_add, null)
+
+            parentActivity = requireActivity() as ValueTransferMainActivity
+            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+            dialogView = view
 
             val myPublicKeyTextView = view.findViewById<EditText>(R.id.etMyPublicKey)
             val myPublicKeyImageView = view.findViewById<ImageView>(R.id.ivMyQRCode)
@@ -63,73 +51,78 @@ class ContactAddDialog(
             val addContactView = view.findViewById<Button>(R.id.btnAddContact)
 
             myPublicKeyTextView.setText(myPublicKey.keyToBin().toHex())
+            contactPublicKeyView.setText(peerPublicKey?.keyToBin()?.toHex())
+            contactNameView.setText(name)
+            toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
 
             onFocusChange(contactNameView, requireContext())
             onFocusChange(contactPublicKeyView, requireContext())
 
             contactNameView.doAfterTextChanged {
                 toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
-//                toggleButton(addContactView, contactNameView, contactPublicKeyView)
             }
 
             contactPublicKeyView.doAfterTextChanged {
                 toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
-//                toggleButton(addContactView, contactNameView, contactPublicKeyView)
             }
 
             copyMyPublicKeyView.setOnClickListener {
-                copyToClipboard(requireContext(),myPublicKey.keyToBin().toHex(), "Public Key")
+                copyToClipboard(requireContext(),myPublicKey.keyToBin().toHex(), "Public key")
+                parentActivity.displaySnackbar(requireContext(), "Public key has been copied")
+//                parentActivity.displaySnackbar(view, requireContext(), "Public key has been copied")
             }
 
             scanContactPublicKeyView.setOnClickListener {
-                QRCodeUtils(requireContext()).startQRScanner(this, vertical = true)
+                QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan QR Code to import contact", vertical = true)
             }
 
             addContactView.setOnClickListener {
                 val publicKeyBin = contactPublicKeyView.text.toString()
                 try {
-                    defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Public key invalid", Toast.LENGTH_SHORT)
-                        .show()
-                } finally {
-                    val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-                    val contactName = contactNameView.text.toString()
+                    defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes()).let { publicKey ->
+                        val contactName = contactNameView.text.toString()
 
-                    when {
-                        publicKeyBin == myPublicKey.keyToBin().toHex() -> {
-                            Toast.makeText(requireContext(), "You can't add yourself", Toast.LENGTH_SHORT).show()
-                        }
-                        ContactStore.getInstance(requireContext())
-                            .getContactFromPublicKey(publicKey) != null -> {
-                            Toast.makeText(requireContext(), "Contact already added", Toast.LENGTH_SHORT).show()
-                        }
-                        else -> {
-                            ContactStore.getInstance(requireContext()).addContact(publicKey, contactName)
-                            Toast.makeText(requireContext(), "Contact $contactName added", Toast.LENGTH_SHORT).show()
-                            bottomSheetDialog.dismiss()
+                        when {
+                            publicKeyBin == myPublicKey.keyToBin().toHex() -> {
+                                parentActivity.displaySnackbar(requireContext(), "You can't add yourself as contact", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+//                                parentActivity.displaySnackbar(view, requireContext(), "You can't add yourself as contact", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                            }
+                            contactStore.getContactFromPublicKey(publicKey) != null -> {
+                                parentActivity.displaySnackbar(requireContext(), "Contact already in address book", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+//                                parentActivity.displaySnackbar(view, requireContext(), "Contact already in address book", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                            }
+                            else -> {
+                                contactStore.addContact(publicKey, contactName)
+                                parentActivity.displaySnackbar(requireContext(), "Contact $contactName added to address book")
+//                                parentActivity.displaySnackbar(containerView, requireContext(), "Contact $contactName added to address book")
+                                bottomSheetDialog.dismiss()
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    parentActivity.displaySnackbar(requireContext(), "Please provide a valid public key", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+//                    parentActivity.displaySnackbar(view, requireContext(), "Please provide a valid public key", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 }
             }
-
-            contactPublicKey.observe(
-                this,
-                Observer { publicKeyBin ->
-                    contactPublicKeyView.setText(publicKeyBin)
-                }
-            )
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             Handler().postDelayed(
                 Runnable {
-                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).visibility = View.GONE
+                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
+
+                    val map = mapOf(
+                        "type" to "contact",
+                        "public_key" to IdentityStore.getInstance(requireContext()).getIdentity()!!.publicKey.keyToBin().toHex(),
+                        "name" to IdentityStore.getInstance(requireContext()).getIdentity()!!.content.givenNames
+                    )
+
                     myPublicKeyImageView.setImageBitmap(
                         createBitmap(
                             requireContext(),
-                            myPublicKey.keyToBin().toHex(),
+                            mapToJSON(map).toString(),
                             R.color.black,
                             R.color.colorPrimaryValueTransfer
                         )
@@ -142,18 +135,18 @@ class ContactAddDialog(
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val publicKeyBin = QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
-
-        if (publicKeyBin != null) {
+        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             try {
-                defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
-                contactPublicKey.value = publicKeyBin
-            } catch (e: Exception) {
+                val obj = JSONObject(result)
+
+                this.dismiss()
+
+                (requireActivity() as ValueTransferMainActivity).getQRScanController().addContact(obj)
+            }catch(e: Exception) {
                 e.printStackTrace()
-                Toast.makeText(requireContext(), "Invalid public key", Toast.LENGTH_LONG).show()
+                parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+//                parentActivity.displaySnackbar(dialogView, requireContext(), "Scanned QR code not in JSON format", ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             }
-        } else {
-            Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         }
     }
 }

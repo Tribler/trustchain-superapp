@@ -14,7 +14,6 @@ import nl.tudelft.trustchain.valuetransfer.R
 class ConfirmDialog(
     private val title: String,
     private val callback: ((BottomSheetDialog) -> Unit)
-
 ) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
