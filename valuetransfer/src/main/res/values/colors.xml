@@ -7,6 +7,7 @@
     <color name="colorGreen">@color/colorPrimaryValueTransfer</color>
     <color name="colorYellow">#FFC145</color>
     <color name="colorOrange">#FFA500</color>
+    <color name="colorRed">#ea4c46</color>
 
     <color name="text_primary">#000000</color>
     <color name="text_secondary">#666666</color>

@@ -31,12 +31,24 @@
         <item name="android:background">@drawable/dialog_rounded</item>
     </style>
 
+    <style name="BottomSheetRed" parent="@style/Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/dialog_rounded_red</item>
+    </style>
+
     <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
         <item name="bottomSheetStyle">@style/BottomSheet</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/colorPrimaryValueTransfer</item>
+    </style>
+
+    <style name="BaseBottomSheetDialogRed" parent="@style/Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="bottomSheetStyle">@style/BottomSheetRed</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/colorRed</item>
     </style>
 
     <style name="ButtonRounded" >
@@ -80,8 +92,8 @@
         <item name="android:ellipsize">end</item>
         <item name="android:paddingStart">12dp</item>
         <item name="android:paddingEnd">12dp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
+<!--        <item name="android:paddingTop">8dp</item>-->
+<!--        <item name="android:paddingBottom">8dp</item>-->
         <item name="android:textSize">14sp</item>
     </style>
 

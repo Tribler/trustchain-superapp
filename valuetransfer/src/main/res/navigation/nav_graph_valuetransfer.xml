@@ -30,6 +30,11 @@
         android:name="nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment"
         android:label="Identity"
         tools:layout="@layout/fragment_identity" />
+    <fragment
+        android:id="@+id/qrScanControllerFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.QRScanController"
+        android:label="Identity"
+        tools:layout="@layout/fragment_identity" />
     <action
         android:id="@+id/action_identityFragment_to_walletOverViewFragment"
         app:destination="@id/walletOverviewFragment"

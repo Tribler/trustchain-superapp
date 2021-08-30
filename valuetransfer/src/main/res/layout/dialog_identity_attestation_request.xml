@@ -15,7 +15,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="ATTRIBUTE DETAILS"
+        android:text="ATTESTATION REQUEST"
         android:textAlignment="center"
         android:textAllCaps="true"
         android:textColor="@color/white"
@@ -26,33 +26,24 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tvAttributeNameTitle"
+        android:id="@+id/tvAttributeTypeTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:paddingStart="8dp"
-        android:text="Attribute"
+        android:text="Attribute type"
         android:textColor="@color/white"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clAttributeName"
+    <Spinner
+        android:id="@+id/spinnerAttributeType"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/etAttributeValue"
-        app:layout_constraintTop_toBottomOf="@+id/tvAttributeNameTitle">
-
-    <Spinner
-        android:id="@+id/spinnerAttributeName"
-        android:layout_width="match_parent"
-        android:minWidth="125dp"
-        android:layout_height="40dp"
         android:background="@drawable/pill_rounded"
         android:backgroundTint="@color/white"
         android:paddingVertical="8dp"
@@ -60,42 +51,25 @@
         android:paddingEnd="8dp"
         android:textSize="14sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/etAttributeName"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:minWidth="100dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:inputType="none"
-        android:paddingVertical="8dp"
-        android:paddingHorizontal="8dp"
-        android:textSize="14sp"
-        android:textColor="@color/gray"
-        android:clickable="false"
-        android:focusable="false"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintEnd_toStartOf="@+id/etAttributeNameValue"
+        app:layout_constraintTop_toBottomOf="@+id/tvAttributeTypeTitle" />
 
     <TextView
-        android:id="@+id/tvAttributeValueTitle"
+        android:id="@+id/tvAttributeNameTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:paddingStart="8dp"
-        android:text="Value"
+        android:text="Attribute name"
         android:textColor="@color/white"
         android:textSize="12sp"
         android:textStyle="italic"
-        app:layout_constraintStart_toStartOf="@+id/etAttributeValue"
+        app:layout_constraintStart_toStartOf="@+id/etAttributeNameValue"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
     <EditText
-        android:id="@+id/etAttributeValue"
+        android:id="@+id/etAttributeNameValue"
         android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginStart="4dp"
@@ -106,18 +80,19 @@
         android:paddingVertical="8dp"
         android:paddingStart="8dp"
         android:textSize="14sp"
+        android:hint="e.g. age"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/clAttributeName"
-        app:layout_constraintTop_toBottomOf="@+id/tvAttributeValueTitle" />
+        app:layout_constraintStart_toEndOf="@+id/spinnerAttributeType"
+        app:layout_constraintTop_toBottomOf="@+id/tvAttributeNameTitle" />
 
     <Button
-        android:id="@+id/btnSaveAttribute"
+        android:id="@+id/btnRequestAttestation"
         style="@style/ButtonDarkGreenRounded"
         android:layout_marginTop="8dp"
         android:enabled="false"
-        android:text="Save"
+        android:text="Request"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etAttributeValue" />
+        app:layout_constraintTop_toBottomOf="@+id/etAttributeNameValue" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

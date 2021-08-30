@@ -5,17 +5,13 @@
 <!--        android:icon="@drawable/ic_device_hub_black_24dp"-->
 <!--        android:title="Add Identity" />-->
     <item
-        android:id="@+id/actionEditIdentity"
+        android:id="@+id/actionAddAttestation"
         android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Edit Identity" />
+        android:title="Add Attestation" />
     <item
-        android:id="@+id/actionRemoveIdentity"
+        android:id="@+id/actionAddAuthority"
         android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Remove Identity" />
-    <item
-        android:id="@+id/actionViewAuthorities"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="View Trusted Authorities" />
+        android:title="Add Authority" />
 <!--    <item-->
 <!--        android:id="@+id/actionAddAttestation"-->
 <!--        android:icon="@drawable/ic_device_hub_black_24dp"-->

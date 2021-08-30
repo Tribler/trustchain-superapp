@@ -13,7 +13,7 @@
         android:id="@+id/actionSendContact"
         android:title="Contact" />
     <item
-        android:id="@+id/actionSendAttribute"
+        android:id="@+id/actionSendIdentityAttribute"
         android:title="Identity Attribute" />
     <item
         android:id="@+id/actionTransferMoney"

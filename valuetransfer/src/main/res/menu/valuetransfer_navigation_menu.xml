@@ -11,6 +11,11 @@
         android:title="Identity" />
 
     <item
+        android:id="@+id/qrScanControllerFragment"
+        android:icon="@drawable/ic_qr_code_scan"
+        android:title="" />
+
+    <item
         android:id="@+id/exchangeFragment"
         android:icon="@drawable/ic_exchange"
         android:title="Exchange" />

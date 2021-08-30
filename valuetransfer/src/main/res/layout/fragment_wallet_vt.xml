@@ -10,6 +10,7 @@
         android:id="@+id/clNoIdentity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -88,7 +89,6 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                tools:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -111,6 +111,20 @@
                         android:textSize="32sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/ivGoToIdentity"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginTop="2dp"
+                        android:padding="4dp"
+                        tools:tint="@color/colorPrimaryDarkValueTransfer"
+                        app:tint="@color/colorPrimaryDarkValueTransfer"
+                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
+                        app:layout_constraintBottom_toBottomOf="@+id/tvIdentityTitle"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tvIdentityTitle" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvIdentities"
@@ -143,6 +157,20 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
+                    <ImageView
+                        android:id="@+id/ivGoToExchange"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginTop="2dp"
+                        android:padding="4dp"
+                        tools:tint="@color/colorPrimaryDarkValueTransfer"
+                        app:tint="@color/colorPrimaryDarkValueTransfer"
+                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
+                        app:layout_constraintBottom_toBottomOf="@+id/tvExchangeTitle"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tvExchangeTitle" />
+
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/clBalances"
                         android:layout_width="match_parent"
@@ -156,14 +184,14 @@
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="0dp"
                             android:layout_height="70dp"
-                            android:background="@drawable/square_rounded_dark"
+                            android:background="@drawable/square_rounded_dark_green"
                             android:paddingStart="16dp"
                             android:paddingEnd="8dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent"
-                            tools:background="@drawable/square_rounded_dark">
+                            tools:background="@drawable/square_rounded_dark_green">
 
                             <ImageView
                                 android:id="@+id/ivBalanceIcon"
@@ -203,7 +231,7 @@
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:id="@+id/clButtonBuy"
-                                android:layout_width="70dp"
+                                android:layout_width="50dp"
                                 android:layout_height="24dp"
                                 android:layout_marginTop="8dp"
                                 android:background="@drawable/pill_rounded"
@@ -216,7 +244,6 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center_horizontal"
-                                    android:paddingHorizontal="4dp"
                                     android:text="Buy"
                                     android:textColor="@color/white"
                                     app:layout_constraintBottom_toBottomOf="parent"
@@ -228,7 +255,7 @@
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:id="@+id/clButtonSell"
-                                android:layout_width="70dp"
+                                android:layout_width="50dp"
                                 android:layout_height="24dp"
                                 android:layout_marginBottom="8dp"
                                 android:background="@drawable/pill_rounded"
@@ -241,7 +268,6 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center_horizontal"
-                                    android:paddingHorizontal="4dp"
                                     android:text="Sell"
                                     android:textColor="@color/white"
                                     app:layout_constraintBottom_toBottomOf="parent"
@@ -260,7 +286,7 @@
                         android:layout_marginStart="12dp"
                         android:layout_marginTop="4dp"
                         android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded_dark"
+                        android:background="@drawable/square_rounded_dark_green"
                         app:layout_constraintEnd_toStartOf="@+id/clTransferContact"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/clBalances">
@@ -297,7 +323,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginTop="4dp"
                         android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded_dark"
+                        android:background="@drawable/square_rounded_dark_green"
                         app:layout_constraintEnd_toStartOf="@+id/clRequest"
                         app:layout_constraintStart_toEndOf="@+id/clTransferQR"
                         app:layout_constraintTop_toBottomOf="@+id/clBalances">
@@ -334,7 +360,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginTop="4dp"
                         android:layout_marginEnd="12dp"
-                        android:background="@drawable/square_rounded_dark"
+                        android:background="@drawable/square_rounded_dark_green"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/clTransferContact"
                         app:layout_constraintTop_toBottomOf="@+id/clBalances">
@@ -386,6 +412,20 @@
                         android:textSize="32sp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <ImageView
+                        android:id="@+id/ivGoToContacts"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_marginTop="2dp"
+                        android:padding="4dp"
+                        tools:tint="@color/colorPrimaryDarkValueTransfer"
+                        app:tint="@color/colorPrimaryDarkValueTransfer"
+                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
+                        app:layout_constraintBottom_toBottomOf="@+id/tvChatsSocialTitle"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tvChatsSocialTitle" />
 
                     <TextView
                         android:id="@+id/tvNoChats"

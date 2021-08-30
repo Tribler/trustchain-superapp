@@ -6,25 +6,12 @@
     android:layout_height="match_parent"
     tools:background="@color/colorPrimaryValueTransfer">
 
-    <!--    <ScrollView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        app:layout_constraintBottom_toTopOf="@+id/bnvContacts"-->
-    <!--        app:layout_constraintTop_toTopOf="parent">-->
-
-    <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:clickable="true"-->
-    <!--            android:focusable="true"-->
-    <!--            android:focusableInTouchMode="true">-->
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clContacts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        android:background="@drawable/square_rounded_dark"
+        android:background="@drawable/square_rounded_dark_green"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -61,8 +48,8 @@
             android:singleLine="true"
             android:textColor="@color/black"
             android:textSize="12dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/tvNoContacts"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/ivAddContactButton"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -75,7 +62,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
             app:layout_constraintStart_toStartOf="@+id/etSearchContact"
             app:layout_constraintTop_toTopOf="@+id/etSearchContact"
-            app:tint="@color/colorPrimaryValueTransfer" />
+            app:tint="@color/colorPrimaryValueTransfer"
+            tools:tint="@color/colorPrimaryValueTransfer"/>
 
         <ImageView
             android:id="@+id/ivSearchBarCancelIcon"
@@ -98,7 +86,7 @@
             android:gravity="center"
             android:paddingHorizontal="12dp"
             android:paddingVertical="16dp"
-            android:text="NO CONTACTS YET"
+            android:text="NO CONTACTS"
             android:textColor="@color/white"
             android:textStyle="bold"
             android:visibility="gone"
@@ -144,53 +132,67 @@
         app:layout_constraintTop_toTopOf="@+id/tvRecentTitle"
         tools:backgroundTint="@color/light_gray">
 
-        <ImageView
-            android:id="@+id/ivShowHiddenChats"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_marginRight="4dp"
-            android:src="@drawable/ic_eye_show"
-            app:layout_constraintBottom_toBottomOf="@+id/tvShowHiddenChats"
-            app:layout_constraintEnd_toStartOf="@+id/tvShowHiddenChats"
-            app:layout_constraintTop_toTopOf="@+id/tvShowHiddenChats"
-            app:tint="@color/light_gray" />
-
-        <ImageView
-            android:id="@+id/ivHideHiddenChats"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:layout_marginRight="4dp"
-            android:src="@drawable/ic_eye_hidden"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/tvHideHiddenChats"
-            app:layout_constraintEnd_toStartOf="@+id/tvHideHiddenChats"
-            app:layout_constraintTop_toTopOf="@+id/tvHideHiddenChats"
-            app:tint="@color/light_gray" />
-
-        <TextView
-            android:id="@+id/tvShowHiddenChats"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clShowHiddenChats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Show hidden chats"
-            android:textColor="@color/light_gray"
-            android:textSize="12sp"
-            android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvHideHiddenChats"
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginRight="4dp"
+                android:src="@drawable/ic_eye_show"
+                app:layout_constraintBottom_toBottomOf="@+id/tvShowHiddenChats"
+                app:layout_constraintEnd_toStartOf="@+id/tvShowHiddenChats"
+                app:layout_constraintTop_toTopOf="@+id/tvShowHiddenChats"
+                app:tint="@color/light_gray" />
+
+            <TextView
+                android:id="@+id/tvShowHiddenChats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="Show hidden chats"
+                android:textColor="@color/light_gray"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clHideHiddenChats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:text="Hide hidden chats"
-            android:textColor="@color/light_gray"
-            android:textSize="12sp"
-            android:textStyle="italic"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivHideHiddenChats"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginRight="4dp"
+                android:src="@drawable/ic_eye_hidden"
+                app:layout_constraintBottom_toBottomOf="@+id/tvHideHiddenChats"
+                app:layout_constraintEnd_toStartOf="@+id/tvHideHiddenChats"
+                app:layout_constraintTop_toTopOf="@+id/tvHideHiddenChats"
+                app:tint="@color/light_gray" />
+
+            <TextView
+                android:id="@+id/tvHideHiddenChats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:text="Hide hidden chats"
+                android:textColor="@color/light_gray"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -198,8 +200,8 @@
         android:id="@+id/tvNoChats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="4dp"
         android:background="@drawable/pill_rounded"
         android:paddingVertical="4dp"
         android:text="There are no conversations with contacts yet"
@@ -245,20 +247,4 @@
                 tools:listitem="@layout/item_contacts_chat" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
-    <!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-    <!--    </ScrollView>-->
-
-<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-<!--        android:id="@+id/bnvContacts"-->
-<!--        style="@style/BottomNavigation"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="0dp"-->
-<!--        android:layout_marginEnd="0dp"-->
-<!--        android:background="@color/colorPrimaryValueTransfer"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintLeft_toLeftOf="parent"-->
-<!--        app:layout_constraintRight_toRightOf="parent"-->
-<!--        app:menu="@menu/valuetransfer_navigation_menu" />-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>

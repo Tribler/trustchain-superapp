@@ -12,48 +12,56 @@
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp"
+        android:background="@drawable/square_rounded_dark_green"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
         app:layout_constraintEnd_toStartOf="@+id/clContactExchange"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/ivChatIconOverview"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/circle"
-            android:backgroundTint="@color/gray"
+        <FrameLayout
+            android:id="@+id/flIdenticon"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/clChatContentOverview"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvChatInitialsOverview"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginHorizontal="8dp"
-            android:gravity="center"
-            android:padding="5dp"
-            android:text="AA"
-            android:textColor="@color/white"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/ivChatIconOverview"
-            app:layout_constraintEnd_toEndOf="@+id/ivChatIconOverview"
-            app:layout_constraintStart_toStartOf="@+id/ivChatIconOverview"
-            app:layout_constraintTop_toTopOf="@+id/ivChatIconOverview" />
+            <ImageView
+                android:id="@+id/ivIdenticon"
+                android:layout_width="@dimen/identiconWidth"
+                android:layout_height="@dimen/identiconHeight"
+                android:layout_gravity="center" />
+        </FrameLayout>
+
+<!--        <TextView-->
+<!--            android:id="@+id/tvChatInitialsOverview"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:layout_marginHorizontal="8dp"-->
+<!--            android:gravity="center"-->
+<!--            android:padding="5dp"-->
+<!--            tools:text="AA"-->
+<!--            android:textColor="@color/white"-->
+<!--            android:textSize="16sp"-->
+<!--            android:textStyle="bold"-->
+<!--            app:layout_constraintBottom_toBottomOf="@+id/flIdenticon"-->
+<!--            app:layout_constraintEnd_toEndOf="@+id/flIdenticon"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/flIdenticon"-->
+<!--            app:layout_constraintTop_toTopOf="@+id/flIdenticon" />-->
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clChatContentOverview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/flIdenticon"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ivChatIconOverview"
-            app:layout_constraintTop_toTopOf="@+id/ivChatIconOverview">
+            app:layout_constraintStart_toEndOf="@+id/flIdenticon"
+            app:layout_constraintTop_toTopOf="@+id/flIdenticon">
 
             <TextView
                 android:id="@+id/tvContactNameOverview"
@@ -81,12 +89,11 @@
                 android:id="@+id/ivMessageStatusOverview"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:layout_marginTop="1dp"
+                android:layout_marginTop="3dp"
                 android:layout_marginEnd="4dp"
                 android:src="@drawable/ic_check_double"
-                app:layout_constraintBottom_toBottomOf="@+id/tvContactMessageOverview"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/tvContactMessageOverview"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview"
                 app:tint="@color/white"
                 tools:tint="@color/white" />
@@ -96,11 +103,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:lines="1"
                 android:text="Message"
                 android:textColor="@color/white"
                 android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/ivMessageStatusOverview"
                 app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
@@ -123,7 +129,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clContactExchange"
         android:layout_width="wrap_content"
-        android:layout_height="64dp"
+        android:layout_height="62dp"
         android:layout_marginStart="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clChatCard"
@@ -132,8 +138,8 @@
         <ImageView
             android:id="@+id/ivRequest"
             android:layout_width="40dp"
-            android:layout_height="30dp"
-            android:background="@drawable/square_rounded_dark"
+            android:layout_height="29dp"
+            android:background="@drawable/square_rounded_dark_green"
             android:src="@drawable/ic_baseline_arrow_drop_up_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -144,8 +150,8 @@
         <ImageView
             android:id="@+id/ivTransfer"
             android:layout_width="40dp"
-            android:layout_height="30dp"
-            android:background="@drawable/square_rounded_dark"
+            android:layout_height="29dp"
+            android:background="@drawable/square_rounded_dark_green"
             android:src="@drawable/ic_baseline_arrow_drop_down_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
