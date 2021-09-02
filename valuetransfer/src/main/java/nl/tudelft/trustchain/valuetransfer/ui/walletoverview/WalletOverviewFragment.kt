@@ -110,20 +110,14 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         // CONTACTS
 
         adapterContacts.registerRenderer(
-            ChatItemRenderer(
-                {
-                    val args = Bundle()
-                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
+            ChatItemRenderer {
+                val args = Bundle()
+                args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
 
-                    parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
-                }, { contact ->
-                    ExchangeTransferMoneyDialog(contact, null,false).show(parentFragmentManager, tag)
-                }, { contact ->
-                    ExchangeTransferMoneyDialog(contact, null,true).show(parentFragmentManager, tag)
-                }
-            )
+                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+            }
         )
 
         lifecycleScope.launchWhenResumed {
@@ -144,7 +138,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         binding.rvIdentities.layoutManager = LinearLayoutManager(context)
 
         binding.btnCreateIdentity.setOnClickListener {
-            IdentityDetailsDialog(null, identityCommunity).show(parentFragmentManager, tag)
+            IdentityDetailsDialog().show(parentFragmentManager, tag)
         }
 
         itemsIdentity.observe(
@@ -159,13 +153,22 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         }
 
         // EXCHANGE
-        lifecycleScope.launchWhenCreated {
-            while(isActive) {
-                binding.tvBalanceAmount.text = parentActivity.getBalance(true)
-                delay(1500)
-            }
-        }
+//        lifecycleScope.launchWhenCreated {
+//            while(isActive) {
+//                binding.tvBalanceAmount.text = parentActivity.getBalance(true)
+//                delay(1500)
+//            }
+//        }
 
+        parentActivity.getBalance(true).observe(
+            viewLifecycleOwner,
+            Observer {
+                if(it != binding.tvBalanceAmount.text.toString()) {
+                    binding.tvBalanceAmount.text = it
+                    binding.pbBalanceUpdating.isVisible = false
+                }
+            }
+        )
 
         binding.clTransferQR.setOnClickListener {
             scanIntent = TRANSFER_INTENT

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
@@ -127,6 +128,26 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         binding.clBalanceRow.setOnClickListener(onBalanceClickListener)
         binding.rvTransactions.adapter = adapterTransactions
         binding.rvTransactions.layoutManager = LinearLayoutManager(requireContext())
+
+        parentActivity.getBalance(false).observe(
+            viewLifecycleOwner,
+            Observer {
+                if(it != binding.tvBalanceAmount.text.toString()) {
+                    binding.tvBalanceAmount.text = it
+                }
+            }
+        )
+
+        parentActivity.getBalance(true).observe(
+            viewLifecycleOwner,
+            Observer {
+                if(it != binding.tvBalanceVerifiedAmount.text.toString()) {
+                    binding.tvBalanceVerifiedAmount.text = it
+                    binding.ivBalanceErrorIcon.isVisible = parentActivity.getBalance(false).value != it
+                    binding.pbBalanceUpdating.isVisible = false
+                }
+            }
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -209,9 +230,9 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
 
         adapterTransactions.updateItems(items)
         binding.rvTransactions.setItemViewCacheSize(items.size)
-        binding.tvBalanceAmount.text = parentActivity.getBalance(false)
-        binding.tvBalanceVerifiedAmount.text = parentActivity.getBalance(true)
-        binding.ivBalanceErrorIcon.isVisible = parentActivity.getBalance(false) != parentActivity.getBalance(true)
+//        binding.tvBalanceAmount.text = parentActivity.getBalance(false)
+//        binding.tvBalanceVerifiedAmount.text = parentActivity.getBalance(true)
+        binding.pbBalanceUpdating.isVisible = false
         binding.pbLoadingSpinner.isVisible = false
         binding.ivReloadTransactions.isVisible = true
         binding.tvShowMoreTransactions.isVisible = items.size >= transactionShowCount
