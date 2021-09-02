@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import com.androidadvance.topsnackbar.TSnackbar
 import com.jaredrummler.blockingdialog.BlockingDialogManager
 import kotlinx.android.synthetic.main.main_activity_vt.*
@@ -73,8 +74,11 @@ class ValueTransferMainActivity : BaseActivity() {
     private lateinit var transactionRepository: TransactionRepository
     private lateinit var trustChainHelper: TrustChainHelper
 
-    private var balance: String = "0.00"
-    private var verifiedBalance: String = "0.00"
+    private var balance = MutableLiveData("0.00")
+    private var verifiedBalance = MutableLiveData("0.00")
+
+//    private var balance: String = "0.00"
+//    private var verifiedBalance: String = "0.00"
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -140,7 +144,8 @@ class ValueTransferMainActivity : BaseActivity() {
         // Register own key as trusted authority.
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
 
-        supportActionBar!!.subtitle
+        // Background color for rootview instead of white background
+        getView(true).setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.colorPrimaryValueTransfer))
     }
 
     /**
@@ -339,11 +344,11 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Return balance to requested fragment or dialog
      */
-    fun getBalance(isVerified: Boolean): String {
+    fun getBalance(isVerified: Boolean): MutableLiveData<String> {
         if(isVerified) {
-            return this.verifiedBalance
+            return verifiedBalance
         }
-        return this.balance
+        return balance
     }
 
     /**
@@ -351,9 +356,9 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     fun setBalance(balance: String, isVerified: Boolean) {
         if(isVerified) {
-            this.verifiedBalance = balance
+            this.verifiedBalance.postValue(balance)
         }else{
-            this.balance = balance
+            this.balance.postValue(balance)
         }
     }
 

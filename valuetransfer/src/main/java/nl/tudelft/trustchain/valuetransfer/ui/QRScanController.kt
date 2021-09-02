@@ -146,7 +146,7 @@ class QRScanController : BaseFragment() {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString("public_key").hexToBytes())
             val amount = if(isCreation) null else data.optLong("amount")
 
-            EuroTokenExchangeDialog(
+            ExchangeGatewayDialog(
                 isCreation,
                 publicKey,
                 data.optString("payment_id"),
