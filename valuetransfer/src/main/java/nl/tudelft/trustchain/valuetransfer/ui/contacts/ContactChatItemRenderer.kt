@@ -246,7 +246,7 @@ class ContactChatItemRenderer(
         }
 
         // Show the transaction w/o its message
-        item.chatMessage.transactionHash?.let {0
+        item.chatMessage.transactionHash?.let {
             clTransaction.isVisible = true
             clTransaction.setBackgroundResource(backgroundResource)
             tvTransactionTitle.setTextColor(ContextCompat.getColor(this.context, textColor))

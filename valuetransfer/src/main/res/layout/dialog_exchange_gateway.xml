@@ -271,6 +271,7 @@
         android:id="@+id/btnConnectToGateway"
         style="@style/ButtonDarkGreenRounded"
         android:text="Connect to Gateway"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
@@ -279,6 +280,7 @@
         android:id="@+id/btnContinueSell"
         style="@style/ButtonDarkGreenRounded"
         android:text="Sell"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
