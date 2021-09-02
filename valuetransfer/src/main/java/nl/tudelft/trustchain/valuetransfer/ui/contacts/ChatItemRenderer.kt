@@ -17,8 +17,6 @@ import java.util.*
 
 class ChatItemRenderer(
     private val onChatClick: (Contact) -> Unit,
-    private val onRequestClick: (Contact) -> Unit,
-    private val onTransferClick: (Contact) -> Unit,
 ) : ItemLayoutRenderer<ContactItem, View>(
     ContactItem::class.java
 ) {
@@ -71,22 +69,11 @@ class ChatItemRenderer(
         tvContactNameOverview.text = item.contact.name
         tvContactMessageOverview.text = message
 
-        if(ContactStore.getInstance(view.context).getContactFromPublicKey(item.contact.publicKey) == null) {
-            clContactExchange.isVisible = false
-        }
         ivOnlineStatusOverview.isVisible = item.isOnline || item.isBluetooth
         tvContactTimeOverview.text = contactTime
 
         clChatCard.setOnClickListener {
             onChatClick(item.contact)
-        }
-
-        ivRequest.setOnClickListener {
-            onRequestClick(item.contact)
-        }
-
-        ivTransfer.setOnClickListener {
-            onTransferClick(item.contact)
         }
     }
 

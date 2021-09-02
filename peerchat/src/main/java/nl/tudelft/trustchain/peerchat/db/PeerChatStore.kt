@@ -126,8 +126,8 @@ class PeerChatStore(context: Context) {
             .asFlow().mapToList()
     }
 
-    fun deleteMessage(item: ChatMessageItem) {
-        database.dbMessageQueries.deleteMessage(item.chatMessage.id)
+    fun deleteMessagesOfPublicKey(publicKey: PublicKey) {
+        database.dbMessageQueries.deleteMessagesOfPublicKey(publicKey.keyToBin(), publicKey.keyToBin())
     }
 
     companion object {

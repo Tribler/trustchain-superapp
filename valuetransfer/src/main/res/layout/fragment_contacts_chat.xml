@@ -148,7 +148,22 @@
             android:text="Send"
             app:layout_constraintBottom_toBottomOf="@+id/etMessage"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:backgroundTint="@color/colorPrimaryDarkValueTransfer" />
+            tools:backgroundTint="@color/colorPrimaryDark" />
+
+        <ProgressBar
+            android:id="@+id/pbSendMessage"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            app:layout_constraintDimensionRatio="H,1:1"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/light_gray"
+            android:indeterminateTintMode="src_atop"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/etMessage"
+            app:layout_constraintTop_toTopOf="@+id/etMessage"
+            app:layout_constraintEnd_toEndOf="@+id/btnSendMessage"
+            app:layout_constraintStart_toStartOf="@+id/btnSendMessage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

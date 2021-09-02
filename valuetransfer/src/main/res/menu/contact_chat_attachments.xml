@@ -3,9 +3,9 @@
     <item
         android:id="@+id/actionSendPhotoVideo"
         android:title="Photo or Video" />
-    <item
-        android:id="@+id/actionSendFile"
-        android:title="File" />
+<!--    <item-->
+<!--        android:id="@+id/actionSendFile"-->
+<!--        android:title="File" />-->
     <item
         android:id="@+id/actionSendLocation"
         android:title="Location" />
