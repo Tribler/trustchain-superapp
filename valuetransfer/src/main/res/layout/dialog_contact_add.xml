@@ -11,183 +11,204 @@
     android:backgroundTint="@color/colorPrimaryValueTransfer"
     tools:background="@color/colorPrimaryValueTransfer">
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Add Contact"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollIndicators="none"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintBottom_toBottomOf="parent">
 
-    <TextView
-        android:id="@+id/tvMyDetailsTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Send your public key to your friend or have your QR code scanned"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
-
-    <EditText
-        android:id="@+id/etMyPublicKey"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:paddingVertical="8dp"
-        android:lines="1"
-        android:maxLines="1"
-        android:inputType="text"
-        android:cursorVisible="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
-        android:paddingStart="8dp"
-        android:paddingRight="44dp"
-        android:layout_marginTop="12dp"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvMyDetailsTitle" />
-
-    <ImageView
-        android:id="@+id/ivCopyMyPublicKey"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_marginEnd="12dp"
-        android:src="@drawable/ic_copy_public_key"
-        app:tint="@color/colorPrimaryValueTransfer"
-        tools:tint="@color/colorPrimaryValueTransfer"
-        app:layout_constraintBottom_toBottomOf="@+id/etMyPublicKey"
-        app:layout_constraintEnd_toEndOf="@+id/etMyPublicKey"
-        app:layout_constraintTop_toTopOf="@+id/etMyPublicKey" />
-
-    <ImageView
-        android:id="@+id/ivMyQRCode"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        app:layout_constraintDimensionRatio="H,1:1"
-        android:layout_marginTop="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etMyPublicKey" />
-
-    <ProgressBar
-        android:id="@+id/pbLoadingSpinner"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:maxHeight="50dp"
-        android:maxWidth="50dp"
-        app:layout_constraintDimensionRatio="H,1:1"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/white"
-        android:indeterminateTintMode="src_atop"
-        app:layout_constraintBottom_toBottomOf="@+id/ivMyQRCode"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/ivMyQRCode" />
-
-    <TextView
-        android:id="@+id/tvContactDetailsTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:layout_marginTop="12dp"
-        android:text="Scan contacts QRcode or paste public key of your contact and give a name"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ivMyQRCode" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clScanQRCode"
-        android:layout_width="78dp"
-        android:layout_height="78dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/etContactPublicKey"
-        tools:background="@drawable/pill_rounded">
-
-        <ImageView
-            android:id="@+id/btnScanContactPublicKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_qr_code_scan"
-            app:tint="@color/colorPrimaryValueTransfer"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:tint="@color/colorPrimaryValueTransfer" />
+            app:layout_constraintBottom_toBottomOf="parent">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Add Contact"
+                android:textSize="20sp"
+                android:textAlignment="center"
+                android:gravity="center_horizontal"
+                android:textColor="@color/white"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
 
-    <EditText
-        android:id="@+id/etContactPublicKey"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:layout_weight="1"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:paddingVertical="8dp"
-        android:lines="1"
-        android:maxLines="1"
-        android:inputType="text"
-        android:paddingHorizontal="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
-        android:textSize="14sp"
-        android:hint="Contact Public Key"
-        android:importantForAutofill="no"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/clScanQRCode"
-        app:layout_constraintTop_toBottomOf="@+id/tvContactDetailsTitle" />
+            <TextView
+                android:id="@+id/tvMyDetailsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="Send your public key or provide QRcode to your friend"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
-    <EditText
-        android:id="@+id/etContactName"
-        android:layout_width="0dp"
-        android:layout_height="35dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
-        android:paddingVertical="8dp"
-        android:lines="1"
-        android:inputType="textCapSentences"
-        android:paddingHorizontal="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
-        android:textSize="14sp"
-        android:hint="Contact name"
-        android:importantForAutofill="no"
-        app:layout_constraintEnd_toStartOf="@+id/btnAddContact"
-        app:layout_constraintStart_toEndOf="@+id/clScanQRCode"
-        app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
+            <EditText
+                android:id="@+id/etMyPublicKey"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:paddingVertical="8dp"
+                android:lines="1"
+                android:maxLines="1"
+                android:inputType="text"
+                android:cursorVisible="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:paddingStart="8dp"
+                android:paddingRight="44dp"
+                android:layout_marginTop="12dp"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvMyDetailsTitle" />
 
-    <Button
-        android:id="@+id/btnAddContact"
-        style="@style/ButtonDarkGreenRounded"
-        android:enabled="false"
-        android:text="Add"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/etContactName"
-        app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
+            <ImageView
+                android:id="@+id/ivCopyMyPublicKey"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="12dp"
+                android:src="@drawable/ic_copy_public_key"
+                app:tint="@color/colorPrimaryValueTransfer"
+                tools:tint="@color/colorPrimaryValueTransfer"
+                app:layout_constraintBottom_toBottomOf="@+id/etMyPublicKey"
+                app:layout_constraintEnd_toEndOf="@+id/etMyPublicKey"
+                app:layout_constraintTop_toTopOf="@+id/etMyPublicKey" />
+
+            <ImageView
+                android:id="@+id/ivMyQRCode"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                app:layout_constraintDimensionRatio="H,1:1"
+                android:layout_marginTop="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivCopyMyPublicKey" />
+
+            <ProgressBar
+                android:id="@+id/pbLoadingSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:maxHeight="50dp"
+                android:maxWidth="50dp"
+                app:layout_constraintDimensionRatio="H,1:1"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:indeterminateTintMode="src_atop"
+                app:layout_constraintBottom_toBottomOf="@+id/ivMyQRCode"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/ivMyQRCode" />
+
+            <TextView
+                android:id="@+id/tvContactDetailsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:layout_marginTop="12dp"
+                android:text="Paste or scan public key of contact and provide a name"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/ivMyQRCode" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clScanQRCode"
+                android:layout_width="78dp"
+                android:layout_height="78dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/etContactPublicKey"
+                tools:background="@drawable/pill_rounded">
+
+                <ImageView
+                    android:id="@+id/btnScanContactPublicKey"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_qr_code_scan"
+                    app:tint="@color/colorPrimaryValueTransfer"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:tint="@color/colorPrimaryValueTransfer" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <EditText
+                android:id="@+id/etContactPublicKey"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_weight="1"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:paddingVertical="8dp"
+                android:lines="1"
+                android:maxLines="1"
+                android:inputType="text"
+                android:paddingHorizontal="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:textSize="14sp"
+                android:hint="Contact Public Key"
+                android:importantForAutofill="no"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/clScanQRCode"
+                app:layout_constraintTop_toBottomOf="@+id/tvContactDetailsTitle" />
+
+            <EditText
+                android:id="@+id/etContactName"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/white"
+                android:paddingVertical="8dp"
+                android:lines="1"
+                android:inputType="textCapSentences"
+                android:paddingHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:textSize="14sp"
+                android:hint="Contact name"
+                android:importantForAutofill="no"
+                app:layout_constraintEnd_toStartOf="@+id/btnAddContact"
+                app:layout_constraintStart_toEndOf="@+id/clScanQRCode"
+                app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
+
+            <Button
+                android:id="@+id/btnAddContact"
+                style="@style/ButtonDarkGreenRounded"
+                android:enabled="false"
+                android:text="Add"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/etContactName"
+                app:layout_constraintTop_toBottomOf="@+id/etContactPublicKey" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

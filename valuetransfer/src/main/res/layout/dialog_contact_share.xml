@@ -38,69 +38,13 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clSelectedRecipient"
+        android:id="@+id/clSelectedContact"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="4dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/clSelectedContact"
-        app:layout_constraintTop_toBottomOf="@+id/clTitle">
-
-        <TextView
-            android:id="@+id/tvSelectRecipientTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:paddingStart="8dp"
-            android:text="Select the recipient"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <Spinner
-            android:id="@+id/spinnerSelectRecipient"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
-            android:paddingVertical="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvSelectRecipientTitle" />
-
-        <TextView
-            android:id="@+id/tvSelectedRecipient"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="4dp"
-            android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
-            android:gravity="center_vertical"
-            android:hint="There are no contacts"
-            android:clickable="false"
-            android:paddingVertical="8dp"
-            android:paddingStart="8dp"
-            android:paddingRight="8dp"
-            android:textColor="@color/gray"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvSelectRecipientTitle" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clSelectedContact"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/clSelectedRecipient"
+        app:layout_constraintEnd_toStartOf="@+id/clSelectedRecipient"
         app:layout_constraintTop_toBottomOf="@+id/clTitle">
 
         <TextView
@@ -147,6 +91,62 @@
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvSelectContactTitle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clSelectedRecipient"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/clSelectedContact"
+        app:layout_constraintTop_toBottomOf="@+id/clTitle">
+
+        <TextView
+            android:id="@+id/tvSelectRecipientTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="Select the recipient"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <Spinner
+            android:id="@+id/spinnerSelectRecipient"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:paddingVertical="8dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSelectRecipientTitle" />
+
+        <TextView
+            android:id="@+id/tvSelectedRecipient"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/white"
+            android:gravity="center_vertical"
+            android:hint="There are no contacts"
+            android:clickable="false"
+            android:paddingVertical="8dp"
+            android:paddingStart="8dp"
+            android:paddingRight="8dp"
+            android:textColor="@color/gray"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvSelectRecipientTitle" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Button

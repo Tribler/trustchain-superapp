@@ -32,7 +32,7 @@
                 android:id="@+id/ivBalanceIcon"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:src="@drawable/ic_eurotoken"
+                android:src="@drawable/ic_baseline_euro_symbol_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -143,18 +143,6 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/tvBalanceSymbol"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="ET"
-                android:textColor="@color/light_gray"
-                android:textSize="20sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/clBalanceAmount"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <ImageView
                 android:id="@+id/ivBalanceErrorIcon"
                 android:layout_width="30dp"
@@ -166,9 +154,23 @@
                 tools:tint="@color/red"
                 android:visibility="gone"
                 android:tooltipText="Verified balance differs from the correct balance, click the balance to see the difference"
-                app:layout_constraintBottom_toBottomOf="@+id/tvBalanceSymbol"
-                app:layout_constraintStart_toEndOf="@+id/tvBalanceSymbol"
-                app:layout_constraintTop_toTopOf="@+id/tvBalanceSymbol" />
+                app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
+                app:layout_constraintStart_toEndOf="@+id/clBalanceAmount"
+                app:layout_constraintTop_toTopOf="@+id/clBalanceAmount"
+                tools:visibility="visible"/>
+
+            <ProgressBar
+                android:id="@+id/pbBalanceUpdating"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_marginStart="8dp"
+                app:layout_constraintDimensionRatio="H,1:1"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:indeterminateTintMode="src_atop"
+                app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
+                app:layout_constraintStart_toEndOf="@+id/ivBalanceErrorIcon"
+                app:layout_constraintTop_toTopOf="@+id/clBalanceAmount" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clButtonBuy"
@@ -286,7 +288,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_marginEnd="12dp"
-            android:src="@drawable/ic_baseline_edit_24"
+            android:src="@drawable/ic_exchange"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

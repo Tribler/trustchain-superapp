@@ -136,6 +136,7 @@
         android:inputType="numberDecimal"
         android:paddingVertical="8dp"
         android:paddingStart="34dp"
+        android:paddingEnd="8dp"
         android:textSize="14sp"
         tools:hint="39918,55 max"
         app:layout_constraintEnd_toEndOf="parent"
@@ -146,23 +147,12 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_marginStart="8dp"
-        android:src="@drawable/ic_eurotoken"
+        android:src="@drawable/ic_baseline_euro_symbol_24"
         app:layout_constraintBottom_toBottomOf="@+id/etTransactionAmount"
         app:layout_constraintStart_toStartOf="@+id/etTransactionAmount"
         app:layout_constraintTop_toTopOf="@+id/etTransactionAmount"
         app:tint="@color/black"
         tools:tint="@color/black" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
-        android:text="ET"
-        android:textSize="14sp"
-        android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="@+id/etTransactionAmount"
-        app:layout_constraintEnd_toEndOf="@+id/etTransactionAmount"
-        app:layout_constraintTop_toTopOf="@+id/etTransactionAmount" />
 
     <EditText
         android:id="@+id/etTransactionMessage"
@@ -241,22 +231,6 @@
         android:layout_marginTop="12dp"
         android:enabled="false"
         android:text="Create Request QR"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
-
-    <ProgressBar
-        android:id="@+id/pbLoadingSpinner"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginTop="12dp"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/white"
-        android:indeterminateTintMode="src_atop"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintDimensionRatio="H,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />

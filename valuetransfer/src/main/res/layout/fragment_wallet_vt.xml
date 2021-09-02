@@ -28,7 +28,7 @@
                 android:id="@+id/ivNoIdentity"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
-                android:src="@drawable/ic_identity_required"
+                android:src="@drawable/ic_identity"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -43,7 +43,7 @@
                 android:background="@drawable/pill_rounded"
                 android:gravity="center"
                 android:paddingHorizontal="8dp"
-                android:text="A personal identity is required for this application. This identity is a digital representation of your formal passport. It is important to provide the correct details."
+                android:text="A personal identity is required for this application. It is important to provide the correct details."
                 android:textColor="@color/white"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -197,7 +197,7 @@
                                 android:id="@+id/ivBalanceIcon"
                                 android:layout_width="30dp"
                                 android:layout_height="30dp"
-                                android:src="@drawable/ic_eurotoken"
+                                android:src="@drawable/ic_baseline_euro_symbol_24"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent"
@@ -217,17 +217,18 @@
                                 app:layout_constraintStart_toEndOf="@+id/ivBalanceIcon"
                                 app:layout_constraintTop_toTopOf="parent" />
 
-                            <TextView
-                                android:id="@+id/tvBalanceSymbol"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="4dp"
-                                android:text="ET"
-                                android:textColor="@color/light_gray"
-                                android:textSize="20sp"
-                                app:layout_constraintBottom_toBottomOf="parent"
+                            <ProgressBar
+                                android:id="@+id/pbBalanceUpdating"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:layout_marginStart="12dp"
+                                app:layout_constraintDimensionRatio="H,1:1"
+                                android:layout_gravity="center"
+                                android:indeterminateTint="@color/white"
+                                android:indeterminateTintMode="src_atop"
+                                app:layout_constraintBottom_toBottomOf="@+id/tvBalanceAmount"
                                 app:layout_constraintStart_toEndOf="@+id/tvBalanceAmount"
-                                app:layout_constraintTop_toTopOf="parent" />
+                                app:layout_constraintTop_toTopOf="@+id/tvBalanceAmount" />
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:id="@+id/clButtonBuy"
@@ -345,7 +346,7 @@
                             android:layout_width="24dp"
                             android:layout_height="24dp"
                             android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_baseline_edit_24"
+                            android:src="@drawable/ic_exchange"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent"

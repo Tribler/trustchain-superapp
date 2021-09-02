@@ -15,7 +15,7 @@
         android:background="@drawable/square_rounded_dark_green"
         android:paddingHorizontal="8dp"
         android:paddingVertical="8dp"
-        app:layout_constraintEnd_toStartOf="@+id/clContactExchange"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -126,38 +126,40 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clContactExchange"
-        android:layout_width="wrap_content"
-        android:layout_height="62dp"
-        android:layout_marginStart="4dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/clChatCard"
-        app:layout_constraintTop_toTopOf="parent">
+<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--        android:id="@+id/clContactExchange"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="62dp"-->
+<!--        android:layout_marginStart="4dp"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toEndOf="@+id/clChatCard"-->
+<!--        app:layout_constraintTop_toTopOf="parent">-->
 
-        <ImageView
-            android:id="@+id/ivRequest"
-            android:layout_width="40dp"
-            android:layout_height="29dp"
-            android:background="@drawable/square_rounded_dark_green"
-            android:src="@drawable/ic_baseline_arrow_drop_up_24"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/colorPrimaryValueTransfer"
-            tools:tint="@color/colorPrimaryValueTransfer" />
+<!--        <ImageView-->
+<!--            android:id="@+id/ivRequest"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="29dp"-->
+<!--            android:padding="5dp"-->
+<!--            android:background="@drawable/square_rounded_dark_green"-->
+<!--            android:src="@drawable/ic_request"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:tint="@color/colorPrimaryValueTransfer"-->
+<!--            tools:tint="@color/white" />-->
 
-        <ImageView
-            android:id="@+id/ivTransfer"
-            android:layout_width="40dp"
-            android:layout_height="29dp"
-            android:background="@drawable/square_rounded_dark_green"
-            android:src="@drawable/ic_baseline_arrow_drop_down_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/red"
-            tools:tint="@color/red" />
+<!--        <ImageView-->
+<!--            android:id="@+id/ivTransfer"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="29dp"-->
+<!--            android:padding="6dp"-->
+<!--            android:background="@drawable/square_rounded_dark_green"-->
+<!--            android:src="@drawable/ic_exchange"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:tint="@color/red"-->
+<!--            tools:tint="@color/red" />-->
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

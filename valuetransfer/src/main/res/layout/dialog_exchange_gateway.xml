@@ -95,23 +95,12 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_eurotoken"
+            android:src="@drawable/ic_baseline_euro_symbol_24"
             app:layout_constraintBottom_toBottomOf="@+id/tvBalance"
             app:layout_constraintStart_toStartOf="@+id/tvBalance"
             app:layout_constraintTop_toTopOf="@+id/tvBalance"
             app:tint="@color/black"
             tools:tint="@color/black" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:text="ET"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="@+id/tvBalance"
-            app:layout_constraintEnd_toEndOf="@+id/tvBalance"
-            app:layout_constraintTop_toTopOf="@+id/tvBalance" />
 
         <TextView
             android:id="@+id/tvSellAmountTitle"
@@ -149,23 +138,12 @@
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/ic_eurotoken"
+            android:src="@drawable/ic_baseline_euro_symbol_24"
             app:layout_constraintBottom_toBottomOf="@+id/tvSellAmount"
             app:layout_constraintStart_toStartOf="@+id/tvSellAmount"
             app:layout_constraintTop_toTopOf="@+id/tvSellAmount"
             app:tint="@color/black"
             tools:tint="@color/black" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
-            android:text="ET"
-            android:textSize="14sp"
-            android:textColor="@color/black"
-            app:layout_constraintBottom_toBottomOf="@+id/tvSellAmount"
-            app:layout_constraintEnd_toEndOf="@+id/tvSellAmount"
-            app:layout_constraintTop_toTopOf="@+id/tvSellAmount" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -292,7 +270,6 @@
     <Button
         android:id="@+id/btnConnectToGateway"
         style="@style/ButtonDarkGreenRounded"
-        android:layout_marginTop="12dp"
         android:text="Connect to Gateway"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -301,8 +278,7 @@
     <Button
         android:id="@+id/btnContinueSell"
         style="@style/ButtonDarkGreenRounded"
-        android:layout_marginTop="12dp"
-        android:text="Continue"
+        android:text="Sell"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
