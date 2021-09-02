@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Handler
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.*
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -60,6 +62,10 @@ class ExchangeTransferMoneyDialog(
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_exchange_transfer, null)
 
+            // Fix keyboard exposing over content of dialog
+            bottomSheetDialog.behavior.skipCollapsed = true
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
             parentActivity = requireActivity() as ValueTransferMainActivity
             trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
             peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
@@ -99,12 +105,12 @@ class ExchangeTransferMoneyDialog(
             view.findViewById<TextView>(R.id.tvTitleTransfer).isVisible = isTransfer
             view.findViewById<TextView>(R.id.tvTitleRequest).isVisible = !isTransfer
 
-            lifecycleScope.launchWhenCreated {
-                while(isActive) {
-                    transactionAmountView.hint = "Balance: ${(requireActivity() as ValueTransferMainActivity).getBalance(true)}"
-                    delay(1000)
+            parentActivity.getBalance(true).observe(
+                this,
+                Observer {
+                    transactionAmountView.hint = "Balance: $it"
                 }
-            }
+            )
 
             // Select contact from dropdown, or nobody in case of an unspecified request
             if(recipient == null) {
@@ -244,46 +250,88 @@ class ExchangeTransferMoneyDialog(
             }
 
             transferButton.setOnClickListener {
-                loadingSpinner.isVisible = true
-                transferButton.isVisible = false
-                try {
-                    // Add contact if it is isn't in your contacts and
-                    if(selectedContact != null && contactStore.getContactFromPublicKey(selectedContact!!.publicKey) == null) {
-                        if(addNewContactSwitch.isChecked) {
-                            contactStore.addContact(selectedContact!!.publicKey, selectedContact!!.name)
-                        }
-                    }
+                transferButton.text = "Transferring..."
 
-                    // Create proposal block to the recipient
-                    val block = transactionRepository.sendTransferProposalSync(selectedContact!!.publicKey.keyToBin(), transactionAmount)
-                    if (block == null) {
-                        parentActivity.displaySnackbar(requireContext(), "Insufficient balance", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-                    } else {
-                        peerChatCommunity.sendMessageWithTransaction(transactionMessage, block.calculateHash(), selectedContact!!.publicKey)
-                        parentActivity.displaySnackbar(requireContext(), "Transfer of ${transactionAmountView.text} ET to ${selectedContact!!.name}", isShort = false)
-                        bottomSheetDialog.dismiss()
-                    }
-                } catch(e: Exception) {
-                    e.printStackTrace()
-                    parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
-                }
-                loadingSpinner.isVisible = false
-                transferButton.isVisible = true
+                Handler().postDelayed(
+                    Runnable {
+                        try {
+                            // Add contact if it is isn't in your contacts and
+                            if (selectedContact != null && contactStore.getContactFromPublicKey(
+                                    selectedContact!!.publicKey
+                                ) == null
+                            ) {
+                                if (addNewContactSwitch.isChecked) {
+                                    contactStore.addContact(
+                                        selectedContact!!.publicKey,
+                                        selectedContact!!.name
+                                    )
+                                }
+                            }
+
+                            // Create proposal block to the recipient
+                            val block = transactionRepository.sendTransferProposalSync(
+                                selectedContact!!.publicKey.keyToBin(),
+                                transactionAmount
+                            )
+                            if (block == null) {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    "Insufficient balance",
+                                    view = view.rootView,
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
+                                    extraPadding = true
+                                )
+                            } else {
+                                peerChatCommunity.sendMessageWithTransaction(
+                                    transactionMessage,
+                                    block.calculateHash(),
+                                    selectedContact!!.publicKey
+                                )
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    "Transfer of €${transactionAmountView.text} to ${selectedContact!!.name}",
+                                    isShort = false
+                                )
+                                bottomSheetDialog.dismiss()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            parentActivity.displaySnackbar(
+                                requireContext(),
+                                "Unexpected error occurred",
+                                view = view.rootView,
+                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
+                                extraPadding = true
+                            )
+                        }
+                    }, 500
+                )
             }
 
             requestMoneyContactButton.setOnClickListener {
-                loadingSpinner.isVisible = true
-                requestMoneyContactButton.isVisible = false
-                peerChatCommunity.sendTransferRequest(transactionMessage, transactionAmount, selectedContact!!.publicKey)
+                requestMoneyContactButton.text = "Requesting..."
 
-                parentActivity.displaySnackbar(requireContext(), "Transfer request of ${transactionAmountView.text} ET sent to ${selectedContact!!.name}", isShort = false)
-                bottomSheetDialog.dismiss()
+                Handler().postDelayed(
+                    Runnable {
+                        loadingSpinner.isVisible = true
+                        requestMoneyContactButton.isVisible = false
+                        peerChatCommunity.sendTransferRequest(
+                            transactionMessage,
+                            transactionAmount,
+                            selectedContact!!.publicKey
+                        )
+
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            "Transfer request of ${transactionAmountView.text} ET sent to ${selectedContact!!.name}",
+                            isShort = false
+                        )
+                        bottomSheetDialog.dismiss()
+                    }, 500
+                )
             }
 
             requestMoneyQRButton.setOnClickListener {
-                loadingSpinner.isVisible = true
-                requestMoneyQRButton.isVisible = false
-
                 closeKeyboard(requireContext(), view)
                 val map = mapOf(
                     "public_key" to trustChainCommunity.myPeer.publicKey.keyToBin().toHex(),

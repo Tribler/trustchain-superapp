@@ -8,6 +8,7 @@ import android.widget.EditText
 import androidx.core.net.toUri
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
@@ -35,6 +36,10 @@ class ContactRenameDialog(
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_contact_rename, null)
+
+            // Fix keyboard exposing over content of dialog
+            bottomSheetDialog.behavior.skipCollapsed = true
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             val contactNameView = view.findViewById<EditText>(R.id.etContactName)
             val saveContactNameButton = view.findViewById<Button>(R.id.btnSaveContactName)

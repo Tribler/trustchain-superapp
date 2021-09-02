@@ -8,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.util.createBitmap
 import nl.tudelft.trustchain.valuetransfer.R
@@ -24,6 +25,10 @@ class QRCodeDialog(
             val bottomSheetDialog =
                 BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_qrcode, null)
+
+            // Fix keyboard exposing over content of dialog
+            bottomSheetDialog.behavior.skipCollapsed = true
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
             val tvSubTitle = view.findViewById<TextView>(R.id.tvSubTitle)

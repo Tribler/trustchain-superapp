@@ -2,11 +2,14 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.Observer
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -18,7 +21,7 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.util.*
 
-class EuroTokenExchangeDialog(
+class ExchangeGatewayDialog(
     private val isCreation: Boolean,
     private val publicKey: PublicKey,
     private val paymentID: String,
@@ -38,7 +41,11 @@ class EuroTokenExchangeDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            val view = layoutInflater.inflate(R.layout.dialog_exchange_buy, null)
+            val view = layoutInflater.inflate(R.layout.dialog_exchange_gateway, null)
+
+            // Fix keyboard exposing over content of dialog
+            bottomSheetDialog.behavior.skipCollapsed = true
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
             trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
@@ -71,7 +78,12 @@ class EuroTokenExchangeDialog(
             }
 
             if(!isCreation) {
-                view.findViewById<TextView>(R.id.tvBalance).text = (requireActivity() as ValueTransferMainActivity).getBalance(true)
+                parentActivity.getBalance(true).observe(
+                    this,
+                    Observer {
+                        view.findViewById<TextView>(R.id.tvBalance).text = it
+                    }
+                )
                 view.findViewById<TextView>(R.id.tvSellAmount).text = formatBalance(amount!!)
             }
 
@@ -85,34 +97,41 @@ class EuroTokenExchangeDialog(
             val preferredGateway = gateWayPreferredSwitch.isChecked
 
             btnConnect.setOnClickListener {
-                if(saveGateway) {
-                    gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
-                }
-                euroTokenCommunity.connectToGateway(publicKey.keyToBin().toHex(), ip, port, paymentID)
+                btnConnect.text = "Connecting..."
 
-                parentActivity.displaySnackbar(requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
-                bottomSheetDialog.dismiss()
+                Handler().postDelayed(
+                    Runnable {
+                        if (saveGateway) {
+                            gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
+                        }
+
+                        euroTokenCommunity.connectToGateway(publicKey.keyToBin().toHex(), ip, port, paymentID)
+                        parentActivity.displaySnackbar(requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
+                        bottomSheetDialog.dismiss()
+                    }, 500
+                )
             }
 
             btnContinueSell.setOnClickListener {
-                if(saveGateway) {
-                    gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
-                }
+                btnContinueSell.text = "Trying to sell..."
 
-                val block = transactionRepository.sendDestroyProposalWithPaymentID(
-                    publicKey.keyToBin(),
-                    ip,
-                    port,
-                    paymentID,
-                    amount!!
+                Handler().postDelayed(
+                    Runnable {
+                        if (saveGateway) {
+                            gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
+                        }
+
+                        val block = transactionRepository.sendDestroyProposalWithPaymentID(publicKey.keyToBin(), ip, port, paymentID, amount!!)
+
+                        if (block == null) {
+                            btnContinueSell.text = "Sell"
+                            parentActivity.displaySnackbar(requireContext(), "Sell of ${formatBalance(amount)} ET did not succeed, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
+                        } else {
+                            parentActivity.displaySnackbar(requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
+                            bottomSheetDialog.dismiss()
+                        }
+                    }, 500
                 )
-
-                if(block == null) {
-                    parentActivity.displaySnackbar(requireContext(), "Sell of ${formatBalance(amount)} ET did not succeed, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false )
-                }else{
-                    parentActivity.displaySnackbar(requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
-                    bottomSheetDialog.dismiss()
-                }
             }
 
             bottomSheetDialog.setContentView(view)

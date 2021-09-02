@@ -7,6 +7,7 @@ import android.text.InputType
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.jaredrummler.blockingdialog.BlockingDialogFragment
 import nl.tudelft.ipv8.android.IPv8Android
@@ -31,6 +32,10 @@ class IdentityAttestationConfirmDialog(
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(it, R.style.BaseBottomSheetDialog)
             val view = it.layoutInflater.inflate(R.layout.dialog_identity_attestation_confirm, null)
+
+            // Fix keyboard exposing over content of dialog
+            bottomSheetDialog.behavior.skipCollapsed = true
+            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             val subtitleView = view.findViewById<TextView>(R.id.tvSubTitle)
             val attributeValueView = view.findViewById<EditText>(R.id.etAttributeValue)
