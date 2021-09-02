@@ -3,18 +3,19 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
-//apply plugin: 'com.google.gms.google-services'
-//apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'com.google.gms.google-services' // To run a different version next to standard version of the app comment this line
+apply plugin: 'com.google.firebase.crashlytics' // To run a different version next to standard version of the app comment this line
 apply plugin: 'kotlinx-serialization'
 
 buildscript {
     repositories {
-//        google()
+        google() // To run a different version next to standard version of the app comment this line
         mavenCentral()
     }
-//    dependencies {
-//        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'
-//    }
+    // To run a different version next to standard version of the app comment the dependency below
+    dependencies {
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'
+    }
 }
 
 ktlint {
@@ -45,17 +46,18 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    flavorDimensions "version"
-
-    productFlavors {
-        demo {
-            applicationIdSuffix ".demo"
-            versionCode 1
-            versionName "1.0"
-            versionNameSuffix "-demo"
-            dimension "version"
-        }
-    }
+    // To run a different version next to standard version of the app uncomment flavorDimensions and productFlavors, comment 'client' in google-services.json, and select demo as build variant
+//    flavorDimensions "version"
+//
+//    productFlavors {
+//        demo {
+//            applicationIdSuffix ".demo"
+//            versionCode 1
+//            versionName "1.0"
+//            versionNameSuffix "-demo"
+//            dimension "version"
+//        }
+//    }
 
     signingConfigs {
         release {

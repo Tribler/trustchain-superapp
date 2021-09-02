@@ -5,36 +5,36 @@
     "project_id": "trustchain-superapp",
     "storage_bucket": "trustchain-superapp.appspot.com"
   },
-//  "client": [
-//    {
-//      "client_info": {
-//        "mobilesdk_app_id": "1:327016605343:android:3055eb92f8bea31f5ae4aa",
-//        "android_client_info": {
-//          "package_name": "nl.tudelft.trustchain"
-//        }
-//      },
-//      "oauth_client": [
-//        {
-//          "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
-//          "client_type": 3
-//        }
-//      ],
-//      "api_key": [
-//        {
-//          "current_key": "AIzaSyAUq3-O12VR884jokteVn14yiXDeckIxAQ"
-//        }
-//      ],
-//      "services": {
-//        "appinvite_service": {
-//          "other_platform_oauth_client": [
-//            {
-//              "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
-//              "client_type": 3
-//            }
-//          ]
-//        }
-//      }
-//    }
-//  ],
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:327016605343:android:3055eb92f8bea31f5ae4aa",
+        "android_client_info": {
+          "package_name": "nl.tudelft.trustchain"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUq3-O12VR884jokteVn14yiXDeckIxAQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "327016605343-rkvebn5hatrighvkr3ea8gn0br7d7f9d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
   "configuration_version": "1"
 }
