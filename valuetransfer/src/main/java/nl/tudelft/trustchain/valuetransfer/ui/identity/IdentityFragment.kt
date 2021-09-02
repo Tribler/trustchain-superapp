@@ -268,10 +268,10 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.actionEditIdentity -> {
-                IdentityDetailsDialog(identityStore.getIdentity(), identityCommunity).show(parentFragmentManager, tag)
+                IdentityDetailsDialog().show(parentFragmentManager, tag)
             }
             R.id.actionRemoveIdentity -> {
-                ConfirmDialog("Are you sure to delete your identity?") { dialog ->
+                ConfirmDialog("Are you sure to delete your identity?") {
                     try {
                         identityStore.deleteAllAttributes()
 
@@ -283,13 +283,12 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                         if(identity != null) {
                             identityStore.deleteIdentity(identity)
                         }
+
+                        parentActivity.reloadActivity()
+                        parentActivity.displaySnackbar(requireContext(), "Identity successfully deleted. Application re-initialized.", isShort = false)
                     }catch(e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-                    } finally {
-                        dialog.dismiss()
-                        parentActivity.displaySnackbar(requireContext(), "Identity successfully deleted. Application re-initialized.", isShort = false)
-                        parentActivity.reloadActivity()
                     }
                 }
                     .show(parentFragmentManager, tag)
