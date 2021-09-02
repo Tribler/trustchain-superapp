@@ -85,33 +85,25 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
 
         hiddenChatsAdapter.registerRenderer(
-            ChatItemRenderer(
-                {
-                    val args = Bundle()
-                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
+            ChatItemRenderer {
+                val args = Bundle()
+                args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-                    parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
-                }, {}, {}
-            )
+                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+            }
         )
 
         chatsAdapter.registerRenderer(
-            ChatItemRenderer(
-                {
-                    val args = Bundle()
-                    args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                    args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                    args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
+            ChatItemRenderer {
+                val args = Bundle()
+                args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.contactsFragmentTag)
 
-                    parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
-                }, { contact ->
-                    ExchangeTransferMoneyDialog(contact, null, false).show(parentFragmentManager, tag)
-                }, { contact ->
-                    ExchangeTransferMoneyDialog(contact, null, true).show(parentFragmentManager, tag)
-                }
-            )
+                parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
+            }
         )
 
         contactsAdapter.registerRenderer(
