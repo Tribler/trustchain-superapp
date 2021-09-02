@@ -1,0 +1,11 @@
+build
+.idea
+*.iml
+local.properties
+.gradle
+gossipML/.cxx
+**.project
+**.settings
+**.classpath
+.vscode/
+.DS_Store
