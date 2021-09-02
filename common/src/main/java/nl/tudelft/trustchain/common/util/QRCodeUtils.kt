@@ -44,7 +44,12 @@ class QRCodeUtils(private val context: Context) {
      * from: https://demonuts.com/kotlin-generate-qr-code/
      * Creates a QR code from text
      */
-    fun createQR(text: String, size: Int = QRCodeSize, pColor: Int = pixelColor, bColor: Int = backgroundColor): Bitmap? {
+    fun createQR(
+        text: String,
+        size: Int = QRCodeSize,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
+    ): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
         } else {
@@ -61,7 +66,12 @@ class QRCodeUtils(private val context: Context) {
      * Encode the text into a bitmap
      */
     @Throws(WriterException::class)
-    private fun textToImageEncode(value: String, size: Int = QRCodeSize, pColor: Int = pixelColor, bColor: Int = backgroundColor): Bitmap? {
+    private fun textToImageEncode(
+        value: String,
+        size: Int = QRCodeSize,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
+    ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
             bitMatrix = MultiFormatWriter().encode(

@@ -436,7 +436,11 @@ class TransactionRepository(
             }
     }
 
-    fun getLatestNTransactionsOfType(trustchain: TrustChainHelper, limit: Int, allowedTypes: List<String>): List<Transaction> {
+    fun getLatestNTransactionsOfType(
+        trustchain: TrustChainHelper,
+        limit: Int,
+        allowedTypes: List<String>
+    ): List<Transaction> {
         val myKey = trustChainCommunity.myPeer.publicKey.keyToBin()
         val blocks = trustChainCommunity.database.getLatestBlocks(myKey, 1000)
 
@@ -446,12 +450,12 @@ class TransactionRepository(
                 allowedTypes.contains(block.type)
             }
             .filter { block ->
-                val linkedBlock = blocks.find {it.linkedBlockId == block.blockId }
+                val linkedBlock = blocks.find { it.linkedBlockId == block.blockId }
                 val hasLinkedBlock = linkedBlock != null
                 val outgoing = getBalanceChangeForBlock(block) < 0
 
                 val outgoingTransaction = outgoing && hasLinkedBlock && block.type == BLOCK_TYPE_TRANSFER
-                val incomingTransaction = !outgoing && block.type == BLOCK_TYPE_TRANSFER && (blocks.find{ it.blockId == block.linkedBlockId }  != null)
+                val incomingTransaction = !outgoing && block.type == BLOCK_TYPE_TRANSFER && (blocks.find { it.blockId == block.linkedBlockId } != null)
                 val buyFromExchange = !outgoing && block.type == BLOCK_TYPE_CREATE && !block.isAgreement
                 val sellToExchange = outgoing && block.type == BLOCK_TYPE_DESTROY && !block.isAgreement
 
