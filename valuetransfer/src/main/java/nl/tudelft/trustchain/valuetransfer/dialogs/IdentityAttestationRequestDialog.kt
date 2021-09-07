@@ -49,7 +49,7 @@ class IdentityAttestationRequestDialog(
             val requestButton = view.findViewById<Button>(R.id.btnRequestAttestation)
             toggleButton(requestButton, attributeNameView.text.toString().isNotEmpty())
 
-            val attributeNameAdapter = object: ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, attestationCommunity.schemaManager.getSchemaNames().sorted()) {
+            val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, attestationCommunity.schemaManager.getSchemaNames().sorted()) {
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                     val params = textView.layoutParams
@@ -57,7 +57,7 @@ class IdentityAttestationRequestDialog(
                     textView.layoutParams = params
                     textView.gravity = Gravity.CENTER_VERTICAL
 
-                    if (position == attributeTypeSpinner.selectedItemPosition){
+                    if (position == attributeTypeSpinner.selectedItemPosition) {
                         textView.background = ColorDrawable(Color.LTGRAY)
                     }
 
@@ -66,14 +66,18 @@ class IdentityAttestationRequestDialog(
             }
 
             attributeTypeSpinner.adapter = attributeNameAdapter
-            attributeTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-                    override fun onNothingSelected(parent: AdapterView<*>?) {}
+            attributeTypeSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
 
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                        toggleButton(requestButton, attributeNameView.text.isNotEmpty())
-                    }
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    toggleButton(requestButton, attributeNameView.text.isNotEmpty())
                 }
-
+            }
 
             attributeNameView.doAfterTextChanged { state ->
                 toggleButton(requestButton, state != null && state.isNotEmpty())
@@ -90,14 +94,14 @@ class IdentityAttestationRequestDialog(
                     var privateKey: BonehPrivateKey? = null
 
                     try {
-                        privateKey = when(idFormat) {
+                        privateKey = when (idFormat) {
                             ID_METADATA_BIG -> myPeer.identityPrivateKeyBig!!
                             ID_METADATA_HUGE -> myPeer.identityPrivateKeyHuge!!
                             else -> myPeer.identityPrivateKeySmall!!
                         }
-                    }catch (e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
-                    }finally {
+                    } finally {
                         attestationCommunity.requestAttestation(
                             peer,
                             attributeName,

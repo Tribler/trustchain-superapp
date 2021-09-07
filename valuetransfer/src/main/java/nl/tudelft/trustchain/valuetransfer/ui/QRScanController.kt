@@ -37,7 +37,7 @@ class QRScanController : BaseFragment() {
 
     private fun checkRequiredVariables(variables: List<String>, data: JSONObject): Boolean {
         variables.forEach { variable ->
-            if(!data.has(variable)) {
+            if (!data.has(variable)) {
                 parentActivity.displaySnackbar(requireContext(), "Missing variable $variable", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 return false
             }
@@ -54,11 +54,11 @@ class QRScanController : BaseFragment() {
     fun addAttestation(publicKey: String) {
         Log.d("VTLOG", "ADD ATTESTATION")
 
-        val peer = attestationCommunity.getPeers().find { peer -> peer.publicKey.keyToBin().toHex() == publicKey}
+        val peer = attestationCommunity.getPeers().find { peer -> peer.publicKey.keyToBin().toHex() == publicKey }
 
-        if(peer != null) {
+        if (peer != null) {
             IdentityAttestationRequestDialog(peer).show(parentFragmentManager, tag)
-        }else{
+        } else {
             parentActivity.displaySnackbar(requireContext(), "Peer could not be located in the network, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
         }
     }
@@ -97,7 +97,7 @@ class QRScanController : BaseFragment() {
             val name = data.optString("name")
 
             ContactAddDialog(getTrustChainCommunity().myPeer.publicKey, publicKey, name).show(parentFragmentManager, tag)
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
         }
@@ -113,7 +113,7 @@ class QRScanController : BaseFragment() {
         try {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString("public_key").hexToBytes())
 
-            if(publicKey == getTrustChainCommunity().myPeer.publicKey) {
+            if (publicKey == getTrustChainCommunity().myPeer.publicKey) {
                 parentActivity.displaySnackbar(requireContext(), "Cannot transfer money to yourself", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 return
             }
@@ -121,11 +121,11 @@ class QRScanController : BaseFragment() {
             val amount = data.optString("amount")
 
             var contact = contactStore.getContactFromPublicKey(publicKey)
-            if(contact == null) {
+            if (contact == null) {
                 contact = Contact(data.optString("name"), publicKey)
             }
             ExchangeTransferMoneyDialog(contact, amount, true).show(parentFragmentManager, tag)
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
         }
@@ -144,7 +144,7 @@ class QRScanController : BaseFragment() {
 
         try {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString("public_key").hexToBytes())
-            val amount = if(isCreation) null else data.optLong("amount")
+            val amount = if (isCreation) null else data.optLong("amount")
 
             ExchangeGatewayDialog(
                 isCreation,
@@ -155,7 +155,7 @@ class QRScanController : BaseFragment() {
                 data.optString("name"),
                 amount
             ).show(parentFragmentManager, tag)
-        }catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
         }
@@ -188,14 +188,14 @@ class QRScanController : BaseFragment() {
                             defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
 
                             PublicKeyScanOptionsDialog(obj).show(parentFragmentManager, tag)
-                        }catch(e: Exception) {
+                        } catch (e: Exception) {
                             e.printStackTrace()
                             parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                         }
                     }
                     else -> throw RuntimeException("QR code not recognized")
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 initiateScan()

@@ -23,7 +23,7 @@ class ContactsItemRenderer(
         val publicKeyString = item.contact.publicKey.toString()
         val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
         val color = getColorByHash(context, publicKeyString)
-        val identicon = generateIdenticon(input, color , resources)
+        val identicon = generateIdenticon(input, color, resources)
         ivIdenticon.setImageBitmap(identicon)
 
         setOnClickListener {

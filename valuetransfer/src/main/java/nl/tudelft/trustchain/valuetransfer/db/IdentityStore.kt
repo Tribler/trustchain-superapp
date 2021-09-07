@@ -18,35 +18,35 @@ class IdentityStore(context: Context) {
     private val database = Database(driver)
 
     private val identityMapper = {
-            id: String,
-            publicKey: ByteArray,
-            name: String?,
-            surname: String?,
-            gender: Long?,
-            dateOfBirth: Long?,
-            placeOfBirth: String?,
-            nationality: String?,
-            personalNumber: Long?,
-            documentNumber: String?,
-            added: Long,
-            modified: Long
-            ->
-                Identity(
-                    id,
-                    defaultCryptoProvider.keyFromPublicBin(publicKey),
-                    PersonalIdentity(
-                        name!!,
-                        surname!!,
-                        if (gender == 0L) "Male" else if (gender == 1L) "Female" else "Neutral",
-                        Date(dateOfBirth!!),
-                        placeOfBirth!!,
-                        nationality!!,
-                        personalNumber!!,
-                        documentNumber!!
-                    ),
-                    Date(added),
-                    Date(modified)
-                )
+        id: String,
+        publicKey: ByteArray,
+        name: String?,
+        surname: String?,
+        gender: Long?,
+        dateOfBirth: Long?,
+        placeOfBirth: String?,
+        nationality: String?,
+        personalNumber: Long?,
+        documentNumber: String?,
+        added: Long,
+        modified: Long
+        ->
+        Identity(
+            id,
+            defaultCryptoProvider.keyFromPublicBin(publicKey),
+            PersonalIdentity(
+                name!!,
+                surname!!,
+                if (gender == 0L) "Male" else if (gender == 1L) "Female" else "Neutral",
+                Date(dateOfBirth!!),
+                placeOfBirth!!,
+                nationality!!,
+                personalNumber!!,
+                documentNumber!!
+            ),
+            Date(added),
+            Date(modified)
+        )
     }
 
     private val attributeMapper = {
@@ -55,7 +55,8 @@ class IdentityStore(context: Context) {
         value: String,
         added: Long,
         modified: Long
-        -> IdentityAttribute(
+        ->
+        IdentityAttribute(
             id,
             name,
             value,
@@ -117,7 +118,7 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if(identity.content.gender == "Male") 0L else if (identity.content.gender == "Female") 1L else 2L,
+            if (identity.content.gender == "Male") 0L else if (identity.content.gender == "Female") 1L else 2L,
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,

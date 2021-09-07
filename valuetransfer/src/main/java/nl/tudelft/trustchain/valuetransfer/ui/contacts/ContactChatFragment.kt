@@ -20,7 +20,6 @@ import android.util.Log
 import android.view.*
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.webkit.MimeTypeMap
 import android.widget.*
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.app.ActivityCompat
@@ -50,7 +49,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.ui.conversation.ChatMessageItem
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.peerchat.util.saveFile
 import nl.tudelft.trustchain.valuetransfer.R
@@ -99,7 +97,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     return item.attachment!!.type == type
                 }
 
-                when(filterType.value.toString()) {
+                when (filterType.value.toString()) {
                     FILTER_TYPE_MESSAGE -> hasMessage && !hasAttachment && !hasTransaction && messageContainsTerm
                     FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
                     FILTER_TYPE_PHOTO_VIDEO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
@@ -178,7 +176,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         setHasOptionsMenu(true)
 
         lifecycleScope.launchWhenCreated {
-            while(isActive) {
+            while (isActive) {
 //                val latestBlockCount = blocks.size
                 blocks = trustChainHelper.getChainByUser(trustchain.getMyPublicKey())
 
@@ -190,42 +188,42 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         }
 
         lifecycleScope.launchWhenCreated {
-            while(isActive) {
+            while (isActive) {
 //                if(transactionsHashes.value!!.isNotEmpty()) {
-////                    val unconfirmed = unconfirmedTransactions.value!!
+// //                    val unconfirmed = unconfirmedTransactions.value!!
 //                    val confirmed = confirmedTransactions.value!!
-////                    val transactionsReceivedMap = transactionsReceived.value
-////                    Log.d("VTLOG", "NUMBER OF HASHES: ${transactionsReceivedMap!!.size}")
+// //                    val transactionsReceivedMap = transactionsReceived.value
+// //                    Log.d("VTLOG", "NUMBER OF HASHES: ${transactionsReceivedMap!!.size}")
 //                    transactionsHashes.value!!.forEach { transactionHash ->
 //                        Log.d("VTLOG", "T: $transactionHash")
 //                        val transaction = transactionRepository.getTransactionWithHash(transactionHash)
 //                        if(blocks.find { it.linkedBlockId == transaction!!.blockId } != null) {
 //                            Log.d("VTLOG", "IS CONFIRMED")
-////                            unconfirmed.remove(transactionHash)
+// //                            unconfirmed.remove(transactionHash)
 //                            confirmed.add(transactionHash)
 //                        }else{
 //                            Log.d("VTLOG", "IS UNCONFIRMED")
-////                            unconfirmed.add(transactionHash)
+// //                            unconfirmed.add(transactionHash)
 //                            confirmed.remove(transactionHash)
 //                        }
 //                    }
 //
-////                    Log.d("VTLOG", transactionsReceivedMap.toString())
-////                    Log.d("VTLOG", "${transactionsReceivedMap.size} ${transactionsReceived.value!!.size}")
+// //                    Log.d("VTLOG", transactionsReceivedMap.toString())
+// //                    Log.d("VTLOG", "${transactionsReceivedMap.size} ${transactionsReceived.value!!.size}")
 //
-////                    if(transactionsReceivedMap != transactionsReceived.value) {
-////                        Log.d("VTLOG", "UPDATING HASHSET")
-////                    Log.d("VTLOG", "UNCONFIRMED COUNT: ${unconfirmed.size} ${unconfirmedTransactions.value!!.size}")
-////                    if(unconfirmed != unconfirmedTransactions.value) {
-////                        unconfirmedTransactions.postValue(unconfirmed)
-////                    }
+// //                    if(transactionsReceivedMap != transactionsReceived.value) {
+// //                        Log.d("VTLOG", "UPDATING HASHSET")
+// //                    Log.d("VTLOG", "UNCONFIRMED COUNT: ${unconfirmed.size} ${unconfirmedTransactions.value!!.size}")
+// //                    if(unconfirmed != unconfirmedTransactions.value) {
+// //                        unconfirmedTransactions.postValue(unconfirmed)
+// //                    }
 //
 //                    Log.d("VTLOG", "CONFIRMED COUNT: ${confirmed.size} ${confirmedTransactions.value!!.size}")
 //                    if(confirmed != confirmedTransactions.value) {
 //                        confirmedTransactions.postValue(confirmed)
 //                    }
-////                        transactionsReceived.postValue(transactionsReceivedMap)
-////                    }
+// //                        transactionsReceived.postValue(transactionsReceivedMap)
+// //                    }
 //                }
 
                 delay(2000)
@@ -233,7 +231,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_contacts_chat, container, false)
     }
 
@@ -272,7 +274,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             MessageAttachment.TYPE_CONTACT -> {
                                 val contact = Contact.deserialize(attachment.content, 0).first
 
-                                if(contactStore.getContactFromPublicKey(contact.publicKey) == null) {
+                                if (contactStore.getContactFromPublicKey(contact.publicKey) == null) {
                                     when (contact.publicKey) {
                                         getTrustChainCommunity().myPeer.publicKey -> parentActivity.displaySnackbar(requireContext(), "You can't add yourself as contact", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                                         else -> {
@@ -282,15 +284,14 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                                                     parentActivity.displaySnackbar(requireContext(), "Contact ${contact.name} added to address book")
 
                                                     dialog.dismiss()
-
-                                                }catch(e: Exception) {
+                                                } catch (e: Exception) {
                                                     e.printStackTrace()
                                                 }
                                             }
                                                 .show(parentFragmentManager, tag)
                                         }
                                     }
-                                }else{
+                                } else {
                                     goToContactFragment(contact)
                                 }
                             }
@@ -315,15 +316,15 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                                 val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
                                 JSONObject(offsetBuffer.decodeToString()).let { json ->
-                                    val description = if(it.chatMessage.message.isNotEmpty()) "Transfer of request: ${it.chatMessage.message}" else null
+                                    val description = if (it.chatMessage.message.isNotEmpty()) "Transfer of request: ${it.chatMessage.message}" else null
 
-                                    if(json.has("amount")) {
+                                    if (json.has("amount")) {
                                         val amount = json.getString("amount")
                                         var contact = contactStore.getContactFromPublicKey(publicKey)
 
-                                        if(contact != null) {
+                                        if (contact != null) {
                                             ExchangeTransferMoneyDialog(contact, amount, true, description).show(parentFragmentManager, tag)
-                                        }else{
+                                        } else {
                                             parentActivity.displaySnackbar(requireContext(), "Please add contact first to transfer money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                                         }
                                     }
@@ -332,7 +333,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                         }
                     }
 
-                    if(transactionHash != null) {
+                    if (transactionHash != null) {
                         val transaction = transactionRepository.getTransactionWithHash(transactionHash)
                         val key = defaultCryptoProvider.keyFromPublicBin(transaction!!.linkPublicKey)
                         val peer = Peer(key)
@@ -343,7 +344,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 //                            }, 5000
 //                        )
                     }
-                }, {
+                },
+                {
                     messageCountChanged = true
                     limitedMessageCount.value = limitedMessageCount.value?.plus(10)
                 },
@@ -374,7 +376,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             Handler().postDelayed(
                 Runnable {
                     peerChatCommunity.sendMessage(message, publicKey)
-                }, 500
+                },
+                500
             )
         }
 
@@ -390,9 +393,9 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             Observer { list ->
                 val peer = list.find { it.mid == publicKey.keyToHash().toHex() }
 
-                if((peer != null && !peer.address.isEmpty()) || (peer?.bluetoothAddress != null)) {
+                if ((peer != null && !peer.address.isEmpty()) || (peer?.bluetoothAddress != null)) {
                     parentActivity.setActionBarTitle("Connected with IPv8", false)
-                }else{
+                } else {
                     parentActivity.setActionBarTitle("", false)
                 }
             }
@@ -417,7 +420,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 //        )
 
 //        lifecycleScope.launch(Dispatchers.IO) {
-////            withContext(Dispatchers.Main) {
+// //            withContext(Dispatchers.Main) {
 //                while (isActive) {
 //                    val set = transactionsHashes.value
 //                    if (set!!.isNotEmpty()) {
@@ -436,24 +439,25 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 //
 //                    delay(2000)
 //                }
-////            }
+// //            }
 //        }
 
         val optionsMenuButton = binding.ivAttachment
         optionsMenuButton.setOnClickListener {
             val optionsMenu = PopupMenu(requireContext(), optionsMenuButton)
             optionsMenu.menuInflater.inflate(R.menu.contact_chat_attachments, optionsMenu.menu)
-            optionsMenu.setOnMenuItemClickListener(PopupMenu.OnMenuItemClickListener { item ->
-                val contact = contactStore.getContactFromPublicKey(publicKey)
+            optionsMenu.setOnMenuItemClickListener(
+                PopupMenu.OnMenuItemClickListener { item ->
+                    val contact = contactStore.getContactFromPublicKey(publicKey)
 
-                when(item.itemId) {
-                    R.id.actionSendPhotoVideo -> {
-                        val mimeTypes = arrayOf("image/*", "video/*")
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        intent.type = "*/*"
-                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-                        startActivityForResult(Intent.createChooser(intent, "Send Photo or Video"), PICK_IMAGE)
-                    }
+                    when (item.itemId) {
+                        R.id.actionSendPhotoVideo -> {
+                            val mimeTypes = arrayOf("image/*", "video/*")
+                            val intent = Intent(Intent.ACTION_GET_CONTENT)
+                            intent.type = "*/*"
+                            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                            startActivityForResult(Intent.createChooser(intent, "Send Photo or Video"), PICK_IMAGE)
+                        }
 //                    R.id.actionSendFile -> {
 //                        val mimeTypes = arrayOf("application/*", "text/plain")
 //                        val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -461,43 +465,44 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 //                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
 //                        startActivityForResult(Intent.createChooser(intent, "Send File"), PICK_FILE)
 //                    }
-                    R.id.actionSendLocation -> {
-                        getLocation()?.let { location ->
-                            val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                        R.id.actionSendLocation -> {
+                            getLocation()?.let { location ->
+                                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                                val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)
 
-                            var addressLine = "No address found using these coordinates: ${location.latitude} ${location.longitude}"
+                                var addressLine = "No address found using these coordinates: ${location.latitude} ${location.longitude}"
 
-                            try {
-                                addressLine = address[0].getAddressLine(0)
-                            }catch (e: Exception) {
-                                e.printStackTrace()
+                                try {
+                                    addressLine = address[0].getAddressLine(0)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+
+                                peerChatCommunity.sendLocation(location, addressLine, publicKey)
+                                return@OnMenuItemClickListener true
                             }
-
-                            peerChatCommunity.sendLocation(location, addressLine, publicKey)
-                            return@OnMenuItemClickListener true
+                            parentActivity.displaySnackbar(requireContext(), "The location could not be retrieved, please grant permissions or try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                         }
-                        parentActivity.displaySnackbar(requireContext(), "The location could not be retrieved, please grant permissions or try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-                    }
-                    R.id.actionSendContact -> ContactShareDialog(null, contact).show(parentFragmentManager, tag)
-                    R.id.actionSendIdentityAttribute -> IdentityAttributeShareDialog(contact, null).show(parentFragmentManager, tag)
-                    R.id.actionTransferMoney -> {
-                        if(contact != null) {
-                            ExchangeTransferMoneyDialog(contact, null, true).show(parentFragmentManager, tag)
-                        } else {
-                            parentActivity.displaySnackbar(requireContext(), "Please add contact first to transfer money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                        R.id.actionSendContact -> ContactShareDialog(null, contact).show(parentFragmentManager, tag)
+                        R.id.actionSendIdentityAttribute -> IdentityAttributeShareDialog(contact, null).show(parentFragmentManager, tag)
+                        R.id.actionTransferMoney -> {
+                            if (contact != null) {
+                                ExchangeTransferMoneyDialog(contact, null, true).show(parentFragmentManager, tag)
+                            } else {
+                                parentActivity.displaySnackbar(requireContext(), "Please add contact first to transfer money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                            }
                         }
-                    }
-                    R.id.actionRequestMoney -> {
-                        if(contact != null) {
-                            ExchangeTransferMoneyDialog(contact, null, false).show(parentFragmentManager, tag)
-                        } else {
-                            parentActivity.displaySnackbar(requireContext(), "Please add contact first to request money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                        R.id.actionRequestMoney -> {
+                            if (contact != null) {
+                                ExchangeTransferMoneyDialog(contact, null, false).show(parentFragmentManager, tag)
+                            } else {
+                                parentActivity.displaySnackbar(requireContext(), "Please add contact first to request money", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                            }
                         }
                     }
+                    true
                 }
-                true
-            })
+            )
             optionsMenu.show()
         }
 
@@ -519,12 +524,12 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 textView.textSize = 14F
                 textView.text = FILTER_TYPES[position]
 
-                if(position == 0) {
+                if (position == 0) {
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
                 }
 
-                if(position == spinnerFilter.selectedItemPosition) {
+                if (position == spinnerFilter.selectedItemPosition) {
                     textView.background = ColorDrawable(Color.LTGRAY)
                 }
 
@@ -571,7 +576,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
                 isSending.value = false
 
-                if(!messageCountChanged) {
+                if (!messageCountChanged) {
                     scrollToBottom(binding.rvMessages)
                 }
 
@@ -597,7 +602,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.contact_chat_options, menu)
 
-        if(contactStore.getContactFromPublicKey(publicKey) == null) {
+        if (contactStore.getContactFromPublicKey(publicKey) == null) {
             menu.getItem(0).title = "Add contact"
             menu.getItem(1).title = "Remove local conversation"
         }
@@ -606,7 +611,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         var contact = contactStore.getContactFromPublicKey(publicKey)
 
-        when(item.itemId) {
+        when (item.itemId) {
             android.R.id.home -> {
                 onBackPressed()
 
@@ -624,7 +629,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 dialogContactRename.show(requireFragmentManager().beginTransaction(), "dialog")
             }
             R.id.actionRemoveContact -> {
-                if(contact == null) {
+                if (contact == null) {
                     ConfirmDialog("Are u sure to remove the conversation completely?") { dialog ->
                         try {
                             peerChatStore.deleteMessagesOfPublicKey(publicKey)
@@ -632,12 +637,12 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             dialog.dismiss()
 
                             onBackPressed()
-                        }catch(e: Exception) {
+                        } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     }
                         .show(parentFragmentManager, tag)
-                }else{
+                } else {
                     ConfirmDialog("Are u sure you want to remove ${contact.name}?") { dialog ->
                         try {
                             contactStore.deleteContact(contact)
@@ -645,7 +650,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             dialog.dismiss()
 
                             onBackPressed()
-                        }catch(e: Exception) {
+                        } catch (e: Exception) {
                             e.printStackTrace()
                         }
                     }
@@ -658,23 +663,23 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             }
             R.id.actionShareContact -> ContactShareDialog(contact, null).show(parentFragmentManager, tag)
             R.id.actionSearchFilterChat -> {
-                if(binding.clSearchFilter.isVisible) {
+                if (binding.clSearchFilter.isVisible) {
                     binding.clSearchFilter.isVisible = false
                     val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
                     binding.clSearchFilter.startAnimation(slideUpAnimation)
                     binding.etSearchMessage.setText("")
                     binding.ivSearchClearIcon.isVisible = false
                     parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryValueTransfer)
-                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(),R.color.colorPrimaryValueTransfer))
+                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorPrimaryValueTransfer))
                     searchTerm.value = ""
                     filterType.value = FILTER_TYPE_EVERYTHING
                     spinnerFilter.setSelection(0)
-                }else{
+                } else {
                     binding.clSearchFilter.isVisible = true
                     val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
                     binding.clSearchFilter.startAnimation(slideDownAnimation)
                     parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorYellow)
-                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(),R.color.colorYellow))
+                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorYellow))
                 }
             }
         }
@@ -683,12 +688,13 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
     private fun getLocation(): Location? {
         if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-            (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)) {
-                requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION)
-        }else{
+            (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION)
+        } else {
             val locationManager = parentActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-            for(provider in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
+            for (provider in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
                 locationManager.getLastKnownLocation(provider)?.let { location ->
                     return location
                 }
@@ -711,7 +717,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     private fun hideSearchFilterBar() {
         binding.clSearchFilter.isVisible = false
         parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryValueTransfer)
-        parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(),R.color.colorPrimaryValueTransfer))
+        parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorPrimaryValueTransfer))
     }
 
     private fun goToContactFragment(contact: Contact) {
@@ -729,7 +735,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             .setCustomAnimations(0, R.anim.exit_to_left)
             .remove(this)
             .setCustomAnimations(R.anim.enter_from_right, 0)
-            .add(R.id.container, contactChatFragment,
+            .add(
+                R.id.container, contactChatFragment,
                 ValueTransferMainActivity.contactChatFragmentTag
             )
             .commit()
@@ -737,7 +744,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
     private fun onBackPressed() {
         hideSearchFilterBar()
-        parentActivity.setActionBarTitle("",false)
+        parentActivity.setActionBarTitle("", false)
         closeKeyboard(requireContext(), etMessage)
 
         val previousFragment = parentFragmentManager.fragments.filter {
@@ -772,11 +779,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 //                    sendFromUri(uri, TYPE_FILE, fileName)
 //                }
 //            }
-            RENAME_CONTACT -> if(resultCode == Activity.RESULT_OK && data != null)  {
+            RENAME_CONTACT -> if (resultCode == Activity.RESULT_OK && data != null) {
                 val newName = data.data.toString()
                 parentActivity.setActionBarTitle(newName)
             }
-            DIRECTORY_CHOOSER -> if(resultCode == Activity.RESULT_OK && data != null){
+            DIRECTORY_CHOOSER -> if (resultCode == Activity.RESULT_OK && data != null) {
                 data.data?.let { treeUri ->
                     Log.d("VTLOG", "SELECTED TREE URI: ${treeUri.path}")
                 }
@@ -789,7 +796,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     private fun sendFromUri(uri: Uri, type: String, text: String? = "") {
         val file = saveFile(requireContext(), uri)
 
-        when(type) {
+        when (type) {
             TYPE_IMAGE_VIDEO -> peerChatCommunity.sendImage(file, publicKey)
 //            TYPE_FILE -> peerChatCommunity.sendFile(file, text!!, publicKey)
         }
@@ -817,7 +824,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         if (requestCode == LOCATION_PERMISSION) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 parentActivity.displaySnackbar(requireContext(), "Permission has been granted")

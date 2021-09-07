@@ -71,7 +71,7 @@ data class PersonalIdentity(
      */
     var documentNumber: String,
 ) {
-    override fun toString() : String {
+    override fun toString(): String {
         return "$givenNames $surname ($gender) born on $dateOfBirth at $placeOfBirth as $nationality. Personal number $personalNumber, document number $documentNumber"
     }
 }

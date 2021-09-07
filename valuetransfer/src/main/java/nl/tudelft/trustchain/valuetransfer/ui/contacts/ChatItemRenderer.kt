@@ -6,7 +6,6 @@ import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat.view.ivIdenticon
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
@@ -32,7 +31,7 @@ class ChatItemRenderer(
 
         val message = when {
             item.lastMessage?.transactionHash != null -> "Transaction"
-            item.lastMessage?.attachment != null -> when(item.lastMessage?.attachment?.type) {
+            item.lastMessage?.attachment != null -> when (item.lastMessage?.attachment?.type) {
                 MessageAttachment.TYPE_IMAGE -> "Attachment: Photo/Video"
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> "Attachment: Identity Attribute"
                 MessageAttachment.TYPE_LOCATION -> "Attachment: Location"
@@ -45,24 +44,24 @@ class ChatItemRenderer(
         }
 
         val contactTime = when {
-            diff <= 24*60*60*1000 -> timeFormat.format(lastMessageDate)
-            diff <= 7*24*60*60*1000 -> dayOfWeekFormat.format(lastMessageDate)
+            diff <= 24 * 60 * 60 * 1000 -> timeFormat.format(lastMessageDate)
+            diff <= 7 * 24 * 60 * 60 * 1000 -> dayOfWeekFormat.format(lastMessageDate)
             else -> dateFormat.format(lastMessageDate)
         }
 
         val publicKeyString = item.contact.publicKey.toString()
         val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
         val color = getColorByHash(context, publicKeyString)
-        val identicon = generateIdenticon(input, color , resources)
+        val identicon = generateIdenticon(input, color, resources)
         ivIdenticon.setImageBitmap(identicon)
 
-        if(item.lastMessage?.outgoing!!) {
-            if(item.lastMessage?.ack!!) {
+        if (item.lastMessage?.outgoing!!) {
+            if (item.lastMessage?.ack!!) {
                 ivMessageStatusOverview.setImageResource(R.drawable.ic_check_double)
-            }else{
+            } else {
                 ivMessageStatusOverview.setImageResource(R.drawable.ic_check_single)
             }
-        }else {
+        } else {
             ivMessageStatusOverview.isVisible = false
         }
 

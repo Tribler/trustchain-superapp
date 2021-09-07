@@ -62,15 +62,22 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
 
     private val itemsContacts: LiveData<List<Item>> by lazy {
         combine(peerChatStore.getContactsWithLastMessages(), peers) { contacts, peers ->
-            createContactsItems(contacts.filter {
-                it.second?.timestamp != null && contactStore.getContactFromPublicKey(it.first.publicKey) != null
-            }, peers)
+            createContactsItems(
+                contacts.filter {
+                    it.second?.timestamp != null && contactStore.getContactFromPublicKey(it.first.publicKey) != null
+                },
+                peers
+            )
         }.asLiveData()
     }
 
     private var scanIntent: Int = -1
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_wallet_vt, container, false)
     }
 
@@ -101,9 +108,11 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
 
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
-                0, {
+                0,
+                {
                     parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
-                }, {}
+                },
+                {}
             )
         )
 
@@ -163,7 +172,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
             Observer {
-                if(it != binding.tvBalanceAmount.text.toString()) {
+                if (it != binding.tvBalanceAmount.text.toString()) {
                     binding.tvBalanceAmount.text = it
                     binding.pbBalanceUpdating.isVisible = false
                 }
@@ -212,23 +221,23 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             val obj = JSONObject(result)
 
-            when(scanIntent) {
+            when (scanIntent) {
                 TRANSFER_INTENT -> {
-                    if(obj.has("payment_id")) {
+                    if (obj.has("payment_id")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a transfer QR-code instead of buy or sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
                         return
                     }
                     parentActivity.getQRScanController().transferMoney(obj)
                 }
                 BUY_EXCHANGE_INTENT -> {
-                    if(obj.has("amount")) {
+                    if (obj.has("amount")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a buy QR-code instead of sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
                         return
                     }
                     parentActivity.getQRScanController().exchangeMoney(obj, true)
                 }
                 SELL_EXCHANGE_INTENT -> {
-                    if(!obj.has("amount")) {
+                    if (!obj.has("amount")) {
                         parentActivity.displaySnackbar(requireContext(), "Please scan a sell QR-code instead of buy", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
                         return
                     }
@@ -238,7 +247,11 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         }
     }
 
-    private fun observeContactsItems(owner: LifecycleOwner, adapter: ItemAdapter, items: LiveData<List<Item>>) {
+    private fun observeContactsItems(
+        owner: LifecycleOwner,
+        adapter: ItemAdapter,
+        items: LiveData<List<Item>>
+    ) {
         items.observe(
             owner,
             Observer { list ->

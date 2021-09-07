@@ -72,12 +72,12 @@ class ExchangeGatewayDialog(
 
             gateWaySaveConstraintLayout.isVisible = gateway == null
 
-            gateWayName.text = when(gateway != null) {
+            gateWayName.text = when (gateway != null) {
                 true -> gateway.name
                 else -> name
             }
 
-            if(!isCreation) {
+            if (!isCreation) {
                 parentActivity.getBalance(true).observe(
                     this,
                     Observer {
@@ -108,7 +108,8 @@ class ExchangeGatewayDialog(
                         euroTokenCommunity.connectToGateway(publicKey.keyToBin().toHex(), ip, port, paymentID)
                         parentActivity.displaySnackbar(requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
                         bottomSheetDialog.dismiss()
-                    }, 500
+                    },
+                    500
                 )
             }
 
@@ -130,7 +131,8 @@ class ExchangeGatewayDialog(
                             parentActivity.displaySnackbar(requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
                             bottomSheetDialog.dismiss()
                         }
-                    }, 500
+                    },
+                    500
                 )
             }
 

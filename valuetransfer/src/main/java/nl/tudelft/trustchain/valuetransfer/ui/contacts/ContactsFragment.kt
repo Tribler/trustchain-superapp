@@ -31,7 +31,6 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactAddDialog
-import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
 
 class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
@@ -55,11 +54,14 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
     private val chatItems: LiveData<List<Item>> by lazy {
         combine(peerChatStore.getContactsWithLastMessages(), peers) { contacts, peers ->
-            createChatItems(contacts
-                .filter {
-                    it.second?.timestamp != null &&
-                        contactStore.getContactFromPublicKey(it.first.publicKey) != null
-                }, peers)
+            createChatItems(
+                contacts
+                    .filter {
+                        it.second?.timestamp != null &&
+                            contactStore.getContactFromPublicKey(it.first.publicKey) != null
+                    },
+                peers
+            )
         }.asLiveData()
     }
 
@@ -72,7 +74,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     private var hiddenChatsShown = false
     private var searchFilter = ""
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_contacts_vt, container, false)
     }
 
@@ -181,11 +187,15 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    private fun observeHiddenChats(owner: LifecycleOwner, adapter: ItemAdapter, items: LiveData<List<Item>>) {
+    private fun observeHiddenChats(
+        owner: LifecycleOwner,
+        adapter: ItemAdapter,
+        items: LiveData<List<Item>>
+    ) {
         items.observe(
             owner,
             Observer { list ->
-                if(list.isEmpty()) {
+                if (list.isEmpty()) {
                     binding.rvHiddenChats.isVisible = false
                     hiddenChatsShown = false
                 }
@@ -196,7 +206,11 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         )
     }
 
-    private fun observeChats(owner: LifecycleOwner, adapter: ItemAdapter, items: LiveData<List<Item>>) {
+    private fun observeChats(
+        owner: LifecycleOwner,
+        adapter: ItemAdapter,
+        items: LiveData<List<Item>>
+    ) {
         items.observe(
             owner,
             Observer { list ->
@@ -211,9 +225,9 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
             owner,
             Observer {
                 val list = it.filter { item ->
-                    (item as ContactItem).contact.name.contains(searchFilter, ignoreCase = true)
-                        || item.contact.mid.contains(searchFilter, ignoreCase = true)
-                        || item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
+                    (item as ContactItem).contact.name.contains(searchFilter, ignoreCase = true) ||
+                        item.contact.mid.contains(searchFilter, ignoreCase = true) ||
+                        item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
                 }
                 adapter.updateItems(list)
 
@@ -227,8 +241,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         peers: List<Peer>
     ): List<Item> {
         return contacts.filter {
-                it.publicKey != getTrustChainCommunity().myPeer.publicKey
-            }
+            it.publicKey != getTrustChainCommunity().myPeer.publicKey
+        }
             .sortedBy { contact ->
                 contact.name
             }
@@ -251,17 +265,17 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         return messages
             .filter { message ->
                 contacts.none { contact ->
-                    contact.publicKey == if(message.outgoing) message.recipient else message.sender
+                    contact.publicKey == if (message.outgoing) message.recipient else message.sender
                 }
             }
             .sortedByDescending {
                 it.timestamp.time
             }
             .distinctBy {
-                if(it.outgoing) it.recipient else it.sender
+                if (it.outgoing) it.recipient else it.sender
             }
             .map { message ->
-                val publicKey = if(message.outgoing) message.recipient else message.sender
+                val publicKey = if (message.outgoing) message.recipient else message.sender
                 val peer = peers.find { it.publicKey == publicKey }
 
                 ContactItem(
@@ -278,8 +292,8 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         peers: List<Peer>
     ): List<Item> {
         return contacts.filter {
-                it.first.publicKey != getTrustChainCommunity().myPeer.publicKey
-            }
+            it.first.publicKey != getTrustChainCommunity().myPeer.publicKey
+        }
             .sortedByDescending { item ->
                 item.second?.timestamp?.time
             }

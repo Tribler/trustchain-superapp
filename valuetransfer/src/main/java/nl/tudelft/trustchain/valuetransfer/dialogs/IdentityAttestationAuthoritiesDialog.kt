@@ -67,7 +67,7 @@ class IdentityAttestationAuthoritiesDialog(
             )
 
             lifecycleScope.launchWhenCreated {
-                while(isActive) {
+                while (isActive) {
                     loadAuthorities()
                     delay(1000)
                 }
@@ -91,7 +91,7 @@ class IdentityAttestationAuthoritiesDialog(
         val authorities = createAuthoritiesItems(
             attestationCommunity.trustedAuthorityManager.getAuthorities()
         )
-        if(adapterAuthorities.itemCount != authorities.size) {
+        if (adapterAuthorities.itemCount != authorities.size) {
             adapterAuthorities.updateItems(authorities)
         }
     }
@@ -101,20 +101,20 @@ class IdentityAttestationAuthoritiesDialog(
             try {
                 val obj = JSONObject(result)
 
-                if(obj.has("public_key")) {
+                if (obj.has("public_key")) {
                     try {
                         defaultCryptoProvider.keyFromPublicBin(obj.optString("public_key").hexToBytes())
                         val publicKey = obj.optString("public_key")
 
                         parentActivity.getQRScanController().addAuthority(publicKey)
-                    }catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
                     }
-                }else{
+                } else {
                     parentActivity.displaySnackbar(requireContext(), "No public key found in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
             }

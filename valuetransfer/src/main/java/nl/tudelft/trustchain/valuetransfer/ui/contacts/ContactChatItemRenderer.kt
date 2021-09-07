@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
-import android.os.Handler
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -14,13 +13,11 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatItem
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import org.json.JSONObject
@@ -78,9 +75,9 @@ class ContactChatItemRenderer(
         // Date section when item is the first of the data
         val messageDate = item.chatMessage.timestamp
         clDateSection.isVisible = item.shouldShowDate
-        tvDateSection.text = if(yearFormat.format(Date()).equals(yearFormat.format(messageDate))) {
+        tvDateSection.text = if (yearFormat.format(Date()).equals(yearFormat.format(messageDate))) {
             dateFormat.format(messageDate)
-        }else{
+        } else {
             previousYearsDateFormat.format(messageDate)
         }
 
@@ -114,7 +111,7 @@ class ContactChatItemRenderer(
         }
 
         // Show simple chat message
-        if(item.chatMessage.message.isNotBlank() && item.chatMessage.attachment == null && item.chatMessage.transactionHash == null) {
+        if (item.chatMessage.message.isNotBlank() && item.chatMessage.attachment == null && item.chatMessage.transactionHash == null) {
             clChatMessage.isVisible = true
             tvChatMessage.isVisible = true
 
@@ -175,10 +172,10 @@ class ContactChatItemRenderer(
 
                     val input = publicKey.substring(20, publicKey.length).toByteArray()
                     val color = getColorByHash(context, publicKey)
-                    val identicon = generateIdenticon(input, color , resources)
+                    val identicon = generateIdenticon(input, color, resources)
                     ivAttachmentContactIdenticon.setImageBitmap(identicon)
 
-                    if(!item.chatMessage.outgoing) {
+                    if (!item.chatMessage.outgoing) {
                         clAttachmentContactIcon.isVisible = true
                         clAttachmentContact.setOnClickListener {
                             onItemClick(item)
@@ -252,11 +249,11 @@ class ContactChatItemRenderer(
             tvTransactionTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
 
 //            val isReceived = if(item.chatMessage.outgoing) {
-////                val trustChainHelper = parentActivity.getStore(ValueTransferMainActivity.trustChainHelperTag) as TrustChainHelper
-////                val transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
+// //                val trustChainHelper = parentActivity.getStore(ValueTransferMainActivity.trustChainHelperTag) as TrustChainHelper
+// //                val transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
 //
 //                val transaction = transactionRepository.getTransactionWithHash(transactionHash)
-////                val blocks = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey())
+// //                val blocks = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey())
 //
 //                blocks.find { it.linkedBlockId == transaction!!.blockId} != null
 //            }else{
@@ -272,7 +269,7 @@ class ContactChatItemRenderer(
 //            clTransactionResend.isVisible = item.chatMessage.outgoing && !isReceived
 
 //            if (item.chatMessage.outgoing && !isReceived) {
-////                clTransactionResend.isVisible = true
+// //                clTransactionResend.isVisible = true
 //                clTransactionResend.setOnClickListener {
 //                    onItemClick(item)
 //                    clTransactionResend.background = ContextCompat.getDrawable(this.context, R.drawable.pill_rounded_bottom_orange)
@@ -290,20 +287,20 @@ class ContactChatItemRenderer(
             ivTransactionIconOutgoing.isVisible = item.chatMessage.outgoing
 
             tvTransactionTitle.text = if (item.transaction?.transaction?.get("amount") != null) {
-                    val amount = formatBalance((item.transaction.transaction["amount"] as BigInteger).toLong())
+                val amount = formatBalance((item.transaction.transaction["amount"] as BigInteger).toLong())
 
-                    if (item.chatMessage.outgoing) {
-                        "Outgoing transfer of €$amount"
-                    } else {
-                        "Incoming transfer of €$amount"
-                    }
+                if (item.chatMessage.outgoing) {
+                    "Outgoing transfer of €$amount"
                 } else {
-                    if (item.chatMessage.outgoing) {
-                        "Outgoing transfer failed"
-                    } else {
-                        "Unknown incoming transfer, ask to resend transfer"
-                    }
+                    "Incoming transfer of €$amount"
                 }
+            } else {
+                if (item.chatMessage.outgoing) {
+                    "Outgoing transfer failed"
+                } else {
+                    "Unknown incoming transfer, ask to resend transfer"
+                }
+            }
         }
 
         // Position the message or attachments on the left or right side of the view, depending on incoming or outgoing
@@ -315,16 +312,16 @@ class ContactChatItemRenderer(
         constraintSet.connect(flContent.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START)
         constraintSet.connect(flContent.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
 
-        val gravityHorizontal = if(item.chatMessage.outgoing) Gravity.END else Gravity.START
-        val constraintGravity = if(item.chatMessage.outgoing) ConstraintSet.END else ConstraintSet.START
+        val gravityHorizontal = if (item.chatMessage.outgoing) Gravity.END else Gravity.START
+        val constraintGravity = if (item.chatMessage.outgoing) ConstraintSet.END else ConstraintSet.START
 
         llChatItemTimeStatus.gravity = gravityHorizontal
 
         flContent.setPadding(0, flContent.paddingTop, 0, flContent.paddingBottom)
 
-        if(item.chatMessage.outgoing) {
+        if (item.chatMessage.outgoing) {
             flContent.setPadding(100, flContent.paddingTop, flContent.paddingRight, flContent.paddingBottom)
-        }else{
+        } else {
             flContent.setPadding(flContent.paddingLeft, flContent.paddingTop, 100, flContent.paddingBottom)
         }
 

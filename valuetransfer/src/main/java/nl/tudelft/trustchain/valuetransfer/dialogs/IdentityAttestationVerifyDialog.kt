@@ -68,12 +68,15 @@ class IdentityAttestationVerifyDialog(
                     signature,
                     defaultCryptoProvider.keyFromPublicBin(authorityKey)
                 ).let { result ->
-                    Handler().postDelayed({
-                        loadingSpinner.isVisible = false
+                    Handler().postDelayed(
+                        {
+                            loadingSpinner.isVisible = false
 
-                        IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
-                        bottomSheetDialog.dismiss()
-                    }, 1000)
+                            IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
+                            bottomSheetDialog.dismiss()
+                        },
+                        1000
+                    )
                 }
             }
 
@@ -99,9 +102,9 @@ class IdentityAttestationVerificationResultDialog(
             verificationResultValidView.isVisible = isValid
             verificationResultInvalidView.isVisible = !isValid
 
-            val bottomSheetDialog = if(isValid) {
+            val bottomSheetDialog = if (isValid) {
                 BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
-            }else{
+            } else {
                 BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialogRed)
             }
 

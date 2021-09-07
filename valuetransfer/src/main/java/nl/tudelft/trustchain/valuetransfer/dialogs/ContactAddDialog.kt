@@ -70,7 +70,7 @@ class ContactAddDialog(
             }
 
             copyMyPublicKeyView.setOnClickListener {
-                copyToClipboard(requireContext(),myPublicKey.keyToBin().toHex(), "Public key")
+                copyToClipboard(requireContext(), myPublicKey.keyToBin().toHex(), "Public key")
                 parentActivity.displaySnackbar(requireContext(), "Public key has been copied")
             }
 
@@ -125,7 +125,8 @@ class ContactAddDialog(
                             R.color.colorPrimaryValueTransfer
                         )
                     )
-                }, 100
+                },
+                100
             )
 
             bottomSheetDialog
@@ -140,7 +141,7 @@ class ContactAddDialog(
                 this.dismiss()
 
                 (requireActivity() as ValueTransferMainActivity).getQRScanController().addContact(obj)
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
             }

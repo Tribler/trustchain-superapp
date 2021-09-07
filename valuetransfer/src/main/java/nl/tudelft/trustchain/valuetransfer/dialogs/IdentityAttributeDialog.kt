@@ -50,19 +50,23 @@ class IdentityAttributeDialog(
             val saveButton = view.findViewById<Button>(R.id.btnSaveAttribute)
             toggleButton(saveButton, attribute != null)
 
-            attributeNameView.visibility = if(attribute == null) View.GONE else View.VISIBLE
-            attributeNameSpinner.visibility = if(attribute == null) View.VISIBLE else View.GONE
+            attributeNameView.visibility = if (attribute == null) View.GONE else View.VISIBLE
+            attributeNameSpinner.visibility = if (attribute == null) View.VISIBLE else View.GONE
 
-            if(attribute == null) {
-                val attributeNameAdapter = object: ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
-                    override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+            if (attribute == null) {
+                val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
+                    override fun getDropDownView(
+                        position: Int,
+                        convertView: View?,
+                        parent: ViewGroup
+                    ): View {
                         val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                         val params = textView.layoutParams
                         params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
                         textView.layoutParams = params
                         textView.gravity = Gravity.CENTER_VERTICAL
 
-                        if (position == attributeNameSpinner.selectedItemPosition){
+                        if (position == attributeNameSpinner.selectedItemPosition) {
                             textView.background = ColorDrawable(Color.LTGRAY)
                         }
 
@@ -71,17 +75,22 @@ class IdentityAttributeDialog(
                 }
 
                 attributeNameSpinner.adapter = attributeNameAdapter
-                attributeNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+                attributeNameSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                     override fun onNothingSelected(parent: AdapterView<*>?) {
                         selectedName = ""
                     }
 
-                    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>?,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
                         selectedName = unusedAttributes[position]
                         toggleButton(saveButton, selectedName != "" && attributeValueView.text.isNotEmpty())
                     }
                 }
-            }else{
+            } else {
                 attributeNameView.setText(attribute!!.name.toString())
                 attributeValueView.setText(attribute!!.value)
 

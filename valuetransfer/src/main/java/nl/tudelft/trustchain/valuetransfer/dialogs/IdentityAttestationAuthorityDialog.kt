@@ -45,7 +45,7 @@ class IdentityAttestationAuthorityDialog(
 
             addAuthorityButton.setOnClickListener {
                 val authorityManager = attestationCommunity.trustedAuthorityManager
-                when(!authorityManager.contains(authorityKey.keyToHash().toHex())) {
+                when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
                     true -> {
                         authorityManager.addTrustedAuthority(authorityKey)
                         parentActivity.displaySnackbar(requireContext(), "Authority has been added")

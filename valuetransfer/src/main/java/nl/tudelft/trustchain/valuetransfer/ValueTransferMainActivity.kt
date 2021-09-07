@@ -181,10 +181,10 @@ class ValueTransferMainActivity : BaseActivity() {
             }.tag
 
             when (menuItem.itemId) {
-                R.id.walletOverviewFragment -> if(previousTag != walletOverviewFragmentTag) switchFragment(walletOverviewFragment)
-                R.id.identityFragment -> if(previousTag != identityFragmentTag) switchFragment(identityFragment)
-                R.id.exchangeFragment -> if(previousTag != exchangeFragmentTag) switchFragment(exchangeFragment)
-                R.id.contactsFragment -> if(previousTag != contactsFragmentTag) switchFragment(contactsFragment)
+                R.id.walletOverviewFragment -> if (previousTag != walletOverviewFragmentTag) switchFragment(walletOverviewFragment)
+                R.id.identityFragment -> if (previousTag != identityFragmentTag) switchFragment(identityFragment)
+                R.id.exchangeFragment -> if (previousTag != exchangeFragmentTag) switchFragment(exchangeFragment)
+                R.id.contactsFragment -> if (previousTag != contactsFragmentTag) switchFragment(contactsFragment)
                 R.id.qrScanControllerFragment -> {
                     qrScanControllerFragment.initiateScan()
                     return@setOnNavigationItemSelectedListener false
@@ -218,7 +218,7 @@ class ValueTransferMainActivity : BaseActivity() {
             it.isVisible
         }
 
-        when(tag) {
+        when (tag) {
             contactChatFragmentTag -> {
                 val contactChatFragment = ContactChatFragment()
                 contactChatFragment.arguments = args
@@ -226,7 +226,7 @@ class ValueTransferMainActivity : BaseActivity() {
                 fragmentManager.beginTransaction()
                     .setCustomAnimations(0, R.anim.exit_to_left)
                     .hide(previousFragment)
-                    .setCustomAnimations(R.anim.enter_from_right,0)
+                    .setCustomAnimations(R.anim.enter_from_right, 0)
                     .add(R.id.container, contactChatFragment, contactChatFragmentTag)
                     .commit()
             }
@@ -237,7 +237,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Function that returns the fragment using a given tag
      */
     fun getFragmentByTag(tag: String): Fragment? {
-        return when(tag) {
+        return when (tag) {
             walletOverviewFragmentTag -> walletOverviewFragment
             identityFragmentTag -> identityFragment
             exchangeFragmentTag -> exchangeFragment
@@ -261,7 +261,7 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     fun getView(isRoot: Boolean = false): View {
         val root = window.decorView.rootView
-        if(isRoot) {
+        if (isRoot) {
             return root
         }
 
@@ -271,13 +271,20 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Function that displays a snackbar at the top in the requested view with the requested text, type and length
      */
-    fun displaySnackbar(context: Context, text: String, view: View = getView(), type: String = SNACKBAR_TYPE_SUCCESS, isShort: Boolean = true, extraPadding: Boolean = false) {
-        val snackbar = TSnackbar.make(view, text, if(isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG)
+    fun displaySnackbar(
+        context: Context,
+        text: String,
+        view: View = getView(),
+        type: String = SNACKBAR_TYPE_SUCCESS,
+        isShort: Boolean = true,
+        extraPadding: Boolean = false
+    ) {
+        val snackbar = TSnackbar.make(view, text, if (isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG)
         val snackbarView = snackbar.view
 
         snackbar.setActionTextColor(Color.WHITE)
 
-        when(type) {
+        when (type) {
             SNACKBAR_TYPE_SUCCESS -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimaryDarkValueTransfer))
             SNACKBAR_TYPE_WARNING -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorYellow))
             SNACKBAR_TYPE_ERROR -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRed))
@@ -288,8 +295,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
         val density = resources.displayMetrics.density
 
-        if(extraPadding) {
-            snackbarView.setPadding(snackbarView.paddingLeft, (snackbarView.paddingTop+density*40).toInt(), snackbarView.paddingRight, snackbarView.paddingBottom)
+        if (extraPadding) {
+            snackbarView.setPadding(snackbarView.paddingLeft, (snackbarView.paddingTop + density * 40).toInt(), snackbarView.paddingRight, snackbarView.paddingBottom)
         }
 
         snackbar.show()
@@ -299,7 +306,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Programmatically push bottom navigation item using tag
      */
     fun selectBottomNavigationItem(tag: String) {
-        bottomNavigationView.selectedItemId = when(tag) {
+        bottomNavigationView.selectedItemId = when (tag) {
             walletOverviewFragmentTag -> R.id.walletOverviewFragment
             identityFragmentTag -> R.id.identityFragment
             exchangeFragmentTag -> R.id.exchangeFragment
@@ -312,9 +319,9 @@ class ValueTransferMainActivity : BaseActivity() {
      * Change title or subtitle of action bar
      */
     fun setActionBarTitle(title: String?, isTitle: Boolean = true) {
-        if(isTitle) {
+        if (isTitle) {
             supportActionBar!!.title = title
-        }else{
+        } else {
             supportActionBar!!.subtitle = title
         }
     }
@@ -345,7 +352,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Return balance to requested fragment or dialog
      */
     fun getBalance(isVerified: Boolean): MutableLiveData<String> {
-        if(isVerified) {
+        if (isVerified) {
             return verifiedBalance
         }
         return balance
@@ -355,9 +362,9 @@ class ValueTransferMainActivity : BaseActivity() {
      * Enable one-time update of balance for complete app
      */
     fun setBalance(balance: String, isVerified: Boolean) {
-        if(isVerified) {
+        if (isVerified) {
             this.verifiedBalance.postValue(balance)
-        }else{
+        } else {
             this.balance.postValue(balance)
         }
     }
@@ -375,12 +382,31 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * After the attestation request has been successfully completed execute the following
      */
-    private fun attestationRequestCompleteCallbackWrapper(forPeer: Peer, attributeName: String, attestation: WalletAttestation, attributeHash: ByteArray, idFormat: String, fromPeer: Peer?, metaData: String?, signature: ByteArray?) {
+    private fun attestationRequestCompleteCallbackWrapper(
+        forPeer: Peer,
+        attributeName: String,
+        attestation: WalletAttestation,
+        attributeHash: ByteArray,
+        idFormat: String,
+        fromPeer: Peer?,
+        metaData: String?,
+        signature: ByteArray?
+    ) {
         attestationRequestCompleteCallback(forPeer, attributeName, attestation, attributeHash, idFormat, fromPeer, metaData, signature, applicationContext)
     }
 
     @Suppress("UNUSED_PARAMETER")
-    fun attestationRequestCompleteCallback(forPeer: Peer, attributeName: String, attestation: WalletAttestation, attributeHash: ByteArray, idFormat: String, fromPeer: Peer?, metaData: String?, signature: ByteArray?, context: Context) {
+    fun attestationRequestCompleteCallback(
+        forPeer: Peer,
+        attributeName: String,
+        attestation: WalletAttestation,
+        attributeHash: ByteArray,
+        idFormat: String,
+        fromPeer: Peer?,
+        metaData: String?,
+        signature: ByteArray?,
+        context: Context
+    ) {
         if (fromPeer == null) {
             Log.i("VTLOG", "Signed attestation for attribute $attributeName for peer ${forPeer.mid}.")
             Handler(Looper.getMainLooper()).post {
@@ -406,8 +432,8 @@ class ValueTransferMainActivity : BaseActivity() {
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
 
         val input = BlockingDialogManager.getInstance()
-                .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat))
-                ?: throw RuntimeException("User cancelled dialog.")
+            .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat))
+            ?: throw RuntimeException("User cancelled dialog.")
 
         Log.i("VTLOG", "Signing attestation with value $input with format $idFormat.")
 

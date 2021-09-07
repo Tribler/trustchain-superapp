@@ -18,9 +18,7 @@ import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.toHex
@@ -91,7 +89,7 @@ class ExchangeTransferMoneyDialog(
 
             transactionAmountView.addDecimalLimiter()
 
-            if(amount != null) {
+            if (amount != null) {
                 transactionAmount = amount.toLong()
                 transactionAmountView.setText(formatAmount(amount).toString())
             }
@@ -113,7 +111,7 @@ class ExchangeTransferMoneyDialog(
             )
 
             // Select contact from dropdown, or nobody in case of an unspecified request
-            if(recipient == null) {
+            if (recipient == null) {
                 lifecycleScope.launch(Dispatchers.Main) {
                     var contacts: MutableList<Contact> = contactStore.getContacts()
                         .first()
@@ -126,7 +124,7 @@ class ExchangeTransferMoneyDialog(
                         .toMutableList()
 
                     // Add option to select nobody for money request (qrcode only)
-                    if(!isTransfer) {
+                    if (!isTransfer) {
                         contacts.add(
                             0,
                             Contact(
@@ -136,7 +134,7 @@ class ExchangeTransferMoneyDialog(
                         )
                     }
 
-                    if(!isTransfer || (isTransfer && contacts.isNotEmpty())) {
+                    if (!isTransfer || (isTransfer && contacts.isNotEmpty())) {
                         selectedContactView.isVisible = false
 
                         contactAdapter = object : ArrayAdapter<Contact>(
@@ -144,7 +142,11 @@ class ExchangeTransferMoneyDialog(
                             android.R.layout.simple_spinner_item,
                             contacts
                         ) {
-                            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getDropDownView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                                 val params = textView.layoutParams
                                 params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
@@ -172,7 +174,11 @@ class ExchangeTransferMoneyDialog(
                                 return textView
                             }
 
-                            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getView(position, convertView, parent) as TextView
                                 textView.text = contacts[position].name
 
@@ -197,7 +203,7 @@ class ExchangeTransferMoneyDialog(
                             val selected = contacts.indexOf(selectedContact)
                             contactSpinner.setSelection(selected)
                         }
-                    }else{
+                    } else {
                         selectedContactView.isVisible = true
                         contactSpinner.isVisible = false
                     }
@@ -210,7 +216,12 @@ class ExchangeTransferMoneyDialog(
                         }
 
                         // Get selected contact for transfer and request
-                        override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                        override fun onItemSelected(
+                            p0: AdapterView<*>?,
+                            p1: View?,
+                            position: Int,
+                            p3: Long
+                        ) {
                             selectedContact = if (!isTransfer && position == 0) {
                                 null
                             } else {
@@ -221,15 +232,15 @@ class ExchangeTransferMoneyDialog(
                         }
                     }
 
-            // Display the recipients name instead of a spinner when the contact is pre-assigned
-            }else{
+                // Display the recipients name instead of a spinner when the contact is pre-assigned
+            } else {
                 recipientTitleView.text = "Recipient"
 
                 // Check whether the contact is already in my contacts
-                if(contactStore.getContactFromPublicKey(selectedContact!!.publicKey) == null) {
+                if (contactStore.getContactFromPublicKey(selectedContact!!.publicKey) == null) {
                     selectedContactView.text = "${recipient.name} (not a contact)"
                     addNewContactView.isVisible = true
-                }else{
+                } else {
                     selectedContactView.text = contactStore.getContactFromPublicKey(selectedContact!!.publicKey)!!.name
                 }
 
@@ -304,7 +315,8 @@ class ExchangeTransferMoneyDialog(
                                 extraPadding = true
                             )
                         }
-                    }, 500
+                    },
+                    500
                 )
             }
 
@@ -327,7 +339,8 @@ class ExchangeTransferMoneyDialog(
                             isShort = false
                         )
                         bottomSheetDialog.dismiss()
-                    }, 500
+                    },
+                    500
                 )
             }
 
@@ -341,7 +354,7 @@ class ExchangeTransferMoneyDialog(
                 )
 
                 bottomSheetDialog.dismiss()
-                QRCodeDialog("REQUEST MONEY", "Have your friend scan this QR-code", mapToJSON(map).toString()).show(parentFragmentManager,tag)
+                QRCodeDialog("REQUEST MONEY", "Have your friend scan this QR-code", mapToJSON(map).toString()).show(parentFragmentManager, tag)
             }
 
             bottomSheetDialog.setContentView(view)
@@ -357,9 +370,9 @@ class ExchangeTransferMoneyDialog(
 
         transferButton.isVisible = isTransfer
 
-        if(isTransfer) {
+        if (isTransfer) {
             toggleButton(transferButton, nonEmptyContact && nonEmptyAmount)
-        }else{
+        } else {
             // Situation in which money is requested from one person
             requestMoneyContactButton.isVisible = nonEmptyContact
             toggleButton(requestMoneyContactButton, nonEmptyContact && nonEmptyAmount)

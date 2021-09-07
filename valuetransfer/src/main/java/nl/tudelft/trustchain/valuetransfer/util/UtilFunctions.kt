@@ -57,7 +57,7 @@ fun copyToClipboard(context: Context, text: String, label: String) {
     clipboard?.setPrimaryClip(clip)
 }
 
-fun mapToJSON(attributes: Map<String, String?>) : JSONObject {
+fun mapToJSON(attributes: Map<String, String?>): JSONObject {
     val data = JSONObject()
     for ((key, value) in attributes) {
         data.put(key, value)
@@ -71,7 +71,7 @@ fun createBitmap(context: Context, data: String, pColor: Int, bColor: Int): Bitm
 
 fun toggleButton(button: Button, state: Boolean) {
     button.isEnabled = state
-    button.alpha = if(state) 1f else 0.5f
+    button.alpha = if (state) 1f else 0.5f
     button.isClickable = state
 }
 
@@ -142,31 +142,30 @@ fun generateIdenticon(hash: ByteArray, color: Int, resources: Resources, dimensi
     val foregroundColor = Color.argb(100, Color.red(color), Color.green(color), Color.blue(color))
     var identiconBitmap = Bitmap.createBitmap(dimension, dimension, Bitmap.Config.ARGB_8888)
 
-    for(x in 0 until dimension) {
-        for(y in 0 until dimension) {
-            if((hash[if(x < (dimension/2)) x else 4 - x].toInt() shr y and 1) == 1) {
+    for (x in 0 until dimension) {
+        for (y in 0 until dimension) {
+            if ((hash[if (x < (dimension / 2)) x else 4 - x].toInt() shr y and 1) == 1) {
                 identiconBitmap.setPixel(x, y, foregroundColor)
             }
         }
     }
 
     val density = resources.displayMetrics.density
-    val w = (resources.getDimension(R.dimen.identiconWidth)*density).toInt()
-    val h = (resources.getDimension(R.dimen.identiconHeight)*density).toInt()
+    val w = (resources.getDimension(R.dimen.identiconWidth) * density).toInt()
+    val h = (resources.getDimension(R.dimen.identiconHeight) * density).toInt()
 
     return Bitmap.createScaledBitmap(identiconBitmap, w, h, false)
 }
 
 fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
-    val higher = if(first.time >= second.time) first else second
-    val lower = if(first.time < second.time) first else second
+    val higher = if (first.time >= second.time) first else second
+    val lower = if (first.time < second.time) first else second
 
-    val dayCount = (higher.time - lower.time)/(24*60*60*1000)
+    val dayCount = (higher.time - lower.time) / (24 * 60 * 60 * 1000)
 
-    if(days == true) {
+    if (days == true) {
         return dayCount
     }
 
-    return (dayCount/365)
-
+    return (dayCount / 365)
 }

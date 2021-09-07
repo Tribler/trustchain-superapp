@@ -65,7 +65,7 @@ class IdentityDetailsDialog : DialogFragment() {
                 override fun onSlide(bottomSheet: View, slideOffset: Float) {}
             })
 
-            if(!identityStore.hasIdentity()) {
+            if (!identityStore.hasIdentity()) {
                 bottomSheetDialog.setOnKeyListener { _, keyCode, _ ->
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
                         parentActivity.displaySnackbar(requireContext(), "Adding identity cancelled. Without an identity you'll not be able to use this application.", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING, isShort = false)
@@ -121,7 +121,7 @@ class IdentityDetailsDialog : DialogFragment() {
                 editTexts["personalNumber"]!!.setText(identity!!.content.personalNumber.toString())
                 editTexts["documentNumber"]!!.setText(identity!!.content.documentNumber)
 
-                when(identity!!.content.gender) {
+                when (identity!!.content.gender) {
                     "Male" -> {
                         btnMale.isChecked = true
                         btnMale.isCheckable = false
@@ -147,53 +147,60 @@ class IdentityDetailsDialog : DialogFragment() {
                 }
             }
 
-            genderButtonGroup.addOnButtonCheckedListener(MaterialButtonToggleGroup.OnButtonCheckedListener { _, checkedId, _ ->
-                when(checkedId) {
-                    R.id.btnMale -> {
-                        btnMale.setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryDarkValueTransfer
+            genderButtonGroup.addOnButtonCheckedListener(
+                MaterialButtonToggleGroup.OnButtonCheckedListener { _, checkedId, _ ->
+                    when (checkedId) {
+                        R.id.btnMale -> {
+                            btnMale.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryDarkValueTransfer
+                                )
                             )
-                        )
-                        btnMale.setTextColor(Color.WHITE)
-                        btnFemale.setBackgroundColor(Color.WHITE)
-                        btnFemale.setTextColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryValueTransfer
+                            btnMale.setTextColor(Color.WHITE)
+                            btnFemale.setBackgroundColor(Color.WHITE)
+                            btnFemale.setTextColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryValueTransfer
+                                )
                             )
-                        )
-                        btnMale.isCheckable = false
-                        btnFemale.isCheckable = true
+                            btnMale.isCheckable = false
+                            btnFemale.isCheckable = true
+                        }
+                        R.id.btnFemale -> {
+                            btnFemale.setBackgroundColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryDarkValueTransfer
+                                )
+                            )
+                            btnFemale.setTextColor(Color.WHITE)
+                            btnMale.setBackgroundColor(Color.WHITE)
+                            btnMale.setTextColor(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.colorPrimaryValueTransfer
+                                )
+                            )
+                            btnFemale.isCheckable = false
+                            btnMale.isCheckable = true
+                        }
                     }
-                    R.id.btnFemale -> {
-                        btnFemale.setBackgroundColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryDarkValueTransfer
-                            )
-                        )
-                        btnFemale.setTextColor(Color.WHITE)
-                        btnMale.setBackgroundColor(Color.WHITE)
-                        btnMale.setTextColor(
-                            ContextCompat.getColor(
-                                requireContext(),
-                                R.color.colorPrimaryValueTransfer
-                            )
-                        )
-                        btnFemale.isCheckable = false
-                        btnMale.isCheckable = true
-                    }
+                    toggleButton(saveButton, validateEditTexts(editTexts))
                 }
-                toggleButton(saveButton, validateEditTexts(editTexts))
-            })
+            )
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             val dateSetListener = object : DatePickerDialog.OnDateSetListener {
-                override fun onDateSet(view: DatePicker, year: Int, monthOfYear: Int, dayOfMonth: Int) {
+                override fun onDateSet(
+                    view: DatePicker,
+                    year: Int,
+                    monthOfYear: Int,
+                    dayOfMonth: Int
+                ) {
                     cal.set(Calendar.YEAR, year)
                     cal.set(Calendar.MONTH, monthOfYear)
                     cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
@@ -205,8 +212,13 @@ class IdentityDetailsDialog : DialogFragment() {
 
             editTexts["dateOfBirth"]!!.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View) {
-                    DatePickerDialog(requireContext(), R.style.DatePickerDialogTheme, dateSetListener, cal.get(Calendar.YEAR), cal.get(
-                        Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+                    DatePickerDialog(
+                        requireContext(), R.style.DatePickerDialogTheme, dateSetListener, cal.get(Calendar.YEAR),
+                        cal.get(
+                            Calendar.MONTH
+                        ),
+                        cal.get(Calendar.DAY_OF_MONTH)
+                    ).show()
                 }
             })
 
@@ -216,7 +228,7 @@ class IdentityDetailsDialog : DialogFragment() {
                 val placeOfBirth = editTexts["placeOfBirth"]!!.text.toString()
                 val dateOfBirth = (dateOfBirthFormat.parse(editTexts["dateOfBirth"]!!.text.toString()) as Date).time
                 val nationality = editTexts["nationality"]!!.text.toString()
-                val gender = when(genderButtonGroup.checkedButtonId) {
+                val gender = when (genderButtonGroup.checkedButtonId) {
                     R.id.btnMale -> "Male"
                     R.id.btnFemale -> "Female"
                     else -> "Neutral"
@@ -231,7 +243,7 @@ class IdentityDetailsDialog : DialogFragment() {
                         bottomSheetDialog.dismiss()
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully added. Application re-initialized.")
                         parentActivity.reloadActivity()
-                    } catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be added", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                     }
@@ -251,7 +263,7 @@ class IdentityDetailsDialog : DialogFragment() {
                         parentActivity.invalidateOptionsMenu()
 
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully updated")
-                    } catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be updated", view = parentActivity.getView(true), type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                     }

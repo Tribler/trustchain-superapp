@@ -49,11 +49,14 @@ class IdentityAttributeItemRenderer(
         view.clAttributeOptions.startAnimation(pushInAnimation)
         isExpanded[item.attribute.name] = true
 
-        Handler().postDelayed({
-            if(isExpanded[item.attribute.name] == true) {
-                contractOptions(view, item)
-            }
-        }, 5000)
+        Handler().postDelayed(
+            {
+                if (isExpanded[item.attribute.name] == true) {
+                    contractOptions(view, item)
+                }
+            },
+            5000
+        )
     }
 
     private fun contractOptions(view: View, item: IdentityAttributeItem) {

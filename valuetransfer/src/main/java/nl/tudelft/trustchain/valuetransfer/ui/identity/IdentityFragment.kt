@@ -67,7 +67,11 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return inflater.inflate(R.layout.fragment_identity, container, false)
     }
 
@@ -90,15 +94,16 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
                 1,
-                 { identity ->
-                     val map = mapOf(
-                         "public_key" to identity.publicKey.keyToBin().toHex(),
-                         "name" to identity.content.givenNames
-                     )
+                { identity ->
+                    val map = mapOf(
+                        "public_key" to identity.publicKey.keyToBin().toHex(),
+                        "name" to identity.content.givenNames
+                    )
 
-                     QRCodeDialog("MY PUBLIC KEY", "Show the QR-code to the other party", mapToJSON(map).toString())
-                         .show(parentFragmentManager, tag)
-                }, { identity ->
+                    QRCodeDialog("MY PUBLIC KEY", "Show the QR-code to the other party", mapToJSON(map).toString())
+                        .show(parentFragmentManager, tag)
+                },
+                { identity ->
                     copyToClipboard(requireContext(), identity.publicKey.keyToBin().toHex(), "Public Key")
                     parentActivity.displaySnackbar(requireContext(), "Public key copied to clipboard")
                 }
@@ -116,16 +121,17 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                             dialog.dismiss()
 
                             parentActivity.displaySnackbar(requireContext(), "Attribute succesfully deleted")
-                        }catch(e: Exception) {
+                        } catch (e: Exception) {
                             e.printStackTrace()
                             parentActivity.displaySnackbar(requireContext(), "Attribute couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                         }
                     }
                         .show(parentFragmentManager, tag)
-
-                }, { attribute ->
+                },
+                { attribute ->
                     IdentityAttributeDialog(attribute).show(parentFragmentManager, tag)
-                }, { attribute ->
+                },
+                { attribute ->
                     IdentityAttributeShareDialog(null, attribute).show(parentFragmentManager, tag)
                 }
             )
@@ -136,7 +142,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                 {
                     val blob = it.attestationBlob
 
-                    if(blob.signature != null) {
+                    if (blob.signature != null) {
                         val manager = SchemaManager()
                         manager.registerDefaultSchemas()
                         val attestation = manager.deserialize(blob.blob, blob.idFormat)
@@ -153,7 +159,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
                         QRCodeDialog("Attestation for ${parsedMetadata.optString("attribute", "UNKNOWN")}", "${parsedMetadata.optString("attribute", "UNKNOWN")}: ${parsedMetadata.optString("value", "UNKNOWN")}", mapToJSON(map).toString())
                             .show(parentFragmentManager, tag)
-                    }else{
+                    } else {
                         deleteAttestation(it)
                     }
                 }
@@ -168,7 +174,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             try {
                 attestationCommunity.database.deleteAttestationByHash(attestation.attestationBlob.attestationHash)
                 updateAttestations()
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Attestation couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             } finally {
@@ -235,7 +241,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         val oldCount = adapterAttestations.itemCount
         val itemsAttestations = attestationCommunity.database.getAllAttestations()
 
-        if(oldCount != itemsAttestations.size) {
+        if (oldCount != itemsAttestations.size) {
             adapterAttestations.updateItems(
                 createAttestationItems(itemsAttestations)
             )
@@ -266,7 +272,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.actionEditIdentity -> {
                 IdentityDetailsDialog().show(parentFragmentManager, tag)
             }
@@ -280,13 +286,13 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                         }
 
                         val identity = identityStore.getIdentity()
-                        if(identity != null) {
+                        if (identity != null) {
                             identityStore.deleteIdentity(identity)
                         }
 
                         parentActivity.reloadActivity()
                         parentActivity.displaySnackbar(requireContext(), "Identity successfully deleted. Application re-initialized.", isShort = false)
-                    }catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Identity couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                     }
@@ -306,7 +312,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         inflater.inflate(R.menu.identity_attestations_options, popupMenu.menu)
         popupMenu.show()
 
-        popupMenu.setOnMenuItemClickListener{ item ->
+        popupMenu.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.actionAddAttestation -> addAttestation()
                 R.id.actionAddAuthority -> addAuthority()
@@ -320,23 +326,23 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
             try {
                 val obj = JSONObject(result)
 
-                if(obj.has("public_key")) {
+                if (obj.has("public_key")) {
                     try {
                         defaultCryptoProvider.keyFromPublicBin(obj.optString("public_key").hexToBytes())
                         val publicKey = obj.optString("public_key")
 
-                        when(scanIntent) {
+                        when (scanIntent) {
                             ADD_ATTESTATION_INTENT -> parentActivity.getQRScanController().addAttestation(publicKey)
                             ADD_AUTHORITY_INTENT -> parentActivity.getQRScanController().addAuthority(publicKey)
                         }
-                    }catch(e: Exception) {
+                    } catch (e: Exception) {
                         e.printStackTrace()
                         parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                     }
-                }else{
+                } else {
                     parentActivity.displaySnackbar(requireContext(), "No public key found in QR-code", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 }
-            }catch(e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             }

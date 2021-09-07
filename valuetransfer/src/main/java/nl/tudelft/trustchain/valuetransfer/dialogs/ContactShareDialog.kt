@@ -76,14 +76,14 @@ class ContactShareDialog(
                     }
                     .toMutableList()
 
-                if(contacts.size > 1) {
+                if (contacts.size > 1) {
                     contacts.add(0, Contact("No contact selected", trustChainCommunity.myPeer.publicKey))
 
                     // Adapter for selecting the recipient
-                    if(recipient != null) {
+                    if (recipient != null) {
                         spinnerRecipient.isVisible = false
                         selectedRecipientView.text = recipient.name
-                    }else {
+                    } else {
                         selectedRecipientView.isVisible = false
                         recipientAdapter = spinnerAdapter(contacts, spinnerRecipient, true)
                         spinnerRecipient.adapter = recipientAdapter
@@ -97,10 +97,10 @@ class ContactShareDialog(
                     }
 
                     // Adapter for selecting the contact to share
-                    if(contact != null) {
+                    if (contact != null) {
                         spinnerContact.isVisible = false
                         selectedContactView.text = contact.name
-                    }else {
+                    } else {
                         selectedContactView.isVisible = false
                         contactAdapter = spinnerAdapter(contacts, spinnerContact, false)
                         spinnerContact.adapter = contactAdapter
@@ -112,15 +112,15 @@ class ContactShareDialog(
 
                         spinnerSelection(spinnerContact, false)
                     }
-                }else{
+                } else {
                     spinnerContact.isVisible = false
                     spinnerRecipient.isVisible = false
 
-                    if(selectedRecipient != null) {
+                    if (selectedRecipient != null) {
                         selectedRecipientView.text = selectedRecipient!!.name
                     }
 
-                    if(selectedContact != null) {
+                    if (selectedContact != null) {
                         selectedContactView.text = selectedContact!!.name
                     }
                 }
@@ -135,7 +135,7 @@ class ContactShareDialog(
                     parentActivity.displaySnackbar(requireContext(), "Contact shared to ${selectedContact!!.name}")
 
                     bottomSheetDialog.dismiss()
-                }catch(e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                     parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 }
@@ -155,14 +155,14 @@ class ContactShareDialog(
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                if(isRecipient) {
-                    selectedRecipient = if(position == 0) {
+                if (isRecipient) {
+                    selectedRecipient = if (position == 0) {
                         null
                     } else {
                         spinner.selectedItem as Contact
                     }
-                }else{
-                    selectedContact = if(position == 0) {
+                } else {
+                    selectedContact = if (position == 0) {
                         null
                     } else {
                         spinner.selectedItem as Contact
@@ -175,13 +175,13 @@ class ContactShareDialog(
     }
 
     private fun spinnerAdapter(list: MutableList<Contact>, spinner: Spinner, isRecipient: Boolean): ArrayAdapter<Contact> {
-        val contacts = if(spinner.selectedItemPosition == 0) {
-                list
-            }else {
-                list.filter {
-                    it != if (isRecipient) selectedContact else selectedRecipient
-                }
+        val contacts = if (spinner.selectedItemPosition == 0) {
+            list
+        } else {
+            list.filter {
+                it != if (isRecipient) selectedContact else selectedRecipient
             }
+        }
 
         return object : ArrayAdapter<Contact>(requireContext(), android.R.layout.simple_spinner_item, contacts) {
             override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -193,12 +193,12 @@ class ContactShareDialog(
 
                 textView.text = contacts[position].name
 
-                if(position == 0) {
+                if (position == 0) {
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
                 }
 
-                if(position == spinner.selectedItemPosition) {
+                if (position == spinner.selectedItemPosition) {
                     textView.background = ColorDrawable(Color.LTGRAY)
                 }
 
@@ -210,7 +210,7 @@ class ContactShareDialog(
 
                 textView.text = contacts[position].name
 
-                if(position == 0) {
+                if (position == 0) {
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
                 }

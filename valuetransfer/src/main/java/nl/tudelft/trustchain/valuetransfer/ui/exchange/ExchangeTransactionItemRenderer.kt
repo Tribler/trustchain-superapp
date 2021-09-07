@@ -59,9 +59,9 @@ class ExchangeTransactionItemRenderer(
             TransactionRepository.BLOCK_TYPE_TRANSFER -> {
                 val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
 
-                transactionType.text = if(outgoing) {
+                transactionType.text = if (outgoing) {
                     "Outgoing transfer to ${contact?.name ?: "unknown contact"}"
-                }else{
+                } else {
                     "Incoming transfer from ${contact?.name ?: "unknown contact"}"
                 }
 
@@ -74,15 +74,15 @@ class ExchangeTransactionItemRenderer(
         transactionDate.text = dateFormat.format(item.transaction.timestamp)
 
         val map = item.transaction.block.transaction.toMap()
-        if(map.containsKey("amount")) {
+        if (map.containsKey("amount")) {
             currencyAmount.text = formatBalance((map["amount"] as BigInteger).toLong())
-        }else{
+        } else {
             currencyAmount.text = "-"
         }
 
         blockStatus.text = ""
 
-        when(item.status) {
+        when (item.status) {
             ExchangeTransactionItem.BlockStatus.SELF_SIGNED -> {
                 blockStatus.text = "Self-Signed"
                 blockStatusColorSelfSigned.isVisible = true
@@ -108,7 +108,8 @@ class ExchangeTransactionItemRenderer(
             Handler().postDelayed(
                 Runnable {
                     onSignClick(item.transaction.block)
-                }, 2000
+                },
+                2000
             )
         }
 
@@ -116,7 +117,7 @@ class ExchangeTransactionItemRenderer(
 
         transactionSenderReceiverTitle.text = when {
             outgoing -> "Receiver"
-                else -> "Sender"
+            else -> "Sender"
         }
 
         transactionSenderReceiverText.text = item.transaction.sender.keyToBin().toHex()

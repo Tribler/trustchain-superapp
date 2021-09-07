@@ -27,7 +27,6 @@ class AttestationItemRenderer(
             ivAttestationQRButton.isVisible = true
             ivAttestationDelete.isVisible = false
 
-
             ivAttestationQRButton.setOnClickListener {
                 onClickAction(item)
             }

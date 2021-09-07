@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.peerchat.community
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.location.Location
-import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -249,7 +248,7 @@ class PeerChatCommunity(
 
         // Request attachment
         if (chatMessage.attachment != null) {
-            when(chatMessage.attachment.type) {
+            when (chatMessage.attachment.type) {
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
                 MessageAttachment.TYPE_CONTACT -> return
                 MessageAttachment.TYPE_LOCATION -> return

@@ -7,7 +7,6 @@ import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
 
-
 class ConfirmDialog(
     private val title: String,
     private val callback: ((BottomSheetDialog) -> Unit)

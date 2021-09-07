@@ -80,8 +80,8 @@ class IdentityAttributeShareDialog(
                 identityAttributes = identityStore.getAllAttributes().first().toList()
 
                 // If the user has no identity attributes yet
-                if(identityAttributes.isNotEmpty()) {
-                    if(identityAttribute == null) {
+                if (identityAttributes.isNotEmpty()) {
+                    if (identityAttribute == null) {
                         selectedAttributeView.isVisible = false
 
                         attributeAdapter = object : ArrayAdapter<IdentityAttribute>(
@@ -89,7 +89,11 @@ class IdentityAttributeShareDialog(
                             android.R.layout.simple_spinner_item,
                             identityAttributes
                         ) {
-                            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getDropDownView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                                 val params = textView.layoutParams
                                 params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
@@ -106,7 +110,11 @@ class IdentityAttributeShareDialog(
                                 return textView
                             }
 
-                            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getView(position, convertView, parent) as TextView
                                 textView.text = identityAttributes[position].name
 
@@ -123,7 +131,12 @@ class IdentityAttributeShareDialog(
                                 }
 
                                 // Get selected contact for transfer and request
-                                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                                override fun onItemSelected(
+                                    p0: AdapterView<*>?,
+                                    p1: View?,
+                                    position: Int,
+                                    p3: Long
+                                ) {
                                     selectedAttribute = attributeSpinner.selectedItem as IdentityAttribute
 
                                     toggleButton(shareAttributeButton, selectedContact != null && selectedAttribute != null)
@@ -139,7 +152,7 @@ class IdentityAttributeShareDialog(
                                 selectedAttribute = identityAttributes[0]
                             }
                         }
-                    }else{
+                    } else {
                         attributeTitleView.text = "Selected attribute"
                         attributeSpinner.isVisible = false
                         selectedAttributeView.text = selectedAttribute!!.name
@@ -159,7 +172,7 @@ class IdentityAttributeShareDialog(
                     .toList()
 
                 if (contacts.isNotEmpty()) {
-                    if(recipient == null) {
+                    if (recipient == null) {
                         selectedContactView.isVisible = false
 
                         contactAdapter = object : ArrayAdapter<Contact>(
@@ -167,7 +180,11 @@ class IdentityAttributeShareDialog(
                             android.R.layout.simple_spinner_item,
                             contacts
                         ) {
-                            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getDropDownView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                                 val params = textView.layoutParams
                                 params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
@@ -184,7 +201,11 @@ class IdentityAttributeShareDialog(
                                 return textView
                             }
 
-                            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            override fun getView(
+                                position: Int,
+                                convertView: View?,
+                                parent: ViewGroup
+                            ): View {
                                 val textView: TextView = super.getView(position, convertView, parent) as TextView
                                 textView.text = contacts[position].name
 
@@ -200,7 +221,12 @@ class IdentityAttributeShareDialog(
                                 }
 
                                 // Get selected contact for transfer and request
-                                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
+                                override fun onItemSelected(
+                                    p0: AdapterView<*>?,
+                                    p1: View?,
+                                    position: Int,
+                                    p3: Long
+                                ) {
                                     selectedContact = contactSpinner.selectedItem as Contact
 
                                     toggleButton(shareAttributeButton, selectedContact != null && selectedAttribute != null)
@@ -212,7 +238,7 @@ class IdentityAttributeShareDialog(
                             val selected = contacts.indexOf(selectedContact)
                             contactSpinner.setSelection(selected)
                         }
-                    }else{
+                    } else {
                         recipientTitleView.text = "Selected recipient"
                         contactSpinner.isVisible = false
                         selectedContactView.text = selectedContact!!.name
@@ -228,12 +254,12 @@ class IdentityAttributeShareDialog(
 
                     peerChatCommunity.sendIdentityAttribute(serializedAttribute, selectedContact!!.publicKey)
 
-                    if(identityAttribute != null) {
+                    if (identityAttribute != null) {
                         parentActivity.displaySnackbar(requireContext(), "Identity attribute shared to ${selectedContact!!.name}")
                     }
 
                     bottomSheetDialog.dismiss()
-                } catch(e: Exception) {
+                } catch (e: Exception) {
                     e.printStackTrace()
                     parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                 }

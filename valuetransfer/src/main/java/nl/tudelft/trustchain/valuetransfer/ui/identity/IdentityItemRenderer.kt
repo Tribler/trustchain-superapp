@@ -23,7 +23,7 @@ class IdentityItemRenderer(
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy")
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
-        if(layoutType == 0) {
+        if (layoutType == 0) {
             tvIdentityPublicKey.text = item.identity.publicKey.keyToBin().toHex()
 
             val content = item.identity.content
@@ -32,14 +32,13 @@ class IdentityItemRenderer(
             val publicKeyString = item.identity.publicKey.toString()
             val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
             val color = getColorByHash(context, publicKeyString)
-            val identicon = generateIdenticon(input, color , resources)
+            val identicon = generateIdenticon(input, color, resources)
             ivIdenticon.setImageBitmap(identicon)
 
             view.setOnClickListener {
                 onQRButtonClick(item.identity)
             }
-
-        }else if(layoutType == 1) {
+        } else if (layoutType == 1) {
             val content = item.identity.content
 
             tvGivenNamesSurnameValue.text = "${content.givenNames} ${content.surname}"
@@ -52,7 +51,7 @@ class IdentityItemRenderer(
 
             tvPublicKeyValue.setOnClickListener {
 
-                when(tvPublicKeyValue.lineCount) {
+                when (tvPublicKeyValue.lineCount) {
                     2 -> tvPublicKeyValue.maxLines = 6
                     else -> tvPublicKeyValue.maxLines = 2
                 }

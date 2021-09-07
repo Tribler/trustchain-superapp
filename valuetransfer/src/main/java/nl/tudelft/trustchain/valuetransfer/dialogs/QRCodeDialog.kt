@@ -53,7 +53,8 @@ class QRCodeDialog(
                             R.color.colorPrimaryValueTransfer
                         )
                     )
-                }, 100
+                },
+                100
             )
 
             bottomSheetDialog

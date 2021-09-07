@@ -66,9 +66,9 @@ class ContactRenameDialog(
 
                 bottomSheetDialog.dismiss()
 
-                if(contact.name.isEmpty()) {
+                if (contact.name.isEmpty()) {
                     "Contact has been added"
-                }else{
+                } else {
                     "Contact has been renamed"
                 }.let { text ->
                     parentActivity.displaySnackbar(requireContext(), text)
