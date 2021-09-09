@@ -38,7 +38,7 @@ class IdentityAttestationVerifyDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            attestationCommunity = parentActivity.getCommunity()!!
 
             val verificationSummaryView = view.findViewById<ConstraintLayout>(R.id.clVerificationSummary)
             val attestationFromValue = view.findViewById<EditText>(R.id.etAttestationFromValue)

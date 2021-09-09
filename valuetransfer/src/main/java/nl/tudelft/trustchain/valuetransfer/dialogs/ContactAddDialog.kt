@@ -42,7 +42,7 @@ class ContactAddDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+            contactStore = parentActivity.getStore()!!
             dialogView = view
 
             val myPublicKeyTextView = view.findViewById<EditText>(R.id.etMyPublicKey)

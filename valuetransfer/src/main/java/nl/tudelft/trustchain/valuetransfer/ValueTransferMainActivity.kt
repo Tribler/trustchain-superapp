@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.Menu
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -20,6 +21,7 @@ import com.androidadvance.topsnackbar.TSnackbar
 import com.jaredrummler.blockingdialog.BlockingDialogManager
 import kotlinx.android.synthetic.main.main_activity_vt.*
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
@@ -42,6 +44,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
+import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
 
@@ -55,24 +58,13 @@ class ValueTransferMainActivity : BaseActivity() {
     private val identityFragment = IdentityFragment()
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
+    private val settingsFragment = SettingsFragment()
     private val qrScanControllerFragment = QRScanController()
 
     private val fragmentManager = supportFragmentManager
 
-    private lateinit var communities: Map<String, Community>
-    private lateinit var trustChainCommunity: TrustChainCommunity
-    private lateinit var identityCommunity: IdentityCommunity
-    private lateinit var peerChatCommunity: PeerChatCommunity
-    private lateinit var euroTokenCommunity: EuroTokenCommunity
-    private lateinit var attestationCommunity: AttestationCommunity
-
-    private lateinit var stores: Map<String, Any>
-    private lateinit var identityStore: IdentityStore
-    private lateinit var peerChatStore: PeerChatStore
-    private lateinit var gatewayStore: GatewayStore
-    private lateinit var contactStore: ContactStore
-    private lateinit var transactionRepository: TransactionRepository
-    private lateinit var trustChainHelper: TrustChainHelper
+    var communities: MutableMap<Class<out Community>, Community> = mutableMapOf()
+    var stores: MutableMap<Any, Any> = mutableMapOf()
 
     private var balance = MutableLiveData("0.00")
     private var verifiedBalance = MutableLiveData("0.00")
@@ -86,39 +78,23 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Initialize all communities and (database) stores and repo's
          */
-        trustChainCommunity = IPv8Android.getInstance().getOverlay()!!
-        identityCommunity = IPv8Android.getInstance().getOverlay()!!
-        peerChatCommunity = IPv8Android.getInstance().getOverlay()!!
-        euroTokenCommunity = IPv8Android.getInstance().getOverlay()!!
-        attestationCommunity = IPv8Android.getInstance().getOverlay()!!
+        communities[TrustChainCommunity::class.java] = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
+        communities[IdentityCommunity::class.java] = IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!
+        communities[PeerChatCommunity::class.java] = IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!
+        communities[EuroTokenCommunity::class.java] = IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!
+        communities[AttestationCommunity::class.java] = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
 
-        communities = mapOf(
-            trustChainCommunityTag to trustChainCommunity,
-            identityCommunityTag to identityCommunity,
-            peerChatCommunityTag to peerChatCommunity,
-            euroTokenCommunityTag to euroTokenCommunity,
-            attestationCommunityTag to attestationCommunity
-        )
-
-        identityStore = IdentityStore.getInstance(applicationContext)
-        peerChatStore = PeerChatStore.getInstance(applicationContext)
-        gatewayStore = GatewayStore.getInstance(applicationContext)
-        contactStore = ContactStore.getInstance(applicationContext)
-        transactionRepository = TransactionRepository(trustChainCommunity, gatewayStore)
-        trustChainHelper = TrustChainHelper(trustChainCommunity)
-
-        stores = mapOf(
-            identityStoreTag to identityStore,
-            peerChatStoreTag to peerChatStore,
-            gatewayStoreTag to gatewayStore,
-            contactStoreTag to contactStore,
-            transactionRepositoryTag to transactionRepository,
-            trustChainHelperTag to trustChainHelper,
-        )
+        stores[IdentityStore::class.java] = IdentityStore.getInstance(applicationContext)
+        stores[PeerChatStore::class.java] = PeerChatStore.getInstance(applicationContext)
+        stores[GatewayStore::class.java] = GatewayStore.getInstance(applicationContext)
+        stores[ContactStore::class.java] = ContactStore.getInstance(applicationContext)
+        stores[TransactionRepository::class.java] = TransactionRepository(getCommunity()!!, getStore()!!)
+        stores[TrustChainHelper::class.java] = TrustChainHelper(getCommunity()!!)
 
         /**
          * Create database tables if not exist
          */
+        val identityCommunity = getCommunity<IdentityCommunity>()!!
         identityCommunity.createIdentitiesTable()
         identityCommunity.createAttributesTable()
 
@@ -130,33 +106,36 @@ class ValueTransferMainActivity : BaseActivity() {
             .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
             .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
             .add(R.id.container, qrScanControllerFragment, qrScanControllerFragmentTag).hide(qrScanControllerFragment)
+            .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
             .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).commit()
 
-        initiateListeners()
+        /**
+         * Create listeners for bottom navigation view
+         */
+        bottomNavigationViewListeners()
 
+        /**
+         * Attestation community callbacks and register own key as trusted authority
+         */
+        val attestationCommunity = getCommunity<AttestationCommunity>()!!
         attestationCommunity.setAttestationRequestCallback(::attestationRequestCallback)
         attestationCommunity.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
         attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
-
-        // Register own key as trusted authority.
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
-
-        // Background color for rootview instead of white background
-        getView(true).setBackgroundColor(ContextCompat.getColor(applicationContext, R.color.colorPrimaryValueTransfer))
     }
 
     /**
      * Return a community
      */
-    fun getCommunity(communityTag: String): Community {
-        return communities[communityTag]!!
+    inline fun <reified T : Community> getCommunity(): T? {
+        return communities[T::class.java]!! as? T
     }
 
     /**
      * Returns a store
      */
-    fun getStore(storeTag: String): Any {
-        return stores[storeTag]!!
+    inline fun <reified T> getStore(): T? {
+        return stores[T::class.java] as? T
     }
 
     /**
@@ -169,9 +148,16 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
+     * Fix menus shown on wrong fragments
+     */
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        return false
+    }
+
+    /**
      * Define bottom navigation view listeners
      */
-    private fun initiateListeners() {
+    private fun bottomNavigationViewListeners() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             val previousTag = fragmentManager.fragments.first {
                 it.isVisible
@@ -227,6 +213,15 @@ class ValueTransferMainActivity : BaseActivity() {
                     .add(R.id.container, contactChatFragment, contactChatFragmentTag)
                     .commit()
             }
+            settingsFragmentTag -> {
+                fragmentManager.beginTransaction()
+                    .setCustomAnimations(0, R.anim.exit_to_left)
+                    .hide(previousFragment)
+                    .setCustomAnimations(R.anim.enter_from_right, 0)
+                    .show(settingsFragment)
+                    .commit()
+                settingsFragment.onResume()
+            }
         }
     }
 
@@ -239,6 +234,7 @@ class ValueTransferMainActivity : BaseActivity() {
             identityFragmentTag -> identityFragment
             exchangeFragmentTag -> exchangeFragment
             contactsFragmentTag -> contactsFragment
+            settingsFragmentTag -> settingsFragment
             contactChatFragmentTag -> fragmentManager.findFragmentByTag(tag)
             else -> null
         }
@@ -453,6 +449,7 @@ class ValueTransferMainActivity : BaseActivity() {
         const val contactsFragmentTag = "contacts_fragment"
         const val qrScanControllerFragmentTag = "qrscancontroller_fragment"
         const val contactChatFragmentTag = "contact_chat_fragment"
+        const val settingsFragmentTag = "settings_fragment"
 
         const val trustChainCommunityTag = "trustchain_community"
         const val identityCommunityTag = "identity_community"

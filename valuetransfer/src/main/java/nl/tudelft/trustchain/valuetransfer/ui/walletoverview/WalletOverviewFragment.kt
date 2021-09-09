@@ -98,11 +98,11 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
-        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-        identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
-        peerChatStore = parentActivity.getStore(ValueTransferMainActivity.peerChatStoreTag) as PeerChatStore
-        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+        identityCommunity = parentActivity.getCommunity()!!
+        peerChatCommunity = parentActivity.getCommunity()!!
+        identityStore = parentActivity.getStore()!!
+        peerChatStore = parentActivity.getStore()!!
+        contactStore = parentActivity.getStore()!!
 
         // IDENTITY
 

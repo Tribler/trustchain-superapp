@@ -46,7 +46,7 @@ class IdentityAttestationAuthoritiesDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            attestationCommunity = parentActivity.getCommunity()!!
             dialogView = view
 
             val authoritiesRecyclerView = view.findViewById<RecyclerView>(R.id.rvAuthorities)

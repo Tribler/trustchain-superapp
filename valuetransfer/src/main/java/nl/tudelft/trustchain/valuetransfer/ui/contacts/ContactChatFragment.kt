@@ -53,6 +53,7 @@ import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.peerchat.util.saveFile
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsChatBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
@@ -160,11 +161,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-        peerChatStore = parentActivity.getStore(ValueTransferMainActivity.peerChatStoreTag) as PeerChatStore
-        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
-        transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
-        trustChainHelper = parentActivity.getStore(ValueTransferMainActivity.trustChainHelperTag) as TrustChainHelper
+        peerChatCommunity = parentActivity.getCommunity()!!
+        peerChatStore = parentActivity.getStore()!!
+        contactStore = parentActivity.getStore()!!
+        transactionRepository = parentActivity.getStore()!!
+        trustChainHelper = parentActivity.getStore()!!
 
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(

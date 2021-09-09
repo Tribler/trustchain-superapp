@@ -38,8 +38,8 @@ class IdentityDetailsDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             parentActivity = requireActivity() as ValueTransferMainActivity
-            identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
-            identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
+            identityCommunity = parentActivity.getCommunity()!!
+            identityStore = parentActivity.getStore()!!
 
             identity = identityStore.getIdentity()
 

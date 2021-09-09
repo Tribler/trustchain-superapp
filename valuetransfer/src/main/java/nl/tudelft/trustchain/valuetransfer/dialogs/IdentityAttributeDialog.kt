@@ -39,8 +39,8 @@ class IdentityAttributeDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
-            identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
+            identityCommunity = parentActivity.getCommunity()!!
+            identityStore = parentActivity.getStore()!!
 
             val unusedAttributes = identityCommunity.getUnusedAttributeNames()
 

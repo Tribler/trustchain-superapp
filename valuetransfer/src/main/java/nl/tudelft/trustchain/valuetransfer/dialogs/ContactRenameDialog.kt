@@ -45,7 +45,7 @@ class ContactRenameDialog(
             val saveContactNameButton = view.findViewById<Button>(R.id.btnSaveContactName)
 
             parentActivity = (requireActivity() as ValueTransferMainActivity)
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+            contactStore = parentActivity.getStore()!!
 
             contactNameView.setText(contact.name)
 

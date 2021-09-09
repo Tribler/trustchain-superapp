@@ -79,7 +79,7 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
+        transactionRepository = parentActivity.getStore()!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

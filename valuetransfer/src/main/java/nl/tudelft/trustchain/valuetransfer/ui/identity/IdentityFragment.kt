@@ -87,9 +87,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
-        attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
-        identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
+        identityCommunity = parentActivity.getCommunity()!!
+        attestationCommunity = parentActivity.getCommunity()!!
+        identityStore = parentActivity.getStore()!!
 
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(

@@ -40,8 +40,8 @@ class IdentityAttestationRequestDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            trustChainCommunity = parentActivity.getCommunity()!!
+            attestationCommunity = parentActivity.getCommunity()!!
 
             val attributeTypeSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeType)
             val attributeNameView = view.findViewById<EditText>(R.id.etAttributeNameValue)

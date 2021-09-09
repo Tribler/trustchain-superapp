@@ -86,9 +86,9 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-        peerChatStore = parentActivity.getStore(ValueTransferMainActivity.peerChatStoreTag) as PeerChatStore
-        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+        peerChatCommunity = parentActivity.getCommunity()!!
+        peerChatStore = parentActivity.getStore()!!
+        contactStore = parentActivity.getStore()!!
 
         hiddenChatsAdapter.registerRenderer(
             ChatItemRenderer {

@@ -54,9 +54,9 @@ class ContactShareDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+            trustChainCommunity = parentActivity.getCommunity()!!
+            peerChatCommunity = parentActivity.getCommunity()!!
+            contactStore = parentActivity.getStore()!!
             dialogView = view
 
             val spinnerRecipient = view.findViewById<Spinner>(R.id.spinnerSelectRecipient)

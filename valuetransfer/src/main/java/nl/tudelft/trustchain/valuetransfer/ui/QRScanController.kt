@@ -30,9 +30,9 @@ class QRScanController : BaseFragment() {
         super.onCreate(savedInstanceState)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
-        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-        attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
-        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
+        peerChatCommunity = parentActivity.getCommunity()!!
+        attestationCommunity = parentActivity.getCommunity()!!
+        contactStore = parentActivity.getStore()!!
     }
 
     private fun checkRequiredVariables(variables: List<String>, data: JSONObject): Boolean {

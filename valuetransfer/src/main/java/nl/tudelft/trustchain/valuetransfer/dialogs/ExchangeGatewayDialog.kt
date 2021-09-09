@@ -48,10 +48,10 @@ class ExchangeGatewayDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            euroTokenCommunity = parentActivity.getCommunity(ValueTransferMainActivity.euroTokenCommunityTag) as EuroTokenCommunity
-            gatewayStore = parentActivity.getStore(ValueTransferMainActivity.gatewayStoreTag) as GatewayStore
-            transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
+            trustChainCommunity = parentActivity.getCommunity()!!
+            euroTokenCommunity = parentActivity.getCommunity()!!
+            gatewayStore = parentActivity.getStore()!!
+            transactionRepository = parentActivity.getStore()!!
 
             val gateWayName = view.findViewById<TextView>(R.id.tvGatewayName)
             val gateWayPublicKey = view.findViewById<TextView>(R.id.tvGatewayPublicKey)

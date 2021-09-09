@@ -65,10 +65,10 @@ class ExchangeTransferMoneyDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
-            transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
+            trustChainCommunity = parentActivity.getCommunity()!!
+            peerChatCommunity = parentActivity.getCommunity()!!
+            contactStore = parentActivity.getStore()!!
+            transactionRepository = parentActivity.getStore()!!
 
             val contactSpinner = view.findViewById<Spinner>(R.id.spinnerContact)
             val selectedContactView = view.findViewById<TextView>(R.id.tvSelectedContact)

@@ -32,7 +32,7 @@ class IdentityAttestationAuthorityDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            attestationCommunity = parentActivity.getCommunity()!!
             dialogView = view
 
             val authorityAddressValue = view.findViewById<EditText>(R.id.etAuthorityAddressValue)
