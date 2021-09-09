@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="identiconWidth">30dp</dimen>
+    <dimen name="identiconHeight">30dp</dimen>
+    <dimen name="chatContentPadding">25dp</dimen>
+    <dimen name="textViewHeight">40dp</dimen>
+</resources>

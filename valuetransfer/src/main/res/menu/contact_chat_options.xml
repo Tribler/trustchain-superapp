@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/actionEditContactName"
+        android:title="Rename Contact" />
+    <item
+        android:id="@+id/actionRemoveContact"
+        android:title="Remove Contact" />
+    <item
+        android:id="@+id/actionCopyPublicKey"
+        android:title="Copy Public Key" />
+    <item
+        android:id="@+id/actionShareContact"
+        android:title="Share Contact" />
+    <item
+        android:id="@+id/actionSearchFilterChat"
+        android:icon="@drawable/ic_search_filter"
+        android:title="Search/Filter Chat"
+        app:showAsAction="always"/>
+
+</menu>

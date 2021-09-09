@@ -12,6 +12,7 @@ buildscript {
         google()
         mavenCentral()
     }
+
     dependencies {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'
     }
@@ -121,6 +122,7 @@ dependencies {
     implementation project(':eurotoken')
     implementation project(':ig-ssi')
     implementation project(':liquidity-pool')
+    implementation project(':valuetransfer')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }

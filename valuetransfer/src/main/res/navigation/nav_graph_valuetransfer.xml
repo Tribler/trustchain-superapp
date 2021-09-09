@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_valuetransfer"
+    app:startDestination="@id/walletOverviewFragment">
+
+    <fragment
+        android:id="@+id/walletOverviewFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment"
+        android:label="Wallet"
+        tools:layout="@layout/fragment_wallet_vt" />
+        <action
+            android:id="@+id/action_identityOverview_to_identityView"
+            app:destination="@id/identityFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+        <action
+            android:id="@+id/action_walletOverviewFragment_to_contactChatFragment"
+            app:destination="@+id/contactChatFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+    <fragment
+        android:id="@+id/identityFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment"
+        android:label="Identity"
+        tools:layout="@layout/fragment_identity" />
+    <fragment
+        android:id="@+id/qrScanControllerFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.QRScanController"
+        android:label="Identity"
+        tools:layout="@layout/fragment_identity" />
+    <action
+        android:id="@+id/action_identityFragment_to_walletOverViewFragment"
+        app:destination="@id/walletOverviewFragment"
+        app:enterAnim="@anim/fragment_open_enter"
+        app:exitAnim="@anim/fragment_open_exit"
+        app:popEnterAnim="@anim/fragment_close_enter"
+        app:popExitAnim="@anim/fragment_close_exit" />
+
+    <fragment
+        android:id="@+id/contactsFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment"
+        android:label="Contacts"
+        tools:layout="@layout/fragment_contacts_vt" />
+
+        <action
+            android:id="@+id/action_chatsFragment_to_contactChatFragment"
+            app:destination="@+id/contactChatFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+    <fragment
+        android:id="@+id/contactChatFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment"
+        tools:layout="@layout/fragment_contacts_chat"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:label="{name}">
+        <argument android:name="name" />
+        <argument android:name="public_key" />
+        <argument android:name="parent_tag" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/exchangeFragment"
+        android:name="nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment"
+        android:label="Exchange"
+        tools:layout="@layout/fragment_exchange_vt" />
+
+</navigation>
