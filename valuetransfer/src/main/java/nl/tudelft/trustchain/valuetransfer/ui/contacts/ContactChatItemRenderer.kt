@@ -248,40 +248,11 @@ class ContactChatItemRenderer(
             clTransaction.setBackgroundResource(backgroundResource)
             tvTransactionTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
 
-//            val isReceived = if(item.chatMessage.outgoing) {
-// //                val trustChainHelper = parentActivity.getStore(ValueTransferMainActivity.trustChainHelperTag) as TrustChainHelper
-// //                val transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
-//
-//                val transaction = transactionRepository.getTransactionWithHash(transactionHash)
-// //                val blocks = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey())
-//
-//                blocks.find { it.linkedBlockId == transaction!!.blockId} != null
-//            }else{
-//                false
-//            }
-
             if (item.chatMessage.message.isNotEmpty()) {
                 tvTransactionMessage.isVisible = true
                 tvTransactionMessage.text = item.chatMessage.message
                 tvTransactionMessage.setTextColor(ContextCompat.getColor(this.context, textColor))
             }
-
-//            clTransactionResend.isVisible = item.chatMessage.outgoing && !isReceived
-
-//            if (item.chatMessage.outgoing && !isReceived) {
-// //                clTransactionResend.isVisible = true
-//                clTransactionResend.setOnClickListener {
-//                    onItemClick(item)
-//                    clTransactionResend.background = ContextCompat.getDrawable(this.context, R.drawable.pill_rounded_bottom_orange)
-//                    tvResendTransaction.text = "Trying to resend..."
-//                    Handler().postDelayed(
-//                        Runnable {
-//                            clTransactionResend.background = ContextCompat.getDrawable(this.context, R.drawable.pill_rounded_bottom_red)
-//                            tvResendTransaction.text = "Resend Transaction"
-//                        }, 10000
-//                    )
-//                }
-//            }
 
             ivTransactionIconIncoming.isVisible = !item.chatMessage.outgoing
             ivTransactionIconOutgoing.isVisible = item.chatMessage.outgoing

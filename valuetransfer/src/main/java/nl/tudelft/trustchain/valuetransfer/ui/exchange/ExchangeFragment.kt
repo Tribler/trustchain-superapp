@@ -235,8 +235,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
 
         adapterTransactions.updateItems(items)
         binding.rvTransactions.setItemViewCacheSize(items.size)
-//        binding.tvBalanceAmount.text = parentActivity.getBalance(false)
-//        binding.tvBalanceVerifiedAmount.text = parentActivity.getBalance(true)
         binding.pbBalanceUpdating.isVisible = false
         binding.pbLoadingSpinner.isVisible = false
         binding.ivReloadTransactions.isVisible = true

@@ -77,9 +77,6 @@ class ValueTransferMainActivity : BaseActivity() {
     private var balance = MutableLiveData("0.00")
     private var verifiedBalance = MutableLiveData("0.00")
 
-//    private var balance: String = "0.00"
-//    private var verifiedBalance: String = "0.00"
-
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

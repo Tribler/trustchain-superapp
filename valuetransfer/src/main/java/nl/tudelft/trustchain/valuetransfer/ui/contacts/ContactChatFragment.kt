@@ -78,20 +78,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
     private val itemsMessages: LiveData<List<Item>> by lazy {
         combine(peerChatStore.getAllByPublicKey(publicKey), limitedMessageCount.asFlow(), searchTerm.asFlow(), filterType.asFlow()) { messages, _, _, _ ->
-            Log.d("VTLOG", "TRIGGERED")
-//            var transactionHashSet = mutableSetOf<ByteArray>()
-
             val filteredMessages = messages.filter { item ->
                 val hasMessage = item.message.isNotEmpty()
                 val hasAttachment = item.attachment != null
                 val hasTransaction = item.transactionHash != null
                 val messageContainsTerm = item.message.contains(searchTerm.value.toString(), ignoreCase = true)
-
-//                if(hasTransaction && isReceived && !messageTransactionsSet.contains(item.transactionHash!!)) {
-//                    messageTransactionsSet.remove(item.transactionHash!!)
-//                }else if(hasTransaction && !isReceived && messageTransactionsSet.contains(item.transactionHash!!)) {
-//                    messageTransactionsSet.add(item.transactionHash!!)
-//                }
 
                 fun attachmentTypeOf(type: String): Boolean {
                     return item.attachment!!.type == type
@@ -101,7 +92,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     FILTER_TYPE_MESSAGE -> hasMessage && !hasAttachment && !hasTransaction && messageContainsTerm
                     FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
                     FILTER_TYPE_PHOTO_VIDEO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
-//                    FILTER_TYPE_FILE -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_FILE) && messageContainsTerm
                     FILTER_TYPE_LOCATION -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_LOCATION)
                     FILTER_TYPE_CONTACT -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT)
                     FILTER_TYPE_IDENTITY_ATTRIBUTE -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE)
@@ -111,18 +101,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
             totalMessages = filteredMessages.size
             val limitMessages = filteredMessages.takeLast(limitedMessageCount.value?.toInt()!!)
-
-//            limitMessages.forEach { item ->
-//                if(item.transactionHash != null && item.outgoing) {
-//                    transactionHashSet.add(item.transactionHash!!)
-//                }
-//            }
-//
-//            if(transactionsHashes.value!!.isEmpty() && transactionHashSet.isNotEmpty()) {
-//                confirmedTransactions.postValue(transactionHashSet)
-//            }
-//
-//            transactionsHashes.postValue(transactionHashSet)
 
             createMessagesItems(limitMessages)
         }.asLiveData()
@@ -157,75 +135,14 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     private var searchTerm = MutableLiveData("")
     private var filterType = MutableLiveData(FILTER_TYPE_EVERYTHING)
 
-    // Remember file and filename for sending
-    private lateinit var selectedFile: File
-    private lateinit var originalFileName: String
-
     private var isSending = MutableLiveData(false)
-
-    // Update when an transaction changes status
-//    private var transactionsHashes = MutableLiveData(mutableSetOf<ByteArray>())
-//    private var unconfirmedTransactions = MutableLiveData(mutableSetOf<ByteArray>())
-//    private var confirmedTransactions = MutableLiveData(mutableSetOf<ByteArray>())
-//    private var transactionsReceived = MutableLiveData(mutableMapOf<ByteArray,Boolean>())
-//    private var unconfirmedTransactions = MutableLiveData(0)
-//    private var shouldUpdate = MutableLiveData("UPDATE")
-//    private var transactionMessages = MutableLiveData(mutableSetOf<ByteArray>())
 
     init {
         setHasOptionsMenu(true)
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
-//                val latestBlockCount = blocks.size
                 blocks = trustChainHelper.getChainByUser(trustchain.getMyPublicKey())
-
-//                if(blocks.size != latestBlockCount) {
-//                    shouldUpdate.postValue("UPDATE")
-//                }
-                delay(2000)
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-            while (isActive) {
-//                if(transactionsHashes.value!!.isNotEmpty()) {
-// //                    val unconfirmed = unconfirmedTransactions.value!!
-//                    val confirmed = confirmedTransactions.value!!
-// //                    val transactionsReceivedMap = transactionsReceived.value
-// //                    Log.d("VTLOG", "NUMBER OF HASHES: ${transactionsReceivedMap!!.size}")
-//                    transactionsHashes.value!!.forEach { transactionHash ->
-//                        Log.d("VTLOG", "T: $transactionHash")
-//                        val transaction = transactionRepository.getTransactionWithHash(transactionHash)
-//                        if(blocks.find { it.linkedBlockId == transaction!!.blockId } != null) {
-//                            Log.d("VTLOG", "IS CONFIRMED")
-// //                            unconfirmed.remove(transactionHash)
-//                            confirmed.add(transactionHash)
-//                        }else{
-//                            Log.d("VTLOG", "IS UNCONFIRMED")
-// //                            unconfirmed.add(transactionHash)
-//                            confirmed.remove(transactionHash)
-//                        }
-//                    }
-//
-// //                    Log.d("VTLOG", transactionsReceivedMap.toString())
-// //                    Log.d("VTLOG", "${transactionsReceivedMap.size} ${transactionsReceived.value!!.size}")
-//
-// //                    if(transactionsReceivedMap != transactionsReceived.value) {
-// //                        Log.d("VTLOG", "UPDATING HASHSET")
-// //                    Log.d("VTLOG", "UNCONFIRMED COUNT: ${unconfirmed.size} ${unconfirmedTransactions.value!!.size}")
-// //                    if(unconfirmed != unconfirmedTransactions.value) {
-// //                        unconfirmedTransactions.postValue(unconfirmed)
-// //                    }
-//
-//                    Log.d("VTLOG", "CONFIRMED COUNT: ${confirmed.size} ${confirmedTransactions.value!!.size}")
-//                    if(confirmed != confirmedTransactions.value) {
-//                        confirmedTransactions.postValue(confirmed)
-//                    }
-// //                        transactionsReceived.postValue(transactionsReceivedMap)
-// //                    }
-//                }
-
                 delay(2000)
             }
         }
@@ -265,12 +182,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                                     parentActivity.displaySnackbar(requireContext(), "File does not exists (yet)", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
                                 }
                             }
-//                            MessageAttachment.TYPE_FILE -> {
-//                                selectedFile = attachment.getFile(requireContext())
-//                                originalFileName = it.chatMessage.message
-//
-//                                val extension = originalFileName.split(".")[1]
-//                            }
                             MessageAttachment.TYPE_CONTACT -> {
                                 val contact = Contact.deserialize(attachment.content, 0).first
 
@@ -338,11 +249,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                         val key = defaultCryptoProvider.keyFromPublicBin(transaction!!.linkPublicKey)
                         val peer = Peer(key)
                         transactionRepository.trustChainCommunity.sendBlock(transaction, peer)
-//                        Handler().postDelayed(
-//                            Runnable {
-//                                triggerMessages.postValue(true)
-//                            }, 5000
-//                        )
                     }
                 },
                 {
@@ -401,47 +307,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             }
         )
 
-//        lifecycleScope.launchWhenCreated {
-//            while(isActive) {
-//                val set = transactionMessages.value
-//
-//                delay(2000)
-//            }
-//        }
-//        transactionMessages.observe(
-//            viewLifecycleOwner,
-//            Observer { map ->
-//                map.filter {
-//                    !it.value
-//                }.forEach { entry ->
-//
-//                }
-//            }
-//        )
-
-//        lifecycleScope.launch(Dispatchers.IO) {
-// //            withContext(Dispatchers.Main) {
-//                while (isActive) {
-//                    val set = transactionsHashes.value
-//                    if (set!!.isNotEmpty()) {
-//                        val previousCount = unconfirmedTransactions.value
-//                        val nextCount = set.filter { hash ->
-//                            val transaction = transactionRepository.getTransactionWithHash(hash)
-//                            blocks.find { it.blockId == transaction!!.linkedBlockId } != null
-//                        }.size
-//
-//                        if (previousCount != nextCount) {
-//                            shouldUpdate.postValue(0)
-//                        }
-//
-//                        unconfirmedTransactions.postValue(nextCount)
-//                    }
-//
-//                    delay(2000)
-//                }
-// //            }
-//        }
-
         val optionsMenuButton = binding.ivAttachment
         optionsMenuButton.setOnClickListener {
             val optionsMenu = PopupMenu(requireContext(), optionsMenuButton)
@@ -458,13 +323,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                             intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
                             startActivityForResult(Intent.createChooser(intent, "Send Photo or Video"), PICK_IMAGE)
                         }
-//                    R.id.actionSendFile -> {
-//                        val mimeTypes = arrayOf("application/*", "text/plain")
-//                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-//                        intent.type = "*/*"
-//                        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-//                        startActivityForResult(Intent.createChooser(intent, "Send File"), PICK_FILE)
-//                    }
                         R.id.actionSendLocation -> {
                             getLocation()?.let { location ->
                                 val geocoder = Geocoder(requireContext(), Locale.getDefault())
@@ -768,17 +626,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     sendFromUri(uri, TYPE_IMAGE_VIDEO)
                 }
             }
-//            PICK_FILE -> if(resultCode == Activity.RESULT_OK && data != null) {
-//                val uri = data.data
-//                if(uri != null) {
-//                    val fileName = if(uri.path != null) {
-//                        File(uri.path!!).name
-//                    }else{
-//                        "unknown"
-//                    }
-//                    sendFromUri(uri, TYPE_FILE, fileName)
-//                }
-//            }
             RENAME_CONTACT -> if (resultCode == Activity.RESULT_OK && data != null) {
                 val newName = data.data.toString()
                 parentActivity.setActionBarTitle(newName)
@@ -798,22 +645,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
         when (type) {
             TYPE_IMAGE_VIDEO -> peerChatCommunity.sendImage(file, publicKey)
-//            TYPE_FILE -> peerChatCommunity.sendFile(file, text!!, publicKey)
         }
     }
 
     private fun createMessagesItems(messages: List<ChatMessage>): List<Item> {
-//        val receivedTransactions = transactionsReceived.value!!
-//        val unconfirmed = unconfirmedTransactions.value!!
-//        val confirmed = confirmedTransactions.value!!
-//        val hashes = transactionsHashes.value!!
-
-//        if(receivedTransactions.isEmpty()) true else chatMessage.outgoing && chatMessage.transactionHash != null && receivedTransactions.containsKey(chatMessage.transactionHash) && receivedTransactions[chatMessage.transactionHash] == true
-
         return messages.mapIndexed { index, chatMessage ->
-//            val isConfirmed = confirmed.contains(chatMessage.transactionHash)
-//            val isUnconfirmed = unconfirmed.contains(chatMessage.transactionHash)
-//            Log.d("VTLOG", "CONF: $isConfirmed")
             ContactChatItem(
                 chatMessage,
                 transactionRepository.getTransactionWithHash(chatMessage.transactionHash),
@@ -840,19 +676,16 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
     companion object {
         const val PICK_IMAGE = 1
-//        const val PICK_FILE = 2
         const val DIRECTORY_CHOOSER = 4
 
         const val RENAME_CONTACT = 10
 
         const val TYPE_IMAGE_VIDEO = "image_video"
-//        const val TYPE_FILE = "file"
 
         const val FILTER_TYPE_EVERYTHING = "Everything"
         const val FILTER_TYPE_MESSAGE = "Message"
         const val FILTER_TYPE_TRANSACTION = "Transaction"
         const val FILTER_TYPE_PHOTO_VIDEO = "Photo/Video"
-//        const val FILTER_TYPE_FILE = "File"
         const val FILTER_TYPE_LOCATION = "Location"
         const val FILTER_TYPE_CONTACT = "Contact"
         const val FILTER_TYPE_IDENTITY_ATTRIBUTE = "Identity Attribute"

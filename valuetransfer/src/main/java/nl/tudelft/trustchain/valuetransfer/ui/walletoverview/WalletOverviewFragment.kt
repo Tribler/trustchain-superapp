@@ -162,12 +162,6 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         }
 
         // EXCHANGE
-//        lifecycleScope.launchWhenCreated {
-//            while(isActive) {
-//                binding.tvBalanceAmount.text = parentActivity.getBalance(true)
-//                delay(1500)
-//            }
-//        }
 
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
