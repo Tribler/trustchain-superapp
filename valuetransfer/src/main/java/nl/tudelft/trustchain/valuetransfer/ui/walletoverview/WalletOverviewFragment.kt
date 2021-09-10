@@ -2,9 +2,7 @@ package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -96,6 +94,8 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
         identityCommunity = parentActivity.getCommunity()!!
@@ -209,6 +209,21 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         binding.ivGoToContacts.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.wallet_overview_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.actionSettings -> {
+                parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

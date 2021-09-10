@@ -451,19 +451,6 @@ class ValueTransferMainActivity : BaseActivity() {
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
 
-        const val trustChainCommunityTag = "trustchain_community"
-        const val identityCommunityTag = "identity_community"
-        const val peerChatCommunityTag = "peerchat_community"
-        const val euroTokenCommunityTag = "eurotoken_community"
-        const val attestationCommunityTag = "attestation_community"
-
-        const val identityStoreTag = "identity_store"
-        const val peerChatStoreTag = "peerchat_store"
-        const val gatewayStoreTag = "gateway_store"
-        const val contactStoreTag = "contact_store"
-        const val transactionRepositoryTag = "transaction_repository"
-        const val trustChainHelperTag = "trustchain_helper"
-
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"
         const val SNACKBAR_TYPE_ERROR = "error"

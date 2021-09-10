@@ -459,6 +459,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
         inflater.inflate(R.menu.contact_chat_options, menu)
 
         if (contactStore.getContactFromPublicKey(publicKey) == null) {

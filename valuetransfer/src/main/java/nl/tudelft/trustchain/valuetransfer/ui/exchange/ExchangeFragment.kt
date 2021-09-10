@@ -36,8 +36,21 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
     private var scanIntent: Int = -1
     private var transactionForceUpdate: Boolean = false
 
-    init {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_exchange_vt, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         setHasOptionsMenu(true)
+
+        parentActivity = requireActivity() as ValueTransferMainActivity
+        transactionRepository = parentActivity.getStore()!!
 
         adapterTransactions.registerRenderer(
             ExchangeTransactionItemRenderer {
@@ -58,28 +71,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                 delay(1000)
             }
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_exchange_vt, container, false)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        parentActivity.setActionBarTitle("Exchange")
-        parentActivity.toggleActionBar(false)
-        parentActivity.toggleBottomNavigation(true)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        parentActivity = requireActivity() as ValueTransferMainActivity
-        transactionRepository = parentActivity.getStore()!!
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -156,8 +147,16 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+        parentActivity.setActionBarTitle("Exchange")
+        parentActivity.toggleActionBar(false)
+        parentActivity.toggleBottomNavigation(true)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
         inflater.inflate(R.menu.exchange_options, menu)
     }
 
@@ -168,16 +167,6 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                 true
             }
             else -> false
-        }
-    }
-
-    private fun verifyBalance() {
-        val gateway = transactionRepository.getGatewayPeer()
-        if (gateway != null) {
-            transactionRepository.sendCheckpointProposal(gateway)
-            parentActivity.displaySnackbar(requireContext(), "Balance verification succeeded")
-        } else {
-            parentActivity.displaySnackbar(requireContext(), "Balance verification failed", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
         }
     }
 
@@ -239,6 +228,16 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         binding.pbLoadingSpinner.isVisible = false
         binding.ivReloadTransactions.isVisible = true
         binding.tvShowMoreTransactions.isVisible = items.size >= transactionShowCount
+    }
+
+    private fun verifyBalance() {
+        val gateway = transactionRepository.getGatewayPeer()
+        if (gateway != null) {
+            transactionRepository.sendCheckpointProposal(gateway)
+            parentActivity.displaySnackbar(requireContext(), "Balance verification succeeded")
+        } else {
+            parentActivity.displaySnackbar(requireContext(), "Balance verification failed", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+        }
     }
 
     private fun createTransactionItems(transactions: List<Transaction>): List<Item> {

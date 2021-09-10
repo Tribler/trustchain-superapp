@@ -63,10 +63,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
     private var scanIntent: Int = -1
 
-    init {
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -85,6 +81,8 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
 
         parentActivity = requireActivity() as ValueTransferMainActivity
         identityCommunity = parentActivity.getCommunity()!!
@@ -169,22 +167,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         )
     }
 
-    private fun deleteAttestation(attestation: AttestationItem) {
-        ConfirmDialog("Are you sure to delete this attestation?") { dialog ->
-            try {
-                attestationCommunity.database.deleteAttestationByHash(attestation.attestationBlob.attestationHash)
-                updateAttestations()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                parentActivity.displaySnackbar(requireContext(), "Attestation couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-            } finally {
-                dialog.dismiss()
-                parentActivity.displaySnackbar(requireContext(), "Attestation succesfully deleted")
-            }
-        }
-            .show(parentFragmentManager, tag)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -231,43 +213,9 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         }
     }
 
-    private fun toggleVisibility() {
-        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
-        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
-        binding.ivAddAttribute.isVisible = identityCommunity.getUnusedAttributeNames().isNotEmpty()
-    }
-
-    private fun updateAttestations() {
-        val oldCount = adapterAttestations.itemCount
-        val itemsAttestations = attestationCommunity.database.getAllAttestations()
-
-        if (oldCount != itemsAttestations.size) {
-            adapterAttestations.updateItems(
-                createAttestationItems(itemsAttestations)
-            )
-
-            binding.rvAttestations.setItemViewCacheSize(itemsAttestations.size)
-        }
-
-        toggleVisibility()
-    }
-
-    private fun addAttribute() {
-        IdentityAttributeDialog(null).show(parentFragmentManager, tag)
-    }
-
-    private fun addAttestation() {
-        scanIntent = ADD_ATTESTATION_INTENT
-        QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan public key of signee to add attestation", vertical = true)
-    }
-
-    private fun addAuthority() {
-        scanIntent = ADD_AUTHORITY_INTENT
-        QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan public key of signee to add as authority", vertical = true)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
         inflater.inflate(R.menu.identity_options, menu)
     }
 
@@ -306,21 +254,6 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun showPopup(view: View) {
-        val popupMenu = PopupMenu(requireContext(), view, Gravity.END)
-        val inflater = popupMenu.menuInflater
-        inflater.inflate(R.menu.identity_attestations_options, popupMenu.menu)
-        popupMenu.show()
-
-        popupMenu.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.actionAddAttestation -> addAttestation()
-                R.id.actionAddAuthority -> addAuthority()
-            }
-            true
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
             try {
@@ -346,6 +279,72 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
                 e.printStackTrace()
                 parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
             }
+        }
+    }
+
+    private fun deleteAttestation(attestation: AttestationItem) {
+        ConfirmDialog("Are you sure to delete this attestation?") { dialog ->
+            try {
+                attestationCommunity.database.deleteAttestationByHash(attestation.attestationBlob.attestationHash)
+                updateAttestations()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                parentActivity.displaySnackbar(requireContext(), "Attestation couldn't be deleted", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+            } finally {
+                dialog.dismiss()
+                parentActivity.displaySnackbar(requireContext(), "Attestation succesfully deleted")
+            }
+        }
+            .show(parentFragmentManager, tag)
+    }
+
+    private fun toggleVisibility() {
+        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
+        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
+        binding.ivAddAttribute.isVisible = identityCommunity.getUnusedAttributeNames().isNotEmpty()
+    }
+
+    private fun updateAttestations() {
+        val oldCount = adapterAttestations.itemCount
+        val itemsAttestations = attestationCommunity.database.getAllAttestations()
+
+        if (oldCount != itemsAttestations.size) {
+            adapterAttestations.updateItems(
+                createAttestationItems(itemsAttestations)
+            )
+
+            binding.rvAttestations.setItemViewCacheSize(itemsAttestations.size)
+        }
+
+        toggleVisibility()
+    }
+
+    private fun addAttribute() {
+        IdentityAttributeDialog(null).show(parentFragmentManager, tag)
+    }
+
+    private fun addAttestation() {
+        scanIntent = ADD_ATTESTATION_INTENT
+        QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan public key of signee to add attestation", vertical = true)
+    }
+
+    private fun addAuthority() {
+        scanIntent = ADD_AUTHORITY_INTENT
+        QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan public key of signee to add as authority", vertical = true)
+    }
+
+    private fun showPopup(view: View) {
+        val popupMenu = PopupMenu(requireContext(), view, Gravity.END)
+        val inflater = popupMenu.menuInflater
+        inflater.inflate(R.menu.identity_attestations_options, popupMenu.menu)
+        popupMenu.show()
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.actionAddAttestation -> addAttestation()
+                R.id.actionAddAuthority -> addAuthority()
+            }
+            true
         }
     }
 
