@@ -79,7 +79,6 @@ class ExchangeTransferMoneyDialog(
             val recipientTitleView = view.findViewById<TextView>(R.id.tvRecipientTitle)
             val addNewContactView = view.findViewById<ConstraintLayout>(R.id.clAddNewContact)
             val addNewContactSwitch = view.findViewById<Switch>(R.id.switchAddNewContact)
-            val loadingSpinner = view.findViewById<ProgressBar>(R.id.pbLoadingSpinner)
 
             transferButton = view.findViewById(R.id.btnTransferMoney)
             toggleButton(transferButton, selectedContact != null && transactionAmount != 0L)
@@ -325,7 +324,6 @@ class ExchangeTransferMoneyDialog(
 
                 Handler().postDelayed(
                     Runnable {
-                        loadingSpinner.isVisible = true
                         requestMoneyContactButton.isVisible = false
                         peerChatCommunity.sendTransferRequest(
                             transactionMessage,
