@@ -97,35 +97,29 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Switch to day or night version of theme
          */
-        getSharedPreferences(preferencesFileName, Context.MODE_PRIVATE).let { prefs ->
-            prefs.getString(preferencesThemeName, APP_THEME_DAY)
-        }.apply {
-            when (this) {
-                APP_THEME_DAY -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                        window.statusBarColor = Color.BLACK
-                    }
-
-                }
-                APP_THEME_NIGHT -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                        window.statusBarColor = ContextCompat.getColor(
-                            applicationContext,
-                            getColorIDFromThemeAttribute(
-                                this@ValueTransferMainActivity,
-                                R.attr.colorPrimary
-                            )
-                        )
-                    }
-                }
-            }
+        val themePrefs = getSharedPreferences(preferencesFileName, Context.MODE_PRIVATE).getString(preferencesThemeName, APP_THEME_DAY)
+        when (themePrefs) {
+            APP_THEME_DAY -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
         }
 
         super.onCreate(savedInstanceState)
+
+        // Set status bar to black on Lollipop when in day mode
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (themePrefs == APP_THEME_NIGHT) {
+                window.statusBarColor = ContextCompat.getColor(
+                    applicationContext,
+                    getColorIDFromThemeAttribute(
+                        this@ValueTransferMainActivity,
+                        R.attr.colorPrimary
+                    )
+                )
+            } else {
+                window.statusBarColor = Color.BLACK
+            }
+        }
 
         setContentView(R.layout.main_activity_vt)
 

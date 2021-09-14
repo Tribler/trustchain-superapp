@@ -601,7 +601,15 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         val color = ContextCompat.getColor(requireContext(), typedValue.resourceId)
 
         parentActivity.window.statusBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            Color.BLACK
+            val themePrefs = parentActivity.getSharedPreferences(ValueTransferMainActivity.preferencesFileName, Context.MODE_PRIVATE).getString(
+                ValueTransferMainActivity.preferencesThemeName,
+                ValueTransferMainActivity.APP_THEME_DAY
+            )
+            if (themePrefs == ValueTransferMainActivity.APP_THEME_NIGHT) {
+                color
+            } else {
+                Color.BLACK
+            }
         } else {
             color
         }
