@@ -88,7 +88,11 @@ class PeerChatCommunity(
         sendMessage(chatMessage)
     }
 
-    fun sendIdentityAttribute(attributeMessage: String, serializedAttribute: ByteArray, recipient: PublicKey) {
+    fun sendIdentityAttribute(
+        attributeMessage: String,
+        serializedAttribute: ByteArray,
+        recipient: PublicKey
+    ) {
         val attachment = MessageAttachment(
             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
             serializedAttribute.size.toLong(),

@@ -4,14 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
@@ -57,7 +55,6 @@ import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.peerchat.util.saveFile
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsChatBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
@@ -98,8 +95,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
                     FILTER_TYPE_PHOTO_VIDEO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
                     FILTER_TYPE_LOCATION -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_LOCATION) && messageContainsTerm
-                    FILTER_TYPE_CONTACT ->  hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT) && messageContainsTerm
-                    FILTER_TYPE_IDENTITY_ATTRIBUTE ->  hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE) && messageContainsTerm
+                    FILTER_TYPE_CONTACT -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT) && messageContainsTerm
+                    FILTER_TYPE_IDENTITY_ATTRIBUTE -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE) && messageContainsTerm
                     else -> messageContainsTerm
                 }
             }

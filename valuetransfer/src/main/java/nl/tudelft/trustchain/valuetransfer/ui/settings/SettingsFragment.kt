@@ -3,11 +3,8 @@ package nl.tudelft.trustchain.valuetransfer.ui.settings
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.*
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.android.synthetic.main.fragment_contacts_chat.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Html.fromHtml
 import android.text.InputType
-import android.util.TypedValue
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible

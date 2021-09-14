@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.View
 import android.widget.*
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog

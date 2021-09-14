@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity

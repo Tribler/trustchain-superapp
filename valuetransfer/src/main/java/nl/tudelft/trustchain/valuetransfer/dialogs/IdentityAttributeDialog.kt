@@ -83,7 +83,7 @@ class IdentityAttributeDialog(
 
                         if (position == attributeNameSpinner.selectedItemPosition) {
                             textView.background = ColorDrawable(Color.LTGRAY)
-                        }else{
+                        } else {
                             textView.background = ColorDrawable(Color.WHITE)
                         }
 

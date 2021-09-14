@@ -218,7 +218,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId) {
+        when (item.itemId) {
             R.id.actionSettings -> {
                 parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
             }

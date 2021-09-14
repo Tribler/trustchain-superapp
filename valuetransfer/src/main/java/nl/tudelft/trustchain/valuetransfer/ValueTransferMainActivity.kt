@@ -9,14 +9,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.*
-import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBar.LayoutParams
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -51,7 +48,6 @@ import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
-
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -324,8 +320,6 @@ class ValueTransferMainActivity : BaseActivity() {
             SNACKBAR_TYPE_WARNING -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorYellow))
             SNACKBAR_TYPE_ERROR -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRed))
         }
-
-
 
         val textView = snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
         textView.setTextColor(Color.WHITE)
