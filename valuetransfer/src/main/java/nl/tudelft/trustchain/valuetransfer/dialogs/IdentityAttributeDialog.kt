@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -16,6 +17,7 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 
@@ -42,6 +44,8 @@ class IdentityAttributeDialog(
             identityCommunity = parentActivity.getCommunity()!!
             identityStore = parentActivity.getStore()!!
 
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val unusedAttributes = identityCommunity.getUnusedAttributeNames()
 
             val attributeNameSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeName)
@@ -55,6 +59,15 @@ class IdentityAttributeDialog(
 
             if (attribute == null) {
                 val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
+                    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                        val textView: TextView = super.getView(position, convertView, parent) as TextView
+
+                        textView.text = unusedAttributes[position]
+                        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+
+                        return textView
+                    }
+
                     override fun getDropDownView(
                         position: Int,
                         convertView: View?,
@@ -66,8 +79,12 @@ class IdentityAttributeDialog(
                         textView.layoutParams = params
                         textView.gravity = Gravity.CENTER_VERTICAL
 
+                        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+
                         if (position == attributeNameSpinner.selectedItemPosition) {
                             textView.background = ColorDrawable(Color.LTGRAY)
+                        }else{
+                            textView.background = ColorDrawable(Color.WHITE)
                         }
 
                         return textView

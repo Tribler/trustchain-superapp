@@ -20,7 +20,8 @@
             android:id="@+id/clBalanceRow"
             android:layout_width="0dp"
             android:layout_height="70dp"
-            android:background="@drawable/square_rounded_dark_green"
+            android:background="@drawable/square_rounded"
+            tools:background="@drawable/square_rounded_dark_green"
             android:paddingStart="16dp"
             android:paddingEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -36,60 +37,16 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white"
+                app:tint="?attr/colorOnPrimary"
                 tools:tint="@color/white" />
-
-<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--                android:id="@+id/clBalanceAmount"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="8dp"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintStart_toEndOf="@+id/ivBalanceIcon"-->
-<!--                app:layout_constraintTop_toTopOf="parent">-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/tvBalanceAmountTitle"-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Unsettled"-->
-<!--                    android:textColor="@color/gray"-->
-<!--                    android:textSize="10sp"-->
-<!--                    android:textStyle="italic"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--                <TextView-->
-<!--                    android:id="@+id/tvBalanceAmount"-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:textColor="@color/white"-->
-<!--                    android:textSize="24sp"-->
-<!--                    android:textStyle="bold"-->
-<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toBottomOf="@+id/tvBalanceAmountTitle"-->
-<!--                    android:text="0.00" />-->
-<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/tvBalanceAmountSlash"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="4dp"-->
-<!--                android:text="/"-->
-<!--                android:textColor="@color/colorYellow"-->
-<!--                android:textSize="20sp"-->
-<!--                android:textStyle="bold"-->
-<!--                app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"-->
-<!--                app:layout_constraintStart_toEndOf="@+id/clBalanceAmount" />-->
 
             <TextView
                 android:id="@+id/tvBalanceAmountTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Including Unverified Transactions"
-                android:textColor="@color/gray"
+                android:textColor="?attr/colorSecondary"
+                tools:textColor="@color/gray"
                 android:textSize="10sp"
                 android:textStyle="italic"
                 android:visibility="gone"
@@ -105,22 +62,12 @@
                 app:layout_constraintStart_toEndOf="@+id/ivBalanceIcon"
                 app:layout_constraintTop_toTopOf="parent">
 
-<!--                <TextView-->
-<!--                    android:id="@+id/tvBalanceVerifiedAmountTitle"-->
-<!--                    android:layout_width="0dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Verified"-->
-<!--                    android:textColor="@color/gray"-->
-<!--                    android:textSize="10sp"-->
-<!--                    android:textStyle="italic"-->
-<!--                    app:layout_constraintStart_toStartOf="parent"-->
-<!--                    app:layout_constraintTop_toTopOf="parent" />-->
-
                 <TextView
                     android:id="@+id/tvBalanceAmount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/colorOnPrimary"
+                    tools:textColor="@color/white"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:visibility="gone"
@@ -133,7 +80,8 @@
                     android:id="@+id/tvBalanceVerifiedAmount"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/colorOnPrimary"
+                    tools:textColor="@color/white"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -166,7 +114,8 @@
                 android:layout_marginStart="8dp"
                 app:layout_constraintDimensionRatio="H,1:1"
                 android:layout_gravity="center"
-                android:indeterminateTint="@color/white"
+                android:indeterminateTint="?attr/colorOnPrimary"
+                tools:indeterminateTint="@color/white"
                 android:indeterminateTintMode="src_atop"
                 app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
                 app:layout_constraintStart_toEndOf="@+id/ivBalanceErrorIcon"
@@ -229,7 +178,8 @@
         android:layout_marginStart="12dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="2dp"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
         app:layout_constraintEnd_toStartOf="@+id/clTransferToContact"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clBalance">
@@ -241,7 +191,8 @@
             android:layout_marginStart="12dp"
             android:gravity="center_vertical"
             android:text="Transfer"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -255,7 +206,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
+            app:tint="?attr/colorOnPrimary"
             tools:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -266,7 +217,8 @@
         android:layout_marginStart="2dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="2dp"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
         app:layout_constraintEnd_toStartOf="@+id/clRequest"
         app:layout_constraintStart_toEndOf="@+id/clTransferQR"
         app:layout_constraintTop_toBottomOf="@+id/clBalance">
@@ -278,7 +230,8 @@
             android:layout_marginStart="12dp"
             android:gravity="center_vertical"
             android:text="Transfer"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -292,7 +245,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
+            app:tint="?attr/colorOnPrimary"
             tools:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -303,7 +256,8 @@
         android:layout_marginStart="2dp"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clTransferToContact"
         app:layout_constraintTop_toBottomOf="@+id/clBalance">
@@ -315,7 +269,8 @@
             android:layout_marginStart="12dp"
             android:gravity="center_vertical"
             android:text="Request"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -329,7 +284,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white"
+            app:tint="?attr/colorOnPrimary"
             tools:tint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -340,7 +295,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:text="Transactions"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textSize="24sp"
         app:layout_constraintEnd_toStartOf="@+id/pbLoadingSpinner"
         app:layout_constraintStart_toStartOf="parent"
@@ -354,6 +310,8 @@
         android:src="@drawable/ic_baseline_refresh_24"
         android:visibility="invisible"
         tools:visibility="visible"
+        app:tint="?attr/colorOnPrimary"
+        tools:tint="@color/white"
         app:layout_constraintBottom_toBottomOf="@+id/tvTransactionsTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvTransactionsTitle" />
@@ -365,7 +323,8 @@
         android:layout_marginEnd="12dp"
         app:layout_constraintDimensionRatio="H,1:1"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/white"
+        android:indeterminateTint="?attr/colorOnPrimary"
+        tools:indeterminateTint="@color/white"
         android:indeterminateTintMode="src_atop"
         app:layout_constraintBottom_toBottomOf="@+id/tvTransactionsTitle"
         app:layout_constraintEnd_toEndOf="parent"
@@ -380,7 +339,8 @@
         android:background="@drawable/pill_rounded"
         android:paddingVertical="4dp"
         android:text="There are no transactions yet"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textStyle="italic"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
@@ -422,7 +382,8 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="8dp"
                 android:text="SHOW MORE TRANSACTIONS..."
-                android:textColor="@color/white"
+                android:textColor="?attr/colorOnPrimary"
+                tools:textColor="@color/white"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/rvTransactions" />

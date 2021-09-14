@@ -22,6 +22,7 @@ import nl.tudelft.trustchain.ssi.peers.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.identity.AttestationAuthorityItemRenderer
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import org.json.JSONObject
 import java.lang.IllegalStateException
 
@@ -48,6 +49,8 @@ class IdentityAttestationAuthoritiesDialog(
             parentActivity = requireActivity() as ValueTransferMainActivity
             attestationCommunity = parentActivity.getCommunity()!!
             dialogView = view
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val authoritiesRecyclerView = view.findViewById<RecyclerView>(R.id.rvAuthorities)
             val addAuthorityButton = view.findViewById<Button>(R.id.btnAddAuthority)

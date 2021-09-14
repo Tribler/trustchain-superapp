@@ -1,10 +1,12 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -69,6 +71,8 @@ class ExchangeTransferMoneyDialog(
             peerChatCommunity = parentActivity.getCommunity()!!
             contactStore = parentActivity.getStore()!!
             transactionRepository = parentActivity.getStore()!!
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val contactSpinner = view.findViewById<Spinner>(R.id.spinnerContact)
             val selectedContactView = view.findViewById<TextView>(R.id.tvSelectedContact)
@@ -163,11 +167,20 @@ class ExchangeTransferMoneyDialog(
                                         )
                                     )
                                     textView.setTypeface(null, Typeface.ITALIC)
+                                } else {
+                                    textView.setTextColor(
+                                        ContextCompat.getColor(
+                                            requireContext(),
+                                            R.color.black
+                                        )
+                                    )
                                 }
 
                                 // Currently selected item background in dropdown
                                 if (position == contactSpinner.selectedItemPosition) {
                                     textView.background = ColorDrawable(Color.LTGRAY)
+                                } else {
+                                    textView.background = ColorDrawable(Color.WHITE)
                                 }
 
                                 return textView
@@ -190,6 +203,13 @@ class ExchangeTransferMoneyDialog(
                                         )
                                     )
                                     textView.setTypeface(null, Typeface.ITALIC)
+                                } else {
+                                    textView.setTextColor(
+                                        ContextCompat.getColor(
+                                            requireContext(),
+                                            R.color.black
+                                        )
+                                    )
                                 }
 
                                 return textView

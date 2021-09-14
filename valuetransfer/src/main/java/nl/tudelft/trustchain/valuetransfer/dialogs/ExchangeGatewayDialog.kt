@@ -53,6 +53,8 @@ class ExchangeGatewayDialog(
             gatewayStore = parentActivity.getStore()!!
             transactionRepository = parentActivity.getStore()!!
 
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val gateWayName = view.findViewById<TextView>(R.id.tvGatewayName)
             val gateWayPublicKey = view.findViewById<TextView>(R.id.tvGatewayPublicKey)
             val gateWaySaveConstraintLayout = view.findViewById<ConstraintLayout>(R.id.clSaveGateway)

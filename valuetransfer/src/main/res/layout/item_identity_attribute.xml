@@ -12,7 +12,8 @@
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
         android:paddingVertical="8dp"
         android:paddingStart="12dp"
         android:paddingEnd="8dp"
@@ -33,7 +34,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorOnPrimary"
+                tools:textColor="@color/white"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textSize="14sp"
@@ -50,7 +52,8 @@
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/white"
+                android:textColor="?attr/colorOnPrimary"
+                tools:textColor="@color/white"
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@+id/clAllAttributeOptions"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +77,8 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/white" />
+                    app:tint="?attr/colorOnPrimary"
+                    tools:tint="@color/white" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clAttributeOptions"
@@ -91,14 +95,16 @@
                         android:layout_height="0dp"
                         android:layout_marginEnd="4dp"
                         android:background="@drawable/pill_rounded"
-                        android:backgroundTint="@color/colorPrimaryValueTransfer"
+                        android:backgroundTint="?attr/colorPrimary"
+                        tools:backgroundTint="@color/colorPrimaryValueTransfer"
                         android:padding="8dp"
                         android:src="@drawable/ic_baseline_delete_24"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintEnd_toStartOf="@+id/ivAttributeEditButton"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/white" />
+                        app:tint="?attr/colorOnPrimary"
+                        tools:tint="@color/white" />
 
                     <ImageView
                         android:id="@+id/ivAttributeEditButton"
@@ -106,28 +112,32 @@
                         android:layout_height="0dp"
                         android:layout_marginEnd="4dp"
                         android:background="@drawable/pill_rounded"
-                        android:backgroundTint="@color/colorPrimaryValueTransfer"
+                        android:backgroundTint="?attr/colorPrimary"
+                        tools:backgroundTint="@color/colorPrimaryValueTransfer"
                         android:padding="8dp"
                         android:src="@drawable/ic_baseline_edit_24"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintEnd_toStartOf="@+id/ivAttributeShareButton"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/white" />
+                        app:tint="?attr/colorOnPrimary"
+                        tools:tint="@color/white" />
 
                     <ImageView
                         android:id="@+id/ivAttributeShareButton"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
                         android:background="@drawable/pill_rounded"
-                        android:backgroundTint="@color/colorPrimaryValueTransfer"
+                        android:backgroundTint="?attr/colorPrimary"
+                        tools:backgroundTint="@color/colorPrimaryValueTransfer"
                         android:padding="6dp"
                         android:src="@drawable/ic_baseline_share_24"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/white" />
+                        app:tint="?attr/colorOnPrimary"
+                        tools:tint="@color/white" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

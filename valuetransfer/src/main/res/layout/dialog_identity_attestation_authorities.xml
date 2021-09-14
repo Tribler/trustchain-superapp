@@ -5,11 +5,13 @@
     android:id="@+id/clVerificationDialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/colorPrimary"
+    tools:backgroundTint="@color/colorPrimaryValueTransfer"
+    tools:background="@drawable/dialog_rounded_top">
 
     <TextView
         android:id="@+id/tvAuthorityTitle"
@@ -19,7 +21,8 @@
         android:text="TRUSTED AUTHORITIES"
         android:textAlignment="center"
         android:textAllCaps="true"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"

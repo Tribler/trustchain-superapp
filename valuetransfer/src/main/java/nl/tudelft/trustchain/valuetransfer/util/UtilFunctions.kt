@@ -9,15 +9,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import org.json.JSONObject
 import java.util.*
 import kotlin.math.abs
@@ -168,4 +172,18 @@ fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
     }
 
     return (dayCount / 365)
+}
+
+fun getColorIDFromThemeAttribute(parentActivity: ValueTransferMainActivity, color: Int): Int {
+    val typedValue = TypedValue()
+    parentActivity.theme.resolveAttribute(color, typedValue, true)
+    return typedValue.resourceId
+}
+
+fun DialogFragment.setNavigationBarColor(
+    context: Context,
+    parentActivity: ValueTransferMainActivity,
+    dialog: BottomSheetDialog
+) {
+    dialog.window!!.navigationBarColor = ContextCompat.getColor(context, getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary))
 }

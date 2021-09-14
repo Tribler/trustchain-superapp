@@ -74,7 +74,7 @@ class IdentityFragment : BaseFragment(R.layout.fragment_identity) {
     override fun onResume() {
         super.onResume()
 
-        parentActivity.setActionBarTitle("Identity")
+        parentActivity.setActionBarTitle("Identity", null)
         parentActivity.toggleActionBar(false)
         parentActivity.toggleBottomNavigation(true)
     }

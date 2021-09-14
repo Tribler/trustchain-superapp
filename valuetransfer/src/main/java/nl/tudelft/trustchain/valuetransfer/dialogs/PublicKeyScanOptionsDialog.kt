@@ -7,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import org.json.JSONObject
 
 class PublicKeyScanOptionsDialog(
@@ -26,6 +27,8 @@ class PublicKeyScanOptionsDialog(
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
             parentActivity = requireActivity() as ValueTransferMainActivity
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val publicKey = data.optString("public_key")
 

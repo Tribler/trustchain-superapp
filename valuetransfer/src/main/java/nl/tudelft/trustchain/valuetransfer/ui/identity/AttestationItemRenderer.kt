@@ -20,7 +20,6 @@ class AttestationItemRenderer(
         if (item.attestationBlob.metadata != null) {
             val metadata = JSONObject(item.attestationBlob.metadata!!)
             tvAttestationNameValue.text = metadata.optString("attribute") + ": " + metadata.optString("value")
-            tvAttestationNameValue.setTextColor(Color.WHITE)
 
             tvAttestationIDFormat.text = "(" + item.attestationBlob.idFormat + ")"
 

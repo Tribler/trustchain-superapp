@@ -105,7 +105,7 @@ class ContactChatItemRenderer(
                 textColor = R.color.white
             }
             else -> {
-                backgroundResource = R.drawable.pill_rounded_white
+                backgroundResource = R.drawable.pill_rounded_light_gray
                 textColor = R.color.black
             }
         }
@@ -187,14 +187,10 @@ class ContactChatItemRenderer(
 
                     clAttachmentLocation.setBackgroundResource(backgroundResource)
                     tvLocation.setTextColor(ContextCompat.getColor(this.context, textColor))
+                    tvLocation.text = item.chatMessage.message.replace(", ", "\n")
 
-                    val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
-                    JSONObject(offsetBuffer.decodeToString()).let { json ->
-                        tvLocation.text = json.getString("address_line").replace(", ", "\n")
-
-                        clAttachmentLocation.setOnClickListener {
-                            onItemClick(item)
-                        }
+                    clAttachmentLocation.setOnClickListener {
+                        onItemClick(item)
                     }
                 }
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> {

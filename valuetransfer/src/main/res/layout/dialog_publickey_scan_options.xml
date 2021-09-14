@@ -7,8 +7,10 @@
     android:paddingHorizontal="12dp"
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/colorPrimary"
+    tools:backgroundTint="@color/colorPrimaryValueTransfer"
+    tools:background="@drawable/dialog_rounded_top">
 
     <TextView
         android:id="@+id/tvTitle"
@@ -18,7 +20,8 @@
         android:textSize="20sp"
         android:textAlignment="center"
         android:gravity="center_horizontal"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textAllCaps="true"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"

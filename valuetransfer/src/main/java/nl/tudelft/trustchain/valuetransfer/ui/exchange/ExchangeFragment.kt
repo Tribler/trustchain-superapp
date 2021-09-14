@@ -149,7 +149,7 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
 
     override fun onResume() {
         super.onResume()
-        parentActivity.setActionBarTitle("Exchange")
+        parentActivity.setActionBarTitle("Exchange", null)
         parentActivity.toggleActionBar(false)
         parentActivity.toggleBottomNavigation(true)
     }
@@ -222,6 +222,7 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
             parentActivity.setBalance(formatBalance(transactionRepository.getMyVerifiedBalance()), true)
         }
 
+        binding.tvNoTransactions.isVisible = items.isEmpty()
         adapterTransactions.updateItems(items)
         binding.rvTransactions.setItemViewCacheSize(items.size)
         binding.pbBalanceUpdating.isVisible = false

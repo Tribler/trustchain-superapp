@@ -88,13 +88,13 @@ class PeerChatCommunity(
         sendMessage(chatMessage)
     }
 
-    fun sendIdentityAttribute(serializedAttribute: ByteArray, recipient: PublicKey) {
+    fun sendIdentityAttribute(attributeMessage: String, serializedAttribute: ByteArray, recipient: PublicKey) {
         val attachment = MessageAttachment(
             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
             serializedAttribute.size.toLong(),
             serializedAttribute
         )
-        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+        val chatMessage = createOutgoingChatMessage(attributeMessage, attachment, null, recipient)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
@@ -117,7 +117,7 @@ class PeerChatCommunity(
         val serializedLocation = json.toString().toByteArray()
 
         val attachment = MessageAttachment(MessageAttachment.TYPE_LOCATION, serializedLocation.size.toLong(), serializedLocation)
-        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+        val chatMessage = createOutgoingChatMessage(addressLine, attachment, null, recipient)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
@@ -138,8 +138,9 @@ class PeerChatCommunity(
 
     fun sendContact(contact: Contact, recipient: PublicKey) {
         val serializedContact = contact.serialize()
+        val contactMessage = "${contact.name} ${contact.publicKey.keyToBin().toHex()}"
         val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT, serializedContact.size.toLong(), serializedContact)
-        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
+        val chatMessage = createOutgoingChatMessage(contactMessage, attachment, null, recipient)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)

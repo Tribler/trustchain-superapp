@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.*
@@ -62,6 +63,8 @@ class IdentityAttributeShareDialog(
             peerChatCommunity = IPv8Android.getInstance().getOverlay()!!
             trustChainCommunity = IPv8Android.getInstance().getOverlay()!!
 
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val contactSpinner = view.findViewById<Spinner>(R.id.spinnerContact)
             val attributeSpinner = view.findViewById<Spinner>(R.id.spinnerAttribute)
             val selectedContactView = view.findViewById<TextView>(R.id.tvSelectedContact)
@@ -101,10 +104,13 @@ class IdentityAttributeShareDialog(
                                 textView.gravity = Gravity.CENTER_VERTICAL
 
                                 textView.text = identityAttributes[position].name
+                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
                                 // Currently selected item background in dropdown
                                 if (position == attributeSpinner.selectedItemPosition) {
                                     textView.background = ColorDrawable(Color.LTGRAY)
+                                } else {
+                                    textView.background = ColorDrawable(Color.WHITE)
                                 }
 
                                 return textView
@@ -117,6 +123,7 @@ class IdentityAttributeShareDialog(
                             ): View {
                                 val textView: TextView = super.getView(position, convertView, parent) as TextView
                                 textView.text = identityAttributes[position].name
+                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
                                 return textView
                             }
@@ -192,10 +199,13 @@ class IdentityAttributeShareDialog(
                                 textView.gravity = Gravity.CENTER_VERTICAL
 
                                 textView.text = contacts[position].name
+                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
                                 // Currently selected item background in dropdown
                                 if (position == contactSpinner.selectedItemPosition) {
                                     textView.background = ColorDrawable(Color.LTGRAY)
+                                } else {
+                                    textView.background = ColorDrawable(Color.WHITE)
                                 }
 
                                 return textView
@@ -208,6 +218,7 @@ class IdentityAttributeShareDialog(
                             ): View {
                                 val textView: TextView = super.getView(position, convertView, parent) as TextView
                                 textView.text = contacts[position].name
+                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
                                 return textView
                             }
@@ -252,7 +263,7 @@ class IdentityAttributeShareDialog(
                 try {
                     val serializedAttribute = selectedAttribute!!.serialize()
 
-                    peerChatCommunity.sendIdentityAttribute(serializedAttribute, selectedContact!!.publicKey)
+                    peerChatCommunity.sendIdentityAttribute(selectedAttribute.toString(), serializedAttribute, selectedContact!!.publicKey)
 
                     if (identityAttribute != null) {
                         parentActivity.displaySnackbar(requireContext(), "Identity attribute shared to ${selectedContact!!.name}")

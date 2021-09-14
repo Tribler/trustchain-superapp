@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.text.Html.fromHtml
 import android.text.InputType
+import android.util.TypedValue
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -14,8 +16,10 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_18PLUS
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_UNDERAGE
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.util.betweenDates
+import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 import java.util.*
@@ -24,6 +28,7 @@ import java.util.*
 class IdentityAttestationConfirmDialog(
     private val attributeName: String,
     private val idFormat: String,
+    private val parentActivity: ValueTransferMainActivity
 ) : BlockingDialogFragment<String>() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -32,6 +37,8 @@ class IdentityAttestationConfirmDialog(
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(it, R.style.BaseBottomSheetDialog)
             val view = it.layoutInflater.inflate(R.layout.dialog_identity_attestation_confirm, null)
+
+            bottomSheetDialog.window!!.navigationBarColor = ContextCompat.getColor(parentActivity.applicationContext, getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary))
 
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.skipCollapsed = true

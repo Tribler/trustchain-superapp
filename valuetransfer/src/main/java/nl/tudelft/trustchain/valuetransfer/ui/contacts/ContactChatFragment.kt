@@ -4,19 +4,23 @@ import android.Manifest
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -93,9 +97,9 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     FILTER_TYPE_MESSAGE -> hasMessage && !hasAttachment && !hasTransaction && messageContainsTerm
                     FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
                     FILTER_TYPE_PHOTO_VIDEO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
-                    FILTER_TYPE_LOCATION -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_LOCATION)
-                    FILTER_TYPE_CONTACT -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT)
-                    FILTER_TYPE_IDENTITY_ATTRIBUTE -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE)
+                    FILTER_TYPE_LOCATION -> hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_LOCATION) && messageContainsTerm
+                    FILTER_TYPE_CONTACT ->  hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_CONTACT) && messageContainsTerm
+                    FILTER_TYPE_IDENTITY_ATTRIBUTE ->  hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IDENTITY_ATTRIBUTE) && messageContainsTerm
                     else -> messageContainsTerm
                 }
             }
@@ -125,6 +129,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         requireArguments().getString(ValueTransferMainActivity.ARG_PARENT)!!
     }
 
+    private lateinit var contactName: String
+    private var isConnected = false
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy")
 
     // Limit the number of shown messages
@@ -158,14 +164,18 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        parentActivity = requireActivity() as ValueTransferMainActivity
+        parentActivity.setTheme(ValueTransferMainActivity.APP_THEME)
+
         super.onCreate(savedInstanceState)
 
-        parentActivity = requireActivity() as ValueTransferMainActivity
         peerChatCommunity = parentActivity.getCommunity()!!
         peerChatStore = parentActivity.getStore()!!
         contactStore = parentActivity.getStore()!!
         transactionRepository = parentActivity.getStore()!!
         trustChainHelper = parentActivity.getStore()!!
+
+        contactName = name
 
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(
@@ -266,7 +276,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         super.onViewCreated(view, savedInstanceState)
 
         parentActivity.toggleActionBar(true)
-        parentActivity.setActionBarTitle(name)
+        parentActivity.setActionBarTitle(contactName, null)
         parentActivity.toggleBottomNavigation(false)
 
         etMessage.doAfterTextChanged { state ->
@@ -277,7 +287,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             isSending.value = true
             val message = binding.etMessage.text.toString()
             closeKeyboard(requireContext(), etMessage)
-            binding.etMessage.text = null
+            binding.etMessage.setText(null)
             binding.etMessage.clearFocus()
 
             Handler().postDelayed(
@@ -301,16 +311,18 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 val peer = list.find { it.mid == publicKey.keyToHash().toHex() }
 
                 if ((peer != null && !peer.address.isEmpty()) || (peer?.bluetoothAddress != null)) {
-                    parentActivity.setActionBarTitle("Connected with IPv8", false)
+                    isConnected = true
+                    parentActivity.setActionBarTitle(contactName, IS_CONNECTED_TEXT)
                 } else {
-                    parentActivity.setActionBarTitle("", false)
+                    isConnected = false
+                    parentActivity.setActionBarTitle(contactName, null)
                 }
             }
         )
 
         val optionsMenuButton = binding.ivAttachment
         optionsMenuButton.setOnClickListener {
-            val optionsMenu = PopupMenu(requireContext(), optionsMenuButton)
+            val optionsMenu = PopupMenu(ContextThemeWrapper(requireContext(), R.style.OptionsMenu), optionsMenuButton)
             optionsMenu.menuInflater.inflate(R.menu.contact_chat_attachments, optionsMenu.menu)
             optionsMenu.setOnMenuItemClickListener(
                 PopupMenu.OnMenuItemClickListener { item ->
@@ -383,13 +395,16 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 textView.textSize = 14F
                 textView.text = FILTER_TYPES[position]
 
+                textView.setTextColor(Color.BLACK)
+
                 if (position == 0) {
-                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
                 }
 
                 if (position == spinnerFilter.selectedItemPosition) {
                     textView.background = ColorDrawable(Color.LTGRAY)
+                } else {
+                    textView.background = ColorDrawable(Color.WHITE)
                 }
 
                 return textView
@@ -453,7 +468,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         super.onResume()
 
         parentActivity.toggleActionBar(true)
-        parentActivity.setActionBarTitle(name)
+        parentActivity.setActionBarTitle(name, null)
         parentActivity.toggleBottomNavigation(false)
     }
 
@@ -527,10 +542,11 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     binding.clSearchFilter.isVisible = false
                     val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
                     binding.clSearchFilter.startAnimation(slideUpAnimation)
+
+                    toggleSearchFilterBar()
+
                     binding.etSearchMessage.setText("")
                     binding.ivSearchClearIcon.isVisible = false
-                    parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryValueTransfer)
-                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorPrimaryValueTransfer))
                     searchTerm.value = ""
                     filterType.value = FILTER_TYPE_EVERYTHING
                     spinnerFilter.setSelection(0)
@@ -538,8 +554,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     binding.clSearchFilter.isVisible = true
                     val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
                     binding.clSearchFilter.startAnimation(slideDownAnimation)
-                    parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorYellow)
-                    parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorYellow))
+                    toggleSearchFilterBar(false)
                 }
             }
         }
@@ -574,10 +589,27 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         dialog.show()
     }
 
-    private fun hideSearchFilterBar() {
-        binding.clSearchFilter.isVisible = false
-        parentActivity.window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.colorPrimaryValueTransfer)
-        parentActivity.supportActionBar!!.setBackgroundDrawable(ContextCompat.getDrawable(requireActivity(), R.color.colorPrimaryValueTransfer))
+    private fun toggleSearchFilterBar(hide: Boolean = true) {
+        binding.clSearchFilter.isVisible = !hide
+
+        val typedValue = TypedValue()
+
+        if (hide) {
+            parentActivity.theme.resolveAttribute(R.attr.colorPrimary, typedValue, true)
+        } else {
+            parentActivity.theme.resolveAttribute(R.attr.colorAccent, typedValue, true)
+        }
+
+        val colorDrawable = ContextCompat.getDrawable(requireContext(), typedValue.resourceId)
+        val color = ContextCompat.getColor(requireContext(), typedValue.resourceId)
+
+        parentActivity.window.statusBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            Color.BLACK
+        } else {
+            color
+        }
+
+        parentActivity.supportActionBar!!.setBackgroundDrawable(colorDrawable)
     }
 
     private fun goToContactFragment(contact: Contact) {
@@ -589,7 +621,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
         val contactChatFragment = ContactChatFragment()
         contactChatFragment.arguments = args
 
-        hideSearchFilterBar()
+        toggleSearchFilterBar()
 
         parentFragmentManager.beginTransaction()
             .setCustomAnimations(0, R.anim.exit_to_left)
@@ -603,8 +635,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     }
 
     private fun onBackPressed() {
-        hideSearchFilterBar()
-        parentActivity.setActionBarTitle("", false)
+        toggleSearchFilterBar()
+        parentActivity.setActionBarTitle("", null)
         closeKeyboard(requireContext(), etMessage)
 
         val previousFragment = parentFragmentManager.fragments.filter {
@@ -629,8 +661,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                 }
             }
             RENAME_CONTACT -> if (resultCode == Activity.RESULT_OK && data != null) {
-                val newName = data.data.toString()
-                parentActivity.setActionBarTitle(newName)
+                contactName = data.data.toString()
+                parentActivity.setActionBarTitle(contactName, if (isConnected) IS_CONNECTED_TEXT else null)
             }
             DIRECTORY_CHOOSER -> if (resultCode == Activity.RESULT_OK && data != null) {
                 data.data?.let { treeUri ->
@@ -677,6 +709,8 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
     }
 
     companion object {
+        const val IS_CONNECTED_TEXT = "Connected with IPv8"
+
         const val PICK_IMAGE = 1
         const val DIRECTORY_CHOOSER = 4
 

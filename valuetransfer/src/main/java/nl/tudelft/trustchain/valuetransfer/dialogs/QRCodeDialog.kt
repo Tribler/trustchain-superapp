@@ -12,6 +12,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.util.createBitmap
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import java.lang.IllegalStateException
 
 class QRCodeDialog(
@@ -19,6 +22,7 @@ class QRCodeDialog(
     private val subtitle: String?,
     private val data: String
 ) : DialogFragment() {
+    private lateinit var parentActivity: ValueTransferMainActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -29,6 +33,10 @@ class QRCodeDialog(
             // Fix keyboard exposing over content of dialog
             bottomSheetDialog.behavior.skipCollapsed = true
             bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+            parentActivity = requireActivity() as ValueTransferMainActivity
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
             val tvSubTitle = view.findViewById<TextView>(R.id.tvSubTitle)
@@ -50,7 +58,7 @@ class QRCodeDialog(
                             requireContext(),
                             data,
                             R.color.black,
-                            R.color.colorPrimaryValueTransfer
+                            getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary)
                         )
                     )
                 },

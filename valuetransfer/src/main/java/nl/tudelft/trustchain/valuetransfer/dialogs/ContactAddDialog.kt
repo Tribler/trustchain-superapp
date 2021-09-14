@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
@@ -44,6 +45,8 @@ class ContactAddDialog(
             parentActivity = requireActivity() as ValueTransferMainActivity
             contactStore = parentActivity.getStore()!!
             dialogView = view
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val myPublicKeyTextView = view.findViewById<EditText>(R.id.etMyPublicKey)
             val myPublicKeyImageView = view.findViewById<ImageView>(R.id.ivMyQRCode)
@@ -122,7 +125,7 @@ class ContactAddDialog(
                             requireContext(),
                             mapToJSON(map).toString(),
                             R.color.black,
-                            R.color.colorPrimaryValueTransfer
+                            getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary)
                         )
                     )
                 },

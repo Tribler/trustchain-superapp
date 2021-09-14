@@ -11,29 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/ivAddContactButton"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
-            android:gravity="center"
-            android:paddingHorizontal="8dp"
-            android:src="@drawable/ic_add_black_24dp"
-            app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
-            app:layout_constraintEnd_toStartOf="@+id/etSearchContact"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/colorPrimaryValueTransfer"
-            tools:tint="@color/colorPrimaryValueTransfer" />
 
         <EditText
             android:id="@+id/etSearchContact"
@@ -47,10 +31,11 @@
             android:paddingEnd="40dp"
             android:singleLine="true"
             android:textColor="@color/black"
+            android:textColorHint="@color/gray"
             android:textSize="12dp"
             app:layout_constraintBottom_toTopOf="@+id/tvNoContacts"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/ivAddContactButton"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
@@ -62,8 +47,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
             app:layout_constraintStart_toStartOf="@+id/etSearchContact"
             app:layout_constraintTop_toTopOf="@+id/etSearchContact"
-            app:tint="@color/colorPrimaryValueTransfer"
-            tools:tint="@color/colorPrimaryValueTransfer"/>
+            app:tint="?attr/colorSecondary"
+            tools:tint="@color/gray"/>
 
         <ImageView
             android:id="@+id/ivSearchBarCancelIcon"
@@ -75,7 +60,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
             app:layout_constraintEnd_toEndOf="@+id/etSearchContact"
             app:layout_constraintTop_toTopOf="@+id/etSearchContact"
-            app:tint="@color/colorPrimaryValueTransfer" />
+            app:tint="?attr/colorSecondary"
+            tools:tint="@color/gray" />
 
         <TextView
             android:id="@+id/tvNoContacts"
@@ -87,7 +73,8 @@
             android:paddingHorizontal="12dp"
             android:paddingVertical="16dp"
             android:text="NO CONTACTS"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             android:textStyle="bold"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
@@ -117,7 +104,8 @@
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         android:text="Recent"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clContacts" />
@@ -147,7 +135,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/tvShowHiddenChats"
                 app:layout_constraintEnd_toStartOf="@+id/tvShowHiddenChats"
                 app:layout_constraintTop_toTopOf="@+id/tvShowHiddenChats"
-                app:tint="@color/light_gray" />
+                app:tint="?attr/colorOnPrimary"
+                tools:tint="@color/white"/>
 
             <TextView
                 android:id="@+id/tvShowHiddenChats"
@@ -155,7 +144,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:text="Show hidden chats"
-                android:textColor="@color/light_gray"
+                android:textColor="?attr/colorOnPrimary"
+                tools:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="italic"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -179,7 +169,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/tvHideHiddenChats"
                 app:layout_constraintEnd_toStartOf="@+id/tvHideHiddenChats"
                 app:layout_constraintTop_toTopOf="@+id/tvHideHiddenChats"
-                app:tint="@color/light_gray" />
+                app:tint="?attr/colorOnPrimary"
+                tools:tint="@color/white" />
 
             <TextView
                 android:id="@+id/tvHideHiddenChats"
@@ -187,7 +178,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:text="Hide hidden chats"
-                android:textColor="@color/light_gray"
+                android:textColor="?attr/colorOnPrimary"
+                tools:textColor="@color/white"
                 android:textSize="12sp"
                 android:textStyle="italic"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -205,7 +197,8 @@
         android:background="@drawable/pill_rounded"
         android:paddingVertical="4dp"
         android:text="There are no conversations with contacts yet"
-        android:textColor="@color/white"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
         android:textStyle="italic"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"

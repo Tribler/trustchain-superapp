@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 
 class ContactRenameDialog(
     private val contact: Contact,
@@ -46,6 +47,8 @@ class ContactRenameDialog(
 
             parentActivity = (requireActivity() as ValueTransferMainActivity)
             contactStore = parentActivity.getStore()!!
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             contactNameView.setText(contact.name)
 

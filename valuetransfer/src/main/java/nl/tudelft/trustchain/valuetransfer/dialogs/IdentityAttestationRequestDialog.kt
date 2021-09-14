@@ -1,12 +1,14 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -19,6 +21,7 @@ import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 
@@ -43,6 +46,8 @@ class IdentityAttestationRequestDialog(
             trustChainCommunity = parentActivity.getCommunity()!!
             attestationCommunity = parentActivity.getCommunity()!!
 
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val attributeTypeSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeType)
             val attributeNameView = view.findViewById<EditText>(R.id.etAttributeNameValue)
 
@@ -50,6 +55,15 @@ class IdentityAttestationRequestDialog(
             toggleButton(requestButton, attributeNameView.text.toString().isNotEmpty())
 
             val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, attestationCommunity.schemaManager.getSchemaNames().sorted()) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val textView: TextView = super.getView(position, convertView, parent) as TextView
+
+                    textView.text = attestationCommunity.schemaManager.getSchemaNames().sorted()[position]
+                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+
+                    return textView
+                }
+
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
                     val params = textView.layoutParams
@@ -57,8 +71,12 @@ class IdentityAttestationRequestDialog(
                     textView.layoutParams = params
                     textView.gravity = Gravity.CENTER_VERTICAL
 
+                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+
                     if (position == attributeTypeSpinner.selectedItemPosition) {
                         textView.background = ColorDrawable(Color.LTGRAY)
+                    } else {
+                        textView.background = ColorDrawable(Color.WHITE)
                     }
 
                     return textView

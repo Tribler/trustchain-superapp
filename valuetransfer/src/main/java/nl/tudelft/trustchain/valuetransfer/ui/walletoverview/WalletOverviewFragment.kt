@@ -82,7 +82,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
     override fun onResume() {
         super.onResume()
 
-        parentActivity.setActionBarTitle("Wallet")
+        parentActivity.setActionBarTitle("Wallet", null)
         parentActivity.toggleActionBar(true)
         parentActivity.toggleBottomNavigation(identityStore.hasIdentity())
 

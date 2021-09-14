@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_actionbar_title"
+        style="@style/ActionBarTitleStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="Title"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_actionbar_subtitle"
+        style="@style/ActionBarSubTitleStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_below="@+id/tv_actionbar_title"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="Subtitle" />
+
+</RelativeLayout>

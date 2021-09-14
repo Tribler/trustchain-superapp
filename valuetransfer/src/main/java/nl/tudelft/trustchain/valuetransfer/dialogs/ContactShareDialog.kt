@@ -59,6 +59,8 @@ class ContactShareDialog(
             contactStore = parentActivity.getStore()!!
             dialogView = view
 
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val spinnerRecipient = view.findViewById<Spinner>(R.id.spinnerSelectRecipient)
             val selectedRecipientView = view.findViewById<TextView>(R.id.tvSelectedRecipient)
             val spinnerContact = view.findViewById<Spinner>(R.id.spinnerSelectContact)
@@ -196,10 +198,14 @@ class ContactShareDialog(
                 if (position == 0) {
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
+                } else {
+                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                 }
 
                 if (position == spinner.selectedItemPosition) {
                     textView.background = ColorDrawable(Color.LTGRAY)
+                } else {
+                    textView.background = ColorDrawable(Color.WHITE)
                 }
 
                 return textView
@@ -213,6 +219,8 @@ class ContactShareDialog(
                 if (position == 0) {
                     textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
                     textView.setTypeface(null, Typeface.ITALIC)
+                } else {
+                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                 }
 
                 return textView

@@ -134,7 +134,7 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     override fun onResume() {
         super.onResume()
 
-        parentActivity.setActionBarTitle("Contacts")
+        parentActivity.setActionBarTitle("Contacts", null)
         parentActivity.toggleActionBar(false)
         parentActivity.toggleBottomNavigation(true)
     }
@@ -158,10 +158,6 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         }
 
         onFocusChange(binding.etSearchContact, requireContext())
-
-        binding.ivAddContactButton.setOnClickListener {
-            ContactAddDialog(getTrustChainCommunity().myPeer.publicKey, null, null).show(parentFragmentManager, tag)
-        }
 
         binding.rvHiddenChats.adapter = hiddenChatsAdapter
         binding.rvHiddenChats.layoutManager = LinearLayoutManager(context)
@@ -190,6 +186,15 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
+
+        inflater.inflate(R.menu.contacts_options, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.actionAddContact -> ContactAddDialog(getTrustChainCommunity().myPeer.publicKey, null, null).show(parentFragmentManager, tag)
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     private fun observeHiddenChats(

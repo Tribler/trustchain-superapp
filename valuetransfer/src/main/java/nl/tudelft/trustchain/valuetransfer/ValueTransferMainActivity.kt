@@ -8,10 +8,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.Menu
-import android.view.View
+import android.view.*
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.ActionBar.LayoutParams
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -21,7 +26,6 @@ import com.androidadvance.topsnackbar.TSnackbar
 import com.jaredrummler.blockingdialog.BlockingDialogManager
 import kotlinx.android.synthetic.main.main_activity_vt.*
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
@@ -48,6 +52,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import org.json.JSONObject
 
+
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
 
@@ -63,33 +68,56 @@ class ValueTransferMainActivity : BaseActivity() {
 
     private val fragmentManager = supportFragmentManager
 
-    var communities: MutableMap<Class<out Community>, Community> = mutableMapOf()
-    var stores: MutableMap<Any, Any> = mutableMapOf()
+    private lateinit var customActionBar: View
+//    private lateinit var titleView: AppCompatTextView
+//    private lateinit var subtitleView: AppCompatTextView
+
+    /**
+     * Initialize all communities and (database) stores and repo's
+     */
+    val communities: Map<Class<out Community>, Community> = mapOf(
+        TrustChainCommunity::class.java to IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!,
+        IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
+        PeerChatCommunity::class.java to IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!,
+        EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
+        AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+    )
+    val stores: Map<Any, Any> = mapOf(
+        IdentityStore::class.java to IdentityStore.getInstance(this),
+        PeerChatStore::class.java to PeerChatStore.getInstance(this),
+        GatewayStore::class.java to GatewayStore.getInstance(this),
+        ContactStore::class.java to ContactStore.getInstance(this),
+        TransactionRepository::class.java to TransactionRepository(getCommunity()!!, GatewayStore.getInstance(this)),
+        TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
+    )
 
     private var balance = MutableLiveData("0.00")
     private var verifiedBalance = MutableLiveData("0.00")
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        /**
+         * Switch to day or night version of theme
+         */
+        getSharedPreferences(preferencesFileName, Context.MODE_PRIVATE).let { prefs ->
+            prefs.getString(preferencesThemeName, APP_THEME_DAY)
+        }.apply {
+            when (this) {
+                APP_THEME_DAY -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        window.statusBarColor = Color.BLACK
+                    }
+                }
+                APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            }
+        }
+
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.main_activity_vt)
-
-        /**
-         * Initialize all communities and (database) stores and repo's
-         */
-        communities[TrustChainCommunity::class.java] = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
-        communities[IdentityCommunity::class.java] = IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!
-        communities[PeerChatCommunity::class.java] = IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!
-        communities[EuroTokenCommunity::class.java] = IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!
-        communities[AttestationCommunity::class.java] = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
-
-        stores[IdentityStore::class.java] = IdentityStore.getInstance(applicationContext)
-        stores[PeerChatStore::class.java] = PeerChatStore.getInstance(applicationContext)
-        stores[GatewayStore::class.java] = GatewayStore.getInstance(applicationContext)
-        stores[ContactStore::class.java] = ContactStore.getInstance(applicationContext)
-        stores[TransactionRepository::class.java] = TransactionRepository(getCommunity()!!, getStore()!!)
-        stores[TrustChainHelper::class.java] = TrustChainHelper(getCommunity()!!)
 
         /**
          * Create database tables if not exist
@@ -122,6 +150,19 @@ class ValueTransferMainActivity : BaseActivity() {
         attestationCommunity.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
         attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
+
+        /**
+         * Create a (centered) custom action bar with a title and subtitle
+         */
+        customActionBar = LayoutInflater.from(this).inflate(R.layout.action_bar, null)
+        customActionBar.findViewById<TextView>(R.id.tv_actionbar_title)
+        val params = LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT)
+        params.apply {
+            gravity = Gravity.CENTER
+        }
+
+        supportActionBar?.setCustomView(customActionBar, params)
+        supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
     }
 
     /**
@@ -142,9 +183,10 @@ class ValueTransferMainActivity : BaseActivity() {
      * Reload/reset activity completely
      */
     fun reloadActivity() {
-        val refresh = Intent(this, ValueTransferMainActivity::class.java)
-        startActivity(refresh)
         finish()
+        val intent = Intent(this, ValueTransferMainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+        startActivity(intent)
     }
 
     /**
@@ -283,6 +325,8 @@ class ValueTransferMainActivity : BaseActivity() {
             SNACKBAR_TYPE_ERROR -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRed))
         }
 
+
+
         val textView = snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
         textView.setTextColor(Color.WHITE)
 
@@ -311,11 +355,11 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Change title or subtitle of action bar
      */
-    fun setActionBarTitle(title: String?, isTitle: Boolean = true) {
-        if (isTitle) {
-            supportActionBar!!.title = title
-        } else {
-            supportActionBar!!.subtitle = title
+    fun setActionBarTitle(title: String?, subtitle: String?) {
+        customActionBar.findViewById<TextView>(R.id.tv_actionbar_title).text = title
+        customActionBar.findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
+            text = subtitle ?: ""
+            isVisible = subtitle != null
         }
     }
 
@@ -425,7 +469,7 @@ class ValueTransferMainActivity : BaseActivity() {
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
 
         val input = BlockingDialogManager.getInstance()
-            .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat))
+            .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
             ?: throw RuntimeException("User cancelled dialog.")
 
         Log.i("VTLOG", "Signing attestation with value $input with format $idFormat.")
@@ -450,6 +494,14 @@ class ValueTransferMainActivity : BaseActivity() {
         const val qrScanControllerFragmentTag = "qrscancontroller_fragment"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
+
+        const val preferencesFileName = "prefs_vt"
+        const val preferencesThemeName = "theme"
+        val APP_THEME = R.style.Theme_ValueTransfer
+        const val APP_THEME_DAY = "day"
+        const val APP_THEME_NIGHT = "night"
+//        val APP_THEME_LIGHT = R.style.ThemeLight_ValueTransfer
+//        val APP_THEME_DARK = R.style.Theme_ValueTransfer
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"

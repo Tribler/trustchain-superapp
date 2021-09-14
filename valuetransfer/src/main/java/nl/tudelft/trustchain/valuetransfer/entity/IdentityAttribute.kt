@@ -43,6 +43,10 @@ data class IdentityAttribute(
         return json.toString().toByteArray()
     }
 
+    override fun toString(): String {
+        return "$name $value"
+    }
+
     companion object : Deserializable<IdentityAttribute> {
         private const val IDENTITY_ATTRIBUTE_ID = "attribute_id"
         private const val IDENTITY_ATTRIBUTE_NAME = "attribute_name"

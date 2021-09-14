@@ -1,8 +1,10 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -11,6 +13,7 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import java.lang.IllegalStateException
 
 class IdentityAttestationAuthorityDialog(
@@ -34,6 +37,8 @@ class IdentityAttestationAuthorityDialog(
             parentActivity = requireActivity() as ValueTransferMainActivity
             attestationCommunity = parentActivity.getCommunity()!!
             dialogView = view
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val authorityAddressValue = view.findViewById<EditText>(R.id.etAuthorityAddressValue)
             val addAuthorityButton = view.findViewById<Button>(R.id.btnAddAuthority)

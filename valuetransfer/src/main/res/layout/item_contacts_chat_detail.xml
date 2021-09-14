@@ -5,7 +5,8 @@
     android:id="@+id/clItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryValueTransfer"
+    android:background="?attr/colorPrimary"
+    tools:background="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
     android:paddingTop="8dp"
     android:paddingBottom="4dp">
@@ -516,7 +517,7 @@
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
+                    android:backgroundTint="@color/white"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -605,7 +606,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="12dp"
-            android:textColor="@color/white"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             tools:text="12:00" />
 
         <ImageView
@@ -615,7 +617,6 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:visibility="gone"
-            app:tint="@color/white"
             tools:src="@drawable/ic_check_double" />
 
     </LinearLayout>
