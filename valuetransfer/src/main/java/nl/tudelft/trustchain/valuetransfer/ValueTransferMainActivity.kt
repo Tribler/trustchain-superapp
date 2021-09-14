@@ -47,6 +47,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
+import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 
 class ValueTransferMainActivity : BaseActivity() {
@@ -106,8 +107,21 @@ class ValueTransferMainActivity : BaseActivity() {
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                         window.statusBarColor = Color.BLACK
                     }
+
                 }
-                APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                APP_THEME_NIGHT -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        window.statusBarColor = ContextCompat.getColor(
+                            applicationContext,
+                            getColorIDFromThemeAttribute(
+                                this@ValueTransferMainActivity,
+                                R.attr.colorPrimary
+                            )
+                        )
+                    }
+                }
             }
         }
 
