@@ -485,12 +485,6 @@ class ValueTransferMainActivity : BaseActivity() {
         val textView = snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
         textView.setTextColor(Color.WHITE)
 
-//        val density = resources.displayMetrics.density
-
-//        if (extraPadding) {
-//            snackbarView.setPadding(snackbarView.paddingLeft, (snackbarView.paddingTop + density * 40).toInt(), snackbarView.paddingRight, snackbarView.paddingBottom)
-//        }
-
         snackbar.show()
     }
 
