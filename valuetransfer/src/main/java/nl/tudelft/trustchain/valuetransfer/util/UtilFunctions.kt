@@ -187,3 +187,9 @@ fun DialogFragment.setNavigationBarColor(
 ) {
     dialog.window!!.navigationBarColor = ContextCompat.getColor(context, getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary))
 }
+
+fun Int.dpToPixels(context: Context): Int = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    this.toFloat(),
+    context.resources.displayMetrics
+).toInt()

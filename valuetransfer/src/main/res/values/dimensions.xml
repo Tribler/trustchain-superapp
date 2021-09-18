@@ -4,4 +4,5 @@
     <dimen name="identiconHeight">30dp</dimen>
     <dimen name="chatContentPadding">25dp</dimen>
     <dimen name="textViewHeight">40dp</dimen>
+    <dimen name="cornerRadius">6dp</dimen>
 </resources>

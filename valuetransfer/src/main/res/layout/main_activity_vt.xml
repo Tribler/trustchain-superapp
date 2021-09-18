@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="?attr/colorPrimary"
+    tools:background="@color/colorPrimaryValueTransfer"
     tools:context="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity">
 
     <FrameLayout
@@ -19,16 +21,6 @@
         app:layout_constraintTop_toTopOf="parent">
 
     </FrameLayout>
-
-<!--    <include-->
-<!--        layout="@layout/content"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:id="@+id/container"-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"/>-->
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

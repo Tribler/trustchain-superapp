@@ -58,7 +58,6 @@ import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 
-
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
 
@@ -104,7 +103,6 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Switch to day or night version of theme
          */
-
         val themePrefs = getSharedPreferences(preferencesFileName, Context.MODE_PRIVATE).getString(preferencesThemeName, APP_THEME_DAY)
         when (themePrefs) {
             APP_THEME_DAY -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -115,8 +113,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
         // Set status bar to black on Lollipop when in day mode
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            if (themePrefs == APP_THEME_NIGHT) {
-                window.statusBarColor = ContextCompat.getColor(
+            window.statusBarColor = if (themePrefs == APP_THEME_NIGHT) {
+                ContextCompat.getColor(
                     applicationContext,
                     getColorIDFromThemeAttribute(
                         this@ValueTransferMainActivity,
@@ -124,7 +122,7 @@ class ValueTransferMainActivity : BaseActivity() {
                     )
                 )
             } else {
-                window.statusBarColor = Color.BLACK
+                Color.BLACK
             }
         }
 
@@ -181,13 +179,14 @@ class ValueTransferMainActivity : BaseActivity() {
          */
         customActionBar = LayoutInflater.from(this).inflate(R.layout.action_bar, null)
         customActionBar.findViewById<TextView>(R.id.tv_actionbar_title)
-        val params = LayoutParams(ActionBar.LayoutParams.WRAP_CONTENT, ActionBar.LayoutParams.WRAP_CONTENT)
+        val params = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         params.apply {
             gravity = Gravity.CENTER
         }
 
         supportActionBar?.setCustomView(customActionBar, params)
         supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+
         /**
          * Enable click on notification when app is currently not on foreground
          */
@@ -443,13 +442,25 @@ class ValueTransferMainActivity : BaseActivity() {
         return root.findViewById(R.id.container)
     }
 
+    private fun getStatusBarHeight(): Int {
+        var result = 0
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId < 0) {
+            result = (25.0f * resources.displayMetrics.density + 0.5F).toInt()
+        } else if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
+
     /**
      * Function that displays a snackbar at the top in the requested view with the requested text, type and length
      */
+    @Suppress("UNUSED_PARAMETER")
     fun displaySnackbar(
         context: Context,
         text: String,
-        view: View = getView(),
+        view: View = getView(true),
         type: String = SNACKBAR_TYPE_SUCCESS,
         isShort: Boolean = true,
         extraPadding: Boolean = false
@@ -457,22 +468,28 @@ class ValueTransferMainActivity : BaseActivity() {
         val snackbar = TSnackbar.make(view, text, if (isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG)
         val snackbarView = snackbar.view
 
+        val layoutParams = (snackbarView.layoutParams as FrameLayout.LayoutParams)
+        val margin = 12.dpToPixels(context)
+        val marginTop = 6.dpToPixels(context) + getStatusBarHeight()
+
+        layoutParams.setMargins(margin, marginTop, margin, layoutParams.bottomMargin)
+
         snackbar.setActionTextColor(Color.WHITE)
 
         when (type) {
-            SNACKBAR_TYPE_SUCCESS -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimaryDarkValueTransfer))
-            SNACKBAR_TYPE_WARNING -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorYellow))
-            SNACKBAR_TYPE_ERROR -> snackbarView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorRed))
+            SNACKBAR_TYPE_SUCCESS -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_dark_green)
+            SNACKBAR_TYPE_WARNING -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_orange)
+            SNACKBAR_TYPE_ERROR -> snackbarView.background = ContextCompat.getDrawable(context, R.drawable.square_rounded_red)
         }
 
         val textView = snackbarView.findViewById<TextView>(com.androidadvance.topsnackbar.R.id.snackbar_text)
         textView.setTextColor(Color.WHITE)
 
-        val density = resources.displayMetrics.density
+//        val density = resources.displayMetrics.density
 
-        if (extraPadding) {
-            snackbarView.setPadding(snackbarView.paddingLeft, (snackbarView.paddingTop + density * 40).toInt(), snackbarView.paddingRight, snackbarView.paddingBottom)
-        }
+//        if (extraPadding) {
+//            snackbarView.setPadding(snackbarView.paddingLeft, (snackbarView.paddingTop + density * 40).toInt(), snackbarView.paddingRight, snackbarView.paddingBottom)
+//        }
 
         snackbar.show()
     }
@@ -625,8 +642,6 @@ class ValueTransferMainActivity : BaseActivity() {
             displaySnackbar(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
         }
 
-        Log.d("VTLOG", "CONTINUED")
-
         return when (idFormat) {
             "id_metadata_range_18plus" -> byteArrayOf(input.toByte())
             else -> input.toByteArray()
@@ -644,11 +659,10 @@ class ValueTransferMainActivity : BaseActivity() {
 
         const val preferencesFileName = "prefs_vt"
         const val preferencesThemeName = "theme"
+
         val APP_THEME = R.style.Theme_ValueTransfer
         const val APP_THEME_DAY = "day"
         const val APP_THEME_NIGHT = "night"
-//        val APP_THEME_LIGHT = R.style.ThemeLight_ValueTransfer
-//        val APP_THEME_DARK = R.style.Theme_ValueTransfer
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"

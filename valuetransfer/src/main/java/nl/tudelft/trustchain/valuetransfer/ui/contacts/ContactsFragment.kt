@@ -1,7 +1,13 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.view.animation.TranslateAnimation
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
@@ -18,8 +24,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
-import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
@@ -29,6 +33,9 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ContactAddDialog
+import nl.tudelft.trustchain.valuetransfer.util.closeKeyboard
+import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
+
 
 class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
@@ -183,6 +190,30 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
+    private fun showView(view: View, callback: (() -> Unit)? = null) {
+        view.animate()
+            .translationY(0.0f)
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?) {
+                    super.onAnimationStart(animation)
+                    view.isVisible = true
+                    callback?.invoke()
+                }
+            })
+    }
+
+    private fun hideView(view: View, callback: (() -> Unit)? = null) {
+        view.animate()
+            .translationY(-view.height.toFloat())
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    view.isVisible = false
+                    callback?.invoke()
+                }
+            })
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
@@ -192,6 +223,31 @@ class ContactsFragment : BaseFragment(R.layout.fragment_contacts_vt) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.actionSearch -> {
+                if (binding.clSearchbar.isVisible) {
+                    val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
+                    binding.clSearchbar.startAnimation(slideUpAnimation)
+                    binding.etSearchContact.text = null
+
+                    Handler().postDelayed(
+                        Runnable {
+                            binding.clSearchbar.isVisible = false
+                        }, 200
+                    )
+
+//                    binding.clSearchbar.isVisible = false
+//                    hideView(binding.clSearchbar) {
+//                        binding.etSearchContact.text = null
+//                    }
+                } else {
+                    binding.clSearchbar.isVisible = true
+                    val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
+                    binding.clSearchbar.startAnimation(slideDownAnimation)
+
+//                    showView(binding.clSearchbar)
+                }
+//                binding.clSearchbar.isVisible = !binding.clSearchbar.isVisible
+            }
             R.id.actionAddContact -> ContactAddDialog(getTrustChainCommunity().myPeer.publicKey, null, null).show(parentFragmentManager, tag)
         }
         return super.onOptionsItemSelected(item)

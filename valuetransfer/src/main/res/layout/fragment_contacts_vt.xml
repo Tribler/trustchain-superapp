@@ -7,14 +7,12 @@
     tools:background="@color/colorPrimaryValueTransfer">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clContacts"
+        android:id="@+id/clSearchbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        android:background="@drawable/square_rounded"
-        tools:background="@drawable/square_rounded_dark_green"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp"
+        android:visibility="gone"
+        tools:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -24,16 +22,17 @@
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?attr/colorPrimaryDark"
+            tools:backgroundTint="@color/colorPrimaryDarkValueTransfer"
             android:hint="Search Contact..."
             android:inputType="text"
             android:paddingStart="45dp"
             android:paddingEnd="40dp"
             android:singleLine="true"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnPrimary"
+            tools:textColor="@color/white"
             android:textColorHint="@color/gray"
             android:textSize="12dp"
-            app:layout_constraintBottom_toTopOf="@+id/tvNoContacts"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -47,8 +46,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/etSearchContact"
             app:layout_constraintStart_toStartOf="@+id/etSearchContact"
             app:layout_constraintTop_toTopOf="@+id/etSearchContact"
-            app:tint="?attr/colorSecondary"
-            tools:tint="@color/gray"/>
+            app:tint="?attr/colorOnPrimary"
+            tools:tint="@color/white"/>
 
         <ImageView
             android:id="@+id/ivSearchBarCancelIcon"
@@ -63,11 +62,38 @@
             app:tint="?attr/colorSecondary"
             tools:tint="@color/gray" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <TextView
+        android:id="@+id/tvAddressBookTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="12dp"
+        android:text="Address Book"
+        android:textColor="?attr/colorOnPrimary"
+        tools:textColor="@color/white"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clSearchbar" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clContacts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        android:background="@drawable/square_rounded"
+        tools:background="@drawable/square_rounded_dark_green"
+        android:paddingHorizontal="4dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvAddressBookTitle">
+
         <TextView
             android:id="@+id/tvNoContacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="12dp"
             android:background="@drawable/pill_rounded"
             android:gravity="center"
             android:paddingHorizontal="12dp"
@@ -79,7 +105,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etSearchContact"
+            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -87,7 +113,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingTop="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -103,7 +128,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
-        android:text="Recent"
+        android:text="Recent Chats"
         android:textColor="?attr/colorOnPrimary"
         tools:textColor="@color/white"
         android:textSize="24sp"
@@ -136,7 +161,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/tvShowHiddenChats"
                 app:layout_constraintTop_toTopOf="@+id/tvShowHiddenChats"
                 app:tint="?attr/colorOnPrimary"
-                tools:tint="@color/white"/>
+                tools:tint="@color/white" />
 
             <TextView
                 android:id="@+id/tvShowHiddenChats"
@@ -196,7 +221,7 @@
         android:layout_marginTop="4dp"
         android:background="@drawable/pill_rounded"
         android:paddingVertical="4dp"
-        android:text="There are no conversations with contacts yet"
+        android:text="There are no chats with contacts yet"
         android:textColor="?attr/colorOnPrimary"
         tools:textColor="@color/white"
         android:textStyle="italic"
