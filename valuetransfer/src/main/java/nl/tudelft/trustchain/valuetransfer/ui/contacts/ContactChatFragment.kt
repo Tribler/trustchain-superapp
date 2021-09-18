@@ -540,8 +540,6 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
                     binding.clSearchFilter.startAnimation(slideUpAnimation)
 
-                    toggleSearchFilterBar()
-
                     binding.etSearchMessage.setText("")
                     binding.ivSearchClearIcon.isVisible = false
                     searchTerm.value = ""
@@ -551,8 +549,9 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
                     binding.clSearchFilter.isVisible = true
                     val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
                     binding.clSearchFilter.startAnimation(slideDownAnimation)
-                    toggleSearchFilterBar(false)
                 }
+
+                toggleSearchFilterBar(!binding.clSearchFilter.isVisible)
             }
         }
         return super.onOptionsItemSelected(item)
@@ -639,7 +638,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             .commit()
     }
 
-    private fun onBackPressed() {
+    fun onBackPressed() {
         toggleSearchFilterBar()
         parentActivity.setActionBarTitle("", null)
         closeKeyboard(requireContext(), etMessage)
@@ -653,7 +652,7 @@ class ContactChatFragment : BaseFragment(R.layout.fragment_contacts_chat) {
             .remove(this)
             .setCustomAnimations(R.anim.enter_from_left, 0)
             .show(previousFragment[0])
-            .commit()
+            .commitNowAllowingStateLoss()
         previousFragment[0].onResume()
     }
 

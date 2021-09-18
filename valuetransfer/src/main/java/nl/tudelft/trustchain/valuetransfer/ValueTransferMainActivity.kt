@@ -9,15 +9,18 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.*
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.ActionBar.LayoutParams
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import com.androidadvance.topsnackbar.TSnackbar
 import com.jaredrummler.blockingdialog.BlockingDialogManager
@@ -29,6 +32,8 @@ import nl.tudelft.ipv8.attestation.WalletAttestation
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -37,6 +42,7 @@ import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog
@@ -45,17 +51,21 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
+import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
+import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
+
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
 
     /**
-     * All fragments within this application, detail fragments excluded
+     * All fragments within this application, contact chat fragment excluded because it depends on arguments
      */
+    private val fragmentManager = supportFragmentManager
     private val walletOverviewFragment = WalletOverviewFragment()
     private val identityFragment = IdentityFragment()
     private val exchangeFragment = ExchangeFragment()
@@ -63,11 +73,8 @@ class ValueTransferMainActivity : BaseActivity() {
     private val settingsFragment = SettingsFragment()
     private val qrScanControllerFragment = QRScanController()
 
-    private val fragmentManager = supportFragmentManager
-
     private lateinit var customActionBar: View
-//    private lateinit var titleView: AppCompatTextView
-//    private lateinit var subtitleView: AppCompatTextView
+    private lateinit var notificationHandler: NotificationHandler
 
     /**
      * Initialize all communities and (database) stores and repo's
@@ -124,11 +131,16 @@ class ValueTransferMainActivity : BaseActivity() {
         setContentView(R.layout.main_activity_vt)
 
         /**
-         * Create database tables if not exist
+         * Create identity database tables if not exist
          */
         val identityCommunity = getCommunity<IdentityCommunity>()!!
         identityCommunity.createIdentitiesTable()
         identityCommunity.createAttributesTable()
+
+        /**
+         * Initialize notification handler and handle notification click intents
+         */
+        notificationHandler = NotificationHandler.getInstance(this)
 
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
@@ -139,12 +151,21 @@ class ValueTransferMainActivity : BaseActivity() {
             .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
             .add(R.id.container, qrScanControllerFragment, qrScanControllerFragmentTag).hide(qrScanControllerFragment)
             .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-            .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).commit()
+            .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
+            .commit()
+
+        fragmentManager.executePendingTransactions()
 
         /**
          * Create listeners for bottom navigation view
          */
         bottomNavigationViewListeners()
+
+        /**
+         * PeerChat community callbacks when a message is received
+         */
+        val peerChatCommunity = getCommunity<PeerChatCommunity>()!!
+        peerChatCommunity.setOnMessageCallback(::onMessageCallback)
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -167,6 +188,125 @@ class ValueTransferMainActivity : BaseActivity() {
 
         supportActionBar?.setCustomView(customActionBar, params)
         supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+        /**
+         * Enable click on notification when app is currently not on foreground
+         */
+        if (intent != null && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+            onNewIntent(intent)
+        }
+    }
+
+    /**
+     * Enable notification click intents
+     */
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        if (intent != null) {
+            Handler().postDelayed(
+                Runnable {
+                    notificationIntentController(intent)
+                },
+                1000
+            )
+        }
+    }
+
+    /**
+     * Controls the behaviour of the notification click intents to the correct fragment
+     */
+    private fun notificationIntentController(intent: Intent) {
+        val fragmentTag = intent.extras?.getString(ARG_FRAGMENT)
+
+        if (fragmentTag != null) {
+            closeAllDialogs()
+
+            when (fragmentTag) {
+                contactChatFragmentTag -> {
+                    when (val fragment = notificationChatIntent(intent)) {
+                        is ContactChatFragment -> {
+                            val previousFragmentTag = fragment.arguments?.getString(ARG_PARENT) ?: walletOverviewFragmentTag
+                            val previousFragment = getFragmentByTag(previousFragmentTag)!!
+
+                            if (previousFragmentTag == contactChatFragmentTag) {
+                                if (previousFragment.arguments?.getString(ARG_PUBLIC_KEY) != fragment.arguments?.getString(ARG_PUBLIC_KEY)) {
+                                    fragment.arguments = fragment.arguments?.apply {
+                                        putString(ARG_PARENT, previousFragment.arguments?.getString(ARG_PARENT))
+                                    }
+
+                                    fragmentManager.beginTransaction().apply {
+                                        remove(previousFragment)
+                                        add(R.id.container, fragment, fragmentTag)
+                                    }.commit()
+
+
+                                }
+                            } else {
+                                fragmentManager.beginTransaction().apply {
+                                    hide(previousFragment)
+                                    add(R.id.container, fragment, fragmentTag)
+                                }.commit()
+                            }
+                        }
+                        is ContactsFragment -> {
+                            selectBottomNavigationItem(contactsFragmentTag)
+                        }
+                    }
+                }
+                else -> {
+                    getActiveFragment().let { previousFragment ->
+                        if (previousFragment is ContactChatFragment){
+                            previousFragment.onBackPressed()
+                        } else if (previousFragment is SettingsFragment) {
+                            previousFragment.onBackPressed(false)
+                        }
+                    }
+
+                    fragmentManager.executePendingTransactions()
+
+                    if (fragmentTag == settingsFragmentTag) {
+                        detailFragment(settingsFragmentTag, Bundle())
+                    } else {
+                        selectBottomNavigationItem(fragmentTag)
+                        getFragmentByTag(fragmentTag)!!.onResume()
+                    }
+                }
+            }
+        }
+    }
+
+    fun getActiveFragment(): Fragment {
+        return fragmentManager.fragments.first {
+            it.isVisible
+        }
+    }
+
+    private fun notificationChatIntent(intent: Intent): Fragment {
+        val publicKeyString = intent.extras?.getString(ARG_PUBLIC_KEY)
+
+        return if (publicKeyString != null) {
+            try {
+                val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyString.hexToBytes())
+                val contact = getStore<ContactStore>()!!.getContactFromPublicKey(publicKey)
+
+                ContactChatFragment().apply {
+                    arguments = bundleOf(
+                        ARG_PUBLIC_KEY to publicKeyString,
+                        ARG_NAME to (contact?.name ?: "Unknown contact"),
+                        ARG_PARENT to getActiveFragment().tag
+                    )
+                }
+            } catch(e: Exception) {
+                e.printStackTrace()
+                contactsFragment
+            }
+        } else {
+            contactsFragment
+        }
+    }
+
+    fun notificationHandler(): NotificationHandler {
+        return notificationHandler
     }
 
     /**
@@ -227,15 +367,13 @@ class ValueTransferMainActivity : BaseActivity() {
      * Controller from fragment to fragment
      */
     private fun switchFragment(fragment: Fragment) {
-        val previousFragment = fragmentManager.fragments.first {
-            it.isVisible
-        }
+        val previousFragment = getActiveFragment()
 
-        fragmentManager.beginTransaction()
-            .hide(previousFragment)
-            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
-            .show(fragment)
-            .commit()
+        fragmentManager.beginTransaction().apply {
+            hide(previousFragment)
+            setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+            show(fragment)
+        }.commit()
         fragment.onResume()
     }
 
@@ -243,29 +381,27 @@ class ValueTransferMainActivity : BaseActivity() {
      * Controller from fragment to detail view fragment
      */
     fun detailFragment(tag: String, args: Bundle) {
-        val previousFragment = fragmentManager.fragments.first {
-            it.isVisible
-        }
+        val previousFragment = getActiveFragment()
 
         when (tag) {
             contactChatFragmentTag -> {
                 val contactChatFragment = ContactChatFragment()
                 contactChatFragment.arguments = args
 
-                fragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.exit_to_left)
-                    .hide(previousFragment)
-                    .setCustomAnimations(R.anim.enter_from_right, 0)
-                    .add(R.id.container, contactChatFragment, contactChatFragmentTag)
-                    .commit()
+                fragmentManager.beginTransaction().apply {
+                    setCustomAnimations(0, R.anim.exit_to_left)
+                    hide(previousFragment)
+                    setCustomAnimations(R.anim.enter_from_right, 0)
+                    add(R.id.container, contactChatFragment, contactChatFragmentTag)
+                }.commit()
             }
             settingsFragmentTag -> {
-                fragmentManager.beginTransaction()
-                    .setCustomAnimations(0, R.anim.exit_to_left)
-                    .hide(previousFragment)
-                    .setCustomAnimations(R.anim.enter_from_right, 0)
-                    .show(settingsFragment)
-                    .commit()
+                fragmentManager.beginTransaction().apply {
+                    setCustomAnimations(0, R.anim.exit_to_left)
+                    hide(previousFragment)
+                    setCustomAnimations(R.anim.enter_from_right, 0)
+                    show(settingsFragment)
+                }.commit()
                 settingsFragment.onResume()
             }
         }
@@ -409,6 +545,15 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
+     * Create a callback on receipt of a message within the peerchat community
+     */
+    private fun onMessageCallback(peer: Peer, chatMessage: ChatMessage) {
+        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
+
+        notificationHandler.notify(peer, chatMessage)
+    }
+
+    /**
      * On receipt of a chunk of the requested attestation execute the following
      */
     private fun attestationChunkCallback(peer: Peer, i: Int) {
@@ -512,5 +657,9 @@ class ValueTransferMainActivity : BaseActivity() {
         const val ARG_PUBLIC_KEY = "public_key"
         const val ARG_NAME = "name"
         const val ARG_PARENT = "parent_tag"
+        const val ARG_FRAGMENT = "fragment"
+
+        const val NOTIFICATION_INTENT_CHAT = 1
+        const val NOTIFICATION_INTENT_TRANSACTION = 2
     }
 }

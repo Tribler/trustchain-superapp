@@ -33,6 +33,8 @@ class PeerChatCommunity(
 ) : Community() {
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
+    private lateinit var onMessageCallback: (peer: Peer, chatMessage: ChatMessage) -> Unit
+
     init {
         messageHandlers[MessageId.MESSAGE] = ::onMessagePacket
         messageHandlers[MessageId.ACK] = ::onAckPacket
@@ -248,6 +250,10 @@ class PeerChatCommunity(
             e.printStackTrace()
         }
 
+        if (this::onMessageCallback.isInitialized) {
+            this.onMessageCallback(peer, chatMessage)
+        }
+
         Log.d("PeerChat", "Sending ack to ${chatMessage.id}")
         sendAck(peer, chatMessage.id)
 
@@ -261,6 +267,10 @@ class PeerChatCommunity(
                 else -> sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
             }
         }
+    }
+
+    fun setOnMessageCallback(f: (peer: Peer, chatMessage: ChatMessage) -> Unit) {
+        this.onMessageCallback = f
     }
 
     private fun onAck(peer: Peer, payload: AckPayload) {

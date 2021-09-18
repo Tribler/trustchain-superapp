@@ -94,7 +94,9 @@
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.ValueTransfer" />
+            android:theme="@style/Theme.ValueTransfer"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop" />
 
         <activity
             android:name="com.example.musicdao.MusicService"
