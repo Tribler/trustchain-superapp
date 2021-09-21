@@ -44,12 +44,17 @@ class QRCodeUtils(private val context: Context) {
      * from: https://demonuts.com/kotlin-generate-qr-code/
      * Creates a QR code from text
      */
-    fun createQR(text: String, size: Int = QRCodeSize): Bitmap? {
+    fun createQR(
+        text: String,
+        size: Int = QRCodeSize,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
+    ): Bitmap? {
         if (text.isEmpty()) {
             Toast.makeText(context, "Enter String!", Toast.LENGTH_SHORT).show()
         } else {
             try {
-                return textToImageEncode(text, size)
+                return textToImageEncode(text, size, pColor, bColor)
             } catch (e: WriterException) {
                 e.printStackTrace()
             }
@@ -61,7 +66,12 @@ class QRCodeUtils(private val context: Context) {
      * Encode the text into a bitmap
      */
     @Throws(WriterException::class)
-    private fun textToImageEncode(value: String, size: Int = QRCodeSize): Bitmap? {
+    private fun textToImageEncode(
+        value: String,
+        size: Int = QRCodeSize,
+        pColor: Int = pixelColor,
+        bColor: Int = backgroundColor
+    ): Bitmap? {
         val bitMatrix: BitMatrix
         try {
             bitMatrix = MultiFormatWriter().encode(
@@ -82,9 +92,9 @@ class QRCodeUtils(private val context: Context) {
             val offset = y * bitMatrixWidth
             for (x in 0 until bitMatrixWidth) {
                 pixels[offset + x] = if (bitMatrix.get(x, y))
-                    ContextCompat.getColor(context, R.color.black)
+                    ContextCompat.getColor(context, pColor)
                 else
-                    ContextCompat.getColor(context, R.color.white)
+                    ContextCompat.getColor(context, bColor)
             }
         }
         val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_8888)
@@ -95,5 +105,7 @@ class QRCodeUtils(private val context: Context) {
 
     companion object {
         const val QRCodeSize = 500
+        var pixelColor = R.color.black
+        var backgroundColor = R.color.white
     }
 }

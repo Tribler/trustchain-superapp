@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionSendPhotoVideo"
+        android:title="Photo or Video" />
+<!--    <item-->
+<!--        android:id="@+id/actionSendFile"-->
+<!--        android:title="File" />-->
+    <item
+        android:id="@+id/actionSendLocation"
+        android:title="Location" />
+    <item
+        android:id="@+id/actionSendContact"
+        android:title="Contact" />
+    <item
+        android:id="@+id/actionSendIdentityAttribute"
+        android:title="Identity Attribute" />
+    <item
+        android:id="@+id/actionTransferMoney"
+        android:title="Transfer Money" />
+    <item
+        android:id="@+id/actionRequestMoney"
+        android:title="Request Money" />
+
+</menu>

@@ -47,7 +47,11 @@ data class MessageAttachment constructor(
 
     companion object {
         const val TYPE_IMAGE = "image"
+        const val TYPE_FILE = "file"
         const val TYPE_CONTACT = "contact"
+        const val TYPE_LOCATION = "location"
+        const val TYPE_IDENTITY_ATTRIBUTE = "identity_attribute"
+        const val TYPE_TRANSFER_REQUEST = "transfer_request"
 
         fun getFile(context: Context, id: String): File {
             val path = "" + context.filesDir + "/" + id

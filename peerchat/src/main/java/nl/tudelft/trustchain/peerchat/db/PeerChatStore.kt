@@ -54,7 +54,7 @@ class PeerChatStore(context: Context) {
         )
     }
 
-    private fun getAllMessages(): Flow<List<ChatMessage>> {
+    fun getAllMessages(): Flow<List<ChatMessage>> {
         return database.dbMessageQueries.getAll(messageMapper)
             .asFlow().mapToList()
     }
@@ -121,6 +121,10 @@ class PeerChatStore(context: Context) {
             messageMapper
         )
             .asFlow().mapToList()
+    }
+
+    fun deleteMessagesOfPublicKey(publicKey: PublicKey) {
+        database.dbMessageQueries.deleteMessagesOfPublicKey(publicKey.keyToBin(), publicKey.keyToBin())
     }
 
     companion object {

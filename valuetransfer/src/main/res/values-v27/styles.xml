@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimaryValueTransfer</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryValueTransfer</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryValueTransfer</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
+    </style>
+
+    <style name="ActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="titleTextStyle">@style/ActionBarTitleStyle</item>
+        <item name="subtitleTextStyle">@style/ActionBarSubTitleStyle</item>
+    </style>
+
+    <style name="ActionBarTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">24dp</item>
+    </style>
+
+    <style name="ActionBarSubTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="OptionsMenu" parent="Widget.AppCompat.PopupMenu.Overflow" >
+        <item name="android:overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">4.0dip</item>
+    </style>
+</resources>

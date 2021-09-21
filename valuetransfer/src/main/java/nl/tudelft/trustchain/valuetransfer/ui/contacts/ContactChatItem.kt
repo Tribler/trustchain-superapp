@@ -1,0 +1,17 @@
+package nl.tudelft.trustchain.valuetransfer.ui.contacts
+
+import com.mattskala.itemadapter.Item
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+
+data class ContactChatItem(
+    val chatMessage: ChatMessage,
+    val transaction: TrustChainBlock?,
+    val loadMoreMessages: Boolean,
+    val shouldShowDate: Boolean,
+    val transactionIsReceived: Boolean,
+) : Item() {
+    override fun areItemsTheSame(other: Item): Boolean {
+        return other is ContactChatItem && other.chatMessage.id == chatMessage.id
+    }
+}

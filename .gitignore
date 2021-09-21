@@ -8,3 +8,4 @@ gossipML/.cxx
 **.settings
 **.classpath
 .vscode/
+.DS_Store
