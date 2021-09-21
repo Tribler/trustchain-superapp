@@ -58,6 +58,16 @@
         <action
             android:id="@+id/action_conversationFragment_to_transferFragment"
             app:destination="@id/transferFragment" />
+        <action
+            android:id="@+id/action_conversationFragment_to_sendContactsFragment"
+            app:destination="@id/sendContactsFragment" />
+        <action
+            android:id="@+id/action_conversationFragment_to_addContactFragment"
+            app:destination="@id/addContactFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
     </fragment>
     <fragment
         android:id="@+id/addNearbyFragment"
@@ -100,5 +110,13 @@
         <argument
             android:name="is_request"
             app:argType="boolean" />
+    </fragment>
+    <fragment
+        android:id="@+id/sendContactsFragment"
+        android:name="nl.tudelft.trustchain.peerchat.ui.conversation.SendContactFragment"
+        android:label="Send Contacts"
+        tools:layout="@layout/fragment_send_contact">
+        <argument android:name="name" />
+        <argument android:name="public_key" />
     </fragment>
 </navigation>

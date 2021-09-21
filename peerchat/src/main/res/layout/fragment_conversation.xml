@@ -62,6 +62,15 @@
             fab:fab_icon="@drawable/ic_baseline_add_photo_alternate_24"
             fab:fab_title="Send attachment" />
 
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btnSendContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@color/green"
+            fab:fab_colorPressed="@color/green"
+            fab:fab_icon="@drawable/ic_baseline_person_24"
+            fab:fab_title="Send contact" />
+
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
 

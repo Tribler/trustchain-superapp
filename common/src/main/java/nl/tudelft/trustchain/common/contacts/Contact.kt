@@ -3,10 +3,10 @@ package nl.tudelft.trustchain.common.contacts
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.json.JSONObject
-import java.io.Serializable
 
 data class Contact(
     val name: String,
@@ -26,23 +26,25 @@ data class Contact(
         return result
     }
 
-    fun serialize(): ByteArray {
+    override fun serialize(): ByteArray {
         val json = JSONObject()
-        json.put("name", name)
-        json.put("public_key", publicKey.keyToBin().toHex())
-
+        json.put(ARG_NAME, name)
+        json.put(ARG_PUBLIC_KEY, publicKey.keyToBin().toHex())
         return json.toString().toByteArray()
     }
 
     companion object : Deserializable<Contact> {
-        override fun deserialize(buffer: ByteArray, offset: Int): Pair<Contact, Int> {
-            val offsetBuffer = buffer.copyOfRange(0, buffer.size)
-            val json = JSONObject(offsetBuffer.decodeToString())
-            val name = json.getString("name")
-            val publicKeyString = json.getString("public_key")
-            val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyString.hexToBytes())
+        val ARG_PUBLIC_KEY = "public_key"
+        val ARG_NAME = "name"
 
-            return Pair(Contact(name, publicKey), 0)
+        override fun deserialize(buffer: ByteArray, offset: Int): Pair<Contact, Int> {
+            val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
+            val json = JSONObject(offsetBuffer.decodeToString())
+            val jname = json.getString(ARG_NAME)
+            val publicKeyBin = json.getString(ARG_PUBLIC_KEY).hexToBytes()
+            val jpublicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyBin)
+            val contact = Contact(jname, jpublicKey)
+            return Pair(contact, 0)
         }
     }
 }
