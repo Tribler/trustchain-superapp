@@ -123,6 +123,7 @@ dependencies {
     implementation project(':ig-ssi')
     implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
+    implementation project(':data-vault')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }

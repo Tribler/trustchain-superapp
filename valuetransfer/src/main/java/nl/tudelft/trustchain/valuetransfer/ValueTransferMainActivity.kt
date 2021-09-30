@@ -313,25 +313,6 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
-     * Change title or subtitle of action bar
-     */
-    fun setActionBarTitle(title: String?, isTitle: Boolean = true) {
-        if (isTitle) {
-            supportActionBar!!.title = title
-        } else {
-            supportActionBar!!.subtitle = title
-        }
-    }
-
-    /**
-     * Switch visibility of action bar
-     */
-    fun toggleActionBar(state: Boolean) {
-        supportActionBar!!.setDisplayHomeAsUpEnabled(state)
-        supportActionBar!!.setHomeButtonEnabled(state)
-    }
-
-    /**
      * Switch visibility of bottom navigation view
      */
     fun toggleBottomNavigation(state: Boolean) {

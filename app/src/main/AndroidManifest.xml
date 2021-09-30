@@ -109,6 +109,11 @@
                 android:resource="@xml/searchable" />
         </activity>
 
+        <activity
+            android:name="nl.tudelft.trustchain.datavault.DataVaultMainActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"
+            android:theme="@style/Theme.DataVault" />
+
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
 
         <service

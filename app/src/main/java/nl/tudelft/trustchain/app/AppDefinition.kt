@@ -8,6 +8,7 @@ import nl.tudelft.trustchain.FOC.MainActivityFOC
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
+import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
@@ -110,5 +111,11 @@ enum class AppDefinition(
         "Value Transfer",
         R.color.colorPrimaryValueTransfer,
         ValueTransferMainActivity::class.java
+    ),
+    DATAVAULT(
+        R.drawable.ic_data_vault,
+        "Data Vault",
+        R.color.colorPrimaryValueTransfer,
+        DataVaultMainActivity::class.java
     )
 }
