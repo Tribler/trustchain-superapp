@@ -1,31 +1,24 @@
 package nl.tudelft.trustchain.valuetransfer.ui.settings
 
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.*
 import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentSettingsBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 
-class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
+class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     private val binding by viewBinding(FragmentSettingsBinding::bind)
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var notificationHandler: NotificationHandler
 
     private val notificationsStatus = MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_DISABLED)
     private val notificationsMessageStatus = MutableLiveData(NotificationHandler.NOTIFICATION_STATUS_UNKNOWN)
@@ -43,10 +36,6 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
-
-        parentActivity = requireActivity() as ValueTransferMainActivity
-        sharedPreferences = parentActivity.getSharedPreferences(ValueTransferMainActivity.preferencesFileName, Context.MODE_PRIVATE)
-        notificationHandler = parentActivity.notificationHandler()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -55,30 +44,40 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
 
         onResume()
 
-        val theme = sharedPreferences.getString(ValueTransferMainActivity.preferencesThemeName, ValueTransferMainActivity.APP_THEME_DAY)
+        val theme = appPreferences.getCurrentTheme()
 
-        binding.switchTheme.isChecked = theme != ValueTransferMainActivity.APP_THEME_DAY
-        binding.switchTheme.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putString(
-                ValueTransferMainActivity.preferencesThemeName,
-                when (isChecked) {
-                    true -> ValueTransferMainActivity.APP_THEME_NIGHT
-                    else -> ValueTransferMainActivity.APP_THEME_DAY
+        binding.tvSelectedTheme.text = when (theme) {
+            AppPreferences.APP_THEME_DAY -> resources.getString(R.string.text_theme_day)
+            AppPreferences.APP_THEME_NIGHT -> resources.getString(R.string.text_theme_night)
+            AppPreferences.APP_THEME_SYSTEM -> resources.getString(R.string.text_theme_system)
+            else -> resources.getString(R.string.text_theme_day)
+        }
+
+        binding.clThemeSelector.setOnClickListener {
+            OptionsDialog(
+                R.menu.settings_theme_options,
+                "Choose Theme",
+                optionSelected = { _, item ->
+                    when (item.itemId) {
+                        R.id.actionThemeDay -> AppPreferences.APP_THEME_DAY
+                        R.id.actionThemeNight -> AppPreferences.APP_THEME_NIGHT
+                        R.id.actionThemeSystem -> AppPreferences.APP_THEME_SYSTEM
+                        else -> AppPreferences.APP_THEME_DAY
+                    }.run {
+                        appPreferences.setTheme(this)
+                        appPreferences.switchTheme(this)
+                        parentActivity.reloadActivity()
+                    }
                 }
-            ).apply()
-
-            when (isChecked) {
-                true -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-
-            parentActivity.reloadActivity()
+            ).show(parentFragmentManager, tag)
         }
 
         notificationsStatus.observe(
             viewLifecycleOwner,
             Observer {
-                binding.tvNotificationStatus.text = if (it == NotificationHandler.NOTIFICATION_STATUS_DISABLED) NotificationHandler.NOTIFICATION_STATUS_DISABLED else ""
+                binding.tvNotificationStatus.text = if (it == NotificationHandler.NOTIFICATION_STATUS_DISABLED) {
+                    NotificationHandler.NOTIFICATION_STATUS_DISABLED
+                } else ""
                 binding.llNotificationsSpecific.isVisible = it == NotificationHandler.NOTIFICATION_STATUS_ENABLED
             }
         )
@@ -110,15 +109,10 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
                     action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
                     putExtra(Settings.EXTRA_APP_PACKAGE, parentActivity.packageName)
                 }
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
+                else -> {
                     action = "android.settings.APP_NOTIFICATION_SETTINGS"
                     putExtra("app_package", parentActivity.packageName)
                     putExtra("app_uid", parentActivity.applicationInfo.uid)
-                }
-                else -> {
-                    action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                    addCategory(Intent.CATEGORY_DEFAULT)
-                    data = Uri.parse("package:" + parentActivity.packageName)
                 }
             }
         }
@@ -129,13 +123,29 @@ class SettingsFragment : BaseFragment(R.layout.fragment_settings) {
     override fun onResume() {
         super.onResume()
 
-        parentActivity.toggleActionBar(true)
-        parentActivity.setActionBarTitle("Settings", null)
-        parentActivity.toggleBottomNavigation(false)
+        parentActivity.apply {
+            setActionBarTitle(resources.getString(R.string.menu_navigation_settings), null)
+            toggleActionBar(true)
+            toggleBottomNavigation(false)
+        }
 
-        notificationsStatus.postValue(if (NotificationManagerCompat.from(requireContext()).areNotificationsEnabled()) NotificationHandler.NOTIFICATION_STATUS_ENABLED else NotificationHandler.NOTIFICATION_STATUS_DISABLED)
-        notificationsMessageStatus.postValue(notificationHandler.getNotificationChannelStatus(NotificationHandler.NOTIFICATION_CHANNEL_MESSAGES_ID))
-        notificationsTransactionStatus.postValue(notificationHandler.getNotificationChannelStatus(NotificationHandler.NOTIFICATION_CHANNEL_TRANSACTIONS_ID))
+        notificationsStatus.postValue(
+            if (NotificationManagerCompat.from(requireContext()).areNotificationsEnabled()) {
+                NotificationHandler.NOTIFICATION_STATUS_ENABLED
+            } else {
+                NotificationHandler.NOTIFICATION_STATUS_DISABLED
+            }
+        )
+        notificationsMessageStatus.postValue(
+            notificationHandler.getNotificationChannelStatus(
+                NotificationHandler.NOTIFICATION_CHANNEL_MESSAGES_ID
+            )
+        )
+        notificationsTransactionStatus.postValue(
+            notificationHandler.getNotificationChannelStatus(
+                NotificationHandler.NOTIFICATION_CHANNEL_TRANSACTIONS_ID
+            )
+        )
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

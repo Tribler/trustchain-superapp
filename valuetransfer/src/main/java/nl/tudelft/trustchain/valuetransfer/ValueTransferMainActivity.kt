@@ -1,13 +1,16 @@
 package nl.tudelft.trustchain.valuetransfer
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.TypedValue
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -23,6 +26,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.MutableLiveData
 import com.androidadvance.topsnackbar.TSnackbar
+import com.google.android.material.bottomnavigation.BottomNavigationItemView
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
 import kotlinx.android.synthetic.main.main_activity_vt.*
 import nl.tudelft.ipv8.Community
@@ -34,6 +39,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -43,6 +49,7 @@ import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog
@@ -51,6 +58,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
+import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
@@ -70,10 +78,11 @@ class ValueTransferMainActivity : BaseActivity() {
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
     private val settingsFragment = SettingsFragment()
-    private val qrScanControllerFragment = QRScanController()
+    private val qrScanController = QRScanController()
 
     private lateinit var customActionBar: View
     private lateinit var notificationHandler: NotificationHandler
+    private lateinit var appPreferences: AppPreferences
 
     /**
      * Initialize all communities and (database) stores and repo's
@@ -97,23 +106,22 @@ class ValueTransferMainActivity : BaseActivity() {
     private var balance = MutableLiveData("0.00")
     private var verifiedBalance = MutableLiveData("0.00")
 
+    @SuppressLint("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
 
         /**
-         * Switch to day or night version of theme
+         * Initialize app preferences class and set theme saved in it
          */
-        val themePrefs = getSharedPreferences(preferencesFileName, Context.MODE_PRIVATE).getString(preferencesThemeName, APP_THEME_DAY)
-        when (themePrefs) {
-            APP_THEME_DAY -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
+        appPreferences = AppPreferences.getInstance(this)
+        val currentTheme = appPreferences.getCurrentTheme()
+        appPreferences.switchTheme(currentTheme)
 
         super.onCreate(savedInstanceState)
 
         // Set status bar to black on Lollipop when in day mode
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            window.statusBarColor = if (themePrefs == APP_THEME_NIGHT) {
+            window.statusBarColor = if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
                 ContextCompat.getColor(
                     applicationContext,
                     getColorIDFromThemeAttribute(
@@ -147,7 +155,7 @@ class ValueTransferMainActivity : BaseActivity() {
             .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
             .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
             .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-            .add(R.id.container, qrScanControllerFragment, qrScanControllerFragmentTag).hide(qrScanControllerFragment)
+            .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
             .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
             .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
             .commit()
@@ -155,15 +163,24 @@ class ValueTransferMainActivity : BaseActivity() {
         fragmentManager.executePendingTransactions()
 
         /**
-         * Create listeners for bottom navigation view
+         * Bottom navigation view listener and set icon of qr scan controller the height without title
          */
         bottomNavigationViewListeners()
 
+        val bottomView: BottomNavigationMenuView = bottomNavigationView.getChildAt(0) as BottomNavigationMenuView
+        (bottomView.getChildAt(2) as BottomNavigationItemView).setIconSize(
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, 40f,
+                resources.displayMetrics
+            ).toInt()
+        )
+
         /**
-         * PeerChat community callbacks when a message is received
+         * PeerChat community callbacks when a message is received and create archive and muted chat database tables
          */
         val peerChatCommunity = getCommunity<PeerChatCommunity>()!!
         peerChatCommunity.setOnMessageCallback(::onMessageCallback)
+        peerChatCommunity.createContactStateTable()
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -190,10 +207,22 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        if (intent != null && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity() && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             onNewIntent(intent)
         }
     }
+
+//    /**
+//     * Switch to day, night or system default version of theme
+//     */
+//    fun switchTheme(theme: String?) {
+//        when (theme) {
+//            AppPreferences.APP_THEME_DAY -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//            AppPreferences.APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//            AppPreferences.APP_THEME_SYSTEM -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+//            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//        }
+//    }
 
     /**
      * Enable notification click intents
@@ -201,13 +230,10 @@ class ValueTransferMainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        if (intent != null) {
-            Handler().postDelayed(
-                Runnable {
-                    notificationIntentController(intent)
-                },
-                1000
-            )
+        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity()) {
+            Handler().postDelayed({
+                notificationIntentController(intent)
+            }, 1000)
         }
     }
 
@@ -274,7 +300,7 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
-    fun getActiveFragment(): Fragment {
+    private fun getActiveFragment(): Fragment {
         return fragmentManager.fragments.first {
             it.isVisible
         }
@@ -304,8 +330,18 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Return the instance of notification handler
+     */
     fun notificationHandler(): NotificationHandler {
         return notificationHandler
+    }
+
+    /**
+     * Return the instance of app preferences class
+     */
+    fun appPreferences(): AppPreferences {
+        return appPreferences
     }
 
     /**
@@ -344,9 +380,7 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     private fun bottomNavigationViewListeners() {
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
-            val previousTag = fragmentManager.fragments.first {
-                it.isVisible
-            }.tag
+            val previousTag = getActiveFragment().tag
 
             when (menuItem.itemId) {
                 R.id.walletOverviewFragment -> if (previousTag != walletOverviewFragmentTag) switchFragment(walletOverviewFragment)
@@ -354,7 +388,7 @@ class ValueTransferMainActivity : BaseActivity() {
                 R.id.exchangeFragment -> if (previousTag != exchangeFragmentTag) switchFragment(exchangeFragment)
                 R.id.contactsFragment -> if (previousTag != contactsFragmentTag) switchFragment(contactsFragment)
                 R.id.qrScanControllerFragment -> {
-                    qrScanControllerFragment.initiateScan()
+                    qrScanController.initiateScan()
                     return@setOnNavigationItemSelectedListener false
                 }
             }
@@ -409,7 +443,7 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Function that returns the fragment using a given tag
      */
-    fun getFragmentByTag(tag: String): Fragment? {
+    private fun getFragmentByTag(tag: String): Fragment? {
         return when (tag) {
             walletOverviewFragmentTag -> walletOverviewFragment
             identityFragmentTag -> identityFragment
@@ -429,18 +463,18 @@ class ValueTransferMainActivity : BaseActivity() {
             fragment.dismissAllowingStateLoss()
         }
     }
-
-    /**
-     * Function that returns the rootview of the activity or the containerview that is below the actionbar
-     */
-    fun getView(isRoot: Boolean = false): View {
-        val root = window.decorView.rootView
-        if (isRoot) {
-            return root
-        }
-
-        return root.findViewById(R.id.container)
-    }
+//
+//    /**
+//     * Function that returns the rootview of the activity or the containerview that is below the actionbar
+//     */
+//    private fun getView(isRoot: Boolean = false): View {
+//        val root = window.decorView.rootView
+//        if (isRoot) {
+//            return root
+//        }
+//
+//        return root.findViewById(R.id.container)
+//    }
 
     private fun getStatusBarHeight(): Int {
         var result = 0
@@ -460,7 +494,7 @@ class ValueTransferMainActivity : BaseActivity() {
     fun displaySnackbar(
         context: Context,
         text: String,
-        view: View = getView(true),
+        view: View = window.decorView.rootView,
         type: String = SNACKBAR_TYPE_SUCCESS,
         isShort: Boolean = true,
         extraPadding: Boolean = false
@@ -531,7 +565,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Enable general accessibility for the QRScanController
      */
     fun getQRScanController(): QRScanController {
-        return qrScanControllerFragment
+        return qrScanController
     }
 
     /**
@@ -556,12 +590,55 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
-     * Create a callback on receipt of a message within the peerchat community
+     * Create a callback on receipt of a message within the peerchat community for notifications and contact status handling (archived, muted, blocked)
      */
-    private fun onMessageCallback(peer: Peer, chatMessage: ChatMessage) {
+    private fun onMessageCallback(community: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) {
         Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
 
-        notificationHandler.notify(peer, chatMessage)
+
+        if (!getCommunity<IdentityCommunity>()!!.hasIdentity()) {
+            return
+        }
+
+        val contactState = getStore<PeerChatStore>()!!.getContactState(chatMessage.sender)
+
+        // Don't allow messages to be received while the contact is blocked, but acknowledge to stop resending
+        if (contactState != null && contactState.isBlocked) {
+            community.sendAck(peer, chatMessage.id)
+            return
+        }
+
+        // Check if message has already been delivered (by ip or bluetooth packet)
+        if (community.getDatabase().getMessageById(chatMessage.id) != null) {
+            return
+        }
+
+        try {
+            community.getDatabase().addMessage(chatMessage)
+        } catch (e: SQLiteConstraintException) {
+            e.printStackTrace()
+        }
+
+        // Only sent notification when contact is not archived or muted (or blocked)
+        if (contactState == null || (!contactState.isArchived && !contactState.isMuted)) {
+            notificationHandler.notify(peer, chatMessage)
+        }
+
+        community.sendAck(peer, chatMessage.id)
+
+        // Request attachment
+        if (chatMessage.attachment != null) {
+            when (chatMessage.attachment!!.type) {
+                MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
+                MessageAttachment.TYPE_CONTACT -> return
+                MessageAttachment.TYPE_LOCATION -> return
+                MessageAttachment.TYPE_TRANSFER_REQUEST -> return
+                else -> community.sendAttachmentRequest(
+                    peer,
+                    chatMessage.attachment!!.content.toHex()
+                )
+            }
+        }
     }
 
     /**
@@ -621,10 +698,10 @@ class ValueTransferMainActivity : BaseActivity() {
     @Suppress("UNUSED_PARAMETER")
     private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
 
-        closeAllDialogs()
-
         val parsedMetadata = JSONObject(metadata)
         val idFormat = parsedMetadata.optString("id_format", ID_METADATA)
+
+        closeAllDialogs()
 
         val input = BlockingDialogManager.getInstance()
             .showAndWait<String?>(this, IdentityAttestationConfirmDialog(attributeName, idFormat, this))
@@ -647,16 +724,17 @@ class ValueTransferMainActivity : BaseActivity() {
         const val identityFragmentTag = "identity_fragment"
         const val exchangeFragmentTag = "exchange_fragment"
         const val contactsFragmentTag = "contacts_fragment"
-        const val qrScanControllerFragmentTag = "qrscancontroller_fragment"
+        const val qrScanControllerTag = "qrscancontroller"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
 
-        const val preferencesFileName = "prefs_vt"
-        const val preferencesThemeName = "theme"
-
-        val APP_THEME = R.style.Theme_ValueTransfer
-        const val APP_THEME_DAY = "day"
-        const val APP_THEME_NIGHT = "night"
+//        const val preferencesFileName = "prefs_vt"
+//        const val preferencesThemeName = "theme"
+//
+//        val APP_THEME = R.style.Theme_ValueTransfer
+//        const val APP_THEME_DAY = "day"
+//        const val APP_THEME_NIGHT = "night"
+//        const val APP_THEME_SYSTEM = "system"
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"

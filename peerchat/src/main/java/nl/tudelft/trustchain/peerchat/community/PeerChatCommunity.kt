@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.peerchat.community
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.location.Location
+import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -33,7 +34,7 @@ class PeerChatCommunity(
 ) : Community() {
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
-    private lateinit var onMessageCallback: (peer: Peer, chatMessage: ChatMessage) -> Unit
+    private lateinit var onMessageCallback: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
 
     init {
         messageHandlers[MessageId.MESSAGE] = ::onMessagePacket
@@ -190,14 +191,14 @@ class PeerChatCommunity(
         }
     }
 
-    private fun sendAck(peer: Peer, id: String) {
+    fun sendAck(peer: Peer, id: String) {
         val payload = AckPayload(id)
         val packet = serializePacket(MessageId.ACK, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
     }
 
-    private fun sendAttachmentRequest(peer: Peer, id: String) {
+    fun sendAttachmentRequest(peer: Peer, id: String) {
         val payload = AttachmentRequestPayload(id)
         val packet = serializePacket(MessageId.ATTACHMENT_REQUEST, payload)
         logger.debug { "-> $payload" }
@@ -244,14 +245,17 @@ class PeerChatCommunity(
         Log.d("PeerChat", "onMessage from $peer: $payload")
 
         val chatMessage = createIncomingChatMessage(peer, payload)
+
+        if (this::onMessageCallback.isInitialized) {
+            this.onMessageCallback(this@PeerChatCommunity, peer, chatMessage)
+
+            return
+        }
+
         try {
             database.addMessage(chatMessage)
         } catch (e: SQLiteConstraintException) {
             e.printStackTrace()
-        }
-
-        if (this::onMessageCallback.isInitialized) {
-            this.onMessageCallback(peer, chatMessage)
         }
 
         Log.d("PeerChat", "Sending ack to ${chatMessage.id}")
@@ -269,7 +273,7 @@ class PeerChatCommunity(
         }
     }
 
-    fun setOnMessageCallback(f: (peer: Peer, chatMessage: ChatMessage) -> Unit) {
+    fun setOnMessageCallback(f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit) {
         this.onMessageCallback = f
     }
 
@@ -367,6 +371,14 @@ class PeerChatCommunity(
         } else {
             null
         }
+    }
+
+    fun getDatabase(): PeerChatStore {
+        return database
+    }
+
+    fun createContactStateTable() {
+        database.createContactStateTable()
     }
 
     object MessageId {
