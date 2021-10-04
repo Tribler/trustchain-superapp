@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionEditContactName"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/menu_contact_chat_options_contact_name" />
+    <item
+        android:id="@+id/actionRemoveContact"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/menu_contact_chat_options_contact_remove" />
+    <item
+        android:id="@+id/actionMuteContact"
+        android:icon="@drawable/ic_contact_mute"
+        android:title="@string/menu_contact_chat_options_contact_mute" />
+    <item
+        android:id="@+id/actionArchiveContact"
+        android:icon="@drawable/ic_contact_archive"
+        android:title="@string/menu_contact_chat_options_contact_archive" />
+    <item
+        android:id="@+id/actionBlockContact"
+        android:icon="@drawable/ic_contact_block"
+        android:title="@string/menu_contact_chat_options_contact_block" />
+    <item
+        android:id="@+id/actionCopyPublicKey"
+        android:icon="@drawable/ic_copy_public_key"
+        android:title="@string/menu_contact_chat_options_copy_public_key" />
+    <item
+        android:id="@+id/actionShareContact"
+        android:icon="@drawable/ic_share"
+        android:title="@string/menu_contact_chat_options_contact_share" />
+</menu>

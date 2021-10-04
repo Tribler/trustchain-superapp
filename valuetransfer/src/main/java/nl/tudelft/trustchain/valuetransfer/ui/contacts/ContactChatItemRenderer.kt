@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
+import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -20,6 +21,7 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
+import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.math.BigInteger
 import java.text.SimpleDateFormat
@@ -34,10 +36,10 @@ class ContactChatItemRenderer(
 ) : ItemLayoutRenderer<ContactChatItem, View>(
     ContactChatItem::class.java
 ) {
-    private val timeFormat = SimpleDateFormat("HH:mm")
-    private val dateFormat = SimpleDateFormat("EEEE, d MMM")
-    private val previousYearsDateFormat = SimpleDateFormat("EEEE, d MMM yyyy")
-    private val yearFormat = SimpleDateFormat("yyyy")
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+    private val dateFormat = SimpleDateFormat("EEEE, d MMM", Locale.ENGLISH)
+    private val previousYearsDateFormat = SimpleDateFormat("EEEE, d MMM yyyy", Locale.ENGLISH)
+    private val yearFormat = SimpleDateFormat("yyyy", Locale.ENGLISH)
 
     override fun bindView(item: ContactChatItem, view: View) = with(view) {
 
@@ -47,7 +49,6 @@ class ContactChatItemRenderer(
         clTransactionResend.isVisible = false
         clAttachmentPhotoVideo.isVisible = false
         clAttachmentIdentityAttribute.isVisible = false
-        clAttachmentFile.isVisible = false
         clAttachmentLocation.isVisible = false
         clAttachmentTransferRequest.isVisible = false
         clAttachmentContact.isVisible = false
@@ -101,12 +102,12 @@ class ContactChatItemRenderer(
 
         when {
             item.chatMessage.outgoing -> {
-                backgroundResource = R.drawable.pill_rounded_dark_green
-                textColor = R.color.white
+                backgroundResource = R.drawable.pill_rounded_chat_from
+                textColor = getColorIDFromThemeAttribute(parentActivity, R.attr.onChatFromColor)
             }
             else -> {
-                backgroundResource = R.drawable.pill_rounded_light_gray
-                textColor = R.color.black
+                backgroundResource = R.drawable.pill_rounded_chat_to
+                textColor = getColorIDFromThemeAttribute(parentActivity, R.attr.onChatToColor)
             }
         }
 
@@ -140,22 +141,6 @@ class ContactChatItemRenderer(
                         onItemClick(item)
                     }
                 }
-                MessageAttachment.TYPE_FILE -> {
-                    clAttachmentFile.isVisible = true
-
-                    clAttachmentFile.setBackgroundResource(backgroundResource)
-                    tvAttachmentFileTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
-                    tvAttachmentFilename.setTextColor(ContextCompat.getColor(this.context, textColor))
-
-                    val file = attachment.getFile(view.context)
-                    if (file.exists()) {
-                        tvAttachmentFilename.text = item.chatMessage.message
-
-                        clAttachmentFile.setOnClickListener {
-                            onItemClick(item)
-                        }
-                    }
-                }
                 MessageAttachment.TYPE_CONTACT -> {
                     clAttachmentContact.isVisible = true
                     tvAttachmentContactName.isVisible = true
@@ -170,10 +155,13 @@ class ContactChatItemRenderer(
                     val publicKey = contact.publicKey.keyToBin().toHex()
                     tvAttachmentContactPublicKey.text = publicKey
 
-                    val input = publicKey.substring(20, publicKey.length).toByteArray()
-                    val color = getColorByHash(context, publicKey)
-                    val identicon = generateIdenticon(input, color, resources)
-                    ivAttachmentContactIdenticon.setImageBitmap(identicon)
+                    generateIdenticon(
+                        publicKey.substring(20, publicKey.length).toByteArray(),
+                        getColorByHash(context, publicKey),
+                        resources
+                    ).let {
+                        ivAttachmentContactIdenticon.setImageBitmap(it)
+                    }
 
                     if (!item.chatMessage.outgoing) {
                         clAttachmentContactIcon.isVisible = true
@@ -219,7 +207,10 @@ class ContactChatItemRenderer(
 
                     val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
                     JSONObject(offsetBuffer.decodeToString()).let { json ->
-                        tvAttachmentTransferRequestTitle.text = "Request to transfer €${formatBalance(json.optLong("amount"))}"
+                        tvAttachmentTransferRequestTitle.text = this.context.resources.getString(
+                            R.string.text_contact_chat_request_transfer,
+                            formatBalance(json.optLong("amount"))
+                        )
 
                         item.chatMessage.message.let { description ->
                             tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
@@ -257,15 +248,15 @@ class ContactChatItemRenderer(
                 val amount = formatBalance((item.transaction.transaction["amount"] as BigInteger).toLong())
 
                 if (item.chatMessage.outgoing) {
-                    "Outgoing transfer of €$amount"
+                    this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_of, amount)
                 } else {
-                    "Incoming transfer of €$amount"
+                    this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_of, amount)
                 }
             } else {
                 if (item.chatMessage.outgoing) {
-                    "Outgoing transfer failed"
+                    this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_failed)
                 } else {
-                    "Unknown incoming transfer, ask to resend transfer"
+                    this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_unknown)
                 }
             }
         }

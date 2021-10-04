@@ -1,22 +1,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="28dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top"
-    android:padding="28dp">
+    android:backgroundTint="?attr/dialogColor">
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Are you sure?"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:textColor="?attr/onDialogColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,13 +21,11 @@
 
     <Button
         android:id="@+id/btnPositive"
-        style="@style/ButtonLightGrayRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginTop="12dp"
         android:text="OK"
-        tools:background="@drawable/button_rounded"
-        tools:backgroundTint="@color/light_gray"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
@@ -43,8 +37,6 @@
         android:layout_marginRight="12dp"
         android:layout_marginTop="12dp"
         android:text="CANCEL"
-        tools:background="@drawable/button_rounded"
-        tools:backgroundTint="@color/light_gray"
         app:layout_constraintEnd_toStartOf="@+id/btnPositive"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>

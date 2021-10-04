@@ -45,12 +45,14 @@ class IdentityAttributeItemRenderer(
     private fun expandOptions(view: View, item: IdentityAttributeItem) {
         val pushInAnimation = AnimationUtils.loadAnimation(view.context, R.anim.push_left_in)
         view.ivAttributeOptionsButton.isVisible = false
-        view.clAttributeOptions.isVisible = true
-        view.clAttributeOptions.startAnimation(pushInAnimation)
+        view.clAttributeOptions.apply {
+            isVisible = true
+            startAnimation(pushInAnimation)
+        }
         isExpanded[item.attribute.name] = true
 
         Handler().postDelayed(
-            {
+            Runnable {
                 if (isExpanded[item.attribute.name] == true) {
                     contractOptions(view, item)
                 }
@@ -61,8 +63,10 @@ class IdentityAttributeItemRenderer(
 
     private fun contractOptions(view: View, item: IdentityAttributeItem) {
         val pushOutAnimation = AnimationUtils.loadAnimation(view.context, R.anim.push_right_out)
-        view.clAttributeOptions.startAnimation(pushOutAnimation)
-        view.clAttributeOptions.isVisible = false
+        view.clAttributeOptions.apply {
+            startAnimation(pushOutAnimation)
+            isVisible = false
+        }
         view.ivAttributeOptionsButton.isVisible = true
         isExpanded[item.attribute.name] = false
     }

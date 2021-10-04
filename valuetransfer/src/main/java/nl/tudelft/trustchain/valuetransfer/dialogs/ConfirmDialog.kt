@@ -3,25 +3,21 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 
 class ConfirmDialog(
     private val title: String,
     private val callback: ((BottomSheetDialog) -> Unit)
-) : DialogFragment() {
-    private lateinit var parentActivity: ValueTransferMainActivity
+) : VTDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
 
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_confirm, null)
-
-            parentActivity = requireActivity() as ValueTransferMainActivity
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
@@ -43,6 +39,6 @@ class ConfirmDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

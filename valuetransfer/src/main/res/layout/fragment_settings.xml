@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="12dp"
-    android:background="?attr/colorPrimary">
+    android:background="?attr/backgroundColor">
 
     <LinearLayout
-        android:id="@+id/clThemeSelect"
+        android:id="@+id/clThemeSelector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -17,30 +17,15 @@
         android:padding="12dp"
         android:gravity="center_vertical"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="?attr/colorPrimaryDark"
+        android:backgroundTint="?attr/widgetColor"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Light Theme"
-            android:textColor="?attr/colorOnPrimary"
+            android:text="Theme"
+            android:textColor="?attr/onWidgetColor"
             android:textStyle="bold" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" >
-        </Space>
-
-        <Switch
-            android:id="@+id/switchTheme"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
 
         <Space
             android:layout_width="0dp"
@@ -49,11 +34,20 @@
         </Space>
 
         <TextView
+            android:id="@+id/tvSelectedTheme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dark Theme"
-            android:textColor="?attr/colorOnPrimary"
-            android:textStyle="bold" />
+            android:textAllCaps="true"
+            android:textColorHint="?attr/onWidgetSecondaryColor"
+            tools:hint="DARK" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:padding="4dp"
+            app:tint="?attr/onWidgetSecondaryColor"
+            android:src="@drawable/ic_baseline_arrow_forward_ios_24" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -64,8 +58,8 @@
         android:layout_marginTop="8dp"
         android:padding="12dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="?attr/colorPrimaryDark"
-        app:layout_constraintTop_toBottomOf="@+id/clThemeSelect"
+        android:backgroundTint="?attr/widgetColor"
+        app:layout_constraintTop_toBottomOf="@+id/clThemeSelector"
         android:orientation="vertical">
 
         <LinearLayout
@@ -78,7 +72,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Notifications"
-                android:textColor="?attr/colorOnPrimary"
+                android:textColor="?attr/onWidgetColor"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
@@ -93,7 +87,7 @@
                 android:id="@+id/tvNotificationStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColorHint="@color/gray"
+                android:textColorHint="?attr/onWidgetSecondaryColor"
                 tools:hint="ON" />
 
         </LinearLayout>
@@ -116,7 +110,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Messages"
-                    android:textColor="?attr/colorOnPrimary" />
+                    android:textColor="?attr/onWidgetColor" />
 
                 <Space
                     android:layout_width="0dp"
@@ -128,7 +122,7 @@
                     android:id="@+id/tvNotificationMessagesStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColorHint="@color/gray"
+                    android:textColorHint="?attr/onWidgetSecondaryColor"
                     tools:hint="ON" />
 
             </LinearLayout>
@@ -143,7 +137,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Transactions"
-                    android:textColor="?attr/colorOnPrimary" />
+                    android:textColor="?attr/onWidgetColor" />
 
                 <Space
                     android:layout_width="0dp"
@@ -155,7 +149,7 @@
                     android:id="@+id/tvNotificationTransactionsStatus"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColorHint="@color/gray"
+                    android:textColorHint="?attr/onWidgetSecondaryColor"
                     tools:hint="ON" />
 
             </LinearLayout>
@@ -164,8 +158,8 @@
         <TextView
             android:id="@+id/tv_openSystemNotificationsSettings"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/gray"
-            android:textColor="@color/white"
+            android:backgroundTint="?attr/backgroundColor"
+            android:textColor="?attr/onBackgroundColor"
             android:layout_marginTop="8dp"
             android:paddingHorizontal="12dp"
             android:paddingVertical="4dp"
@@ -183,7 +177,7 @@
         android:layout_marginTop="12dp"
         android:layout_marginEnd="8dp"
         android:text="About App"
-        android:textColor="?attr/colorOnPrimary"
+        android:textColor="?attr/onBackgroundColor"
         android:textSize="24sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/llNotifications" />
@@ -196,14 +190,14 @@
         android:layout_marginTop="8dp"
         android:padding="12dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="?attr/colorPrimaryDark"
+        android:backgroundTint="?attr/widgetColor"
         app:layout_constraintTop_toBottomOf="@+id/tvAboutAppTitle">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="GDPR"
-            android:textColor="?attr/colorOnPrimary"
+            android:textColor="?attr/onWidgetColor"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -214,7 +208,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:padding="4dp"
-            app:tint="?attr/colorSecondary"
+            app:tint="?attr/onWidgetSecondaryColor"
             android:src="@drawable/ic_baseline_arrow_forward_ios_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -226,7 +220,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:textColor="?attr/colorOnPrimary"
+        android:textColor="?attr/onBackgroundColor"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

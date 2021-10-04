@@ -16,31 +16,30 @@ import java.util.*
 
 class ChatItemRenderer(
     private val onChatClick: (Contact) -> Unit,
-) : ItemLayoutRenderer<ContactItem, View>(
-    ContactItem::class.java
+) : ItemLayoutRenderer<ChatItem, View>(
+    ChatItem::class.java
 ) {
 
-    private val timeFormat = SimpleDateFormat("HH:mm")
-    private val dayOfWeekFormat = SimpleDateFormat("EEEE")
-    private val dateFormat = SimpleDateFormat("dd/MM/yyyy")
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+    private val dayOfWeekFormat = SimpleDateFormat("EEEE", Locale.ENGLISH)
+    private val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
-    override fun bindView(item: ContactItem, view: View) = with(view) {
+    override fun bindView(item: ChatItem, view: View) = with(view) {
 
         val lastMessageDate = item.lastMessage?.timestamp
         val diff = Date().time - lastMessageDate!!.time
 
         val message = when {
-            item.lastMessage?.transactionHash != null -> "Transaction"
-            item.lastMessage?.attachment != null -> when (item.lastMessage?.attachment?.type) {
-                MessageAttachment.TYPE_IMAGE -> "Attachment: Photo/Video"
-                MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> "Attachment: Identity Attribute"
-                MessageAttachment.TYPE_LOCATION -> "Attachment: Location"
-                MessageAttachment.TYPE_FILE -> "Attachment: File"
-                MessageAttachment.TYPE_TRANSFER_REQUEST -> "Attachment: Transfer Request"
-                MessageAttachment.TYPE_CONTACT -> "Attachment: Contact"
-                else -> "Attachment"
+            item.lastMessage.transactionHash != null -> this.context.resources.getString(R.string.text_attachment_transaction)
+            item.lastMessage.attachment != null -> when (item.lastMessage.attachment?.type) {
+                MessageAttachment.TYPE_IMAGE -> this.context.resources.getString(R.string.text_attachment_photo_video)
+                MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> this.context.resources.getString(R.string.text_attachment_identity_attribute)
+                MessageAttachment.TYPE_LOCATION -> this.context.resources.getString(R.string.text_attachment_location)
+                MessageAttachment.TYPE_TRANSFER_REQUEST -> this.context.resources.getString(R.string.text_attachment_transfer_request)
+                MessageAttachment.TYPE_CONTACT -> this.context.resources.getString(R.string.text_attachment_contact)
+                else -> this.context.resources.getString(R.string.text_attachment)
             }
-            else -> item.lastMessage?.message
+            else -> item.lastMessage.message
         }
 
         val contactTime = when {
@@ -49,14 +48,18 @@ class ChatItemRenderer(
             else -> dateFormat.format(lastMessageDate)
         }
 
-        val publicKeyString = item.contact.publicKey.toString()
-        val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
-        val color = getColorByHash(context, publicKeyString)
-        val identicon = generateIdenticon(input, color, resources)
-        ivIdenticon.setImageBitmap(identicon)
+        item.contact.publicKey.toString().let { publicKeyString ->
+            generateIdenticon(
+                publicKeyString.substring(20, publicKeyString.length).toByteArray(),
+                getColorByHash(context, publicKeyString),
+                resources
+            ).let {
+                ivIdenticon.setImageBitmap(it)
+            }
+        }
 
-        if (item.lastMessage?.outgoing!!) {
-            if (item.lastMessage?.ack!!) {
+        if (item.lastMessage.outgoing) {
+            if (item.lastMessage.ack) {
                 ivMessageStatusOverview.setImageResource(R.drawable.ic_check_double)
             } else {
                 ivMessageStatusOverview.setImageResource(R.drawable.ic_check_single)
@@ -70,6 +73,8 @@ class ChatItemRenderer(
 
         ivOnlineStatusOverview.isVisible = item.isOnline || item.isBluetooth
         tvContactTimeOverview.text = contactTime
+
+        ivMuted.isVisible = item.state?.isMuted ?: false
 
         clChatCard.setOnClickListener {
             onChatClick(item.contact)

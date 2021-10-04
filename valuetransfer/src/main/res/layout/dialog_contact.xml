@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        style="@style/DialogTitle"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Menu Title"
+        tools:visibility="visible" />
+
+    <ListView
+        android:id="@+id/listOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:backgroundTint="?attr/dialogColor"
+        tools:listitem="@layout/item_option"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

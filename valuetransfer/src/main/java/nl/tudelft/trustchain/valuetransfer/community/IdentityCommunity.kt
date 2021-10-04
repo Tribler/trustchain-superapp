@@ -27,6 +27,10 @@ class IdentityCommunity(
         return store.getIdentity()
     }
 
+    fun hasIdentity(): Boolean {
+        return store.hasIdentity()
+    }
+
     fun createIdentity(
         givenNames: String,
         surname: String,
@@ -39,7 +43,7 @@ class IdentityCommunity(
     ): Identity {
         val id = UUID.randomUUID().toString()
 
-        var content = PersonalIdentity(
+        val content = PersonalIdentity(
             givenNames,
             surname,
             gender,

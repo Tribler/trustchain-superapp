@@ -9,26 +9,15 @@
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top">
+    android:backgroundTint="?attr/dialogColor">
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Identity Details"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
+        style="@style/DialogTitle"
+        android:text="@string/dialog_title_identity_details"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/clContent"
@@ -60,11 +49,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Given Names"
+                    android:text="@string/text_given_names"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"
                     android:inputType="textCapWords"/>
@@ -96,11 +84,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Surname"
+                    android:text="@string/text_surname"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -140,11 +127,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Place of Birth"
+                    android:text="@string/text_place_of_birth"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -160,7 +146,6 @@
                     android:inputType="textCapWords"
                     android:textSize="14sp"
                     android:textColor="@color/black" />
-
             </LinearLayout>
 
             <LinearLayout
@@ -175,11 +160,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Date of Birth"
+                    android:text="@string/text_date_of_birth"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -219,11 +203,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nationality"
+                    android:text="@string/text_nationality"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -254,11 +237,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gender"
+                    android:text="@string/text_gender"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -279,7 +261,7 @@
                         android:insetTop="0dp"
                         android:layout_weight="1"
                         android:backgroundTint="@color/light_gray"
-                        android:text="Male"
+                        android:text="@string/text_gender_male"
                         android:textAllCaps="false"
                         android:textSize="12sp"
                         android:textColor="@color/black"
@@ -292,7 +274,7 @@
                         android:layout_height="match_parent"
                         android:insetBottom="0dp"
                         android:insetTop="0dp"
-                        android:text="Female"
+                        android:text="@string/text_gender_female"
                         app:shapeAppearance="@style/Rounded"
                         android:backgroundTint="@color/light_gray"
                         android:textSize="12sp"
@@ -325,11 +307,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Personal Number"
+                    android:text="@string/text_personal_number"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -360,11 +341,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Document Number"
+                    android:text="@string/text_document_number"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="?attr/colorOnPrimary"
-                    tools:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -382,13 +362,17 @@
                     android:textColor="@color/black" />
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clCancel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/clContent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/clSaveIdentity"
         app:layout_constraintStart_toStartOf="parent"
         android:visibility="gone"
@@ -397,8 +381,7 @@
         <Button
             android:id="@+id/btnCancel"
             style="@style/ButtonRedRounded"
-            android:layout_marginTop="12dp"
-            android:text="Cancel"
+            android:text="@string/btn_cancel"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -406,19 +389,22 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clSaveIdentity"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/clContent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clCancel"
         app:layout_constraintEnd_toEndOf="parent">
+
         <Button
             android:id="@+id/btnSaveIdentity"
-            style="@style/ButtonDarkGreenRounded"
-            android:layout_marginTop="12dp"
-            android:text="Save"
+            style="@style/ButtonGreenRounded"
+            android:text="@string/btn_save"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

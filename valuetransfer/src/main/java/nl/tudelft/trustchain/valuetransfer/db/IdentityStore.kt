@@ -37,7 +37,7 @@ class IdentityStore(context: Context) {
             PersonalIdentity(
                 name!!,
                 surname!!,
-                if (gender == 0L) "Male" else if (gender == 1L) "Female" else "Neutral",
+                if (gender == 0L) GENDER_MALE else if (gender == 1L) GENDER_FEMALE else GENDER_NEUTRAL,
                 Date(dateOfBirth!!),
                 placeOfBirth!!,
                 nationality!!,
@@ -66,7 +66,7 @@ class IdentityStore(context: Context) {
     }
 
     fun createIdentitiesTable() {
-        return database.dbIdentityQueries.createIdentitiesTable()
+        database.dbIdentityQueries.createIdentitiesTable()
     }
 
     fun getAllIdentities(): Flow<List<Identity>> {
@@ -102,7 +102,7 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == "Male") 0L else if (identity.content.gender == "Female") 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -118,7 +118,7 @@ class IdentityStore(context: Context) {
             identity.publicKey.keyToBin(),
             identity.content.givenNames,
             identity.content.surname,
-            if (identity.content.gender == "Male") 0L else if (identity.content.gender == "Female") 1L else 2L,
+            if (identity.content.gender == GENDER_MALE) 0L else if (identity.content.gender == GENDER_FEMALE) 1L else 2L,
             identity.content.dateOfBirth.time,
             identity.content.placeOfBirth,
             identity.content.nationality,
@@ -131,10 +131,6 @@ class IdentityStore(context: Context) {
 
     fun deleteIdentity(identity: Identity) {
         database.dbIdentityQueries.deleteIdentity(identity.id)
-    }
-
-    fun deleteIdentityByPublicKey(identity: Identity) {
-        database.dbIdentityQueries.deleteIdentityByPublicKey(identity.publicKey.keyToBin())
     }
 
     fun createAttributesTable() {
@@ -184,5 +180,9 @@ class IdentityStore(context: Context) {
             }
             return instance
         }
+
+        const val GENDER_MALE = "Male"
+        const val GENDER_FEMALE = "Female"
+        const val GENDER_NEUTRAL = "Neutral"
     }
 }

@@ -6,53 +6,40 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top">
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle">
 
         <TextView
             android:id="@+id/tvTitleBuy"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Connect to gateway"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/DialogTitle"
+            android:text="@string/dialog_title_exchange_gateway_connect"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/tvTitleSell"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Sell to gateway"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            tools:visibility="invisible"
-            app:layout_constraintEnd_toEndOf="parent"
+            style="@style/DialogTitle"
+            android:text="@string/dialog_title_exchange_gateway_sell"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:visibility="invisible"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -68,9 +55,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Current Balance"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:text="@string/text_current_balance"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
@@ -104,17 +90,15 @@
             app:layout_constraintBottom_toBottomOf="@+id/tvBalance"
             app:layout_constraintStart_toStartOf="@+id/tvBalance"
             app:layout_constraintTop_toTopOf="@+id/tvBalance"
-            app:tint="@color/black"
-            tools:tint="@color/black" />
+            app:tint="@color/black" />
 
         <TextView
             android:id="@+id/tvSellAmountTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Sell Amount"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:text="@string/text_sell_amount"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="@+id/tvSellAmount"
@@ -148,8 +132,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/tvSellAmount"
             app:layout_constraintStart_toStartOf="@+id/tvSellAmount"
             app:layout_constraintTop_toTopOf="@+id/tvSellAmount"
-            app:tint="@color/black"
-            tools:tint="@color/black" />
+            app:tint="@color/black" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -159,9 +142,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:paddingStart="8dp"
-        android:text="Gateway"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_gateway"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
@@ -190,8 +172,7 @@
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/tvGatewayPublicKey"
@@ -205,8 +186,7 @@
             android:typeface="monospace"
             app:layout_constraintTop_toBottomOf="@+id/tvGatewayName"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -224,9 +204,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Save Gateway"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:text="@string/text_gateway_save"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
@@ -258,9 +237,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Prefer Gateway"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:text="@string/text_gateway_prefer"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
@@ -278,8 +256,8 @@
 
     <Button
         android:id="@+id/btnConnectToGateway"
-        style="@style/ButtonDarkGreenRounded"
-        android:text="Connect to Gateway"
+        style="@style/ButtonGreenRounded"
+        android:text="@string/btn_gateway_connect"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -287,8 +265,8 @@
 
     <Button
         android:id="@+id/btnContinueSell"
-        style="@style/ButtonDarkGreenRounded"
-        android:text="Sell"
+        style="@style/ButtonGreenRounded"
+        android:text="@string/btn_sell"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

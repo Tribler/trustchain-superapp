@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,13 +13,14 @@ import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.attestation.Authority
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.peers.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.AttestationAuthorityItemRenderer
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import org.json.JSONObject
@@ -28,10 +28,7 @@ import java.lang.IllegalStateException
 
 class IdentityAttestationAuthoritiesDialog(
     private val myPublicKey: String
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var attestationCommunity: AttestationCommunity
+) : VTDialogFragment() {
 
     private lateinit var dialogView: View
 
@@ -43,11 +40,11 @@ class IdentityAttestationAuthoritiesDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_authorities, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity()!!
             dialogView = view
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
@@ -59,11 +56,20 @@ class IdentityAttestationAuthoritiesDialog(
                 AttestationAuthorityItemRenderer(
                     myPublicKey
                 ) { authorityItem ->
-                    ConfirmDialog("Are u sure to remove this authority?") { dialog ->
-                        attestationCommunity.trustedAuthorityManager.deleteTrustedAuthority(
+                    ConfirmDialog(
+                        resources.getString(
+                            R.string.text_confirm_delete,
+                            resources.getString(R.string.text_this_authority)
+                        )
+                    ) { dialog ->
+                        getAttestationCommunity().trustedAuthorityManager.deleteTrustedAuthority(
                             authorityItem.publicKeyHash
                         )
-                        parentActivity.displaySnackbar(requireContext(), "Authority has been removed")
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_authority_remove_success),
+                            view = view.rootView
+                        )
                         dialog.dismiss()
                     }.show(parentFragmentManager, tag)
                 }
@@ -80,22 +86,26 @@ class IdentityAttestationAuthoritiesDialog(
             authoritiesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
             addAuthorityButton.setOnClickListener {
-                QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan public key of signee to add as authority", vertical = true)
+                QRCodeUtils(requireContext()).startQRScanner(
+                    this,
+                    promptText = resources.getString(R.string.text_scan_public_key_to_add_authority),
+                    vertical = true
+                )
             }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     private fun loadAuthorities() {
-        val authorities = createAuthoritiesItems(
-            attestationCommunity.trustedAuthorityManager.getAuthorities()
-        )
-        if (adapterAuthorities.itemCount != authorities.size) {
-            adapterAuthorities.updateItems(authorities)
+        createAuthoritiesItems(
+            getAttestationCommunity().trustedAuthorityManager.getAuthorities()
+        ).apply {
+            if (this.size != adapterAuthorities.itemCount)
+                adapterAuthorities.updateItems(this)
         }
     }
 
@@ -104,22 +114,38 @@ class IdentityAttestationAuthoritiesDialog(
             try {
                 val obj = JSONObject(result)
 
-                if (obj.has("public_key")) {
+                if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
                     try {
-                        defaultCryptoProvider.keyFromPublicBin(obj.optString("public_key").hexToBytes())
-                        val publicKey = obj.optString("public_key")
+                        defaultCryptoProvider.keyFromPublicBin(obj.optString(QRScanController.KEY_PUBLIC_KEY).hexToBytes())
+                        val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
 
+                        this.dismiss()
                         parentActivity.getQRScanController().addAuthority(publicKey)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        parentActivity.displaySnackbar(requireContext(), "Invalid public key in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_invalid_public_key),
+                            view = dialogView.rootView,
+                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        )
                     }
                 } else {
-                    parentActivity.displaySnackbar(requireContext(), "No public key found in QR-code", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                    parentActivity.displaySnackbar(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_no_public_key_found),
+                        view = dialogView.rootView,
+                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                parentActivity.displaySnackbar(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_qr_code_not_json_format),
+                    view = dialogView.rootView,
+                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                )
             }
         }
     }

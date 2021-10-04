@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/actionSendPhotoVideo"
-        android:title="Photo or Video" />
-<!--    <item-->
-<!--        android:id="@+id/actionSendFile"-->
-<!--        android:title="File" />-->
+        android:id="@+id/actionSendCamera"
+        android:icon="@drawable/ic_camera"
+        android:title="@string/menu_contact_chat_attachment_camera" />
+    <item
+        android:id="@+id/actionSendPhotoFromLibrary"
+        android:icon="@drawable/ic_media"
+        android:title="@string/menu_contact_chat_attachment_photo" />
     <item
         android:id="@+id/actionSendLocation"
-        android:title="Location" />
+        android:icon="@drawable/ic_location"
+        android:title="@string/menu_contact_chat_attachment_location" />
     <item
         android:id="@+id/actionSendContact"
-        android:title="Contact" />
+        android:icon="@drawable/ic_contact"
+        android:title="@string/menu_contact_chat_attachment_contact" />
     <item
         android:id="@+id/actionSendIdentityAttribute"
-        android:title="Identity Attribute" />
+        android:icon="@drawable/ic_attribute"
+        android:title="@string/menu_contact_chat_attachment_identity_attribute" />
     <item
         android:id="@+id/actionTransferMoney"
-        android:title="Transfer Money" />
+        android:icon="@drawable/ic_exchange"
+        android:title="@string/menu_contact_chat_attachment_transfer_money" />
     <item
         android:id="@+id/actionRequestMoney"
-        android:title="Request Money" />
+        android:icon="@drawable/ic_request"
+        android:title="@string/menu_contact_chat_attachment_transfer_request" />
 
 </menu>

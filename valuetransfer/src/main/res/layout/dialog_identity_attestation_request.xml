@@ -5,28 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top">
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="ATTESTATION REQUEST"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        style="@style/DialogTitle"
+        android:text="@string/dialog_title_attestation_request"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle" />
 
     <TextView
         android:id="@+id/tvAttributeTypeTitle"
@@ -34,9 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:paddingStart="8dp"
-        android:text="Attribute type"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_attestation_attribute_type"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
@@ -65,9 +58,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:paddingStart="8dp"
-        android:text="Attribute name"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_attestation_attribute_name"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="@+id/etAttributeNameValue"
@@ -87,17 +79,17 @@
         android:textSize="14sp"
         android:textColor="@color/black"
         android:textColorHint="@color/gray"
-        android:hint="e.g. age"
+        android:hint="@string/text_attestation_attribute_name_hint"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/spinnerAttributeType"
         app:layout_constraintTop_toBottomOf="@+id/tvAttributeNameTitle" />
 
     <Button
         android:id="@+id/btnRequestAttestation"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_marginTop="8dp"
         android:enabled="false"
-        android:text="Request"
+        android:text="@string/btn_request"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etAttributeNameValue" />

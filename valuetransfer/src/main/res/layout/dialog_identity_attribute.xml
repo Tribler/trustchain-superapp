@@ -5,28 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top">
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="ATTRIBUTE DETAILS"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        style="@style/DialogTitle"
+        android:layout_marginTop="8dp"
+        android:text="@string/dialog_title_attribute_details"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/tvAttributeNameTitle"
@@ -34,9 +28,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:paddingStart="8dp"
-        android:text="Attribute"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_attribute"
+        android:textColor="?attr/onWidgetColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
@@ -91,9 +84,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:paddingStart="8dp"
-        android:text="Value"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_value"
+        android:textColor="?attr/onWidgetColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="@+id/etAttributeValue"
@@ -118,10 +110,10 @@
 
     <Button
         android:id="@+id/btnSaveAttribute"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_marginTop="8dp"
         android:enabled="false"
-        android:text="Save"
+        android:text="@string/btn_save"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etAttributeValue" />

@@ -4,11 +4,11 @@
     <item
         android:id="@+id/actionSearch"
         android:icon="@drawable/ic_search_filter"
-        android:title="Search"
+        android:title="@string/menu_contacts_search"
         app:showAsAction="always"/>
     <item
         android:id="@+id/actionAddContact"
-        android:icon="@drawable/ic_baseline_person_add_24"
-        android:title="Add Contact"
+        android:icon="@drawable/ic_contact_add"
+        android:title="@string/menu_contacts_add"
         app:showAsAction="always"/>
 </menu>

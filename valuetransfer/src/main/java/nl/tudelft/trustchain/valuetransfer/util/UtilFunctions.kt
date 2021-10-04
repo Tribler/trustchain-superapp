@@ -11,10 +11,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,16 +29,22 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.math.abs
 
-fun closeKeyboard(context: Context, view: View) {
+fun View.closeKeyboard(context: Context) {
     val inputMethodManager = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    view.clearFocus()
+    inputMethodManager.hideSoftInputFromWindow(this.windowToken, 0)
+    clearFocus()
+}
+
+fun EditText.showKeyboard(context: Context) {
+    requestFocus()
+    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
 fun onFocusChange(editText: EditText, context: Context) {
     editText.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
         if (!hasFocus) {
-            closeKeyboard(context, v)
+            v.closeKeyboard(context)
         }
     }
 }
@@ -74,6 +83,12 @@ fun createBitmap(context: Context, data: String, pColor: Int, bColor: Int): Bitm
 }
 
 fun toggleButton(button: Button, state: Boolean) {
+    button.isEnabled = state
+    button.alpha = if (state) 1f else 0.5f
+    button.isClickable = state
+}
+
+fun toggleButton(button: ImageButton, state: Boolean) {
     button.isEnabled = state
     button.alpha = if (state) 1f else 0.5f
     button.isClickable = state
@@ -193,3 +208,35 @@ fun Int.dpToPixels(context: Context): Int = TypedValue.applyDimension(
     this.toFloat(),
     context.resources.displayMetrics
 ).toInt()
+
+fun View.viewEnterFromLeft(context: Context) {
+    val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_left)
+    this.apply {
+        isVisible = true
+        startAnimation(animation)
+    }
+}
+
+fun View.viewEnterFromRight(context: Context) {
+    val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_right)
+    this.apply {
+        isVisible = true
+        startAnimation(animation)
+    }
+}
+
+fun View.viewExitToLeft(context: Context) {
+    val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_left)
+    this.apply {
+        startAnimation(animation)
+        isVisible = false
+    }
+}
+
+fun View.viewExitToRight(context: Context) {
+    val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_right)
+    this.apply {
+        startAnimation(animation)
+        isVisible = false
+    }
+}

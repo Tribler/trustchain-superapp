@@ -5,28 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
     android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/colorPrimary"
-    tools:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@drawable/dialog_rounded_top">
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="CONFIRM ATTESTATION REQUEST"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        style="@style/DialogTitle"
+        android:text="@string/dialog_title_attestation_confirm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle" />
 
     <TextView
         android:id="@+id/tvSubTitle"
@@ -35,9 +29,8 @@
         android:layout_marginTop="8dp"
         android:gravity="center_horizontal"
         android:textAlignment="center"
-        android:text="An attestation has been requested with name XXX and format YYY. Please confirm the attestation by providing the requested value."
-        android:textColor="?attr/colorOnPrimary"
-        tools:textColor="@color/white"
+        android:text="@string/text_attestation_confirm"
+        android:textColor="?attr/onDialogColor"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -58,7 +51,7 @@
             android:layout_height="40dp"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="@color/light_gray"
-            android:hint="Provide requested attribute value"
+            android:hint="@string/text_attestation_provide_value"
             android:inputType="textCapWords"
             android:paddingVertical="8dp"
             android:paddingHorizontal="8dp"
@@ -90,9 +83,9 @@
 
     <Button
         android:id="@+id/btnConfirmRequestedAttestation"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_marginTop="8dp"
-        android:text="Confirm"
+        android:text="@string/btn_confirm"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clAttributeValue" />

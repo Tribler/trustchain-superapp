@@ -9,36 +9,23 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 
 class IdentityAttributeShareDialog(
     private val recipient: Contact?,
     private val identityAttribute: IdentityAttribute?,
-) : DialogFragment() {
-
-    private val contactStore by lazy {
-        ContactStore.getInstance(requireContext())
-    }
-
-    private val identityStore by lazy {
-        IdentityStore.getInstance(requireContext())
-    }
+) : VTDialogFragment() {
 
     private var selectedContact: Contact? = recipient
     private var selectedAttribute: IdentityAttribute? = identityAttribute
@@ -46,22 +33,16 @@ class IdentityAttributeShareDialog(
     private lateinit var contactAdapter: ArrayAdapter<Contact>
     private lateinit var attributeAdapter: ArrayAdapter<IdentityAttribute>
 
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var peerChatCommunity: PeerChatCommunity
-    private lateinit var trustChainCommunity: TrustChainCommunity
-
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_identity_attribute_share, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            peerChatCommunity = IPv8Android.getInstance().getOverlay()!!
-            trustChainCommunity = IPv8Android.getInstance().getOverlay()!!
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
@@ -80,7 +61,7 @@ class IdentityAttributeShareDialog(
             var identityAttributes: List<IdentityAttribute>
 
             lifecycleScope.launch(Dispatchers.Main) {
-                identityAttributes = identityStore.getAllAttributes().first().toList()
+                identityAttributes = getIdentityStore().getAllAttributes().first().toList()
 
                 // If the user has no identity attributes yet
                 if (identityAttributes.isNotEmpty()) {
@@ -97,23 +78,22 @@ class IdentityAttributeShareDialog(
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
-                                val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-                                val params = textView.layoutParams
-                                params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                                textView.layoutParams = params
-                                textView.gravity = Gravity.CENTER_VERTICAL
+                                return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                                    layoutParams.apply {
+                                        height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                                    }
+                                    gravity = Gravity.CENTER_VERTICAL
+                                    text = identityAttributes[position].name
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
-                                textView.text = identityAttributes[position].name
-                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                                    // Currently selected item background in dropdown
+                                    background = if (position == attributeSpinner.selectedItemPosition) {
+                                        ColorDrawable(Color.LTGRAY)
+                                    } else {
+                                        ColorDrawable(Color.WHITE)
+                                    }
 
-                                // Currently selected item background in dropdown
-                                if (position == attributeSpinner.selectedItemPosition) {
-                                    textView.background = ColorDrawable(Color.LTGRAY)
-                                } else {
-                                    textView.background = ColorDrawable(Color.WHITE)
                                 }
-
-                                return textView
                             }
 
                             override fun getView(
@@ -121,11 +101,10 @@ class IdentityAttributeShareDialog(
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
-                                val textView: TextView = super.getView(position, convertView, parent) as TextView
-                                textView.text = identityAttributes[position].name
-                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-
-                                return textView
+                                return (super.getView(position, convertView, parent) as TextView).apply {
+                                    text = identityAttributes[position].name
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                                }
                             }
                         }
 
@@ -152,15 +131,14 @@ class IdentityAttributeShareDialog(
 
                         // Select item in spinner in case the identity attribute is pre-assigned
                         if (selectedAttribute != null) {
-                            val selected = identityAttributes.indexOf(selectedAttribute)
-                            attributeSpinner.setSelection(selected)
+                            attributeSpinner.setSelection(identityAttributes.indexOf(selectedAttribute))
                         } else {
                             if (identityAttributes.isNotEmpty()) {
                                 selectedAttribute = identityAttributes[0]
                             }
                         }
                     } else {
-                        attributeTitleView.text = "Selected attribute"
+                        attributeTitleView.text = resources.getString(R.string.text_selected_attribute)
                         attributeSpinner.isVisible = false
                         selectedAttributeView.text = selectedAttribute!!.name
                     }
@@ -168,10 +146,10 @@ class IdentityAttributeShareDialog(
             }
 
             lifecycleScope.launch(Dispatchers.Main) {
-                val contacts: List<Contact> = contactStore.getContacts()
+                val contacts: List<Contact> = getContactStore().getContacts()
                     .first()
                     .filter {
-                        it.publicKey != trustChainCommunity.myPeer.publicKey
+                        it.publicKey != getTrustChainCommunity().myPeer.publicKey
                     }
                     .sortedBy {
                         it.name
@@ -192,23 +170,21 @@ class IdentityAttributeShareDialog(
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
-                                val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-                                val params = textView.layoutParams
-                                params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                                textView.layoutParams = params
-                                textView.gravity = Gravity.CENTER_VERTICAL
+                                return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                                    layoutParams.apply {
+                                        height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                                    }
+                                    gravity = Gravity.CENTER_VERTICAL
+                                    text = contacts[position].name
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
-                                textView.text = contacts[position].name
-                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-
-                                // Currently selected item background in dropdown
-                                if (position == contactSpinner.selectedItemPosition) {
-                                    textView.background = ColorDrawable(Color.LTGRAY)
-                                } else {
-                                    textView.background = ColorDrawable(Color.WHITE)
+                                    // Currently selected item background in dropdown
+                                    background = if (position == contactSpinner.selectedItemPosition) {
+                                        ColorDrawable(Color.LTGRAY)
+                                    } else {
+                                        ColorDrawable(Color.WHITE)
+                                    }
                                 }
-
-                                return textView
                             }
 
                             override fun getView(
@@ -216,11 +192,10 @@ class IdentityAttributeShareDialog(
                                 convertView: View?,
                                 parent: ViewGroup
                             ): View {
-                                val textView: TextView = super.getView(position, convertView, parent) as TextView
-                                textView.text = contacts[position].name
-                                textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-
-                                return textView
+                                return (super.getView(position, convertView, parent) as TextView).apply {
+                                    text = contacts[position].name
+                                    setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                                }
                             }
                         }
                         contactSpinner.adapter = contactAdapter
@@ -246,11 +221,10 @@ class IdentityAttributeShareDialog(
 
                         // Select item in spinner in case the contact is pre-assigned
                         if (selectedContact != null) {
-                            val selected = contacts.indexOf(selectedContact)
-                            contactSpinner.setSelection(selected)
+                            contactSpinner.setSelection(contacts.indexOf(selectedContact))
                         }
                     } else {
-                        recipientTitleView.text = "Selected recipient"
+                        recipientTitleView.text = resources.getString(R.string.text_selected_recipient)
                         contactSpinner.isVisible = false
                         selectedContactView.text = selectedContact!!.name
                     }
@@ -263,16 +237,27 @@ class IdentityAttributeShareDialog(
                 try {
                     val serializedAttribute = selectedAttribute!!.serialize()
 
-                    peerChatCommunity.sendIdentityAttribute(selectedAttribute.toString(), serializedAttribute, selectedContact!!.publicKey)
+                    getPeerChatCommunity().sendIdentityAttribute(selectedAttribute.toString(), serializedAttribute, selectedContact!!.publicKey)
 
+                    // Only send snackbar when it is sent from identity fragment (and not from within chat)
                     if (identityAttribute != null) {
-                        parentActivity.displaySnackbar(requireContext(), "Identity attribute shared to ${selectedContact!!.name}")
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(
+                                R.string.snackbar_identity_attribute_share_success,
+                                selectedContact!!.name
+                            )
+                        )
                     }
 
                     bottomSheetDialog.dismiss()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                    parentActivity.displaySnackbar(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_unexpected_error_occurred),
+                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    )
                 }
             }
 
@@ -280,6 +265,6 @@ class IdentityAttributeShareDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

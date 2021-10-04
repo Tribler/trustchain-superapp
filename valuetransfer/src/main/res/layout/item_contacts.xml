@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="?attr/colorPrimaryDark"
-    tools:background="@color/colorPrimaryDarkValueTransfer">
+    android:background="?attr/widgetColor">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="60dp"
@@ -19,7 +18,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="5dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?attr/backgroundColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -42,8 +41,7 @@
             android:gravity="center"
             android:maxLines="2"
             android:text="Contact"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="12sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"

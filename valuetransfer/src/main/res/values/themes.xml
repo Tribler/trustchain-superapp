@@ -1,27 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.DayNight">
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">@color/light_gray</item>
-        <item name="colorPrimaryVariant">@color/light_gray</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <item name="colorSecondary">@color/gray</item>
-        <item name="colorSecondaryVariant">@color/light_gray</item>
-        <item name="colorAccent">@color/colorYellow</item>
-        <item name="colorSurface">@color/gray</item>
+
+        <item name="backgroundColor">?attr/colorPrimary</item>
+        <item name="onBackgroundColor">@color/black</item>
+        <item name="onBackgroundSecondaryColor">?attr/mutedColor</item>
+
+        <item name="widgetColor">@color/light_gray</item>
+        <item name="onWidgetColor">@color/black</item>
+        <item name="onWidgetSecondaryColor">?attr/mutedColor</item>
+
+        <item name="dialogColor">?attr/colorPrimary</item>
+        <item name="onDialogColor">@color/black</item>
+        <item name="onDialogSecondaryColor">@color/colorLightGray</item>
+
+        <item name="mutedLightColor">@color/colorGrayMute</item>
+        <item name="mutedColor">@color/colorLightGray</item>
+        <item name="mutedDarkColor">@color/colorGray</item>
+
+        <item name="chatFromColor">@color/colorPrimaryValueTransfer</item>
+        <item name="onChatFromColor">@color/white</item>
+        <item name="chatToColor">@color/light_gray</item>
+        <item name="onChatToColor">@color/black</item>
+
+        <item name="colorAccent">@color/colorBlue</item>
         <item name="colorError">@color/colorRed</item>
         <item name="colorOnError">@color/white</item>
-        <item name="colorBackgroundFloating">@color/black</item>
-        <item name="android:colorBackground">@color/white</item>
-        <item name="colorOnBackground">@color/gray</item>
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:colorBackground">?attr/colorPrimary</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
-        <item name="android:navigationBarColor">@color/white</item>
+        <item name="android:navigationBarColor">?attr/colorPrimary</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="actionBarStyle">@style/ActionBar</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowBackground">?attr/colorPrimary</item>
         <item name="popupMenuStyle">@style/OptionsMenu</item>
-        <item name="android:itemBackground">@color/white</item>
+        <item name="android:itemBackground">@color/colorGray</item>
+
+<!--        <item name="colorPrimaryDark">@color/light_gray</item>-->
+<!--        <item name="colorPrimaryVariant">@color/light_gray</item>-->
+<!--        <item name="colorOnPrimary">@color/black</item>-->
+<!--        <item name="colorSecondary">@color/gray</item>-->
+<!--        <item name="colorSecondaryVariant">@color/light_gray</item>-->
+<!--        <item name="colorAccent">@color/colorYellow</item>-->
+<!--        <item name="colorSurface">@color/gray</item>-->
+<!--        <item name="colorError">@color/colorRed</item>-->
+<!--        <item name="colorOnError">@color/white</item>-->
+<!--        <item name="colorBackgroundFloating">@color/black</item>-->
+<!--        <item name="android:colorBackground">@color/white</item>-->
+<!--        <item name="colorOnBackground">@color/gray</item>-->
+<!--        <item name="android:statusBarColor">@color/white</item>-->
+<!--        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
+<!--        <item name="android:navigationBarColor">@color/white</item>-->
+<!--        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>-->
+<!--        <item name="actionBarStyle">@style/ActionBar</item>-->
+<!--        <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>-->
+<!--        <item name="android:windowBackground">@color/white</item>-->
+<!--        <item name="popupMenuStyle">@style/OptionsMenu</item>-->
+<!--        <item name="android:itemBackground">@color/white</item>-->
     </style>
 </resources>

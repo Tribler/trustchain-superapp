@@ -2,9 +2,12 @@
     android:width="1000dp"
     android:height="1000dp"
     android:viewportWidth="1000"
-    android:viewportHeight="1000">
-  <path
-      android:fillColor="#FF000000"
-      android:pathData="M452,314.7c-165.2,-85.3 -303.8,26.6 -437,207.9l186.5,191.9l79.9,-95.9h389.1L985,336c-79.9,-101.3 -202.5,42.6 -346.4,154.6H500c-21.3,-10.7 -37.3,-21.3 -42.6,-42.6h170.5c48,-48 42.6,-90.6 -10.7,-133.2H452z"
-      android:fillType="evenOdd"/>
+    android:viewportHeight="1000"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:pathData="M35,521.6l178.8,184l76.6,-91.9h373.1L965,342.7c-76.6,-97.1 -194.1,40.8 -332.1,148.2H500c-20.4,-10.3 -35.8,-20.4 -40.8,-40.8h163.5c46,-46 40.8,-86.9 -10.3,-127.7H454v-0.1C295.6,240.5 162.7,347.8 35,521.6z"
+        android:strokeLineJoin="round"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="48"
+        android:strokeLineCap="round"/>
 </vector>

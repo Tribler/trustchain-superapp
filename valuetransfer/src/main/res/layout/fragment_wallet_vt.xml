@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clNoIdentity"
@@ -32,8 +31,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="?attr/colorOnPrimary"
-                tools:tint="@color/white" />
+                app:tint="?attr/onBackgroundColor" />
 
             <TextView
                 android:id="@+id/tvNoIdentityExplanation"
@@ -44,8 +42,7 @@
                 android:gravity="center"
                 android:paddingHorizontal="8dp"
                 android:text="A personal identity is required for this application. It is important to provide the correct details."
-                android:textColor="?attr/colorOnPrimary"
-                tools:textColor="@color/white"
+                android:textColor="?attr/onBackgroundColor"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -53,7 +50,7 @@
 
             <Button
                 android:id="@+id/btnCreateIdentity"
-                style="@style/ButtonDarkGreenRounded"
+                style="@style/ButtonGreenRounded"
                 android:layout_marginTop="24dp"
                 android:text="Create identity"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -86,7 +83,6 @@
             android:layout_height="match_parent"
             android:paddingTop="12dp">
 
-            // Identity
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,13 +100,10 @@
 
                     <TextView
                         android:id="@+id/tvIdentityTitle"
+                        style="@style/FragmentTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Identity"
-                        android:textColor="?attr/colorOnPrimary"
-                        tools:textColor="@color/white"
-                        android:textSize="32sp"
+                        android:text="@string/menu_navigation_identity"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -121,8 +114,7 @@
                         android:layout_marginEnd="12dp"
                         android:layout_marginTop="2dp"
                         android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="?attr/colorPrimaryDark"
+                        app:tint="?attr/onBackgroundSecondaryColor"
                         android:src="@drawable/ic_baseline_arrow_forward_ios_24"
                         app:layout_constraintBottom_toBottomOf="@+id/tvIdentityTitle"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -138,8 +130,6 @@
                         tools:listitem="@layout/item_identity" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                // Exchange
-
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clExchange"
                     android:layout_width="match_parent"
@@ -150,13 +140,10 @@
 
                     <TextView
                         android:id="@+id/tvExchangeTitle"
+                        style="@style/FragmentTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Exchange"
-                        android:textColor="?attr/colorOnPrimary"
-                        tools:textColor="@color/white"
-                        android:textSize="32sp"
+                        android:text="@string/menu_navigation_exchange"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -167,8 +154,7 @@
                         android:layout_marginEnd="12dp"
                         android:layout_marginTop="2dp"
                         android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="?attr/colorPrimaryDark"
+                        app:tint="?attr/onBackgroundSecondaryColor"
                         android:src="@drawable/ic_baseline_arrow_forward_ios_24"
                         app:layout_constraintBottom_toBottomOf="@+id/tvExchangeTitle"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -179,18 +165,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingHorizontal="12dp"
-                        android:paddingTop="12dp"
+                        android:paddingVertical="8dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/tvExchangeTitle">
 
                         <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="0dp"
+                            android:id="@+id/clExchangeBalance"
+                            android:layout_width="match_parent"
                             android:layout_height="70dp"
                             android:background="@drawable/square_rounded"
-                            android:paddingStart="16dp"
+                            android:paddingStart="12dp"
                             android:paddingEnd="8dp"
-                            tools:background="@drawable/square_rounded_dark_green"
+                            android:layout_marginEnd="4dp"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
@@ -204,8 +191,7 @@
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
                                 app:layout_constraintTop_toTopOf="parent"
-                                app:tint="?attr/colorOnPrimary"
-                                tools:tint="@color/white" />
+                                app:tint="?attr/onWidgetColor" />
 
                             <TextView
                                 android:id="@+id/tvBalanceAmount"
@@ -213,8 +199,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="8dp"
                                 android:text="0.00"
-                                android:textColor="?attr/colorOnPrimary"
-                                tools:textColor="@color/white"
+                                android:textColor="?attr/onWidgetColor"
                                 android:textSize="24sp"
                                 android:textStyle="bold"
                                 app:layout_constraintBottom_toBottomOf="parent"
@@ -228,182 +213,33 @@
                                 android:layout_marginStart="12dp"
                                 app:layout_constraintDimensionRatio="H,1:1"
                                 android:layout_gravity="center"
-                                android:indeterminateTint="?attr/colorOnPrimary"
-                                tools:indeterminatTint="@color/white"
+                                android:indeterminateTint="?attr/onWidgetSecondaryColor"
                                 android:indeterminateTintMode="src_atop"
                                 app:layout_constraintBottom_toBottomOf="@+id/tvBalanceAmount"
                                 app:layout_constraintStart_toEndOf="@+id/tvBalanceAmount"
                                 app:layout_constraintTop_toTopOf="@+id/tvBalanceAmount" />
 
                             <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/clButtonBuy"
-                                android:layout_width="50dp"
-                                android:layout_height="24dp"
-                                android:layout_marginTop="8dp"
-                                android:background="@drawable/pill_rounded"
-                                android:backgroundTint="@color/colorPrimaryValueTransfer"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:background="@color/colorPrimaryValueTransfer">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center_horizontal"
-                                    android:text="Buy"
-                                    android:textColor="@color/white"
-                                    app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toEndOf="parent"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintTop_toTopOf="parent" />
-
-                            </androidx.constraintlayout.widget.ConstraintLayout>
-
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/clButtonSell"
-                                android:layout_width="50dp"
-                                android:layout_height="24dp"
-                                android:layout_marginBottom="8dp"
-                                android:background="@drawable/pill_rounded"
-                                android:backgroundTint="@color/red"
+                                android:id="@+id/clExchangeOptions"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintEnd_toEndOf="parent"
-                                tools:background="@color/white">
+                                app:layout_constraintTop_toTopOf="parent">
 
-                                <TextView
+                                <ImageView
                                     android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center_horizontal"
-                                    android:text="Sell"
-                                    android:textColor="@color/white"
+                                    android:layout_height="match_parent"
+                                    android:src="@drawable/ic_baseline_more_vert_24"
+                                    app:tint="?attr/mutedColor"
                                     app:layout_constraintBottom_toBottomOf="parent"
                                     app:layout_constraintEnd_toEndOf="parent"
                                     app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintTop_toTopOf="parent" />
-
+                                    app:layout_constraintTop_toTopOf="parent"/>
                             </androidx.constraintlayout.widget.ConstraintLayout>
                         </androidx.constraintlayout.widget.ConstraintLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clTransferQR"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded"
-                        tools:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toStartOf="@+id/clTransferContact"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
-
-                        <TextView
-                            android:id="@+id/tvSendQR"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Transfer"
-                            android:textColor="?attr/colorOnPrimary"
-                            tools:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/ivTransferQRIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_qr_code_scan"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="?attr/colorOnPrimary"
-                            tools:tint="@color/white" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clTransferContact"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded"
-                        tools:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toStartOf="@+id/clRequest"
-                        app:layout_constraintStart_toEndOf="@+id/clTransferQR"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
-
-                        <TextView
-                            android:id="@+id/tvSendContact"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Transfer"
-                            android:textColor="?attr/colorOnPrimary"
-                            tools:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/ivTransferContactIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_exchange"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="?attr/colorOnPrimary"
-                            tools:tint="@color/white" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clRequest"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/square_rounded"
-                        tools:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/clTransferContact"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
-
-                        <TextView
-                            android:id="@+id/tvRequest"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Request"
-                            android:textColor="?attr/colorOnPrimary"
-                            tools:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/ivRequestIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_request"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="?attr/colorOnPrimary"
-                            tools:tint="@color/white" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-                // Contacts
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clContacts"
@@ -414,15 +250,11 @@
                     app:layout_constraintTop_toBottomOf="@+id/clExchange">
 
                     <TextView
-                        android:id="@+id/tvChatsSocialTitle"
+                        android:id="@+id/tvContactsTitle"
+                        style="@style/FragmentTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="12dp"
-                        android:text="Contacts"
-                        tools:textColor="@color/white"
-                        android:textColor="?attr/colorOnPrimary"
-                        android:textSize="32sp"
+                        android:text="@string/menu_navigation_contacts"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -433,12 +265,11 @@
                         android:layout_marginEnd="12dp"
                         android:layout_marginTop="2dp"
                         android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="?attr/colorPrimaryDark"
+                        app:tint="?attr/onBackgroundSecondaryColor"
                         android:src="@drawable/ic_baseline_arrow_forward_ios_24"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvChatsSocialTitle"
+                        app:layout_constraintBottom_toBottomOf="@+id/tvContactsTitle"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvChatsSocialTitle" />
+                        app:layout_constraintTop_toTopOf="@+id/tvContactsTitle" />
 
                     <TextView
                         android:id="@+id/tvNoChats"
@@ -448,24 +279,37 @@
                         android:layout_marginTop="4dp"
                         android:background="@drawable/pill_rounded"
                         android:paddingVertical="4dp"
-                        android:text="There are no conversations with contacts yet"
-                        android:textColor="?attr/colorOnPrimary"
-                        tools:textColor="@color/white"
+                        android:text="@string/text_no_chats"
+                        android:textColor="?attr/onBackgroundColor"
                         android:textStyle="italic"
                         android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvChatsSocialTitle"
+                        app:layout_constraintTop_toBottomOf="@+id/tvContactsTitle"
                         tools:visibility="visible" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvContactChats"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingVertical="8dp"
+                        android:paddingTop="8dp"
                         app:layout_constraintTop_toBottomOf="@+id/tvNoChats"
                         tools:itemCount="2"
                         tools:listitem="@layout/item_contacts_chat" />
+
+                    <Button
+                        android:id="@+id/btnShowMoreChats"
+                        style="@style/ButtonLightGrayRounded"
+                        android:layout_height="26dp"
+                        android:paddingVertical="0dp"
+                        android:background="@drawable/pill_rounded"
+                        android:text="@string/btn_show_more"
+                        android:textColor="?attr/onWidgetSecondaryColor"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rvContactChats"
+                        tools:visibility="visible" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>

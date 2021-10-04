@@ -16,6 +16,7 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import java.math.BigInteger
 import java.text.SimpleDateFormat
+import java.util.*
 
 class ExchangeTransactionItemRenderer(
     private val onSignClick: (TrustChainBlock) -> Unit,
@@ -47,12 +48,12 @@ class ExchangeTransactionItemRenderer(
 
         when (item.transaction.type) {
             TransactionRepository.BLOCK_TYPE_CREATE -> {
-                transactionType.text = "Buy from EuroToken Exchange"
+                transactionType.text = this.context.resources.getString(R.string.text_exchange_buy)
                 transactionDirectionUp.isVisible = outgoing
                 transactionDirectionDown.isVisible = !outgoing
             }
             TransactionRepository.BLOCK_TYPE_DESTROY -> {
-                transactionType.text = "Sell to EuroToken Exchange"
+                transactionType.text = this.context.resources.getString(R.string.text_exchange_sell)
                 transactionDirectionUp.isVisible = outgoing
                 transactionDirectionDown.isVisible = !outgoing
             }
@@ -60,9 +61,15 @@ class ExchangeTransactionItemRenderer(
                 val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
 
                 transactionType.text = if (outgoing) {
-                    "Outgoing transfer to ${contact?.name ?: "unknown contact"}"
+                    this.context.resources.getString(
+                        R.string.text_exchange_transaction_outgoing,
+                        contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
+                    )
                 } else {
-                    "Incoming transfer from ${contact?.name ?: "unknown contact"}"
+                    this.context.resources.getString(
+                        R.string.text_exchange_transaction_incoming,
+                        contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
+                    )
                 }
 
                 transactionDirectionUp.isVisible = !outgoing
@@ -70,7 +77,7 @@ class ExchangeTransactionItemRenderer(
             }
         }
 
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm")
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.ENGLISH)
         transactionDate.text = dateFormat.format(item.transaction.timestamp)
 
         val map = item.transaction.block.transaction.toMap()
@@ -84,19 +91,19 @@ class ExchangeTransactionItemRenderer(
 
         when (item.status) {
             ExchangeTransactionItem.BlockStatus.SELF_SIGNED -> {
-                blockStatus.text = "Self-Signed"
+                blockStatus.text = this.context.resources.getString(R.string.text_exchange_self_signed)
                 blockStatusColorSelfSigned.isVisible = true
             }
             ExchangeTransactionItem.BlockStatus.SIGNED -> {
-                blockStatus.text = "Signed"
+                blockStatus.text = this.context.resources.getString(R.string.text_exchange_signed)
                 blockStatusColorSigned.isVisible = true
             }
             ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE -> {
-                blockStatus.text = "Waiting for signature"
+                blockStatus.text = this.context.resources.getString(R.string.text_exchange_waiting_for_signature)
                 blockStatusColorWaitingForSignature.isVisible = true
             }
             null -> {
-                blockStatus.text = "Status unknown"
+                blockStatus.text = this.context.resources.getString(R.string.text_exchange_unknown)
             }
         }
 
@@ -104,7 +111,7 @@ class ExchangeTransactionItemRenderer(
 
         transactionSignButton.setOnClickListener {
             transactionSignButton.background = ContextCompat.getDrawable(this.context, R.drawable.pill_rounded_bottom_orange)
-            transactionSignButtonView.text = "Signing transaction..."
+            transactionSignButtonView.text = this.context.resources.getString(R.string.text_exchange_signing_transaction)
             Handler().postDelayed(
                 Runnable {
                     onSignClick(item.transaction.block)
@@ -116,8 +123,8 @@ class ExchangeTransactionItemRenderer(
         transactionContentText.text = item.transaction.block.transaction.toString()
 
         transactionSenderReceiverTitle.text = when {
-            outgoing -> "Receiver"
-            else -> "Sender"
+            outgoing -> this.context.resources.getString(R.string.text_transaction_receiver)
+            else -> this.context.resources.getString(R.string.text_transaction_sender)
         }
 
         transactionSenderReceiverText.text = item.transaction.sender.keyToBin().toHex()

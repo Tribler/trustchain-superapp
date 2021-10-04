@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import java.text.SimpleDateFormat
+import java.util.*
 
 class IdentityItemRenderer(
     private val layoutType: Int,
@@ -20,40 +21,57 @@ class IdentityItemRenderer(
     IdentityItem::class.java
 ) {
 
-    private val dateFormat = SimpleDateFormat("MMMM d, yyyy")
+    private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
         if (layoutType == 0) {
             tvIdentityPublicKey.text = item.identity.publicKey.keyToBin().toHex()
 
-            val content = item.identity.content
-            tvIdentityGivenNamesSurname.text = "${content.givenNames} ${content.surname}"
+            item.identity.content.let { content ->
+                tvIdentityGivenNamesSurname.text =
+                    StringBuilder()
+                        .append(content.givenNames)
+                        .append(" ")
+                        .append(content.surname)
+            }
 
-            val publicKeyString = item.identity.publicKey.toString()
-            val input = publicKeyString.substring(20, publicKeyString.length).toByteArray()
-            val color = getColorByHash(context, publicKeyString)
-            val identicon = generateIdenticon(input, color, resources)
-            ivIdenticon.setImageBitmap(identicon)
+            item.identity.publicKey.toString().let { publicKeyString ->
+                generateIdenticon(
+                    publicKeyString.substring(20, publicKeyString.length).toByteArray(),
+                    getColorByHash(context, publicKeyString),
+                    resources
+                ).let {
+                    ivIdenticon.setImageBitmap(it)
+                }
+            }
 
             view.setOnClickListener {
                 onQRButtonClick(item.identity)
             }
         } else if (layoutType == 1) {
-            val content = item.identity.content
+            item.identity.content.let { content ->
+                tvGivenNamesSurnameValue.text =
+                    StringBuilder()
+                        .append(content.givenNames)
+                        .append(" ")
+                        .append(content.surname)
+                tvGenderValue.text = content.gender
+                tvDatePlaceOfBirthValue.text =
+                    StringBuilder().append(dateFormat.format(content.dateOfBirth))
+                        .append(", ")
+                        .append(content.placeOfBirth)
+                tvNationalityValue.text = content.nationality
+                tvPersonalNumberValue.text = content.personalNumber.toString()
+                tvDocumentNumberValue.text = content.documentNumber
+            }
 
-            tvGivenNamesSurnameValue.text = "${content.givenNames} ${content.surname}"
-            tvGenderValue.text = content.gender
-            tvDatePlaceOfBirthValue.text = "${dateFormat.format(content.dateOfBirth)}, ${content.placeOfBirth}"
-            tvNationalityValue.text = content.nationality
-            tvPersonalNumberValue.text = content.personalNumber.toString()
-            tvDocumentNumberValue.text = content.documentNumber
-            tvPublicKeyValue.text = item.identity.publicKey.keyToBin().toHex()
-
-            tvPublicKeyValue.setOnClickListener {
-
-                when (tvPublicKeyValue.lineCount) {
-                    2 -> tvPublicKeyValue.maxLines = 6
-                    else -> tvPublicKeyValue.maxLines = 2
+            tvPublicKeyValue.apply {
+                text = item.identity.publicKey.keyToBin().toHex()
+                setOnClickListener {
+                    when (this.lineCount) {
+                        3 -> tvPublicKeyValue.maxLines = 6
+                        else -> tvPublicKeyValue.maxLines = 3
+                    }
                 }
             }
 

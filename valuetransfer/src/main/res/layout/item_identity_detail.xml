@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:padding="12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clIdentityCard"
@@ -15,18 +13,20 @@
         android:padding="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:background="@drawable/square_rounded_dark_green">
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/tvGivenNamesSurnameTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Given Names / Surname"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/text_given_names_surname"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            app:layout_constraintEnd_toStartOf="@+id/tvGenderTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,23 +34,29 @@
             android:id="@+id/tvGenderTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gender"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:gravity="end"
+            android:layout_marginStart="4dp"
+            android:text="@string/text_gender"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintStart_toEndOf="@+id/tvGivenNamesSurnameTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/tvGivenNamesSurnameValue"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
             android:text="Jan Jansen"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvGenderValue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvGivenNamesSurnameTitle" />
 
@@ -58,24 +64,30 @@
             android:id="@+id/tvGenderValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:gravity="end"
             android:text="Male"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@+id/tvGivenNamesSurnameValue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvGenderTitle" />
 
         <TextView
             android:id="@+id/tvDatePlaceOfBirthTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
             android:layout_marginTop="8dp"
-            android:text="Date of Birth / Place of Birth"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/text_date_place_of_birth"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            app:layout_constraintEnd_toStartOf="@+id/tvNationalityTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvGivenNamesSurnameValue" />
 
@@ -83,24 +95,30 @@
             android:id="@+id/tvNationalityTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
-            android:text="Nationality"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:gravity="end"
+            android:text="@string/text_nationality"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintStart_toEndOf="@+id/tvDatePlaceOfBirthTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvGenderValue" />
 
         <TextView
             android:id="@+id/tvDatePlaceOfBirthValue"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
             android:text="March 7, 1975, Amsterdam"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/tvNationalityValue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDatePlaceOfBirthTitle" />
 
@@ -108,61 +126,74 @@
             android:id="@+id/tvNationalityValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:gravity="end"
             android:text="Netherlands"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@+id/tvDatePlaceOfBirthValue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvNationalityTitle" />
 
         <TextView
             android:id="@+id/tvPersonalNumberTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
             android:layout_marginTop="8dp"
-            android:text="Personal Number"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:ellipsize="end"
+            android:text="@string/text_personal_number"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            app:layout_constraintEnd_toStartOf="@+id/tvDocumentNumberTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDatePlaceOfBirthValue" />
 
         <TextView
             android:id="@+id/tvDocumentNumberTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
-            android:text="Document Number"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:gravity="end"
+            android:text="@string/text_document_number"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@+id/tvPersonalNumberTitle"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvNationalityValue" />
 
         <TextView
             android:id="@+id/tvPersonalNumberValue"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
             android:text="1065726824"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toStartOf="@+id/tvDocumentNumberValue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPersonalNumberTitle" />
 
         <TextView
             android:id="@+id/tvDocumentNumberValue"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
             android:text="U25GIJH43D2"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
+            android:gravity="end"
             android:textSize="14sp"
             android:textStyle="bold"
+            android:ellipsize="end"
+            app:layout_constraintStart_toEndOf="@+id/tvPersonalNumberValue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvDocumentNumberTitle" />
 
@@ -171,10 +202,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Public Key"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
-            android:textSize="10sp"
+            android:text="@string/text_public_key"
+            android:textColor="?attr/onWidgetSecondaryColor"
+            android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPersonalNumberValue" />
@@ -184,38 +214,58 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:maxLines="2"
+            android:maxLines="3"
             android:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3"
-            android:textColor="?attr/colorOnPrimary"
-            tools:textColor="@color/white"
+            android:textColor="?attr/onWidgetColor"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/btnQRCode"
+            app:layout_constraintEnd_toStartOf="@+id/clbtnQRCode"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvPublicKeyTitle" />
 
-        <ImageButton
-            android:id="@+id/btnQRCode"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clbtnQRCode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
-            android:background="@drawable/ic_qr_code_simple"
-            android:backgroundTint="?attr/colorOnPrimary"
-            tools:backgroundTint="@color/white"
-            app:layout_constraintEnd_toStartOf="@+id/btnCopyPublicKey"
+            android:padding="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/backgroundColor"
+            app:layout_constraintEnd_toStartOf="@+id/clbtnCopyPublicKey"
             app:layout_constraintStart_toEndOf="@+id/tvPublicKeyValue"
-            app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
+            app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue">
+
+            <ImageButton
+                android:id="@+id/btnQRCode"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/ic_qr_code_simple"
+                android:backgroundTint="?attr/onWidgetColor"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clbtnCopyPublicKey"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/backgroundColor"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue">
 
         <ImageButton
             android:id="@+id/btnCopyPublicKey"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:background="@drawable/ic_copy_public_key"
-            android:backgroundTint="?attr/colorOnPrimary"
-            tools:backgroundTint="@color/white"
+            android:backgroundTint="?attr/onWidgetColor"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvPublicKeyValue" />
+            app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

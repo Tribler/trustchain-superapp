@@ -8,26 +8,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 
 class IdentityAttributeDialog(
     private var attribute: IdentityAttribute?,
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var identityCommunity: IdentityCommunity
-    private lateinit var identityStore: IdentityStore
+) : VTDialogFragment() {
 
     private var selectedName = ""
 
@@ -37,16 +31,14 @@ class IdentityAttributeDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_attribute, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            identityCommunity = parentActivity.getCommunity()!!
-            identityStore = parentActivity.getStore()!!
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            val unusedAttributes = identityCommunity.getUnusedAttributeNames()
+            val unusedAttributes = getIdentityCommunity().getUnusedAttributeNames()
 
             val attributeNameSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeName)
             val attributeNameView = view.findViewById<EditText>(R.id.etAttributeName)
@@ -54,18 +46,16 @@ class IdentityAttributeDialog(
             val saveButton = view.findViewById<Button>(R.id.btnSaveAttribute)
             toggleButton(saveButton, attribute != null)
 
-            attributeNameView.visibility = if (attribute == null) View.GONE else View.VISIBLE
-            attributeNameSpinner.visibility = if (attribute == null) View.VISIBLE else View.GONE
+            attributeNameView.isVisible = attribute != null
+            attributeNameSpinner.isVisible = attribute == null
 
             if (attribute == null) {
                 val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, unusedAttributes) {
                     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                        val textView: TextView = super.getView(position, convertView, parent) as TextView
-
-                        textView.text = unusedAttributes[position]
-                        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-
-                        return textView
+                        return (super.getView(position, convertView, parent) as TextView).apply {
+                            text = unusedAttributes[position]
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                        }
                     }
 
                     override fun getDropDownView(
@@ -73,21 +63,18 @@ class IdentityAttributeDialog(
                         convertView: View?,
                         parent: ViewGroup
                     ): View {
-                        val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-                        val params = textView.layoutParams
-                        params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                        textView.layoutParams = params
-                        textView.gravity = Gravity.CENTER_VERTICAL
-
-                        textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
-
-                        if (position == attributeNameSpinner.selectedItemPosition) {
-                            textView.background = ColorDrawable(Color.LTGRAY)
-                        } else {
-                            textView.background = ColorDrawable(Color.WHITE)
+                        return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                            layoutParams.apply {
+                                height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                            }
+                            gravity = Gravity.CENTER_VERTICAL
+                            setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                            background = if (position == attributeNameSpinner.selectedItemPosition) {
+                                ColorDrawable(Color.LTGRAY)
+                            } else {
+                                ColorDrawable(Color.WHITE)
+                            }
                         }
-
-                        return textView
                     }
                 }
 
@@ -108,7 +95,7 @@ class IdentityAttributeDialog(
                     }
                 }
             } else {
-                attributeNameView.setText(attribute!!.name.toString())
+                attributeNameView.setText(attribute!!.name)
                 attributeValueView.setText(attribute!!.value)
 
                 selectedName = attribute!!.name
@@ -125,15 +112,23 @@ class IdentityAttributeDialog(
                 val attributeValue = attributeValueView.text.toString()
 
                 if (attribute == null) {
-                    val newAttribute = identityCommunity.createAttribute(selectedName, attributeValue)
-                    identityStore.addAttribute(newAttribute)
-                    parentActivity.displaySnackbar(requireContext(), "Identity attribute added")
+                    getIdentityCommunity().createAttribute(selectedName, attributeValue).let { newAttribute ->
+                        getIdentityStore().addAttribute(newAttribute)
+
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_identity_attribute_add_success)
+                        )
+                    }
                 } else {
                     attribute!!.name = selectedName
                     attribute!!.value = attributeValue
 
-                    identityStore.editAttribute(attribute!!)
-                    parentActivity.displaySnackbar(requireContext(), "Identity attribute updated")
+                    getIdentityStore().editAttribute(attribute!!)
+                    parentActivity.displaySnackbar(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_identity_attribute_update_success)
+                    )
                 }
 
                 activity?.invalidateOptionsMenu()
@@ -141,6 +136,6 @@ class IdentityAttributeDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

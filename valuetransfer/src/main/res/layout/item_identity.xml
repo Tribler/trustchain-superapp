@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:background="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
     android:paddingBottom="4dp">
 
@@ -15,8 +14,7 @@
         android:background="@drawable/square_rounded"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:background="@drawable/square_rounded_dark_green">
+        app:layout_constraintTop_toTopOf="parent">
 
         <FrameLayout
             android:id="@+id/flIdenticon"
@@ -25,7 +23,7 @@
             android:layout_marginVertical="8dp"
             android:layout_marginStart="8dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?attr/backgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -51,8 +49,7 @@
                 android:id="@+id/tvIdentityGivenNamesSurname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnPrimary"
-                tools:textColor="@color/white"
+                android:textColor="?attr/onWidgetColor"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -65,8 +62,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="?attr/colorOnPrimary"
-                tools:textColor="@color/white"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="12sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
