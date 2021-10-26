@@ -20,9 +20,12 @@ import java.util.*
 
 class ExchangeTransactionItemRenderer(
     private val onSignClick: (TrustChainBlock) -> Unit,
+    private val type: String
 ) : ItemLayoutRenderer<ExchangeTransactionItem, View>(
     ExchangeTransactionItem::class.java
 ) {
+
+    private val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.ENGLISH)
 
     override fun bindView(item: ExchangeTransactionItem, view: View) = with(view) {
 
@@ -44,7 +47,9 @@ class ExchangeTransactionItemRenderer(
         val transactionSignButton = view.findViewById<ConstraintLayout>(R.id.clTransactionSignButton)
         val transactionSignButtonView = view.findViewById<TextView>(R.id.tvTransactionSignButton)
 
-        val outgoing = !item.transaction.outgoing
+        val outgoing = if (type == TYPE_FULL_VIEW) {
+            !item.transaction.outgoing
+        } else item.transaction.outgoing
 
         when (item.transaction.type) {
             TransactionRepository.BLOCK_TYPE_CREATE -> {
@@ -61,15 +66,24 @@ class ExchangeTransactionItemRenderer(
                 val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
 
                 transactionType.text = if (outgoing) {
-                    this.context.resources.getString(
-                        R.string.text_exchange_transaction_outgoing,
-                        contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
-                    )
+                    if (type == TYPE_FULL_VIEW) {
+                        this.context.resources.getString(
+                            R.string.text_exchange_transaction_outgoing_to,
+                            contact?.name
+                                ?: this.context.resources.getString(R.string.text_unknown_contact)
+                        )
+                    } else {
+                        this.context.resources.getString(R.string.text_exchange_transaction_outgoing)
+                    }
                 } else {
-                    this.context.resources.getString(
-                        R.string.text_exchange_transaction_incoming,
-                        contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
-                    )
+                    if (type == TYPE_FULL_VIEW) {
+                        this.context.resources.getString(
+                            R.string.text_exchange_transaction_incoming_to,
+                            contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
+                        )
+                    } else {
+                        this.context.resources.getString(R.string.text_exchange_transaction_incoming)
+                    }
                 }
 
                 transactionDirectionUp.isVisible = !outgoing
@@ -77,7 +91,6 @@ class ExchangeTransactionItemRenderer(
             }
         }
 
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.ENGLISH)
         transactionDate.text = dateFormat.format(item.transaction.timestamp)
 
         val map = item.transaction.block.transaction.toMap()
@@ -122,9 +135,13 @@ class ExchangeTransactionItemRenderer(
 
         transactionContentText.text = item.transaction.block.transaction.toString()
 
-        transactionSenderReceiverTitle.text = when {
-            outgoing -> this.context.resources.getString(R.string.text_transaction_receiver)
-            else -> this.context.resources.getString(R.string.text_transaction_sender)
+        transactionSenderReceiverTitle.text = when (item.transaction.type) {
+            TransactionRepository.BLOCK_TYPE_CREATE -> this.context.resources.getString(R.string.text_gateway)
+            TransactionRepository.BLOCK_TYPE_DESTROY -> this.context.resources.getString(R.string.text_gateway)
+            else -> when {
+                outgoing -> this.context.resources.getString(R.string.text_transaction_receiver)
+                else -> this.context.resources.getString(R.string.text_transaction_sender)
+            }
         }
 
         transactionSenderReceiverText.text = item.transaction.sender.keyToBin().toHex()
@@ -134,6 +151,11 @@ class ExchangeTransactionItemRenderer(
         view.setOnClickListener {
             transactionContent.isVisible = !transactionContent.isVisible
         }
+    }
+
+    companion object {
+        const val TYPE_FULL_VIEW = "full_view"
+        const val TYPE_CONTACT_VIEW = "contact_view"
     }
 
     override fun getLayoutResourceId(): Int {

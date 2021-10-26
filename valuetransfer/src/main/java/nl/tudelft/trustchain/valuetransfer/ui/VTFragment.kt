@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
 import androidx.annotation.LayoutRes
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
@@ -16,6 +15,7 @@ import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
+import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 
 abstract class VTFragment(@LayoutRes contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
@@ -81,7 +81,13 @@ abstract class VTFragment(@LayoutRes contentLayoutId: Int = 0) : BaseFragment(co
         parentActivity.notificationHandler()
     }
 
+    val passportHandler: PassportHandler by lazy {
+        parentActivity.passportHandler()
+    }
+
     val appPreferences: AppPreferences by lazy {
         parentActivity.appPreferences()
     }
+
+    open fun initView() {}
 }

@@ -108,6 +108,18 @@ dependencies {
     // Blocking dialog and top snacbkbar
     implementation 'com.jaredrummler:blocking-dialog:1.0.0'
     implementation 'com.github.Redman1037:TSnackBar:V2.0.0'
+
+    // Passport onboarding
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    api('org.jmrtd:jmrtd:0.7.18') {
+        exclude group: 'org.bouncycastle'
+    }
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:16.0.0'
+    implementation 'com.journeyapps:zxing-android-embedded:3.6.0'
+//    implementation 'edu.ucar:jj2000:5.2'
+    implementation 'com.github.mhshams:jnbis:1.1.0'
+    implementation 'net.sf.scuba:scuba-sc-android:0.0.20'
+    implementation 'com.madgag.spongycastle:prov:1.58.0.0'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

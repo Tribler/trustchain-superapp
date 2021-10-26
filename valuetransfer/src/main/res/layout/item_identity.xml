@@ -16,26 +16,46 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/flIdenticon"
-            android:layout_width="50dp"
+            android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginVertical="8dp"
             android:layout_marginStart="8dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/cornerRadius"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="?attr/backgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/clNamePublicKey"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/ivIdenticon"
-                android:layout_width="@dimen/identiconWidth"
-                android:layout_height="@dimen/identiconHeight"
-                android:layout_gravity="center" />
-        </FrameLayout>
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:padding="10dp"
+                tools:src="@drawable/ic_contact"
+                android:adjustViewBounds="true"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/ivIdentityPhoto"
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                tools:src="@drawable/ic_contact"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clNamePublicKey"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"

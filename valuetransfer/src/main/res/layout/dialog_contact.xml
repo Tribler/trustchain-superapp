@@ -3,34 +3,382 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/dialog_rounded_top"
-    android:backgroundTint="?attr/dialogColor">
+    android:layout_height="match_parent"
+    android:background="?attr/backgroundColor">
 
-    <include
-        android:id="@+id/dialogHandle"
-        layout="@layout/handle_dialog" />
-
-    <TextView
-        android:id="@+id/tvTitle"
-        style="@style/DialogTitle"
-        android:layout_marginTop="8dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
-        app:layout_constraintStart_toStartOf="parent"
+    <ImageView
+        android:id="@+id/ivClose"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:src="@drawable/ic_baseline_close_24"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Menu Title"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <ListView
-        android:id="@+id/listOptions"
+    <LinearLayout
+        android:id="@+id/llContentTop"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="12dp"
-        android:backgroundTint="?attr/dialogColor"
-        tools:listitem="@layout/item_option"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+
+<!--        <include-->
+<!--            android:id="@+id/dialogHandle"-->
+<!--            layout="@layout/handle_dialog" />-->
+
+        <!--    <ScrollView-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="match_parent"-->
+        <!--        android:layout_marginTop="8dp"-->
+        <!--        android:scrollbars="none"-->
+        <!--        android:orientation="vertical"-->
+        <!--        app:layout_constraintStart_toStartOf="parent"-->
+        <!--        app:layout_constraintEnd_toEndOf="parent"-->
+        <!--        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"-->
+        <!--        app:layout_constraintBottom_toBottomOf="parent">-->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cvContactImage"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginTop="12dp"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="@dimen/cornerRadius"
+                android:background="@drawable/square_rounded"
+                android:layout_gravity="center_horizontal">
+
+                <ImageView
+                    android:id="@+id/ivIdenticon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
+                    tools:src="@drawable/ic_contact"
+                    android:layout_gravity="center"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+                <ImageView
+                    android:id="@+id/ivContactImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    tools:src="@drawable/ic_contact"
+                    android:adjustViewBounds="true"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+            </androidx.cardview.widget.CardView>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:id="@+id/tvNickNameValue"
+                    style="@style/DialogTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/ivNickNameEdit"
+                    tools:text="Piet" />
+
+                <ImageView
+                    android:id="@+id/ivNickNameEdit"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:padding="5dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/ic_edit"
+                    app:tint="?attr/mutedLightColor"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_gravity="center_vertical"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/llVerificationStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvVerifiedStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawablePadding="2dp"
+                        app:drawableTint="?attr/colorAccent"
+                        android:text="Verified"
+                        app:drawableStartCompat="@drawable/ic_verified_smaller" />
+
+                    <TextView
+                        android:id="@+id/tvNotVerifiedStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawablePadding="2dp"
+                        app:drawableTint="?attr/colorError"
+                        android:gravity="center"
+                        android:text="Not Verified"
+                        app:drawableStartCompat="@drawable/ic_verified_not_smaller" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/ivVerifiedInfoIcon"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/ic_baseline_info_24"
+                    app:tint="?attr/mutedLightColor" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvVerifiedInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="4dp"
+                android:text="A contact is verified when during import both the camera and NFC chip are used to ensure legitimacy of the document. When a contact is not verified, it's identity name below may be forged."
+                android:textStyle="italic"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="?attr/widgetColor"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/tvIdentityNameTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical"
+                        android:text="Identity Name"
+                        android:textColor="?attr/onWidgetColor"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/ivIdentityNameInfoIcon"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_alignTop="@+id/tvIdentityNameTitle"
+                        android:layout_alignBottom="@+id/tvIdentityNameTitle"
+                        android:layout_marginStart="8dp"
+                        android:layout_toRightOf="@+id/tvIdentityNameTitle"
+                        android:src="@drawable/ic_baseline_info_24"
+                        app:tint="?attr/mutedLightColor" />
+
+                    <TextView
+                        android:id="@+id/tvIdentityNameValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginStart="8dp"
+                        android:layout_toRightOf="@+id/ivIdentityNameInfoIcon"
+                        android:ellipsize="end"
+                        android:gravity="end|center_vertical"
+                        android:maxLines="1"
+                        tools:text="P.J. Hein" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tvIdentityNameInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="The identity name consists of the initials and surname of the contact that are on the official identity document."
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+        </LinearLayout>
+        <!--    </ScrollView>-->
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llIsContact"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llContentTop">
+
+        <LinearLayout
+            android:id="@+id/llTabChooser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:padding="4dp"
+            android:background="@drawable/square_rounded"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/tvShowIdentityAttributes"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/pill_rounded_selected"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="Identity Attributes"
+                android:textColor="?attr/onWidgetColor"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvShowTransactions"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/pill_rounded"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="Transactions"
+                android:textColor="?attr/onWidgetColor" />
+
+        </LinearLayout>
+
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:id="@+id/clIdentityAttributes"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/llTabChooser">-->
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/clIdentityAttributes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+<!--            <ScrollView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent">-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvContactIdentityAttributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_contact_identity_attribute"
+                    />
+            </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:id="@+id/clTransactions"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:visibility="gone"-->
+<!--            tools:visibility="visible"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/llTabChooser">-->
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/clTransactions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+<!--            <ScrollView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent">-->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvContactTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/item_exchange_transaction"
+                    />
+
+                <Button
+                    android:id="@+id/btnMoreTransactions"
+                    style="@style/ButtonLightGrayRounded"
+                    android:layout_height="26dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@drawable/pill_rounded"
+                    android:paddingVertical="0dp"
+                    android:text="@string/btn_show_more"
+                    android:textColor="?attr/onWidgetSecondaryColor"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rvContactTransactions"
+                    tools:visibility="visible" />
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

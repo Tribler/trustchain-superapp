@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import com.mattskala.itemadapter.Item
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 
 data class IdentityAttributeItem(
     val attribute: IdentityAttribute

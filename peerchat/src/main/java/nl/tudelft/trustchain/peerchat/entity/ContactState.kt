@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.entity
 
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 
 data class ContactState(
     /**
@@ -22,4 +23,9 @@ data class ContactState(
      * Blocked status of contact
      */
     val isBlocked: Boolean,
+
+    /**
+     * Identity info of contact
+     */
+    val identityInfo: IdentityInfo? = null
 )

@@ -126,7 +126,11 @@ class ContactShareDialog(
 
             buttonShareContact.setOnClickListener {
                 try {
-                    getPeerChatCommunity().sendContact(selectedContact!!, selectedRecipient!!.publicKey)
+                    getPeerChatCommunity().sendContact(
+                        selectedContact!!,
+                        selectedRecipient!!.publicKey,
+                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                    )
 
                     // Only show snackbar if contact of chat is shared to another contact (and not some contact that is shared to the contact of the chat)
                     if (recipient != null) {

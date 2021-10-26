@@ -3,8 +3,11 @@ package nl.tudelft.trustchain.valuetransfer.ui.settings
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
+import kotlinx.coroutines.flow.Flow
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.util.md5
+import java.security.MessageDigest
 
 class AppPreferences(
     private val parentActivity: ValueTransferMainActivity
@@ -32,9 +35,35 @@ class AppPreferences(
         }
     }
 
+    fun setIdentityFace(encodedImage: String?) {
+        sharedPreferences.edit().putString(
+            PREFS_IDENTITY_FACE_NAME,
+            encodedImage
+        ).apply()
+        sharedPreferences.edit().putString(
+            PREFS_IDENTITY_FACE_HASH_NAME,
+            encodedImage?.md5()
+        ).apply()
+    }
+
+    fun getIdentityFace(): String? {
+        return sharedPreferences.getString(PREFS_IDENTITY_FACE_NAME, "")
+    }
+
+    fun getIdentityFaceHash(): String? {
+        return sharedPreferences.getString(PREFS_IDENTITY_FACE_HASH_NAME, "")
+    }
+
+    fun deleteIdentityFace() {
+        sharedPreferences.edit().remove(PREFS_IDENTITY_FACE_NAME).apply()
+        sharedPreferences.edit().remove(PREFS_IDENTITY_FACE_HASH_NAME).apply()
+    }
+
     companion object {
         const val PREFS_FILE_NAME = "prefs_vt"
         const val PREFS_THEME_NAME = "theme"
+        const val PREFS_IDENTITY_FACE_NAME = "identity_face"
+        const val PREFS_IDENTITY_FACE_HASH_NAME = "identity_face_hash"
 
         val APP_THEME = R.style.Theme_ValueTransfer
         const val APP_THEME_DAY = "day"

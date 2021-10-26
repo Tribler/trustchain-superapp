@@ -1,13 +1,19 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
+import android.graphics.ImageDecoder
+import android.graphics.Typeface
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.*
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
@@ -29,9 +35,12 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentIdentityBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeImage
+import nl.tudelft.trustchain.common.valuetransfer.extensions.encodeImage
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
 import org.json.JSONObject
 import java.util.*
 
@@ -42,9 +51,11 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     private val adapterAttributes = ItemAdapter()
     private val adapterAttestations = ItemAdapter()
 
+    private val identityImage = MutableLiveData<String?>()
+
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        getIdentityStore().getAllIdentities().map { identities ->
-            createIdentityItems(identities)
+        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow()) { identities, identityImage ->
+            createIdentityItems(identities, identityImage)
         }.asLiveData()
     }
 
@@ -64,9 +75,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         return inflater.inflate(R.layout.fragment_identity, container, false)
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    override fun initView() {
         parentActivity.apply {
             setActionBarTitle(resources.getString(R.string.menu_navigation_identity), null)
             toggleActionBar(false)
@@ -74,13 +83,28 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }
     }
 
+    init {
+        setHasOptionsMenu(true)
+
+        lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                if (appPreferences.getIdentityFace() != identityImage.value) {
+                    identityImage.postValue(appPreferences.getIdentityFace())
+                    parentActivity.invalidateOptionsMenu()
+                }
+
+                delay(1000)
+            }
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setHasOptionsMenu(true)
-
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
+                parentActivity,
                 1,
                 { identity ->
                     val map = mapOf(
@@ -90,8 +114,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
                     QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
                         .show(parentFragmentManager, tag)
-                },
-                { identity ->
+                }, { identity ->
                     copyToClipboard(
                         requireContext(),
                         identity.publicKey.keyToBin().toHex(),
@@ -104,12 +127,37 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                             resources.getString(R.string.text_public_key)
                         )
                     )
+                }, {
+                    if (identityImage.value!!.isBlank()) {
+                        identityImageIntent()
+                    } else {
+                        OptionsDialog(
+                            R.menu.identity_image_options,
+                            "Choose Option",
+                            menuMods = { menu ->
+                                menu.apply {
+                                    findItem(R.id.actionDeleteIdentityImage).isVisible =
+                                        identityImage.value!!.isNotBlank()
+                                }
+                            },
+                            optionSelected = { _, item ->
+                                when (item.itemId) {
+                                    R.id.actionAddIdentityImage -> identityImageIntent()
+                                    R.id.actionDeleteIdentityImage -> {
+                                        appPreferences.deleteIdentityFace()
+                                        parentActivity.invalidateOptionsMenu()
+                                    }
+                                }
+                            }
+                        ).show(parentFragmentManager, tag)
+                    }
                 }
             )
         )
 
         adapterAttributes.registerRenderer(
             IdentityAttributeItemRenderer(
+                1,
                 { attribute ->
                     ConfirmDialog(
                         resources.getString(
@@ -197,22 +245,30 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         )
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onResume()
+        initView()
 
-        binding.rvIdentities.adapter = adapterIdentity
-        binding.rvIdentities.layoutManager = LinearLayoutManager(context)
+        binding.rvIdentities.apply {
+            adapter = adapterIdentity
+            layoutManager = LinearLayoutManager(context)
+        }
 
-        binding.rvAttributes.adapter = adapterAttributes
-        binding.rvAttributes.layoutManager = LinearLayoutManager(context)
+        binding.rvAttributes.apply {
+            adapter = adapterAttributes
+            layoutManager = LinearLayoutManager(context)
+        }
 
-        binding.rvAttestations.adapter = adapterAttestations
-        binding.rvAttestations.layoutManager = LinearLayoutManager(context)
+        binding.rvAttestations.apply {
+            adapter = adapterAttestations
+            layoutManager = LinearLayoutManager(context)
+        }
 
         itemsIdentity.observe(
-            viewLifecycleOwner, {
+            viewLifecycleOwner,
+            Observer {
                 adapterIdentity.updateItems(it)
                 toggleVisibility()
             }
@@ -226,23 +282,83 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }
 
         itemsAttributes.observe(
-            viewLifecycleOwner, {
+            viewLifecycleOwner,
+            Observer {
                 adapterAttributes.updateItems(it)
                 toggleVisibility()
             }
         )
 
-        binding.ivAddAttribute.setOnClickListener {
-            addAttribute()
+        binding.ivAddAttributeAttestation.setOnClickListener {
+            OptionsDialog(
+                R.menu.identity_add_options,
+                "Choose Option",
+                menuMods = { menu ->
+                    menu.apply {
+                        findItem(R.id.actionAddIdentityAttribute).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
+                    }
+                },
+                optionSelected = { _, item ->
+                    when (item.itemId) {
+                        R.id.actionAddIdentityAttribute -> addAttribute()
+                        R.id.actionAddAttestation -> addAttestation()
+                        R.id.actionAddAuthority -> addAuthority()
+                    }
+                }
+            ).show(parentFragmentManager, tag)
         }
 
-        binding.ivAddAttestationAuthority.setOnClickListener {
-            OptionsDialog(R.menu.identity_attestations_options, "Choose Option") { _, item ->
-                when (item.itemId) {
-                    R.id.actionAddAttestation -> addAttestation()
-                    R.id.actionAddAuthority -> addAuthority()
-                }
-            }.show(parentFragmentManager, tag)
+//        binding.ivAddAttribute.setOnClickListener {
+//            addAttribute()
+//        }
+//
+//        binding.ivAddAttestationAuthority.setOnClickListener {
+//            OptionsDialog(R.menu.identity_add_options, "Choose Option") { _, item ->
+//                when (item.itemId) {
+//                    R.id.actionAddAttestation -> addAttestation()
+//                    R.id.actionAddAuthority -> addAuthority()
+//                }
+//            }.show(parentFragmentManager, tag)
+//        }
+
+//        binding.ivAttributesInfoIcon.setOnClickListener {
+//            binding.tvAttributesInfo.isVisible = true
+//        }
+//
+//        binding.ivAttestationsInfoIcon.setOnClickListener {
+//            binding.tvAttestationInfo.isVisible = true
+//        }
+
+
+        binding.tvShowIdentityAttributes.setOnClickListener {
+            if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
+            binding.tvAttestationInfo.isVisible = false
+            binding.tvAttributesInfo.isVisible = true
+            binding.tvShowIdentityAttributes.apply {
+                setTypeface(null, Typeface.BOLD)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+            }
+            binding.tvShowAttestations.apply {
+                setTypeface(null, Typeface.NORMAL)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+            }
+
+            binding.clAttestations.exitEnterView(requireContext(), binding.clIdentityAttributes, false)
+        }
+
+        binding.tvShowAttestations.setOnClickListener {
+            if (binding.clAttestations.isVisible) return@setOnClickListener
+            binding.tvAttributesInfo.isVisible = false
+            binding.tvAttestationInfo.isVisible = true
+            binding.tvShowIdentityAttributes.apply {
+                setTypeface(null, Typeface.NORMAL)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+            }
+            binding.tvShowAttestations.apply {
+                setTypeface(null, Typeface.BOLD)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+            }
+            binding.clIdentityAttributes.exitEnterView(requireContext(), binding.clAttestations, true)
         }
     }
 
@@ -254,50 +370,12 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         OptionsDialog(
             R.menu.identity_options,
             "Choose Option") { _, selectedItem ->
                 when (selectedItem.itemId) {
-                    R.id.actionEditIdentity -> {
-                        IdentityDetailsDialog().show(parentFragmentManager, tag)
-                    }
-                    R.id.actionRemoveIdentity -> {
-                        ConfirmDialog(
-                            resources.getString(
-                                R.string.text_confirm_delete,
-                                resources.getString(R.string.text_identity)
-                            )
-                        ) {
-                            try {
-                                getIdentityStore().deleteAllAttributes()
-
-                                getAttestationCommunity().database.getAllAttestations().forEach {
-                                    getAttestationCommunity().database.deleteAttestationByHash(it.attestationHash)
-                                }
-
-                                val identity = getIdentityStore().getIdentity()
-                                if (identity != null) {
-                                    getIdentityStore().deleteIdentity(identity)
-                                }
-
-                                parentActivity.reloadActivity()
-                                parentActivity.displaySnackbar(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_identity_remove_success),
-                                    isShort = false
-                                )
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                                parentActivity.displaySnackbar(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_identity_remove_error),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                                )
-                            }
-                        }
-                            .show(parentFragmentManager, tag)
-                    }
                     R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(
                         trustchain.getMyPublicKey().toHex()
                     ).show(parentFragmentManager, tag)
@@ -307,44 +385,75 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         return super.onOptionsItemSelected(item)
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
-            try {
-                val obj = JSONObject(result)
-
-                if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
-                    try {
-                        defaultCryptoProvider.keyFromPublicBin(obj.optString(QRScanController.KEY_PUBLIC_KEY).hexToBytes())
-                        val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
-
-                        when (scanIntent) {
-                            ADD_ATTESTATION_INTENT -> getQRScanController().addAttestation(publicKey)
-                            ADD_AUTHORITY_INTENT -> getQRScanController().addAuthority(publicKey)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PICK_IDENTITY_IMAGE) {
+                if (data != null) {
+                    data.data?.let { uri ->
+                        val bitmap = if (Build.VERSION.SDK_INT >= 29) {
+                            val source = ImageDecoder.createSource(parentActivity.contentResolver, uri)
+                            ImageDecoder.decodeBitmap(source)
+                        } else {
+                            MediaStore.Images.Media.getBitmap(parentActivity.contentResolver, uri)
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        parentActivity.displaySnackbar(
-                            requireContext(),
-                            resources.getString(R.string.snackbar_invalid_public_key),
-                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                        )
+
+                        appPreferences.setIdentityFace(encodeImage(bitmap))
+
+//                        ContactImage.imageToBytes(bitmap)?.let { imageBytes ->
+//                            appPreferences.setIdentityFace(ContactImage.encodeImage(imageBytes))
+//                        }
                     }
-                } else {
-                    parentActivity.displaySnackbar(
-                        requireContext(),
-                        resources.getString(R.string.snackbar_no_public_key_found),
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                    )
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                parentActivity.displaySnackbar(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                )
+            } else {
+                QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+                    ?.let { result ->
+                        try {
+                            val obj = JSONObject(result)
+
+                            if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
+                                try {
+                                    defaultCryptoProvider.keyFromPublicBin(
+                                        obj.optString(
+                                            QRScanController.KEY_PUBLIC_KEY
+                                        ).hexToBytes()
+                                    )
+                                    val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
+
+                                    when (scanIntent) {
+                                        ADD_ATTESTATION_INTENT -> getQRScanController().addAttestation(
+                                            publicKey
+                                        )
+                                        ADD_AUTHORITY_INTENT -> getQRScanController().addAuthority(
+                                            publicKey
+                                        )
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    parentActivity.displaySnackbar(
+                                        requireContext(),
+                                        resources.getString(R.string.snackbar_invalid_public_key),
+                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                    )
+                                }
+                            } else {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_no_public_key_found),
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                )
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            parentActivity.displaySnackbar(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_qr_code_not_json_format),
+                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                            )
+                        }
+                    }
             }
-        }
+        } else super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun deleteAttestation(attestation: AttestationItem) {
@@ -378,7 +487,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     private fun toggleVisibility() {
         binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
         binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
-        binding.ivAddAttribute.isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
     }
 
     private fun updateAttestations() {
@@ -418,6 +526,20 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         )
     }
 
+    private fun identityImageIntent() {
+        val mimeTypes = arrayOf("image/*")
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        startActivityForResult(
+            Intent.createChooser(
+                intent,
+                resources.getString(R.string.text_send_photo_video)
+            ),
+            PICK_IDENTITY_IMAGE
+        )
+    }
+
     private fun createAttributeItems(attributes: List<IdentityAttribute>): List<Item> {
         return attributes.map { attribute ->
             IdentityAttributeItem(attribute)
@@ -438,10 +560,23 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             }
     }
 
-    private fun createIdentityItems(identities: List<Identity>): List<Item> {
+    private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
+        val bitmap = imageString?.let { decodeImage(it) }
+
+//        val bitmap = if (imageString != null) {
+//            try {
+//                val decodedImage = ContactImage.decodeImage(imageString)
+//                ContactImage.bytesToImage(decodedImage)
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                null
+//            }
+//        } else null
+
         return identities.map { identity ->
             IdentityItem(
-                identity
+                identity,
+                bitmap
             )
         }
     }
@@ -450,5 +585,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         private const val ADD_ATTESTATION_INTENT = 0
         private const val ADD_AUTHORITY_INTENT = 1
         private const val MENU_ITEM_OPTIONS = 1234
+        private const val PICK_IDENTITY_IMAGE = 2
     }
 }

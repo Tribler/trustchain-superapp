@@ -8,7 +8,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
-import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -18,7 +17,8 @@ import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
@@ -205,24 +205,43 @@ class ContactChatItemRenderer(
                     tvAttachmentTransferRequestTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
                     tvAttachmentTransferRequestDescription.setTextColor(ContextCompat.getColor(this.context, textColor))
 
-                    val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
-                    JSONObject(offsetBuffer.decodeToString()).let { json ->
-                        tvAttachmentTransferRequestTitle.text = this.context.resources.getString(
-                            R.string.text_contact_chat_request_transfer,
-                            formatBalance(json.optLong("amount"))
-                        )
+                    try {
+                        TransferRequest.deserialize(
+                            attachment.content,
+                            0
+                        ).first.let { transferRequest ->
+                            tvAttachmentTransferRequestTitle.text =
+                                this.context.resources.getString(
+                                    R.string.text_contact_chat_request_transfer,
+                                    formatBalance(transferRequest.amount)
+                                )
+
+                            tvAttachmentTransferRequestDescription.isVisible =
+                                transferRequest.description != null
+                            tvAttachmentTransferRequestDescription.text =
+                                transferRequest.description
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
+                        JSONObject(offsetBuffer.decodeToString()).let { json ->
+                            tvAttachmentTransferRequestTitle.text = this.context.resources.getString(
+                                R.string.text_contact_chat_request_transfer,
+                                formatBalance(json.optLong(TransferRequest.TRANSFER_REQUEST_AMOUNT))
+                            )
+                        }
 
                         item.chatMessage.message.let { description ->
                             tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
                             tvAttachmentTransferRequestDescription.text = description
                         }
+                    }
 
-                        if (!item.chatMessage.outgoing) {
-                            ivAttachmentTransferRequestContinueIcon.isVisible = true
+                    if (!item.chatMessage.outgoing) {
+                        ivAttachmentTransferRequestContinueIcon.isVisible = true
 
-                            clAttachmentTransferRequest.setOnClickListener {
-                                onItemClick(item)
-                            }
+                        clAttachmentTransferRequest.setOnClickListener {
+                            onItemClick(item)
                         }
                     }
                 }

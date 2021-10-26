@@ -52,7 +52,6 @@ data class MessageAttachment constructor(
         const val TYPE_LOCATION = "location"
         const val TYPE_IDENTITY_ATTRIBUTE = "identity_attribute"
         const val TYPE_TRANSFER_REQUEST = "transfer_request"
-
         fun getFile(context: Context, id: String): File {
             val path = "" + context.filesDir + "/" + id
             return File(path)

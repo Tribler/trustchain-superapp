@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 
@@ -235,9 +235,12 @@ class IdentityAttributeShareDialog(
 
             shareAttributeButton.setOnClickListener {
                 try {
-                    val serializedAttribute = selectedAttribute!!.serialize()
-
-                    getPeerChatCommunity().sendIdentityAttribute(selectedAttribute.toString(), serializedAttribute, selectedContact!!.publicKey)
+                    getPeerChatCommunity().sendIdentityAttribute(
+                        selectedAttribute.toString(),
+                        selectedAttribute!!,
+                        selectedContact!!.publicKey,
+                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                    )
 
                     // Only send snackbar when it is sent from identity fragment (and not from within chat)
                     if (identityAttribute != null) {

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/actionSearchFilterChat"
+        android:icon="@drawable/ic_search_filter"
+        android:title="@string/text_search_filter_chat" />
+    <item
         android:id="@+id/actionAddContactFromChat"
         android:icon="@drawable/ic_contact_add"
         android:title="@string/menu_contact_chat_options_contact_add" />

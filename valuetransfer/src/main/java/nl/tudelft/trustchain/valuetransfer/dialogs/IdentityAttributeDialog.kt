@@ -13,7 +13,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
@@ -112,7 +112,7 @@ class IdentityAttributeDialog(
                 val attributeValue = attributeValueView.text.toString()
 
                 if (attribute == null) {
-                    getIdentityCommunity().createAttribute(selectedName, attributeValue).let { newAttribute ->
+                    getIdentityCommunity().createIdentityAttribute(selectedName, attributeValue).let { newAttribute ->
                         getIdentityStore().addAttribute(newAttribute)
 
                         parentActivity.displaySnackbar(

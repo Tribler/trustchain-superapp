@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.valuetransfer.entity
+package nl.tudelft.trustchain.common.valuetransfer.entity
 
 import nl.tudelft.ipv8.messaging.Deserializable
 import org.json.JSONObject
@@ -32,16 +32,13 @@ data class IdentityAttribute(
     var modified: Date,
 ) : Serializable {
 
-    fun serialize(): ByteArray {
-        val json = JSONObject()
-        json.put(IDENTITY_ATTRIBUTE_ID, id)
-        json.put(IDENTITY_ATTRIBUTE_NAME, name)
-        json.put(IDENTITY_ATTRIBUTE_VALUE, value)
-        json.put(IDENTITY_ATTRIBUTE_ADDED, added)
-        json.put(IDENTITY_ATTRIBUTE_MODIFIED, modified)
-
-        return json.toString().toByteArray()
-    }
+    fun serialize(): ByteArray = JSONObject().apply {
+        put(IDENTITY_ATTRIBUTE_ID, id)
+        put(IDENTITY_ATTRIBUTE_NAME, name)
+        put(IDENTITY_ATTRIBUTE_VALUE, value)
+        put(IDENTITY_ATTRIBUTE_ADDED, added)
+        put(IDENTITY_ATTRIBUTE_MODIFIED, modified)
+    }.toString().toByteArray()
 
     override fun toString(): String {
         return "$name $value"
@@ -67,19 +64,15 @@ data class IdentityAttribute(
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<IdentityAttribute, Int> {
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
-            val attributeID = json.getString(IDENTITY_ATTRIBUTE_ID)
-            val attributeName = json.getString(IDENTITY_ATTRIBUTE_NAME)
-            val attributeValue = json.getString(IDENTITY_ATTRIBUTE_VALUE)
-            val attributeAdded = Date()
-            val attributeModified = Date()
-            val attribute = IdentityAttribute(
-                attributeID,
-                attributeName,
-                attributeValue,
-                attributeAdded,
-                attributeModified
+            return Pair(
+                IdentityAttribute(
+                    json.getString(IDENTITY_ATTRIBUTE_ID),
+                    json.getString(IDENTITY_ATTRIBUTE_NAME),
+                    json.getString(IDENTITY_ATTRIBUTE_VALUE),
+                    Date(),
+                    Date()
+                ), 0
             )
-            return Pair(attribute, 0)
         }
     }
 }

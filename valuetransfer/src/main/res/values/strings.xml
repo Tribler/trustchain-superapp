@@ -42,8 +42,9 @@
     <string name="menu_contact_chat_options_contact_remove_conversation">Clear Chat</string>
     <string name="menu_contacts_search">Search</string>
     <string name="menu_contacts_add">Add Contact</string>
+    <string name="menu_identity_attribute_add">Add Identity Attribute</string>
     <string name="menu_identity_attestations_add">Add Attestation</string>
-    <string name="menu_identity_attestations_authority_add">Add Authority</string>
+    <string name="menu_identity_attestations_authority_add">Add Attestation Authority</string>
     <string name="menu_identity_edit">Edit Identity</string>
     <string name="menu_identity_remove">Remove Identity</string>
     <string name="menu_identity_authorities_view">View Trusted Authorities</string>
@@ -54,6 +55,7 @@
     <string name="dialog_title_exchange_request">Request Money</string>
     <string name="dialog_title_contact_share">Share Contact</string>
     <string name="dialog_title_contact_name">Contact Name</string>
+    <string name="dialog_title_contact_nickname">Contact Nickname</string>
     <string name="dialog_title_contact_add">Add Contact</string>
     <string name="dialog_title_exchange_gateway_connect">Connect to Gateway</string>
     <string name="dialog_title_exchange_gateway_sell">Sell to Gateway</string>
@@ -69,6 +71,10 @@
     <string name="dialog_title_attribute_share">Share Identity Attribute</string>
     <string name="dialog_title_identity_details">Identity Details</string>
     <string name="dialog_title_scan_options">Choose an option below</string>
+    <string name="dialog_title_identity_onboarding_start">Import Identity</string>
+    <string name="dialog_title_identity_onboarding_scan">Scan Document</string>
+    <string name="dialog_title_identity_onboarding_read">Read Document</string>
+    <string name="dialog_title_identity_onboarding_confirm">Confirm Identity</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -86,26 +92,34 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_contact_add">Add Contact</string>
     <string name="btn_attestation_add">Add Attestation</string>
-    <string name="btn_show_more">Show more...</string>
+    <string name="btn_show_more">Show more…</string>
     <string name="btn_transaction_sign">Sign Transaction</string>
     <string name="btn_send">Send</string>
     <string name="btn_load_more_messages">Load more messages…</string>
     <string name="btn_contact_unblock">Unblock Contact</string>
+    <string name="btn_confirm_identity">Confirm Identity</string>
+    <string name="btn_scan_again">Scan Again</string>
+    <string name="btn_start_importing">Start Importing</string>
+    <string name="btn_continue">Continue</string>
+    <string name="btn_start_over">Start Over</string>
+    <string name="btn_go_back">Go back</string>
 
     // Texts and sentences
     <string name="text_recipient">Recipient</string>
     <string name="text_select_recipient">Select the recipient</string>
     <string name="text_no_contacts">There are no contacts</string>
     <string name="text_transaction_amount">Enter the transaction amount</string>
-    <string name="text_optional_message">(Optional) message to receiver...</string>
+    <string name="text_optional_message">(Optional) message to receiver…</string>
     <string name="text_add_to_address_book">Add contact to address book</string>
     <string name="text_select_contact_share">Select the contact to share</string>
     <string name="text_provide_name_for_contact">Provide a name for this contact</string>
     <string name="text_send_publickey_or_qr">Provide QRcode to your friend</string>
     <string name="text_provide_publickey">Provide public key to your friend</string>
     <string name="text_paste_publickey_or_name">Paste or scan public key of contact and provide a name</string>
+    <string name="text_paste_publickey_or_nickname">Paste or scan public key of contact and provide a nickname</string>
     <string name="text_contact_publickey">Contact Public Key</string>
     <string name="text_contact_name">Contact name</string>
+    <string name="text_contact_nickname">Contact Nickname</string>
     <string name="text_current_balance">Current Balance</string>
     <string name="text_sell_amount">Sell Amount</string>
     <string name="text_gateway">Gateway</string>
@@ -128,6 +142,7 @@
     <string name="text_given_names_surname">Given Names / Surname</string>
     <string name="text_place_of_birth">Place of Birth</string>
     <string name="text_date_of_birth">Date of Birth</string>
+    <string name="text_date_of_expiry">Date of Expiry</string>
     <string name="text_date_place_of_birth">Date of Birth / Place of Birth</string>
     <string name="text_nationality">Nationality</string>
     <string name="text_gender">Gender</string>
@@ -136,6 +151,10 @@
     <string name="text_gender_neutral">Neutral</string>
     <string name="text_personal_number">Personal Number</string>
     <string name="text_document_number">Document Number</string>
+    <string name="text_issuer">Issuer</string>
+    <string name="text_verification_status">Verification Status</string>
+    <string name="text_verified">Verified</string>
+    <string name="text_unverified">Not verified</string>
     <string name="text_title_transactions">Transactions</string>
     <string name="text_no_transactions">There are no transactions yet</string>
     <string name="text_including_unverified_transactions">Including Unverified Transactions</string>
@@ -146,8 +165,10 @@
     <string name="text_transaction_block_hash">Block Hash</string>
     <string name="text_exchange_buy">Buy from EuroToken Exchange</string>
     <string name="text_exchange_sell">"Sell to EuroToken Exchange"</string>
-    <string name="text_exchange_transaction_outgoing">Outgoing transfer to %s</string>
-    <string name="text_exchange_transaction_incoming">Incoming transfer from %s</string>
+    <string name="text_exchange_transaction_outgoing">Outgoing transfer</string>
+    <string name="text_exchange_transaction_incoming">Incoming transfer</string>
+    <string name="text_exchange_transaction_outgoing_to">Outgoing transfer to %s</string>
+    <string name="text_exchange_transaction_incoming_to">Incoming transfer from %s</string>
     <string name="text_exchange_self_signed">Self-Signed</string>
     <string name="text_exchange_signed">Signed</string>
     <string name="text_exchange_waiting_for_signature">Waiting for signature</string>
@@ -174,7 +195,7 @@
     <string name="text_contact_chat_incoming_transfer_unknown">"Unknown incoming transfer, ask to resend transfer"</string>
     <string name="text_title_identity_attributes">Identity Attributes</string>
     <string name="text_title_identity_attribute">Identity attribute</string>
-    <string name="text_tooltip_identity_attributes">Attributes provide extra information about you and your identity</string>
+    <string name="text_tooltip_identity_attributes">Identity attributes extend your official identity with shareable additional information about you</string>
     <string name="text_tooltip_attestations">Attestations declare that a claim about a piece of information is validated by an authority</string>
     <string name="text_no_attestations">There are no attestations yet</string>
     <string name="text_public_key">Public Key</string>
@@ -187,6 +208,7 @@
     <string name="text_attachment_contact">Attachment: Contact</string>
     <string name="text_attachment">Attachment</string>
     <string name="text_attachment_transaction">Transaction</string>
+    <string name="text_search_filter_chat">Search/Filter this chat</string>
     <string name="text_search_chat">Search this chat…</string>
     <string name="text_message">Message</string>
     <string name="text_my_public_key">My Public Key</string>
@@ -239,6 +261,52 @@
     <string name="text_contact_chat_request_to_chat">Request to chat</string>
     <string name="text_chat_blocked">No new messages will be received because this contact is blocked</string>
     <string name="text_chatting_unknown_person">You are chatting with an unknown person</string>
+    <string name="text_theme_choose">Choose Theme</string>
+    <string name="text_general">General</string>
+    <string name="text_about_app">About App</string>
+    <string name="text_confirm_replace_identity">Are you sure to replace your current identity?</string>
+    <string name="text_error_passport">An error occurred.\nPlease read again or start over again.</string>
+    <string name="text_error_passport_service">An error occurred activating the passport service.\nPlease read again or start over.</string>
+    <string name="text_error_passport_nfc_unavailable">NFC is not activated.\nPlease try again.</string>
+    <string name="text_error_passport_person_details">Failed to get person details from card.\nPlease read again or start over.</string>
+    <string name="text_error_passport_document_type">Failed to confirm card document type.\nPlease read again or start over.</string>
+    <string name="text_error_passport_card_authentication">Card authentication failed.\nPlease read again or start over.</string>
+    <string name="text_passport_error_invalid_check_digit_doc_nr">INVALID DOCUMENT NUMBER CHECK DIGIT</string>
+    <string name="text_passport_error_invalid_check_digit_date_birth">INVALID DATE OF BIRTH CHECK DIGIT</string>
+    <string name="text_passport_error_invalid_check_digit_date_expiry">INVALID DATE OF EXPIRY CHECK DIGIT</string>
+    <string name="text_passport_error_invalid_check_digit_personal_nr">INVALID PERSONAL NUMBER CHECK DIGIT</string>
+    <string name="text_passport_error_invalid_check_digit_combined">INVALID COMBINED CHECK DIGIT</string>
+    <string name="text_identity_onboarding_confirm_subtitle">The following identity has been obtained from your document. This identity will be used within this application upon confirmation.</string>
+    <string name="text_identity_onboarding_confirm_unverified_message">Please confirm the correctness of above details. If some details are wrongly scanned, please scan again.</string>
+    <string name="text_identity_onboarding_start_subtitle">The process of importing your identity consists of the following steps.</string>
+    <string name="text_identity_onboarding_start_step_one_subtitle">Scan the machine readable zone of your document using your device camera.</string>
+    <string name="text_identity_onboarding_start_step_two_subtitle">Hold your document against the back of your device to read the biometric chip. This step ensures that your identity is authentic.</string>
+    <string name="text_identity_onboarding_start_step_two_nfc_unverified">If the device does not support NFC, the identity cannot be considered legitimate.</string>
+    <string name="text_identity_onboarding_start_step_three_subtitle">Confirm the imported identity and start using the application.</string>
+    <string name="text_identity_onboarding_read_subtitle">Hold your document steady to the back of your phone until it has finished.</string>
+    <string name="text_identity_onboarding_read_success">Document successfully read.\nPlease continue to confirm your identity.</string>
+    <string name="text_identity_onboarding_read_reading">Reading document…\nPlease hold steady until finished.</string>
+    <string name="text_identity_onboarding_scan_subtitle">Scan the red marked machine readable zone on the passport or the back of the ID card. Please choose your identity document type.</string>
+    <string name="text_passport">Passport</string>
+    <string name="text_id_card">ID Card</string>
+    <string name="text_nfc_is_supported">NFC is supported</string>
+    <string name="text_nfc_is_unsupported">NFC is unsupported</string>
+    <string name="text_nfc_is_enabled">NFC is enabled</string>
+    <string name="text_nfc_is_disabled">NFC is disabled</string>
+    <string name="text_nfc_enable_in_settings">Enable NFC in System settings</string>
+    <string name="text_one">1</string>
+    <string name="text_two">2</string>
+    <string name="text_three">3</string>
+    <string name="text_version">Version</string>
+    <string name="text_GDPR">GDPR</string>
+    <string name="text_remove">Remove</string>
+    <string name="text_replace">Replace</string>
+    <string name="text_edit">Edit</string>
+    <string name="text_notifications_open_settings">Open system settings to change</string>
+    <string name="text_messages">Messages</string>
+    <string name="text_notifications">Notifications</string>
+    <string name="text_theme">Theme</string>
+    <string name="text_tap_contact_info">Tap here for contact info</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>
@@ -270,6 +338,7 @@
     <string name="snackbar_contact_remove_success">%s removed from address book</string>
     <string name="snackbar_permission_location_granted">Permission has been granted, please click send location again</string>
     <string name="snackbar_permission_camera_granted">Permission has been granted, please click camera again</string>
+    <string name="snackbar_permission_camera_granted_other">Permission has been granted</string>
     <string name="snackbar_permission_denied">Permission has been denied</string>
     <string name="snackbar_exchange_transfer_error_self">Cannot transfer money to yourself</string>
     <string name="snackbar_peer_unlocated">Peer could not be located in the network, please try again</string>
@@ -294,4 +363,7 @@
     <string name="snackbar_identity_update_success">Identity successfully updated</string>
     <string name="snackbar_identity_update_error">Identity couldn\'t be updated</string>
     <string name="snackbar_identity_add_cancelled">Adding identity cancelled. Without an identity you\'ll not be able to use this application.</string>
+    <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
+    <string name="text_identity_add_image">Add Identity Image</string>
+    <string name="text_identity_delete_image">Delete Identity Image</string>
 </resources>

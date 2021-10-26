@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.settings
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -11,10 +12,14 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.valuetransfer.BuildConfig
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentSettingsBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.ConfirmDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 
 class SettingsFragment : VTFragment(R.layout.fragment_settings) {
@@ -42,6 +47,7 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initView()
         onResume()
 
         val theme = appPreferences.getCurrentTheme()
@@ -53,24 +59,83 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             else -> resources.getString(R.string.text_theme_day)
         }
 
-        binding.clThemeSelector.setOnClickListener {
-            OptionsDialog(
-                R.menu.settings_theme_options,
-                "Choose Theme",
-                optionSelected = { _, item ->
-                    when (item.itemId) {
-                        R.id.actionThemeDay -> AppPreferences.APP_THEME_DAY
-                        R.id.actionThemeNight -> AppPreferences.APP_THEME_NIGHT
-                        R.id.actionThemeSystem -> AppPreferences.APP_THEME_SYSTEM
-                        else -> AppPreferences.APP_THEME_DAY
-                    }.run {
-                        appPreferences.setTheme(this)
-                        appPreferences.switchTheme(this)
-                        parentActivity.reloadActivity()
+        binding.clThemeSelector.apply {
+            setOnClickListener {
+                OptionsDialog(
+                    R.menu.settings_theme_options,
+                    resources.getString(R.string.text_theme_choose),
+                    optionSelected = { _, item ->
+                        when (item.itemId) {
+                            R.id.actionThemeDay -> AppPreferences.APP_THEME_DAY
+                            R.id.actionThemeNight -> AppPreferences.APP_THEME_NIGHT
+                            R.id.actionThemeSystem -> AppPreferences.APP_THEME_SYSTEM
+                            else -> AppPreferences.APP_THEME_DAY
+                        }.run {
+                            appPreferences.setTheme(this)
+                            appPreferences.switchTheme(this)
+                            parentActivity.reloadActivity()
+                        }
                     }
-                }
-            ).show(parentFragmentManager, tag)
+                ).show(parentFragmentManager, this@SettingsFragment.tag)
+            }
         }
+
+        binding.llSettingsIdentity.apply {
+            isVisible = getIdentityCommunity().hasIdentity()
+        }
+
+        binding.clIdentityEdit.apply {
+            isVisible = !getIdentityCommunity().isVerified()
+            setOnClickListener {
+                IdentityDetailsDialog().show(parentFragmentManager, this@SettingsFragment.tag)
+            }
+        }
+
+        binding.clIdentityReplace.apply {
+            setOnClickListener {
+                IdentityOnboardingDialog().show(parentFragmentManager, this@SettingsFragment.tag)
+            }
+        }
+
+        binding.clIdentityRemove.apply {
+            setOnClickListener {
+                ConfirmDialog(
+                    resources.getString(
+                        R.string.text_confirm_delete,
+                        resources.getString(R.string.text_identity)
+                    )
+                ) {
+                    try {
+                        getIdentityCommunity().deleteIdentity()
+
+                        getAttestationCommunity().database.getAllAttestations().forEach {
+                            getAttestationCommunity().database.deleteAttestationByHash(it.attestationHash)
+                        }
+
+                        appPreferences.deleteIdentityFace()
+
+                        parentActivity.reloadActivity()
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_identity_remove_success),
+                            isShort = false
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        parentActivity.displaySnackbar(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_identity_remove_error),
+                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        )
+                    }
+                }.show(parentFragmentManager, this@SettingsFragment.tag)
+            }
+        }
+
+        binding.tvAppVersion.text = parentActivity.packageManager.getPackageInfo(
+            parentActivity.packageName,
+            PackageManager.GET_ACTIVITIES
+        ).versionName
 
         notificationsStatus.observe(
             viewLifecycleOwner,
@@ -117,17 +182,19 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             }
         }
         startActivity(intent)
-        onBackPressed(false)
+//        onBackPressed(false)
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    override fun initView() {
         parentActivity.apply {
             setActionBarTitle(resources.getString(R.string.menu_navigation_settings), null)
             toggleActionBar(true)
             toggleBottomNavigation(false)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         notificationsStatus.postValue(
             if (NotificationManagerCompat.from(requireContext()).areNotificationsEnabled()) {
@@ -176,6 +243,6 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             show(previousFragment[0])
         }.commit()
 
-        previousFragment[0].onResume()
+        (previousFragment[0] as VTFragment).initView()
     }
 }

@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.view.View
+import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts.view.*
 import kotlinx.android.synthetic.main.item_contacts.view.ivIdenticon
@@ -19,13 +20,25 @@ class ContactsItemRenderer(
 
         tvContactName.text = item.contact.name
 
-        item.contact.publicKey.toString().let { publicKeyString ->
-            generateIdenticon(
-                publicKeyString.substring(20, publicKeyString.length).toByteArray(),
-                getColorByHash(context, publicKeyString),
-                resources
-            ).let {
-                ivIdenticon.setImageBitmap(it)
+        if (item.image == null) {
+            item.contact.publicKey.toString().let { publicKeyString ->
+                generateIdenticon(
+                    publicKeyString.substring(20, publicKeyString.length).toByteArray(),
+                    getColorByHash(context, publicKeyString),
+                    resources
+                ).let {
+                    ivContactImage.isVisible = false
+                    ivIdenticon.apply {
+                        setImageBitmap(it)
+                        isVisible = true
+                    }
+                }
+            }
+        } else {
+            ivIdenticon.isVisible = false
+            ivContactImage.apply {
+                setImageBitmap(item.image.image)
+                isVisible = true
             }
         }
 

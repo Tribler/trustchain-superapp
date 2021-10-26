@@ -5,4 +5,7 @@
     <dimen name="chatContentPadding">25dp</dimen>
     <dimen name="textViewHeight">40dp</dimen>
     <dimen name="cornerRadius">6dp</dimen>
+    <dimen name="actionBarTitleSize">28sp</dimen>
+    <dimen name="actionBarSubTitleSize">14sp</dimen>
+    <dimen name="actionBarTitleSizeChat">20sp</dimen>
 </resources>

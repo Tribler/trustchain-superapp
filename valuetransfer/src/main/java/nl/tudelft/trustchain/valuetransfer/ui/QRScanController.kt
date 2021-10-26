@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.util.Log
+import android.view.MenuItem
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex

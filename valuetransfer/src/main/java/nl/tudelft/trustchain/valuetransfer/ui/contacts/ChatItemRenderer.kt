@@ -5,6 +5,7 @@ import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.android.synthetic.main.item_contacts_chat.view.ivIdenticon
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
@@ -48,13 +49,25 @@ class ChatItemRenderer(
             else -> dateFormat.format(lastMessageDate)
         }
 
-        item.contact.publicKey.toString().let { publicKeyString ->
-            generateIdenticon(
-                publicKeyString.substring(20, publicKeyString.length).toByteArray(),
-                getColorByHash(context, publicKeyString),
-                resources
-            ).let {
-                ivIdenticon.setImageBitmap(it)
+        if (item.image == null) {
+            item.contact.publicKey.keyToBin().toHex().let { publicKeyString ->
+                generateIdenticon(
+                    publicKeyString.substring(20, publicKeyString.length).toByteArray(),
+                    getColorByHash(context, publicKeyString),
+                    resources
+                ).let {
+                    ivContactImage.isVisible = false
+                    ivIdenticon.apply {
+                        isVisible = true
+                        setImageBitmap(it)
+                    }
+                }
+            }
+        } else {
+            ivIdenticon.isVisible = false
+            ivContactImage.apply {
+                isVisible = true
+                setImageBitmap(item.image.image)
             }
         }
 

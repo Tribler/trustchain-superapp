@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/actionEditIdentity"
-        android:icon="@drawable/ic_edit"
-        android:title="@string/menu_identity_edit" />
-    <item
-        android:id="@+id/actionRemoveIdentity"
-        android:icon="@drawable/ic_delete"
-        android:title="@string/menu_identity_remove" />
-    <item
         android:id="@+id/actionViewAuthorities"
         android:icon="@drawable/ic_authority"
         android:title="@string/menu_identity_authorities_view" />

@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.peerchat.community
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.location.Location
-import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -18,8 +17,12 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
+import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.entity.ContactImage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import org.json.JSONObject
 import java.io.File
@@ -35,12 +38,16 @@ class PeerChatCommunity(
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
     private lateinit var onMessageCallback: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
+    private lateinit var onContactImageRequestCallback: (instance: PeerChatCommunity, peer: Peer) -> Unit
+    private lateinit var onContactImageCallback: (instance: PeerChatCommunity, contactImage: ContactImage) -> Unit
 
     init {
         messageHandlers[MessageId.MESSAGE] = ::onMessagePacket
         messageHandlers[MessageId.ACK] = ::onAckPacket
         messageHandlers[MessageId.ATTACHMENT_REQUEST] = ::onAttachmentRequestPacket
         messageHandlers[MessageId.ATTACHMENT] = ::onAttachmentPacket
+        messageHandlers[MessageId.CONTACT_IMAGE_REQUEST] = ::onContactImageRequestPacket
+        messageHandlers[MessageId.CONTACT_IMAGE] = ::onContactImagePacket
     }
 
     override fun load() {
@@ -74,91 +81,125 @@ class PeerChatCommunity(
         }
     }
 
+    fun setOnMessageCallback(f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit) {
+        this.onMessageCallback = f
+    }
+
+    fun setOnContactImageRequestCallback(f: (instance: PeerChatCommunity, peer: Peer) -> Unit) {
+        this.onContactImageRequestCallback = f
+    }
+
+    fun setOnContactImageCallback(f: (instance: PeerChatCommunity, contactImage: ContactImage) -> Unit) {
+        this.onContactImageCallback = f
+    }
+
+    /**
+     * Send actions
+     */
     fun sendMessageWithTransaction(
         message: String,
         transaction_hash: ByteArray?,
-        recipient: PublicKey
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
     ) {
-        val chatMessage = createOutgoingChatMessage(message, null, transaction_hash, recipient)
+        val chatMessage = createOutgoingChatMessage(message, null, transaction_hash, recipient, identityInfo)
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
-    fun sendMessage(message: String, recipient: PublicKey) {
-        val chatMessage = createOutgoingChatMessage(message, null, null, recipient)
+    fun sendMessage(message: String, recipient: PublicKey, identityInfo: IdentityInfo? = null) {
+        val chatMessage = createOutgoingChatMessage(message, null, null, recipient, identityInfo)
         database.addMessage(chatMessage)
 
+        sendMessage(chatMessage)
+    }
+
+    fun sendImage(file: File, recipient: PublicKey, identityInfo: IdentityInfo? = null) {
+        val hash = file.name.hexToBytes()
+        val attachment = MessageAttachment(MessageAttachment.TYPE_IMAGE, file.length(), hash)
+        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient, identityInfo)
+        database.addMessage(chatMessage)
+
+        sendMessage(chatMessage)
+    }
+
+    fun sendFile(
+        file: File,
+        fileName: String,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
+        val hash = file.name.hexToBytes()
+        val attachment = MessageAttachment(MessageAttachment.TYPE_FILE, file.length(), hash)
+        val chatMessage = createOutgoingChatMessage(fileName, attachment, null, recipient, identityInfo)
+
+        database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
     fun sendIdentityAttribute(
         attributeMessage: String,
-        serializedAttribute: ByteArray,
-        recipient: PublicKey
+        identityAttribute: IdentityAttribute,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
     ) {
+        val serialized = identityAttribute.serialize()
         val attachment = MessageAttachment(
             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE,
-            serializedAttribute.size.toLong(),
-            serializedAttribute
+            serialized.size.toLong(),
+            serialized
         )
-        val chatMessage = createOutgoingChatMessage(attributeMessage, attachment, null, recipient)
+        val chatMessage = createOutgoingChatMessage(attributeMessage, attachment, null, recipient, identityInfo)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
-    fun sendFile(file: File, fileName: String, recipient: PublicKey) {
-        val hash = file.name.hexToBytes()
-        val attachment = MessageAttachment(MessageAttachment.TYPE_FILE, file.length(), hash)
-        val chatMessage = createOutgoingChatMessage(fileName, attachment, null, recipient)
-
-        database.addMessage(chatMessage)
-        sendMessage(chatMessage)
-    }
-
-    fun sendLocation(location: Location, addressLine: String, recipient: PublicKey) {
+    fun sendLocation(
+        location: Location,
+        addressLine: String,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
         val json = JSONObject()
         json.put("latitude", location.latitude)
         json.put("longitude", location.longitude)
         json.put("address_line", addressLine)
-        val serializedLocation = json.toString().toByteArray()
+        val serialized = json.toString().toByteArray()
 
-        val attachment = MessageAttachment(MessageAttachment.TYPE_LOCATION, serializedLocation.size.toLong(), serializedLocation)
-        val chatMessage = createOutgoingChatMessage(addressLine, attachment, null, recipient)
-
-        database.addMessage(chatMessage)
-        sendMessage(chatMessage)
-    }
-
-    fun sendTransferRequest(description: String?, amount: Long, recipient: PublicKey) {
-        val json = JSONObject()
-//        json.put("description", description)
-        json.put("amount", amount)
-        val serializedTransferRequest = json.toString().toByteArray()
-
-        val attachment = MessageAttachment(MessageAttachment.TYPE_TRANSFER_REQUEST, serializedTransferRequest.size.toLong(), serializedTransferRequest)
-        val chatMessage = createOutgoingChatMessage(description ?: "", attachment, null, recipient)
+        val attachment = MessageAttachment(MessageAttachment.TYPE_LOCATION, serialized.size.toLong(), serialized)
+        val chatMessage = createOutgoingChatMessage(addressLine, attachment, null, recipient, identityInfo)
 
         database.addMessage(chatMessage)
         sendMessage(chatMessage)
     }
 
-    fun sendContact(contact: Contact, recipient: PublicKey) {
-        val serializedContact = contact.serialize()
+    fun sendTransferRequest(
+        description: String?,
+        transferRequest: TransferRequest,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
+        val serialized = transferRequest.serialize()
+
+        val attachment = MessageAttachment(MessageAttachment.TYPE_TRANSFER_REQUEST, serialized.size.toLong(), serialized)
+        val chatMessage = createOutgoingChatMessage(description ?: "", attachment, null, recipient, identityInfo)
+
+        database.addMessage(chatMessage)
+        sendMessage(chatMessage)
+    }
+
+    fun sendContact(
+        contact: Contact,
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
+    ) {
+        val serialized = contact.serialize()
         val contactMessage = "${contact.name} ${contact.publicKey.keyToBin().toHex()}"
-        val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT, serializedContact.size.toLong(), serializedContact)
-        val chatMessage = createOutgoingChatMessage(contactMessage, attachment, null, recipient)
+        val attachment = MessageAttachment(MessageAttachment.TYPE_CONTACT, serialized.size.toLong(), serialized)
+        val chatMessage = createOutgoingChatMessage(contactMessage, attachment, null, recipient, identityInfo)
 
         database.addMessage(chatMessage)
-        sendMessage(chatMessage)
-    }
-
-    fun sendImage(file: File, recipient: PublicKey) {
-        val hash = file.name.hexToBytes()
-        val attachment = MessageAttachment(MessageAttachment.TYPE_IMAGE, file.length(), hash)
-        val chatMessage = createOutgoingChatMessage("", attachment, null, recipient)
-        database.addMessage(chatMessage)
-
         sendMessage(chatMessage)
     }
 
@@ -173,7 +214,8 @@ class PeerChatCommunity(
                 chatMessage.attachment?.type ?: "",
                 chatMessage.attachment?.size ?: 0L,
                 chatMessage.attachment?.content ?: ByteArray(0),
-                chatMessage.transactionHash
+                chatMessage.transactionHash,
+                chatMessage.identityInfo
             )
 
             val packet = serializePacket(
@@ -213,6 +255,33 @@ class PeerChatCommunity(
         send(peer, packet)
     }
 
+    fun sendContactImageRequest(recipient: PublicKey) {
+        Log.d("VTLOG", "SEND CONTACT IMAGE REQUEST")
+        val mid = recipient.keyToHash().toHex()
+        val peer = getPeers().find { it.mid == mid }
+
+        if (peer != null) {
+            val payload = ContactImageRequestPayload(myPeer.publicKey)
+            val packet = serializePacket(MessageId.CONTACT_IMAGE_REQUEST, payload)
+            logger.debug { "-> $payload" }
+            send(peer, packet)
+        } else {
+            Log.d("PeerChat", "Peer $mid not online")
+        }
+    }
+
+    fun sendContactImage(peer: Peer, contactImage: ContactImage) {
+        Log.d("VTLOG", "SEND CONTACT IMAGE")
+        val payload = ContactImagePayload(contactImage.publicKey, contactImage.imageHash, contactImage.image)
+//        val packet = serializePacket(MessageId.CONTACT_IMAGE, payload)
+        val packet = serializePacket(MessageId.CONTACT_IMAGE, payload, encrypt = true, recipient = peer)
+        logger.debug { "-> $payload" }
+        send(peer, packet)
+    }
+
+    /**
+     * On packet receipt
+     */
     private fun onMessagePacket(packet: Packet) {
         val (peer, payload) = packet.getDecryptedAuthPayload(
             MessagePayload.Deserializer, myPeer.key as PrivateKey
@@ -241,6 +310,33 @@ class PeerChatCommunity(
         onAttachment(payload)
     }
 
+    private fun onContactImageRequestPacket(packet: Packet) {
+        val (peer, _) = packet.getAuthPayload(ContactImageRequestPayload.Deserializer)
+
+        logger.debug { "<- $peer" }
+        onContactImageRequest(peer)
+    }
+
+    private fun onContactImagePacket(packet: Packet) {
+        Log.d("VTLOG", "CONTACT IMAGE PACKET RECEIVED")
+//        val (peer, payload) = packet.getAuthPayload(
+//            ContactImagePayload.Deserializer
+//        )
+
+        val (peer, payload) = packet.getDecryptedAuthPayload(
+            ContactImagePayload.Deserializer, myPeer.key as PrivateKey
+        )
+
+        Log.d("VTLOG", "CONTACT IMAGE CONTENTS PEER: $peer")
+        Log.d("VTLOG", "CONTACT IMAGE CONTENTS: ${payload.imageHash}")
+
+        logger.debug { "<- $payload" }
+        onContactImage(payload)
+    }
+
+    /**
+     * On receipt handlers
+     */
     private fun onMessage(peer: Peer, payload: MessagePayload) {
         Log.d("PeerChat", "onMessage from $peer: $payload")
 
@@ -271,10 +367,6 @@ class PeerChatCommunity(
                 else -> sendAttachmentRequest(peer, chatMessage.attachment.content.toHex())
             }
         }
-    }
-
-    fun setOnMessageCallback(f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit) {
-        this.onMessageCallback = f
     }
 
     private fun onAck(peer: Peer, payload: AckPayload) {
@@ -315,11 +407,32 @@ class PeerChatCommunity(
         }
     }
 
+    private fun onContactImageRequest(peer: Peer) {
+        if (this::onContactImageRequestCallback.isInitialized) {
+            this.onContactImageRequestCallback(this@PeerChatCommunity, peer)
+
+            return
+        }
+    }
+
+    private fun onContactImage(payload: ContactImagePayload) {
+        Log.d("VTLOG", "ON CONTACT IMAGE with Payload image hash: ${payload.imageHash}")
+        if (this::onContactImageCallback.isInitialized) {
+            this.onContactImageCallback(this@PeerChatCommunity, ContactImage(payload.publicKey, payload.imageHash, payload.image))
+
+            return
+        }
+    }
+
+    /**
+     * Creation of objects from payload
+     */
     private fun createOutgoingChatMessage(
         message: String,
         attachment: MessageAttachment?,
         transaction_hash: ByteArray?,
-        recipient: PublicKey
+        recipient: PublicKey,
+        identityInfo: IdentityInfo? = null
     ): ChatMessage {
         val id = UUID.randomUUID().toString()
         return ChatMessage(
@@ -333,7 +446,8 @@ class PeerChatCommunity(
             ack = false,
             read = true,
             attachmentFetched = true,
-            transactionHash = transaction_hash
+            transactionHash = transaction_hash,
+            identityInfo = identityInfo
         )
     }
 
@@ -357,7 +471,8 @@ class PeerChatCommunity(
             ack = false,
             read = false,
             attachmentFetched = false,
-            transactionHash = message.transactionHash
+            transactionHash = message.transactionHash,
+            identityInfo = message.identityInfo
         )
     }
 
@@ -373,6 +488,9 @@ class PeerChatCommunity(
         }
     }
 
+    /**
+     * Database functions
+     */
     fun getDatabase(): PeerChatStore {
         return database
     }
@@ -381,11 +499,17 @@ class PeerChatCommunity(
         database.createContactStateTable()
     }
 
+    fun createContactImageTable() {
+        database.createContactImageTable()
+    }
+
     object MessageId {
         const val MESSAGE = 1
         const val ACK = 2
         const val ATTACHMENT_REQUEST = 3
         const val ATTACHMENT = 4
+        const val CONTACT_IMAGE_REQUEST = 5
+        const val CONTACT_IMAGE = 6
     }
 
     class Factory(

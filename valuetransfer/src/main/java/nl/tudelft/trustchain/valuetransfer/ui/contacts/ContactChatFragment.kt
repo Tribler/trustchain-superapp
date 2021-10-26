@@ -19,10 +19,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -42,6 +45,7 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
@@ -52,7 +56,9 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentContactsChatBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.peerchat.entity.ContactImage
+import nl.tudelft.trustchain.peerchat.entity.ContactState
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.util.*
@@ -65,6 +71,22 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private val binding by viewBinding(FragmentContactsChatBinding::bind)
 
     private val adapterMessages = ItemAdapter()
+
+    private val publicKey by lazy {
+        defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
+    }
+
+    private val publicKeyBin by lazy {
+        requireArguments().getString(ValueTransferMainActivity.ARG_PUBLIC_KEY)!!
+    }
+
+    private val name by lazy {
+        requireArguments().getString(ValueTransferMainActivity.ARG_NAME)!!
+    }
+
+    private val parentTag by lazy {
+        requireArguments().getString(ValueTransferMainActivity.ARG_PARENT)!!
+    }
 
     private var blocks: List<TrustChainBlock> = emptyList()
 
@@ -100,23 +122,19 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
     private val peers = MutableLiveData<List<Peer>>(emptyList())
 
-    private val publicKey by lazy {
-        defaultCryptoProvider.keyFromPublicBin(publicKeyBin.hexToBytes())
+    private val contactState: LiveData<ContactState?> by lazy {
+        getPeerChatStore().getContactStateFlow(publicKey).asLiveData()
     }
 
-    private val publicKeyBin by lazy {
-        requireArguments().getString(ValueTransferMainActivity.ARG_PUBLIC_KEY)!!
+    private val contactImage: LiveData<ContactImage?> by lazy {
+        getPeerChatStore().getContactImage(publicKey).asLiveData()
     }
 
-    private val name by lazy {
-        requireArguments().getString(ValueTransferMainActivity.ARG_NAME)!!
+    private val contact: LiveData<Contact?> by lazy {
+        getContactStore().getContactFromPublickey(publicKey).asLiveData()
     }
 
-    private val parentTag by lazy {
-        requireArguments().getString(ValueTransferMainActivity.ARG_PARENT)!!
-    }
-
-    private lateinit var contactName: String
+//    private lateinit var contactName: String
     private var isConnected = false
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
 
@@ -155,7 +173,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         super.onCreate(savedInstanceState)
 
-        contactName = name
+//        contactName = name
 
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(
@@ -303,9 +321,23 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        parentActivity.toggleActionBar(true)
-        parentActivity.setActionBarTitle(contactName, null)
-        parentActivity.toggleBottomNavigation(false)
+        initView()
+
+        contact.observe(
+            viewLifecycleOwner,
+            Observer {
+                parentActivity.setActionBarTitle(
+                    it?.name ?: resources.getString(R.string.text_unknown_contact),
+                    resources.getString(
+                        if (isConnected) {
+                            R.string.text_contact_connected
+                        } else {
+                            R.string.text_tap_contact_info
+                        }
+                    )
+                )
+            }
+        )
 
         binding.etMessage.doAfterTextChanged { state ->
             toggleButton(btnSendMessage, state != null && state.isNotEmpty())
@@ -319,7 +351,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             binding.etMessage.clearFocus()
 
             Handler().postDelayed({
-                getPeerChatCommunity().sendMessage(message, publicKey)
+                getPeerChatCommunity().sendMessage(
+                    message,
+                    publicKey,
+                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                )
                 binding.pbSendMessage.isVisible = false
             }, 500)
         }
@@ -342,16 +378,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                 if ((peer != null && !peer.address.isEmpty()) || (peer?.bluetoothAddress != null)) {
                     isConnected = true
-                    parentActivity.setActionBarTitle(
-                        contactName,
-                        resources.getString(R.string.text_contact_connected)
-                    )
+                    parentActivity.setActionBarSubTitle(resources.getString(R.string.text_contact_connected))
                 } else {
                     isConnected = false
-                    parentActivity.setActionBarTitle(
-                        contactName,
-                        null
-                    )
+                    parentActivity.setActionBarSubTitle(resources.getString(R.string.text_tap_contact_info))
                 }
             }
         )
@@ -422,7 +452,12 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     e.printStackTrace()
                                 }
 
-                                getPeerChatCommunity().sendLocation(location, addressLine, publicKey)
+                                getPeerChatCommunity().sendLocation(
+                                    location,
+                                    addressLine,
+                                    publicKey,
+                                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                                )
                             } else {
                                 parentActivity.displaySnackbar(
                                     requireContext(),
@@ -524,24 +559,77 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             searchTerm.value = ""
         }
 
-        val isBlocked = getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK)
-        binding.clBlockedContact.isVisible = isBlocked
-        binding.clMessageInputRow.isVisible = !isBlocked
-
         binding.btnUnblockContact.setOnClickListener {
             toggleBlockContact(
                 getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK)
             )
         }
+
+        contactState.observe(
+            viewLifecycleOwner,
+            Observer { contactState ->
+                if (contactState == null) return@Observer
+
+                binding.clBlockedContact.isVisible = contactState.isBlocked
+                binding.clMessageInputRow.isVisible = !contactState.isBlocked
+
+                Log.d("VTLOG", "${contactState.identityInfo?.initials} ${contactState.identityInfo?.surname} IS VERIFIED: ${contactState.identityInfo?.isVerified}")
+
+                parentActivity.setActionBarTitleIcon(if (contactState.identityInfo?.isVerified == true) R.drawable.ic_verified_smaller else null)
+            }
+        )
+
+        contactImage.observe(
+            viewLifecycleOwner,
+            Observer { contactImage ->
+                val contactImageView = parentActivity.getCustomActionBar().findViewById<ImageView>(R.id.ivContactImage)
+                val contactIdenticonView = parentActivity.getCustomActionBar().findViewById<ImageView>(R.id.ivContactIdenticon)
+
+                if (contactImage?.image == null) {
+                    val publicKeyString = publicKey.keyToBin().toHex()
+                    generateIdenticon(
+                        publicKeyString.substring(20, publicKeyString.length).toByteArray(),
+                        getColorByHash(requireContext(), publicKeyString),
+                        resources
+                    ).let {
+                        contactIdenticonView.apply {
+                            setImageBitmap(it)
+                            isVisible = true
+                        }
+                        contactImageView.isVisible = false
+                    }
+                } else {
+                    contactImageView.apply {
+                        setImageBitmap(contactImage.image)
+                        isVisible = true
+                    }
+                    contactIdenticonView.isVisible = false
+                }
+            }
+        )
+
+        parentActivity.getCustomActionBar().setOnClickListener {
+            ContactInfoDialog(publicKey).show(parentFragmentManager, tag)
+        }
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun initView() {
+        super.initView()
 
         parentActivity.apply {
             toggleActionBar(true)
-            setActionBarTitle(name, null)
+            setActionBarTitle(
+                name,
+                resources.getString(R.string.text_tap_contact_info)
+            )
             toggleBottomNavigation(false)
+
+            setActionBarTitleSize(resources.getDimension(R.dimen.actionBarTitleSizeChat) / resources.displayMetrics.scaledDensity)
+            setActionBarTitleIcon()
+            getCustomActionBar().findViewById<CardView>(R.id.cvActionbarImage).apply {
+                isVisible = true
+            }
+            setActionBarWithGravity(Gravity.START)
         }
     }
 
@@ -551,6 +639,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         menu.add(Menu.NONE, MENU_ITEM_SEARCH_FILTER, Menu.NONE, null)
             .setIcon(R.drawable.ic_search_filter)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+
+        menu.getItem(0).isVisible = binding.clSearchFilter.isVisible
+
         menu.add(Menu.NONE, MENU_ITEM_OPTIONS, Menu.NONE, null)
             .setIcon(R.drawable.ic_baseline_more_vert_24)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
@@ -566,30 +657,23 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 return true
             }
             MENU_ITEM_SEARCH_FILTER -> {
-                if (binding.clSearchFilter.isVisible) {
-//                    val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.exit_to_top)
-//                    binding.clSearchFilter.startAnimation(slideUpAnimation)
-                    binding.clSearchFilter.isVisible = false
+                binding.clSearchFilter.isVisible = false
 
-                    binding.etSearchMessage.text = null
-                    binding.ivSearchClearIcon.isVisible = false
-                    searchTerm.value = ""
-                    if (filterType.value != FILTER_TYPE_EVERYTHING) {
-                        filterType.value = FILTER_TYPE_EVERYTHING
-                    }
-                    binding.ivFilterByType.setImageDrawable(
-                        ContextCompat.getDrawable(
-                            requireContext(),
-                            R.drawable.ic_everything
-                        )
-                    )
-                } else {
-                    binding.clSearchFilter.isVisible = true
-//                    val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.enter_from_top)
-//                    binding.clSearchFilter.startAnimation(slideDownAnimation)
+                binding.etSearchMessage.text = null
+                binding.ivSearchClearIcon.isVisible = false
+                searchTerm.value = ""
+                if (filterType.value != FILTER_TYPE_EVERYTHING) {
+                    filterType.value = FILTER_TYPE_EVERYTHING
                 }
+                binding.ivFilterByType.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        requireContext(),
+                        R.drawable.ic_everything
+                    )
+                )
 
-                toggleSearchFilterBar(!binding.clSearchFilter.isVisible)
+                toggleSearchFilterBar(true)
+                parentActivity.invalidateOptionsMenu()
 
                 return true
             }
@@ -601,7 +685,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             R.menu.contact_chat_options_contact
         }
 
-        var contact = getContactStore().getContactFromPublicKey(publicKey)
+        val contact = getContactStore().getContactFromPublicKey(publicKey)
         val contactState = getPeerChatStore().getContactState(publicKey)
 
         OptionsDialog(
@@ -627,6 +711,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             optionSelected = { _, selectedItem ->
 
                 when (selectedItem.itemId) {
+                    R.id.actionSearchFilterChat -> {
+                        binding.clSearchFilter.isVisible = true
+                        parentActivity.invalidateOptionsMenu()
+                        toggleSearchFilterBar(false)
+                    }
                     R.id.actionAddContactFromChat -> {
                         addRenameContact(
                             Contact("", publicKey)
@@ -667,6 +756,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         ) { dialog ->
                             try {
                                 getContactStore().deleteContact(contact)
+                                getPeerChatStore().removeContactState(contact.publicKey)
+                                getPeerChatStore().removeContactImage(contact.publicKey)
                                 parentActivity.displaySnackbar(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_contact_remove_success, contact.name),
@@ -731,9 +822,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             PeerChatStore.STATUS_BLOCK,
             !isBlocked
         )
-
-        binding.clBlockedContact.isVisible = !isBlocked
-        binding.clMessageInputRow.isVisible = isBlocked
+//
+//        binding.clBlockedContact.isVisible = !isBlocked
+//        binding.clMessageInputRow.isVisible = isBlocked
     }
 
     private fun addRenameContact(contact: Contact) {
@@ -757,8 +848,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     }
 
     private fun checkCameraPermissions(): Boolean {
-        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
-            requestPermissions(arrayOf(Manifest.permission.CAMERA), PERMISSION_CAMERA)
+        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                PERMISSION_CAMERA
+            )
 
             return false
         }
@@ -812,10 +906,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         val color = ContextCompat.getColor(requireContext(), typedValue.resourceId)
 
         parentActivity.window.statusBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-//            val themePrefs = parentActivity.getSharedPreferences(ValueTransferMainActivity.preferencesFileName, Context.MODE_PRIVATE).getString(
-//                ValueTransferMainActivity.preferencesThemeName,
-//                ValueTransferMainActivity.APP_THEME_DAY
-//            )
             val currentTheme = appPreferences.getCurrentTheme()
             if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
                 color
@@ -888,7 +978,28 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             show(previousFragment[0])
         }.commitNowAllowingStateLoss()
 
-        previousFragment[0].onResume()
+        // Prepare the action bar for title only without subtitle, image and icon
+        parentActivity.apply {
+            setActionBarTitleSize(resources.getDimension(R.dimen.actionBarTitleSize) / resources.displayMetrics.scaledDensity)
+            setActionBarTitleIcon()
+            getCustomActionBar().run {
+                findViewById<CardView>(R.id.cvActionbarImage)
+                    .apply {
+                        isVisible = false
+                    }
+                findViewById<ImageView>(R.id.ivContactIdenticon).apply {
+                    isVisible = false
+                    setImageBitmap(null)
+                }
+                findViewById<ImageView>(R.id.ivContactImage).apply {
+                    isVisible = false
+                    setImageBitmap(null)
+                }
+            }
+            setActionBarWithGravity(Gravity.CENTER)
+        }
+
+        (previousFragment[0] as VTFragment).initView()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -903,11 +1014,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     sendFromUri(it, TYPE_IMAGE)
                 }
                 RENAME_CONTACT -> if (data != null) {
-                    contactName = data.data.toString()
-                    parentActivity.setActionBarTitle(
-                        contactName,
-                        if (isConnected) resources.getString(R.string.text_contact_connected) else null
-                    )
+//                    contactName = data.data.toString()
+//                    parentActivity.setActionBarTitle(
+//                        contactName,
+//                        if (isConnected) resources.getString(R.string.text_contact_connected) else resources.getString(R.string.text_tap_contact_info)
+//                    )
                     searchTerm.value = searchTerm.value
                 }
             }
@@ -918,7 +1029,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         val file = saveFile(requireContext(), uri)
 
         when (type) {
-            TYPE_IMAGE -> getPeerChatCommunity().sendImage(file, publicKey)
+            TYPE_IMAGE -> {
+//                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+                getPeerChatCommunity().sendImage(file, publicKey)
+            }
         }
     }
 

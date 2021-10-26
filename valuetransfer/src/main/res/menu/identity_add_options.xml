@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/actionAddIdentityAttribute"
+        android:icon="@drawable/ic_attribute"
+        android:title="@string/menu_identity_attribute_add" />
+    <item
         android:id="@+id/actionAddAttestation"
         android:icon="@drawable/ic_attestation"
         android:title="@string/menu_identity_attestations_add" />

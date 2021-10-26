@@ -13,6 +13,8 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
+import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 
 abstract class VTDialogFragment : DialogFragment() {
 
@@ -78,4 +80,25 @@ abstract class VTDialogFragment : DialogFragment() {
     fun getQRScanController(): QRScanController {
         return parentActivity.getQRScanController()
     }
+
+    val passportHandler: PassportHandler by lazy {
+        parentActivity.passportHandler()
+    }
+
+    val appPreferences: AppPreferences by lazy {
+        parentActivity.appPreferences()
+    }
+
+    open fun onReceive(type: String, data: Any? = null) {}
+
+    open fun onError(type: String, data: Any? = null) {}
+
+    companion object {
+        const val RECEIVE_TYPE_NFC = "type_nfc"
+    }
+
+//    interface DialogFragmentListener {
+//        fun onReceive(type: String, data: Any? = null)
+//        fun onError(type: String, data: Any? = null)
+//    }
 }

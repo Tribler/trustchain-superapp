@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
+import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
@@ -296,7 +297,8 @@ class ExchangeTransferMoneyDialog(
                             getPeerChatCommunity().sendMessageWithTransaction(
                                 transactionMessage,
                                 block.calculateHash(),
-                                selectedContact!!.publicKey
+                                selectedContact!!.publicKey,
+                                getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                             )
                             parentActivity.displaySnackbar(
                                 requireContext(),
@@ -320,12 +322,20 @@ class ExchangeTransferMoneyDialog(
             requestMoneyContactButton.setOnClickListener {
                 requestMoneyContactButton.text = resources.getString(R.string.text_requesting)
 
+                val transferRequest = TransferRequest(
+                    transactionMessage,
+                    transactionAmount,
+                    getTrustChainCommunity().myPeer.publicKey,
+                    selectedContact!!.publicKey
+                )
+
                 Handler().postDelayed({
                     requestMoneyContactButton.isVisible = false
                     getPeerChatCommunity().sendTransferRequest(
                         transactionMessage,
-                        transactionAmount,
-                        selectedContact!!.publicKey
+                        transferRequest,
+                        selectedContact!!.publicKey,
+                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                     )
 
                     // Only show snackbar when not sent from chat

@@ -38,27 +38,5 @@
         <item name="android:windowBackground">?attr/colorPrimary</item>
         <item name="popupMenuStyle">@style/OptionsMenu</item>
         <item name="android:itemBackground">@color/colorGray</item>
-
-<!--        <item name="colorPrimaryDark">@color/light_gray</item>-->
-<!--        <item name="colorPrimaryVariant">@color/light_gray</item>-->
-<!--        <item name="colorOnPrimary">@color/black</item>-->
-<!--        <item name="colorSecondary">@color/gray</item>-->
-<!--        <item name="colorSecondaryVariant">@color/light_gray</item>-->
-<!--        <item name="colorAccent">@color/colorYellow</item>-->
-<!--        <item name="colorSurface">@color/gray</item>-->
-<!--        <item name="colorError">@color/colorRed</item>-->
-<!--        <item name="colorOnError">@color/white</item>-->
-<!--        <item name="colorBackgroundFloating">@color/black</item>-->
-<!--        <item name="android:colorBackground">@color/white</item>-->
-<!--        <item name="colorOnBackground">@color/gray</item>-->
-<!--        <item name="android:statusBarColor">@color/white</item>-->
-<!--        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>-->
-<!--        <item name="android:navigationBarColor">@color/white</item>-->
-<!--        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>-->
-<!--        <item name="actionBarStyle">@style/ActionBar</item>-->
-<!--        <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>-->
-<!--        <item name="android:windowBackground">@color/white</item>-->
-<!--        <item name="popupMenuStyle">@style/OptionsMenu</item>-->
-<!--        <item name="android:itemBackground">@color/white</item>-->
     </style>
 </resources>

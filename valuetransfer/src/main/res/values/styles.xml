@@ -8,13 +8,17 @@
     </style>
 
     <style name="ActionBarTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="android:textSize">24dp</item>
+        <item name="android:textSize">@dimen/actionBarTitleSize</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
     </style>
 
     <style name="ActionBarSubTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
-        <item name="android:textSize">12dp</item>
-        <item name="android:textStyle">italic</item>
+        <item name="android:textSize">@dimen/actionBarSubTitleSize</item>
+        <item name="android:textColor">?attr/onBackgroundSecondaryColor</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
     </style>
 
     // OPTIONS MENU STYLE
@@ -49,11 +53,7 @@
         <item name="cornerSize">@dimen/cornerRadius</item>
     </style>
 
-    // Bottom Sheet Dialog
-    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-    </style>
-
+    // Dialogs
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/dialog_rounded_top</item>
     </style>
@@ -63,6 +63,26 @@
         <item name="bottomSheetStyle">@style/BottomSheet</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="FullscreenDialog" parent="@style/Theme.AppCompat.Light">
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">?attr/backgroundColor</item>
+        <item name="android:windowAnimationStyle">@style/OpenDialogAnimation</item>
+    </style>
+
+<!--    <style name="FullscreenDialogTheme" parent="FullscreenDialog">-->
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+<!--    </style>-->
+
+    <style name="OpenDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
     </style>
 
     // Buttons
@@ -79,7 +99,22 @@
 
     <style name="ButtonLightGrayRounded" parent="ButtonRounded">
         <item name="backgroundTint">?attr/widgetColor</item>
-        <item name="android:textColor">@color/colorPrimaryValueTransfer</item>
+        <item name="android:textColor">?attr/onWidgetColor</item>
+    </style>
+
+    <style name="ButtonMutedRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedColor</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ButtonMutedLightRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedLightColor</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ButtonMutedDarkRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedDarkColor</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="ButtonRedRounded" parent="ButtonRounded">

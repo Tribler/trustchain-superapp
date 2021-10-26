@@ -2,6 +2,9 @@ package nl.tudelft.trustchain.common.eurotoken
 
 import android.util.Log
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
@@ -10,6 +13,7 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -434,6 +438,31 @@ class TransactionRepository(
             .first { block: TrustChainBlock ->
                 allowedTypes.contains(block.type)
             }
+    }
+
+    fun getTransactionsBetweenMeAndOther(other: PublicKey, trustchain: TrustChainHelper): List<Transaction> {
+        val me = trustchain.getMyPublicKey()
+        return trustchain.getChainByUser(me)
+            .filter { block ->
+                block.linkPublicKey.contentEquals(other.keyToBin()) ||
+                    block.linkPublicKey.contentEquals(other.keyToBin())
+            }
+            .map { block: TrustChainBlock ->
+                val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+                Transaction(
+                    block,
+                    sender,
+                    defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey),
+                    if (block.transaction.containsKey(KEY_AMOUNT)) {
+                        (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+                    } else 0L,
+                    block.type,
+                    getBalanceChangeForBlock(block) < 0,
+                    block.timestamp
+                )
+            }
+            .toList()
+
     }
 
     fun getLatestNTransactionsOfType(

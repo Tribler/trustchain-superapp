@@ -18,10 +18,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:id="@+id/flIdenticon"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvContactImage"
             android:layout_width="46dp"
             android:layout_height="46dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/cornerRadius"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="?attr/backgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -29,22 +31,47 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
+<!--        <FrameLayout-->
+<!--            android:id="@+id/flIdenticon"-->
+<!--            android:layout_width="46dp"-->
+<!--            android:layout_height="46dp"-->
+<!--            android:background="@drawable/pill_rounded"-->
+<!--            android:backgroundTint="?attr/backgroundColor"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toStartOf="@+id/clChatContentOverview"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent">-->
+
             <ImageView
                 android:id="@+id/ivIdenticon"
                 android:layout_width="@dimen/identiconWidth"
                 android:layout_height="@dimen/identiconHeight"
-                android:layout_gravity="center" />
-        </FrameLayout>
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible"/>
+
+            <ImageView
+                android:id="@+id/ivContactImage"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_gravity="center"
+                tools:src="@drawable/ic_contact"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"/>
+<!--        </FrameLayout>-->
+        </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clChatContentOverview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/flIdenticon"
+            app:layout_constraintBottom_toBottomOf="@+id/cvContactImage"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/flIdenticon"
-            app:layout_constraintTop_toTopOf="@+id/flIdenticon">
+            app:layout_constraintStart_toEndOf="@+id/cvContactImage"
+            app:layout_constraintTop_toTopOf="@+id/cvContactImage">
 
             <TextView
                 android:id="@+id/tvContactNameOverview"

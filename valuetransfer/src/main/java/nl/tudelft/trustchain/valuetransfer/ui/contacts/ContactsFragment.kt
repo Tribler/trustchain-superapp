@@ -1,10 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
-import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
-import android.view.animation.AnimationUtils
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
@@ -20,7 +17,9 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.viewBinding
+import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.entity.ContactImage
 import nl.tudelft.trustchain.peerchat.entity.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
@@ -41,18 +40,27 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
     private val contactItems: LiveData<List<Item>> by lazy {
-        combine(getContactStore().getContacts(), peers) { contacts, peers ->
-            createContactItems(contacts, peers)
+        combine(
+            getContactStore().getContacts(),
+            peers,
+            getPeerChatStore().getAllContactImages()
+        ) { contacts, peers, images ->
+            createContactItems(contacts, peers, images)
         }.asLiveData()
     }
 
     private val chatItems: LiveData<List<Item>> by lazy {
-        combine(getPeerChatStore().getLastMessages(
-            isRecent = true,
-            isArchive = false,
-            isBlocked = false
-        ), peers, getPeerChatStore().getAllContactState()) { messages, peers, state ->
-            createChatItems(messages, peers, state)
+        combine(
+            getPeerChatStore().getLastMessages(
+                isRecent = true,
+                isArchive = false,
+                isBlocked = false
+            ),
+            peers,
+            getPeerChatStore().getAllContactState(),
+            getPeerChatStore().getAllContactImages()
+        ) { messages, peers, state, images ->
+            createChatItems(messages, peers, state, images)
         }.asLiveData()
     }
 
@@ -62,19 +70,27 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 isRecent = false,
                 isArchive = true,
                 isBlocked = false
-            ), peers, getPeerChatStore().getAllContactState()
-        ) { messages, peers, state ->
-            createChatItems(messages, peers, state)
+            ),
+            peers,
+            getPeerChatStore().getAllContactState(),
+            getPeerChatStore().getAllContactImages()
+        ) { messages, peers, state, images ->
+            createChatItems(messages, peers, state, images)
         }.asLiveData()
     }
 
     private val blockedChatItems: LiveData<List<Item>> by lazy {
-        combine(getPeerChatStore().getLastMessages(
-            isRecent = false,
-            isArchive = false,
-            isBlocked = true
-        ), peers, getPeerChatStore().getAllContactState()) { messages, peers, state ->
-            createChatItems(messages, peers, state)
+        combine(
+            getPeerChatStore().getLastMessages(
+                isRecent = false,
+                isArchive = false,
+                isBlocked = true
+            ),
+            peers,
+            getPeerChatStore().getAllContactState(),
+            getPeerChatStore().getAllContactImages()
+        ) { messages, peers, state, images ->
+            createChatItems(messages, peers, state, images)
         }.asLiveData()
     }
 
@@ -151,9 +167,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    override fun initView() {
         parentActivity.apply {
             setActionBarTitle(
                 resources.getString(R.string.menu_navigation_contacts),
@@ -167,7 +181,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onResume()
+        initView()
 
         binding.ivSearchBarCancelIcon.setOnClickListener {
             etSearchContact.text = null
@@ -184,19 +198,26 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
 
         onFocusChange(binding.etSearchContact, requireContext())
 
-        binding.rvContacts.adapter = contactsAdapter
-        binding.rvContacts.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvContacts.apply {
+            adapter = contactsAdapter
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        }
 
-        binding.rvRecentChats.adapter = chatsAdapter
-        binding.rvRecentChats.layoutManager = LinearLayoutManager(context)
+        binding.rvRecentChats.apply {
+            adapter = chatsAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
 
-        binding.rvArchivedChats.adapter = archivedChatsAdapter
-        binding.rvArchivedChats.layoutManager = LinearLayoutManager(context)
+        binding.rvArchivedChats.apply {
+            adapter = archivedChatsAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
 
-        binding.rvBlockedChats.adapter = blockedChatsAdapter
-        binding.rvBlockedChats.layoutManager = LinearLayoutManager(context)
+        binding.rvBlockedChats.apply {
+            adapter = blockedChatsAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
 
-//        observeArchivedChats(viewLifecycleOwner, archivedChatsAdapter, archivedChatItems)
         observeContacts(viewLifecycleOwner, contactsAdapter)
         observeChats(viewLifecycleOwner, chatsAdapter, chatItems, ADAPTER_RECENT)
         observeChats(viewLifecycleOwner, archivedChatsAdapter, archivedChatItems, ADAPTER_ARCHIVE)
@@ -227,23 +248,19 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         if (from == ADAPTER_RECENT) {
             when (to) {
                 ADAPTER_ARCHIVE -> {
-                    binding.clRecentChats.viewExitToLeft(requireContext())
-                    binding.clArchivedChats.viewEnterFromRight(requireContext())
+                    binding.clRecentChats.exitEnterView(requireContext(), binding.clArchivedChats)
                 }
                 ADAPTER_BLOCKED -> {
-                    binding.clRecentChats.viewExitToLeft(requireContext())
-                    binding.clBlockedChats.viewEnterFromRight(requireContext())
+                    binding.clRecentChats.exitEnterView(requireContext(), binding.clBlockedChats)
                 }
             }
         } else {
             when (from) {
                 ADAPTER_ARCHIVE -> {
-                    binding.clArchivedChats.viewExitToRight(requireContext())
-                    binding.clRecentChats.viewEnterFromLeft(requireContext())
+                    binding.clArchivedChats.exitEnterView(requireContext(), binding.clRecentChats, false)
                 }
                 ADAPTER_BLOCKED -> {
-                    binding.clBlockedChats.viewExitToRight(requireContext())
-                    binding.clRecentChats.viewEnterFromLeft(requireContext())
+                    binding.clBlockedChats.exitEnterView(requireContext(), binding.clRecentChats, false)
                 }
             }
         }
@@ -264,18 +281,10 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         when (item.itemId) {
             R.id.actionSearch -> {
                 if (binding.clSearchbar.isVisible) {
-                    val slideUpAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
-                    binding.clSearchbar.startAnimation(slideUpAnimation)
                     binding.etSearchContact.text = null
-
-                    Handler().postDelayed({
-                        binding.clSearchbar.isVisible = false
-                    }, 200)
+                    binding.clSearchbar.isVisible = false
                 } else {
                     binding.clSearchbar.isVisible = true
-                    val slideDownAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_down)
-                    binding.clSearchbar.startAnimation(slideDownAnimation)
-
                     binding.etSearchContact.showKeyboard(requireContext())
                 }
             }
@@ -327,7 +336,8 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
 
     private fun createContactItems(
         contacts: List<Contact>,
-        peers: List<Peer>
+        peers: List<Peer>,
+        images: List<ContactImage>
     ): List<Item> {
         return contacts
             .filter {
@@ -338,12 +348,14 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
             }
             .mapIndexed { _, contact ->
                 val peer = peers.find { it.mid == contact.mid }
+                val image = images.firstOrNull { it.publicKey == contact.publicKey }
                 ChatItem(
                     contact,
                     null,
                     peer != null && !peer.address.isEmpty(),
                     peer?.bluetoothAddress != null,
-                    null
+                    null,
+                    image
                 )
             }
     }
@@ -352,7 +364,8 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     private fun createChatItems(
         messages: List<ChatMessage>,
         peers: List<Peer>,
-        state: List<ContactState>
+        state: List<ContactState>,
+        images: List<ContactImage>
     ): List<Item> {
         return messages
             .map { message ->
@@ -360,6 +373,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 val peer = peers.find { it.publicKey == publicKey }
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
+                val image = images.firstOrNull { it.publicKey == publicKey }
 
                 ChatItem(
                     Contact(
@@ -369,7 +383,8 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                     message,
                     isOnline = peer != null && !peer.address.isEmpty(),
                     isBluetooth = peer?.bluetoothAddress != null,
-                    status
+                    status,
+                    image
                 )
             }
     }

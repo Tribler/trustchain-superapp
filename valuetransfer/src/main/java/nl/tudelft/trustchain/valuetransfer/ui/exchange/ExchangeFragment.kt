@@ -32,7 +32,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     private val adapterTransactions = ItemAdapter()
 
     private var transactionsItems: List<Transaction> = emptyList()
-    private var transactionShowCount: Int = 5
+    private var transactionShowCount: Int = 10
     private var scanIntent: Int = -1
     private var transactionForceUpdate: Boolean = false
 
@@ -50,10 +50,10 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer {
+            ExchangeTransactionItemRenderer({
                 trustchain.createAgreementBlock(it, it.transaction)
                 transactionForceUpdate = true
-            }
+            }, ExchangeTransactionItemRenderer.TYPE_FULL_VIEW)
         )
 
         lifecycleScope.launchWhenStarted {
@@ -74,7 +74,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onResume()
+        initView()
 
         binding.clExchangeOptions.setOnClickListener {
             OptionsDialog(R.menu.exchange_options, "Choose Option") { _, item ->
@@ -161,8 +161,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         )
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun initView() {
         parentActivity.apply {
             setActionBarTitle(
                 resources.getString(R.string.menu_navigation_exchange),
@@ -248,7 +247,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                 transactionShowCount,
                 ALLOWED_EUROTOKEN_TYPES
             )
+
             items = createTransactionItems(transactionsItems)
+
             parentActivity.setBalance(
                 formatBalance(
                     getTransactionRepository().getMyBalance()

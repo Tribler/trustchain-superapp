@@ -1,8 +1,10 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.app.Activity
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import androidx.core.net.toUri
@@ -81,5 +83,17 @@ class ContactRenameDialog(
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+
+        if (targetFragment is ContactInfoDialog) {
+            targetFragment!!.onActivityResult(
+                ContactChatFragment.RENAME_CONTACT,
+                Activity.RESULT_OK,
+                Intent()
+            )
+        }
     }
 }

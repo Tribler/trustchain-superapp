@@ -1,10 +1,15 @@
 package nl.tudelft.trustchain.valuetransfer
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteConstraintException
 import android.graphics.Color
+import android.nfc.NfcAdapter
+import android.nfc.Tag
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -16,8 +21,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
-import androidx.appcompat.app.ActionBar.LayoutParams
-import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
@@ -45,15 +49,21 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
+import nl.tudelft.trustchain.common.valuetransfer.extensions.bytesToImage
+import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeBytes
+import nl.tudelft.trustchain.common.valuetransfer.extensions.imageBytes
+import nl.tudelft.trustchain.common.valuetransfer.extensions.resize
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
+import nl.tudelft.trustchain.peerchat.entity.ContactImage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityAttestationConfirmDialog
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeFragment
@@ -64,7 +74,9 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
+import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 import org.json.JSONObject
+import java.util.*
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -83,6 +95,7 @@ class ValueTransferMainActivity : BaseActivity() {
     private lateinit var customActionBar: View
     private lateinit var notificationHandler: NotificationHandler
     private lateinit var appPreferences: AppPreferences
+    private lateinit var passportHandler: PassportHandler
 
     /**
      * Initialize all communities and (database) stores and repo's
@@ -144,9 +157,10 @@ class ValueTransferMainActivity : BaseActivity() {
         identityCommunity.createAttributesTable()
 
         /**
-         * Initialize notification handler and handle notification click intents
+         * Initialize notification and passport handler
          */
         notificationHandler = NotificationHandler.getInstance(this)
+        passportHandler = PassportHandler.getInstance(this)
 
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
@@ -180,7 +194,10 @@ class ValueTransferMainActivity : BaseActivity() {
          */
         val peerChatCommunity = getCommunity<PeerChatCommunity>()!!
         peerChatCommunity.setOnMessageCallback(::onMessageCallback)
+        peerChatCommunity.setOnContactImageRequestCallback(::onContactImageRequestCallback)
+        peerChatCommunity.setOnContactImageCallback(::onContactImageCallback)
         peerChatCommunity.createContactStateTable()
+        peerChatCommunity.createContactImageTable()
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -195,13 +212,7 @@ class ValueTransferMainActivity : BaseActivity() {
          * Create a (centered) custom action bar with a title and subtitle
          */
         customActionBar = LayoutInflater.from(this).inflate(R.layout.action_bar, null)
-        customActionBar.findViewById<TextView>(R.id.tv_actionbar_title)
-        val params = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
-        params.apply {
-            gravity = Gravity.CENTER
-        }
-
-        supportActionBar?.setCustomView(customActionBar, params)
+        setActionBarWithGravity(Gravity.CENTER)
         supportActionBar?.displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
 
         /**
@@ -210,19 +221,46 @@ class ValueTransferMainActivity : BaseActivity() {
         if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity() && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
             onNewIntent(intent)
         }
+
+        checkCameraPermissions()
     }
 
-//    /**
-//     * Switch to day, night or system default version of theme
-//     */
-//    fun switchTheme(theme: String?) {
-//        when (theme) {
-//            AppPreferences.APP_THEME_DAY -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//            AppPreferences.APP_THEME_NIGHT -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-//            AppPreferences.APP_THEME_SYSTEM -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-//            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-//        }
-//    }
+    fun setActionBarWithGravity(alignment: Int) {
+        val params = ActionBar.LayoutParams(
+            ActionBar.LayoutParams.WRAP_CONTENT,
+            ActionBar.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = alignment
+        }
+
+        supportActionBar?.customView = null
+        supportActionBar?.setCustomView(customActionBar, params)
+
+    }
+
+    /**
+     * Enable NFC scanning
+     */
+    override fun onResume() {
+        super.onResume()
+
+        if (passportHandler.getNFCAdapter() != null) {
+            val intent = Intent(applicationContext, this.javaClass)
+            intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            val pendingIntent = PendingIntent.getActivity(applicationContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val filter = arrayOf(arrayOf("android.nfc.tech.IsoDep"))
+            passportHandler.getNFCAdapter()!!.enableForegroundDispatch(this, pendingIntent, null, filter)
+        }
+    }
+
+    /**
+     * Only allow NFC scanning when the app is on the foreground
+     */
+    override fun onPause() {
+        super.onPause()
+
+        passportHandler.getNFCAdapter()?.disableForegroundDispatch(this)
+    }
 
     /**
      * Enable notification click intents
@@ -230,10 +268,26 @@ class ValueTransferMainActivity : BaseActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity()) {
-            Handler().postDelayed({
-                notificationIntentController(intent)
-            }, 1000)
+        if (intent == null) return
+
+        when {
+            intent.action == NfcAdapter.ACTION_TECH_DISCOVERED -> nfcIntentController(intent)
+            getCommunity<IdentityCommunity>()!!.hasIdentity() -> {
+                Handler().postDelayed({
+                    notificationIntentController(intent)
+                }, 1000)
+            }
+        }
+    }
+
+    /**
+     * Process an incoming NFC tag intent
+     */
+    private fun nfcIntentController(intent: Intent) {
+        intent.extras?.getParcelable<Tag>(NfcAdapter.EXTRA_TAG)?.let { tag ->
+            if (tag.techList.contains("android.nfc.tech.IsoDep")) {
+                passportHandler.setIsoDep(tag)
+            }
         }
     }
 
@@ -263,8 +317,6 @@ class ValueTransferMainActivity : BaseActivity() {
                                         remove(previousFragment)
                                         add(R.id.container, fragment, fragmentTag)
                                     }.commit()
-
-
                                 }
                             } else {
                                 fragmentManager.beginTransaction().apply {
@@ -293,7 +345,7 @@ class ValueTransferMainActivity : BaseActivity() {
                         detailFragment(settingsFragmentTag, Bundle())
                     } else {
                         selectBottomNavigationItem(fragmentTag)
-                        getFragmentByTag(fragmentTag)!!.onResume()
+                        (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
                     }
                 }
             }
@@ -317,7 +369,7 @@ class ValueTransferMainActivity : BaseActivity() {
                 ContactChatFragment().apply {
                     arguments = bundleOf(
                         ARG_PUBLIC_KEY to publicKeyString,
-                        ARG_NAME to (contact?.name ?: "Unknown contact"),
+                        ARG_NAME to (contact?.name ?: resources.getString(R.string.text_unknown_contact)),
                         ARG_PARENT to getActiveFragment().tag
                     )
                 }
@@ -335,6 +387,13 @@ class ValueTransferMainActivity : BaseActivity() {
      */
     fun notificationHandler(): NotificationHandler {
         return notificationHandler
+    }
+
+    /**
+     * Return the instance of the passport handler
+     */
+    fun passportHandler(): PassportHandler {
+        return passportHandler
     }
 
     /**
@@ -407,7 +466,8 @@ class ValueTransferMainActivity : BaseActivity() {
             setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
             show(fragment)
         }.commit()
-        fragment.onResume()
+
+        (fragment as VTFragment).initView()
     }
 
     /**
@@ -435,7 +495,8 @@ class ValueTransferMainActivity : BaseActivity() {
                     setCustomAnimations(R.anim.enter_from_right, 0)
                     show(settingsFragment)
                 }.commit()
-                settingsFragment.onResume()
+
+                (settingsFragment as VTFragment).initView()
             }
         }
     }
@@ -463,19 +524,10 @@ class ValueTransferMainActivity : BaseActivity() {
             fragment.dismissAllowingStateLoss()
         }
     }
-//
-//    /**
-//     * Function that returns the rootview of the activity or the containerview that is below the actionbar
-//     */
-//    private fun getView(isRoot: Boolean = false): View {
-//        val root = window.decorView.rootView
-//        if (isRoot) {
-//            return root
-//        }
-//
-//        return root.findViewById(R.id.container)
-//    }
 
+    /**
+     * Function that determines the height of the status bar for placement of the snackbar
+     */
     private fun getStatusBarHeight(): Int {
         var result = 0
         val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
@@ -535,15 +587,45 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
+    fun getCustomActionBar(): View {
+        return customActionBar
+    }
+
     /**
      * Change title or subtitle of action bar
      */
-    fun setActionBarTitle(title: String?, subtitle: String?) {
-        customActionBar.findViewById<TextView>(R.id.tv_actionbar_title).text = title
-        customActionBar.findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
+    fun setActionBarTitle(title: String?, subtitle: String?) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_title).text = title
+        findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
             text = subtitle ?: ""
             isVisible = subtitle != null
         }
+    }
+
+    /**
+     * Change only subtitle of action bar
+     */
+    fun setActionBarSubTitle(subtitle: String) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_subtitle).apply {
+            text = subtitle
+            isVisible = true
+        }
+    }
+
+    fun setActionBarTitleSize(size: Float) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_title).textSize = size
+    }
+
+    /**
+     * Set an icon next to the action bar title
+     */
+    fun setActionBarTitleIcon(icon: Int? = null) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_title).setCompoundDrawablesWithIntrinsicBounds(
+            0,
+            0,
+            icon ?: 0,
+            0
+        )
     }
 
     /**
@@ -593,14 +675,15 @@ class ValueTransferMainActivity : BaseActivity() {
      * Create a callback on receipt of a message within the peerchat community for notifications and contact status handling (archived, muted, blocked)
      */
     private fun onMessageCallback(community: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) {
-        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
-
-
-        if (!getCommunity<IdentityCommunity>()!!.hasIdentity()) {
+        // Discard callback when there's no identity or when the message is already in the database (delivered using ip or bluetooth packet)
+        if (!getCommunity<IdentityCommunity>()!!.hasIdentity() || community.getDatabase().getMessageById(chatMessage.id) != null) {
             return
         }
 
-        val contactState = getStore<PeerChatStore>()!!.getContactState(chatMessage.sender)
+        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
+
+        val peerChatStore: PeerChatStore = getStore()!!
+        val contactState = peerChatStore.getContactState(chatMessage.sender)
 
         // Don't allow messages to be received while the contact is blocked, but acknowledge to stop resending
         if (contactState != null && contactState.isBlocked) {
@@ -608,9 +691,71 @@ class ValueTransferMainActivity : BaseActivity() {
             return
         }
 
-        // Check if message has already been delivered (by ip or bluetooth packet)
-        if (community.getDatabase().getMessageById(chatMessage.id) != null) {
-            return
+        var contactImageRequest = false
+
+        chatMessage.identityInfo?.let { identityInfo ->
+
+            when {
+                contactState?.identityInfo == null -> {
+                    peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
+                    contactImageRequest = true
+                }
+                contactState.identityInfo != identityInfo -> {
+                    Log.d("VTLOG", "CONTACT STATE IS NOT UP2DATE")
+                    if (contactState.identityInfo!!.imageHash != identityInfo.imageHash) {
+                        contactImageRequest = true
+                    }
+                    peerChatStore.setIdentityState(
+                        contactState.publicKey,
+                        contactState.identityInfo!!
+                    )
+                }
+            }
+
+//            if (contactState != null) {
+//                if (contactState.identityInfo == null) {
+//                    peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
+//                    contactImageRequest = true
+//                } else {
+//                    if (contactState.identityInfo!! != identityInfo) {
+//                        Log.d("VTLOG", "CONTACT STATE IS NOT UP2DATE")
+//                        if (contactState.identityInfo!!.imageHash != identityInfo.imageHash) {
+//                            contactImageRequest = true
+//                        }
+//                        peerChatStore.setIdentityState(
+//                            contactState.publicKey,
+//                            contactState.identityInfo!!
+//                        )
+//                    } else {
+//                        Log.d("VTLOG", "CONTACT STATE IS UP2DATE")
+//                    }
+////                    if (contactState.identityInfo!!.isVerified != identityInfo.isVerified) {
+////                        peerChatStore.setState(chatMessage.sender, PeerChatStore.STATUS_VERIFICATION, identityInfo.isVerified)
+////                    }
+////                    if (contactState.identityInfo!!.imageHash != identityInfo.imageHash) {
+////                        peerChatStore.setState(chatMessage.sender, PeerChatStore.STATUS_IMAGE_HASH, false, identityInfo.imageHash)
+////                        contactImageRequest = true
+////                    }
+////                    if (contactState.identityInfo!!.initials != identityInfo.initials) {
+////                        Log.d("VTLOG", "TRIGGERED INITIALS")
+////                        peerChatStore.setState(chatMessage.sender, PeerChatStore.STATUS_INITIALS, false, identityInfo.initials)
+////                    }
+////                    if (contactState.identityInfo!!.surname != identityInfo.surname) {
+////                        peerChatStore.setState(chatMessage.sender, PeerChatStore.STATUS_SURNAME, false, identityInfo.surname)
+////                    }
+////                    if (contactState.identityInfo!!.imageHash != peerChatStore.getContactImageHash(chatMessage.sender)) {
+////                        contactImageRequest = true
+////                    }
+//                }
+//            } else {
+//                peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
+//                contactImageRequest = true
+//            }
+        }
+
+        if (contactImageRequest) {
+            Log.d("VTLOG", "SEND CONTACT IMAGE REQUEST UPON RECEIPT OF MESSAGE TO ${chatMessage.sender}")
+            community.sendContactImageRequest(chatMessage.sender)
         }
 
         try {
@@ -619,7 +764,7 @@ class ValueTransferMainActivity : BaseActivity() {
             e.printStackTrace()
         }
 
-        // Only sent notification when contact is not archived or muted (or blocked)
+        // Only show notification when contact is not archived or muted (and thus blocked)
         if (contactState == null || (!contactState.isArchived && !contactState.isMuted)) {
             notificationHandler.notify(peer, chatMessage)
         }
@@ -629,6 +774,7 @@ class ValueTransferMainActivity : BaseActivity() {
         // Request attachment
         if (chatMessage.attachment != null) {
             when (chatMessage.attachment!!.type) {
+                MessageAttachment.TYPE_IMAGE -> return
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
                 MessageAttachment.TYPE_CONTACT -> return
                 MessageAttachment.TYPE_LOCATION -> return
@@ -638,6 +784,78 @@ class ValueTransferMainActivity : BaseActivity() {
                     chatMessage.attachment!!.content.toHex()
                 )
             }
+        }
+    }
+
+    /**
+     * Callback on receipt of a request to send contact image
+     */
+    private fun onContactImageRequestCallback(community: PeerChatCommunity, peer: Peer) {
+        Log.d("VTLOG", "CONTACT IMAGE REQUEST RECEIVED FROM $peer")
+
+        val identityFaceImage = appPreferences.getIdentityFace()
+        val identityFaceHash = appPreferences.getIdentityFaceHash()
+        val decodedImage = identityFaceImage?.let { decodeBytes(it) }
+//        val decodedImage = identityFaceImage?.let { ContactImage.decodeImage(it) }
+        var bitmap = decodedImage?.let { bytesToImage(it) }
+//        var bitmap = if (decodedImage != null) ContactImage.bytesToImage(decodedImage) else null
+        Log.d("VTLOG", "BITMAP NULL: ${bitmap == null}")
+
+        // Try to compress the image to width of at most 200 to increase transfer speed
+        if (bitmap != null) {
+            bitmap = bitmap.resize(200f)
+//            try {
+//                val width = bitmap.width
+//                val height = bitmap.height
+//                val scale = if (width > 200) 200f / width else 1.0f
+//                val matrix = Matrix().apply {
+//                    postScale(scale, scale)
+//                }
+//                bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false)
+//                Log.d("VTLOG", "BITMAP WIDTH: ${bitmap.width}")
+//                Log.d("VTLOG", "BITMAP HEIGHT: ${bitmap.height}")
+//                Log.d("VTLOG", "BITMAP SIZE IS: ${bitmap?.byteCount}")
+//            } catch(e: Exception) {
+//                e.printStackTrace()
+//                Log.d("VTLOG", "FAILED TO RESIZE BITMAP")
+//            }
+        }
+        Log.d("VTLOG", "CREATING CONTACT IMAGE OBJECT")
+        val contactImage = ContactImage(
+            getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
+            identityFaceHash,
+            bitmap
+        )
+        Log.d("VTLOG", "CREATED CONTACT IMAGE OBJECT: ${contactImage}")
+
+        Log.d("VTLOG", "CONTACT IMAGE SEND TO $peer $contactImage")
+
+        community.sendContactImage(peer, contactImage)
+    }
+
+    /**
+     * Callback on receipt of a requested contact image
+     */
+    private fun onContactImageCallback(community: PeerChatCommunity, contactImage: ContactImage) {
+        Log.d("VTLOG", "CONTACT IMAGE RECEIVED FROM ${contactImage.publicKey}")
+        Log.d("VTLOG", "PUBLIC KEY: ${contactImage.publicKey.keyToBin().toHex()}")
+        Log.d("VTLOG", "IMAGE HASH: ${contactImage.imageHash}")
+        Log.d("VTLOG", "IMAGE NULL: ${contactImage.image == null}")
+
+        if (contactImage.imageHash != null && contactImage.image != null) {
+
+//           ContactImage.imageToBytes(contactImage.image!!)?.let { imageBytes ->
+            imageBytes(contactImage.image!!)?.let { imageBytes ->
+                community.getDatabase().setContactImage(
+                    contactImage.publicKey,
+                    imageBytes,
+                    contactImage.imageHash!!
+                )
+                community.getDatabase().setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, contactImage.imageHash!!)
+            }
+        } else {
+            community.getDatabase().removeContactImage(contactImage.publicKey)
+            community.getDatabase().setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, null)
         }
     }
 
@@ -719,6 +937,46 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Check camera permissions
+     */
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun checkCameraPermissions() {
+        if ((ActivityCompat.checkSelfPermission(applicationContext, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA),
+                PERMISSION_CAMERA
+            )
+        }
+    }
+
+    /**
+     * Process permission result
+     */
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == ContactChatFragment.PERMISSION_CAMERA) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED}) {
+                Log.d("VTLOG", "CAMERA PERMISSION GRANTED")
+                displaySnackbar(
+                    applicationContext,
+                    resources.getString(R.string.snackbar_permission_camera_granted_other)
+                )
+            } else {
+                Log.d("VTLOG", "CAMERA PERMISSION NOT GRANTED")
+                displaySnackbar(
+                    applicationContext,
+                    resources.getString(R.string.snackbar_permission_denied),
+                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                )
+                finish()
+            }
+        }
+    }
+
     companion object {
         const val walletOverviewFragmentTag = "wallet_overview_fragment"
         const val identityFragmentTag = "identity_fragment"
@@ -727,14 +985,6 @@ class ValueTransferMainActivity : BaseActivity() {
         const val qrScanControllerTag = "qrscancontroller"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
-
-//        const val preferencesFileName = "prefs_vt"
-//        const val preferencesThemeName = "theme"
-//
-//        val APP_THEME = R.style.Theme_ValueTransfer
-//        const val APP_THEME_DAY = "day"
-//        const val APP_THEME_NIGHT = "night"
-//        const val APP_THEME_SYSTEM = "system"
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"
@@ -747,5 +997,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
         const val NOTIFICATION_INTENT_CHAT = 1
         const val NOTIFICATION_INTENT_TRANSACTION = 2
+
+        const val PERMISSION_LOCATION = 1
+        const val PERMISSION_CAMERA = 2
     }
 }
