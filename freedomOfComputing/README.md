@@ -3,7 +3,7 @@
 ## Overview
 
 Freedom-of-Computing is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "DemoCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, needs to have a specific format for its execution to work, the requirements/constraints are listed below.
- 
+
 ## Describing the main use case of our app
 We present the main use case of our app, step by step, through which our contributions to the whole “superapp” project become visible.
 
@@ -22,7 +22,7 @@ The user can press the “Execute code from jar” button to execute the file sp
 ## User Guide
 
 ### Upload
-Enter the apk name in the upper input box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder. 
+Enter the apk name in the upper input box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder.
 Press "Inform peers about seeding" to let the other connected peers know about the file you are uploading (seeding).
 
 ### Download/Execute
@@ -30,7 +30,7 @@ Press "Inform peers about seeding" to let the other connected peers know about t
 
 <img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="180">
 
-2. Download 
+2. Download
 
 The corresponding magnet link should auto-fill in the first input box. Proceed with the download by pressing "Download magnet link".
 
@@ -56,7 +56,7 @@ Here are the constraints a developer needs to strictly follow to develop an app 
 
 Other then these constraints, a developer can follow the normal android development procedures for further functionalities.
 
-**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states temporarily/persistantly can be found on: https://developer.android.com/topic/libraries/architecture/saving-states and https://developer.android.com/training/data-storage/shared-preferences 
+**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states temporarily/persistantly can be found on: https://developer.android.com/topic/libraries/architecture/saving-states and https://developer.android.com/training/data-storage/shared-preferences
 
 ### A "Hello World!" example
 ```java
