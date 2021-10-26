@@ -22,10 +22,15 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import org.json.JSONObject
+import java.security.MessageDigest
 import java.util.*
 import kotlin.math.abs
 
@@ -209,34 +214,44 @@ fun Int.dpToPixels(context: Context): Int = TypedValue.applyDimension(
     context.resources.displayMetrics
 ).toInt()
 
-fun View.viewEnterFromLeft(context: Context) {
-    val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_left)
-    this.apply {
-        isVisible = true
-        startAnimation(animation)
+fun <R> CoroutineScope.executeAsyncTask(
+    onPreExecute: () -> Unit,
+    doInBackground: () -> R,
+    onPostExecute: (R) -> Unit
+) = launch {
+    onPreExecute()
+    val result = withContext(Dispatchers.IO) {
+        doInBackground()
     }
+    onPostExecute(result)
 }
 
-fun View.viewEnterFromRight(context: Context) {
-    val animation = AnimationUtils.loadAnimation(context, R.anim.enter_from_right)
-    this.apply {
-        isVisible = true
-        startAnimation(animation)
-    }
+fun hashString(input: String, algorithm: String): String {
+    return MessageDigest
+        .getInstance(algorithm)
+        .digest(input.toByteArray())
+        .fold("", { str, it -> str + "%02x".format(it) })
 }
 
-fun View.viewExitToLeft(context: Context) {
-    val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_left)
-    this.apply {
-        startAnimation(animation)
-        isVisible = false
-    }
+fun String.md5(): String {
+    return hashString(this, "MD5")
 }
 
-fun View.viewExitToRight(context: Context) {
-    val animation = AnimationUtils.loadAnimation(context, R.anim.exit_to_right)
-    this.apply {
-        startAnimation(animation)
-        isVisible = false
+fun hashBytes(input: ByteArray, algorithm: String): String {
+    return MessageDigest
+        .getInstance(algorithm)
+        .digest(input)
+        .fold("", { str, it -> str + "%02x".format(it) })
+}
+
+fun ByteArray.md5(): String {
+    return hashBytes(this, "MD5")
+}
+
+fun String.getInitials(): String {
+    val initials = StringBuilder()
+    this.split(" ").forEach {
+        if (it.isNotEmpty()) initials.append("${it[0].toUpperCase()}.")
     }
+    return initials.toString()
 }

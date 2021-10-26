@@ -5,9 +5,8 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import nl.tudelft.valuetransfer.sqldelight.Database
@@ -29,7 +28,9 @@ class IdentityStore(context: Context) {
         personalNumber: Long?,
         documentNumber: String?,
         added: Long,
-        modified: Long
+        modified: Long,
+        verified: Long,
+        dateOfExpiry: Long?
         ->
         Identity(
             id,
@@ -42,7 +43,9 @@ class IdentityStore(context: Context) {
                 placeOfBirth!!,
                 nationality!!,
                 personalNumber!!,
-                documentNumber!!
+                documentNumber!!,
+                verified == 1L,
+                if (dateOfExpiry == null) Date() else Date(dateOfExpiry)
             ),
             Date(added),
             Date(modified)
@@ -81,19 +84,12 @@ class IdentityStore(context: Context) {
         return true
     }
 
+    fun isVerified(): Boolean {
+        return database.dbIdentityQueries.isVerified().executeAsOneOrNull() == 1L
+    }
+
     fun getIdentity(): Identity? {
         return database.dbIdentityQueries.getIdentity(identityMapper).executeAsOneOrNull()
-    }
-
-    fun getIdentityByPublicKey(publicKey: PublicKey): Flow<List<Identity>> {
-        val publicKeyBin = publicKey.keyToBin()
-        return database.dbIdentityQueries.getIdentityByPublicKey(publicKeyBin, identityMapper)
-            .asFlow().mapToList()
-    }
-
-    fun getIdentityByID(ID: String): Flow<List<Identity>> {
-        return database.dbIdentityQueries.getIdentityByID(ID, identityMapper)
-            .asFlow().mapToList()
     }
 
     fun addIdentity(identity: Identity) {
@@ -109,7 +105,9 @@ class IdentityStore(context: Context) {
             identity.content.personalNumber,
             identity.content.documentNumber,
             identity.added.time,
-            identity.modified.time
+            identity.modified.time,
+            if (identity.content.verified) 1L else 0L,
+            identity.content.dateOfExpiry.time
         )
     }
 
@@ -125,12 +123,14 @@ class IdentityStore(context: Context) {
             identity.content.personalNumber,
             identity.content.documentNumber,
             Date().time,
+            if (identity.content.verified) 1L else 0L,
+            identity.content.dateOfExpiry.time,
             identity.id
         )
     }
 
-    fun deleteIdentity(identity: Identity) {
-        database.dbIdentityQueries.deleteIdentity(identity.id)
+    fun deleteIdentity() {
+        database.dbIdentityQueries.deleteIdentity()
     }
 
     fun createAttributesTable() {
@@ -181,8 +181,8 @@ class IdentityStore(context: Context) {
             return instance
         }
 
-        const val GENDER_MALE = "Male"
-        const val GENDER_FEMALE = "Female"
-        const val GENDER_NEUTRAL = "Neutral"
+        const val GENDER_MALE = "M"
+        const val GENDER_FEMALE = "F"
+        const val GENDER_NEUTRAL = "X"
     }
 }

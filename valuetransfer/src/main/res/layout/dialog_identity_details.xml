@@ -127,25 +127,41 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/text_place_of_birth"
+                    android:text="@string/text_date_of_birth"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
                     android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etPlaceOfBirth"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapWords"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etDateOfBirth"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:focusable="false"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -160,25 +176,42 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/text_date_of_birth"
+                    android:text="@string/text_date_of_expiry"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
                     android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etDateOfBirth"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:focusable="false"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:layout_height="40dp">
+
+                    <EditText
+                        android:id="@+id/etDateOfExpiry"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:focusable="false"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -210,18 +243,33 @@
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etNationality"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapWords"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etNationality"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:inputType="textCapWords"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -314,18 +362,35 @@
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etPersonalNumber"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:inputType="number"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:layout_height="40dp">
+
+                    <EditText
+                        android:id="@+id/etPersonalNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:inputType="number"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -348,18 +413,34 @@
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etDocumentNumber"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapCharacters"
-                    android:textSize="14sp"
-                    android:textColor="@color/black" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etDocumentNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:inputType="textCapCharacters"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -374,9 +455,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/clSaveIdentity"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
-        tools:visibility="visible">
+        app:layout_constraintStart_toStartOf="parent">
 
         <Button
             android:id="@+id/btnCancel"

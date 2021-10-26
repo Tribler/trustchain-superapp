@@ -4,9 +4,11 @@ import android.content.Context
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
 import java.util.*
 
 class IdentityCommunity(
@@ -31,6 +33,14 @@ class IdentityCommunity(
         return store.hasIdentity()
     }
 
+    fun isVerified(): Boolean {
+        return store.isVerified()
+    }
+
+    fun addIdentity(identity: Identity) {
+        store.addIdentity(identity)
+    }
+
     fun createIdentity(
         givenNames: String,
         surname: String,
@@ -39,31 +49,38 @@ class IdentityCommunity(
         nationality: String,
         gender: String,
         personalNumber: Long,
-        documentNumber: String
+        documentNumber: String,
+        verified: Boolean,
+        dateOfExpiry: Long,
     ): Identity {
         val id = UUID.randomUUID().toString()
-
-        val content = PersonalIdentity(
-            givenNames,
-            surname,
-            gender,
-            Date(dateOfBirth),
-            placeOfBirth,
-            nationality,
-            personalNumber,
-            documentNumber
-        )
 
         return Identity(
             id = id,
             publicKey = myPeer.publicKey,
-            content = content,
+            content = PersonalIdentity(
+                givenNames,
+                surname,
+                gender,
+                Date(dateOfBirth),
+                placeOfBirth,
+                nationality,
+                personalNumber,
+                documentNumber,
+                verified,
+                Date(dateOfExpiry)
+            ),
             added = Date(),
             modified = Date()
         )
     }
 
-    fun createAttribute(name: String, value: String): IdentityAttribute {
+    fun deleteIdentity() {
+        deleteAllAttributes()
+        store.deleteIdentity()
+    }
+
+    fun createIdentityAttribute(name: String, value: String): IdentityAttribute {
         val id = UUID.randomUUID().toString()
 
         return IdentityAttribute(
@@ -84,8 +101,25 @@ class IdentityCommunity(
         }
     }
 
+    fun deleteAllAttributes() {
+        store.deleteAllAttributes()
+    }
+
     fun deleteDatabase(context: Context) {
         context.deleteDatabase("identities-vt.db")
+    }
+
+    fun getIdentityInfo(imageHash: String?): IdentityInfo? {
+        if (!hasIdentity()) {
+            return null
+        }
+
+        return IdentityInfo(
+            getIdentity()?.content?.givenNames?.getInitials(),
+            getIdentity()?.content?.surname,
+            isVerified(),
+            imageHash
+        )
     }
 
     class Factory(

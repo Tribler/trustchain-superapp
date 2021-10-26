@@ -99,6 +99,12 @@
             android:launchMode="singleTop" />
 
         <activity
+            android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+
+        <activity
             android:name="com.example.musicdao.MusicService"
             android:label="Music app"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
