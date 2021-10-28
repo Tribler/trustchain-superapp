@@ -161,10 +161,12 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         }
     }
 
+    /**
+     * Fetch NFC device status and apply to views
+     */
     private fun getNFCDeviceStatus() {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(parentActivity)
         nfcSupported = nfcAdapter != null
-//        nfcSupported = false
         nfcEnabled = nfcSupported && nfcAdapter?.isEnabled == true
 
         dialogView.findViewById<LinearLayout>(R.id.llNFCSupported).isVisible = nfcSupported
@@ -191,6 +193,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         startImportingButton.isVisible = if (nfcSupported) nfcEnabled else true
     }
 
+    /**
+     * Open device settings to enable NFC
+     */
     private fun openNFCSettings() {
         val intent = Intent().apply {
             when {
@@ -209,12 +214,18 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         startActivity(intent)
     }
 
+    /**
+     * Dismiss dialog to initial state
+     */
     private fun dismissDialog() {
         passportHandler.deactivateNFCAdapter()
         passportHandler.unsubscribe()
         dialog?.dismiss()
     }
 
+    /**
+     * Start the scan of the document, based on selected document
+     */
     private fun startPassportScan(type: String) {
         passportHandler.setDocumentType(type)
 
@@ -223,63 +234,69 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             PassportHandler.DOCUMENT_TYPE_ID_CARD -> scanIDCardSelected.viewFadeIn(requireContext(), 500)
         }
 
-        Handler().postDelayed({
-            passportHandler.startPassportScanActivity(this, nfcSupported)
-        }, 500)
+        Handler().postDelayed(
+            {
+                passportHandler.startPassportScanActivity(this, nfcSupported)
+            },
+            500
+        )
 
-        Handler().postDelayed({
-            initScanView()
-        }, 1000)
+        Handler().postDelayed(
+            {
+                initScanView()
+            },
+            1000
+        )
     }
 
-    private fun readGoBack() {
-        passportHandler.init()
-        initScanView()
-        readView.exitEnterView(requireContext(), scanView, false)
-    }
+    /**
+     * Launch NFC scan as async task
+     */
+    private fun launchNFCScan() = lifecycleScope.executeAsyncTask(
+        onPreExecute = {
+            Log.d("VTLOG", "LAUNCHED NFC SCAN")
+            startReadingView()
+        },
+        doInBackground = {
+            passportHandler.startNFCReader()
+        },
+        onPostExecute = { result ->
+            if (result is EDocument && result.personDetails != null && result.documentType != null) {
+                this.eDocument = result
 
-    private fun confirmView() {
-        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.ENGLISH)
+                endReadingView(true)
 
-        eDocument.let { eDoc ->
-            if (eDoc!!.personDetails == null || eDoc.documentType == null) return
+                readingFinishedSuccessImage.viewFadeIn(requireContext(), 1000)
 
-            eDoc.personDetails?.let { pDetails ->
-                dialogView.findViewById<CardView>(R.id.cvConfirmIdentityImage).isVisible = pDetails.faceImage != null
-                dialogView.findViewById<ImageView>(R.id.ivIdentityFaceImage).setImageBitmap(pDetails.faceImage)
-
-                dialogView.findViewById<TextView>(R.id.tvIDFullName).text = StringBuilder()
-                    .append(pDetails.name)
-                    .append(" ")
-                    .append(pDetails.surname)
-                dialogView.findViewById<TextView>(R.id.tvIDPersonalNumber).text = pDetails.personalNumber
-                dialogView.findViewById<TextView>(R.id.tvIDGender).text = pDetails.gender
-                dialogView.findViewById<TextView>(R.id.tvIDDateOfBirth).text = dateFormat.format(pDetails.dateOfBirth)
-                dialogView.findViewById<TextView>(R.id.tvIDDateOfExpiry).text = dateFormat.format(pDetails.dateOfExpiry)
-                dialogView.findViewById<TextView>(R.id.tvIDDocumentNumber).text = pDetails.serialNumber
-                dialogView.findViewById<TextView>(R.id.tvIDNationality).text = pDetails.nationality
-                dialogView.findViewById<TextView>(R.id.tvIDIssuer).text = pDetails.issuerAuthority
+                passportHandler.deactivateNFCAdapter()
+                passportHandler.unsubscribe()
+            } else {
+                readingFailedText.text = if (result is String) result else resources.getString(R.string.text_error_passport)
+                endReadingView(false)
             }
         }
-    }
+    )
 
+    /**
+     * Create and confirm identity
+     */
     private fun confirmIdentity() {
         if (eDocument == null || eDocument!!.personDetails == null) return
 
         val identity = try {
             getIdentityCommunity().createIdentity(
-                eDocument!!.personDetails!!.name ?: "Unknown",
-                eDocument!!.personDetails!!.surname ?: "Unknown",
+                eDocument!!.personDetails!!.name.toString(),
+                eDocument!!.personDetails!!.surname.toString(),
                 "",
-                eDocument!!.personDetails!!.dateOfBirth ?: 0,
-                eDocument!!.personDetails!!.nationality ?: "Unknown",
+                eDocument!!.personDetails!!.dateOfBirth!!.toLong(),
+                eDocument!!.personDetails!!.nationality.toString(),
                 eDocument!!.personDetails!!.gender!!.substring(0, 1),
                 eDocument!!.personDetails!!.personalNumber!!.toLong(),
-                eDocument!!.personDetails!!.serialNumber ?: "Unknown",
+                eDocument!!.personDetails!!.serialNumber.toString(),
                 nfcSupported,
                 eDocument!!.personDetails!!.dateOfExpiry ?: 0
             )
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.d("VTLOG", "IDENTITY CREATION FAILED")
 
@@ -308,17 +325,6 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
                     getIdentityCommunity().addIdentity(identity)
                     eDocument!!.personDetails!!.faceImage?.let { bitmap ->
                         parentActivity.appPreferences().setIdentityFace(encodeImage(bitmap))
-
-////                        val imageBytes = ContactImage.imageToBytes(bitmap)
-//
-////                        imageBytes?.let {
-//                            parentActivity.appPreferences().setIdentityFace(
-////                            ImageUtil.encodeImage(it)
-////                                ContactImage.encodeImage(it)
-////                                encodeBytes(imageBytes)
-//                                encodeImage(bitmap)
-//                            )
-////                        }
                     }
                     bottomSheetDialog.dismiss()
 
@@ -336,12 +342,6 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             getIdentityCommunity().addIdentity(identity)
             eDocument!!.personDetails!!.faceImage?.let { bitmap ->
                 parentActivity.appPreferences().setIdentityFace(encodeImage(bitmap))
-////                encodeImage(it)?.let { it1 ->
-//                    parentActivity.appPreferences().setIdentityFace(
-//                        encodeImage(it)
-//            //                    ImageUtil.encodeImage(it)
-//                    )
-////                }
             }
             bottomSheetDialog.dismiss()
 
@@ -349,54 +349,17 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         }
     }
 
-    override fun onReceive(type: String, data: Any?) {
-        Log.d("VTLOG", "ON RECEIVE $type")
-        when (type) {
-            RECEIVE_TYPE_NFC -> launchNFCScan()
-        }
-    }
-
-//    override fun onError(type: String, data: Any?) {
-//        Log.d("VTLOG", "ON ERROR $type")
-//
-//        when (type) {
-//            ERROR_TYPE_NFC -> {
-//                if (data != null && data is String) {
-//                    readingErrorText.append(data)
-//                } else {
-//                    readingErrorText.text = "An error occurred, please scan again or go back and start over again"
-//                }
-//            }
-//        }
-//    }
-
-//    private fun captureResultReceived(mrzInfo: MRZInfo) {
-//        passportHandler.activateNFCAdapter()
-//        passportHandler.subscribe(this)
-//
-//        passportHandler.setBasicAuthenticationKey(
-//            mrzInfo.documentNumber,
-//            mrzInfo.dateOfBirth,
-//            mrzInfo.dateOfExpiry
-//        )
-//
-//        initReadingView()
-//        scanView.exitEnterView(requireContext(), readView)
-//    }
-
-//    private fun startReadingDocument(tag: IsoDep) {
-//        Log.d("VTLOG", "INCOMING DATA TAG: $tag")
-//
-//        if (passportHandler.getNFCAdapter() == null) return
-//
-//        launchNFCScan()
-//    }
-
+    /**
+     * Init scan view
+     */
     private fun initScanView() {
         scanPassportSelected.isVisible = false
         scanIDCardSelected.isVisible = false
     }
 
+    /**
+     * Init reading view
+     */
     private fun initReadingView() {
         eDocument = null
 
@@ -414,6 +377,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         readContinueButton.isVisible = false
     }
 
+    /**
+     * Change reading view after it started
+     */
     private fun startReadingView() {
         readingStartImage.isVisible = false
         readingSpinner.isVisible = true
@@ -429,6 +395,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         readContinueButton.isVisible = false
     }
 
+    /**
+     * Change reading view after it ended reading
+     */
     private fun endReadingView(success: Boolean) {
         readingStartImage.isVisible = false
         readingSpinner.isVisible = false
@@ -443,30 +412,52 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
         readContinueButton.isVisible = success
     }
 
-    private fun launchNFCScan() = lifecycleScope.executeAsyncTask(
-        onPreExecute = {
-            Log.d("VTLOG", "LAUNCHED NFC SCAN")
-            startReadingView()
-        },
-        doInBackground = {
-            passportHandler.startNFCReader()
-        },
-        onPostExecute = { result ->
-            if (result is EDocument && result.personDetails != null && result.documentType != null) {
-                this.eDocument = result
+    /**
+     * Return from read view to scan view
+     */
+    private fun readGoBack() {
+        passportHandler.init()
+        initScanView()
+        readView.exitEnterView(requireContext(), scanView, false)
+    }
 
-                endReadingView(true)
+    /**
+     * Init confirm view
+     */
+    private fun confirmView() {
+        val dateFormat = SimpleDateFormat("MMMM dd, yyyy", Locale.ENGLISH)
 
-                readingFinishedSuccessImage.viewFadeIn(requireContext(), 1000)
+        eDocument.let { eDoc ->
+            if (eDoc!!.personDetails == null || eDoc.documentType == null) return
 
-                passportHandler.deactivateNFCAdapter()
-                passportHandler.unsubscribe()
-            } else {
-                readingFailedText.text = if (result is String) result else resources.getString(R.string.text_error_passport)
-                endReadingView(false)
+            eDoc.personDetails?.let { pDetails ->
+                dialogView.findViewById<CardView>(R.id.cvConfirmIdentityImage).isVisible = pDetails.faceImage != null
+                dialogView.findViewById<ImageView>(R.id.ivIdentityFaceImage).setImageBitmap(pDetails.faceImage)
+
+                dialogView.findViewById<TextView>(R.id.tvIDFullName).text = StringBuilder()
+                    .append(pDetails.name)
+                    .append(" ")
+                    .append(pDetails.surname)
+                dialogView.findViewById<TextView>(R.id.tvIDPersonalNumber).text = pDetails.personalNumber
+                dialogView.findViewById<TextView>(R.id.tvIDGender).text = pDetails.gender
+                dialogView.findViewById<TextView>(R.id.tvIDDateOfBirth).text = dateFormat.format(pDetails.dateOfBirth)
+                dialogView.findViewById<TextView>(R.id.tvIDDateOfExpiry).text = dateFormat.format(pDetails.dateOfExpiry)
+                dialogView.findViewById<TextView>(R.id.tvIDDocumentNumber).text = pDetails.serialNumber
+                dialogView.findViewById<TextView>(R.id.tvIDNationality).text = pDetails.nationality
+                dialogView.findViewById<TextView>(R.id.tvIDIssuer).text = pDetails.issuerAuthority
             }
         }
-    )
+    }
+
+    /**
+     * Receive listener from NFC reader
+     */
+    override fun onReceive(type: String, data: Any?) {
+        Log.d("VTLOG", "ON RECEIVE $type")
+        when (type) {
+            RECEIVE_TYPE_NFC -> launchNFCScan()
+        }
+    }
 
     /**
      * Passport capture result is received

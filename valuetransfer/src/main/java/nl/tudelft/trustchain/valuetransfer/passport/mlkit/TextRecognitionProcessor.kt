@@ -26,7 +26,7 @@ class TextRecognitionProcessor(
     private val nfcSupported: Boolean,
     private val resultListener: ResultListener,
     private val activity: Activity
-){
+) {
     private var textRecognizer: TextRecognizer = TextRecognition.getClient()
     private lateinit var scannedTextBuffer: String
     private val shouldThrottle = AtomicBoolean(false)
@@ -110,7 +110,7 @@ class TextRecognitionProcessor(
                     lines[0].substring(15, 24).replace("O", "0").replace("<", "").trim()
                 }
                 PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[1].substring(28, 37).replace("O","0").replace("<","")
+                    lines[1].substring(28, 37).replace("O", "0").replace("<", "")
                 }
                 else -> null
             }
@@ -164,7 +164,7 @@ class TextRecognitionProcessor(
                     lines[2].split("<<")[1].replace("<", " ").trim()
                 }
                 PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(5).split("<<")[1].replace("<"," ").trim()
+                    lines[0].substring(5).split("<<")[1].replace("<", " ").trim()
                 }
                 else -> null
             }
@@ -173,7 +173,7 @@ class TextRecognitionProcessor(
                     lines[2].split("<<")[0].replace("<", " ")
                 }
                 PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-                    lines[0].substring(5).split("<<")[0].replace("<"," ")
+                    lines[0].substring(5).split("<<")[0].replace("<", " ")
                 }
                 else -> null
             }
@@ -231,7 +231,6 @@ class TextRecognitionProcessor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun filterScannedText(
         graphicOverlay: GraphicOverlay,
         feedbackText: TextView,
@@ -264,15 +263,25 @@ class TextRecognitionProcessor(
             val checkDigits: Map<String, Int> = try {
                 mapOf(
                     TYPE_DOCUMENT_NUMBER to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DOCUMENT_NUMBER, lines)!!.toInt(),
+                        TYPE_CHECK_DIGIT_DOCUMENT_NUMBER,
+                        lines
+                    )!!.toInt(),
                     TYPE_PERSONAL_NUMBER to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_PERSONAL_NUMBER, lines)!!.toInt(),
+                        TYPE_CHECK_DIGIT_PERSONAL_NUMBER,
+                        lines
+                    )!!.toInt(),
                     TYPE_DATE_OF_BIRTH to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DATE_OF_BIRTH, lines)!!.toInt(),
+                        TYPE_CHECK_DIGIT_DATE_OF_BIRTH,
+                        lines
+                    )!!.toInt(),
                     TYPE_DATE_OF_EXPIRY to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_DATE_OF_EXPIRY, lines)!!.toInt(),
+                        TYPE_CHECK_DIGIT_DATE_OF_EXPIRY,
+                        lines
+                    )!!.toInt(),
                     TYPE_COMBINED to parseMRZStringForType(
-                        TYPE_CHECK_DIGIT_COMBINED, lines)!!.toInt(),
+                        TYPE_CHECK_DIGIT_COMBINED,
+                        lines
+                    )!!.toInt(),
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -288,18 +297,18 @@ class TextRecognitionProcessor(
             val dateOfBirth = parseMRZStringForType(TYPE_DATE_OF_BIRTH, lines) ?: return
             val dateOfExpiry = parseMRZStringForType(TYPE_DATE_OF_EXPIRY, lines) ?: return
 
-            if(!digitValidation(documentNumber, checkDigits[TYPE_DOCUMENT_NUMBER]!!)) {
+            if (!digitValidation(documentNumber, checkDigits[TYPE_DOCUMENT_NUMBER]!!)) {
                 Log.d("VTLOG", "DOCUMENT NUMBER CHECK DIGIT FAILS: ${checkDigits[TYPE_DOCUMENT_NUMBER]}")
 
                 feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_doc_nr)
                 return
             }
-            if(!digitValidation(dateOfBirth, checkDigits[TYPE_DATE_OF_BIRTH]!!)) {
+            if (!digitValidation(dateOfBirth, checkDigits[TYPE_DATE_OF_BIRTH]!!)) {
                 Log.d("VTLOG", "DATE BIRTH CHECK DIGIT FAILS: ${checkDigits[TYPE_DATE_OF_BIRTH]}")
                 feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_birth)
                 return
             }
-            if(!digitValidation(dateOfExpiry, checkDigits[TYPE_DATE_OF_EXPIRY]!!)) {
+            if (!digitValidation(dateOfExpiry, checkDigits[TYPE_DATE_OF_EXPIRY]!!)) {
                 Log.d("VTLOG", "DATE EXPIRY CHECK DIGIT FAILS: ${checkDigits[TYPE_DATE_OF_EXPIRY]}")
                 feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_date_expiry)
                 return
@@ -326,24 +335,17 @@ class TextRecognitionProcessor(
                     val issuer = parseMRZStringForType(TYPE_ISSUER, lines) ?: return
                     val personalNumber =
                         parseMRZStringForType(TYPE_PERSONAL_NUMBER, lines) ?: return
-
                     val gender = parseMRZStringForType(TYPE_GENDER, lines) ?: return
                     val nationality = parseMRZStringForType(TYPE_NATIONALITY, lines) ?: return
-
                     val surname = parseMRZStringForType(TYPE_SURNAME, lines) ?: return
                     val givenNames = parseMRZStringForType(TYPE_GIVEN_NAMES, lines) ?: return
-
                     val combined = parseMRZStringForType(TYPE_COMBINED, lines) ?: return
 
-                    Log.d("VTLOG", "COMBINED: $combined")
-
-                    if(!digitValidation(personalNumber, checkDigits[TYPE_PERSONAL_NUMBER]!!)) {
-                        Log.d("VTLOG", "PERSONAL NUMBER CHECK DIGIT FAILS: ${checkDigits[TYPE_PERSONAL_NUMBER]}")
+                    if (!digitValidation(personalNumber, checkDigits[TYPE_PERSONAL_NUMBER]!!)) {
                         feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_personal_nr)
                         return
                     }
-                    if(!digitValidation(combined, checkDigits[TYPE_COMBINED]!!)) {
-                        Log.d("VTLOG", "COMBINED CHECK DIGIT FAILS: ${checkDigits[TYPE_COMBINED]}")
+                    if (!digitValidation(combined, checkDigits[TYPE_COMBINED]!!)) {
                         feedbackText.text = activity.resources.getString(R.string.text_passport_error_invalid_check_digit_combined)
                         return
                     }
@@ -380,234 +382,6 @@ class TextRecognitionProcessor(
                 finishScanning(it)
             }
         }
-
-
-//        when (documentType) {
-//            PassportHandler.DOCUMENT_TYPE_ID_CARD -> {
-//                val patternIDCardTD1Line1 = Pattern.compile(ID_CARD_TD_1_LINE_1_REGEX)
-//                val matcherIDCardTD1Line1 = patternIDCardTD1Line1.matcher(scannedTextBuffer)
-//
-//                val patternIDCardTD1Line2 = Pattern.compile(ID_CARD_TD_1_LINE_2_REGEX)
-//                val matcherIDCardTD1Line2 = patternIDCardTD1Line2.matcher(scannedTextBuffer)
-//
-//                val patternIDCardTD1Line3 = Pattern.compile(ID_CARD_TD_1_LINE_3_REGEX)
-//                val matcherIDCardTD1Line3 = patternIDCardTD1Line3.matcher(scannedTextBuffer)
-//
-//                if (matcherIDCardTD1Line1.find() && matcherIDCardTD1Line2.find() && matcherIDCardTD1Line3.find()) {
-//                    graphicOverlay.add(textGraphic)
-//
-////                    var line1 = matcherIDCardTD1Line1.group(0) ?: return
-////                    val line2 = matcherIDCardTD1Line2.group(0) ?: return
-////                    val line3 = matcherIDCardTD1Line3.group(0) ?: return
-//
-//                    val lines = listOf(
-//                        matcherIDCardTD1Line1.group(0) ?: return,
-//                        matcherIDCardTD1Line2.group(0) ?: return,
-//                        matcherIDCardTD1Line3.group(0) ?: return
-//                    )
-//
-//                    val documentNumber = parseMRZStringForType(TYPE_DOCUMENT_NUMBER, lines) ?: return
-//                    val dateOfBirthDay = parseMRZStringForType(TYPE_DATE_OF_BIRTH, lines) ?: return
-//                    val expiryDate = parseMRZStringForType(TYPE_DATE_OF_EXPIRY, lines) ?: return
-//
-////                        val documentNumber = line1.substring(5, 14).replace("O", "0")
-////                        val dateOfBirthDay = line2.substring(0, 6)
-////                        val expiryDate = line2.substring(8, 14)
-//
-//                        if (nfcSupported) {
-//                            Log.d(
-//                                "VTLOG",
-//                                "Scanned Text Buffer ID Card ->>>> \n" +
-//                                    "Doc Number: $documentNumber \n" +
-//                                    "DateOfBirth: $dateOfBirthDay \n" +
-//                                    "ExpiryDate: $expiryDate"
-//                            )
-//
-//                            buildTempMrz(
-//                                documentNumber,
-//                                dateOfBirthDay,
-//                                expiryDate
-//                            )
-//                        } else {
-//                            val documentCode = parseMRZStringForType(TYPE_DOCUMENT_CODE, lines) ?: return
-//                            val issuer = parseMRZStringForType(TYPE_ISSUER, lines) ?: return
-//                            val personalNumber = parseMRZStringForType(TYPE_PERSONAL_NUMBER, lines) ?: return
-//
-//                            val gender = parseMRZStringForType(TYPE_GENDER, lines) ?: return
-//                            val nationality = parseMRZStringForType(TYPE_NATIONALITY, lines) ?: return
-//
-//                            val surname = parseMRZStringForType(TYPE_SURNAME, lines) ?: return
-//                            val givenNames = parseMRZStringForType(TYPE_GIVEN_NAMES, lines) ?: return
-//
-////                            val documentCode = line1.substring(0, 1)
-////                            val issuer = line1.substring(2, 5)
-////                            val personalNumber = line1.substring(15, 24).replace("O", "0").replace("<", "").trim()
-////
-////                            val gender = line2.substring(7, 8)
-////                            val nationality = line2.substring(15, 18)
-////
-////                            Log.d("VTLOG", line3)
-////                            val nameArray = line3.split("<<")
-////                            val surname = nameArray[0]
-//////                                .replace("<", " ")
-////                            val givenNames = nameArray[1].replace("<", " ").trim()
-//
-//                            Log.d(
-//                                "VTLOG",
-//                                "Scanned Text Buffer ID CARD ->>>> \n" +
-//                                    " Document Code: $documentCode \n" +
-//                                    " Given Names: $givenNames \n" +
-//                                    " Surname: $surname \n" +
-//                                    " DateOfBirth: $dateOfBirthDay \n" +
-//                                    " ExpiryDate: $expiryDate \n" +
-//                                    " Personal Number: $personalNumber \n" +
-//                                    " Document Number: $documentNumber \n" +
-//                                    " Gender: $gender \n" +
-//                                    " Nationality: $nationality \n" +
-//                                    " Issuer: $issuer"
-//                            )
-//
-//                            buildTempMrzComplete(
-//                                documentCode,
-//                                givenNames,
-//                                surname,
-//                                dateOfBirthDay,
-//                                expiryDate,
-//                                personalNumber,
-//                                documentNumber,
-//                                gender,
-//                                nationality,
-//                                issuer
-//                            )
-//                        }?.let {
-//                            finishScanning(it)
-//                        }
-////                    }
-//                }
-//            }
-//            PassportHandler.DOCUMENT_TYPE_PASSPORT -> {
-//                val patternPassportTD3Line1 = Pattern.compile(PASSPORT_TD_3_LINE_1_REGEX)
-//                val matcherPassportTD3Line1 = patternPassportTD3Line1.matcher(scannedTextBuffer)
-//
-//                val patternPassportTD3Line2 = Pattern.compile(PASSPORT_TD_3_LINE_2_REGEX)
-//                val matcherPassportTD3Line2 = patternPassportTD3Line2.matcher(scannedTextBuffer)
-//
-//                if (matcherPassportTD3Line1.find() && matcherPassportTD3Line2.find()) {
-//                    graphicOverlay.add(textGraphic)
-//
-////                    val line1 = matcherPassportTD3Line1.group(0) ?: return
-////                    val line2 = matcherPassportTD3Line2.group(0) ?: return
-//
-//                    val lines = listOf(
-//                        matcherPassportTD3Line1.group(0) ?: return,
-//                        matcherPassportTD3Line2.group(0) ?: return
-//                    )
-//
-//                    val checkDigits: Map<String, Int> = try {
-//                        mapOf(
-//                            TYPE_DOCUMENT_NUMBER to parseMRZStringForType(
-//                                TYPE_CHECK_DIGIT_DOCUMENT_NUMBER, lines)!!.toInt(),
-//                            TYPE_DATE_OF_BIRTH to parseMRZStringForType(
-//                                TYPE_CHECK_DIGIT_DATE_OF_BIRTH, lines)!!.toInt(),
-//                            TYPE_DATE_OF_EXPIRY to parseMRZStringForType(
-//                                TYPE_CHECK_DIGIT_DATE_OF_EXPIRY, lines)!!.toInt(),
-//                            TYPE_PERSONAL_NUMBER to parseMRZStringForType(
-//                                TYPE_CHECK_DIGIT_PERSONAL_NUMBER, lines)!!.toInt(),
-//                            TYPE_COMBINED_PASSPORT to parseMRZStringForType(
-//                                TYPE_CHECK_DIGIT_COMBINED, lines)!!.toInt(),
-//                        )
-//                    } catch (e: Exception) {
-//                        e.printStackTrace()
-//                        Log.d("VTLOG", "CHECK DIGIT IS NOT A DIGIT")
-//                        return
-//                    }
-//
-//                    val documentNumber = parseMRZStringForType(TYPE_DOCUMENT_NUMBER, lines) ?: return
-//                    val dateOfBirthDay = parseMRZStringForType(TYPE_DATE_OF_BIRTH, lines) ?: return
-//                    val expiryDate = parseMRZStringForType(TYPE_DATE_OF_EXPIRY, lines) ?: return
-//
-////                    val documentNumber = line2.substring(0, 9).replace("O", "0")
-////                    val dateOfBirthDay = line2.substring(13, 19)
-////                    val expiryDate = line2.substring(21, 27)
-//
-//                    if (!digitValidation(documentNumber, checkDigits[TYPE_DOCUMENT_NUMBER]!!)) return
-//                    if (!digitValidation(dateOfBirthDay, checkDigits[TYPE_DATE_OF_BIRTH]!!)) return
-//                    if (!digitValidation(expiryDate, checkDigits[TYPE_DATE_OF_EXPIRY]!!)) return
-//
-//
-//                    if (nfcSupported) {
-//                        Log.d(
-//                            "VTLOG",
-//                            "Scanned Text Buffer Passport ->>>> \n" +
-//                                " Document Number: $documentNumber \n" +
-//                                " DateOfBirth: $dateOfBirthDay \n" +
-//                                " ExpiryDate: $expiryDate"
-//                        )
-//                        buildTempMrz(
-//                            documentNumber,
-//                            dateOfBirthDay,
-//                            expiryDate
-//                        )
-//                    } else {
-//                        val documentCode = parseMRZStringForType(TYPE_DOCUMENT_CODE, lines) ?: return
-//                        val issuer = parseMRZStringForType(TYPE_ISSUER, lines) ?: return
-//
-//                        val surname = parseMRZStringForType(TYPE_SURNAME, lines) ?: return
-//                        val givenNames = parseMRZStringForType(TYPE_GIVEN_NAMES, lines) ?: return
-//
-//                        val nationality = parseMRZStringForType(TYPE_NATIONALITY, lines) ?: return
-//                        val gender = parseMRZStringForType(TYPE_GENDER, lines) ?: return
-//                        val personalNumber = parseMRZStringForType(TYPE_PERSONAL_NUMBER, lines) ?: return
-//
-//                        val combined = parseMRZStringForType(TYPE_COMBINED_PASSPORT, lines) ?: return
-//
-////                        val documentCode = line1.substring(0, 1)
-////                        val issuer = line1.substring(2, 5)
-////                        val names = line1.substring(5)
-////                        val nameArray = names.split("<<")
-////                        val surname = nameArray[0].replace("<", " ")
-////                        val givenNames = nameArray[1].replace("<", " ").trim()
-////
-////                        val nationality = line2.substring(10, 13)
-////                        val gender = line2.substring(20, 21)
-////                        val personalNumber = line2.substring(28, 37).replace("O","0").replace("<","")
-//
-//                        if (!digitValidation(personalNumber, checkDigits[TYPE_PERSONAL_NUMBER]!!)) return
-//                        if (!digitValidation(combined, checkDigits[TYPE_COMBINED_PASSPORT]!!)) return
-//
-//                        Log.d(
-//                            "VTLOG",
-//                            "Scanned Text Buffer Passport ->>>> \n" +
-//                                " Document Code: $documentCode \n" +
-//                                " Given Names: $givenNames \n" +
-//                                " Surname: $surname \n" +
-//                                " DateOfBirth: $dateOfBirthDay \n" +
-//                                " ExpiryDate: $expiryDate \n" +
-//                                " Personal Number: $personalNumber \n" +
-//                                " Document Number: $documentNumber \n" +
-//                                " Gender: $gender \n" +
-//                                " Nationality: $nationality \n" +
-//                                " Issuer: $issuer"
-//                        )
-//
-//                        buildTempMrzComplete(
-//                            documentCode,
-//                            givenNames,
-//                            surname,
-//                            dateOfBirthDay,
-//                            expiryDate,
-//                            personalNumber,
-//                            documentNumber,
-//                            gender,
-//                            nationality,
-//                            issuer
-//                        )
-//                    }?.let {
-//                        finishScanning(it)
-//                    }
-//                }
-//            }
-//        }
     }
 
     private fun detectInVisionImage(
@@ -637,8 +411,9 @@ class TextRecognitionProcessor(
                 // You want to call 'resultListener.onSuccess(mrzInfo)' without no delay
                 Handler().postDelayed({ resultListener.onSuccess(mrzInfo) }, 1000)
             }
-        } catch (exp: java.lang.Exception) {
+        } catch (e: java.lang.Exception) {
             Log.d("VTLOG", "MRZ DATA is not valid")
+            e.printStackTrace()
         }
     }
 
@@ -757,7 +532,7 @@ class TextRecognitionProcessor(
                 sum += value * digitWeights[index % 3]
             }
 
-            return sum%10 == checkDigit
+            return sum % 10 == checkDigit
         }
     }
 }

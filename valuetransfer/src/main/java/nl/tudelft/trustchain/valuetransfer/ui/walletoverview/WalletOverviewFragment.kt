@@ -96,10 +96,8 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         super.onCreate(savedInstanceState)
 
         // IDENTITY
-
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
-                parentActivity,
                 0,
                 {
                     parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
@@ -110,7 +108,6 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         )
 
         // CONTACTS
-
         adapterContacts.registerRenderer(
             ChatItemRenderer {
                 val args = Bundle().apply {
@@ -137,7 +134,7 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 resources.getString(R.string.menu_navigation_wallet_overview),
                 null
             )
-            toggleActionBar(true)
+            toggleActionBar(false)
             toggleBottomNavigation(getIdentityStore().hasIdentity())
         }
     }
@@ -165,7 +162,6 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             IdentityOnboardingDialog().show(parentFragmentManager, tag)
         }
         binding.clNoIdentity.setOnClickListener {
-//            IdentityDetailsDialog().show(parentFragmentManager, tag)
             IdentityOnboardingDialog().show(parentFragmentManager, tag)
         }
 
@@ -181,7 +177,6 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         }
 
         // EXCHANGE
-
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
             Observer {
@@ -269,69 +264,49 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
+            QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+                ?.let { result ->
+                    val obj = JSONObject(result)
 
-//            Log.d("VTLOG", "ACTIVITY RESULT RECEIVED FOR $requestCode")
-//            if (requestCode == IdentityCommunity.REQUEST_CODE_PASSPORT_SCAN) {
-//                Log.d("VTLOG", "ACTIVITY RESULT RECEIVED FOR PASSPORT")
-//
-//                if (data != null) {
-//                    val info: MRZInfo = data.getSerializableExtra(IdentityCommunity.MRZ_RESULT) as MRZInfo
-//
-//                    Log.d("VTLOG", info.documentNumber)
-//                }
-////                PassportHandler(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let {
-////
-////                    it
-////
-////                    val mrzInfo: MRZInfo = data?.getSerializableExtra(PassportHandler.MRZ_RESULT) as MRZInfo
-////
-////                    Log.d("VTLOG", mrzInfo.documentNumber)
-////                }
-//            } else {
-                QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
-                    ?.let { result ->
-                        val obj = JSONObject(result)
-
-                        when (scanIntent) {
-                            DEPOSIT_INTENT -> {
-                                if (obj.has(QRScanController.KEY_AMOUNT)) {
-                                    parentActivity.displaySnackbar(
-                                        requireContext(),
-                                        resources.getString(R.string.snackbar_exchange_scan_buy_not_sell),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
-                                        isShort = false
-                                    )
-                                    return
-                                }
-                                getQRScanController().exchangeMoney(obj, true)
+                    when (scanIntent) {
+                        DEPOSIT_INTENT -> {
+                            if (obj.has(QRScanController.KEY_AMOUNT)) {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_buy_not_sell),
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
+                                    isShort = false
+                                )
+                                return
                             }
-                            WITHDRAW_INTENT -> {
-                                if (!obj.has(QRScanController.KEY_AMOUNT)) {
-                                    parentActivity.displaySnackbar(
-                                        requireContext(),
-                                        resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
-                                        isShort = false
-                                    )
-                                    return
-                                }
-                                getQRScanController().exchangeMoney(obj, false)
+                            getQRScanController().exchangeMoney(obj, true)
+                        }
+                        WITHDRAW_INTENT -> {
+                            if (!obj.has(QRScanController.KEY_AMOUNT)) {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
+                                    isShort = false
+                                )
+                                return
                             }
-                            TRANSFER_INTENT -> {
-                                if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
-                                    parentActivity.displaySnackbar(
-                                        requireContext(),
-                                        resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
-                                        isShort = false
-                                    )
-                                    return
-                                }
-                                getQRScanController().transferMoney(obj)
+                            getQRScanController().exchangeMoney(obj, false)
+                        }
+                        TRANSFER_INTENT -> {
+                            if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell),
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
+                                    isShort = false
+                                )
+                                return
                             }
+                            getQRScanController().transferMoney(obj)
                         }
                     }
-//            }
+                }
         }
     }
 
@@ -351,21 +326,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     }
 
     private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
-        val bitmap = imageString?.let { decodeImage(it) }
-//        val bitmap = if (imageString != null) {
-//            try {
-//                val decodedImage = ContactImage.decodeImage(imageString)
-//                ContactImage.bytesToImage(decodedImage)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                null
-//            }
-//        } else null
-
         return identities.mapIndexed { _, identity ->
             IdentityItem(
                 identity,
-                bitmap
+                imageString?.let { decodeImage(it) }
             )
         }
     }

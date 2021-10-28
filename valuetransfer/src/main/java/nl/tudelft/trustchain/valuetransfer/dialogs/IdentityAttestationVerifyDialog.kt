@@ -68,12 +68,15 @@ class IdentityAttestationVerifyDialog(
                     signature,
                     defaultCryptoProvider.keyFromPublicBin(authorityKey)
                 ).let { result ->
-                    Handler().postDelayed({
-                        loadingSpinner.isVisible = false
+                    Handler().postDelayed(
+                        {
+                            loadingSpinner.isVisible = false
 
-                        IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
-                        bottomSheetDialog.dismiss()
-                    }, 1000)
+                            IdentityAttestationVerificationResultDialog(result).show(parentFragmentManager, tag)
+                            bottomSheetDialog.dismiss()
+                        },
+                        1000
+                    )
                 }
             }
 

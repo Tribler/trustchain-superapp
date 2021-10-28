@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.view.menu.MenuBuilder

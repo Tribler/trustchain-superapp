@@ -45,17 +45,20 @@ class QRCodeDialog(
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
-            Handler().postDelayed({
-                view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
-                view.findViewById<ImageView>(R.id.ivQRCode).setImageBitmap(
-                    createBitmap(
-                        requireContext(),
-                        data,
-                        R.color.black,
-                        R.color.light_gray
+            Handler().postDelayed(
+                {
+                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
+                    view.findViewById<ImageView>(R.id.ivQRCode).setImageBitmap(
+                        createBitmap(
+                            requireContext(),
+                            data,
+                            R.color.black,
+                            R.color.light_gray
+                        )
                     )
-                )
-            }, 100)
+                },
+                100
+            )
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))

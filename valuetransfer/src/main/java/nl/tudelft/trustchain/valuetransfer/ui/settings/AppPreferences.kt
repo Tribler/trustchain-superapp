@@ -3,11 +3,9 @@ package nl.tudelft.trustchain.valuetransfer.ui.settings
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import kotlinx.coroutines.flow.Flow
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.util.md5
-import java.security.MessageDigest
 
 class AppPreferences(
     private val parentActivity: ValueTransferMainActivity
@@ -89,6 +87,5 @@ class AppPreferences(
         private fun setThemeSystem() {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
-
     }
 }

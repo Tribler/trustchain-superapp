@@ -32,11 +32,6 @@ data class ContactImage(
         put(IMAGE_HASH, imageHash)
         put(IMAGE, image?.let { imageBytes(it) })
     }.toString().toByteArray()
-//
-//    val encodedImage = image?.let { imageBytes(it) }
-////        val encodedImage = if (image != null) {
-////            imageToBytes(image)?.let { encodeImage(it) }
-////        } else null
 
     companion object : Deserializable<ContactImage> {
         private const val PUBLIC_KEY = "public_key"
@@ -47,60 +42,15 @@ data class ContactImage(
             val offsetBuffer = buffer.copyOfRange(0, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
             val imageEncoded = json.getString(IMAGE)
-//            val image = if (imageEncoded.isNotBlank()) bytesToImage(decodeImage(imageEncoded)) else null
 
-            return Pair(ContactImage(
-                defaultCryptoProvider.keyFromPublicBin(json.getString(PUBLIC_KEY).hexToBytes()),
-                json.getString(IMAGE_HASH),
-                if (imageEncoded.isNotBlank()) decodeImage(imageEncoded) else null
-            ), 0)
+            return Pair(
+                ContactImage(
+                    defaultCryptoProvider.keyFromPublicBin(json.getString(PUBLIC_KEY).hexToBytes()),
+                    json.getString(IMAGE_HASH),
+                    if (imageEncoded.isNotBlank()) decodeImage(imageEncoded) else null
+                ),
+                0
+            )
         }
-
-//        fun encodeImage(bytes: ByteArray): String {
-//            return Base64.encodeToString(bytes, Base64.DEFAULT)
-//        }
-//
-//        fun decodeImage(encodedString: String): ByteArray {
-//            return Base64.decode(encodedString, Base64.DEFAULT)
-//        }
-
-//        fun encodeImage(bitmap: Bitmap): String? {
-//            var encodedString: String? = null
-//            val baos = ByteArrayOutputStream()
-//            try {
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-//                val bytes = baos.toByteArray()
-//                encodedString = Base64.encodeToString(bytes, Base64.DEFAULT)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//            }
-//            return encodedString
-//        }
-
-//        fun imageToBytes(bitmap: Bitmap): ByteArray? {
-//            val baos = ByteArrayOutputStream()
-//
-//            return try {
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-//                baos.toByteArray()
-//            } catch(e: Exception) {
-//                e.printStackTrace()
-//                null
-//            }
-//        }
-
-//        fun bytesToImage(bytes: ByteArray): Bitmap? {
-//            return try {
-//                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                null
-//            }
-//        }
-
-//        fun decodeImage(decoded: String): Bitmap {
-//            val bytes = Base64.decode(decoded, Base64.DEFAULT)
-//            return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-//        }
     }
 }

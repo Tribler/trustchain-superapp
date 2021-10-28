@@ -8,6 +8,6 @@ data class EDocument(
     var documentPublicKey: PublicKey? = null
 ) {
     override fun toString(): String {
-        return "TYPE: $documentType,/nPUBLIC_KEY: ${documentPublicKey.toString()},/nPERSON_DETAILS: ${personDetails.toString()}"
+        return "TYPE: $documentType,/nPUBLIC_KEY: $documentPublicKey,/nPERSON_DETAILS: $personDetails"
     }
 }

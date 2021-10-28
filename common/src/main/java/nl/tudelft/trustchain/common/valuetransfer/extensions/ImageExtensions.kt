@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.common.valuetransfer.extensions
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
+import android.graphics.*
 import android.util.Base64
 import android.util.Log
 import java.io.ByteArrayOutputStream
@@ -26,7 +24,7 @@ fun imageBytes(bitmap: Bitmap): ByteArray? {
     return try {
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
         baos.toByteArray()
-    } catch(e: Exception) {
+    } catch (e: Exception) {
         e.printStackTrace()
         null
     }
@@ -89,8 +87,44 @@ fun Bitmap.resize(maxDimension: Float): Bitmap? {
         Log.d("VTLOG", "BITMAP HEIGHT: $height ${resized.height}")
         Log.d("VTLOG", "BITMAP SIZE IS: ${this.byteCount} ${resized?.byteCount}")
         resized
-    } catch(e: Exception) {
+    } catch (e: Exception) {
         e.printStackTrace()
         null
     }
+}
+
+/**
+ * Converts a bitmap to a squared bitmap
+ */
+fun Bitmap.toSquare(): Bitmap {
+    val side = minOf(width, height)
+
+    val xOffset = (width - side) / 2
+    val yOffset = (height - side) / 2
+
+    return Bitmap.createBitmap(this, xOffset, yOffset, side, side)
+}
+
+/**
+ * Returns a new Bitmap with provided background color and recycles the current one.
+ */
+fun Bitmap.changeBackgroundColor(color: Int): Bitmap {
+    val bitmap = Bitmap.createBitmap(width, height, config)
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(color)
+    canvas.drawBitmap(this, 0F, 0F, null)
+    recycle()
+    return bitmap
+}
+
+/**
+ * Returns a bitmap with padding
+ */
+fun Bitmap.setPadding(size: Int): Bitmap {
+    val bitmap = Bitmap.createBitmap(width + 2 * size, height + 2 * size, config)
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(Color.WHITE)
+    canvas.drawBitmap(this, size.toFloat(), size.toFloat(), null)
+
+    return bitmap
 }

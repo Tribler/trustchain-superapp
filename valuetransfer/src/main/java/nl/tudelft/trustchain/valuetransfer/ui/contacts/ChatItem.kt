@@ -18,4 +18,3 @@ data class ChatItem(
         return other is ChatItem && contact.mid == other.contact.mid
     }
 }
-

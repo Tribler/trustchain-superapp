@@ -26,18 +26,19 @@ class PeerChatStore(context: Context) {
     private val database = Database(driver)
     val contactsStore = ContactStore.getInstance(context)
 
-    private val messageMapper = { id: String,
-                                  message: String,
-                                  senderPk: ByteArray,
-                                  receipientPk: ByteArray,
-                                  outgoing: Long,
-                                  timestamp: Long,
-                                  ack: Long,
-                                  read: Long, attachmentType: String?,
-                                  attachmentSize: Long?,
-                                  attachmentContent: ByteArray?,
-                                  attachmentFetched: Long,
-                                  transaction_hash: ByteArray?
+    private val messageMapper = {
+        id: String,
+        message: String,
+        senderPk: ByteArray,
+        receipientPk: ByteArray,
+        outgoing: Long,
+        timestamp: Long,
+        ack: Long,
+        read: Long, attachmentType: String?,
+        attachmentSize: Long?,
+        attachmentContent: ByteArray?,
+        attachmentFetched: Long,
+        transaction_hash: ByteArray?
         ->
         ChatMessage(
             id,
@@ -212,9 +213,10 @@ class PeerChatStore(context: Context) {
         database.dbContactImageQueries.createContactImageTable()
     }
 
-    private val contactImageMapper = { public_key: ByteArray,
-                                       image_hash: String?,
-                                       image: ByteArray?,
+    private val contactImageMapper = {
+        public_key: ByteArray,
+        image_hash: String?,
+        image: ByteArray?,
         ->
         ContactImage(
             defaultCryptoProvider.keyFromPublicBin(public_key),
@@ -227,7 +229,11 @@ class PeerChatStore(context: Context) {
         return database.dbContactImageQueries.getAll(contactImageMapper).asFlow().mapToList()
     }
 
-    fun getContactImage(publicKey: PublicKey): Flow<ContactImage?> {
+    fun getContactImage(publicKey: PublicKey): ContactImage? {
+        return database.dbContactImageQueries.getContactImage(publicKey.keyToBin(), contactImageMapper).executeAsOneOrNull()
+    }
+
+    fun getContactImageFlow(publicKey: PublicKey): Flow<ContactImage?> {
         return database.dbContactImageQueries.getContactImage(publicKey.keyToBin(), contactImageMapper).asFlow().mapToOneOrNull()
     }
 
@@ -354,15 +360,12 @@ class PeerChatStore(context: Context) {
                     null,
                     value
                 )
-
             }
         }
     }
 
     fun setIdentityState(publicKey: PublicKey, identityInfo: IdentityInfo) {
-        val contactState = getContactState(publicKey)
-
-        if (contactState != null) {
+        if (getContactState(publicKey) != null) {
             database.dbContactStateQueries.updateContactIdentity(
                 if (identityInfo.isVerified) 1L else 0L,
                 identityInfo.imageHash,
@@ -385,10 +388,7 @@ class PeerChatStore(context: Context) {
     }
 
     fun getContactState(publicKey: PublicKey): ContactState? {
-        val contactState =
-            database.dbContactStateQueries.getOne(publicKey.keyToBin()).executeAsOneOrNull()
-
-        return if (contactState != null) {
+        return database.dbContactStateQueries.getOne(publicKey.keyToBin()).executeAsOneOrNull()?.let { contactState ->
             ContactState(
                 defaultCryptoProvider.keyFromPublicBin(contactState.public_key),
                 contactState.is_archived == 1L,
@@ -401,17 +401,18 @@ class PeerChatStore(context: Context) {
                     contactState.image_hash
                 )
             )
-        } else null
+        }
     }
 
-    private val contactStateMapper = { public_key: ByteArray,
-                                       is_archived: Long,
-                                       is_muted: Long,
-                                       is_blocked: Long,
-                                       is_verified: Long,
-                                       image_hash: String?,
-                                       initials: String?,
-                                       surname: String?
+    private val contactStateMapper = {
+        public_key: ByteArray,
+        is_archived: Long,
+        is_muted: Long,
+        is_blocked: Long,
+        is_verified: Long,
+        image_hash: String?,
+        initials: String?,
+        surname: String?
         ->
         ContactState(
             defaultCryptoProvider.keyFromPublicBin(public_key),

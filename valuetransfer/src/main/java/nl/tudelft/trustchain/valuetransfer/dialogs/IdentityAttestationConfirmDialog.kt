@@ -6,7 +6,6 @@ import android.text.Html.fromHtml
 import android.text.InputType
 import android.widget.*
 import androidx.core.content.ContextCompat
-import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior

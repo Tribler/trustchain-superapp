@@ -12,7 +12,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.valuetransfer.BuildConfig
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
@@ -182,7 +181,6 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             }
         }
         startActivity(intent)
-//        onBackPressed(false)
     }
 
     override fun initView() {

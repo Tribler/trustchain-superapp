@@ -42,12 +42,15 @@ data class IdentityInfo(
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
 
-            return Pair(IdentityInfo(
-                json.optString(IDENTITY_INFO_INITIALS),
-                json.optString(IDENTITY_INFO_SURNAME),
-                json.getBoolean(IDENTITY_INFO_VERIFIED),
-                json.optString(IDENTITY_INFO_IMAGE_HASH)
-            ), 0)
+            return Pair(
+                IdentityInfo(
+                    json.optString(IDENTITY_INFO_INITIALS),
+                    json.optString(IDENTITY_INFO_SURNAME),
+                    json.getBoolean(IDENTITY_INFO_VERIFIED),
+                    json.optString(IDENTITY_INFO_IMAGE_HASH)
+                ),
+                0
+            )
         }
     }
 }

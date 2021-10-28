@@ -24,7 +24,6 @@ class ExchangeTransactionItemRenderer(
 ) : ItemLayoutRenderer<ExchangeTransactionItem, View>(
     ExchangeTransactionItem::class.java
 ) {
-
     private val dateFormat = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.ENGLISH)
 
     override fun bindView(item: ExchangeTransactionItem, view: View) = with(view) {
@@ -144,7 +143,11 @@ class ExchangeTransactionItemRenderer(
             }
         }
 
-        transactionSenderReceiverText.text = item.transaction.sender.keyToBin().toHex()
+        transactionSenderReceiverText.text = when (item.transaction.type) {
+            TransactionRepository.BLOCK_TYPE_CREATE -> item.transaction.sender.keyToBin().toHex()
+            TransactionRepository.BLOCK_TYPE_DESTROY -> item.transaction.receiver.keyToBin().toHex()
+            else -> item.transaction.sender.keyToBin().toHex()
+        }
         transactionTypeText.text = item.transaction.type
         transactionBlockHash.text = item.transaction.block.calculateHash().toHex()
 

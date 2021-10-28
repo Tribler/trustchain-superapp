@@ -27,30 +27,17 @@ import org.jmrtd.lds.icao.*
 import org.jmrtd.lds.iso19794.FaceImageInfo
 import java.security.PublicKey
 
-@Suppress("DEPRECATION")
 class PassportHandler(
     private val activity: Activity,
 ) {
 
     private lateinit var documentType: String
-    private lateinit var basicAuthenicationKey: BACKeySpec
+    private lateinit var basicAuthenticationKey: BACKeySpec
     private var nfcAdapter: NfcAdapter? = null
     private var isoDep = MutableLiveData<IsoDep>()
-    //    private var isoDep: IsoDep? = null
     private var paceSucceeded = false
     private lateinit var passportService: PassportService
-
     private var subscriber: Fragment? = null
-
-//    private var documentType = DOCUMENT_TYPE_OTHER
-//    private lateinit var basicAuthenicationKey: BACKeySpec
-//    private var nfcAdapter: NfcAdapter? = null
-//    private var isoDep = MutableLiveData<IsoDep>()
-////    private var isoDep: IsoDep? = null
-//    private var paceSucceeded = false
-//    private lateinit var passportService: PassportService
-//
-//    private var subscriber: Fragment? = null
 
     init {
         init()
@@ -65,10 +52,16 @@ class PassportHandler(
         subscriber = null
     }
 
+    /**
+     * Subscribe fragment to handler for return of result
+     */
     fun subscribe(fragment: Fragment) {
         subscriber = fragment
     }
 
+    /**
+     * Unsubscribe fragment from handler
+     */
     fun unsubscribe() {
         subscriber = null
     }
@@ -78,7 +71,6 @@ class PassportHandler(
      */
     fun activateNFCAdapter() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(activity)
-//        isoDep = null
         isoDep.postValue(null)
     }
 
@@ -87,8 +79,6 @@ class PassportHandler(
      */
     fun deactivateNFCAdapter() {
         nfcAdapter = null
-//        isoDep = null
-//        isoDep.postValue(null)
     }
 
     /**
@@ -102,24 +92,6 @@ class PassportHandler(
      * Set the current ISODEP value
      */
     fun setIsoDep(tag: Tag) {
-        Log.d("VTLOG", "SET ISODEP: $tag")
-//        isoDep = IsoDep.get(tag)
-//
-//        Log.d("VTLOG", "ISODEP SETTED: $isoDep")
-//
-//        isoDep?.let {
-//            if (subscriber is VTDialogFragment) {
-//                (subscriber as VTDialogFragment).onReceive(
-//                    VTDialogFragment.RECEIVE_TYPE_NFC,
-//                    it
-//                )
-//            }
-//        }
-
-//        val iso = IsoDep.get(tag)
-//        iso.timeout = 20000
-//        isoDep.value = iso
-
         isoDep.value = IsoDep.get(tag)
 
         isoDep.value?.let {
@@ -132,6 +104,9 @@ class PassportHandler(
         }
     }
 
+    /**
+     * Get current ISODEP value
+     */
     fun getISODep(): IsoDep? {
         return isoDep.value
     }
@@ -154,7 +129,7 @@ class PassportHandler(
      * Set basic authentication keys
      */
     fun setBasicAuthenticationKey(documentNumber: String, dateOfBirth: String, dateOfExpiry: String) {
-        basicAuthenicationKey = BACKey(documentNumber, dateOfBirth, dateOfExpiry)
+        basicAuthenticationKey = BACKey(documentNumber, dateOfBirth, dateOfExpiry)
     }
 
     /**
@@ -204,7 +179,7 @@ class PassportHandler(
             passportService.open()
 
             Log.d("VTLOG", "PASSPORT SERVICE OPENED")
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.d("VTLOG", "PASSPORT SERVICE ERROR: ${e.localizedMessage}")
             return activity.resources.getString(R.string.text_error_passport_service)
@@ -212,23 +187,6 @@ class PassportHandler(
 
         return null
     }
-
-//    @Throws(IOException::class)
-//    fun ensureConnected() {
-////        if (isoDep == null) return
-//
-////        if (!isoDep!!.isConnected) {
-////            isoDep!!.timeout = 10000
-////        }
-//        if (!isoDep.value?.isConnected!!) {
-//            isoDep.value?.let {
-//                val iso = it
-//                iso.connect()
-//                iso.timeout = 10000
-//                isoDep.value = iso
-//            }
-//        }
-//    }
 
     fun startNFCReader(): Any? {
         paceSucceeded = false
@@ -263,48 +221,17 @@ class PassportHandler(
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.d("VTLOG", "ERROR DOCUMENT TYPE: ${e.localizedMessage}")
-//                returnError("Failed to confirm card document type. Please scan again or go back and try again.")
                 return activity.resources.getString(R.string.text_error_passport_document_type)
             }
 
-//            try {
-//                ensureConnected()
-//                eDocument.documentPublicKey = getDocumentPublicKey()
-////                docPublicKey = getDocumentPublicKey()
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                Log.d("VTLOG", "ERROR DOCUMENT PUBLIC KEY: ${e.localizedMessage}")
-//            }
-
             return eDocument
-
-//            return EDocument(
-//                docType,
-//                personDet,
-//                docPublicKey
-//            )
-
-//            return EDocument(
-//                getMRZDocumentType(),
-//                getPersonDetails(),
-//                getDocumentPublicKey()
-//            )
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.d("VTLOG", "ERROR NFC SCAN: ${e.localizedMessage}")
         }
 
         return null
     }
-
-//    private fun returnError(error: String) {
-//        if (subscriber is VTDialogFragment) {
-//            (subscriber as VTDialogFragment).onError(
-//                VTDialogFragment.ERROR_TYPE_NFC,
-//                error
-//            )
-//        }
-//    }
 
     private fun establishNFCConnection() {
         try {
@@ -318,7 +245,7 @@ class PassportHandler(
                 if (securityInfo is PACEInfo) {
                     val paceInfo: PACEInfo = securityInfo
                     passportService.doPACE(
-                        basicAuthenicationKey,
+                        basicAuthenticationKey,
                         paceInfo.objectIdentifier,
                         PACEInfo.toParameterSpec(paceInfo.parameterId),
                         null
@@ -339,10 +266,10 @@ class PassportHandler(
                 try {
                     passportService.getInputStream(PassportService.EF_COM).read()
                 } catch (e: Exception) {
-                    passportService.doBAC(basicAuthenicationKey)
+                    passportService.doBAC(basicAuthenticationKey)
                 }
             }
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
             Log.d("VTLOG", "ERROR BAC: ${e.localizedMessage}")
 
@@ -361,7 +288,6 @@ class PassportHandler(
             PassportService.EF_DG15 -> DG15File(input)
             else -> null
         }
-
     }
 
     private fun getMRZInfo(): MRZInfo {
@@ -388,24 +314,11 @@ class PassportHandler(
 
     fun getPersonDetails(): PersonDetails {
         Log.d("VTLOG", "FETCHING PERSON DETAILS FROM MRZ")
-        val mrzInfo = getMRZInfo()
-        val passportImage = getPassportImage()
 
-        return mrzToPersonDetails(mrzInfo, passportImage)
-
-//        return PersonDetails().apply {
-//            name = mrzInfo.secondaryIdentifier.replace("<", " ").trim()
-//            Log.d("VTLOG", "NAME: $name")
-//            surname = mrzInfo.primaryIdentifier.replace("<", " ").trim()
-//            personalNumber = mrzInfo.personalNumber
-//            gender = mrzInfo.gender.toString().substring(0, 1)
-//            dateOfBirth = DateUtil.convertFromMrzDateToTime(mrzInfo.dateOfBirth)
-//            dateOfExpiry = DateUtil.convertFromMrzDateToTime(mrzInfo.dateOfExpiry)
-//            serialNumber = mrzInfo.documentNumber
-//            nationality = mrzInfo.nationality
-//            issuerAuthority = mrzInfo.issuingState
-//            faceImage = passportImage
-//        }
+        return mrzToPersonDetails(
+            getMRZInfo(),
+            getPassportImage()
+        )
     }
 
     private fun getMRZDocumentType(): String {

@@ -5,7 +5,6 @@ import android.app.Dialog
 import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -59,7 +58,7 @@ class ContactInfoDialog(
     }
 
     private val contactImage: LiveData<ContactImage?> by lazy {
-        getPeerChatStore().getContactImage(publicKey).asLiveData()
+        getPeerChatStore().getContactImageFlow(publicKey).asLiveData()
     }
 
     private val publicKeyString = publicKey.keyToBin().toHex()
@@ -237,7 +236,6 @@ class ContactInfoDialog(
                     }
 
                     contactState.identityInfo?.let {
-                        Log.d("VTLOG", it.toString())
                         identityName.text = if (it.initials != null && it.surname != null) {
                             "${it.initials} ${it.surname}"
                         } else "-"

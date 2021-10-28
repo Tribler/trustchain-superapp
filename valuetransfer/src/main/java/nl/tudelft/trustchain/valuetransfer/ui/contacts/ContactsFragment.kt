@@ -94,8 +94,6 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         }.asLiveData()
     }
 
-    private var archivedChatsShown = false
-    private var blockedChatsShown = false
     private var searchFilter = ""
 
     override fun onCreateView(

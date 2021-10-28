@@ -170,7 +170,6 @@ class ExchangeTransferMoneyDialog(
                                     } else {
                                         ColorDrawable(Color.WHITE)
                                     }
-
                                 }
                             }
 
@@ -199,7 +198,6 @@ class ExchangeTransferMoneyDialog(
                                             )
                                         )
                                     }
-
                                 }
                             }
                         }
@@ -265,58 +263,61 @@ class ExchangeTransferMoneyDialog(
             transferButton.setOnClickListener {
                 transferButton.text = resources.getString(R.string.text_transferring)
 
-                Handler().postDelayed({
-                    try {
-                        // Add contact if it is isn't in your contacts and
-                        if (selectedContact != null && getContactStore().getContactFromPublicKey(
-                                selectedContact!!.publicKey
-                            ) == null
-                        ) {
-                            if (addNewContactSwitch.isChecked) {
-                                getContactStore().addContact(
-                                    selectedContact!!.publicKey,
-                                    selectedContact!!.name
-                                )
+                Handler().postDelayed(
+                    {
+                        try {
+                            // Add contact if it is isn't in your contacts and
+                            if (selectedContact != null && getContactStore().getContactFromPublicKey(
+                                    selectedContact!!.publicKey
+                                ) == null
+                            ) {
+                                if (addNewContactSwitch.isChecked) {
+                                    getContactStore().addContact(
+                                        selectedContact!!.publicKey,
+                                        selectedContact!!.name
+                                    )
+                                }
                             }
-                        }
 
-                        // Create proposal block to the recipient
-                        val block = getTransactionRepository().sendTransferProposalSync(
-                            selectedContact!!.publicKey.keyToBin(),
-                            transactionAmount
-                        )
-                        if (block == null) {
+                            // Create proposal block to the recipient
+                            val block = getTransactionRepository().sendTransferProposalSync(
+                                selectedContact!!.publicKey.keyToBin(),
+                                transactionAmount
+                            )
+                            if (block == null) {
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_insufficient_balance),
+                                    view = view.rootView,
+                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                )
+                                transferButton.text = resources.getString(R.string.text_transfer)
+                            } else {
+                                getPeerChatCommunity().sendMessageWithTransaction(
+                                    transactionMessage,
+                                    block.calculateHash(),
+                                    selectedContact!!.publicKey,
+                                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                                )
+                                parentActivity.displaySnackbar(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_transfer_of, transactionAmountView.text, selectedContact!!.name),
+                                    isShort = false
+                                )
+                                bottomSheetDialog.dismiss()
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                             parentActivity.displaySnackbar(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_insufficient_balance),
+                                resources.getString(R.string.snackbar_unexpected_error_occurred),
                                 view = view.rootView,
                                 type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
                             )
-                            transferButton.text = resources.getString(R.string.text_transfer)
-                        } else {
-                            getPeerChatCommunity().sendMessageWithTransaction(
-                                transactionMessage,
-                                block.calculateHash(),
-                                selectedContact!!.publicKey,
-                                getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
-                            )
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_transfer_of, transactionAmountView.text, selectedContact!!.name),
-                                isShort = false
-                            )
-                            bottomSheetDialog.dismiss()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        parentActivity.displaySnackbar(
-                            requireContext(),
-                            resources.getString(R.string.snackbar_unexpected_error_occurred),
-                            view = view.rootView,
-                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                        )
-                    }
-                }, 500)
+                    },
+                    500
+                )
             }
 
             requestMoneyContactButton.setOnClickListener {
@@ -329,25 +330,28 @@ class ExchangeTransferMoneyDialog(
                     selectedContact!!.publicKey
                 )
 
-                Handler().postDelayed({
-                    requestMoneyContactButton.isVisible = false
-                    getPeerChatCommunity().sendTransferRequest(
-                        transactionMessage,
-                        transferRequest,
-                        selectedContact!!.publicKey,
-                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
-                    )
-
-                    // Only show snackbar when not sent from chat
-                    if (recipient == null) {
-                        parentActivity.displaySnackbar(
-                            requireContext(),
-                            resources.getString(R.string.snackbar_transfer_request, transactionAmountView.text, selectedContact!!.name),
-                            isShort = false
+                Handler().postDelayed(
+                    {
+                        requestMoneyContactButton.isVisible = false
+                        getPeerChatCommunity().sendTransferRequest(
+                            transactionMessage,
+                            transferRequest,
+                            selectedContact!!.publicKey,
+                            getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                         )
-                    }
-                    bottomSheetDialog.dismiss()
-                }, 500)
+
+                        // Only show snackbar when not sent from chat
+                        if (recipient == null) {
+                            parentActivity.displaySnackbar(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_transfer_request, transactionAmountView.text, selectedContact!!.name),
+                                isShort = false
+                            )
+                        }
+                        bottomSheetDialog.dismiss()
+                    },
+                    500
+                )
             }
 
             requestMoneyQRButton.setOnClickListener {

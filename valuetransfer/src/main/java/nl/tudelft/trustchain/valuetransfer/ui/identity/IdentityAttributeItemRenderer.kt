@@ -62,7 +62,7 @@ class IdentityAttributeItemRenderer(
 
     private fun expandOptions(view: View, item: IdentityAttributeItem) {
         view.ivAttributeOptionsButton.isVisible = false
-        view.clAttributeOptions.viewEnterFromRight(view.context, 1000)
+        view.clAttributeOptions.viewEnterFromRight(view.context)
         isExpanded[item.attribute.name] = true
 
         Handler().postDelayed(
@@ -76,7 +76,7 @@ class IdentityAttributeItemRenderer(
     }
 
     private fun contractOptions(view: View, item: IdentityAttributeItem) {
-        view.clAttributeOptions.viewExitToRight(view.context, 1000)
+        view.clAttributeOptions.viewExitToRight(view.context)
         view.ivAttributeOptionsButton.isVisible = true
         isExpanded[item.attribute.name] = false
     }

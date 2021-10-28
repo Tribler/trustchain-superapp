@@ -29,6 +29,7 @@ public class TextGraphic extends GraphicOverlay.Graphic {
         textPaint = new Paint();
         textPaint.setColor(TEXT_COLOR);
         textPaint.setTextSize(TEXT_SIZE);
+
         // Redraw the overlay, as this graphic has been added.
         postInvalidate();
     }
@@ -38,6 +39,7 @@ public class TextGraphic extends GraphicOverlay.Graphic {
 
         textPaint.setColor(textColor);
         rectPaint.setColor(Color.alpha(0));
+
         // Redraw the overlay, as this graphic has been added.
         postInvalidate();
     }

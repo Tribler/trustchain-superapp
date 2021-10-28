@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.util.Log
-import android.view.MenuItem
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -122,7 +120,8 @@ class QRScanController : VTFragment() {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
 
             if (publicKey == getTrustChainCommunity().myPeer.publicKey) {
-                parentActivity.displaySnackbar(requireContext(),
+                parentActivity.displaySnackbar(
+                    requireContext(),
                     resources.getString(R.string.snackbar_exchange_transfer_error_self),
                     type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
                 )

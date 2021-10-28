@@ -104,7 +104,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
-                parentActivity,
                 1,
                 { identity ->
                     val map = mapOf(
@@ -114,7 +113,8 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
                     QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
                         .show(parentFragmentManager, tag)
-                }, { identity ->
+                },
+                { identity ->
                     copyToClipboard(
                         requireContext(),
                         identity.publicKey.keyToBin().toHex(),
@@ -127,7 +127,8 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                             resources.getString(R.string.text_public_key)
                         )
                     )
-                }, {
+                },
+                {
                     if (identityImage.value!!.isBlank()) {
                         identityImageIntent()
                     } else {
@@ -308,28 +309,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             ).show(parentFragmentManager, tag)
         }
 
-//        binding.ivAddAttribute.setOnClickListener {
-//            addAttribute()
-//        }
-//
-//        binding.ivAddAttestationAuthority.setOnClickListener {
-//            OptionsDialog(R.menu.identity_add_options, "Choose Option") { _, item ->
-//                when (item.itemId) {
-//                    R.id.actionAddAttestation -> addAttestation()
-//                    R.id.actionAddAuthority -> addAuthority()
-//                }
-//            }.show(parentFragmentManager, tag)
-//        }
-
-//        binding.ivAttributesInfoIcon.setOnClickListener {
-//            binding.tvAttributesInfo.isVisible = true
-//        }
-//
-//        binding.ivAttestationsInfoIcon.setOnClickListener {
-//            binding.tvAttestationInfo.isVisible = true
-//        }
-
-
         binding.tvShowIdentityAttributes.setOnClickListener {
             if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
             binding.tvAttestationInfo.isVisible = false
@@ -374,13 +353,14 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         OptionsDialog(
             R.menu.identity_options,
-            "Choose Option") { _, selectedItem ->
-                when (selectedItem.itemId) {
-                    R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(
-                        trustchain.getMyPublicKey().toHex()
-                    ).show(parentFragmentManager, tag)
-                }
-            }.show(parentFragmentManager, tag)
+            "Choose Option"
+        ) { _, selectedItem ->
+            when (selectedItem.itemId) {
+                R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(
+                    trustchain.getMyPublicKey().toHex()
+                ).show(parentFragmentManager, tag)
+            }
+        }.show(parentFragmentManager, tag)
 
         return super.onOptionsItemSelected(item)
     }
@@ -399,10 +379,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                         }
 
                         appPreferences.setIdentityFace(encodeImage(bitmap))
-
-//                        ContactImage.imageToBytes(bitmap)?.let { imageBytes ->
-//                            appPreferences.setIdentityFace(ContactImage.encodeImage(imageBytes))
-//                        }
                     }
                 }
             } else {
@@ -561,22 +537,10 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     }
 
     private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
-        val bitmap = imageString?.let { decodeImage(it) }
-
-//        val bitmap = if (imageString != null) {
-//            try {
-//                val decodedImage = ContactImage.decodeImage(imageString)
-//                ContactImage.bytesToImage(decodedImage)
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                null
-//            }
-//        } else null
-
         return identities.map { identity ->
             IdentityItem(
                 identity,
-                bitmap
+                imageString?.let { decodeImage(it) }
             )
         }
     }

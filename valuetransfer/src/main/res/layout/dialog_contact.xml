@@ -65,6 +65,7 @@
                     android:id="@+id/ivIdenticon"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:background="?attr/widgetColor"
                     android:padding="8dp"
                     tools:src="@drawable/ic_contact"
                     android:layout_gravity="center"

@@ -84,12 +84,6 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
     private fun startCameraSource() {
         if (cameraSource != null) {
             try {
-                if (preview == null) {
-                    Log.d("VTLOG", "CAMERA SOURCE PREVIEW IS NULL")
-                }
-                if (graphicOverlay == null) {
-                    Log.d("VTLOG", "CAMERA SOURCE GRAPHOVERLAY IS NULL")
-                }
                 preview?.start(cameraSource, graphicOverlay, feedbackText)
 
                 Log.d("VTLOG", "CAMERA SOURCE STARTED")

@@ -92,7 +92,6 @@ class IdentityAttributeShareDialog(
                                     } else {
                                         ColorDrawable(Color.WHITE)
                                     }
-
                                 }
                             }
 

@@ -193,6 +193,8 @@
     <string name="text_contact_chat_incoming_transfer_request_with_message">for \'%s\'</string>
     <string name="text_contact_chat_outgoing_transfer_failed">Outgoing transfer failed</string>
     <string name="text_contact_chat_incoming_transfer_unknown">"Unknown incoming transfer, ask to resend transfer"</string>
+    <string name="text_exchange_incoming_transfer_portal">Incoming transaction from EuroToken Exchange of €%s</string>
+    <string name="text_exchange_incoming_transfer_portal_of">Incoming transaction from EuroToken Exchange of €%s</string>
     <string name="text_title_identity_attributes">Identity Attributes</string>
     <string name="text_title_identity_attribute">Identity attribute</string>
     <string name="text_tooltip_identity_attributes">Identity attributes extend your official identity with shareable additional information about you</string>
@@ -281,7 +283,7 @@
     <string name="text_identity_onboarding_start_subtitle">The process of importing your identity consists of the following steps.</string>
     <string name="text_identity_onboarding_start_step_one_subtitle">Scan the machine readable zone of your document using your device camera.</string>
     <string name="text_identity_onboarding_start_step_two_subtitle">Hold your document against the back of your device to read the biometric chip. This step ensures that your identity is authentic.</string>
-    <string name="text_identity_onboarding_start_step_two_nfc_unverified">If the device does not support NFC, the identity cannot be considered legitimate.</string>
+    <string name="text_identity_onboarding_start_step_two_nfc_unverified">If the device has no NFC support, the identity cannot be considered legitimate. This means that there is less trust that the person you\'re chatting with is who he says he is.</string>
     <string name="text_identity_onboarding_start_step_three_subtitle">Confirm the imported identity and start using the application.</string>
     <string name="text_identity_onboarding_read_subtitle">Hold your document steady to the back of your phone until it has finished.</string>
     <string name="text_identity_onboarding_read_success">Document successfully read.\nPlease continue to confirm your identity.</string>
@@ -366,4 +368,5 @@
     <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
     <string name="text_identity_add_image">Add Identity Image</string>
     <string name="text_identity_delete_image">Delete Identity Image</string>
+    <string name="text_choose_attachment">Choose Attachment</string>
 </resources>

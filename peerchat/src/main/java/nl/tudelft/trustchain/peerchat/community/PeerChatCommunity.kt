@@ -37,9 +37,18 @@ class PeerChatCommunity(
 ) : Community() {
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
-    private lateinit var onMessageCallback: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
-    private lateinit var onContactImageRequestCallback: (instance: PeerChatCommunity, peer: Peer) -> Unit
-    private lateinit var onContactImageCallback: (instance: PeerChatCommunity, contactImage: ContactImage) -> Unit
+    private lateinit var onMessageCallback: (
+        instance: PeerChatCommunity,
+        peer: Peer,
+        chatMessage: ChatMessage
+    ) -> Unit
+    private lateinit var onContactImageRequestCallback: (
+        instance: PeerChatCommunity,
+        peer: Peer
+    ) -> Unit
+    private lateinit var onContactImageCallback: (
+        contactImage: ContactImage
+    ) -> Unit
 
     init {
         messageHandlers[MessageId.MESSAGE] = ::onMessagePacket
@@ -81,15 +90,21 @@ class PeerChatCommunity(
         }
     }
 
-    fun setOnMessageCallback(f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit) {
+    fun setOnMessageCallback(
+        f: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
+    ) {
         this.onMessageCallback = f
     }
 
-    fun setOnContactImageRequestCallback(f: (instance: PeerChatCommunity, peer: Peer) -> Unit) {
+    fun setOnContactImageRequestCallback(
+        f: (instance: PeerChatCommunity, peer: Peer) -> Unit
+    ) {
         this.onContactImageRequestCallback = f
     }
 
-    fun setOnContactImageCallback(f: (instance: PeerChatCommunity, contactImage: ContactImage) -> Unit) {
+    fun setOnContactImageCallback(
+        f: (contactImage: ContactImage) -> Unit
+    ) {
         this.onContactImageCallback = f
     }
 
@@ -418,7 +433,7 @@ class PeerChatCommunity(
     private fun onContactImage(payload: ContactImagePayload) {
         Log.d("VTLOG", "ON CONTACT IMAGE with Payload image hash: ${payload.imageHash}")
         if (this::onContactImageCallback.isInitialized) {
-            this.onContactImageCallback(this@PeerChatCommunity, ContactImage(payload.publicKey, payload.imageHash, payload.image))
+            this.onContactImageCallback(ContactImage(payload.publicKey, payload.imageHash, payload.image))
 
             return
         }

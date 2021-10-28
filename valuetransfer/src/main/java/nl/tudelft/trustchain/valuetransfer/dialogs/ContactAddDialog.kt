@@ -145,24 +145,27 @@ class ContactAddDialog(
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
-            Handler().postDelayed({
-                view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
+            Handler().postDelayed(
+                {
+                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
 
-                val map = mapOf(
-                    QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
-                    QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin().toHex(),
-                    QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames
-                )
-
-                myPublicKeyImageView.setImageBitmap(
-                    createBitmap(
-                        requireContext(),
-                        mapToJSON(map).toString(),
-                        R.color.black,
-                        R.color.light_gray
+                    val map = mapOf(
+                        QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
+                        QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin().toHex(),
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames
                     )
-                )
-            }, 100)
+
+                    myPublicKeyImageView.setImageBitmap(
+                        createBitmap(
+                            requireContext(),
+                            mapToJSON(map).toString(),
+                            R.color.black,
+                            R.color.light_gray
+                        )
+                    )
+                },
+                100
+            )
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))

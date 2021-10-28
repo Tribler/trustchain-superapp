@@ -38,10 +38,10 @@ data class TransferRequest(
     }.toString().toByteArray()
 
     companion object : Deserializable<TransferRequest> {
-        private const val TRANSFER_REQUEST_DESCRIPTION = "description"
-        private const val TRANSFER_REQUEST_AMOUNT = "amount"
-        private const val TRANSFER_REQUEST_REQUESTOR = "requestor"
-        private const val TRANSFER_REQUEST_RECEIVER = "receiver"
+        const val TRANSFER_REQUEST_DESCRIPTION = "description"
+        const val TRANSFER_REQUEST_AMOUNT = "amount"
+        const val TRANSFER_REQUEST_REQUESTOR = "requestor"
+        const val TRANSFER_REQUEST_RECEIVER = "receiver"
 
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TransferRequest, Int> {
             val offsetBuffer = buffer.copyOfRange(offset, buffer.size)
@@ -50,8 +50,12 @@ data class TransferRequest(
                 TransferRequest(
                     json.getString(TRANSFER_REQUEST_DESCRIPTION),
                     json.getLong(TRANSFER_REQUEST_AMOUNT),
-                    defaultCryptoProvider.keyFromPublicBin(json.getString(TRANSFER_REQUEST_REQUESTOR).hexToBytes()),
-                    defaultCryptoProvider.keyFromPublicBin(json.getString(TRANSFER_REQUEST_RECEIVER).hexToBytes())
+                    defaultCryptoProvider.keyFromPublicBin(
+                        json.getString(TRANSFER_REQUEST_REQUESTOR).hexToBytes()
+                    ),
+                    defaultCryptoProvider.keyFromPublicBin(
+                        json.getString(TRANSFER_REQUEST_RECEIVER).hexToBytes()
+                    )
                 ), 0
             )
         }

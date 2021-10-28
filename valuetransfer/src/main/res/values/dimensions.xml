@@ -8,4 +8,6 @@
     <dimen name="actionBarTitleSize">28sp</dimen>
     <dimen name="actionBarSubTitleSize">14sp</dimen>
     <dimen name="actionBarTitleSizeChat">20sp</dimen>
+    <dimen name="notificationInternalImageSize">40dp</dimen>
+    <dimen name="notificationInternalIdentiticonPadding">8dp</dimen>
 </resources>

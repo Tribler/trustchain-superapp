@@ -9,10 +9,8 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
@@ -31,8 +29,6 @@ class ContactChatItemRenderer(
     private val parentActivity: ValueTransferMainActivity,
     private val onItemClick: (ContactChatItem) -> Unit,
     private val onLoadMoreClick: (ContactChatItem) -> Unit,
-    private val transactionRepository: TransactionRepository,
-    private val blocks: List<TrustChainBlock>
 ) : ItemLayoutRenderer<ContactChatItem, View>(
     ContactChatItem::class.java
 ) {

@@ -50,10 +50,13 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer({
-                trustchain.createAgreementBlock(it, it.transaction)
-                transactionForceUpdate = true
-            }, ExchangeTransactionItemRenderer.TYPE_FULL_VIEW)
+            ExchangeTransactionItemRenderer(
+                {
+                    trustchain.createAgreementBlock(it, it.transaction)
+                    transactionForceUpdate = true
+                },
+                ExchangeTransactionItemRenderer.TYPE_FULL_VIEW
+            )
         )
 
         lifecycleScope.launchWhenStarted {
@@ -143,7 +146,8 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         binding.rvTransactions.layoutManager = LinearLayoutManager(requireContext())
 
         parentActivity.getBalance(false).observe(
-            viewLifecycleOwner, {
+            viewLifecycleOwner,
+            {
                 if (it != binding.tvBalanceAmount.text.toString()) {
                     binding.tvBalanceAmount.text = it
                 }
@@ -151,7 +155,8 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         )
 
         parentActivity.getBalance(true).observe(
-            viewLifecycleOwner, {
+            viewLifecycleOwner,
+            {
                 if (it != binding.tvBalanceVerifiedAmount.text.toString()) {
                     binding.tvBalanceVerifiedAmount.text = it
                     binding.ivBalanceErrorIcon.isVisible = parentActivity.getBalance(false).value != it
@@ -196,7 +201,8 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                     }
                     WITHDRAW_INTENT -> {
                         if (!obj.has(QRScanController.KEY_AMOUNT)) {
-                            parentActivity.displaySnackbar(requireContext(),
+                            parentActivity.displaySnackbar(
+                                requireContext(),
                                 resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
                                 type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING
                             )

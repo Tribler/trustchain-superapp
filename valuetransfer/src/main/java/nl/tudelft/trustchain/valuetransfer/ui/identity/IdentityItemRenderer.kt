@@ -8,7 +8,6 @@ import kotlinx.android.synthetic.main.item_identity_detail.view.*
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.entity.PersonalIdentity
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
@@ -16,7 +15,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class IdentityItemRenderer(
-    private val parentActivity: ValueTransferMainActivity,
     private val layoutType: Int,
     private val onQRButtonClick: (Identity) -> Unit,
     private val onCopyPublicKeyButtonClick: (Identity) -> Unit,
@@ -54,24 +52,6 @@ class IdentityItemRenderer(
                     ivIdenticon.isVisible = true
                 }
             }
-
-//            parentActivity.appPreferences().getIdentityFace().let { identityImageString ->
-//                val bitmap = ImageUtil.decodeImage(identityImageString)
-//
-//                if (bitmap != null) {
-//                    ivIdentityPhoto.setImageBitmap(bitmap)
-//                    ivIdentityPhoto.isVisible = true
-//                } else {
-//                    generateIdenticon(
-//                        publicKeyString.substring(20, publicKeyString.length).toByteArray(),
-//                        getColorByHash(context, publicKeyString),
-//                        resources
-//                    ).let { identicon ->
-//                        ivIdenticon.setImageBitmap(identicon)
-//                        ivIdenticon.isVisible = true
-//                    }
-//                }
-//            }
 
             view.setOnClickListener {
                 onQRButtonClick(item.identity)
@@ -112,44 +92,6 @@ class IdentityItemRenderer(
                     ivIdentityIdenticon.isVisible = true
                 }
             }
-
-//            parentActivity.appPreferences().getIdentityFace().let { identityImageString ->
-//                val bitmap = ImageUtil.decodeImage(identityImageString)
-//
-//                if (bitmap != null) {
-//                    ivIdentityIdenticon.isVisible = false
-//                    ivIdentityImage.setImageBitmap(bitmap)
-//                    ivIdentityImage.isVisible = true
-//                } else {
-//                    generateIdenticon(
-//                        publicKeyString.substring(20, publicKeyString.length).toByteArray(),
-//                        getColorByHash(context, publicKeyString),
-//                        resources
-//                    ).let { identicon ->
-//                        ivIdentityImage.isVisible = false
-//                        ivIdentityIdenticon.setImageBitmap(identicon)
-//                        ivIdentityIdenticon.isVisible = true
-//                    }
-//                }
-//            }
-
-            //            parentActivity.appPreferences().getIdentityFace().let { faceImage ->
-//                if (faceImage != "") {
-//                    val decodedString = Base64.decode(faceImage, Base64.DEFAULT)
-//                    val bitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
-//                    ivIdentityPhoto.setImageBitmap(bitmap)
-//                    cvIdentityPhoto.isVisible = true
-//                } else {
-//                    generateIdenticon(
-//                        publicKeyString.substring(20, publicKeyString.length).toByteArray(),
-//                        getColorByHash(context, publicKeyString),
-//                        resources
-//                    ).let { identicon ->
-//                        ivIdentityIdenticon.setImageBitmap(identicon)
-//                        cvIdentityIdenticon.isVisible = true
-//                    }
-//                }
-//            }
 
             ivShowDetails.setOnClickListener {
                 setContentVisible(view, content, true)
