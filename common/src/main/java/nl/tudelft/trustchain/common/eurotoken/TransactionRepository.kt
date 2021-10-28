@@ -2,9 +2,6 @@ package nl.tudelft.trustchain.common.eurotoken
 
 import android.util.Log
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
@@ -462,7 +459,6 @@ class TransactionRepository(
                 )
             }
             .toList()
-
     }
 
     fun getLatestNTransactionsOfType(

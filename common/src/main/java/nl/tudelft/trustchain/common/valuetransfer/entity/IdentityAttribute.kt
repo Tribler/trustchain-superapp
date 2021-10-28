@@ -71,7 +71,8 @@ data class IdentityAttribute(
                     json.getString(IDENTITY_ATTRIBUTE_VALUE),
                     Date(),
                     Date()
-                ), 0
+                ),
+                0
             )
         }
     }

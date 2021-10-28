@@ -56,7 +56,8 @@ data class TransferRequest(
                     defaultCryptoProvider.keyFromPublicBin(
                         json.getString(TRANSFER_REQUEST_RECEIVER).hexToBytes()
                     )
-                ), 0
+                ),
+                0
             )
         }
     }
