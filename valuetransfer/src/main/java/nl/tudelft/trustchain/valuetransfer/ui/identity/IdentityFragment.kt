@@ -311,8 +311,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         binding.tvShowIdentityAttributes.setOnClickListener {
             if (binding.clIdentityAttributes.isVisible) return@setOnClickListener
-            binding.tvAttestationInfo.isVisible = false
-            binding.tvAttributesInfo.isVisible = true
+
             binding.tvShowIdentityAttributes.apply {
                 setTypeface(null, Typeface.BOLD)
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
@@ -327,8 +326,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         binding.tvShowAttestations.setOnClickListener {
             if (binding.clAttestations.isVisible) return@setOnClickListener
-            binding.tvAttributesInfo.isVisible = false
-            binding.tvAttestationInfo.isVisible = true
+
             binding.tvShowIdentityAttributes.apply {
                 setTypeface(null, Typeface.NORMAL)
                 background = ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)

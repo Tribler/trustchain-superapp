@@ -96,31 +96,6 @@
                 android:textColor="?attr/onWidgetColor" />
 
         </LinearLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp">
-
-            <TextView
-                android:id="@+id/tvAttributesInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/text_tooltip_identity_attributes"
-                android:textColor="?attr/onBackgroundColor"
-                android:textStyle="italic" />
-
-            <TextView
-                android:id="@+id/tvAttestationInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/text_tooltip_attestations"
-                android:textColor="?attr/onBackgroundColor"
-                android:textStyle="italic"
-                android:visibility="gone"/>
-
-        </FrameLayout>
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
