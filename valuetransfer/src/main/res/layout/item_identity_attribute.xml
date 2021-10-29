@@ -47,7 +47,7 @@
                 android:textColor="?attr/onWidgetColor"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@+id/tvIdentityAttributeDate"
+                app:layout_constraintEnd_toStartOf="@+id/tvAttributeDate"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Address" />
@@ -100,59 +100,6 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:tint="?attr/mutedColor" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clAttributeOptions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-
-                    <ImageView
-                        android:id="@+id/ivAttributeDeleteButton"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_marginEnd="4dp"
-                        android:background="@drawable/pill_rounded"
-                        android:backgroundTint="?attr/backgroundColor"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_delete"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintDimensionRatio="1:1"
-                        app:layout_constraintEnd_toStartOf="@+id/ivAttributeEditButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?attr/mutedDarkColor" />
-
-                    <ImageView
-                        android:id="@+id/ivAttributeEditButton"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:layout_marginEnd="4dp"
-                        android:background="@drawable/pill_rounded"
-                        android:backgroundTint="?attr/backgroundColor"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_edit"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintDimensionRatio="1:1"
-                        app:layout_constraintEnd_toStartOf="@+id/ivAttributeShareButton"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?attr/mutedDarkColor" />
-
-                    <ImageView
-                        android:id="@+id/ivAttributeShareButton"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@drawable/pill_rounded"
-                        android:backgroundTint="?attr/backgroundColor"
-                        android:padding="6dp"
-                        android:src="@drawable/ic_share"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintDimensionRatio="1:1"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:tint="?attr/mutedDarkColor" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

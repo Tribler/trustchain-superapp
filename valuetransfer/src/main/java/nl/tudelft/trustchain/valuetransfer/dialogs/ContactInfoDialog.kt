@@ -187,21 +187,18 @@ class ContactInfoDialog(
 
             adapterIdentityAttributes.registerRenderer(
                 IdentityAttributeItemRenderer(
-                    2,
-                    {},
-                    {},
-                    {
-                        copyToClipboard(requireContext(), it.value, it.name)
-                        parentActivity.displaySnackbar(
-                            requireContext(),
-                            resources.getString(
-                                R.string.snackbar_copied_clipboard,
-                                it.name
-                            ),
-                            view = view.rootView
-                        )
-                    }
-                )
+                    2
+                ) {
+                    copyToClipboard(requireContext(), it.value, it.name)
+                    parentActivity.displaySnackbar(
+                        requireContext(),
+                        resources.getString(
+                            R.string.snackbar_copied_clipboard,
+                            it.name
+                        ),
+                        view = view.rootView
+                    )
+                }
             )
 
             rvIdentityAttributes.apply {

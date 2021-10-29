@@ -173,6 +173,7 @@
                     android:id="@+id/tvTransactionMessage"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:paddingEnd="12dp"
                     android:textColor="@color/white"
                     android:textIsSelectable="true"
                     android:visibility="gone"

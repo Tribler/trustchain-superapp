@@ -49,6 +49,9 @@
     <string name="menu_identity_remove">Remove Identity</string>
     <string name="menu_identity_authorities_view">View Trusted Authorities</string>
     <string name="menu_wallet_overview_settings">Settings</string>
+    <string name="menu_identity_attribute_edit">Edit Identity Attribute</string>
+    <string name="menu_identity_attribute_delete">Delete Identity Attribute</string>
+    <string name="menu_identity_attribute_share">Share Identity Attribute</string>
 
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
@@ -309,6 +312,9 @@
     <string name="text_notifications">Notifications</string>
     <string name="text_theme">Theme</string>
     <string name="text_tap_contact_info">Tap here for contact info</string>
+    <string name="text_identity_add_image">Add Identity Image</string>
+    <string name="text_identity_delete_image">Delete Identity Image</string>
+    <string name="text_choose_attachment">Choose Attachment</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>
@@ -366,7 +372,4 @@
     <string name="snackbar_identity_update_error">Identity couldn\'t be updated</string>
     <string name="snackbar_identity_add_cancelled">Adding identity cancelled. Without an identity you\'ll not be able to use this application.</string>
     <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
-    <string name="text_identity_add_image">Add Identity Image</string>
-    <string name="text_identity_delete_image">Delete Identity Image</string>
-    <string name="text_choose_attachment">Choose Attachment</string>
 </resources>

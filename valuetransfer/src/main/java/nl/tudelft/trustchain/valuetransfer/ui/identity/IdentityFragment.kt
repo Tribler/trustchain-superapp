@@ -158,42 +158,25 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
 
         adapterAttributes.registerRenderer(
             IdentityAttributeItemRenderer(
-                1,
-                { attribute ->
-                    ConfirmDialog(
-                        resources.getString(
-                            R.string.text_confirm_delete,
-                            resources.getString(R.string.text_this_attribute)
+                1
+            ) {
+                OptionsDialog(
+                    R.menu.identity_attribute_options,
+                    "Choose Option"
+                ) { _, item ->
+                    when (item.itemId) {
+                        R.id.actionEditIdentityAttribute -> IdentityAttributeDialog(it).show(
+                            parentFragmentManager,
+                            tag
                         )
-                    ) { dialog ->
-                        try {
-                            getIdentityStore().deleteAttribute(attribute)
-
-                            activity?.invalidateOptionsMenu()
-                            dialog.dismiss()
-
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_identity_attribute_remove_success)
-                            )
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_identity_attribute_remove_error),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                            )
-                        }
+                        R.id.actionDeleteIdentityAttribute -> deleteIdentityAttribute(it)
+                        R.id.actionShareIdentityAttribute -> IdentityAttributeShareDialog(
+                            null,
+                            it
+                        ).show(parentFragmentManager, tag)
                     }
-                        .show(parentFragmentManager, tag)
-                },
-                { attribute ->
-                    IdentityAttributeDialog(attribute).show(parentFragmentManager, tag)
-                },
-                { attribute ->
-                    IdentityAttributeShareDialog(null, attribute).show(parentFragmentManager, tag)
-                }
-            )
+                }.show(parentFragmentManager, tag)
+            }
         )
 
         adapterAttestations.registerRenderer(
@@ -301,7 +284,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 },
                 optionSelected = { _, item ->
                     when (item.itemId) {
-                        R.id.actionAddIdentityAttribute -> addAttribute()
+                        R.id.actionAddIdentityAttribute -> addIdentityAttribute()
                         R.id.actionAddAttestation -> addAttestation()
                         R.id.actionAddAuthority -> addAuthority()
                     }
@@ -361,6 +344,148 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         }.show(parentFragmentManager, tag)
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun toggleVisibility() {
+        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
+        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
+    }
+
+    private fun addAttestation() {
+        scanIntent = ADD_ATTESTATION_INTENT
+        QRCodeUtils(requireContext()).startQRScanner(
+            this,
+            promptText = resources.getString(R.string.text_scan_public_key_to_add_attestation),
+            vertical = true
+        )
+    }
+
+    private fun updateAttestations() {
+        val oldCount = adapterAttestations.itemCount
+        val itemsAttestations = getAttestationCommunity().database.getAllAttestations()
+
+        if (oldCount != itemsAttestations.size) {
+            adapterAttestations.updateItems(
+                createAttestationItems(itemsAttestations)
+            )
+
+            binding.rvAttestations.setItemViewCacheSize(itemsAttestations.size)
+        }
+
+        toggleVisibility()
+    }
+
+    private fun deleteAttestation(attestation: AttestationItem) {
+        ConfirmDialog(
+            resources.getString(
+                R.string.text_confirm_delete,
+                resources.getString(R.string.text_this_attestation)
+            )
+        ) { dialog ->
+            try {
+                getAttestationCommunity().database.deleteAttestationByHash(attestation.attestationBlob.attestationHash)
+                updateAttestations()
+
+                dialog.dismiss()
+                parentActivity.displaySnackbar(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_attestation_remove_success)
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                parentActivity.displaySnackbar(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_attestation_remove_error),
+                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                )
+            }
+        }
+            .show(parentFragmentManager, tag)
+    }
+
+    private fun addIdentityAttribute() {
+        IdentityAttributeDialog(null).show(parentFragmentManager, tag)
+    }
+
+    private fun deleteIdentityAttribute(attribute: IdentityAttribute) {
+        ConfirmDialog(
+            resources.getString(
+                R.string.text_confirm_delete,
+                resources.getString(R.string.text_this_attribute)
+            )
+        ) { dialog ->
+            try {
+                getIdentityStore().deleteAttribute(attribute)
+
+                activity?.invalidateOptionsMenu()
+                dialog.dismiss()
+
+                parentActivity.displaySnackbar(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_identity_attribute_remove_success)
+                )
+            } catch (e: Exception) {
+                e.printStackTrace()
+                parentActivity.displaySnackbar(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_identity_attribute_remove_error),
+                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                )
+            }
+        }
+            .show(parentFragmentManager, tag)
+    }
+
+    private fun addAuthority() {
+        scanIntent = ADD_AUTHORITY_INTENT
+        QRCodeUtils(requireContext()).startQRScanner(
+            this,
+            promptText = resources.getString(R.string.text_scan_public_key_to_add_authority),
+            vertical = true
+        )
+    }
+
+    private fun identityImageIntent() {
+        val mimeTypes = arrayOf("image/*")
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        startActivityForResult(
+            Intent.createChooser(
+                intent,
+                resources.getString(R.string.text_send_photo_video)
+            ),
+            PICK_IDENTITY_IMAGE
+        )
+    }
+
+    private fun createAttributeItems(attributes: List<IdentityAttribute>): List<Item> {
+        return attributes.map { attribute ->
+            IdentityAttributeItem(attribute)
+        }
+    }
+
+    private fun createAttestationItems(attestations: List<AttestationBlob>): List<Item> {
+        return attestations
+            .map { blob ->
+                AttestationItem(blob)
+            }
+            .sortedBy {
+                if (it.attestationBlob.metadata != null) {
+                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString(QRScanController.KEY_ATTRIBUTE)
+                } else {
+                    return@sortedBy ""
+                }
+            }
+    }
+
+    private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
+        return identities.map { identity ->
+            IdentityItem(
+                identity,
+                imageString?.let { decodeImage(it) }
+            )
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -428,119 +553,6 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                     }
             }
         } else super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    private fun deleteAttestation(attestation: AttestationItem) {
-        ConfirmDialog(
-            resources.getString(
-                R.string.text_confirm_delete,
-                resources.getString(R.string.text_this_attestation)
-            )
-        ) { dialog ->
-            try {
-                getAttestationCommunity().database.deleteAttestationByHash(attestation.attestationBlob.attestationHash)
-                updateAttestations()
-
-                dialog.dismiss()
-                parentActivity.displaySnackbar(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_attestation_remove_success)
-                )
-            } catch (e: Exception) {
-                e.printStackTrace()
-                parentActivity.displaySnackbar(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_attestation_remove_error),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                )
-            }
-        }
-            .show(parentFragmentManager, tag)
-    }
-
-    private fun toggleVisibility() {
-        binding.tvNoAttestations.isVisible = adapterAttestations.itemCount == 0
-        binding.tvNoAttributes.isVisible = adapterAttributes.itemCount == 0
-    }
-
-    private fun updateAttestations() {
-        val oldCount = adapterAttestations.itemCount
-        val itemsAttestations = getAttestationCommunity().database.getAllAttestations()
-
-        if (oldCount != itemsAttestations.size) {
-            adapterAttestations.updateItems(
-                createAttestationItems(itemsAttestations)
-            )
-
-            binding.rvAttestations.setItemViewCacheSize(itemsAttestations.size)
-        }
-
-        toggleVisibility()
-    }
-
-    private fun addAttribute() {
-        IdentityAttributeDialog(null).show(parentFragmentManager, tag)
-    }
-
-    private fun addAttestation() {
-        scanIntent = ADD_ATTESTATION_INTENT
-        QRCodeUtils(requireContext()).startQRScanner(
-            this,
-            promptText = resources.getString(R.string.text_scan_public_key_to_add_attestation),
-            vertical = true
-        )
-    }
-
-    private fun addAuthority() {
-        scanIntent = ADD_AUTHORITY_INTENT
-        QRCodeUtils(requireContext()).startQRScanner(
-            this,
-            promptText = resources.getString(R.string.text_scan_public_key_to_add_authority),
-            vertical = true
-        )
-    }
-
-    private fun identityImageIntent() {
-        val mimeTypes = arrayOf("image/*")
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        startActivityForResult(
-            Intent.createChooser(
-                intent,
-                resources.getString(R.string.text_send_photo_video)
-            ),
-            PICK_IDENTITY_IMAGE
-        )
-    }
-
-    private fun createAttributeItems(attributes: List<IdentityAttribute>): List<Item> {
-        return attributes.map { attribute ->
-            IdentityAttributeItem(attribute)
-        }
-    }
-
-    private fun createAttestationItems(attestations: List<AttestationBlob>): List<Item> {
-        return attestations
-            .map { blob ->
-                AttestationItem(blob)
-            }
-            .sortedBy {
-                if (it.attestationBlob.metadata != null) {
-                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString(QRScanController.KEY_ATTRIBUTE)
-                } else {
-                    return@sortedBy ""
-                }
-            }
-    }
-
-    private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
-        return identities.map { identity ->
-            IdentityItem(
-                identity,
-                imageString?.let { decodeImage(it) }
-            )
-        }
     }
 
     companion object {

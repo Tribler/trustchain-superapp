@@ -131,7 +131,7 @@ class IdentityItemRenderer(
                 onCopyPublicKeyButtonClick(item.identity)
             }
 
-            ivIdentityImageOptions.setOnClickListener {
+            cvIdentityImage.setOnClickListener {
                 onIdentityImageClick(item.identity)
             }
         }

@@ -227,28 +227,28 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent">
 
-                    <ImageView
-                        android:id="@+id/ivIdentityIdenticon"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        android:padding="8dp"
-                        app:layout_constraintDimensionRatio="H,1:1"
-                        android:background="?attr/backgroundColor"
-                        tools:src="@drawable/ic_contact"
-                        android:adjustViewBounds="true"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
+                        <ImageView
+                            android:id="@+id/ivIdentityIdenticon"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            android:padding="8dp"
+                            app:layout_constraintDimensionRatio="H,1:1"
+                            android:background="?attr/backgroundColor"
+                            tools:src="@drawable/ic_contact"
+                            android:adjustViewBounds="true"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
-                    <ImageView
-                        android:id="@+id/ivIdentityImage"
-                        android:layout_width="70dp"
-                        android:layout_height="70dp"
-                        app:layout_constraintDimensionRatio="H,1:1"
-                        tools:src="@drawable/ic_contact"
-                        android:adjustViewBounds="true"
-                        android:scaleType="centerCrop"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
+                        <ImageView
+                            android:id="@+id/ivIdentityImage"
+                            android:layout_width="70dp"
+                            android:layout_height="70dp"
+                            app:layout_constraintDimensionRatio="H,1:1"
+                            tools:src="@drawable/ic_contact"
+                            android:adjustViewBounds="true"
+                            android:scaleType="centerCrop"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
 
                     </FrameLayout>
 
