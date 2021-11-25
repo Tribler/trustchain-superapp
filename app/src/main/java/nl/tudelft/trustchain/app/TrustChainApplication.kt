@@ -44,6 +44,7 @@ import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
+import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
@@ -79,7 +80,8 @@ class TrustChainApplication : Application() {
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity()
+                createIdentityCommunity(),
+                createDataVaultCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -318,6 +320,13 @@ class TrustChainApplication : Application() {
             RecommenderCommunity.Factory(recommendStore, settings, musicStore),
             listOf(randomWalk)
         )
+    }
+
+    private fun createDataVaultCommunity(): OverlayConfiguration<DataVaultCommunity> {
+        // Make sure DataVaultCommunity is created after AttestationCommunity
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(DataVaultCommunity.Factory(this),
+            listOf(randomWalk))
     }
 
     private fun getIdAlgorithmKey(idFormat: String): BonehPrivateKey {

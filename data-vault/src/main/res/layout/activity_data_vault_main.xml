@@ -11,14 +11,14 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="@color/colorPrimaryValueTransfer"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintTop_toTopOf="parent">
-        <!-- app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView" -->
     </FrameLayout>
 
-    <!--
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         style="@style/BottomNavigation"
@@ -30,6 +30,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:background="@color/colorPrimaryValueTransfer"
         />
-        -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
