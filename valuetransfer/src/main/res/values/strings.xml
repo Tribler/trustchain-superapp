@@ -106,6 +106,7 @@
     <string name="btn_continue">Continue</string>
     <string name="btn_start_over">Start Over</string>
     <string name="btn_go_back">Go back</string>
+    <string name="btn_block">Block</string>
 
     // Texts and sentences
     <string name="text_recipient">Recipient</string>
@@ -158,6 +159,8 @@
     <string name="text_verification_status">Verification Status</string>
     <string name="text_verified">Verified</string>
     <string name="text_unverified">Not verified</string>
+    <string name="text_verified_lower">verified</string>
+    <string name="text_unverified_lower">unverified</string>
     <string name="text_title_transactions">Transactions</string>
     <string name="text_no_transactions">There are no transactions yet</string>
     <string name="text_including_unverified_transactions">Including Unverified Transactions</string>
@@ -291,7 +294,9 @@
     <string name="text_identity_onboarding_read_subtitle">Hold your document steady to the back of your phone until it has finished.</string>
     <string name="text_identity_onboarding_read_success">Document successfully read.\nPlease continue to confirm your identity.</string>
     <string name="text_identity_onboarding_read_reading">Reading document…\nPlease hold steady until finished.</string>
-    <string name="text_identity_onboarding_scan_subtitle">Scan the red marked machine readable zone on the passport or the back of the ID card. Please choose your identity document type.</string>
+    <string name="text_identity_onboarding_scan_subtitle">Scan the machine readable zone on the front of your passport or the back of the ID card. The machine readable zone is marked in red in the documents below.</string>
+    <string name="text_identity_onboarding_scan_choose">Please click on your identity document type.</string>
+    <string name="text_identity_onboarding_scan_extra">Fit the machine readable zone of your identity document inside the red square below. Hold your phone as steady as possible and wait until the scan is finished.</string>
     <string name="text_passport">Passport</string>
     <string name="text_id_card">ID Card</string>
     <string name="text_nfc_is_supported">NFC is supported</string>
@@ -315,6 +320,12 @@
     <string name="text_identity_add_image">Add Identity Image</string>
     <string name="text_identity_delete_image">Delete Identity Image</string>
     <string name="text_choose_attachment">Choose Attachment</string>
+    <string name="text_identity_updated_new">The identity of this contact has been determined. The identity is %s and the (official) name of the contact is %s.</string>
+    <string name="text_identity_updated_unverified_message">Please be aware that if the identity is unverified it may have a fake identity name.</string>
+    <string name="text_identity_updated">The identity of the contact has been updated.</string>
+    <string name="text_identity_updated_verification">The identity verification status changed to %s.</string>
+    <string name="text_identity_updated_name">The identity name has changed from %s to %s.</string>
+    <string name="text_identity_updated_careful">Please be careful in case the name is unfamiliar.</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

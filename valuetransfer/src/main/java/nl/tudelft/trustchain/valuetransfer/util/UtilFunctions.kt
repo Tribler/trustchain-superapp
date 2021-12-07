@@ -61,8 +61,9 @@ fun scrollToBottom(recyclerView: RecyclerView) {
     recyclerView.post {
         val target = layoutManager.findViewByPosition(lastItemPosition)
         if (target != null) {
-            val offset = recyclerView.measuredHeight - target.measuredHeight
-            layoutManager.scrollToPositionWithOffset(lastItemPosition, offset)
+            layoutManager.scrollToPosition(lastItemPosition)
+//            val offset = recyclerView.measuredHeight - target.measuredHeight
+//            layoutManager.scrollToPositionWithOffset(lastItemPosition, offset)
         }
     }
 }

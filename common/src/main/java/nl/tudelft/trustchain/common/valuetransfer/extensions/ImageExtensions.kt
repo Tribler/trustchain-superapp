@@ -18,11 +18,11 @@ fun decodeBytes(encoded: String): ByteArray = Base64.decode(encoded, Base64.DEFA
 /**
  * Convert image bitmap to bytearray
  */
-fun imageBytes(bitmap: Bitmap): ByteArray? {
+fun imageBytes(bitmap: Bitmap, quality: Int = 100): ByteArray? {
     val baos = ByteArrayOutputStream()
 
     return try {
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos)
         baos.toByteArray()
     } catch (e: Exception) {
         e.printStackTrace()
@@ -45,11 +45,11 @@ fun bytesToImage(bytes: ByteArray): Bitmap? {
 /**
  * Encode image bitmap to string
  */
-fun encodeImage(bitmap: Bitmap): String? {
+fun encodeImage(bitmap: Bitmap, quality: Int = 100): String? {
     val baos = ByteArrayOutputStream()
 
     return try {
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos)
         val bytes = baos.toByteArray()
 
         encodeBytes(bytes)

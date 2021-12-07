@@ -234,19 +234,8 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             PassportHandler.DOCUMENT_TYPE_ID_CARD -> scanIDCardSelected.viewFadeIn(requireContext(), 500)
         }
 
-        Handler().postDelayed(
-            {
-                passportHandler.startPassportScanActivity(this, nfcSupported)
-            },
-            500
-        )
-
-        Handler().postDelayed(
-            {
-                initScanView()
-            },
-            1000
-        )
+        Handler().postDelayed({ passportHandler.startPassportScanActivity(this, nfcSupported) }, 500)
+        Handler().postDelayed({ initScanView() }, 1000)
     }
 
     /**

@@ -31,6 +31,15 @@
             android:gravity="center_horizontal"
             android:text="@string/text_identity_onboarding_scan_subtitle" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center_horizontal"
+            android:text="@string/text_identity_onboarding_scan_choose"
+            android:textStyle="bold"/>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

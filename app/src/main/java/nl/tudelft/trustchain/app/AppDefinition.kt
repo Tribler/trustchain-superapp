@@ -106,9 +106,10 @@ enum class AppDefinition(
         LiquidityPoolMainActivity::class.java
     ),
     VALUETRANSFER(
-        R.drawable.ic_blockchain_identity,
-        "Value Transfer",
+        R.drawable.ic_confidapp_logo,
+        "ConfIDapp",
         R.color.colorPrimaryValueTransfer,
-        ValueTransferMainActivity::class.java
+        ValueTransferMainActivity::class.java,
+        true,
     )
 }

@@ -2,12 +2,15 @@ package nl.tudelft.trustchain.valuetransfer
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteConstraintException
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -31,11 +34,14 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.androidadvance.topsnackbar.TSnackbar
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
+import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.main_activity_vt.*
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -43,7 +49,13 @@ import nl.tudelft.ipv8.attestation.WalletAttestation
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.keyvault.Key
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.messaging.eva.EVAProtocol
+import nl.tudelft.ipv8.messaging.eva.TransferException
+import nl.tudelft.ipv8.messaging.eva.TransferProgress
+import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity
@@ -51,6 +63,7 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 import nl.tudelft.trustchain.common.valuetransfer.extensions.bytesToImage
 import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.imageBytes
@@ -99,10 +112,14 @@ class ValueTransferMainActivity : BaseActivity() {
     private lateinit var appPreferences: AppPreferences
     private lateinit var passportHandler: PassportHandler
 
+    private var balance = MutableLiveData("0.00")
+    private var verifiedBalance = MutableLiveData("0.00")
+
     private var isAppInForeground = true
 
     /**
-     * Initialize all communities and (database) stores and repo's
+     * Initialize all communities and (database) stores and repo's for performance purposes and
+     * ease of use in other classes/fragments.
      */
     val communities: Map<Class<out Community>, Community> = mapOf(
         TrustChainCommunity::class.java to IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!,
@@ -120,14 +137,9 @@ class ValueTransferMainActivity : BaseActivity() {
         TrustChainHelper::class.java to TrustChainHelper(getCommunity()!!),
     )
 
-    private var balance = MutableLiveData("0.00")
-    private var verifiedBalance = MutableLiveData("0.00")
-
     @SuppressLint("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        Log.d("VTLOG", isAppInForeground.toString())
 
         /**
          * Initialize app preferences class and set theme saved in it
@@ -204,7 +216,8 @@ class ValueTransferMainActivity : BaseActivity() {
          */
         bottomNavigationViewListeners()
 
-        val bottomView: BottomNavigationMenuView = bottomNavigationView.getChildAt(0) as BottomNavigationMenuView
+        val bottomView: BottomNavigationMenuView =
+            bottomNavigationView.getChildAt(0) as BottomNavigationMenuView
         (bottomView.getChildAt(2) as BottomNavigationItemView).setIconSize(
             TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, 40f,
@@ -213,12 +226,14 @@ class ValueTransferMainActivity : BaseActivity() {
         )
 
         /**
-         * PeerChat community callbacks when a message is received and create archive and muted chat database tables
+         * PeerChat community callbacks and creating additional contact database tables
          */
         val peerChatCommunity = getCommunity<PeerChatCommunity>()!!
         peerChatCommunity.setOnMessageCallback(::onMessageCallback)
         peerChatCommunity.setOnContactImageRequestCallback(::onContactImageRequestCallback)
         peerChatCommunity.setOnContactImageCallback(::onContactImageCallback)
+        peerChatCommunity.setOnContactConnectRequestCallback(::onContactConnectRequestCallback)
+        peerChatCommunity.setOnContactConnectCallback(::onContactConnectCallback)
         peerChatCommunity.createContactStateTable()
         peerChatCommunity.createContactImageTable()
 
@@ -244,37 +259,23 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity() && !lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity() && !lifecycle.currentState.isAtLeast(
+                Lifecycle.State.RESUMED
+            )
+        ) {
             onNewIntent(intent)
         }
 
         checkCameraPermissions()
     }
 
-    /**
-     * Enable custom actionbar to be aligned in center (fragment titles) and left (chat)
-     */
-    fun setActionBarWithGravity(alignment: Int) {
-        val params = ActionBar.LayoutParams(
-            ActionBar.LayoutParams.WRAP_CONTENT,
-            ActionBar.LayoutParams.WRAP_CONTENT
-        ).apply {
-            gravity = alignment
-        }
-
-        supportActionBar?.customView = null
-        supportActionBar?.setCustomView(customActionBar, params)
-    }
-
     override fun onStart() {
         super.onStart()
-        Log.d("VTLOG", "STARTED")
         isAppInForeground = true
     }
 
     override fun onStop() {
         super.onStop()
-        Log.d("VTLOG", "STOPPED")
         isAppInForeground = false
     }
 
@@ -401,12 +402,18 @@ class ValueTransferMainActivity : BaseActivity() {
         notificationHandler.cancelAll()
     }
 
+    /**
+     * Get the fragment that is currently active/shown (if exists)
+     */
     fun getActiveFragment(): Fragment? {
         return fragmentManager.fragments.firstOrNull {
             it.isVisible
         }
     }
 
+    /**
+     * Get the chat or contacts fragment from a notification intent
+     */
     private fun notificationChatIntent(intent: Intent): Fragment {
         val publicKeyString = intent.extras?.getString(ARG_PUBLIC_KEY)
         val activeFragment = getActiveFragment()
@@ -662,6 +669,24 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Enable custom actionbar to be aligned in center (fragment titles) and left (chat)
+     */
+    fun setActionBarWithGravity(alignment: Int) {
+        val params = ActionBar.LayoutParams(
+            ActionBar.LayoutParams.WRAP_CONTENT,
+            ActionBar.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = alignment
+        }
+
+        supportActionBar?.customView = null
+        supportActionBar?.setCustomView(customActionBar, params)
+    }
+
+    /**
+     * Returns the custom action bar
+     */
     fun getCustomActionBar(): View {
         return customActionBar
     }
@@ -704,7 +729,7 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
-     * Switch visibility of back button in action bar
+     * Toggle visibility of back button in action bar
      */
     fun toggleActionBar(state: Boolean) {
         supportActionBar!!.setDisplayHomeAsUpEnabled(state)
@@ -712,7 +737,7 @@ class ValueTransferMainActivity : BaseActivity() {
     }
 
     /**
-     * Switch visibility of bottom navigation view
+     * Toggle visibility of bottom navigation view
      */
     fun toggleBottomNavigation(state: Boolean) {
         bottomNavigationView.isVisible = state
@@ -783,6 +808,7 @@ class ValueTransferMainActivity : BaseActivity() {
                     if (currentContactState.identityInfo!!.imageHash != identityInfo.imageHash) {
                         contactImageRequest = true
                     }
+
                     peerChatStore.setIdentityState(
                         currentContactState.publicKey,
                         identityInfo
@@ -795,6 +821,74 @@ class ValueTransferMainActivity : BaseActivity() {
                     peerChatStore.removeContactImage(peer.publicKey)
                 }
             }
+        }
+
+        val idInfo = currentContactState?.identityInfo
+        val messageIdInfo = chatMessage.identityInfo
+        val identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
+
+        // Let know when the identity information of the contact has been updated
+        if (identityIsUpdated) {
+            Log.d("VTLOG", "IDENTITY INFO IS NOT EQUAL: $idInfo != $messageIdInfo")
+            val messages: MutableList<String> = mutableListOf()
+
+            val verificationStatusText = if (messageIdInfo?.isVerified == true) {
+                resources.getString(R.string.text_verified_lower)
+            } else resources.getString(R.string.text_unverified_lower)
+
+            if (idInfo == null) {
+                messages.add(resources.getString(
+                    R.string.text_identity_updated_new,
+                    verificationStatusText,
+                    "${messageIdInfo?.initials} ${messageIdInfo?.surname}"
+                ))
+                if (messageIdInfo?.isVerified != true ) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
+                messages.add(resources.getString(R.string.text_identity_updated_careful))
+            } else {
+                messages.add(resources.getString(R.string.text_identity_updated))
+
+                when {
+                    idInfo.isVerified != messageIdInfo?.isVerified -> messages.add(
+                        resources.getString(
+                            R.string.text_identity_updated_verification,
+                            verificationStatusText
+                        )
+                    )
+                    idInfo.initials != messageIdInfo.initials ||
+                        idInfo.surname != messageIdInfo.surname -> messages.add(
+                        resources.getString(
+                            R.string.text_identity_updated_name,
+                            "${idInfo.initials} ${idInfo.surname}",
+                            "${messageIdInfo.initials} ${messageIdInfo.surname}"
+                        )
+                    )
+                }
+
+                if (messageIdInfo?.isVerified != true ) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
+                messages.add(resources.getString(R.string.text_identity_updated_careful))
+            }
+
+            val attachment = MessageAttachment(
+                MessageAttachment.TYPE_IDENTITY_UPDATED,
+                0,
+                byteArrayOf()
+            )
+
+            val updatedIdentityChatMessage = ChatMessage(
+                UUID.randomUUID().toString(),
+                messages.joinToString(" "),
+                attachment,
+                peer.publicKey,
+                getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
+                false,
+                chatMessage.timestamp,
+                ack = true,
+                read = true,
+                attachmentFetched = true,
+                transactionHash = null,
+            )
+
+            community.getDatabase().addMessage(updatedIdentityChatMessage)
         }
 
         // Check whether a new contact image should be requested
@@ -818,15 +912,19 @@ class ValueTransferMainActivity : BaseActivity() {
         // Request attachment
         if (chatMessage.attachment != null) {
             when (chatMessage.attachment!!.type) {
-                MessageAttachment.TYPE_IMAGE -> return
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> return
                 MessageAttachment.TYPE_CONTACT -> return
                 MessageAttachment.TYPE_LOCATION -> return
                 MessageAttachment.TYPE_TRANSFER_REQUEST -> return
-                else -> community.sendAttachmentRequest(
-                    peer,
-                    chatMessage.attachment!!.content.toHex()
-                )
+                else -> {
+                    val fileID = chatMessage.attachment!!.content.toHex()
+                    val file = MessageAttachment.getFile(this, fileID)
+                    if (file.exists()) {
+                        community.getDatabase().setAttachmentFetched(fileID)
+                    } else {
+                        community.sendAttachmentRequest(peer, fileID)
+                    }
+                }
             }
         }
     }
@@ -878,6 +976,15 @@ class ValueTransferMainActivity : BaseActivity() {
             peerChatStore.removeContactImage(contactImage.publicKey)
             peerChatStore.setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, null)
         }
+    }
+
+    private fun onContactConnectRequestCallback(sender: PublicKey, identityInfo: IdentityInfo) {
+        Log.d("VTLOG", "Received contact connect request in VT from ${sender.keyToHash().toHex()} with $identityInfo")
+
+    }
+
+    private fun onContactConnectCallback(sender: PublicKey, identityInfo: IdentityInfo) {
+        Log.d("VTLOG", "Received contact connect in VT from ${sender.keyToHash().toHex()} with $identityInfo")
     }
 
     /**

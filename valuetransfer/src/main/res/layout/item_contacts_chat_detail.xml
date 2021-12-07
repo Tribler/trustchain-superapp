@@ -67,13 +67,42 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clIdentityUpdated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clDateSection"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tvIdentityUpdatedMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/mutedDarkColor"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/colorYellow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="The identity of the contact has been updated. The identity verification status changed to unverified. " />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <FrameLayout
         android:id="@+id/flContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clDateSection">
+        app:layout_constraintTop_toBottomOf="@+id/clIdentityUpdated">
 
         <FrameLayout
             android:id="@+id/flChatItemContent"
@@ -231,41 +260,99 @@
                 android:id="@+id/clAttachmentPhotoVideo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="100dp"
-                android:maxHeight="100dp"
+                android:maxHeight="120dp"
                 android:visibility="gone"
+                tools:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
 
-                <ProgressBar
-                    android:id="@+id/pbAttachmentPhotoVideoLoadingSpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/white"
-                    android:indeterminateTintMode="src_atop"
-                    android:maxWidth="40dp"
-                    android:maxHeight="40dp"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clAttachmentPhotoVideoProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    tools:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="H,1:1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvAttachmentPhotoVideoProgressStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:paddingHorizontal="4dp"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Starting..." />
+
+                    <ProgressBar
+                        android:id="@+id/pbAttachmentPhotoVideoLoadingSpinner"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:padding="30dp"
+                        android:min="0"
+                        android:max="100"
+                        android:progress="0"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/colorPrimaryValueTransfer"
+                        android:indeterminateTintMode="src_atop"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvAttachmentPhotoVideoProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        tools:text="20%"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="H,1:1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <ImageView
                     android:id="@+id/ivAttachmentPhotoVideo"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="110dp"
                     android:layout_margin="3dp"
                     android:adjustViewBounds="true"
                     android:background="@drawable/pill_rounded"
-                    android:maxWidth="90dp"
-                    android:maxHeight="90dp"
+                    android:maxHeight="110dp"
                     android:scaleType="fitCenter"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAttachmentPhotoVideoSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    tools:text="4.86MB"
+                    android:textSize="10sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -327,8 +414,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clAttachmentIdentityAttribute"
-                tools:visibility="visible">
+                app:layout_constraintTop_toBottomOf="@+id/clAttachmentIdentityAttribute">
 
                 <ImageView
                     android:id="@+id/ivLocationIcon"
@@ -549,5 +635,4 @@
             tools:src="@drawable/ic_check_double" />
 
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

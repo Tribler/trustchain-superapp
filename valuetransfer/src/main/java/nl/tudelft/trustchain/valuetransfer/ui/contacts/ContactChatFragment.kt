@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
@@ -65,6 +66,14 @@ import org.json.JSONObject
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.recyclerview.widget.RecyclerView
+import android.graphics.PorterDuff
+
+import android.graphics.PorterDuffColorFilter
+import android.util.Log
+import nl.tudelft.ipv8.messaging.eva.TransferState
+import nl.tudelft.trustchain.peerchat.community.ContactConnectPayload
+import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 
 class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private val binding by viewBinding(FragmentContactsChatBinding::bind)
@@ -89,19 +98,26 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
     private var blocks: List<TrustChainBlock> = emptyList()
 
+    private var oldMessageCount: Int = 0
+    private var newMessageCount: Int = 0
+
     private val itemsMessages: LiveData<List<Item>> by lazy {
-        combine(getPeerChatStore().getAllByPublicKey(publicKey), limitedMessageCount.asFlow(), searchTerm.asFlow(), filterType.asFlow()) { messages, _, _, _ ->
+        combine(
+            getPeerChatStore().getAllByPublicKey(publicKey),
+            downloadProgress.asFlow(),
+            searchFilterLimit.asFlow(),
+            limitedMessageCount.asFlow(),
+        ) { messages, downloadTransferProgress, searchFilterLimitValues, _ ->
             val filteredMessages = messages.filter { item ->
                 val hasMessage = item.message.isNotEmpty()
                 val hasAttachment = item.attachment != null
                 val hasTransaction = item.transactionHash != null
-                val messageContainsTerm = item.message.contains(searchTerm.value.toString(), ignoreCase = true)
+                val messageContainsTerm = item.message.contains(searchFilterLimitValues.first, ignoreCase = true)
 
                 fun attachmentTypeOf(type: String): Boolean {
                     return item.attachment!!.type == type
                 }
-
-                when (filterType.value.toString()) {
+                when (searchFilterLimitValues.second) {
                     FILTER_TYPE_MESSAGE -> hasMessage && !hasAttachment && !hasTransaction && messageContainsTerm
                     FILTER_TYPE_TRANSACTION -> (!hasAttachment && hasTransaction && messageContainsTerm) || (hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_TRANSFER_REQUEST) && messageContainsTerm)
                     FILTER_TYPE_PHOTO_VIDEO -> !hasMessage && hasAttachment && !hasTransaction && attachmentTypeOf(MessageAttachment.TYPE_IMAGE)
@@ -112,10 +128,12 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 }
             }
 
-            totalMessages = filteredMessages.size
+            totalMessageCount = filteredMessages.size
+            oldMessageCount = newMessageCount
+            newMessageCount = totalMessageCount
             val limitMessages = filteredMessages.takeLast(limitedMessageCount.value?.toInt()!!)
 
-            createMessagesItems(limitMessages)
+            createMessagesItems(limitMessages, downloadTransferProgress)
         }.asLiveData()
     }
 
@@ -137,15 +155,14 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH)
 
     // Limit the number of shown messages
-    private val limitedMessageCount = MutableLiveData(20)
+    private val limitedMessageCount = MutableLiveData(MESSAGES_SHOWN)
     private var messageCountChanged = false
-    private var totalMessages = 0
+    private var totalMessageCount = 0
 
     // Search and filter the messages
-    private var searchTerm = MutableLiveData("")
-    private var filterType = MutableLiveData(FILTER_TYPE_EVERYTHING)
-
+    private var searchFilterLimit = MutableLiveData(Pair("", FILTER_TYPE_EVERYTHING))
     private var cameraUri: Uri? = null
+    private var downloadProgress: MutableLiveData<MutableMap<String, TransferProgress>> = MutableLiveData(mutableMapOf())
 
     init {
         setHasOptionsMenu(true)
@@ -170,6 +187,26 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         parentActivity.setTheme(AppPreferences.APP_THEME)
 
         super.onCreate(savedInstanceState)
+
+        getPeerChatCommunity().setEVAOnReceiveProgressCallback { _, info, progress ->
+            Log.d("VTLOG", "CONTACT CHAT RECEIVE PROGRESS CALLBACK '$info': '$progress'")
+
+            downloadProgress.value?.let { map ->
+                if (map[progress.id] != progress) {
+                    map[progress.id] = progress
+                    downloadProgress.postValue(map)
+                }
+            }
+        }
+
+        getPeerChatCommunity().setEVAOnReceiveCompleteCallback { _, info, fileID, _ ->
+            Log.d("VTLOG", "CONTACT CHAT SEND COMPLETE CALLBACK '$info'")
+
+            downloadProgress.value?.let { map ->
+                map.remove(fileID)
+                downloadProgress.postValue(map)
+            }
+        }
 
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(
@@ -305,11 +342,17 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     }
                 },
                 {
-                    messageCountChanged = true
-                    limitedMessageCount.value = limitedMessageCount.value?.plus(10)
+                    showMoreMessages()
+//                    messageCountChanged = true
+//                    limitedMessageCount.value = limitedMessageCount.value?.plus(MESSAGES_SHOW_MORE)
                 }
             )
         )
+    }
+
+    private fun showMoreMessages() {
+        messageCountChanged = true
+        limitedMessageCount.value = limitedMessageCount.value?.plus(MESSAGES_SHOW_MORE)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -357,8 +400,15 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             )
         }
 
-        binding.btnNewChatAdd.setOnClickListener {
-            addRenameContact(Contact("", publicKey))
+        binding.btnNewChatAdd.apply {
+            setOnClickListener {
+                addRenameContact(Contact("", publicKey))
+            }
+        }
+
+        binding.btnNewChatBlock.setOnClickListener {
+            toggleBlockContact(false)
+            binding.clNewChatRequest.isVisible = false
         }
 
         lifecycleScope.launchWhenResumed {
@@ -523,15 +573,21 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         )
 
         binding.clFilterByType.setOnClickListener {
-            OptionsDialog(R.menu.contact_chat_filter_types) { _, item ->
-                filterType.value = item.title.toString()
+            OptionsDialog(
+                R.menu.contact_chat_filter_types,
+                "Filter by"
+            ) { _, item ->
+                searchFilterLimit.value = searchFilterLimit.value?.copy(second = item.title.toString())
+
+//                filterType.value = item.title.toString()
                 binding.ivFilterByType.setImageDrawable(item.icon)
             }.show(parentFragmentManager, tag)
         }
 
         binding.etSearchMessage.doAfterTextChanged { searchText ->
             ivSearchClearIcon.isVisible = searchText != null && searchText.isNotEmpty()
-            searchTerm.value = searchText.toString()
+            searchFilterLimit.value = searchFilterLimit.value?.copy(first = searchText.toString())
+//            searchTerm.value = searchText.toString()
         }
 
         onFocusChange(binding.etSearchMessage, requireContext())
@@ -539,30 +595,104 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         itemsMessages.observe(
             viewLifecycleOwner,
             Observer { list ->
+
+                val scrollToBottom = when {
+                    adapterMessages.items.isEmpty() && list.isNotEmpty() -> true // on open fragment
+                    newMessageCount > oldMessageCount -> { // on new message
+                        when ((list[list.size-1] as ContactChatItem).chatMessage.outgoing) {
+                            false -> { // incoming message only scroll to bottom when at least one of the last five messages is shown
+                                val layoutManager = LinearLayoutManager::class.java.cast(binding.rvMessages.layoutManager)
+                                if (layoutManager?.findLastVisibleItemPosition()!! < adapterMessages.itemCount - SCROLL_BOTTOM_MESSAGES_SHOWN) {
+                                    binding.tvScrollToBottomNewMessage.isVisible = true
+                                    false
+                                } else true
+                            }
+                            else -> true // outgoing message scroll to bottom
+                        }
+                    }
+                    messageCountChanged -> false // when more messages are shown (scroll to top)
+                    newMessageCount == oldMessageCount -> false // when single items are updated
+                    else -> true
+                }
+
                 adapterMessages.updateItems(list)
                 binding.rvMessages.setItemViewCacheSize(list.size)
 
-                binding.clNewChatRequest.isVisible = getContactStore().getContactFromPublicKey(publicKey) == null && list.none {
-                    (it as ContactChatItem).chatMessage.sender == getTrustChainCommunity().myPeer.publicKey
-                }
+                binding.clNewChatRequest.isVisible = !getPeerChatStore().getContactStateForType(
+                    publicKey,
+                    PeerChatStore.STATUS_BLOCK
+                ) && getContactStore().getContactFromPublicKey(publicKey) == null
 
-                if (!messageCountChanged) {
+//                binding.clNewChatRequest.isVisible = getContactStore().getContactFromPublicKey(publicKey) == null && list.none {
+//                    (it as ContactChatItem).chatMessage.sender == getTrustChainCommunity().myPeer.publicKey
+//                }
+
+                if (scrollToBottom)
                     scrollToBottom(binding.rvMessages)
-                }
 
                 messageCountChanged = false
             }
         )
 
+        binding.rvMessages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val layoutManager = LinearLayoutManager::class.java.cast(recyclerView.layoutManager)
+                val totalItemCount = layoutManager!!.itemCount
+                val firstVisible = layoutManager.findFirstVisibleItemPosition()
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                val topHasBeenReached = firstVisible + 1 <= 2
+                val endHasBeenReached = lastVisible + SCROLL_BOTTOM_MESSAGES_SHOWN >= totalItemCount
+
+                binding.clScrollToBottom.isVisible = !(totalItemCount > 0 && endHasBeenReached)
+
+                if (!(totalItemCount > 0 && endHasBeenReached && !(firstVisible == 0 && lastVisible == totalItemCount - 1))) {
+                    binding.tvScrollToBottomNewMessage.isVisible = false
+                }
+
+                if (topHasBeenReached && newMessageCount >= limitedMessageCount.value!!)
+//                if (topHasBeenReached && newMessageCount >= searchFilterLimit.value!!.third)
+                    showMoreMessages()
+            }
+        })
+
+        binding.clScrollToBottom.setOnClickListener {
+            scrollToBottom(rvMessages)
+        }
+
+//        lifecycleScope.launchWhenCreated {
+//            while (isActive) {
+//                downloadingImages.forEach {
+//                    val file = MessageAttachment.getFile(requireContext(), it)
+//                    if (file.exists()) {
+////                        imageDownloadedTrigger.postValue(true)
+//                        downloadingImages.remove(it)
+//
+//                        val transferProgressMap = parentActivity.getAttachmentTransferProgress().value
+//                        transferProgressMap?.remove(Pair(getTrustChainCommunity().myPeer.key, it))
+//
+//                        if (transferProgressMap != null) {
+//                            parentActivity.setAttachmentTransferProgress(transferProgressMap)
+//                        }
+//
+//                        adapterMessages.notifyDataSetChanged()
+//                    }
+//                }
+//
+//                delay(1000)
+//            }
+//        }
+
         binding.ivSearchClearIcon.setOnClickListener {
             binding.etSearchMessage.text = null
-            searchTerm.value = ""
+            searchFilterLimit.value = searchFilterLimit.value?.copy(first = "")
+//            searchTerm.value = ""
         }
 
         binding.btnUnblockContact.setOnClickListener {
             toggleBlockContact(
                 getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK)
             )
+            clNewChatRequest.isVisible = getContactStore().getContactFromPublicKey(publicKey) == null
         }
 
         contactState.observe(
@@ -635,7 +765,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         super.onCreateOptionsMenu(menu, inflater)
         menu.clear()
         menu.add(Menu.NONE, MENU_ITEM_SEARCH_FILTER, Menu.NONE, null)
-            .setIcon(R.drawable.ic_search_filter)
+            .setIcon(R.drawable.ic_search_filter_up)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
 
         menu.getItem(0).isVisible = binding.clSearchFilter.isVisible
@@ -659,9 +789,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                 binding.etSearchMessage.text = null
                 binding.ivSearchClearIcon.isVisible = false
-                searchTerm.value = ""
-                if (filterType.value != FILTER_TYPE_EVERYTHING) {
-                    filterType.value = FILTER_TYPE_EVERYTHING
+                searchFilterLimit.value = searchFilterLimit.value?.copy(first = "")
+//                searchTerm.value = ""
+                if (searchFilterLimit.value?.second != FILTER_TYPE_EVERYTHING) {
+                    searchFilterLimit.value = searchFilterLimit.value?.copy(second = FILTER_TYPE_EVERYTHING)
+//                    filterType.value = FILTER_TYPE_EVERYTHING
                 }
                 binding.ivFilterByType.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -710,6 +842,28 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 when (selectedItem.itemId) {
                     R.id.actionViewContact -> {
                         ContactInfoDialog(publicKey).show(parentFragmentManager, tag)
+                    }
+                    R.id.actionContactConnectInvitation -> {
+                        val contactConnectPayload = ContactConnectPayload(
+                            getTrustChainCommunity().myPeer.publicKey,
+                            getIdentityCommunity().getIdentityInfo(null)!!
+                        )
+                        getPeerChatCommunity().sendContactConnect(
+                            publicKey,
+                            contactConnectPayload,
+                            PeerChatCommunity.MessageId.CONTACT_CONNECT_REQUEST
+                        )
+                    }
+                    R.id.actionContactConnectConfirmation -> {
+                        val contactConnectPayload = ContactConnectPayload(
+                            getTrustChainCommunity().myPeer.publicKey,
+                            getIdentityCommunity().getIdentityInfo(null)!!
+                        )
+                        getPeerChatCommunity().sendContactConnect(
+                            publicKey,
+                            contactConnectPayload,
+                            PeerChatCommunity.MessageId.CONTACT_CONNECT
+                        )
                     }
                     R.id.actionSearchFilterChat -> {
                         binding.clSearchFilter.isVisible = true
@@ -823,6 +977,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             PeerChatStore.STATUS_BLOCK,
             !isBlocked
         )
+
+        binding.clNewChatRequest.isVisible = !getPeerChatStore().getContactStateForType(publicKey, PeerChatStore.STATUS_BLOCK) && getContactStore().getContactFromPublicKey(publicKey) == null
     }
 
     private fun addRenameContact(contact: Contact) {
@@ -910,9 +1066,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             } else {
                 Color.BLACK
             }
-        } else {
-            color
-        }
+        } else color
 
         val actionBarTypedValue = TypedValue()
         parentActivity.theme.resolveAttribute(
@@ -925,6 +1079,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             ContextCompat.getColor(requireContext(), actionBarTypedValue.resourceId)
         } else Color.WHITE
 
+        val actionBarTitleDrawableColor = if (hide) {
+            Color.WHITE
+        } else ContextCompat.getColor(requireContext(), actionBarTypedValue.resourceId)
+
         parentActivity.supportActionBar!!.apply {
             setBackgroundDrawable(
                 ContextCompat.getDrawable(
@@ -932,10 +1090,17 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     typedValue.resourceId
                 )
             )
-            customView.apply {
-                findViewById<TextView>(R.id.tv_actionbar_title).setTextColor(actionBarTitleColor)
-                findViewById<TextView>(R.id.tv_actionbar_subtitle).setTextColor(actionBarTitleColor)
+
+            customView.findViewById<TextView>(R.id.tv_actionbar_title).apply {
+                setTextColor(actionBarTitleColor)
+                compoundDrawables.forEach { drawable ->
+                    drawable?.colorFilter = PorterDuffColorFilter(
+                        actionBarTitleDrawableColor,
+                        PorterDuff.Mode.SRC_IN
+                    )
+                }
             }
+            customView.findViewById<TextView>(R.id.tv_actionbar_subtitle).setTextColor(actionBarTitleColor)
         }
     }
 
@@ -1012,7 +1177,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     sendFromUri(it, TYPE_IMAGE)
                 }
                 RENAME_CONTACT -> if (data != null) {
-                    searchTerm.value = searchTerm.value
+                    searchFilterLimit.value = searchFilterLimit.value
+//                    searchTerm.value = searchTerm.value
                 }
             }
         } else super.onActivityResult(requestCode, resultCode, data)
@@ -1023,19 +1189,70 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         when (type) {
             TYPE_IMAGE -> {
-                getPeerChatCommunity().sendImage(file, publicKey)
+                getPeerChatCommunity().sendImage(
+                    file,
+                    publicKey,
+                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                )
             }
         }
     }
 
-    private fun createMessagesItems(messages: List<ChatMessage>): List<Item> {
+    private fun createMessagesItems(
+        messages: List<ChatMessage>,
+        transferProgress: MutableMap<String, TransferProgress>
+    ): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
+//            val attachmentID = if (chatMessage.attachment != null && !chatMessage.attachmentFetched) {
+//                chatMessage.attachment?.content?.toHex()
+//            } else null
+
+            val progress = if (chatMessage.attachment != null) {
+                if (!chatMessage.attachmentFetched) {
+                    val attachmentID = chatMessage.attachment?.content?.toHex()
+
+                    if (transferProgress.containsKey(attachmentID)) {
+                        transferProgress[attachmentID]
+                    } else TransferProgress(attachmentID ?: "", TransferState.SCHEDULED, 0.0)
+                } else null
+            } else null
+//
+//
+//
+//                if (chatMessage.attachmentFetched || attachmentTransferProgress[attachmentID]?.state == TransferState.FINISHED) {
+//                    TransferProgress(attachmentID, TransferState.FINISHED, 100.0)
+//                } else if (!chatMessage.attachmentFetched && !attachmentTransferProgress.containsKey(attachmentID)) {
+//
+//                } else {
+//                    if (attachmentTransferProgress.containsKey(attachmentID)) {
+//                        attachmentTransferProgress[attachmentID]
+//                    } else {
+//                        TransferProgress(attachmentID, TransferState.INITIALIZING, 0.0)
+//                    }
+//                }
+//            } else null
+
+//            val transferProgress = if (attachmentID != null) {
+//                if (chatMessage.attachmentFetched || attachmentTransferProgress[attachmentID]?.state == TransferState.FINISHED) {
+//                    TransferProgress(attachmentID, TransferState.FINISHED, 100.0)
+//                } else if (!chatMessage.attachmentFetched && !attachmentTransferProgress.containsKey(attachmentID)) {
+//
+//                } else {
+//                    if (attachmentTransferProgress.containsKey(attachmentID)) {
+//                        attachmentTransferProgress[attachmentID]
+//                    } else {
+//                        TransferProgress(attachmentID, TransferState.INITIALIZING, 0.0)
+//                    }
+//                }
+//            } else null
+
             ContactChatItem(
                 chatMessage,
                 getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash),
-                (index == 0) && (totalMessages >= limitedMessageCount.value?.toInt()!!),
+                false, //                (index == 0) && (totalMessageCount > searchFilterLimit.value?.third!!), // (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!),
                 (index == 0) || (index > 0 && !dateFormat.format(messages[index-1].timestamp).equals(dateFormat.format(chatMessage.timestamp))),
-                false
+                false,
+                progress
             )
         }
     }
@@ -1094,5 +1311,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         const val PERMISSION_LOCATION = 1
         const val PERMISSION_CAMERA = 2
+
+        const val MESSAGES_SHOWN = 20
+        const val MESSAGES_SHOW_MORE = 10
+        const val SCROLL_BOTTOM_MESSAGES_SHOWN = 5
     }
 }

@@ -114,15 +114,30 @@
             app:layout_constraintEnd_toStartOf="@+id/btnNewChatAdd"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
         <Button
             android:id="@+id/btnNewChatAdd"
             style="@style/ButtonGreenRounded"
             android:layout_width="wrap_content"
             android:layout_height="30dp"
             android:layout_marginVertical="4dp"
+            android:layout_marginEnd="8dp"
             android:paddingHorizontal="4dp"
             android:paddingVertical="2dp"
-            android:text="@string/btn_contact_add"
+            android:text="@string/btn_add"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnNewChatBlock"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnNewChatBlock"
+            style="@style/ButtonRedRounded"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginVertical="4dp"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:text="@string/btn_block"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -136,6 +151,46 @@
         app:layout_constraintTop_toBottomOf="@+id/clNewChatRequest"
         tools:itemCount="1"
         tools:listitem="@layout/item_contacts_chat_detail" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clScrollToBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="2dp"
+        android:background="@drawable/pill_rounded_left"
+        app:layout_constraintBottom_toBottomOf="@+id/rvMessages"
+        app:layout_constraintEnd_toEndOf="@+id/rvMessages">
+
+        <ImageView
+            android:id="@+id/ivScrollToBottom"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_circle_arrow_down"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/tvScrollToBottomNewMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@+id/ivScrollToBottom"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="New" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 <!--    <androidx.constraintlayout.widget.ConstraintLayout-->
 <!--        android:id="@+id/clBlockedContact"-->

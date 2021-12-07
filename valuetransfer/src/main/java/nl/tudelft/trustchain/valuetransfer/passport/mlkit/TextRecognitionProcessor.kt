@@ -384,6 +384,7 @@ class TextRecognitionProcessor(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun detectInVisionImage(
         image: InputImage,
         metadata: FrameMetadata,

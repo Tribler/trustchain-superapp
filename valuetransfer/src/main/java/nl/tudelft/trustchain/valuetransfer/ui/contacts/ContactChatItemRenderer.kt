@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
+import android.os.Handler
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -9,6 +11,8 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
+import kotlinx.coroutines.delay
+import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
@@ -22,6 +26,7 @@ import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.math.BigInteger
+import java.math.RoundingMode
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -44,10 +49,12 @@ class ContactChatItemRenderer(
         clTransaction.isVisible = false
         clTransactionResend.isVisible = false
         clAttachmentPhotoVideo.isVisible = false
+        clAttachmentPhotoVideoProgress.isVisible = false
         clAttachmentIdentityAttribute.isVisible = false
         clAttachmentLocation.isVisible = false
         clAttachmentTransferRequest.isVisible = false
         clAttachmentContact.isVisible = false
+        clIdentityUpdated.isVisible = false
 
         tvChatMessage.text = ""
         tvChatMessage.isVisible = false
@@ -60,6 +67,7 @@ class ContactChatItemRenderer(
         tvAttachmentContactPublicKey.text = ""
         tvAttachmentContactPublicKey.isVisible = false
         ivChatItemStatus.isVisible = false
+        tvIdentityUpdatedMessage.text = ""
 
         // Show the load more messages button
         clLoadMoreMessagesSection.isVisible = item.loadMoreMessages
@@ -125,12 +133,68 @@ class ContactChatItemRenderer(
                     clAttachmentPhotoVideo.isVisible = true
                     clAttachmentPhotoVideo.setBackgroundResource(backgroundResource)
 
-                    val file = attachment.getFile(view.context)
-                    if (file.exists()) {
-                        Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
-                        ivAttachmentPhotoVideo.clipToOutline = true
-                    } else {
-                        ivAttachmentPhotoVideo.setImageBitmap(null)
+                    tvAttachmentPhotoVideoSize.isVisible = item.chatMessage.attachment?.size != null
+                    if (item.chatMessage.attachment?.size != null) {
+                        tvAttachmentPhotoVideoSize.setBackgroundResource(backgroundResource)
+                        tvAttachmentPhotoVideoSize.setTextColor(ContextCompat.getColor(this.context, textColor))
+
+                        val size = item.chatMessage.attachment?.size!!.toDouble()
+                        tvAttachmentPhotoVideoSize.text = when {
+                            size >= 1E6 -> StringBuilder()
+                                .append(size.div(1E6).toBigDecimal().setScale(2, RoundingMode.UP).toDouble())
+                                .append("MB")
+                            size >= 1E3 -> StringBuilder()
+                                .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
+                                .append("KB")
+                            else -> StringBuilder()
+                                .append(size)
+                                .append("B")
+                        }
+                    }
+
+                    if (item.chatMessage.outgoing) {
+                        clAttachmentPhotoVideoProgress.isVisible = false
+                    } else { // if (!item.chatMessage.outgoing)
+                        clAttachmentPhotoVideoProgress.isVisible = true
+                        tvAttachmentPhotoVideoProgressStatus.isVisible = true
+
+                        val transferProgress = item.attachtmentTransferProgress
+                        tvAttachmentPhotoVideoProgressStatus.text = when (transferProgress?.state) {
+                            TransferState.INITIALIZING -> "Initializing"
+                            TransferState.SCHEDULED -> "Scheduled"
+                            TransferState.DOWNLOADING -> "Downloading"
+                            TransferState.FINISHED -> {
+                                clAttachmentPhotoVideoProgress.isVisible = false
+                                "Downloaded!"
+                            }
+                            else -> {
+                                tvAttachmentPhotoVideoProgressStatus.isVisible = false
+                                ""
+                            }
+                        }
+
+                        pbAttachmentPhotoVideoLoadingSpinner.apply {
+                            isVisible = !item.chatMessage.attachmentFetched
+                            if (transferProgress != null) {
+                                progress = transferProgress.progress.toInt()
+                            }
+                        }
+                        tvAttachmentPhotoVideoProgress.isVisible =
+                            !item.chatMessage.attachmentFetched
+                        tvAttachmentPhotoVideoProgress.text =
+                            if (!item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING) {
+                                "${transferProgress.progress.toInt()}%"
+                            } else ""
+                    }
+
+                    attachment.getFile(view.context).let { file ->
+                        if (file.exists()) {
+                            clAttachmentPhotoVideoProgress.isVisible = false
+                            Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
+                            ivAttachmentPhotoVideo.clipToOutline = true
+                        } else {
+                            ivAttachmentPhotoVideo.setImageBitmap(null)
+                        }
                     }
 
                     ivAttachmentPhotoVideo.setOnClickListener {
@@ -240,6 +304,11 @@ class ContactChatItemRenderer(
                             onItemClick(item)
                         }
                     }
+                }
+                MessageAttachment.TYPE_IDENTITY_UPDATED -> {
+                    clIdentityUpdated.isVisible = true
+                    tvIdentityUpdatedMessage.text = item.chatMessage.message
+
                 }
             }
         }

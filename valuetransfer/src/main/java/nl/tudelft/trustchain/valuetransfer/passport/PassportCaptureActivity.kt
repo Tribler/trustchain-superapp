@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.CameraSource
@@ -20,9 +21,8 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
     private var preview: CameraSourcePreview? = null
     private var graphicOverlay: GraphicOverlay? = null
     private var feedbackText: TextView? = null
-
-    var documentType: String = PassportHandler.DOCUMENT_TYPE_OTHER
-    var nfcSupported = false
+    private var documentType: String = PassportHandler.DOCUMENT_TYPE_OTHER
+    private var nfcSupported = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +43,10 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
         preview = findViewById(R.id.camera_source_preview)
         graphicOverlay = findViewById(R.id.graphics_overlay)
         feedbackText = findViewById(R.id.tvFeedback)
+
+        findViewById<Button>(R.id.btnScanPrevious).setOnClickListener {
+            onBackPressed()
+        }
 
         onResume()
     }
