@@ -610,7 +610,6 @@ class ValueTransferMainActivity : BaseActivity() {
         action: View.OnClickListener? = null,
         icon: Drawable? = null,
     ) {
-        Log.d("VTLOG", ">>> DISPLAYING SNACKBAR")
         val snackbar = TSnackbar.make(view, text, if (isShort) TSnackbar.LENGTH_SHORT else TSnackbar.LENGTH_LONG)
         val snackbarView = snackbar.view
 

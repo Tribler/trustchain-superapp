@@ -3,7 +3,8 @@
     <string name="filter_everything">Everything</string>
     <string name="filter_message">Message</string>
     <string name="filter_transaction">Transaction</string>
-    <string name="filter_photo_video">Photo/Video</string>
+    <string name="filter_photo">Photo</string>
+    <string name="filter_file">File</string>
     <string name="filter_location">Location</string>
     <string name="filter_contact">Contact</string>
     <string name="filter_identity_attribute">Identity Attribute</string>
@@ -22,11 +23,16 @@
     <string name="menu_exchange_transfer_request">Request Money Transfer</string>
     <string name="menu_contact_chat_attachment_camera">Camera</string>
     <string name="menu_contact_chat_attachment_photo">Photo from Library</string>
+    <string name="menu_contact_chat_attachment_file">File</string>
     <string name="menu_contact_chat_attachment_location">Location</string>
     <string name="menu_contact_chat_attachment_contact">Contact</string>
     <string name="menu_contact_chat_attachment_identity_attribute">Identity Attribute</string>
     <string name="menu_contact_chat_attachment_transfer_money">Transfer Money</string>
     <string name="menu_contact_chat_attachment_transfer_request">Request Money</string>
+    <string name="menu_contact_chat_view_contact">View Contact</string>
+    <string name="menu_contact_chat_view_media">View Media</string>
+    <string name="menu_contact_chat_send_connect_invitation">Send Connect Invitation</string>
+    <string name="menu_contact_chat_send_connect_confirmation">Send Connect Confirmation</string>
     <string name="menu_contact_chat_options_contact_name">Rename Contact</string>
     <string name="menu_contact_chat_options_contact_remove">Remove Contact</string>
     <string name="menu_contact_chat_options_contact_archive">Archive Chat</string>
@@ -238,6 +244,7 @@
     <string name="text_url_google_maps">"https://www.google.com/maps/place/%s,%s"</string>
     <string name="text_transfer_of_request">Transfer of request: %s</string>
     <string name="text_send_photo_video">Send Photo</string>
+    <string name="text_send_file">Send File</string>
     <string name="text_location_address_line">No address found using these coordinates: %s %s</string>
     <string name="text_local_conversation">local conversation completely</string>
     <string name="text_contact_connected">Connected with IPv8</string>
@@ -326,6 +333,9 @@
     <string name="text_identity_updated_verification">The identity verification status changed to %s.</string>
     <string name="text_identity_updated_name">The identity name has changed from %s to %s.</string>
     <string name="text_identity_updated_careful">Please be careful in case the name is unfamiliar.</string>
+    <string name="text_all_media">All Media</string>
+    <string name="text_number_media">%d items</string>
+    <string name="text_no_media">No media is shared yet</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

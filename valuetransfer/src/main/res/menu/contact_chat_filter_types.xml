@@ -13,9 +13,13 @@
         android:icon="@drawable/ic_exchange"
         android:title="@string/filter_transaction" />
     <item
-        android:id="@+id/actionFilterPhotoVideo"
+        android:id="@+id/actionFilterPhoto"
         android:icon="@drawable/ic_media"
-        android:title="@string/filter_photo_video" />
+        android:title="@string/filter_photo" />
+    <item
+        android:id="@+id/actionFilterFile"
+        android:icon="@drawable/ic_file"
+        android:title="@string/filter_file" />
     <item
         android:id="@+id/actionFilterLocation"
         android:icon="@drawable/ic_location"

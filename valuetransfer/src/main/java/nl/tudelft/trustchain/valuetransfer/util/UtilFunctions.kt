@@ -28,6 +28,7 @@ import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import org.json.JSONObject
+import java.math.RoundingMode
 import java.security.MessageDigest
 import java.util.*
 import kotlin.math.abs
@@ -253,4 +254,18 @@ fun String.getInitials(): String {
         if (it.isNotEmpty()) initials.append("${it[0].toUpperCase()}.")
     }
     return initials.toString()
+}
+
+fun getFormattedSize(size: Double): String {
+    return when {
+        size >= 1E6 -> StringBuilder()
+            .append(size.div(1E6).toBigDecimal().setScale(2, RoundingMode.UP).toDouble())
+            .append("MB")
+        size >= 1E3 -> StringBuilder()
+            .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
+            .append("KB")
+        else -> StringBuilder()
+            .append(size)
+            .append("B")
+    }.toString()
 }

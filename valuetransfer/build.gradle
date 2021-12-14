@@ -119,6 +119,9 @@ dependencies {
     implementation 'com.github.mhshams:jnbis:1.1.0'
     implementation 'net.sf.scuba:scuba-sc-android:0.0.20'
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
+
+    // Zoom image
+    implementation 'com.jsibbold:zoomage:1.3.1'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

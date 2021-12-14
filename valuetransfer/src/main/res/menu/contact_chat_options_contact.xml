@@ -3,7 +3,11 @@
     <item
         android:id="@+id/actionViewContact"
         android:icon="@drawable/ic_contact"
-        android:title="View Contact" />
+        android:title="@string/menu_contact_chat_view_contact" />
+    <item
+        android:id="@+id/actionViewMedia"
+        android:icon="@drawable/ic_media_all"
+        android:title="@string/menu_contact_chat_view_media" />
     <item
         android:id="@+id/actionSearchFilterChat"
         android:icon="@drawable/ic_search_filter"
