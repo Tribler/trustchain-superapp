@@ -45,15 +45,6 @@ class ChatMediaDialog(
     private lateinit var bottomSheetDialog: Dialog
     private lateinit var dialogView: View
 
-//    private val itemsChatImages: LiveData<List<Item>> by lazy {
-//        getPeerChatStore().getAllAttachmentsByPublicKey(publicKey, MessageAttachment.TYPE_IMAGE).map { messages ->
-//            val items = createMediaItems(messages.filter {
-//                it.attachment?.getFile(requireContext()) != null
-//            })
-//            items
-//        }.asLiveData()
-//    }
-
     private val itemsChatMedia: LiveData<List<Item>> by lazy {
         getPeerChatStore().getAllByPublicKey(publicKey).map { messages ->
             val items = messages.filter {
@@ -186,14 +177,7 @@ class ChatMediaDialog(
                     MessageAttachment.TYPE_IMAGE -> BitmapFactory.decodeFile(currentItem.file.path).let { bitmap ->
                             saveImage(c, bitmap, currentItem.file.name)
                         }
-                    MessageAttachment.TYPE_FILE -> {
-//                        if (currentItem.fileName.isNullOrEmpty()) {
-//                            Toast.makeText(c, "Couldn't save file because it's original filename is missing", Toast.LENGTH_LONG).show()
-//                        } else {
-//                            Log.d("VTLOG", "FILE: ${currentItem.file.name} ${currentItem.fileName}")
-                            saveFile(c, currentItem.file, currentItem.fileName ?: currentItem.file.name)
-//                        }
-                    }
+                    MessageAttachment.TYPE_FILE -> saveFile(c, currentItem.file, currentItem.fileName ?: currentItem.file.name)
                 }
             }
             R.id.actionAllMedia -> {

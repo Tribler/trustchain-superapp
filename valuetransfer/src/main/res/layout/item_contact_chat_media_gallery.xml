@@ -7,16 +7,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="1dp">
-<!--<androidx.cardview.widget.CardView-->
-<!--    xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
-<!--    xmlns:tools="http://schemas.android.com/tools"-->
-<!--    android:layout_width="match_parent"-->
-<!--    android:layout_height="match_parent"-->
-<!--    android:layout_gravity="center"-->
-<!--    android:layout_margin="5dp"-->
-<!--    app:cardCornerRadius="5dp"-->
-<!--    app:cardElevation="5dp">-->
 
     <ImageView
         android:id="@+id/ivImageItem"
@@ -74,18 +64,4 @@
             android:src="@drawable/ic_file" />
 
     </FrameLayout>
-
-<!--    <ImageView-->
-<!--        android:id="@+id/ivImageItem"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:layout_gravity="center_horizontal"-->
-<!--        android:scaleType="fitCenter"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintDimensionRatio="w,1:1"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:src="@drawable/ic_18_plus" />-->
-
 </androidx.constraintlayout.widget.ConstraintLayout>

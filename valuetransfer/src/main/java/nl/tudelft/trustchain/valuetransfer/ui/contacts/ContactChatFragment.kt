@@ -221,15 +221,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         when (attachment.type) {
                             MessageAttachment.TYPE_FILE -> {
                                 val file = attachment.getFile(requireContext())
-//                                val fileName = it.chatMessage.message
-//
-//                                if (storageIsWritable()) {
-//                                     Log.d("VTLOG", "FILE ID: ${file.name}")
-//                                    saveDocument(requireContext(), file, fileName)
-//                                } else {
-//                                    Log.d("VTLOG", "FAILED TO SAVE DOCUMENT BECAUSE OF EXTERNAL ...")
-//                                    Toast.makeText(requireContext(), "Storage is not writable", Toast.LENGTH_SHORT).show()
-//                                }
 
                                 if (file.exists()) {
                                     val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
@@ -261,7 +252,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             MessageAttachment.TYPE_IMAGE -> {
                                 val file = attachment.getFile(requireContext())
                                 if (file.exists()) {
-//                                    openImage(file)
                                     val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
                                         "You"
                                     } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
@@ -403,8 +393,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 },
                 {
                     showMoreMessages()
-//                    messageCountChanged = true
-//                    limitedMessageCount.value = limitedMessageCount.value?.plus(MESSAGES_SHOW_MORE)
                 }
             )
         )
@@ -655,7 +643,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             ) { _, item ->
                 searchFilterLimit.value = searchFilterLimit.value?.copy(second = item.title.toString())
 
-//                filterType.value = item.title.toString()
                 binding.ivFilterByType.setImageDrawable(item.icon)
             }.show(parentFragmentManager, tag)
         }
@@ -663,7 +650,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         binding.etSearchMessage.doAfterTextChanged { searchText ->
             ivSearchClearIcon.isVisible = searchText != null && searchText.isNotEmpty()
             searchFilterLimit.value = searchFilterLimit.value?.copy(first = searchText.toString())
-//            searchTerm.value = searchText.toString()
         }
 
         onFocusChange(binding.etSearchMessage, requireContext())
@@ -699,10 +685,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     PeerChatStore.STATUS_BLOCK
                 ) && getContactStore().getContactFromPublicKey(publicKey) == null
 
-//                binding.clNewChatRequest.isVisible = getContactStore().getContactFromPublicKey(publicKey) == null && list.none {
-//                    (it as ContactChatItem).chatMessage.sender == getTrustChainCommunity().myPeer.publicKey
-//                }
-
                 if (scrollToBottom)
                     scrollToBottom(binding.rvMessages)
 
@@ -726,7 +708,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 }
 
                 if (topHasBeenReached && newMessageCount >= limitedMessageCount.value!!)
-//                if (topHasBeenReached && newMessageCount >= searchFilterLimit.value!!.third)
                     showMoreMessages()
             }
         })
@@ -735,33 +716,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             scrollToBottom(rvMessages)
         }
 
-//        lifecycleScope.launchWhenCreated {
-//            while (isActive) {
-//                downloadingImages.forEach {
-//                    val file = MessageAttachment.getFile(requireContext(), it)
-//                    if (file.exists()) {
-////                        imageDownloadedTrigger.postValue(true)
-//                        downloadingImages.remove(it)
-//
-//                        val transferProgressMap = parentActivity.getAttachmentTransferProgress().value
-//                        transferProgressMap?.remove(Pair(getTrustChainCommunity().myPeer.key, it))
-//
-//                        if (transferProgressMap != null) {
-//                            parentActivity.setAttachmentTransferProgress(transferProgressMap)
-//                        }
-//
-//                        adapterMessages.notifyDataSetChanged()
-//                    }
-//                }
-//
-//                delay(1000)
-//            }
-//        }
-
         binding.ivSearchClearIcon.setOnClickListener {
             binding.etSearchMessage.text = null
             searchFilterLimit.value = searchFilterLimit.value?.copy(first = "")
-//            searchTerm.value = ""
         }
 
         binding.btnUnblockContact.setOnClickListener {
@@ -866,10 +823,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 binding.etSearchMessage.text = null
                 binding.ivSearchClearIcon.isVisible = false
                 searchFilterLimit.value = searchFilterLimit.value?.copy(first = "")
-//                searchTerm.value = ""
+
                 if (searchFilterLimit.value?.second != FILTER_TYPE_EVERYTHING) {
                     searchFilterLimit.value = searchFilterLimit.value?.copy(second = FILTER_TYPE_EVERYTHING)
-//                    filterType.value = FILTER_TYPE_EVERYTHING
                 }
                 binding.ivFilterByType.setImageDrawable(
                     ContextCompat.getDrawable(
@@ -1285,17 +1241,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 val documentFile = DocumentFile.fromSingleUri(requireContext(), uri)
                 val fileName = documentFile?.name
 
-//                if (fileName.isNullOrEmpty() || fileName == file.name) {
-//                    Toast.makeText(requireContext(), "File couldn't be sent", Toast.LENGTH_SHORT).show()
-//                    return
-//                } else if (fileName.getExtension() == null) {
-//                    Toast.makeText(requireContext(), "The file should have an extension", Toast.LENGTH_SHORT).show()
-//                    return
-//                } else if (fileName.getMimeTypeFromExtension() == null) {
-//                    Toast.makeText(requireContext(), "The MIME-type of the file couldn't be determined", Toast.LENGTH_SHORT).show()
-//                    return
-//                }
-
                 getPeerChatCommunity().sendFile(
                     file,
                     fileName ?: file.name,
@@ -1306,34 +1251,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-    fun getFilename(context: Context, uri: Uri): String? {
-        return when(uri.scheme) {
-            ContentResolver.SCHEME_CONTENT -> {
-                context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                    val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    val name = cursor.getString(nameIndex)
-                    cursor.close()
-                    name
-                }
-            }
-            ContentResolver.SCHEME_FILE-> {
-                uri.path?.let { path ->
-                    File(path).name
-                }
-            }
-            else -> "unknown"
-        }
-    }
-
     private fun createMessagesItems(
         messages: List<ChatMessage>,
         transferProgress: MutableMap<String, TransferProgress>
     ): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
-//            val attachmentID = if (chatMessage.attachment != null && !chatMessage.attachmentFetched) {
-//                chatMessage.attachment?.content?.toHex()
-//            } else null
-
             val progress = if (chatMessage.attachment != null) {
                 if (!chatMessage.attachmentFetched) {
                     val attachmentID = chatMessage.attachment?.content?.toHex()
@@ -1343,35 +1265,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     } else TransferProgress(attachmentID ?: "", TransferState.SCHEDULED, 0.0)
                 } else null
             } else null
-//
-//
-//
-//                if (chatMessage.attachmentFetched || attachmentTransferProgress[attachmentID]?.state == TransferState.FINISHED) {
-//                    TransferProgress(attachmentID, TransferState.FINISHED, 100.0)
-//                } else if (!chatMessage.attachmentFetched && !attachmentTransferProgress.containsKey(attachmentID)) {
-//
-//                } else {
-//                    if (attachmentTransferProgress.containsKey(attachmentID)) {
-//                        attachmentTransferProgress[attachmentID]
-//                    } else {
-//                        TransferProgress(attachmentID, TransferState.INITIALIZING, 0.0)
-//                    }
-//                }
-//            } else null
-
-//            val transferProgress = if (attachmentID != null) {
-//                if (chatMessage.attachmentFetched || attachmentTransferProgress[attachmentID]?.state == TransferState.FINISHED) {
-//                    TransferProgress(attachmentID, TransferState.FINISHED, 100.0)
-//                } else if (!chatMessage.attachmentFetched && !attachmentTransferProgress.containsKey(attachmentID)) {
-//
-//                } else {
-//                    if (attachmentTransferProgress.containsKey(attachmentID)) {
-//                        attachmentTransferProgress[attachmentID]
-//                    } else {
-//                        TransferProgress(attachmentID, TransferState.INITIALIZING, 0.0)
-//                    }
-//                }
-//            } else null
 
             ContactChatItem(
                 chatMessage,
