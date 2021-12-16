@@ -203,7 +203,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         }
 
         getPeerChatCommunity().setEVAOnReceiveCompleteCallback { _, info, fileID, _ ->
-            Log.d("VTLOG", "CONTACT CHAT SEND COMPLETE CALLBACK '$info'")
+            Log.d("VTLOG", "CONTACT CHAT RECEIVE COMPLETE CALLBACK '$info'")
 
             downloadProgress.value?.let { map ->
                 map.remove(fileID)
