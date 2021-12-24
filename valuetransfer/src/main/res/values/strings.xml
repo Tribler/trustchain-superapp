@@ -89,6 +89,8 @@
     <string name="dialog_title_identity_onboarding_scan">Scan Document</string>
     <string name="dialog_title_identity_onboarding_read">Read Document</string>
     <string name="dialog_title_identity_onboarding_confirm">Confirm Identity</string>
+    <string name="dialog_filter_by">Filter by</string>
+    <string name="dialog_choose_option">Choose Option</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -193,6 +195,8 @@
     <string name="text_exchange_signing_transaction">Signing transaction…</string>
     <string name="text_unknown_contact">Unknown contact</string>
     <string name="text_unknown_contact_extra">Unknown contact (%s)</string>
+    <string name="text_to_contact">to %s</string>
+    <string name="text_unknown_contact_lowercase">unknown contact</string>
     <string name="text_no_chats">There are no chats with contacts yet</string>
     <string name="text_no_archived_chats">There are no archived chats with contacts yet</string>
     <string name="text_no_blocked_chats">There are no blocked chats</string>
@@ -341,6 +345,12 @@
     <string name="text_all_media">All Media</string>
     <string name="text_number_media">%d items</string>
     <string name="text_no_media">No media is shared yet</string>
+    <string name="text_location">Location</string>
+    <string name="text_address_not_found">No address found</string>
+    <string name="text_send_current_location">Send current location</string>
+    <string name="text_send_this_location">Send this location</string>
+    <string name="text_you">You</string>
+    <string name="text_storage_not_writable">Storage is not writable</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>
@@ -400,4 +410,5 @@
     <string name="snackbar_identity_update_error">Identity couldn\'t be updated</string>
     <string name="snackbar_identity_add_cancelled">Adding identity cancelled. Without an identity you\'ll not be able to use this application.</string>
     <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
+
 </resources>

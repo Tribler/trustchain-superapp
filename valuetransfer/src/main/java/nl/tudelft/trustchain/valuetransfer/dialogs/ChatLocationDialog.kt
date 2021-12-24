@@ -8,7 +8,6 @@ import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
@@ -25,7 +24,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import java.util.*
 
@@ -75,11 +73,15 @@ class ChatLocationDialog(
             subTitleView = view.findViewById(R.id.tvActionbarSubTitle)
 
             if (location != null) {
-                titleView.text = "Location"
-                subTitleView.text = getAddress(location.latitude, location.longitude) ?: "No address found"
+                titleView.text = getString(R.string.text_location)
+                subTitleView.text = getAddress(location.latitude, location.longitude) ?: resources.getString(R.string.text_address_not_found)
             } else {
                 titleView.text = resources.getString(R.string.dialog_title_contact_chat_send_location)
-                subTitleView.text = "to ${contact?.name ?: "unknown contact"}"
+                subTitleView.text = resources.getString(
+                    R.string.text_to_contact,
+                    contact?.name ?: resources.getString(R.string.text_unknown_contact_lowercase)
+                )
+                resources.getString(R.string.text_unknown_contact)
             }
 
             mapFragment = childFragmentManager.findFragmentById(R.id.fragmentMap) as SupportMapFragment
@@ -113,7 +115,7 @@ class ChatLocationDialog(
                 }.let {
                     getPeerChatCommunity().sendLocation(
                         it,
-                        getAddress(it.latitude, it.longitude) ?: "No address found",
+                        getAddress(it.latitude, it.longitude) ?: resources.getString(R.string.text_address_not_found),
                         publicKey,
                         getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                     )
@@ -171,7 +173,7 @@ class ChatLocationDialog(
                     val latLng = LatLng(it.latitude, it.longitude)
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
 
-                    locationTypeSend.text = "Send current location"
+                    locationTypeSend.text = resources.getString(R.string.text_send_current_location)
                     locationNameSend.text = getAddress(it.latitude, it.longitude)
 
                     mapInitialized = true
@@ -196,7 +198,7 @@ class ChatLocationDialog(
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.cameraPosition.zoom))
 
             locationSendView.isVisible = location == null
-            locationTypeSend.text = "Send this location"
+            locationTypeSend.text = resources.getString(R.string.text_send_this_location)
             locationNameSend.text = getAddress(latitude, longitude)
         }
     }
@@ -210,7 +212,7 @@ class ChatLocationDialog(
             locationSendView.isVisible = map.isMyLocationEnabled
 
             if (map.isMyLocationEnabled) {
-                locationTypeSend.text = "Send current location"
+                locationTypeSend.text = resources.getString(R.string.text_send_current_location)
                 locationNameSend.text = getAddress(map.myLocation.latitude, map.myLocation.longitude)
             }
 

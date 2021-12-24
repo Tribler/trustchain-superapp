@@ -61,7 +61,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.recyclerview.widget.RecyclerView
 import android.graphics.PorterDuff
-
 import android.graphics.PorterDuffColorFilter
 import android.util.Log
 import androidx.documentfile.provider.DocumentFile
@@ -158,9 +157,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private var cameraUri: Uri? = null
     private var downloadProgress: MutableLiveData<MutableMap<String, TransferProgress>> = MutableLiveData(mutableMapOf())
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var lastLocation: Location? = null
-
     init {
         setHasOptionsMenu(true)
 
@@ -205,8 +201,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             }
         }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(parentActivity)
-
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(
                 parentActivity,
@@ -220,7 +214,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                                 if (file.exists()) {
                                     val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
-                                        "You"
+                                        resources.getString(R.string.text_you)
                                     } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
                                     val sendDate = it.chatMessage.timestamp
 
@@ -249,7 +243,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 val file = attachment.getFile(requireContext())
                                 if (file.exists()) {
                                     val senderName = if (getTrustChainCommunity().myPeer.publicKey == publicKey) {
-                                        "You"
+                                        resources.getString(R.string.text_you)
                                     } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
                                     val sendDate = it.chatMessage.timestamp
 
@@ -585,7 +579,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         binding.clFilterByType.setOnClickListener {
             OptionsDialog(
                 R.menu.contact_chat_filter_types,
-                "Filter by"
+                resources.getString(R.string.dialog_filter_by)
             ) { _, item ->
                 searchFilterLimit.value = searchFilterLimit.value?.copy(second = item.title.toString())
 
@@ -798,7 +792,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         OptionsDialog(
             menuId,
-            "Choose Option",
+            resources.getString(R.string.dialog_choose_option),
             menuMods = { menu ->
                 if (contactState != null) {
                     if (contactState.isArchived) {

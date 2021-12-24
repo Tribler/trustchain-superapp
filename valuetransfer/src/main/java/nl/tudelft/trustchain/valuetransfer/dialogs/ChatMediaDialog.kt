@@ -169,7 +169,7 @@ class ChatMediaDialog(
                 val currentItem = chatMediaDetailAdapter.getItem(index) as ChatMediaItem
 
                 if (!storageIsWritable()) {
-                    Toast.makeText(c, "Storage is not writable", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(c, resources.getString(R.string.text_storage_not_writable), Toast.LENGTH_SHORT).show()
                     return true
                 }
 
@@ -203,7 +203,7 @@ class ChatMediaDialog(
     private fun createMediaItems(messages: List<ChatMessage>): List<Item> {
         return messages.map { item ->
             val senderName = if (getTrustChainCommunity().myPeer.publicKey == item.sender) {
-                "You"
+                resources.getString(R.string.text_you)
             } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
 
             val messageID = item.id
