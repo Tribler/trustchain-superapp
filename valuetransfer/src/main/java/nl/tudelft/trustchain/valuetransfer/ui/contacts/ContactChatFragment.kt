@@ -3,18 +3,11 @@ package nl.tudelft.trustchain.valuetransfer.ui.contacts
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.Dialog
-import android.content.ContentResolver
 import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -64,17 +57,15 @@ import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.util.*
 import org.json.JSONObject
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.recyclerview.widget.RecyclerView
 import android.graphics.PorterDuff
 
 import android.graphics.PorterDuffColorFilter
-import android.provider.OpenableColumns
 import android.util.Log
-import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import com.google.android.gms.location.*
 import nl.tudelft.ipv8.messaging.eva.TransferState
 
 class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
@@ -167,6 +158,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private var cameraUri: Uri? = null
     private var downloadProgress: MutableLiveData<MutableMap<String, TransferProgress>> = MutableLiveData(mutableMapOf())
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var lastLocation: Location? = null
+
     init {
         setHasOptionsMenu(true)
 
@@ -210,6 +204,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 downloadProgress.postValue(map)
             }
         }
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(parentActivity)
 
         adapterMessages.registerRenderer(
             ContactChatItemRenderer(
@@ -319,20 +315,14 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             MessageAttachment.TYPE_LOCATION -> {
                                 val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
                                 JSONObject(offsetBuffer.decodeToString()).let { json ->
-                                    val latitude = json.getString(resources.getString(R.string.text_latitude))
-                                    val longitude = json.getString(resources.getString(R.string.text_longitude))
-
-                                    val browserIntent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(
-                                            resources.getString(
-                                                R.string.text_url_google_maps,
-                                                latitude,
-                                                longitude
-                                            )
-                                        )
-                                    )
-                                    startActivity(browserIntent)
+                                    Location("").apply {
+                                        latitude =
+                                            json.getDouble(resources.getString(R.string.text_latitude))
+                                        longitude =
+                                            json.getDouble(resources.getString(R.string.text_longitude))
+                                    }.let { loc ->
+                                        ChatLocationDialog(publicKey, loc).show(parentFragmentManager, tag)
+                                    }
                                 }
                             }
                             MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> {
@@ -536,51 +526,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             PICK_FILE
                         )
                     }
-                    R.id.actionSendLocation -> {
-                        if (!checkLocationPermissions()) {
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_location_retrieve_error),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                            )
-                        } else {
-                            val location = getLocation()
-
-                            if (location != null) {
-                                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                                val address = geocoder.getFromLocation(
-                                    location.latitude,
-                                    location.longitude,
-                                    1
-                                )
-
-                                var addressLine = resources.getString(
-                                    R.string.text_location_address_line,
-                                    location.latitude.toString(),
-                                    location.longitude.toString()
-                                )
-
-                                try {
-                                    addressLine = address[0].getAddressLine(0)
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                }
-
-                                getPeerChatCommunity().sendLocation(
-                                    location,
-                                    addressLine,
-                                    publicKey,
-                                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
-                                )
-                            } else {
-                                parentActivity.displaySnackbar(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_location_no_location_error),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                                )
-                            }
-                        }
-                    }
+                    R.id.actionSendLocation -> ChatLocationDialog(publicKey).show(parentFragmentManager, tag)
                     R.id.actionSendContact -> ContactShareDialog(
                         null,
                         contact
@@ -1026,63 +972,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         dialogContactRename.show(requireFragmentManager().beginTransaction(), "dialog")
     }
 
-    private fun checkLocationPermissions(): Boolean {
-        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) ||
-            (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        ) {
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION), PERMISSION_LOCATION)
-
-            return false
-        }
-
-        return true
-    }
-
-    private fun checkCameraPermissions(): Boolean {
-        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                PERMISSION_CAMERA
-            )
-
-            return false
-        }
-
-        return true
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun getLocation(): Location? {
-        val locationManager = parentActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        for (provider in listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)) {
-            val location = locationManager.getLastKnownLocation(provider)
-            if (location != null) {
-                return location
-            }
-        }
-
-        return null
-    }
-
-    private fun openImage(file: File) {
-        Dialog(requireContext()).apply {
-            window?.requestFeature(Window.FEATURE_NO_TITLE)
-            setContentView(
-                layoutInflater.inflate(
-                    R.layout.dialog_image,
-                    null
-                )
-            )
-
-            BitmapFactory.decodeFile(file.absolutePath).let {
-                this.ivImageFullScreen.setImageBitmap(it)
-            }
-
-            window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }.show()
-    }
-
     private fun toggleSearchFilterBar(hide: Boolean = true) {
         binding.clSearchFilter.isVisible = !hide
 
@@ -1277,25 +1166,25 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
+    private fun checkCameraPermissions(): Boolean {
+        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                PERMISSION_CAMERA
+            )
+
+            return false
+        }
+
+        return true
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == PERMISSION_LOCATION) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                parentActivity.displaySnackbar(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_permission_location_granted)
-                )
-            } else {
-                parentActivity.displaySnackbar(
-                    requireContext(),
-                    resources.getString(R.string.snackbar_permission_denied),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                )
-            }
-        } else if (requestCode == PERMISSION_CAMERA) {
+        if (requestCode == PERMISSION_CAMERA) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 parentActivity.displaySnackbar(
                     requireContext(),
@@ -1332,7 +1221,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         const val FILTER_TYPE_CONTACT = "Contact"
         const val FILTER_TYPE_IDENTITY_ATTRIBUTE = "Identity Attribute"
 
-        const val PERMISSION_LOCATION = 1
         const val PERMISSION_CAMERA = 2
 
         const val MESSAGES_SHOWN = 20

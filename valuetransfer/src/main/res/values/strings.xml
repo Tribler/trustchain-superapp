@@ -58,6 +58,10 @@
     <string name="menu_identity_attribute_edit">Edit Identity Attribute</string>
     <string name="menu_identity_attribute_delete">Delete Identity Attribute</string>
     <string name="menu_identity_attribute_share">Share Identity Attribute</string>
+    <string name="menu_maps_normal_map">Normal Map</string>
+    <string name="menu_maps_hybrid_map">Hybrid Map</string>
+    <string name="menu_maps_satellite_map">Satellite Map</string>
+    <string name="menu_maps_terrain_map">Terrain Map</string>
 
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
@@ -66,6 +70,7 @@
     <string name="dialog_title_contact_name">Contact Name</string>
     <string name="dialog_title_contact_nickname">Contact Nickname</string>
     <string name="dialog_title_contact_add">Add Contact</string>
+    <string name="dialog_title_contact_chat_send_location">Send Location</string>
     <string name="dialog_title_exchange_gateway_connect">Connect to Gateway</string>
     <string name="dialog_title_exchange_gateway_sell">Sell to Gateway</string>
     <string name="dialog_title_attestation">Attestation</string>
@@ -361,6 +366,8 @@
     <string name="snackbar_transfer_error_contact_add">Please add contact first to transfer money</string>
     <string name="snackbar_request_error_contact_add">Please add contact first to request money</string>
     <string name="snackbar_location_retrieve_error">The location could not be retrieved, please grant permissions or try again</string>
+    <string name="snackbar_location_disabled">The location has been disabled in phone settings, please enable and try again</string>
+    <string name="snackbar_location_fetch_fail">Failed to retrieve current location, please try again later</string>
     <string name="snackbar_camera_retrieve_error">The camera could not be retrieved, please grant permissions or try again</string>
     <string name="snackbar_location_no_location_error">No last known location could be found, please try again or wait some time</string>
     <string name="snackbar_chat_remove_success">Local conversation has been removed</string>

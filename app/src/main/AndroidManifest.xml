@@ -124,6 +124,10 @@
             android:name="com.example.musicdao.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyA3FH8vlkY_DyENUT5J7R48a8IRY9FUkJQ"/>
     </application>
 
 </manifest>
