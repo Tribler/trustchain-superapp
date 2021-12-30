@@ -507,7 +507,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     R.id.actionSendFile -> {
                         val mimeTypes = arrayOf(
                             "application/pdf",
-                            "video/*"
+                            "video/*",
+                            "text/plain",
+                            "application/*"
                         )
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
                         intent.type = "*/*"

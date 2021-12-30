@@ -10,8 +10,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:animateLayoutChanges="true"
+        android:orientation="vertical"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -21,115 +21,65 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/tbActionBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:backgroundTint="?attr/backgroundColor"
-            app:contentInsetLeft="0dp"
-            app:contentInsetStart="0dp"
-            app:contentInsetEnd="4dp"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true">
-
-        <RelativeLayout
-            android:id="@+id/rlActionBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:backgroundTint="?attr/backgroundColor"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true">
-
-<!--                <ImageButton-->
-<!--                    android:id="@+id/btnBack"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:scaleType="fitCenter"-->
-<!--                    android:cropToPadding="false"-->
-<!--                    android:padding="12dp"-->
-<!--                    android:src="?attr/homeAsUpIndicator"-->
-<!--                    android:background="@color/zxing_transparent"-->
-<!--                    app:tint="?attr/onBackgroundColor"-->
-<!--                    android:layout_alignParentStart="true" />-->
-
-<!--            <ImageView-->
-<!--                android:id="@+id/ivBack"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="50dp"-->
-<!--                android:layout_marginStart="4dp"-->
-<!--                android:padding="12dp"-->
-<!--                android:scaleType="center"-->
-<!--                android:src="@drawable/ic_baseline_arrow_back_ios_24"-->
-<!--                app:tint="?attr/onBackgroundColor"-->
-<!--                android:layout_alignParentStart="true" />-->
-
-
-<!--            android:layout_toStartOf="@+id/btnOptions"-->
-            <RelativeLayout
-                android:id="@+id/llTitleSubtitle"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/tbActionBar"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:layout_alignParentStart="true">
+                android:backgroundTint="?attr/backgroundColor"
+                app:contentInsetEnd="4dp"
+                app:contentInsetLeft="0dp"
+                app:contentInsetStart="0dp"
+                app:navigationIcon="?attr/homeAsUpIndicator">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tvActionbarSender"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <RelativeLayout
+                    android:id="@+id/rlActionBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_alignParentStart="true"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="?attr/onBackgroundColor"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    tools:text="You" />
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:backgroundTint="?attr/backgroundColor"
+                    android:orientation="horizontal">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tvActionbarTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/tvActionbarSender"
-                    android:layout_alignParentStart="true"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="?attr/onBackgroundSecondaryColor"
-                    android:textSize="14sp"
-                    tools:text="01/01/2021, 13:37" />
+                    <RelativeLayout
+                        android:id="@+id/llTitleSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentEnd="true"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
 
-            </RelativeLayout>
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvActionbarSender"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="?attr/onBackgroundColor"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            tools:text="You" />
 
-<!--            <ImageButton-->
-<!--                android:id="@+id/btnOptions"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:layout_alignParentEnd="true"-->
-<!--                android:layout_marginStart="8dp"-->
-<!--                android:background="@color/zxing_transparent"-->
-<!--                android:cropToPadding="false"-->
-<!--                android:padding="12dp"-->
-<!--                android:scaleType="fitCenter"-->
-<!--                android:src="@drawable/ic_baseline_more_vert_24"-->
-<!--                app:tint="?attr/onBackgroundColor" />-->
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvActionbarTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/tvActionbarSender"
+                            android:layout_alignParentStart="true"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="?attr/onBackgroundSecondaryColor"
+                            android:textSize="14sp"
+                            tools:text="01/01/2021, 13:37" />
 
-<!--            <ImageView-->
-<!--                android:id="@+id/ivOptions"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="50dp"-->
-<!--                android:layout_marginStart="4dp"-->
-<!--                android:padding="12dp"-->
-<!--                android:scaleType="center"-->
-<!--                android:src="@drawable/ic_baseline_more_vert_24"-->
-<!--                app:tint="?attr/onBackgroundColor"-->
-<!--                android:layout_alignParentEnd="true" />-->
-
-        </RelativeLayout>
-        </androidx.appcompat.widget.Toolbar>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </androidx.appcompat.widget.Toolbar>
         </com.google.android.material.appbar.AppBarLayout>
 
         <include
@@ -145,55 +95,6 @@
             android:layout_height="match_parent"
             android:layout_below="@+id/ablActionBar"
             android:orientation="vertical" />
-
-<!--        <com.jsibbold.zoomage.ZoomageView-->
-<!--            android:id="@+id/zmImage"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_above="@+id/llPreviousNext"-->
-<!--            android:layout_below="@+id/ablActionBar"-->
-<!--            android:layout_alignParentStart="true"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            app:zoomage_animateOnReset="true"-->
-<!--            app:zoomage_autoCenter="true"-->
-<!--            app:zoomage_autoResetMode="UNDER"-->
-<!--            app:zoomage_maxScale="8"-->
-<!--            app:zoomage_minScale="0.6"-->
-<!--            app:zoomage_restrictBounds="false"-->
-<!--            app:zoomage_translatable="true"-->
-<!--            app:zoomage_zoomable="true" />-->
-
-<!--        <LinearLayout-->
-<!--            android:id="@+id/llPreviousNext"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:weightSum="2"-->
-<!--            android:layout_alignParentBottom="true">-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/tvPrevious"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="40dp"-->
-<!--                android:paddingStart="8dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:gravity="center_vertical|start"-->
-<!--                android:text="Previous"-->
-<!--                android:drawableLeft="@drawable/ic_baseline_arrow_back_ios_24"-->
-<!--                android:drawableTint="?attr/onBackgroundSecondaryColor"/>-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/tvNext"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="40dp"-->
-<!--                android:layout_weight="1"-->
-<!--                android:paddingEnd="8dp"-->
-<!--                android:gravity="center_vertical|end"-->
-<!--                android:text="Next"-->
-<!--                android:drawableRight="@drawable/ic_baseline_arrow_forward_ios_24"-->
-<!--                android:drawableTint="?attr/onBackgroundSecondaryColor"/>-->
-
-<!--        </LinearLayout>-->
-
 
     </RelativeLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

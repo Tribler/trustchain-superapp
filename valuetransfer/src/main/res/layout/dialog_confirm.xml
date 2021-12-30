@@ -11,7 +11,7 @@
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Are you sure?"
+        android:text="@string/text_confirm_are_you_sure"
         android:textColor="?attr/onDialogColor"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginTop="12dp"
-        android:text="OK"
+        android:text="@string/text_confirm_ok"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
@@ -36,7 +36,7 @@
         android:layout_height="35dp"
         android:layout_marginRight="12dp"
         android:layout_marginTop="12dp"
-        android:text="CANCEL"
+        android:text="@string/text_confirm_cancel"
         app:layout_constraintEnd_toStartOf="@+id/btnPositive"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 </androidx.constraintlayout.widget.ConstraintLayout>

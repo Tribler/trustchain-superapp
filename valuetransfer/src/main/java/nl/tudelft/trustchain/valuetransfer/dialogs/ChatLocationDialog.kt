@@ -119,6 +119,7 @@ class ChatLocationDialog(
                         publicKey,
                         getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                     )
+                    bottomSheetDialog.dismiss()
                 }
             }
             R.id.llOpenDirections -> {

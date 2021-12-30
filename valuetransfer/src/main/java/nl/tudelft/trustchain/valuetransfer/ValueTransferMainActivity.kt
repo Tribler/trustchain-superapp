@@ -2,15 +2,12 @@ package nl.tudelft.trustchain.valuetransfer
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Dialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.sqlite.SQLiteConstraintException
-import android.graphics.BitmapFactory
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -34,7 +31,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
-import androidx.lifecycle.Observer
 import com.androidadvance.topsnackbar.TSnackbar
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
@@ -49,13 +45,8 @@ import nl.tudelft.ipv8.attestation.WalletAttestation
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.keyvault.Key
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.messaging.eva.EVAProtocol
-import nl.tudelft.ipv8.messaging.eva.TransferException
-import nl.tudelft.ipv8.messaging.eva.TransferProgress
-import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.BaseActivity

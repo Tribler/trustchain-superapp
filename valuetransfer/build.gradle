@@ -97,6 +97,8 @@ dependencies {
     implementation project(path: ':peerchat')
     implementation project(path: ':eurotoken')
     implementation project(path: ':ig-ssi')
+    implementation 'com.google.android.gms:play-services-maps:18.0.0'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Testing

@@ -97,7 +97,8 @@ class ExchangeTransferMoneyDialog(
             parentActivity.getBalance(true).observe(
                 this,
                 Observer {
-                    transactionAmountView.hint = resources.getString(R.string.text_balance_max, it)
+
+                    transactionAmountView.hint = if (isTransfer) resources.getString(R.string.text_balance_max, it) else ""
                 }
             )
 

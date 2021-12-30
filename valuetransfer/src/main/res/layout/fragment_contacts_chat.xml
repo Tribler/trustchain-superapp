@@ -161,7 +161,9 @@
         android:paddingVertical="2dp"
         android:background="@drawable/pill_rounded_left"
         app:layout_constraintBottom_toBottomOf="@+id/rvMessages"
-        app:layout_constraintEnd_toEndOf="@+id/rvMessages">
+        app:layout_constraintEnd_toEndOf="@+id/rvMessages"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/ivScrollToBottom"
@@ -188,35 +190,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:text="New" />
+            android:text="@string/text_new" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:id="@+id/clBlockedContact"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:paddingHorizontal="30dp"-->
-<!--        android:paddingVertical="12dp"-->
-<!--        android:visibility="gone"-->
-<!--        tools:visibility="visible"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/rvMessages"-->
-<!--        app:layout_constraintBottom_toTopOf="@+id/clMessageInputRow">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btnUnblockContact"-->
-<!--            style="@style/ButtonRedRounded"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-
-<!--            android:text="@string/btn_chat_blocked"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clBottomBar"
@@ -303,7 +279,7 @@
                 android:background="@drawable/pill_rounded"
                 android:backgroundTint="@color/light_gray"
                 android:hint="@string/text_message"
-                android:inputType="textMultiLine"
+                android:inputType="textCapSentences|textMultiLine"
                 android:maxLines="4"
                 android:minHeight="35dp"
                 android:paddingVertical="8dp"

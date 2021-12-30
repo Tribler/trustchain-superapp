@@ -35,7 +35,6 @@ import android.widget.Toast
 import android.graphics.BitmapFactory
 import nl.tudelft.trustchain.valuetransfer.util.*
 
-
 class ChatMediaDialog(
     private val c: Context,
     private val publicKey: PublicKey,
