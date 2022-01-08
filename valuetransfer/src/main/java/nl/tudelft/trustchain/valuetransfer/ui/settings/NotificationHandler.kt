@@ -250,10 +250,13 @@ class NotificationHandler(
         val transactionText = if (transaction != null) {
             val map = transaction.transaction.toMap()
             if (map.containsKey(QRScanController.KEY_AMOUNT)) {
-                listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(
-                    R.string.text_contact_chat_incoming_transfer_of,
-                    formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
-                ))
+                listOf(
+                    getEmojiByUnicode(EMOJI_TRANSACTION),
+                    resources.getString(
+                        R.string.text_contact_chat_incoming_transfer_of,
+                        formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
+                    )
+                )
             } else listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
         } else {
             listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))

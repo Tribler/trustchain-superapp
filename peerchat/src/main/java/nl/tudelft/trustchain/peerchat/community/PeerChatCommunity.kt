@@ -39,14 +39,39 @@ class PeerChatCommunity(
 ) : Community() {
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
-    private lateinit var onMessageCallback: (instance: PeerChatCommunity, peer: Peer, chatMessage: ChatMessage) -> Unit
-    private lateinit var onContactImageRequestCallback: (instance: PeerChatCommunity, peer: Peer) -> Unit
-    private lateinit var onContactImageCallback: (contactImage: ContactImage) -> Unit
+    private lateinit var onMessageCallback: (
+        instance: PeerChatCommunity,
+        peer: Peer,
+        chatMessage: ChatMessage
+    ) -> Unit
+    private lateinit var onContactImageRequestCallback: (
+        instance: PeerChatCommunity,
+        peer: Peer
+    ) -> Unit
+    private lateinit var onContactImageCallback: (
+        contactImage: ContactImage
+    ) -> Unit
 
-    private lateinit var evaSendCompleteCallback: (peer: Peer, info: String, nonce: ULong) -> Unit
-    private lateinit var evaReceiveProgressCallback: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    private lateinit var evaReceiveCompleteCallback: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
-    private lateinit var evaErrorCallback: (peer: Peer, exception: TransferException) -> Unit
+    private lateinit var evaSendCompleteCallback: (
+        peer: Peer,
+        info: String,
+        nonce: ULong
+    ) -> Unit
+    private lateinit var evaReceiveProgressCallback: (
+        peer: Peer,
+        info: String,
+        progress: TransferProgress
+    ) -> Unit
+    private lateinit var evaReceiveCompleteCallback: (
+        peer: Peer,
+        info: String,
+        id: String,
+        data: ByteArray?
+    ) -> Unit
+    private lateinit var evaErrorCallback: (
+        peer: Peer,
+        exception: TransferException
+    ) -> Unit
 
     var identityInfo: IdentityInfo? = null
 
@@ -119,19 +144,27 @@ class PeerChatCommunity(
         this.onContactImageCallback = f
     }
 
-    fun setEVAOnSendCompleteCallback(f: (peer: Peer, info: String, nonce: ULong) -> Unit) {
+    fun setEVAOnSendCompleteCallback(
+        f: (peer: Peer, info: String, nonce: ULong) -> Unit
+    ) {
         this.evaSendCompleteCallback = f
     }
 
-    fun setEVAOnReceiveProgressCallback(f: (peer: Peer, info: String, progress: TransferProgress) -> Unit) {
+    fun setEVAOnReceiveProgressCallback(
+        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit
+    ) {
         this.evaReceiveProgressCallback = f
     }
 
-    fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit) {
+    fun setEVAOnReceiveCompleteCallback(
+        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
+    ) {
         this.evaReceiveCompleteCallback = f
     }
 
-    fun setEVAOnErrorCallback(f: (peer: Peer, exception: TransferException) -> Unit) {
+    fun setEVAOnErrorCallback(
+        f: (peer: Peer, exception: TransferException) -> Unit
+    ) {
         this.evaErrorCallback = f
     }
 

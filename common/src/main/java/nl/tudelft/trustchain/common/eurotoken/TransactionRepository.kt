@@ -441,7 +441,7 @@ class TransactionRepository(
         return trustchain.getChainByUser(trustchain.getMyPublicKey())
             .asSequence()
             .filter { block ->
-                    block.publicKey.contentEquals(other.keyToBin())
+                block.publicKey.contentEquals(other.keyToBin())
             }
             .map { block: TrustChainBlock ->
                 val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)

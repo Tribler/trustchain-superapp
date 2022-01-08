@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 
 class ContactShareDialog(

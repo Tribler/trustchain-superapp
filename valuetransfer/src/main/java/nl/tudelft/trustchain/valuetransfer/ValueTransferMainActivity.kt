@@ -884,12 +884,15 @@ class ValueTransferMainActivity : BaseActivity() {
             } else resources.getString(R.string.text_unverified_lower)
 
             if (idInfo == null) {
-                messages.add(resources.getString(
-                    R.string.text_identity_updated_new,
-                    verificationStatusText,
-                    "${messageIdInfo?.initials} ${messageIdInfo?.surname}"
-                ))
-                if (messageIdInfo?.isVerified != true ) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
+                messages.add(
+                    resources.getString(
+                        R.string.text_identity_updated_new,
+                        verificationStatusText,
+                        "${messageIdInfo?.initials} ${messageIdInfo?.surname}"
+                    )
+                )
+
+                if (messageIdInfo?.isVerified != true) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
                 messages.add(resources.getString(R.string.text_identity_updated_careful))
             } else {
                 messages.add(resources.getString(R.string.text_identity_updated))
@@ -911,7 +914,7 @@ class ValueTransferMainActivity : BaseActivity() {
                     )
                 }
 
-                if (messageIdInfo?.isVerified != true ) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
+                if (messageIdInfo?.isVerified != true) messages.add(resources.getString(R.string.text_identity_updated_unverified_message))
                 messages.add(resources.getString(R.string.text_identity_updated_careful))
             }
 
@@ -1132,7 +1135,8 @@ class ValueTransferMainActivity : BaseActivity() {
                 Log.d("VTLOG", "CAMERA PERMISSION NOT GRANTED")
                 displayToast(
                     applicationContext,
-                    resources.getString(R.string.snackbar_permission_denied))
+                    resources.getString(R.string.snackbar_permission_denied)
+                )
                 finish()
             }
         }

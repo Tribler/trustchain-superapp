@@ -10,9 +10,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
-import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
@@ -20,7 +17,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransactionDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
@@ -295,7 +291,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
 
         return transactions.map { transaction ->
             transaction.toExchangeTransactionItem(myPk, blocks)
-            }
+        }
     }
 
     companion object {

@@ -153,7 +153,6 @@ class ContactChatItemRenderer(
 
                         tvAttachmentFileSize.isVisible = item.chatMessage.attachment?.size != null
                         tvAttachmentFileSize.text = size
-
                     } else {
                         clAttachmentFile.isVisible = false
                         clAttachmentProgress.setBackgroundResource(backgroundResource)

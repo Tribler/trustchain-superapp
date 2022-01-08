@@ -30,8 +30,6 @@ import androidx.viewpager.widget.ViewPager
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaDetailAdapter
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaItem
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaItemRenderer
-import android.widget.Toast
-
 import android.graphics.BitmapFactory
 import nl.tudelft.trustchain.valuetransfer.util.*
 
@@ -56,10 +54,12 @@ class ChatMediaDialog(
     private lateinit var rvChatMediaItems: RecyclerView
     private val adapterChatMedia = ItemAdapter()
     private var viewPager: ViewPager? = null
-    private val chatMediaDetailAdapter: ChatMediaDetailAdapter = ChatMediaDetailAdapter(c,
+    private val chatMediaDetailAdapter: ChatMediaDetailAdapter = ChatMediaDetailAdapter(
+        c,
         {
             initView(false, it as ChatMediaItem)
-        }, {
+        },
+        {
             initView(true, null)
         }
     )
@@ -222,9 +222,3 @@ class ChatMediaDialog(
         }
     }
 }
-
-
-
-
-
-

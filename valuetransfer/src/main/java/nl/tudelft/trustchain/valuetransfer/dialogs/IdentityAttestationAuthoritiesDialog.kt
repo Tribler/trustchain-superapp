@@ -18,7 +18,6 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.ssi.peers.AuthorityItem
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.identity.AttestationAuthorityItemRenderer

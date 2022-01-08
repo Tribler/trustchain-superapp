@@ -340,7 +340,11 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         )
     }
 
-    private fun createIdentityItems(identities: List<Identity>, imageString: String?, connected: Boolean): List<Item> {
+    private fun createIdentityItems(
+        identities: List<Identity>,
+        imageString: String?,
+        connected: Boolean
+    ): List<Item> {
         return identities.mapIndexed { _, identity ->
             IdentityItem(
                 identity,

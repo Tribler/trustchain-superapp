@@ -188,8 +188,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             Log.d("VTLOG", "CONTACT CHAT RECEIVE PROGRESS CALLBACK '$info': '$progress'")
 
             downloadProgress.value?.let { map ->
-                if (!map.containsKey(progress.id) ||
-                    (map.containsKey(progress.id) && (
+                if (!map.containsKey(progress.id) || (
+                    map.containsKey(progress.id) && (
                         map[progress.id]!!.state != progress.state ||
                             kotlin.math.floor(map[progress.id]!!.progress) != kotlin.math.floor(progress.progress)
                         )
@@ -620,7 +620,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 val scrollToBottom = when {
                     adapterMessages.items.isEmpty() && list.isNotEmpty() -> true // on open fragment
                     newMessageCount > oldMessageCount -> { // on new message
-                        when ((list[list.size-1] as ContactChatItem).chatMessage.outgoing) {
+                        when ((list[list.size - 1] as ContactChatItem).chatMessage.outgoing) {
                             false -> { // incoming message only scroll to bottom when at least one of the last five messages is shown
                                 val layoutManager = LinearLayoutManager::class.java.cast(binding.rvMessages.layoutManager)
                                 if (layoutManager?.findLastVisibleItemPosition()!! < adapterMessages.itemCount - SCROLL_BOTTOM_MESSAGES_SHOWN) {

@@ -184,7 +184,7 @@ class ChatLocationDialog(
     }
 
     override fun onMapClick(point: LatLng) {
-        if(location == null && mapMarker != null) {
+        if (location == null && mapMarker != null) {
             map.clear()
         }
 
@@ -247,14 +247,14 @@ class ChatLocationDialog(
         )
     }
 
-    private fun isPermissionGranted() : Boolean {
-        return (ActivityCompat.checkSelfPermission(
+    private fun isPermissionGranted(): Boolean {
+        return ActivityCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED) && (ActivityCompat.checkSelfPermission(
+        ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED)
+        ) == PackageManager.PERMISSION_GRANTED
     }
 
     override fun onRequestPermissionsResult(

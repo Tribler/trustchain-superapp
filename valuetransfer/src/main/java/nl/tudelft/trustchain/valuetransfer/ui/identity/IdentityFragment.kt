@@ -32,7 +32,6 @@ import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentIdentityBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
