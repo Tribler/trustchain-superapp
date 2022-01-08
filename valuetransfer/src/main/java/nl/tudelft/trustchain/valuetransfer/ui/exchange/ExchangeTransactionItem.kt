@@ -7,7 +7,6 @@ data class ExchangeTransactionItem(
     val transaction: Transaction,
     val canSign: Boolean,
     val status: BlockStatus? = null,
-
 ) : Item() {
     override fun areItemsTheSame(other: Item): Boolean {
         return other is ExchangeTransactionItem &&

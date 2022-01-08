@@ -72,7 +72,7 @@ class ContactRenameDialog(
                     resources.getString(R.string.snackbar_contact_rename_success, contactNameView.text.toString())
                 }.let { text ->
                     bottomSheetDialog.dismiss()
-                    parentActivity.displaySnackbar(requireContext(), text)
+                    parentActivity.displayToast(requireContext(), text)
                     parentActivity.invalidateOptionsMenu()
                 }
             }

@@ -120,7 +120,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                         identity.publicKey.keyToBin().toHex(),
                         resources.getString(R.string.text_public_key)
                     )
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
                         resources.getString(
                             R.string.snackbar_copied_clipboard,
@@ -387,16 +387,15 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 updateAttestations()
 
                 dialog.dismiss()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
                     resources.getString(R.string.snackbar_attestation_remove_success)
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_attestation_remove_error),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_attestation_remove_error)
                 )
             }
         }
@@ -420,16 +419,15 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 activity?.invalidateOptionsMenu()
                 dialog.dismiss()
 
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
                     resources.getString(R.string.snackbar_identity_attribute_remove_success)
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_identity_attribute_remove_error),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_identity_attribute_remove_error)
                 )
             }
         }
@@ -483,7 +481,8 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         return identities.map { identity ->
             IdentityItem(
                 identity,
-                imageString?.let { decodeImage(it) }
+                imageString?.let { decodeImage(it) },
+                false
             )
         }
     }
@@ -529,25 +528,22 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
-                                    parentActivity.displaySnackbar(
+                                    parentActivity.displayToast(
                                         requireContext(),
-                                        resources.getString(R.string.snackbar_invalid_public_key),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                        resources.getString(R.string.snackbar_invalid_public_key)
                                     )
                                 }
                             } else {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_no_public_key_found),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                    resources.getString(R.string.snackbar_no_public_key_found)
                                 )
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_qr_code_not_json_format),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_qr_code_not_json_format)
                             )
                         }
                     }

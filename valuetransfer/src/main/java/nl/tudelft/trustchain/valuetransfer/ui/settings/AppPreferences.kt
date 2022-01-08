@@ -8,7 +8,7 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.util.md5
 
 class AppPreferences(
-    private val parentActivity: ValueTransferMainActivity
+    parentActivity: ValueTransferMainActivity
 ) {
 
     private var sharedPreferences: SharedPreferences = parentActivity.getSharedPreferences(PREFS_FILE_NAME, Context.MODE_PRIVATE)
@@ -49,7 +49,7 @@ class AppPreferences(
     }
 
     fun getIdentityFaceHash(): String? {
-        return sharedPreferences.getString(PREFS_IDENTITY_FACE_HASH_NAME, "")
+        return sharedPreferences.getString(PREFS_IDENTITY_FACE_HASH_NAME, null)
     }
 
     fun deleteIdentityFace() {

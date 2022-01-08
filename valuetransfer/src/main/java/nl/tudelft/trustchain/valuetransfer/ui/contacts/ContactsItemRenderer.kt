@@ -4,7 +4,10 @@ import android.view.View
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts.view.*
+import kotlinx.android.synthetic.main.item_contacts.view.ivContactImage
 import kotlinx.android.synthetic.main.item_contacts.view.ivIdenticon
+import kotlinx.android.synthetic.main.item_contacts_chat.view.*
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.valuetransfer.R
@@ -21,7 +24,7 @@ class ContactsItemRenderer(
         tvContactName.text = item.contact.name
 
         if (item.image == null) {
-            item.contact.publicKey.toString().let { publicKeyString ->
+            item.contact.publicKey.keyToBin().toHex().let { publicKeyString ->
                 generateIdenticon(
                     publicKeyString.substring(20, publicKeyString.length).toByteArray(),
                     getColorByHash(context, publicKeyString),
@@ -29,8 +32,8 @@ class ContactsItemRenderer(
                 ).let {
                     ivContactImage.isVisible = false
                     ivIdenticon.apply {
-                        setImageBitmap(it)
                         isVisible = true
+                        setImageBitmap(it)
                     }
                 }
             }

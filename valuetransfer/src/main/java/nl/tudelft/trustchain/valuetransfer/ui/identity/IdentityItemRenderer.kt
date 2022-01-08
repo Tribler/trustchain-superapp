@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.ui.identity
 
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_identity.view.*
@@ -22,7 +23,6 @@ class IdentityItemRenderer(
 ) : ItemLayoutRenderer<IdentityItem, View>(
     IdentityItem::class.java
 ) {
-
     private val dateFormat = SimpleDateFormat("MMMM d, yyyy", Locale.ENGLISH)
 
     override fun bindView(item: IdentityItem, view: View) = with(view) {
@@ -39,6 +39,13 @@ class IdentityItemRenderer(
                         .append(content.surname)
             }
 
+            ivContactVerifiedStatus.isVisible = item.identity.content.verified
+            ivContactUnverifiedStatus.isVisible = !item.identity.content.verified
+
+            flIdenticon.background = if (item.connected) {
+                ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_green)
+            } else ContextCompat.getDrawable(view.context, R.drawable.pill_rounded_red)
+
             if (item.image != null) {
                 ivIdentityPhoto.setImageBitmap(item.image)
                 ivIdentityPhoto.isVisible = true
@@ -53,8 +60,12 @@ class IdentityItemRenderer(
                 }
             }
 
-            view.setOnClickListener {
+            btnScanIdentityQR.setOnClickListener {
                 onQRButtonClick(item.identity)
+            }
+
+            view.setOnClickListener {
+                onIdentityImageClick(item.identity)
             }
         } else if (layoutType == 1) {
             val content = item.identity.content
@@ -137,7 +148,7 @@ class IdentityItemRenderer(
         }
     }
 
-    fun setContentVisible(view: View, content: PersonalIdentity, visible: Boolean) = with(view) {
+    private fun setContentVisible(view: View, content: PersonalIdentity, visible: Boolean) = with(view) {
         val dummy = "*".repeat(8)
         tvGenderValue.text = if (visible) content.gender else dummy
         tvDatePlaceOfBirthValue.text = if (visible) dateFormat.format(content.dateOfBirth) else dummy

@@ -254,22 +254,54 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/btnConnectToGateway"
-        style="@style/ButtonGreenRounded"
-        android:text="@string/btn_gateway_connect"
-        android:layout_marginTop="8dp"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideConnectGateway"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_gateway_connect"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="false"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
+        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway"/>
 
-    <Button
-        android:id="@+id/btnContinueSell"
-        style="@style/ButtonGreenRounded"
-        android:text="@string/btn_sell"
-        android:layout_marginTop="8dp"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideSell"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_sell"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="false"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway" />
+        app:layout_constraintTop_toBottomOf="@+id/clPreferredGateway"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -66,6 +66,7 @@
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
     <string name="dialog_title_exchange_request">Request Money</string>
+    <string name="dialog_title_exchange_transaction">Transaction</string>
     <string name="dialog_title_contact_share">Share Contact</string>
     <string name="dialog_title_contact_name">Contact Name</string>
     <string name="dialog_title_contact_nickname">Contact Nickname</string>
@@ -94,15 +95,21 @@
 
     // Button text
     <string name="btn_transfer">Transfer</string>
+    <string name="btn_slide_to_transfer">Slide to Transfer</string>
     <string name="btn_send_request">Send request</string>
+    <string name="btn_slide_to_request">Slide to Request</string>
     <string name="btn_create_request_qr">Create Request QR</string>
+    <string name="btn_slide_to_request_qr">Slide to Request QR</string>
     <string name="btn_share">Share</string>
     <string name="btn_save">Save</string>
     <string name="btn_add">Add</string>
     <string name="btn_gateway_connect">Connect to Gateway</string>
+    <string name="btn_slide_to_gateway_connect">Slide to Connect</string>
     <string name="btn_sell">Sell</string>
+    <string name="btn_slide_to_sell">Slide to Sell</string>
     <string name="btn_authority_add">Add Authority</string>
     <string name="btn_confirm">Confirm</string>
+    <string name="btn_slide_to_confirm">Slide to Confirm</string>
     <string name="btn_request">Request</string>
     <string name="btn_verify">Verify</string>
     <string name="btn_cancel">Cancel</string>
@@ -148,6 +155,7 @@
     <string name="text_attestation_attribute_type">Attribute type</string>
     <string name="text_attestation_attribute_name">Attribute name</string>
     <string name="text_attestation_attribute_name_hint">e.g. age</string>
+    <string name="text_to">To</string>
     <string name="text_from">From</string>
     <string name="text_attribute">Attribute</string>
     <string name="text_type">Type</string>
@@ -185,6 +193,7 @@
     <string name="text_transaction_receiver">Receiver</string>
     <string name="text_transaction_sender">Sender</string>
     <string name="text_transaction_block_hash">Block Hash</string>
+    <string name="text_exchange_eurotoken_exchange">EuroToken Exchange</string>
     <string name="text_exchange_buy">Buy from EuroToken Exchange</string>
     <string name="text_exchange_sell">"Sell to EuroToken Exchange"</string>
     <string name="text_exchange_transaction_outgoing">Outgoing transfer</string>
@@ -331,7 +340,7 @@
     <string name="text_remove">Remove</string>
     <string name="text_replace">Replace</string>
     <string name="text_edit">Edit</string>
-    <string name="text_notifications_open_settings">Open system settings to change</string>
+    <string name="text_notifications_open_settings">Change in system settings</string>
     <string name="text_messages">Messages</string>
     <string name="text_notifications">Notifications</string>
     <string name="text_theme">Theme</string>
@@ -345,6 +354,7 @@
     <string name="text_identity_updated_verification">The identity verification status changed to %s.</string>
     <string name="text_identity_updated_name">The identity name has changed from %s to %s.</string>
     <string name="text_identity_updated_careful">Please be careful in case the name is unfamiliar.</string>
+    <string name="text_identity_undetermined">The identity of the contact couldn\'t be determined from this message, please be careful.</string>
     <string name="text_all_media">All Media</string>
     <string name="text_number_media">%d items</string>
     <string name="text_no_media">No media is shared yet</string>
@@ -354,6 +364,17 @@
     <string name="text_send_this_location">Send this location</string>
     <string name="text_you">You</string>
     <string name="text_storage_not_writable">Storage is not writable</string>
+    <string name="text_open_in_google_maps">Open in Google Maps</string>
+    <string name="text_confirm_are_you_sure">Are you sure?</string>
+    <string name="text_confirm_ok">OK</string>
+    <string name="text_confirm_cancel">CANCEL</string>
+    <string name="text_new">New</string>
+    <string name="text_eur">EUR</string>
+    <string name="text_additional_details">Additional Details</string>
+    <string name="text_transaction_details_raw">Raw</string>
+    <string name="text_transaction_details_size">Size</string>
+    <string name="text_transaction_details_block_hash">Block Hash</string>
+    <string name="text_transaction_details_signature">Signature</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>
@@ -388,7 +409,7 @@
     <string name="snackbar_permission_location_granted">Permission has been granted, please click send location again</string>
     <string name="snackbar_permission_camera_granted">Permission has been granted, please click camera again</string>
     <string name="snackbar_permission_camera_granted_other">Permission has been granted</string>
-    <string name="snackbar_permission_denied">Permission has been denied</string>
+    <string name="snackbar_permission_denied">Permission has been denied!</string>
     <string name="snackbar_exchange_transfer_error_self">Cannot transfer money to yourself</string>
     <string name="snackbar_peer_unlocated">Peer could not be located in the network, please try again</string>
     <string name="snackbar_missing_variable">Missing variable %s</string>
@@ -413,10 +434,4 @@
     <string name="snackbar_identity_update_error">Identity couldn\'t be updated</string>
     <string name="snackbar_identity_add_cancelled">Adding identity cancelled. Without an identity you\'ll not be able to use this application.</string>
     <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
-    <string name="text_open_in_google_maps">Open in Google Maps</string>
-    <string name="text_confirm_are_you_sure">Are you sure?</string>
-    <string name="text_confirm_ok">OK</string>
-    <string name="text_confirm_cancel">CANCEL</string>
-    <string name="text_new">New</string>
-
 </resources>

@@ -22,7 +22,6 @@ import androidx.cardview.widget.CardView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -63,9 +62,13 @@ import androidx.recyclerview.widget.RecyclerView
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.Log
+import androidx.core.widget.doAfterTextChanged
 import androidx.documentfile.provider.DocumentFile
 import com.google.android.gms.location.*
 import nl.tudelft.ipv8.messaging.eva.TransferState
+import nl.tudelft.trustchain.common.eurotoken.Transaction
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import java.math.BigInteger
 
 class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     private val binding by viewBinding(FragmentContactsChatBinding::bind)
@@ -185,7 +188,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             Log.d("VTLOG", "CONTACT CHAT RECEIVE PROGRESS CALLBACK '$info': '$progress'")
 
             downloadProgress.value?.let { map ->
-                if (map[progress.id] != progress) {
+                if (!map.containsKey(progress.id) ||
+                    (map.containsKey(progress.id) && (
+                        map[progress.id]!!.state != progress.state ||
+                            kotlin.math.floor(map[progress.id]!!.progress) != kotlin.math.floor(progress.progress)
+                        )
+                    )
+                ) {
                     map[progress.id] = progress
                     downloadProgress.postValue(map)
                 }
@@ -232,10 +241,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                         chatMediaItem
                                     ).show(parentFragmentManager, tag)
                                 } else {
-                                    parentActivity.displaySnackbar(
+                                    parentActivity.displayToast(
                                         requireContext(),
-                                        resources.getString(R.string.snackbar_attachment_file_not_exists),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                        resources.getString(R.string.snackbar_attachment_file_not_exists)
                                     )
                                 }
                             }
@@ -261,10 +269,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                         chatMediaItem
                                     ).show(parentFragmentManager, tag)
                                 } else {
-                                    parentActivity.displaySnackbar(
+                                    parentActivity.displayToast(
                                         requireContext(),
                                         resources.getString(R.string.snackbar_attachment_file_not_exists),
-                                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
                                     )
                                 }
                             }
@@ -273,10 +280,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                                 if (getContactStore().getContactFromPublicKey(contact.publicKey) == null) {
                                     when (contact.publicKey) {
-                                        getTrustChainCommunity().myPeer.publicKey -> parentActivity.displaySnackbar(
+                                        getTrustChainCommunity().myPeer.publicKey -> parentActivity.displayToast(
                                             requireContext(),
                                             resources.getString(R.string.snackbar_contact_add_error_self),
-                                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
                                         )
                                         else -> {
                                             ConfirmDialog(
@@ -287,7 +293,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                             ) { dialog ->
                                                 try {
                                                     getContactStore().addContact(contact.publicKey, contact.name)
-                                                    parentActivity.displaySnackbar(
+                                                    parentActivity.displayToast(
                                                         requireContext(),
                                                         resources.getString(
                                                             R.string.snackbar_contact_add_success,
@@ -326,7 +332,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                     attributeValue.value,
                                     resources.getString(R.string.text_title_identity_attribute)
                                 )
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(
                                         R.string.snackbar_copied_clipboard,
@@ -356,10 +362,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                                 description
                                             ).show(parentFragmentManager, tag)
                                         } else {
-                                            parentActivity.displaySnackbar(
+                                            parentActivity.displayToast(
                                                 requireContext(),
                                                 resources.getString(R.string.snackbar_transfer_error_contact_add),
-                                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
                                             )
                                         }
                                     }
@@ -369,10 +374,27 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     }
 
                     if (transactionHash != null) {
-                        val transaction = getTransactionRepository().getTransactionWithHash(transactionHash)
-                        val key = defaultCryptoProvider.keyFromPublicBin(transaction!!.linkPublicKey)
-                        val peer = Peer(key)
-                        getTransactionRepository().trustChainCommunity.sendBlock(transaction, peer)
+                        it.transaction?.let { block ->
+                            val myPk = getTrustChainCommunity().myPeer.publicKey
+                            val myBlocks = getTrustChainHelper().getChainByUser(myPk.keyToBin())
+                            val sender = if (block.publicKey.toHex() == myPk.keyToBin().toHex()) {
+                                defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey)
+                            } else defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+
+                            Transaction(
+                                block,
+                                sender,
+                                sender,
+                                if (block.transaction.containsKey(TransactionRepository.KEY_AMOUNT)) {
+                                    (block.transaction[TransactionRepository.KEY_AMOUNT] as BigInteger).toLong()
+                                } else 0L,
+                                block.type,
+                                !it.chatMessage.outgoing,
+                                block.timestamp
+                            ).toExchangeTransactionItem(myPk, myBlocks).let { item ->
+                                ExchangeTransactionDialog(item).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+                            }
+                        }
                     }
                 },
                 {
@@ -380,11 +402,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 }
             )
         )
-    }
-
-    private fun showMoreMessages() {
-        messageCountChanged = true
-        limitedMessageCount.value = limitedMessageCount.value?.plus(MESSAGES_SHOW_MORE)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -458,9 +475,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 if ((peer != null && !peer.address.isEmpty()) || (peer?.bluetoothAddress != null)) {
                     isConnected = true
                     parentActivity.setActionBarSubTitle(resources.getString(R.string.text_contact_connected))
+                    parentActivity.setActionBarSubTitleIcon(R.drawable.circle_online)
                 } else {
                     isConnected = false
                     parentActivity.setActionBarSubTitle(resources.getString(R.string.text_tap_contact_info))
+                    parentActivity.setActionBarSubTitleIcon(R.drawable.circle_offline)
                 }
             }
         )
@@ -475,10 +494,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 when (item.itemId) {
                     R.id.actionSendCamera -> {
                         if (!checkCameraPermissions()) {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_camera_retrieve_error),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_camera_retrieve_error)
                             )
                         } else {
                             cameraUri = activity?.contentResolver?.insert(
@@ -506,7 +524,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     }
                     R.id.actionSendFile -> {
                         val mimeTypes = arrayOf(
-                            "application/pdf",
                             "video/*",
                             "text/plain",
                             "application/*"
@@ -539,10 +556,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 true
                             ).show(parentFragmentManager, tag)
                         } else {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_transfer_error_contact_add),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_transfer_error_contact_add)
                             )
                         }
                     }
@@ -554,10 +570,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 false
                             ).show(parentFragmentManager, tag)
                         } else {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_request_error_contact_add),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_request_error_contact_add)
                             )
                         }
                     }
@@ -675,10 +690,17 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             Observer { contactState ->
                 if (contactState == null) return@Observer
 
+                val color = if (contactState.identityInfo?.isVerified == true) {
+                    ContextCompat.getColor(requireContext(), getColorIDFromThemeAttribute(parentActivity, R.attr.colorAccent))
+                } else ContextCompat.getColor(requireContext(), getColorIDFromThemeAttribute(parentActivity, R.attr.colorError))
+                val icon = if (contactState.identityInfo?.isVerified == true) {
+                    R.drawable.ic_verified_smaller
+                } else R.drawable.ic_verified_not_smaller
+
+                parentActivity.setActionBarTitleIcon(icon, color)
+
                 binding.clBlockedContact.isVisible = contactState.isBlocked
                 binding.clMessageInputRow.isVisible = !contactState.isBlocked
-
-                parentActivity.setActionBarTitleIcon(if (contactState.identityInfo?.isVerified == true) R.drawable.ic_verified_smaller else null)
             }
         )
 
@@ -712,7 +734,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         )
 
         parentActivity.getCustomActionBar().setOnClickListener {
-            ContactInfoDialog(publicKey).show(parentFragmentManager, tag)
+            ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
         }
     }
 
@@ -725,10 +747,27 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 name,
                 resources.getString(R.string.text_tap_contact_info)
             )
+            setActionBarSubTitleIcon(R.drawable.circle_offline)
             toggleBottomNavigation(false)
 
             setActionBarTitleSize(resources.getDimension(R.dimen.actionBarTitleSizeChat) / resources.displayMetrics.scaledDensity)
-            setActionBarTitleIcon()
+
+            if (contactState.value != null) {
+                val color = if (contactState.value?.identityInfo?.isVerified == true) {
+                    ContextCompat.getColor(
+                        requireContext(),
+                        getColorIDFromThemeAttribute(parentActivity, R.attr.colorAccent)
+                    )
+                } else ContextCompat.getColor(
+                    requireContext(),
+                    getColorIDFromThemeAttribute(parentActivity, R.attr.colorError)
+                )
+                val icon = if (contactState.value?.identityInfo?.isVerified == true) {
+                    R.drawable.ic_verified_smaller
+                } else R.drawable.ic_verified_not_smaller
+                setActionBarTitleIcon(icon, color)
+            }
+
             getCustomActionBar().findViewById<CardView>(R.id.cvActionbarImage).apply {
                 isVisible = true
             }
@@ -815,35 +854,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             optionSelected = { _, selectedItem ->
                 when (selectedItem.itemId) {
                     R.id.actionViewContact -> {
-                        ContactInfoDialog(publicKey).show(parentFragmentManager, tag)
+                        ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
                     }
                     R.id.actionViewMedia -> ChatMediaDialog(
                         requireContext(),
                         publicKey,
                         null
                     ).show(parentFragmentManager, tag)
-//                    R.id.actionContactConnectInvitation -> {
-//                        val contactConnectPayload = ContactConnectPayload(
-//                            getTrustChainCommunity().myPeer.publicKey,
-//                            getIdentityCommunity().getIdentityInfo(null)!!
-//                        )
-//                        getPeerChatCommunity().sendContactConnect(
-//                            publicKey,
-//                            contactConnectPayload,
-//                            PeerChatCommunity.MessageId.CONTACT_CONNECT_REQUEST
-//                        )
-//                    }
-//                    R.id.actionContactConnectConfirmation -> {
-//                        val contactConnectPayload = ContactConnectPayload(
-//                            getTrustChainCommunity().myPeer.publicKey,
-//                            getIdentityCommunity().getIdentityInfo(null)!!
-//                        )
-//                        getPeerChatCommunity().sendContactConnect(
-//                            publicKey,
-//                            contactConnectPayload,
-//                            PeerChatCommunity.MessageId.CONTACT_CONNECT
-//                        )
-//                    }
                     R.id.actionSearchFilterChat -> {
                         binding.clSearchFilter.isVisible = true
                         parentActivity.invalidateOptionsMenu()
@@ -867,7 +884,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             try {
                                 getPeerChatStore().deleteMessagesOfPublicKey(publicKey)
                                 getPeerChatStore().removeContactState(publicKey)
-                                parentActivity.displaySnackbar(
+
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_chat_remove_success),
                                     isShort = false
@@ -892,7 +910,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                 getContactStore().deleteContact(contact)
                                 getPeerChatStore().removeContactState(contact.publicKey)
                                 getPeerChatStore().removeContactImage(contact.publicKey)
-                                parentActivity.displaySnackbar(
+
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_contact_remove_success, contact.name),
                                     isShort = false
@@ -931,7 +950,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             resources.getString(R.string.text_public_key)
                         )
 
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
                             resources.getString(
                                 R.string.snackbar_copied_clipboard,
@@ -948,6 +967,11 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         ).show(parentFragmentManager, tag)
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showMoreMessages() {
+        messageCountChanged = true
+        limitedMessageCount.value = limitedMessageCount.value?.plus(MESSAGES_SHOW_MORE)
     }
 
     private fun toggleBlockContact(isBlocked: Boolean) {
@@ -1067,6 +1091,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         parentActivity.apply {
             setActionBarTitleSize(resources.getDimension(R.dimen.actionBarTitleSize) / resources.displayMetrics.scaledDensity)
             setActionBarTitleIcon()
+            setActionBarSubTitleIcon()
             getCustomActionBar().run {
                 findViewById<CardView>(R.id.cvActionbarImage)
                     .apply {
@@ -1182,15 +1207,14 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     ) {
         if (requestCode == PERMISSION_CAMERA) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
                     resources.getString(R.string.snackbar_permission_camera_granted)
                 )
             } else {
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_permission_denied),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_permission_denied)
                 )
             }
         }

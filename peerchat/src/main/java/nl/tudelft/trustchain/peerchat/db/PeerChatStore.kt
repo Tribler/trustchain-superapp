@@ -81,6 +81,10 @@ class PeerChatStore(context: Context) {
         database.dbMessageQueries.setAttachmentFetched(id.hexToBytes())
     }
 
+    fun getMessageByTransactionHash(hash: ByteArray): ChatMessage? {
+        return database.dbMessageQueries.getMessageByTransactionHash(hash, messageMapper).executeAsOneOrNull()
+    }
+
     /**
      * Get the list of last messages by public key, filtered if archived, blocked or not
      */
@@ -398,7 +402,7 @@ class PeerChatStore(context: Context) {
                     contactState.initials,
                     contactState.surname,
                     contactState.is_verified == 1L,
-                    contactState.image_hash
+                    contactState.image_hash ?: ""
                 )
             )
         }

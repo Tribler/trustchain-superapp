@@ -42,16 +42,15 @@ class IdentityAttestationAuthorityDialog(
                     when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
                         true -> {
                             authorityManager.addTrustedAuthority(authorityKey)
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
                                 resources.getString(R.string.snackbar_authority_add_success)
                             )
                         }
                         else -> {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_authority_add_error),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_authority_add_error)
                             )
                         }
                     }

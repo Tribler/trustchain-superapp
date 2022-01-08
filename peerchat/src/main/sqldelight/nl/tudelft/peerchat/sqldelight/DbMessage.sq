@@ -50,3 +50,6 @@ DELETE FROM messages WHERE sender_public_key = ? OR recipient_public_key = ?;
 
 getMessageById:
 SELECT * FROM messages WHERE id = ?;
+
+getMessageByTransactionHash:
+SELECT * FROM messages WHERE transaction_hash = ?;

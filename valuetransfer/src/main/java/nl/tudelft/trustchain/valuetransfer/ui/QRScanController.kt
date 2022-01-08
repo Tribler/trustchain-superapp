@@ -8,7 +8,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import org.json.JSONObject
 
@@ -25,13 +24,12 @@ class QRScanController : VTFragment() {
     private fun checkRequiredVariables(variables: List<String>, data: JSONObject): Boolean {
         variables.forEach { variable ->
             if (!data.has(variable)) {
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
                     resources.getString(
                         R.string.snackbar_missing_variable,
                         variable
-                    ),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    )
                 )
                 return false
             }
@@ -53,10 +51,9 @@ class QRScanController : VTFragment() {
         if (peer != null) {
             IdentityAttestationRequestDialog(peer).show(parentFragmentManager, tag)
         } else {
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
-                resources.getString(R.string.snackbar_peer_unlocated),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                resources.getString(R.string.snackbar_peer_unlocated)
             )
         }
     }
@@ -101,10 +98,9 @@ class QRScanController : VTFragment() {
             ).show(parentFragmentManager, tag)
         } catch (e: Exception) {
             e.printStackTrace()
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
-                resources.getString(R.string.snackbar_invalid_public_key),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                resources.getString(R.string.snackbar_invalid_public_key)
             )
         }
     }
@@ -120,10 +116,9 @@ class QRScanController : VTFragment() {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
 
             if (publicKey == getTrustChainCommunity().myPeer.publicKey) {
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_exchange_transfer_error_self),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_exchange_transfer_error_self)
                 )
                 return
             }
@@ -144,10 +139,9 @@ class QRScanController : VTFragment() {
             ).show(parentFragmentManager, tag)
         } catch (e: Exception) {
             e.printStackTrace()
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
-                resources.getString(R.string.snackbar_invalid_public_key),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                resources.getString(R.string.snackbar_invalid_public_key)
             )
         }
     }
@@ -178,10 +172,9 @@ class QRScanController : VTFragment() {
             ).show(parentFragmentManager, tag)
         } catch (e: Exception) {
             e.printStackTrace()
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
-                resources.getString(R.string.snackbar_invalid_public_key),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                resources.getString(R.string.snackbar_invalid_public_key)
             )
         }
     }
@@ -232,10 +225,9 @@ class QRScanController : VTFragment() {
                             }.show(parentFragmentManager, tag)
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_invalid_public_key),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                resources.getString(R.string.snackbar_invalid_public_key)
                             )
                         }
                     }
@@ -243,10 +235,9 @@ class QRScanController : VTFragment() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
                 )
                 initiateScan()
             }

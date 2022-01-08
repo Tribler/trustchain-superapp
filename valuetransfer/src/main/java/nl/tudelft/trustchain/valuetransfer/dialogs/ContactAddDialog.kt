@@ -80,13 +80,12 @@ class ContactAddDialog(
                     myPublicKey.keyToBin().toHex(),
                     resources.getString(R.string.text_public_key)
                 )
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
                     resources.getString(
                         R.string.snackbar_copied_clipboard,
                         resources.getString(R.string.text_public_key)
-                    ),
-                    view = view.rootView
+                    )
                 )
             }
 
@@ -106,24 +105,20 @@ class ContactAddDialog(
 
                         when {
                             publicKeyBin == myPublicKey.keyToBin().toHex() -> {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_error_self),
-                                    view = view.rootView,
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                    resources.getString(R.string.snackbar_contact_add_error_self)
                                 )
                             }
                             getContactStore().getContactFromPublicKey(publicKey) != null -> {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_error_exists),
-                                    view = view.rootView,
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                                    resources.getString(R.string.snackbar_contact_add_error_exists)
                                 )
                             }
                             else -> {
                                 getContactStore().addContact(publicKey, contactName)
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_contact_add_success)
                                 )
@@ -133,11 +128,9 @@ class ContactAddDialog(
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_provide_valid_public_key),
-                        view = view.rootView,
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_provide_valid_public_key)
                     )
                 }
             }
@@ -181,11 +174,9 @@ class ContactAddDialog(
                 parentActivity.getQRScanController().addContact(obj)
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format),
-                    view = dialogView.rootView,
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
                 )
             }
         }

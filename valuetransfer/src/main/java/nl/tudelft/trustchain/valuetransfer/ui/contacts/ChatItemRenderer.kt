@@ -70,6 +70,9 @@ class ChatItemRenderer(
             }
         }
 
+        ivContactVerifiedStatus.isVisible = item.state?.identityInfo?.isVerified == true
+        ivContactUnverifiedStatus.isVisible = item.state?.identityInfo?.isVerified == false
+
         if (item.lastMessage.outgoing) {
             if (item.lastMessage.ack) {
                 ivMessageStatusOverview.setImageResource(R.drawable.ic_check_double)
@@ -84,6 +87,7 @@ class ChatItemRenderer(
         tvContactMessageOverview.text = message
 
         ivOnlineStatusOverview.isVisible = item.isOnline || item.isBluetooth
+        ivOfflineStatusOverview.isVisible = !item.isOnline && !item.isBluetooth
         tvContactTimeOverview.text = contactTime
 
         ivMuted.isVisible = item.state?.isMuted ?: false

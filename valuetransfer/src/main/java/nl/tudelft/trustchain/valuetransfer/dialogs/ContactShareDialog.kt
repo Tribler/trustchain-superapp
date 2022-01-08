@@ -134,7 +134,7 @@ class ContactShareDialog(
 
                     // Only show snackbar if contact of chat is shared to another contact (and not some contact that is shared to the contact of the chat)
                     if (recipient != null) {
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
                             resources.getString(
                                 R.string.snackbar_contact_shared_to,
@@ -147,11 +147,9 @@ class ContactShareDialog(
                     bottomSheetDialog.dismiss()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_unexpected_error_occurred),
-                        view = view.rootView,
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
                     )
                 }
             }

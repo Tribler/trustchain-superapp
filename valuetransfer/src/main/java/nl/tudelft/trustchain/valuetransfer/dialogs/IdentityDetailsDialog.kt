@@ -204,17 +204,15 @@ class IdentityDetailsDialog : VTDialogFragment() {
                     bottomSheetDialog.dismiss()
                     parentActivity.invalidateOptionsMenu()
 
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.snackbar_identity_update_success)
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_identity_update_error),
-                        view = view.rootView,
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_identity_update_error)
                     )
                 }
             }

@@ -243,7 +243,7 @@ class IdentityAttributeShareDialog(
 
                     // Only send snackbar when it is sent from identity fragment (and not from within chat)
                     if (identityAttribute != null) {
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
                             resources.getString(
                                 R.string.snackbar_identity_attribute_share_success,
@@ -255,10 +255,9 @@ class IdentityAttributeShareDialog(
                     bottomSheetDialog.dismiss()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_unexpected_error_occurred),
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
                     )
                 }
             }

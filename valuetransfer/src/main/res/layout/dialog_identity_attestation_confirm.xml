@@ -81,13 +81,29 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/btnConfirmRequestedAttestation"
-        style="@style/ButtonGreenRounded"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_confirm"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideConfirmRequestedAttestation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_confirm"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAttributeValue" />
+        app:layout_constraintTop_toBottomOf="@+id/clAttributeValue"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

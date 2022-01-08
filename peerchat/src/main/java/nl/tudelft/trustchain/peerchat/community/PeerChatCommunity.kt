@@ -45,10 +45,12 @@ class PeerChatCommunity(
     private lateinit var onContactConnectRequestCallback: (sender: PublicKey, identityInfo: IdentityInfo) -> Unit
     private lateinit var onContactConnectCallback: (sender: PublicKey, identityInfo: IdentityInfo) -> Unit
 
-    private lateinit var evaSendCompleteCallback: (peer: Peer, info: String, dataBinary: ByteArray?, nonce: ULong) -> Unit
+    private lateinit var evaSendCompleteCallback: (peer: Peer, info: String, nonce: ULong) -> Unit
     private lateinit var evaReceiveProgressCallback: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    private lateinit var evaReceiveCompleteCallback: (peer: Peer, info: String, id: String, dataBinary: ByteArray?) -> Unit
+    private lateinit var evaReceiveCompleteCallback: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
     private lateinit var evaErrorCallback: (peer: Peer, exception: TransferException) -> Unit
+
+    var identityInfo: IdentityInfo? = null
 
     init {
         messageHandlers[MessageId.MESSAGE] = ::onMessagePacket
@@ -57,8 +59,6 @@ class PeerChatCommunity(
         messageHandlers[MessageId.ATTACHMENT] = ::onAttachmentPacket
         messageHandlers[MessageId.CONTACT_IMAGE_REQUEST] = ::onContactImageRequestPacket
         messageHandlers[MessageId.CONTACT_IMAGE] = ::onContactImagePacket
-        messageHandlers[MessageId.CONTACT_CONNECT_REQUEST] = ::onContactConnectRequestPacket
-        messageHandlers[MessageId.CONTACT_CONNECT] = ::onContactConnectPacket
 
         evaProtocolEnabled = true
     }
@@ -73,7 +73,8 @@ class PeerChatCommunity(
                     val messages = database.getUnacknowledgedMessages()
                     Log.d("PeerChat", "Found ${messages.size} outgoing unack messages")
                     messages.forEach { message ->
-                        sendMessage(message)
+                        val chatMessage = message.copy(identityInfo = identityInfo)
+                        sendMessage(chatMessage)
                     }
 
                     // Request missing attachments
@@ -132,7 +133,7 @@ class PeerChatCommunity(
         this.onContactConnectCallback = f
     }
 
-    fun setEVAOnSendCompleteCallback(f: (peer: Peer, info: String, dataBinary: ByteArray?, nonce: ULong) -> Unit) {
+    fun setEVAOnSendCompleteCallback(f: (peer: Peer, info: String, nonce: ULong) -> Unit) {
         this.evaSendCompleteCallback = f
     }
 
@@ -140,7 +141,7 @@ class PeerChatCommunity(
         this.evaReceiveProgressCallback = f
     }
 
-    fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, dataBinary: ByteArray?) -> Unit) {
+    fun setEVAOnReceiveCompleteCallback(f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit) {
         this.evaReceiveCompleteCallback = f
     }
 
@@ -262,6 +263,8 @@ class PeerChatCommunity(
         val mid = chatMessage.recipient.keyToHash().toHex()
         val peer = getPeers().find { it.mid == mid }
 
+        identityInfo = chatMessage.identityInfo
+
         if (peer != null) {
             val payload = MessagePayload(
                 chatMessage.id,
@@ -352,24 +355,6 @@ class PeerChatCommunity(
         send(peer, packet)
     }
 
-    fun sendContactConnect(recipient: PublicKey, payload: ContactConnectPayload, type: Int) {
-        Log.d("VTLOG", "SEND CONTACT CONNECT ($type): ${payload.identityInfo}")
-
-        if (!listOf(MessageId.CONTACT_CONNECT_REQUEST, MessageId.CONTACT_CONNECT).contains(type)) return
-
-        val mid = recipient.keyToHash().toHex()
-        val peer = getPeers().find { it.mid == mid }
-
-        if (peer != null) {
-            val packet = serializePacket(type, payload, encrypt = true, recipient = peer)
-            logger.debug { "-> $payload" }
-
-            send(peer, packet)
-        } else {
-            Log.d("PeerChat", "Peer $mid not online")
-        }
-    }
-
     /**
      * On packet receipt
      */
@@ -420,26 +405,6 @@ class PeerChatCommunity(
 
         logger.debug { "<- $payload" }
         onContactImage(payload)
-    }
-
-    private fun onContactConnectRequestPacket(packet: Packet) {
-        val (_, payload) = packet.getDecryptedAuthPayload(
-            ContactConnectPayload.Deserializer, myPeer.key as PrivateKey
-        )
-
-        logger.debug { "<- $payload" }
-        onContactConnectRequest(payload)
-    }
-
-    private fun onContactConnectPacket(packet: Packet) {
-        Log.d("VTLOG", "CONTACT INVITATION ACCEPTED ${packet.source}")
-
-        val (_, payload) = packet.getDecryptedAuthPayload(
-            ContactConnectPayload.Deserializer, myPeer.key as PrivateKey
-        )
-
-        logger.debug { "<- $payload" }
-        onContactConnect(payload)
     }
 
     /**
@@ -532,26 +497,6 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onContactConnectRequest(payload: ContactConnectPayload) {
-        Log.d("VTLOG", "ON CONTACT CONNECT REQUEST with payload $payload")
-
-        if (this::onContactConnectRequestCallback.isInitialized) {
-            this.onContactConnectRequestCallback(payload.sender, payload.identityInfo)
-
-            return
-        }
-    }
-
-    private fun onContactConnect(payload: ContactConnectPayload) {
-        Log.d("VTLOG", "ON CONTACT CONNECT with payload $payload")
-
-        if (this::onContactConnectCallback.isInitialized) {
-            this.onContactConnectCallback(payload.sender, payload.identityInfo)
-
-            return
-        }
-    }
-
     /**
      * Creation of objects from payload
      */
@@ -619,15 +564,15 @@ class PeerChatCommunity(
     /**
      * EVA Callbacks
      */
-    private fun onEVASendCompleteCallback(peer: Peer, info: String, dataBinary: ByteArray?, nonce: ULong) {
+    private fun onEVASendCompleteCallback(peer: Peer, info: String, nonce: ULong) {
         Log.d("EVAPROTOCOL", "ON EVA SEND COMPLETE CALLBACK CALLED WITH INFO '${info}'")
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
-        Log.d("VTLOG", "EVA SEND COMPLETE FOR CLASS/COMMUNITY '$info' with data of size '${dataBinary?.size}' and nonce '$nonce'")
+        Log.d("VTLOG", "EVA SEND COMPLETE FOR CLASS/COMMUNITY '$info' and nonce '$nonce'")
 
         if (this::evaSendCompleteCallback.isInitialized) {
-            this.evaSendCompleteCallback(peer, info, dataBinary, nonce)
+            this.evaSendCompleteCallback(peer, info, nonce)
         }
     }
 
@@ -643,18 +588,18 @@ class PeerChatCommunity(
         }
     }
 
-    private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, dataBinary: ByteArray?) {
+    private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
         Log.d("EVAPROTOCOL", "ON EVA RECEIVE COMPLETE CALLBACK CALLED WITH INFO '${info}'")
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
-        dataBinary?.let {
+        data?.let {
             val packet = Packet(peer.address, it)
             onAttachmentPacket(packet)
         }
 
         if (this::evaReceiveCompleteCallback.isInitialized) {
-            this.evaReceiveCompleteCallback(peer, info, id, dataBinary)
+            this.evaReceiveCompleteCallback(peer, info, id, data)
         }
     }
 
@@ -692,8 +637,6 @@ class PeerChatCommunity(
         const val ATTACHMENT = 4
         const val CONTACT_IMAGE_REQUEST = 5
         const val CONTACT_IMAGE = 6
-        const val CONTACT_CONNECT_REQUEST = 7
-        const val CONTACT_CONNECT = 8
     }
 
     class Factory(

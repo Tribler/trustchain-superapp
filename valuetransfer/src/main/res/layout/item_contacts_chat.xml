@@ -31,17 +31,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-<!--        <FrameLayout-->
-<!--            android:id="@+id/flIdenticon"-->
-<!--            android:layout_width="46dp"-->
-<!--            android:layout_height="46dp"-->
-<!--            android:background="@drawable/pill_rounded"-->
-<!--            android:backgroundTint="?attr/backgroundColor"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toStartOf="@+id/clChatContentOverview"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent">-->
-
             <ImageView
                 android:id="@+id/ivIdenticon"
                 android:layout_width="@dimen/identiconWidth"
@@ -60,7 +49,6 @@
                 tools:src="@drawable/ic_contact"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"/>
-<!--        </FrameLayout>-->
         </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -73,27 +61,58 @@
             app:layout_constraintStart_toEndOf="@+id/cvContactImage"
             app:layout_constraintTop_toTopOf="@+id/cvContactImage">
 
-            <TextView
-                android:id="@+id/tvContactNameOverview"
+            <RelativeLayout
+                android:id="@+id/rlNameStatus"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Name"
-                android:textColor="?attr/onWidgetColor"
-                android:textSize="14sp"
-                android:textStyle="bold"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tvContactTimeOverview">
 
-            <ImageView
-                android:id="@+id/ivOnlineStatusOverview"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/circle"
-                android:backgroundTint="@color/colorPrimaryValueTransfer"
-                app:layout_constraintBottom_toBottomOf="@+id/tvContactNameOverview"
-                app:layout_constraintStart_toEndOf="@+id/tvContactNameOverview"
-                app:layout_constraintTop_toTopOf="@+id/tvContactNameOverview" />
+                <TextView
+                    android:id="@+id/tvContactNameOverview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="20dp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:textColor="?attr/onWidgetColor"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="Name" />
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="-16dp"
+                    android:layout_toRightOf="@+id/tvContactNameOverview">
+
+                    <ImageView
+                        android:id="@+id/ivContactUnverifiedStatus"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_verified_not_smaller"
+                        app:tint="?attr/colorError"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <ImageView
+                        android:id="@+id/ivContactVerifiedStatus"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_verified_smaller"
+                        app:tint="?attr/colorAccent"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </FrameLayout>
+            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/ivMessageStatusOverview"
@@ -120,7 +139,7 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toStartOf="@+id/ivMuted"
                 app:layout_constraintStart_toEndOf="@+id/ivMessageStatusOverview"
-                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
+                app:layout_constraintTop_toBottomOf="@+id/rlNameStatus" />
 
             <ImageView
                 android:id="@+id/ivMuted"
@@ -144,8 +163,31 @@
                 android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="12sp"
                 android:typeface="monospace"
+                app:layout_constraintBottom_toBottomOf="@+id/rlNameStatus"
+                app:layout_constraintEnd_toStartOf="@+id/flOnlineStatusOverview"
+                app:layout_constraintTop_toTopOf="@+id/rlNameStatus" />
+
+            <FrameLayout
+                android:id="@+id/flOnlineStatusOverview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/rlNameStatus"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/rlNameStatus">
+
+                <ImageView
+                    android:id="@+id/ivOnlineStatusOverview"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/circle_online" />
+
+                <ImageView
+                    android:id="@+id/ivOfflineStatusOverview"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/circle_offline" />
+            </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

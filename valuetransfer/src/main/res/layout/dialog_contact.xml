@@ -47,7 +47,7 @@
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
                     android:background="?attr/widgetColor"
-                    android:padding="8dp"
+                    android:padding="24dp"
                     android:visibility="gone"
                     tools:src="@drawable/ic_contact"
                     tools:visibility="visible" />
@@ -103,7 +103,7 @@
                 android:id="@+id/llVerificationStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_gravity="center"
                 android:layout_marginTop="4dp"
                 android:orientation="horizontal">
 
@@ -117,6 +117,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:drawablePadding="2dp"
+                        android:gravity="center_vertical"
                         android:text="@string/text_verified"
                         app:drawableStartCompat="@drawable/ic_verified_smaller"
                         app:drawableTint="?attr/colorAccent" />
@@ -277,6 +278,22 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/tvNoAttributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/text_no_attributes"
+                    android:textColor="?attr/onBackgroundColor"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAttributesInfo"
+                    tools:visibility="visible" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvContactIdentityAttributes"
                     android:layout_width="match_parent"
@@ -299,6 +316,22 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/tvNoTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/text_no_transactions"
+                    android:textColor="?attr/onBackgroundColor"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAttestationInfo"
+                    tools:visibility="visible" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvContactTransactions"
                     android:layout_width="match_parent"
@@ -306,19 +339,15 @@
                     tools:itemCount="1"
                     tools:listitem="@layout/item_exchange_transaction" />
 
-                <Button
-                    android:id="@+id/btnMoreTransactions"
-                    style="@style/ButtonLightGrayRounded"
-                    android:layout_height="26dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@drawable/pill_rounded"
-                    android:paddingVertical="0dp"
-                    android:text="@string/btn_show_more"
-                    android:textColor="?attr/onWidgetSecondaryColor"
+                <ImageView
+                    android:id="@+id/btnShowMoreTransactions"
+                    android:layout_width="match_parent"
+                    android:layout_height="28dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:background="@drawable/square_rounded"
+                    android:paddingVertical="8dp"
+                    android:src="@drawable/ic_arrow_down"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/rvContactTransactions"
                     tools:visibility="visible" />
 
             </LinearLayout>

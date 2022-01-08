@@ -289,10 +289,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             e.printStackTrace()
             Log.d("VTLOG", "IDENTITY CREATION FAILED")
 
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
                 resources.getString(R.string.snackbar_identity_create_error),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
             )
 
             return
@@ -320,10 +319,9 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
                     parentActivity.reloadActivity()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_identity_remove_error),
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_identity_remove_error)
                     )
                 }
             }.show(parentFragmentManager, tag)

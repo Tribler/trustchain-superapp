@@ -11,6 +11,7 @@ import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -21,6 +22,7 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeVtBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransactionDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
@@ -50,13 +52,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer(
-                {
-                    trustchain.createAgreementBlock(it, it.transaction)
-                    transactionForceUpdate = true
-                },
-                ExchangeTransactionItemRenderer.TYPE_FULL_VIEW
-            )
+            ExchangeTransactionItemRenderer(true) {
+                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+            }
         )
 
         lifecycleScope.launchWhenStarted {
@@ -110,12 +108,12 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                         null,
                         null,
                         true
-                    ).show(parentFragmentManager, tag)
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
                     R.id.actionRequestTransferContact -> ExchangeTransferMoneyDialog(
                         null,
                         null,
                         false
-                    ).show(parentFragmentManager, tag)
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }
@@ -190,10 +188,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                 when (scanIntent) {
                     DEPOSIT_INTENT -> {
                         if (obj.has(QRScanController.KEY_AMOUNT)) {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_exchange_scan_buy_not_sell),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING
+                                resources.getString(R.string.snackbar_exchange_scan_buy_not_sell)
                             )
                             return
                         }
@@ -201,10 +198,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                     }
                     WITHDRAW_INTENT -> {
                         if (!obj.has(QRScanController.KEY_AMOUNT)) {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING
+                                resources.getString(R.string.snackbar_exchange_scan_sell_not_buy)
                             )
                             return
                         }
@@ -212,10 +208,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                     }
                     TRANSFER_INTENT -> {
                         if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
-                            parentActivity.displaySnackbar(
+                            parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell),
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING
+                                resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell)
                             )
                             return
                         }
@@ -224,10 +219,9 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
                 )
                 QRCodeUtils(requireContext()).startQRScanner(
                     this,
@@ -283,54 +277,24 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         val gateway = getTransactionRepository().getGatewayPeer()
         if (gateway != null) {
             getTransactionRepository().sendCheckpointProposal(gateway)
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
                 resources.getString(R.string.snackbar_exchange_balance_verification_success)
             )
         } else {
-            parentActivity.displaySnackbar(
+            parentActivity.displayToast(
                 requireContext(),
-                resources.getString(R.string.snackbar_exchange_balance_verification_error),
-                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                resources.getString(R.string.snackbar_exchange_balance_verification_error)
             )
         }
     }
 
     private fun createTransactionItems(transactions: List<Transaction>): List<Item> {
-        val myPk = getTrustChainCommunity().myPeer.publicKey.keyToBin()
-        val blocks = trustchain.getChainByUser(myPk)
+        val myPk = getTrustChainCommunity().myPeer.publicKey
+        val blocks = getTrustChainHelper().getChainByUser(myPk.keyToBin())
 
-        return transactions
-            .map { transaction ->
-                val block = transaction.block
-
-                val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-                val isMyPk = block.linkPublicKey.contentEquals(myPk)
-                val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-
-                // Some other (proposal) block is linked to the current agreement block. This is to find the status of incoming transactions.
-                val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
-
-                // Some other (agreement) block is linked to the current proposal block. This is to find the status of outgoing transactions.
-                val outgoingIsLinkedBlock = blocks.find { block.linkedBlockId == it.blockId } != null
-                val status = when {
-                    hasLinkedBlock || outgoingIsLinkedBlock -> ExchangeTransactionItem.BlockStatus.SIGNED
-                    block.isSelfSigned -> ExchangeTransactionItem.BlockStatus.SELF_SIGNED
-                    isProposalBlock -> ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
-                    else -> null
-                }
-
-                // Determine whether the transaction/block can be signed
-                val canSign = (isAnyCounterpartyPk || isMyPk) &&
-                    isProposalBlock &&
-                    !block.isSelfSigned &&
-                    !hasLinkedBlock
-
-                ExchangeTransactionItem(
-                    transaction,
-                    canSign,
-                    status,
-                )
+        return transactions.map { transaction ->
+            transaction.toExchangeTransactionItem(myPk, blocks)
             }
     }
 

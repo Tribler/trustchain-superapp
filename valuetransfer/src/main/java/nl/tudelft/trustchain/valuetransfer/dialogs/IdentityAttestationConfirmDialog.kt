@@ -11,6 +11,7 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.jaredrummler.blockingdialog.BlockingDialogFragment
+import com.ncorti.slidetoact.SlideToActView
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_18PLUS
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_RANGE_UNDERAGE
@@ -19,7 +20,6 @@ import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.util.betweenDates
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
-import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 import java.util.*
 
@@ -75,20 +75,22 @@ class IdentityAttestationConfirmDialog(
                 )
             )
 
-            val confirmButton = view.findViewById<Button>(R.id.btnConfirmRequestedAttestation)
-            toggleButton(confirmButton, attributeValueView.text.toString().isNotEmpty())
+            val confirmSlider = view.findViewById<SlideToActView>(R.id.slideConfirmRequestedAttestation)
+            confirmSlider.isLocked = attributeValueView.text.toString().isEmpty()
 
             attributeValueView.doAfterTextChanged { state ->
-                toggleButton(confirmButton, state != null && state.isNotEmpty())
+                confirmSlider.isLocked = state == null || state.isEmpty()
             }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
-            confirmButton.setOnClickListener {
-                attributeValueView.text.toString().let { attributeValue ->
-                    setResult(attributeValue, false)
-                    bottomSheetDialog.dismiss()
+            confirmSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    attributeValueView.text.toString().let { attributeValue ->
+                        setResult(attributeValue, false)
+                        bottomSheetDialog.dismiss()
+                    }
                 }
             }
 

@@ -115,7 +115,7 @@ class IdentityAttributeDialog(
                     getIdentityCommunity().createIdentityAttribute(selectedName, attributeValue).let { newAttribute ->
                         getIdentityStore().addAttribute(newAttribute)
 
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
                             resources.getString(R.string.snackbar_identity_attribute_add_success)
                         )
@@ -125,7 +125,7 @@ class IdentityAttributeDialog(
                     attribute!!.value = attributeValue
 
                     getIdentityStore().editAttribute(attribute!!)
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.snackbar_identity_attribute_update_success)
                     )

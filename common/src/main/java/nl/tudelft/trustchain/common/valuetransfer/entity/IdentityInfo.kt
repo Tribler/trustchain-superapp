@@ -47,7 +47,7 @@ data class IdentityInfo(
                     json.optString(IDENTITY_INFO_INITIALS),
                     json.optString(IDENTITY_INFO_SURNAME),
                     json.getBoolean(IDENTITY_INFO_VERIFIED),
-                    json.optString(IDENTITY_INFO_IMAGE_HASH)
+                    json.optString(IDENTITY_INFO_IMAGE_HASH) ?: null
                 ),
                 0
             )

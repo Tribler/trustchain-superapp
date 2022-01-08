@@ -16,6 +16,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.ncorti.slidetoact.SlideToActView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -23,7 +24,6 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
 import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
@@ -41,9 +41,9 @@ class ExchangeTransferMoneyDialog(
 
     private lateinit var contactAdapter: ArrayAdapter<Contact>
 
-    private lateinit var transferButton: Button
-    private lateinit var requestMoneyContactButton: Button
-    private lateinit var requestMoneyQRButton: Button
+    private lateinit var transferSlider: SlideToActView
+    private lateinit var requestSlider: SlideToActView
+    private lateinit var requestQRSlider: SlideToActView
     private lateinit var messageView: EditText
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -72,11 +72,10 @@ class ExchangeTransferMoneyDialog(
             val addNewContactView = view.findViewById<ConstraintLayout>(R.id.clAddNewContact)
             val addNewContactSwitch = view.findViewById<Switch>(R.id.switchAddNewContact)
 
-            transferButton = view.findViewById(R.id.btnTransferMoney)
-            toggleButton(transferButton, selectedContact != null && transactionAmount != 0L)
-
-            requestMoneyContactButton = view.findViewById(R.id.btnRequestMoneyContact)
-            requestMoneyQRButton = view.findViewById(R.id.btnRequestMoneyQR)
+            transferSlider = view.findViewById(R.id.slideTransferMoney)
+            transferSlider.isLocked = selectedContact != null && transactionAmount != 0L
+            requestSlider = view.findViewById(R.id.slideRequestMoney)
+            requestQRSlider = view.findViewById(R.id.slideRequestMoneyQR)
 
             transactionAmountView.addDecimalLimiter()
 
@@ -88,9 +87,9 @@ class ExchangeTransferMoneyDialog(
             contactSpinner.isVisible = selectedContact == null
             selectedContactView.isVisible = selectedContact != null
 
-            requestMoneyContactButton.isVisible = !isTransfer && recipient != null
-            requestMoneyQRButton.isVisible = !isTransfer && recipient == null
-            transferButton.isVisible = isTransfer
+            transferSlider.isVisible = isTransfer
+            requestSlider.isVisible = !isTransfer && recipient != null
+            requestQRSlider.isVisible = !isTransfer && recipient == null
             view.findViewById<TextView>(R.id.tvTitleTransfer).isVisible = isTransfer
             view.findViewById<TextView>(R.id.tvTitleRequest).isVisible = !isTransfer
 
@@ -217,7 +216,7 @@ class ExchangeTransferMoneyDialog(
                 contactSpinner.onItemSelectedListener =
                     object : AdapterView.OnItemSelectedListener {
                         override fun onNothingSelected(p0: AdapterView<*>?) {
-                            toggleButton(transferButton, false)
+                            transferSlider.isLocked = true
                         }
 
                         // Get selected contact for transfer and request
@@ -229,7 +228,7 @@ class ExchangeTransferMoneyDialog(
                         ) {
                             selectedContact = if (!isTransfer && position == 0) null else contactSpinner.selectedItem as Contact
 
-                            toggleAllButtons()
+                            toggleAllSliders()
                         }
                     }
 
@@ -245,7 +244,7 @@ class ExchangeTransferMoneyDialog(
                     selectedContactView.text = getContactStore().getContactFromPublicKey(selectedContact!!.publicKey)!!.name
                 }
 
-                toggleAllButtons()
+                toggleAllSliders()
             }
 
             onFocusChange(transactionAmountView, requireContext())
@@ -254,123 +253,129 @@ class ExchangeTransferMoneyDialog(
             transactionAmountView.doAfterTextChanged {
                 transactionAmount = formatAmount(transactionAmountView.text.toString())
 
-                toggleAllButtons()
+                toggleAllSliders()
             }
 
             messageView.doAfterTextChanged {
                 transactionMessage = messageView.text.toString()
             }
 
-            transferButton.setOnClickListener {
-                transferButton.text = resources.getString(R.string.text_transferring)
-
-                Handler().postDelayed(
-                    {
-                        try {
-                            // Add contact if it is isn't in your contacts and
-                            if (selectedContact != null && getContactStore().getContactFromPublicKey(
-                                    selectedContact!!.publicKey
-                                ) == null
-                            ) {
-                                if (addNewContactSwitch.isChecked) {
-                                    getContactStore().addContact(
-                                        selectedContact!!.publicKey,
-                                        selectedContact!!.name
-                                    )
+            transferSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    Handler().postDelayed(
+                        {
+                            try {
+                                // Add contact if it is isn't in your contacts and
+                                if (selectedContact != null && getContactStore().getContactFromPublicKey(
+                                        selectedContact!!.publicKey
+                                    ) == null
+                                ) {
+                                    if (addNewContactSwitch.isChecked) {
+                                        getContactStore().addContact(
+                                            selectedContact!!.publicKey,
+                                            selectedContact!!.name
+                                        )
+                                    }
                                 }
-                            }
 
-                            // Create proposal block to the recipient
-                            val block = getTransactionRepository().sendTransferProposalSync(
-                                selectedContact!!.publicKey.keyToBin(),
-                                transactionAmount
+                                // Create proposal block to the recipient
+                                val block = getTransactionRepository().sendTransferProposalSync(
+                                    selectedContact!!.publicKey.keyToBin(),
+                                    transactionAmount
+                                )
+                                if (block == null) {
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(R.string.snackbar_insufficient_balance)
+                                    )
+                                    transferSlider.text = resources.getString(R.string.btn_slide_to_transfer)
+                                    transferSlider.resetSlider()
+                                } else {
+                                    getPeerChatCommunity().sendMessageWithTransaction(
+                                        transactionMessage,
+                                        block.calculateHash(),
+                                        selectedContact!!.publicKey,
+                                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                                    )
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(R.string.snackbar_transfer_of, transactionAmountView.text, selectedContact!!.name),
+                                        isShort = false
+                                    )
+                                    bottomSheetDialog.dismiss()
+                                }
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_unexpected_error_occurred)
+                                )
+                            }
+                        },
+                        500
+                    )
+                }
+            }
+
+            requestSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    requestSlider.text = resources.getString(R.string.text_requesting)
+
+                    val transferRequest = TransferRequest(
+                        transactionMessage,
+                        transactionAmount,
+                        getTrustChainCommunity().myPeer.publicKey,
+                        selectedContact!!.publicKey
+                    )
+
+                    Handler().postDelayed(
+                        {
+                            requestSlider.isLocked = true
+                            getPeerChatCommunity().sendTransferRequest(
+                                transactionMessage,
+                                transferRequest,
+                                selectedContact!!.publicKey,
+                                getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
                             )
-                            if (block == null) {
-                                parentActivity.displaySnackbar(
+
+                            // Only show snackbar when not sent from chat
+                            if (recipient == null) {
+                                parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_insufficient_balance),
-                                    view = view.rootView,
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                                )
-                                transferButton.text = resources.getString(R.string.text_transfer)
-                            } else {
-                                getPeerChatCommunity().sendMessageWithTransaction(
-                                    transactionMessage,
-                                    block.calculateHash(),
-                                    selectedContact!!.publicKey,
-                                    getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
-                                )
-                                parentActivity.displaySnackbar(
-                                    requireContext(),
-                                    resources.getString(R.string.snackbar_transfer_of, transactionAmountView.text, selectedContact!!.name),
+                                    resources.getString(
+                                        R.string.snackbar_transfer_request,
+                                        transactionAmountView.text,
+                                        selectedContact!!.name
+                                    ),
                                     isShort = false
                                 )
-                                bottomSheetDialog.dismiss()
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_unexpected_error_occurred),
-                                view = view.rootView,
-                                type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                            )
-                        }
-                    },
-                    500
-                )
+                            bottomSheetDialog.dismiss()
+                        },
+                        500
+                    )
+                }
             }
 
-            requestMoneyContactButton.setOnClickListener {
-                requestMoneyContactButton.text = resources.getString(R.string.text_requesting)
+            requestQRSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    view.closeKeyboard(requireContext())
+                    val map = mapOf(
+                        QRScanController.KEY_PUBLIC_KEY to getTrustChainCommunity().myPeer.publicKey.keyToBin()
+                            .toHex(),
+                        QRScanController.KEY_AMOUNT to transactionAmount.toString(),
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames,
+                        QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
+                        QRScanController.KEY_MESSAGE to transactionMessage
+                    )
 
-                val transferRequest = TransferRequest(
-                    transactionMessage,
-                    transactionAmount,
-                    getTrustChainCommunity().myPeer.publicKey,
-                    selectedContact!!.publicKey
-                )
-
-                Handler().postDelayed(
-                    {
-                        requestMoneyContactButton.isVisible = false
-                        getPeerChatCommunity().sendTransferRequest(
-                            transactionMessage,
-                            transferRequest,
-                            selectedContact!!.publicKey,
-                            getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
-                        )
-
-                        // Only show snackbar when not sent from chat
-                        if (recipient == null) {
-                            parentActivity.displaySnackbar(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_transfer_request, transactionAmountView.text, selectedContact!!.name),
-                                isShort = false
-                            )
-                        }
-                        bottomSheetDialog.dismiss()
-                    },
-                    500
-                )
-            }
-
-            requestMoneyQRButton.setOnClickListener {
-                view.closeKeyboard(requireContext())
-                val map = mapOf(
-                    QRScanController.KEY_PUBLIC_KEY to getTrustChainCommunity().myPeer.publicKey.keyToBin().toHex(),
-                    QRScanController.KEY_AMOUNT to transactionAmount.toString(),
-                    QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames,
-                    QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
-                    QRScanController.KEY_MESSAGE to transactionMessage
-                )
-
-                bottomSheetDialog.dismiss()
-                QRCodeDialog(
-                    resources.getString(R.string.text_request_money),
-                    resources.getString(R.string.text_scan_qr_friend),
-                    mapToJSON(map).toString()
-                ).show(parentFragmentManager, tag)
+                    bottomSheetDialog.dismiss()
+                    QRCodeDialog(
+                        resources.getString(R.string.text_request_money),
+                        resources.getString(R.string.text_scan_qr_friend),
+                        mapToJSON(map).toString()
+                    ).show(parentFragmentManager, tag)
+                }
             }
 
             bottomSheetDialog.setContentView(view)
@@ -380,22 +385,26 @@ class ExchangeTransferMoneyDialog(
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    private fun toggleAllButtons() {
+    private fun toggleAllSliders() {
         val nonEmptyContact = selectedContact != null
         val nonEmptyAmount = transactionAmount != 0L
 
-        transferButton.isVisible = isTransfer
+        transferSlider.isVisible = isTransfer
 
         if (isTransfer) {
-            toggleButton(transferButton, nonEmptyContact && nonEmptyAmount)
+            transferSlider.isLocked = !(nonEmptyContact && nonEmptyAmount)
         } else {
             // Situation in which money is requested from one person
-            requestMoneyContactButton.isVisible = nonEmptyContact
-            toggleButton(requestMoneyContactButton, nonEmptyContact && nonEmptyAmount)
+            requestSlider.isVisible = nonEmptyContact
+            requestSlider.isLocked = !(nonEmptyContact && nonEmptyAmount)
 
             // Situation in which money is requested to anyone using QR code only
-            requestMoneyQRButton.isVisible = !nonEmptyContact
-            toggleButton(requestMoneyQRButton, !nonEmptyContact && nonEmptyAmount)
+            requestQRSlider.isVisible = !nonEmptyContact
+            requestQRSlider.isLocked = !(!nonEmptyContact && nonEmptyAmount)
         }
+    }
+
+    companion object {
+        const val TAG = "exchange_transfer_money_dialog"
     }
 }

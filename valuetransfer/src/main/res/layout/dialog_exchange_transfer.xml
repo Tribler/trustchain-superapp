@@ -159,7 +159,7 @@
         android:textSize="14sp"
         android:textColor="@color/black"
         android:textColorHint="@color/gray"
-        android:hint="@string/text_transaction_amount"
+        android:hint="@string/text_optional_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clSelectedContact" />
@@ -197,34 +197,79 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/btnTransferMoney"
-        style="@style/ButtonGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideTransferMoney"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="@string/btn_transfer"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_transfer"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
-    <Button
-        android:id="@+id/btnRequestMoneyContact"
-        style="@style/ButtonGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideRequestMoney"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="@string/btn_send_request"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_request"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
-    <Button
-        android:id="@+id/btnRequestMoneyQR"
-        style="@style/ButtonGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideRequestMoneyQR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="@string/btn_create_request_qr"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_request_qr"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

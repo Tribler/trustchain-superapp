@@ -78,4 +78,8 @@ class OptionsDialog(
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
+
+    companion object {
+        const val TAG = "options_dialog"
+    }
 }

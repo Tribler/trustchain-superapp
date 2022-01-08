@@ -23,8 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
-import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
@@ -37,16 +35,16 @@ import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
-import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItem
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItemRenderer
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
+import nl.tudelft.trustchain.valuetransfer.util.toExchangeTransactionItem
 
 class ContactInfoDialog(
-    private val publicKey: PublicKey
+    val publicKey: PublicKey
 ) : VTDialogFragment() {
 
     private val contact: LiveData<Contact?> by lazy {
@@ -76,15 +74,19 @@ class ContactInfoDialog(
     private var transactionShowCount: Int = 5
 
     private lateinit var rvTransactions: RecyclerView
-    private lateinit var buttonMoreTransactions: Button
+    private lateinit var buttonMoreTransactions: ImageView
     private lateinit var showIdentityAttributes: TextView
     private lateinit var showTransactions: TextView
+    private lateinit var noAttributesView: TextView
+    private lateinit var noTransactionsView: TextView
 
     private lateinit var bottomSheetDialog: Dialog
 
     init {
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer({}, ExchangeTransactionItemRenderer.TYPE_CONTACT_VIEW)
+            ExchangeTransactionItemRenderer(false) {
+                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+            }
         )
 
         lifecycleScope.launchWhenCreated {
@@ -139,6 +141,8 @@ class ContactInfoDialog(
             showTransactions = view.findViewById(R.id.tvShowTransactions)
             val identityAttributesView = view.findViewById<NestedScrollView>(R.id.clIdentityAttributes)
             val transactionsView = view.findViewById<NestedScrollView>(R.id.clTransactions)
+            noAttributesView = view.findViewById(R.id.tvNoAttributes)
+            noTransactionsView = view.findViewById(R.id.tvNoTransactions)
 
             showIdentityAttributes.setOnClickListener {
                 if (identityAttributesView.isVisible) return@setOnClickListener
@@ -168,7 +172,7 @@ class ContactInfoDialog(
 
             val rvIdentityAttributes = view.findViewById<RecyclerView>(R.id.rvContactIdentityAttributes)
             rvTransactions = view.findViewById(R.id.rvContactTransactions)
-            buttonMoreTransactions = view.findViewById(R.id.btnMoreTransactions)
+            buttonMoreTransactions = view.findViewById(R.id.btnShowMoreTransactions)
 
             verifiedInfoIcon.setOnClickListener {
                 verifiedInfo.isVisible = !verifiedInfo.isVisible
@@ -190,13 +194,12 @@ class ContactInfoDialog(
                     2
                 ) {
                     copyToClipboard(requireContext(), it.value, it.name)
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
                         resources.getString(
                             R.string.snackbar_copied_clipboard,
                             it.name
-                        ),
-                        view = view.rootView
+                        )
                     )
                 }
             )
@@ -210,6 +213,8 @@ class ContactInfoDialog(
                 this,
                 Observer {
                     adapterIdentityAttributes.updateItems(it)
+
+                    noAttributesView.isVisible = it.isEmpty()
                 }
             )
 
@@ -240,6 +245,8 @@ class ContactInfoDialog(
                         verificationStatus.isVisible = true
                         verifiedStatus.isVisible = it.isVerified
                         notVerifiedStatus.isVisible = !it.isVerified
+                        verifiedInfo.isVisible = !it.isVerified
+                        identityNameInfo.isVisible = !it.isVerified
                     }
                 }
             )
@@ -287,6 +294,8 @@ class ContactInfoDialog(
         adapterTransactions.updateItems(items)
         rvTransactions.setItemViewCacheSize(items.size)
         buttonMoreTransactions.isVisible = transactionsItems.size >= transactionShowCount
+
+        noTransactionsView.isVisible = items.isEmpty()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -312,39 +321,15 @@ class ContactInfoDialog(
     }
 
     private fun createTransactionItems(transactions: List<Transaction>): List<Item> {
-        val myPk = getTrustChainCommunity().myPeer.publicKey.keyToBin()
-        val blocks = getTrustChainHelper().getChainByUser(myPk)
+        val myPk = getTrustChainCommunity().myPeer.publicKey
+        val blocks = getTrustChainHelper().getChainByUser(myPk.keyToBin())
 
         return transactions.map { transaction ->
-            val block = transaction.block
-
-            val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-            val isMyPk = block.linkPublicKey.contentEquals(myPk)
-            val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-
-            // Some other (proposal) block is linked to the current agreement block. This is to find the status of incoming transactions.
-            val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
-
-            // Some other (agreement) block is linked to the current proposal block. This is to find the status of outgoing transactions.
-            val outgoingIsLinkedBlock = blocks.find { block.linkedBlockId == it.blockId } != null
-            val status = when {
-                hasLinkedBlock || outgoingIsLinkedBlock -> ExchangeTransactionItem.BlockStatus.SIGNED
-                block.isSelfSigned -> ExchangeTransactionItem.BlockStatus.SELF_SIGNED
-                isProposalBlock -> ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
-                else -> null
-            }
-
-            // Determine whether the transaction/block can be signed
-            val canSign = (isAnyCounterpartyPk || isMyPk) &&
-                isProposalBlock &&
-                !block.isSelfSigned &&
-                !hasLinkedBlock
-
-            ExchangeTransactionItem(
-                transaction,
-                canSign,
-                status
-            )
+            transaction.toExchangeTransactionItem(myPk, blocks)
         }
+    }
+
+    companion object {
+        const val TAG = "contact_info_dialog"
     }
 }

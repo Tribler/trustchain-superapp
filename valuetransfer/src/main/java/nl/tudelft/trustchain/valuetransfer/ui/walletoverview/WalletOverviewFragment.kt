@@ -28,6 +28,7 @@ import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletVtBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
@@ -35,6 +36,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItem
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItemRenderer
+import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import org.json.JSONObject
 
 class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
@@ -44,10 +46,11 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     private val adapterContacts = ItemAdapter()
 
     private val identityImage = MutableLiveData<String?>()
+    private val myPeerConnected = MutableLiveData(false)
 
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow()) { identities, identityImage ->
-            createIdentityItems(identities, identityImage)
+        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow(), myPeerConnected.asFlow()) { identities, identityImage, connected ->
+            createIdentityItems(identities, identityImage, connected)
         }.asLiveData()
     }
 
@@ -87,6 +90,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                     identityImage.postValue(appPreferences.getIdentityFace())
                 }
 
+                if (getTrustChainCommunity().getPeers().isNotEmpty() != myPeerConnected.value) {
+                    myPeerConnected.postValue(getTrustChainCommunity().getPeers().isNotEmpty())
+                }
+
                 delay(1000)
             }
         }
@@ -99,11 +106,19 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
                 0,
-                {
-                    parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
+                { identity ->
+                    val map = mapOf(
+                        QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
+                        QRScanController.KEY_NAME to identity.content.givenNames
+                    )
+
+                    QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
+                        .show(parentFragmentManager, tag)
                 },
                 {},
-                {}
+                {
+                    parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
+                }
             )
         )
 
@@ -188,7 +203,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         )
 
         binding.clExchangeOptions.setOnClickListener {
-            OptionsDialog(R.menu.exchange_options, "Choose Option") { _, item ->
+            OptionsDialog(
+                R.menu.exchange_options,
+                resources.getString(R.string.dialog_choose_option)
+            ) { _, item ->
                 when (item.itemId) {
                     R.id.actionDeposit -> {
                         scanIntent = DEPOSIT_INTENT
@@ -271,10 +289,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                     when (scanIntent) {
                         DEPOSIT_INTENT -> {
                             if (obj.has(QRScanController.KEY_AMOUNT)) {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_exchange_scan_buy_not_sell),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
                                     isShort = false
                                 )
                                 return
@@ -283,10 +300,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                         }
                         WITHDRAW_INTENT -> {
                             if (!obj.has(QRScanController.KEY_AMOUNT)) {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
                                     isShort = false
                                 )
                                 return
@@ -295,10 +311,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                         }
                         TRANSFER_INTENT -> {
                             if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
-                                parentActivity.displaySnackbar(
+                                parentActivity.displayToast(
                                     requireContext(),
                                     resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell),
-                                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR,
                                     isShort = false
                                 )
                                 return
@@ -325,11 +340,12 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         )
     }
 
-    private fun createIdentityItems(identities: List<Identity>, imageString: String?): List<Item> {
+    private fun createIdentityItems(identities: List<Identity>, imageString: String?, connected: Boolean): List<Item> {
         return identities.mapIndexed { _, identity ->
             IdentityItem(
                 identity,
-                imageString?.let { decodeImage(it) }
+                imageString?.let { decodeImage(it) },
+                connected
             )
         }
     }

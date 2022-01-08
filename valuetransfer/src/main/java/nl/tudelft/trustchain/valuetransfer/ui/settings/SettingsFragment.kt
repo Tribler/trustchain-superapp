@@ -114,17 +114,16 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
                         appPreferences.deleteIdentityFace()
 
                         parentActivity.reloadActivity()
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
                             resources.getString(R.string.snackbar_identity_remove_success),
                             isShort = false
                         )
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
-                            resources.getString(R.string.snackbar_identity_remove_error),
-                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                            resources.getString(R.string.snackbar_identity_remove_error)
                         )
                     }
                 }.show(parentFragmentManager, this@SettingsFragment.tag)

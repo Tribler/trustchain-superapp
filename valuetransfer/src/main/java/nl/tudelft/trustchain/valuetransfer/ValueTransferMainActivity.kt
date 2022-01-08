@@ -79,10 +79,14 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
+import nl.tudelft.trustchain.valuetransfer.util.EVATest
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.util.*
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.widget.Toast
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -107,6 +111,7 @@ class ValueTransferMainActivity : BaseActivity() {
     private var verifiedBalance = MutableLiveData("0.00")
 
     private var isAppInForeground = true
+    private val testEVA = false
 
     /**
      * Initialize all communities and (database) stores and repo's for performance purposes and
@@ -227,6 +232,7 @@ class ValueTransferMainActivity : BaseActivity() {
         peerChatCommunity.setOnContactConnectCallback(::onContactConnectCallback)
         peerChatCommunity.createContactStateTable()
         peerChatCommunity.createContactImageTable()
+        peerChatCommunity.identityInfo = identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
 
         /**
          * Attestation community callbacks and register own key as trusted authority
@@ -250,7 +256,7 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        if (intent != null && getCommunity<IdentityCommunity>()!!.hasIdentity() && !lifecycle.currentState.isAtLeast(
+        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
         ) {
@@ -258,6 +264,14 @@ class ValueTransferMainActivity : BaseActivity() {
         }
 
         checkCameraPermissions()
+
+        /**
+         * Test EVA Script
+         */
+        if (testEVA) EVATest(
+            this,
+            defaultCryptoProvider.keyFromPublicBin("4C69624E61434C504B3ADB598A9730A5E47F0A372D79CD8DE96092A83A182B925A73E59F488B68EFD335BA0F0C8E882269465E49AF8C3CE855879FB13C1D3DE60E7E61533364544011D3".hexToBytes())
+        )
     }
 
     override fun onStart() {
@@ -567,16 +581,25 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Function that closes all currently opened dialogs
      */
-    private fun closeAllDialogs() {
+    fun closeAllDialogs() {
         fragmentManager.fragments.filterIsInstance<DialogFragment>().forEach { fragment ->
             fragment.dismissAllowingStateLoss()
         }
+    }
+
+    fun getFragment(tag: String): Fragment? {
+        return fragmentManager.findFragmentByTag(tag)
+    }
+
+    fun getDialogFragment(tag: String): DialogFragment? {
+        return fragmentManager.findFragmentByTag(tag) as DialogFragment?
     }
 
     /**
      * Function that determines the height of the status bar for placement of the snackbar
      */
     private fun getStatusBarHeight(): Int {
+
         var result = 0
         val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId < 0) {
@@ -585,6 +608,18 @@ class ValueTransferMainActivity : BaseActivity() {
             result = resources.getDimensionPixelSize(resourceId)
         }
         return result
+    }
+
+    /**
+     * Function that displays a toast
+     */
+    fun displayToast(
+        context: Context,
+        text: String,
+        isShort: Boolean = true
+    ) {
+        val duration = if (isShort) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
+        Toast.makeText(context, text, duration).show()
     }
 
     /**
@@ -709,13 +744,26 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * Set an icon next to the action bar title
      */
-    fun setActionBarTitleIcon(icon: Int? = null) = with(customActionBar) {
-        findViewById<TextView>(R.id.tv_actionbar_title).setCompoundDrawablesWithIntrinsicBounds(
-            0,
-            0,
-            icon ?: 0,
-            0
-        )
+    fun setActionBarTitleIcon(icon: Int? = null, color: Int? = null) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_title).apply {
+            setCompoundDrawablesWithIntrinsicBounds(0, 0, icon ?: 0, 0)
+
+            if (color != null) {
+                compoundDrawables.forEach {
+                    if (it != null) {
+                        it.colorFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Set an icon next to the action bar subtitle
+     */
+    fun setActionBarSubTitleIcon(icon: Int? = null) = with(customActionBar) {
+        findViewById<TextView>(R.id.tv_actionbar_subtitle)
+            .setCompoundDrawablesRelativeWithIntrinsicBounds(icon ?: 0, 0, 0, 0)
     }
 
     /**
@@ -774,7 +822,9 @@ class ValueTransferMainActivity : BaseActivity() {
             return
         }
 
+        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage}")
         Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
+        Log.d("VTLOG", "MESSAGE IDENTITY INFO: ${chatMessage.identityInfo}")
 
         val peerChatStore: PeerChatStore = getStore()!!
         val currentContactState = peerChatStore.getContactState(chatMessage.sender)
@@ -787,15 +837,21 @@ class ValueTransferMainActivity : BaseActivity() {
 
         var contactImageRequest = false
 
+        Log.d("VTLOG", "LOCAL IDENTITY INFO IMAGE: '${currentContactState?.identityInfo?.imageHash}' ${currentContactState?.identityInfo?.imageHash == ""} ${currentContactState?.identityInfo?.imageHash == null} ${currentContactState?.identityInfo?.imageHash.isNullOrBlank()} ${currentContactState?.identityInfo?.imageHash.isNullOrEmpty()}")
+        Log.d("VTLOG", "RECEI IDENTITY INFO IMAGE: '${chatMessage.identityInfo?.imageHash}' ${chatMessage.identityInfo?.imageHash == ""} ${chatMessage.identityInfo?.imageHash == null} ${chatMessage.identityInfo?.imageHash.isNullOrBlank()} ${chatMessage.identityInfo?.imageHash.isNullOrEmpty()}")
+
         chatMessage.identityInfo?.let { identityInfo ->
             val contactImage = peerChatStore.getContactImage(peer.publicKey)
             when {
                 currentContactState?.identityInfo == null -> {
+                    Log.d("VTLOG", "!!!!CURRENT STATE IS NULL")
                     peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
                     contactImageRequest = true
                 }
                 currentContactState.identityInfo != identityInfo -> {
+                    Log.d("VTLOG", "!!!!IDENTITY INFO IS NOT EQUAL")
                     if (currentContactState.identityInfo!!.imageHash != identityInfo.imageHash) {
+                        Log.d("VTLOG", "!!!!IMAGE HASH IS NOT EQUAL")
                         contactImageRequest = true
                     }
 
@@ -804,7 +860,8 @@ class ValueTransferMainActivity : BaseActivity() {
                         identityInfo
                     )
                 }
-                contactImage == null && identityInfo.imageHash != null -> {
+                contactImage == null && (identityInfo.imageHash != null && identityInfo.imageHash != "") -> {
+                    Log.d("VTLOG", "!!!!CONTACT INFO IS NULL AND IMAGEHASH IS NULL")
                     contactImageRequest = true
                 }
                 identityInfo.imageHash == null && contactImage != null -> {
@@ -815,7 +872,26 @@ class ValueTransferMainActivity : BaseActivity() {
 
         val idInfo = currentContactState?.identityInfo
         val messageIdInfo = chatMessage.identityInfo
-        val identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
+        var identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
+
+        if (chatMessage.identityInfo == null) {
+            ChatMessage(
+                UUID.randomUUID().toString(),
+                resources.getString(R.string.text_identity_undetermined),
+                MessageAttachment(MessageAttachment.TYPE_IDENTITY_UPDATED, 0, byteArrayOf()),
+                peer.publicKey,
+                getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
+                false,
+                chatMessage.timestamp,
+                ack = true,
+                read = true,
+                attachmentFetched = true,
+                transactionHash = null,
+            ).let {
+                community.getDatabase().addMessage(it)
+            }
+            identityIsUpdated = false
+        }
 
         // Let know when the identity information of the contact has been updated
         if (identityIsUpdated) {
@@ -983,7 +1059,7 @@ class ValueTransferMainActivity : BaseActivity() {
     private fun attestationChunkCallback(peer: Peer, i: Int) {
         Log.i("VTLOG", "Received attestation chunk $i from ${peer.mid}.")
         Handler(Looper.getMainLooper()).post {
-            displaySnackbar(applicationContext, "Received $i attestation chunks from ${peer.mid}.")
+            displayToast(applicationContext, "Received $i attestation chunks from ${peer.mid}.")
         }
     }
 
@@ -1018,12 +1094,12 @@ class ValueTransferMainActivity : BaseActivity() {
         if (fromPeer == null) {
             Log.i("VTLOG", "Signed attestation for attribute $attributeName for peer ${forPeer.mid}.")
             Handler(Looper.getMainLooper()).post {
-                displaySnackbar(applicationContext, "Successfully sent attestation for $attributeName to peer ${forPeer.mid}", isShort = false)
+                displayToast(applicationContext, "Successfully sent attestation for $attributeName to peer ${forPeer.mid}", isShort = false)
             }
         } else {
             Log.i("VTLOG", "Received attestation for attribute $attributeName with metadata: $metaData.")
             Handler(Looper.getMainLooper()).post {
-                displaySnackbar(applicationContext, "Received Attestation for $attributeName")
+                displayToast(applicationContext, "Received Attestation for $attributeName")
             }
         }
     }
@@ -1046,7 +1122,7 @@ class ValueTransferMainActivity : BaseActivity() {
         Log.i("VTLOG", "Signing attestation with value $input with format $idFormat.")
 
         Handler(Looper.getMainLooper()).post {
-            displaySnackbar(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
+            displayToast(applicationContext, "Signing attestation for $attributeName for peer ${peer.mid} ...", isShort = false)
         }
 
         return when (idFormat) {
@@ -1079,17 +1155,15 @@ class ValueTransferMainActivity : BaseActivity() {
         if (requestCode == ContactChatFragment.PERMISSION_CAMERA) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 Log.d("VTLOG", "CAMERA PERMISSION GRANTED")
-                displaySnackbar(
+                displayToast(
                     applicationContext,
                     resources.getString(R.string.snackbar_permission_camera_granted_other)
                 )
             } else {
                 Log.d("VTLOG", "CAMERA PERMISSION NOT GRANTED")
-                displaySnackbar(
+                displayToast(
                     applicationContext,
-                    resources.getString(R.string.snackbar_permission_denied),
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
-                )
+                    resources.getString(R.string.snackbar_permission_denied))
                 finish()
             }
         }

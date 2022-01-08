@@ -40,13 +40,11 @@ class ContactChatItemRenderer(
     private val yearFormat = SimpleDateFormat("yyyy", Locale.ENGLISH)
 
     override fun bindView(item: ContactChatItem, view: View) = with(view) {
-
-        // Necessary to hide content types because the recycler view displays wrong data sometimes
+        // Necessary to hide content types because the recycler view sometimes displays wrong data
         clChatMessage.isVisible = false
         clTransaction.isVisible = false
         clTransactionResend.isVisible = false
         clAttachmentPhotoVideo.isVisible = false
-//        clAttachmentPhotoVideoProgress.isVisible = false
         clAttachmentFile.isVisible = false
         clAttachmentIdentityAttribute.isVisible = false
         clAttachmentLocation.isVisible = false
@@ -54,6 +52,7 @@ class ContactChatItemRenderer(
         clAttachmentContact.isVisible = false
         clIdentityUpdated.isVisible = false
         clAttachmentProgress.isVisible = false
+        llChatItemTimeStatus.isVisible = true
 
         tvChatMessage.text = ""
         tvChatMessage.isVisible = false
@@ -77,8 +76,8 @@ class ContactChatItemRenderer(
         tvAttachmentContactName.isVisible = false
         tvAttachmentContactPublicKey.text = ""
         tvAttachmentContactPublicKey.isVisible = false
-        ivChatItemStatus.isVisible = false
         tvIdentityUpdatedMessage.text = ""
+        ivChatItemStatus.isVisible = false
 
         // Show the load more messages button
         clLoadMoreMessagesSection.isVisible = item.loadMoreMessages
@@ -155,10 +154,6 @@ class ContactChatItemRenderer(
                         tvAttachmentFileSize.isVisible = item.chatMessage.attachment?.size != null
                         tvAttachmentFileSize.text = size
 
-//                        ivAttachmentDocumentSave.isVisible = !item.chatMessage.outgoing
-//                        ivAttachmentDocumentSave.setOnClickListener {
-//                            onItemClick(item)
-//                        }
                     } else {
                         clAttachmentFile.isVisible = false
                         clAttachmentProgress.setBackgroundResource(backgroundResource)
@@ -167,7 +162,7 @@ class ContactChatItemRenderer(
 
                         if (item.chatMessage.outgoing) {
                             clAttachmentProgress.isVisible = false
-                        } else { // if (!item.chatMessage.outgoing)
+                        } else {
                             clAttachmentProgress.isVisible = true
                             tvAttachmentProgressStatus.isVisible = true
                             tvAttachmentProgressSize.isVisible = true
@@ -217,7 +212,6 @@ class ContactChatItemRenderer(
                     }
                 }
                 MessageAttachment.TYPE_IMAGE -> {
-
                     if (item.chatMessage.attachmentFetched) {
                         clAttachmentProgress.isVisible = false
                         clAttachmentPhotoVideo.isVisible = true
@@ -227,7 +221,6 @@ class ContactChatItemRenderer(
                         tvAttachmentPhotoVideoSize.setBackgroundResource(backgroundResource)
                         tvAttachmentPhotoVideoSize.setTextColor(ContextCompat.getColor(this.context, textColor))
                         tvAttachmentPhotoVideoSize.text = size
-
                     } else {
                         clAttachmentPhotoVideo.isVisible = false
                         clAttachmentProgress.setBackgroundResource(backgroundResource)
@@ -278,7 +271,6 @@ class ContactChatItemRenderer(
                     attachment.getFile(view.context).let { file ->
                         if (file.exists()) {
                             clAttachmentProgress.isVisible = false
-//                            clAttachmentPhotoVideoProgress.isVisible = false
                             Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
                             ivAttachmentPhotoVideo.clipToOutline = true
                         } else {
@@ -366,7 +358,7 @@ class ContactChatItemRenderer(
                                 )
 
                             tvAttachmentTransferRequestDescription.isVisible =
-                                transferRequest.description != null
+                                transferRequest.description != ""
                             tvAttachmentTransferRequestDescription.text =
                                 transferRequest.description
                         }
@@ -381,7 +373,7 @@ class ContactChatItemRenderer(
                         }
 
                         item.chatMessage.message.let { description ->
-                            tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
+                            tvAttachmentTransferRequestDescription.isVisible = description != ""
                             tvAttachmentTransferRequestDescription.text = description
                         }
                     }
@@ -395,9 +387,9 @@ class ContactChatItemRenderer(
                     }
                 }
                 MessageAttachment.TYPE_IDENTITY_UPDATED -> {
+                    llChatItemTimeStatus.isVisible = false
                     clIdentityUpdated.isVisible = true
                     tvIdentityUpdatedMessage.text = item.chatMessage.message
-
                 }
             }
         }
@@ -431,6 +423,10 @@ class ContactChatItemRenderer(
                 } else {
                     this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_unknown)
                 }
+            }
+
+            clTransaction.setOnClickListener {
+                onItemClick(item)
             }
         }
 

@@ -65,10 +65,9 @@ class IdentityAttestationAuthoritiesDialog(
                         getAttestationCommunity().trustedAuthorityManager.deleteTrustedAuthority(
                             authorityItem.publicKeyHash
                         )
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
-                            resources.getString(R.string.snackbar_authority_remove_success),
-                            view = view.rootView
+                            resources.getString(R.string.snackbar_authority_remove_success)
                         )
                         dialog.dismiss()
                     }.show(parentFragmentManager, tag)
@@ -123,28 +122,22 @@ class IdentityAttestationAuthoritiesDialog(
                         parentActivity.getQRScanController().addAuthority(publicKey)
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        parentActivity.displaySnackbar(
+                        parentActivity.displayToast(
                             requireContext(),
-                            resources.getString(R.string.snackbar_invalid_public_key),
-                            view = dialogView.rootView,
-                            type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                            resources.getString(R.string.snackbar_invalid_public_key)
                         )
                     }
                 } else {
-                    parentActivity.displaySnackbar(
+                    parentActivity.displayToast(
                         requireContext(),
-                        resources.getString(R.string.snackbar_no_public_key_found),
-                        view = dialogView.rootView,
-                        type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                        resources.getString(R.string.snackbar_no_public_key_found)
                     )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(
+                parentActivity.displayToast(
                     requireContext(),
-                    resources.getString(R.string.snackbar_qr_code_not_json_format),
-                    view = dialogView.rootView,
-                    type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
                 )
             }
         }
