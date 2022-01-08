@@ -31,7 +31,6 @@ import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import java.math.BigInteger
 
-@Suppress("UNUSED_PARAMETER")
 class NotificationHandler(
     private val parentActivity: ValueTransferMainActivity
 ) {
@@ -192,22 +191,11 @@ class NotificationHandler(
         isAppInForeground: Boolean = true
     ) = with(parentActivity) {
         when (type) {
-            MessageAttachment.TYPE_IMAGE -> StringBuilder()
-                .append(getEmojiByUnicode(EMOJI_CAMERA))
-                .append(" ")
-                .append(ATTACHMENT_TYPE_PHOTO_VIDEO)
-            MessageAttachment.TYPE_CONTACT -> StringBuilder()
-                .append(getEmojiByUnicode(EMOJI_CONTACT))
-                .append(" ")
-                .append(ATTACHMENT_TYPE_CONTACT)
-            MessageAttachment.TYPE_LOCATION -> StringBuilder()
-                .append(getEmojiByUnicode(EMOJI_LOCATION))
-                .append(" ")
-                .append(ATTACHMENT_TYPE_LOCATION)
-            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> StringBuilder()
-                .append(getEmojiByUnicode(EMOJI_IDENTITY_ATTRIBUTE))
-                .append(" ")
-                .append(ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE)
+            MessageAttachment.TYPE_IMAGE -> listOf(getEmojiByUnicode(EMOJI_CAMERA), ATTACHMENT_TYPE_PHOTO)
+            MessageAttachment.TYPE_FILE -> listOf(getEmojiByUnicode(EMOJI_FILE), ATTACHMENT_TYPE_FILE)
+            MessageAttachment.TYPE_CONTACT -> listOf(getEmojiByUnicode(EMOJI_CONTACT), ATTACHMENT_TYPE_CONTACT)
+            MessageAttachment.TYPE_LOCATION -> listOf(getEmojiByUnicode(EMOJI_LOCATION), ATTACHMENT_TYPE_LOCATION)
+            MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> listOf(getEmojiByUnicode(EMOJI_IDENTITY_ATTRIBUTE), ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE)
             MessageAttachment.TYPE_TRANSFER_REQUEST -> {
                 when {
                     message != "" -> parentActivity.resources.getString(
@@ -216,18 +204,13 @@ class NotificationHandler(
                     )
                     else -> ""
                 }.let { text ->
-                    StringBuilder()
-                        .append(getEmojiByUnicode(EMOJI_TRANSFER_REQUEST))
-                        .append(" ")
-                        .append(ATTACHMENT_TYPE_TRANSFER_REQUEST)
-                        .append(" ")
-                        .append(text)
+                    listOf(getEmojiByUnicode(EMOJI_TRANSFER_REQUEST), ATTACHMENT_TYPE_TRANSFER_REQUEST, text)
                 }
             }
-            else -> null
-        }?.let { text ->
+            else -> listOf()
+        }.joinToString(" ").let { text ->
             if (isAppInForeground) {
-                sendInternalNotification(peer, text.toString())
+                sendInternalNotification(peer, text)
             } else {
                 val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
                     putExtra(
@@ -248,7 +231,7 @@ class NotificationHandler(
 
                 sendNotification(
                     peer,
-                    text.toString(),
+                    text,
                     pendingIntent,
                     NOTIFICATION_CHANNEL_MESSAGES_ID
                 )
@@ -267,23 +250,14 @@ class NotificationHandler(
         val transactionText = if (transaction != null) {
             val map = transaction.transaction.toMap()
             if (map.containsKey(QRScanController.KEY_AMOUNT)) {
-                StringBuilder()
-                    .append(getEmojiByUnicode(EMOJI_TRANSACTION))
-                    .append(" ")
-                    .append(
-                        resources.getString(
-                            R.string.text_contact_chat_incoming_transfer_of,
-                            formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
-                        )
-                    )
-            } else StringBuilder()
-                .append(getEmojiByUnicode(EMOJI_TRANSACTION))
-                .append(" ")
-                .append(parentActivity.resources.getString(R.string.text_contact_chat_incoming_transfer))
-        } else StringBuilder()
-            .append(getEmojiByUnicode(EMOJI_TRANSACTION))
-            .append(" ")
-            .append(resources.getString(R.string.text_contact_chat_incoming_transfer))
+                listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(
+                    R.string.text_contact_chat_incoming_transfer_of,
+                    formatBalance((map[QRScanController.KEY_AMOUNT] as BigInteger).toLong())
+                ))
+            } else listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
+        } else {
+            listOf(getEmojiByUnicode(EMOJI_TRANSACTION), resources.getString(R.string.text_contact_chat_incoming_transfer))
+        }.joinToString(" ")
 
         val text = if (message.isNotBlank()) {
             getString(
@@ -294,7 +268,7 @@ class NotificationHandler(
         } else transactionText
 
         if (isAppInForeground) {
-            sendInternalNotification(peer, text.toString())
+            sendInternalNotification(peer, text)
         } else {
             val intent = Intent(this, ValueTransferMainActivity::class.java).apply {
                 putExtra(
@@ -316,7 +290,7 @@ class NotificationHandler(
 
             sendNotification(
                 peer,
-                text.toString(),
+                text,
                 pendingIntent,
                 NOTIFICATION_CHANNEL_TRANSACTIONS_ID
             )
@@ -373,12 +347,14 @@ class NotificationHandler(
 
         const val EMOJI_TRANSACTION = 0x1F4B6
         const val EMOJI_CAMERA = 0x1F4F7
+        const val EMOJI_FILE = 0x1F4C4
         const val EMOJI_CONTACT = 0x1F464
         const val EMOJI_LOCATION = 0x1F4CD
         const val EMOJI_IDENTITY_ATTRIBUTE = 0x1F4CE
         const val EMOJI_TRANSFER_REQUEST = 0x1F4B6
 
-        const val ATTACHMENT_TYPE_PHOTO_VIDEO = "Photo/Video"
+        const val ATTACHMENT_TYPE_PHOTO = "Photo"
+        const val ATTACHMENT_TYPE_FILE = "File"
         const val ATTACHMENT_TYPE_IDENTITY_ATTRIBUTE = "Identity Attribute"
         const val ATTACHMENT_TYPE_CONTACT = "Contact"
         const val ATTACHMENT_TYPE_LOCATION = "Location"

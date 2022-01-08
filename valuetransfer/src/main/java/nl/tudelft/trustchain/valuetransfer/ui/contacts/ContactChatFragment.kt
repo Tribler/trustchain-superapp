@@ -514,6 +514,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
                         intent.type = "*/*"
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                         startActivityForResult(
                             Intent.createChooser(
                                 intent,
@@ -531,6 +532,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         val intent = Intent(Intent.ACTION_GET_CONTENT)
                         intent.type = "*/*"
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
                         startActivityForResult(
                             Intent.createChooser(
                                 intent,
@@ -1116,15 +1118,39 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
                 PICK_IMAGE -> if (data != null) {
-                    data.data?.let { uri ->
-                        sendFromUri(uri, TYPE_IMAGE)
+                    if (data.clipData != null) {
+                        data.clipData?.let {
+                            for (i in 0 until it.itemCount) {
+                                val uri = it.getItemAt(i).uri
+                                sendFromUri(uri, TYPE_IMAGE)
+                            }
+                        }
+                    } else {
+                        data.data?.let {
+                            sendFromUri(it, TYPE_IMAGE)
+                        }
                     }
+//                    data.data?.let { uri ->
+//                        sendFromUri(uri, TYPE_IMAGE)
+//                    }
                 }
                 PICK_FILE -> if (data != null) {
-                    data.data?.let { uri ->
-                        Log.d("VTLOG", "URI: $uri")
-                        sendFromUri(uri, TYPE_FILE)
+                    if (data.clipData != null) {
+                        data.clipData?.let {
+                            for (i in 0 until it.itemCount) {
+                                val uri = it.getItemAt(i).uri
+                                sendFromUri(uri, TYPE_FILE)
+                            }
+                        }
+                    } else {
+                        data.data?.let {
+                            sendFromUri(it, TYPE_FILE)
+                        }
                     }
+//                    data.data?.let { uri ->
+//                        Log.d("VTLOG", "URI: $uri")
+//                        sendFromUri(uri, TYPE_FILE)
+//                    }
                 }
                 PICK_CAMERA -> cameraUri?.let {
                     sendFromUri(it, TYPE_IMAGE)

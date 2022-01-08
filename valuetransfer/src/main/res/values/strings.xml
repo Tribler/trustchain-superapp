@@ -236,7 +236,8 @@
     <string name="text_public_key">Public Key</string>
     <string name="text_title_attestations">Attestations</string>
     <string name="text_attestation_malformed">MALFORMED ATTESTATION</string>
-    <string name="text_attachment_photo_video">Attachment: Photo/Video</string>
+    <string name="text_attachment_photo">Attachment: Photo</string>
+    <string name="text_attachment_file">Attachment: File</string>
     <string name="text_attachment_identity_attribute">Attachment: Identity Attribute</string>
     <string name="text_attachment_location">Attachment: Location</string>
     <string name="text_attachment_transfer_request">Attachment: Transfer Request</string>

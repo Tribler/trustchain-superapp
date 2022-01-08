@@ -45,7 +45,6 @@ import nl.tudelft.ipv8.attestation.WalletAttestation
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -54,7 +53,6 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
-import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 import nl.tudelft.trustchain.common.valuetransfer.extensions.bytesToImage
 import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeBytes
 import nl.tudelft.trustchain.common.valuetransfer.extensions.imageBytes
@@ -79,7 +77,6 @@ import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
 import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
-import nl.tudelft.trustchain.valuetransfer.util.EVATest
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
@@ -111,7 +108,6 @@ class ValueTransferMainActivity : BaseActivity() {
     private var verifiedBalance = MutableLiveData("0.00")
 
     private var isAppInForeground = true
-    private val testEVA = false
 
     /**
      * Initialize all communities and (database) stores and repo's for performance purposes and
@@ -228,8 +224,6 @@ class ValueTransferMainActivity : BaseActivity() {
         peerChatCommunity.setOnMessageCallback(::onMessageCallback)
         peerChatCommunity.setOnContactImageRequestCallback(::onContactImageRequestCallback)
         peerChatCommunity.setOnContactImageCallback(::onContactImageCallback)
-        peerChatCommunity.setOnContactConnectRequestCallback(::onContactConnectRequestCallback)
-        peerChatCommunity.setOnContactConnectCallback(::onContactConnectCallback)
         peerChatCommunity.createContactStateTable()
         peerChatCommunity.createContactImageTable()
         peerChatCommunity.identityInfo = identityCommunity.getIdentityInfo(appPreferences.getIdentityFaceHash())
@@ -264,21 +258,19 @@ class ValueTransferMainActivity : BaseActivity() {
         }
 
         checkCameraPermissions()
-
-        /**
-         * Test EVA Script
-         */
-        if (testEVA) EVATest(
-            this,
-            defaultCryptoProvider.keyFromPublicBin("4C69624E61434C504B3ADB598A9730A5E47F0A372D79CD8DE96092A83A182B925A73E59F488B68EFD335BA0F0C8E882269465E49AF8C3CE855879FB13C1D3DE60E7E61533364544011D3".hexToBytes())
-        )
     }
 
+    /**
+     * Detect foreground status of app
+     */
     override fun onStart() {
         super.onStart()
         isAppInForeground = true
     }
 
+    /**
+     * Detect foreground status of app
+     */
     override fun onStop() {
         super.onStop()
         isAppInForeground = false
@@ -587,10 +579,9 @@ class ValueTransferMainActivity : BaseActivity() {
         }
     }
 
-    fun getFragment(tag: String): Fragment? {
-        return fragmentManager.findFragmentByTag(tag)
-    }
-
+    /**
+     * Get dialog by tag (if exists)
+     */
     fun getDialogFragment(tag: String): DialogFragment? {
         return fragmentManager.findFragmentByTag(tag) as DialogFragment?
     }
@@ -599,7 +590,6 @@ class ValueTransferMainActivity : BaseActivity() {
      * Function that determines the height of the status bar for placement of the snackbar
      */
     private fun getStatusBarHeight(): Int {
-
         var result = 0
         val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
         if (resourceId < 0) {
@@ -822,10 +812,6 @@ class ValueTransferMainActivity : BaseActivity() {
             return
         }
 
-        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage}")
-        Log.d("VTLOG", "MESSAGE RECEIVED FROM $peer with ${chatMessage.message}")
-        Log.d("VTLOG", "MESSAGE IDENTITY INFO: ${chatMessage.identityInfo}")
-
         val peerChatStore: PeerChatStore = getStore()!!
         val currentContactState = peerChatStore.getContactState(chatMessage.sender)
 
@@ -837,21 +823,16 @@ class ValueTransferMainActivity : BaseActivity() {
 
         var contactImageRequest = false
 
-        Log.d("VTLOG", "LOCAL IDENTITY INFO IMAGE: '${currentContactState?.identityInfo?.imageHash}' ${currentContactState?.identityInfo?.imageHash == ""} ${currentContactState?.identityInfo?.imageHash == null} ${currentContactState?.identityInfo?.imageHash.isNullOrBlank()} ${currentContactState?.identityInfo?.imageHash.isNullOrEmpty()}")
-        Log.d("VTLOG", "RECEI IDENTITY INFO IMAGE: '${chatMessage.identityInfo?.imageHash}' ${chatMessage.identityInfo?.imageHash == ""} ${chatMessage.identityInfo?.imageHash == null} ${chatMessage.identityInfo?.imageHash.isNullOrBlank()} ${chatMessage.identityInfo?.imageHash.isNullOrEmpty()}")
-
+        // Detect changes in local and received identityInfo, and update if necessary
         chatMessage.identityInfo?.let { identityInfo ->
             val contactImage = peerChatStore.getContactImage(peer.publicKey)
             when {
                 currentContactState?.identityInfo == null -> {
-                    Log.d("VTLOG", "!!!!CURRENT STATE IS NULL")
                     peerChatStore.setIdentityState(chatMessage.sender, identityInfo)
                     contactImageRequest = true
                 }
                 currentContactState.identityInfo != identityInfo -> {
-                    Log.d("VTLOG", "!!!!IDENTITY INFO IS NOT EQUAL")
                     if (currentContactState.identityInfo!!.imageHash != identityInfo.imageHash) {
-                        Log.d("VTLOG", "!!!!IMAGE HASH IS NOT EQUAL")
                         contactImageRequest = true
                     }
 
@@ -861,7 +842,6 @@ class ValueTransferMainActivity : BaseActivity() {
                     )
                 }
                 contactImage == null && (identityInfo.imageHash != null && identityInfo.imageHash != "") -> {
-                    Log.d("VTLOG", "!!!!CONTACT INFO IS NULL AND IMAGEHASH IS NULL")
                     contactImageRequest = true
                 }
                 identityInfo.imageHash == null && contactImage != null -> {
@@ -874,6 +854,8 @@ class ValueTransferMainActivity : BaseActivity() {
         val messageIdInfo = chatMessage.identityInfo
         var identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
 
+        // When a message is sent but not received, and this activity hasn't been initialized,
+        // the message may be sent without identity info. This tells the user that the info is unknown
         if (chatMessage.identityInfo == null) {
             ChatMessage(
                 UUID.randomUUID().toString(),
@@ -895,7 +877,6 @@ class ValueTransferMainActivity : BaseActivity() {
 
         // Let know when the identity information of the contact has been updated
         if (identityIsUpdated) {
-            Log.d("VTLOG", "IDENTITY INFO IS NOT EQUAL: $idInfo != $messageIdInfo")
             val messages: MutableList<String> = mutableListOf()
 
             val verificationStatusText = if (messageIdInfo?.isVerified == true) {
@@ -1022,10 +1003,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Callback on receipt of a requested contact image
      */
     private fun onContactImageCallback(contactImage: ContactImage) {
-        Log.d("VTLOG", "CONTACT IMAGE RECEIVED FROM ${contactImage.publicKey}")
-        Log.d("VTLOG", "PUBLIC KEY: ${contactImage.publicKey.keyToBin().toHex()}")
-        Log.d("VTLOG", "IMAGE HASH: ${contactImage.imageHash}")
-        Log.d("VTLOG", "IMAGE NULL: ${contactImage.image == null}")
+        Log.d("VTLOG", "Contact image received from ${contactImage.publicKey}")
 
         val peerChatStore: PeerChatStore = getStore()!!
 
@@ -1042,15 +1020,6 @@ class ValueTransferMainActivity : BaseActivity() {
             peerChatStore.removeContactImage(contactImage.publicKey)
             peerChatStore.setState(contactImage.publicKey, PeerChatStore.STATUS_IMAGE_HASH, false, null)
         }
-    }
-
-    private fun onContactConnectRequestCallback(sender: PublicKey, identityInfo: IdentityInfo) {
-        Log.d("VTLOG", "Received contact connect request in VT from ${sender.keyToHash().toHex()} with $identityInfo")
-
-    }
-
-    private fun onContactConnectCallback(sender: PublicKey, identityInfo: IdentityInfo) {
-        Log.d("VTLOG", "Received contact connect in VT from ${sender.keyToHash().toHex()} with $identityInfo")
     }
 
     /**
@@ -1191,7 +1160,6 @@ class ValueTransferMainActivity : BaseActivity() {
         const val NOTIFICATION_INTENT_CHAT = 1
         const val NOTIFICATION_INTENT_TRANSACTION = 2
 
-        const val PERMISSION_LOCATION = 1
         const val PERMISSION_CAMERA = 2
     }
 }

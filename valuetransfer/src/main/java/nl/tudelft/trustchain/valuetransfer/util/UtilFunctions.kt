@@ -63,8 +63,6 @@ fun scrollToBottom(recyclerView: RecyclerView) {
         val target = layoutManager.findViewByPosition(lastItemPosition)
         if (target != null) {
             layoutManager.scrollToPosition(lastItemPosition)
-//            val offset = recyclerView.measuredHeight - target.measuredHeight
-//            layoutManager.scrollToPositionWithOffset(lastItemPosition, offset)
         }
     }
 }
@@ -265,7 +263,7 @@ fun getFormattedSize(size: Double): String {
             .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
             .append("KB")
         else -> StringBuilder()
-            .append(size)
+            .append(size.div(1E0).toBigDecimal().setScale(0, RoundingMode.UP))
             .append("B")
     }.toString()
 }

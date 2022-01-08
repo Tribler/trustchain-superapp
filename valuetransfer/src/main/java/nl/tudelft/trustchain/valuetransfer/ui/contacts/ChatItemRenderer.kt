@@ -32,7 +32,8 @@ class ChatItemRenderer(
         val message = when {
             item.lastMessage.transactionHash != null -> this.context.resources.getString(R.string.text_attachment_transaction)
             item.lastMessage.attachment != null -> when (item.lastMessage.attachment?.type) {
-                MessageAttachment.TYPE_IMAGE -> this.context.resources.getString(R.string.text_attachment_photo_video)
+                MessageAttachment.TYPE_IMAGE -> this.context.resources.getString(R.string.text_attachment_photo)
+                MessageAttachment.TYPE_FILE -> this.context.resources.getString(R.string.text_attachment_file)
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> this.context.resources.getString(R.string.text_attachment_identity_attribute)
                 MessageAttachment.TYPE_LOCATION -> this.context.resources.getString(R.string.text_attachment_location)
                 MessageAttachment.TYPE_TRANSFER_REQUEST -> this.context.resources.getString(R.string.text_attachment_transfer_request)

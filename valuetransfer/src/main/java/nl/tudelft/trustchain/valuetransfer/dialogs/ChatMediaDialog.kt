@@ -168,14 +168,14 @@ class ChatMediaDialog(
                 val currentItem = chatMediaDetailAdapter.getItem(index) as ChatMediaItem
 
                 if (!storageIsWritable()) {
-                    Toast.makeText(c, resources.getString(R.string.text_storage_not_writable), Toast.LENGTH_SHORT).show()
+                    parentActivity.displayToast(c, resources.getString(R.string.text_storage_not_writable))
                     return true
                 }
 
                 when (currentItem.type) {
                     MessageAttachment.TYPE_IMAGE -> BitmapFactory.decodeFile(currentItem.file.path).let { bitmap ->
-                            saveImage(c, bitmap, currentItem.file.name)
-                        }
+                        saveImage(c, bitmap, currentItem.file.name)
+                    }
                     MessageAttachment.TYPE_FILE -> saveFile(c, currentItem.file, currentItem.fileName ?: currentItem.file.name)
                 }
             }
@@ -200,8 +200,9 @@ class ChatMediaDialog(
     }
 
     private fun createMediaItems(messages: List<ChatMessage>): List<Item> {
+        val myKey = getTrustChainCommunity().myPeer.publicKey
         return messages.map { item ->
-            val senderName = if (getTrustChainCommunity().myPeer.publicKey == item.sender) {
+            val senderName = if (myKey == item.sender) {
                 resources.getString(R.string.text_you)
             } else getContactStore().getContactFromPublicKey(publicKey)?.name ?: resources.getString(R.string.text_unknown_contact)
 
