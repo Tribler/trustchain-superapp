@@ -22,7 +22,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup"
         android:requestLegacyExternalStorage="true"
-        android:hardwareAccelerated="false"
+
         android:largeHeap="true">
 
         <activity
