@@ -438,11 +438,10 @@ class TransactionRepository(
     }
 
     fun getTransactionsBetweenMeAndOther(other: PublicKey, trustchain: TrustChainHelper): List<Transaction> {
-        val me = trustchain.getMyPublicKey()
-        return trustchain.getChainByUser(me)
+        return trustchain.getChainByUser(trustchain.getMyPublicKey())
+            .asSequence()
             .filter { block ->
-                block.linkPublicKey.contentEquals(other.keyToBin()) ||
-                    block.linkPublicKey.contentEquals(other.keyToBin())
+                    block.publicKey.contentEquals(other.keyToBin())
             }
             .map { block: TrustChainBlock ->
                 val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
