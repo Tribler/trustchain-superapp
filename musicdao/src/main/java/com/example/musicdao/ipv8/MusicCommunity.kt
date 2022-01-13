@@ -11,7 +11,6 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
 import java.util.*
-import kotlin.random.Random
 
 class MusicCommunity(
     settings: TrustChainSettings,
@@ -113,12 +112,7 @@ class MusicCommunity(
     private fun pickRandomPeer(): Peer? {
         val peers = getPeers()
         if (peers.isEmpty()) return null
-        var index = 0
-        // Pick a random peer if we have more than 1 connected
-        if (peers.size > 1) {
-            index = Random.nextInt(peers.size - 1)
-        }
-        return peers[index]
+        return peers.random()
     }
 
     /**
