@@ -106,7 +106,7 @@ class OptionsDialog(
                     optionsBigView.addView(it)
                 }
 
-                originalItems.takeLast(originalItems.size-items.size)
+                originalItems.takeLast(originalItems.size - items.size)
             } else originalItems
 
             view.findViewById<ListView>(R.id.listOptions).apply {
