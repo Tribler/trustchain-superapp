@@ -6,6 +6,7 @@ import android.os.Handler
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -64,10 +65,24 @@ class ExchangeTransactionDialog(
             val additionalIconHiddenView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalHidden)
             val additionalIconShowedView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalShowed)
 
-            val viewChatView = view.findViewById<TextView>(R.id.tvViewChat)
-            val viewContactView = view.findViewById<TextView>(R.id.tvViewContact)
-            viewChatView.isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
-            viewContactView.isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+            val viewChatView = view.findViewById<ConstraintLayout>(R.id.tvViewChat)
+            val viewContactView = view.findViewById<ConstraintLayout>(R.id.tvViewContact)
+            viewChatView.apply {
+                isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+                if (isVisible) {
+                    findViewById<TextView>(R.id.tvOptionBig).text = resources.getString(R.string.text_string_view_chat)
+                    val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_chat)
+                    findViewById<ImageView>(R.id.ivOptionBig).setImageDrawable(drawable)
+                }
+            }
+            viewContactView.apply {
+                isVisible = transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER
+                if (isVisible) {
+                    findViewById<TextView>(R.id.tvOptionBig).text = resources.getString(R.string.text_string_view_contact)
+                    val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_contact)
+                    findViewById<ImageView>(R.id.ivOptionBig).setImageDrawable(drawable)
+                }
+            }
 
             additionalToggleView.setOnClickListener {
                 additionalIconHiddenView.isVisible = !additionalIconHiddenView.isVisible

@@ -119,7 +119,7 @@ class ContactAddDialog(
                                 getContactStore().addContact(publicKey, contactName)
                                 parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_contact_add_success)
+                                    resources.getString(R.string.snackbar_contact_add_success, contactName)
                                 )
                                 bottomSheetDialog.dismiss()
                             }
