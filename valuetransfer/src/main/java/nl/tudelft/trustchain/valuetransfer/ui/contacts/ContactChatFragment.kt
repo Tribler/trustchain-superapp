@@ -487,7 +487,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         binding.ivAttachment.setOnClickListener {
             OptionsDialog(
                 R.menu.contact_chat_attachments,
-                getString(R.string.text_choose_attachment)
+                getString(R.string.text_choose_attachment),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 8,
+                bigOptionsCols = 2,
             ) { _, item ->
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
 
@@ -598,7 +601,10 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         binding.clFilterByType.setOnClickListener {
             OptionsDialog(
                 R.menu.contact_chat_filter_types,
-                resources.getString(R.string.dialog_filter_by)
+                resources.getString(R.string.dialog_filter_by),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 8,
+                bigOptionsCols = 2,
             ) { _, item ->
                 searchFilterLimit.value = searchFilterLimit.value?.copy(second = item.title.toString())
 
@@ -657,7 +663,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 val totalItemCount = layoutManager!!.itemCount
                 val firstVisible = layoutManager.findFirstVisibleItemPosition()
                 val lastVisible = layoutManager.findLastVisibleItemPosition()
-                val topHasBeenReached = firstVisible + 1 <= 2
                 val endHasBeenReached = lastVisible + SCROLL_BOTTOM_MESSAGES_SHOWN >= totalItemCount
 
                 binding.clScrollToBottom.isVisible = totalItemCount > 0 && !(totalItemCount > 0 && endHasBeenReached)
@@ -665,9 +670,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 if (!(totalItemCount > 0 && endHasBeenReached && !(firstVisible == 0 && lastVisible == totalItemCount - 1))) {
                     binding.tvScrollToBottomNewMessage.isVisible = false
                 }
-
-                if (topHasBeenReached && newMessageCount >= limitedMessageCount.value!!)
-                    showMoreMessages()
             }
         })
 
@@ -824,18 +826,21 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             }
         }
 
-        val menuId = if (getContactStore().getContactFromPublicKey(publicKey) == null) {
+        val contact = getContactStore().getContactFromPublicKey(publicKey)
+        val contactState = getPeerChatStore().getContactState(publicKey)
+
+        val menuId = if (contact == null) {
             R.menu.contact_chat_options_no_contact
         } else {
             R.menu.contact_chat_options_contact
         }
 
-        val contact = getContactStore().getContactFromPublicKey(publicKey)
-        val contactState = getPeerChatStore().getContactState(publicKey)
-
         OptionsDialog(
             menuId,
-            resources.getString(R.string.dialog_choose_option),
+            resources.getString(R.string.dialog_contact_options),
+            bigOptionsEnabled = true,
+            bigOptionsNumber = 4,
+            bigOptionsCols = 4,
             menuMods = { menu ->
                 if (contactState != null) {
                     if (contactState.isArchived) {
@@ -1130,9 +1135,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             sendFromUri(it, TYPE_IMAGE)
                         }
                     }
-//                    data.data?.let { uri ->
-//                        sendFromUri(uri, TYPE_IMAGE)
-//                    }
                 }
                 PICK_FILE -> if (data != null) {
                     if (data.clipData != null) {
@@ -1147,10 +1149,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             sendFromUri(it, TYPE_FILE)
                         }
                     }
-//                    data.data?.let { uri ->
-//                        Log.d("VTLOG", "URI: $uri")
-//                        sendFromUri(uri, TYPE_FILE)
-//                    }
                 }
                 PICK_CAMERA -> cameraUri?.let {
                     sendFromUri(it, TYPE_IMAGE)
@@ -1192,20 +1190,18 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         transferProgress: MutableMap<String, TransferProgress>
     ): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
-            val progress = if (chatMessage.attachment != null) {
-                if (!chatMessage.attachmentFetched) {
-                    val attachmentID = chatMessage.attachment?.content?.toHex()
+            val progress = if (chatMessage.attachment != null && !chatMessage.attachmentFetched) {
+                val attachmentID = chatMessage.attachment?.content?.toHex()
 
-                    if (transferProgress.containsKey(attachmentID)) {
-                        transferProgress[attachmentID]
-                    } else TransferProgress(attachmentID ?: "", TransferState.SCHEDULED, 0.0)
-                } else null
+                if (transferProgress.containsKey(attachmentID)) {
+                    transferProgress[attachmentID]
+                } else TransferProgress(attachmentID ?: "", TransferState.SCHEDULED, 0.0)
             } else null
 
             ContactChatItem(
                 chatMessage,
                 getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash),
-                false, //                (index == 0) && (totalMessageCount > searchFilterLimit.value?.third!!), // (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!),
+                (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!), // (index == 0) && (totalMessageCount > searchFilterLimit.value?.third!!)
                 (index == 0) || (index > 0 && !dateFormat.format(messages[index-1].timestamp).equals(dateFormat.format(chatMessage.timestamp))),
                 false,
                 progress
@@ -1214,16 +1210,13 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     }
 
     private fun checkCameraPermissions(): Boolean {
-        if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
+        return if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
             requestPermissions(
                 arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 PERMISSION_CAMERA
             )
-
-            return false
-        }
-
-        return true
+            false
+        } else true
     }
 
     override fun onRequestPermissionsResult(

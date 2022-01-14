@@ -63,6 +63,7 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
                 OptionsDialog(
                     R.menu.settings_theme_options,
                     resources.getString(R.string.text_theme_choose),
+                    bigOptionsEnabled = true,
                     optionSelected = { _, item ->
                         when (item.itemId) {
                             R.id.actionThemeDay -> AppPreferences.APP_THEME_DAY

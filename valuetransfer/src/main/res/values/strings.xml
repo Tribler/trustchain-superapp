@@ -29,8 +29,8 @@
     <string name="menu_contact_chat_attachment_identity_attribute">Identity Attribute</string>
     <string name="menu_contact_chat_attachment_transfer_money">Transfer Money</string>
     <string name="menu_contact_chat_attachment_transfer_request">Request Money</string>
-    <string name="menu_contact_chat_view_contact">View Contact</string>
-    <string name="menu_contact_chat_view_media">View Media</string>
+    <string name="menu_contact_chat_view_contact">Contact</string>
+    <string name="menu_contact_chat_view_media">Media</string>
     <string name="menu_contact_chat_send_connect_invitation">Send Connect Invitation</string>
     <string name="menu_contact_chat_send_connect_confirmation">Send Connect Confirmation</string>
     <string name="menu_contact_chat_options_contact_name">Rename Contact</string>
@@ -40,9 +40,9 @@
     <string name="menu_contact_chat_options_copy_public_key">Copy Public Key</string>
     <string name="menu_contact_chat_options_contact_share">Share this Contact</string>
     <string name="menu_contact_chat_options_search_filter">Search/Filter Chat</string>
-    <string name="menu_contact_chat_options_contact_add">Add to Contacts</string>
-    <string name="menu_contact_chat_options_contact_mute">Mute Notifications</string>
-    <string name="menu_contact_chat_options_contact_unmute">Unmute Notications</string>
+    <string name="menu_contact_chat_options_contact_add">Add Contact</string>
+    <string name="menu_contact_chat_options_contact_mute">Mute</string>
+    <string name="menu_contact_chat_options_contact_unmute">Unmute</string>
     <string name="menu_contact_chat_options_contact_block">Block Contact</string>
     <string name="menu_contact_chat_options_contact_unblock">Unblock Contact</string>
     <string name="menu_contact_chat_options_contact_remove_conversation">Clear Chat</string>
@@ -92,6 +92,8 @@
     <string name="dialog_title_identity_onboarding_confirm">Confirm Identity</string>
     <string name="dialog_filter_by">Filter by</string>
     <string name="dialog_choose_option">Choose Option</string>
+    <string name="dialog_contact_options">Contact Options</string>
+    <string name="dialog_exchange_options">Exchange Options</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -242,9 +244,10 @@
     <string name="text_attachment_location">Attachment: Location</string>
     <string name="text_attachment_transfer_request">Attachment: Transfer Request</string>
     <string name="text_attachment_contact">Attachment: Contact</string>
+    <string name="text_attachment_identity_updated">Identity Updated</string>
     <string name="text_attachment">Attachment</string>
     <string name="text_attachment_transaction">Transaction</string>
-    <string name="text_search_filter_chat">Search/Filter this chat</string>
+    <string name="text_search_filter_chat">Search</string>
     <string name="text_search_chat">Search this chat…</string>
     <string name="text_message">Message</string>
     <string name="text_my_public_key">My Public Key</string>
@@ -358,7 +361,7 @@
     <string name="text_identity_undetermined">The identity of the contact couldn\'t be determined from this message, please be careful.</string>
     <string name="text_all_media">All Media</string>
     <string name="text_number_media">%d items</string>
-    <string name="text_no_media">No media is shared yet</string>
+    <string name="text_no_media">No media</string>
     <string name="text_location">Location</string>
     <string name="text_address_not_found">No address found</string>
     <string name="text_send_current_location">Send current location</string>
@@ -376,6 +379,8 @@
     <string name="text_transaction_details_size">Size</string>
     <string name="text_transaction_details_block_hash">Block Hash</string>
     <string name="text_transaction_details_signature">Signature</string>
+    <string name="text_string_view_chat">View Chat</string>
+    <string name="text_string_view_contact">View Contact</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

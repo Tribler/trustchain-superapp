@@ -1,21 +1,35 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
+import android.R.*
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.core.view.marginStart
+import androidx.core.view.updateMargins
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.mattskala.itemadapter.Item
+import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 
 class OptionsDialog(
     private val optionsMenu: Int,
     private val title: String? = null,
+    private val bigOptionsEnabled: Boolean? = false,
+    private var bigOptionsNumber: Int = 4,
+    private val bigOptionsCols: Int = 4,
+    private val bigOptionsTextEnabled: Boolean? = true,
+    private val bigOptionsIconEnabled: Boolean? = true,
     private val menuMods: ((MenuBuilder) -> MenuBuilder)? = null,
     private val optionSelected: ((BottomSheetDialog, MenuItem) -> Unit)
 ) : VTDialogFragment() {
@@ -36,6 +50,12 @@ class OptionsDialog(
                 }
             }
 
+//            val bigOptionsMenu = mutableListOf<View>()
+//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionOne))
+//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionTwo))
+//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionThree))
+//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionFour))
+
             var menu = MenuBuilder(requireContext())
             parentActivity.menuInflater.inflate(optionsMenu, menu)
 
@@ -43,12 +63,84 @@ class OptionsDialog(
                 menu = it
             }
 
-            val menuItems = menu.nonActionItems
+//            val optionsBigView = view.findViewById<LinearLayout>(R.id.llOptionsBig)
+//            optionsBigView.isVisible = bigOptionsEnabled == true
+
+            val optionsBigView = view.findViewById<LinearLayout>(R.id.llOptionsBig)
+            optionsBigView.isVisible = bigOptionsEnabled == true
+
+            val originalItems = menu.nonActionItems
+            val menuItems = if (bigOptionsEnabled == true && bigOptionsNumber > 0) {
+//                bigOptionsNumber = when {
+////                    bigOptionsNumber > 4 -> 4
+////                    bigOptionsNumber < 0 ->
+//                    else -> kotlin.math.min(bigOptionsNumber, originalItems.size)
+//                }
+                bigOptionsNumber = kotlin.math.min(bigOptionsNumber, originalItems.size)
+                val items = originalItems.take(kotlin.math.min(bigOptionsNumber, originalItems.size))
+
+                optionsBigView.weightSum = items.size.toFloat()
+
+                val layoutRows = mutableListOf<LinearLayout>()
+
+                val rowCount = (bigOptionsNumber / bigOptionsCols) + if (bigOptionsNumber % bigOptionsCols > 0) 1 else 0
+                for (r in 0 until rowCount) {
+                    val row = LinearLayout(requireContext())
+                    row.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                    row.orientation = LinearLayout.HORIZONTAL
+                    row.weightSum = when {
+                        r < rowCount - 1 -> bigOptionsCols.toFloat()
+                        else -> bigOptionsNumber % bigOptionsCols.toFloat()
+                    }
+                    (row.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                        updateMargins(bottom = 8.dpToPixels(requireContext()))
+                    }
+                    layoutRows.add(row)
+                }
+
+                for (index in items.indices) {
+                    val inflatedView = LayoutInflater.from(requireContext()).inflate(R.layout.item_option_big, null, true)
+                    inflatedView.findViewById<TextView>(R.id.tvOptionBig).text = items[index].title
+                    inflatedView.findViewById<ImageView>(R.id.ivOptionBig).let {
+                        if (items[index].icon != null) {
+                            it.setImageDrawable(items[index].icon)
+                        }
+                    }
+                    inflatedView.setOnClickListener {
+                        optionSelected(bottomSheetDialog, items[index])
+                        bottomSheetDialog.dismiss()
+                    }
+                    inflatedView.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f)
+                    (inflatedView.layoutParams as ViewGroup.MarginLayoutParams).apply {
+                        updateMargins(left = 8.dpToPixels(requireContext()))
+                    }
+                    layoutRows[index / bigOptionsCols].addView(inflatedView)
+
+//                    bigOptionsMenu[index].apply {
+////                        isVisible = true
+//                        findViewById<TextView>(R.id.tvOptionBig).text = items[index].title
+//                        findViewById<ImageView>(R.id.ivOptionBig).let {
+//                            if (items[index].icon != null) {
+//                                it.setImageDrawable(items[index].icon)
+//                            }
+//                        }
+//                    }.setOnClickListener {
+//                        optionSelected(bottomSheetDialog, items[index])
+//                        bottomSheetDialog.dismiss()
+//                    }
+                }
+
+                layoutRows.forEach {
+                    optionsBigView.addView(it)
+                }
+
+                originalItems.takeLast(originalItems.size-items.size)
+            } else originalItems
 
             view.findViewById<ListView>(R.id.listOptions).apply {
                 adapter = object : ArrayAdapter<MenuItemImpl>(
                     requireContext(),
-                    android.R.layout.simple_list_item_1,
+                    layout.simple_list_item_1,
                     menuItems
                 ) {
                     override fun getView(

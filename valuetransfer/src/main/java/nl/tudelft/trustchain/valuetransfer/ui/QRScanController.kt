@@ -216,7 +216,11 @@ class QRScanController : VTFragment() {
                             defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
                             val publicKeyString = obj.optString(KEY_PUBLIC_KEY)
 
-                            OptionsDialog(R.menu.scan_options, "Choose Option") { _, item ->
+                            OptionsDialog(
+                                R.menu.scan_options,
+                                "Choose Option",
+                                bigOptionsEnabled = true,
+                            ) { _, item ->
                                 when (item.itemId) {
                                     R.id.actionAddContactOption -> addContact(obj)
                                     R.id.actionAddAuthorityOption -> addAuthority(publicKeyString)

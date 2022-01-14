@@ -14,6 +14,7 @@
     <TextView
         android:id="@+id/tvTitle"
         android:layout_marginTop="8dp"
+        android:paddingBottom="12dp"
         style="@style/DialogTitle"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
@@ -22,33 +23,58 @@
         tools:text="Menu Title"
         tools:visibility="visible" />
 
+    <LinearLayout
+        android:id="@+id/llOptionsBig"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/llOptionsBigCols"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:weightSum="2"-->
+<!--            android:paddingBottom="8dp"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/tvTitle">-->
+<!--    -->
+<!--            <include android:id="@+id/bigOptionOne"-->
+<!--                layout="@layout/item_option_big"-->
+<!--                android:visibility="gone"-->
+<!--                tools:visibility="visible" />-->
+<!--    -->
+<!--            <include android:id="@+id/bigOptionTwo"-->
+<!--                layout="@layout/item_option_big"-->
+<!--                android:visibility="gone"-->
+<!--                tools:visibility="visible" />-->
+
+<!--            <include android:id="@+id/bigOptionThree"-->
+<!--                layout="@layout/item_option_big"-->
+<!--                android:visibility="gone"-->
+<!--                tools:visibility="visible" />-->
+<!--    -->
+<!--            <include android:id="@+id/bigOptionFour"-->
+<!--                layout="@layout/item_option_big"-->
+<!--                android:visibility="gone"-->
+<!--                tools:visibility="visible" />-->
+<!--        </LinearLayout>-->
+<!--    </LinearLayout>-->
+
     <ListView
         android:id="@+id/listOptions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="12dp"
         android:layout_marginBottom="12dp"
-        android:backgroundTint="?attr/dialogColor"
-        tools:listitem="@layout/item_option"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="?attr/widgetColor"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llOptionsBig"
+        tools:listitem="@layout/item_option" />
 
-<!--    <Button-->
-<!--        android:id="@+id/btnCancel"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="?android:attr/listPreferredItemHeightSmall"-->
-<!--        android:layout_marginHorizontal="8dp"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:layout_marginBottom="12dp"-->
-<!--        android:gravity="center"-->
-<!--        android:layout_gravity="center_horizontal"-->
-<!--        android:background="@drawable/pill_rounded"-->
-<!--        android:backgroundTint="?attr/colorPrimary"-->
-<!--        android:text="Cancel"-->
-<!--        android:textSize="16sp"-->
-<!--        app:layout_constraintTop_toBottomOf="@+id/listOptions"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"/>-->
 </androidx.constraintlayout.widget.ConstraintLayout>

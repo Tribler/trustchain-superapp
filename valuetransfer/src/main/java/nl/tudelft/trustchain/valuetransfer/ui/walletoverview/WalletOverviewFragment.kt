@@ -205,7 +205,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
         binding.clExchangeOptions.setOnClickListener {
             OptionsDialog(
                 R.menu.exchange_options,
-                resources.getString(R.string.dialog_choose_option)
+                resources.getString(R.string.dialog_exchange_options),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 2,
             ) { _, item ->
                 when (item.itemId) {
                     R.id.actionDeposit -> {

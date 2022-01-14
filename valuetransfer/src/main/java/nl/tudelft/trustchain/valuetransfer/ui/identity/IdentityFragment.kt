@@ -134,6 +134,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                         OptionsDialog(
                             R.menu.identity_image_options,
                             "Choose Option",
+                            bigOptionsEnabled = true,
                             menuMods = { menu ->
                                 menu.apply {
                                     findItem(R.id.actionDeleteIdentityImage).isVisible =
@@ -161,7 +162,8 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
             ) {
                 OptionsDialog(
                     R.menu.identity_attribute_options,
-                    "Choose Option"
+                    "Choose Option",
+                    bigOptionsEnabled = true,
                 ) { _, item ->
                     when (item.itemId) {
                         R.id.actionEditIdentityAttribute -> IdentityAttributeDialog(it).show(

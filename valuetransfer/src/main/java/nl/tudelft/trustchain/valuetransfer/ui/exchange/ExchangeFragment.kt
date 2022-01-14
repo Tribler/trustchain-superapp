@@ -74,7 +74,12 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         initView()
 
         binding.clExchangeOptions.setOnClickListener {
-            OptionsDialog(R.menu.exchange_options, "Choose Option") { _, item ->
+            OptionsDialog(
+                R.menu.exchange_options,
+                resources.getString(R.string.dialog_exchange_options),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 2,
+            ) { _, item ->
                 when (item.itemId) {
                     R.id.actionDeposit -> {
                         scanIntent = DEPOSIT_INTENT
