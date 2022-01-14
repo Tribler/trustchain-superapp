@@ -27,13 +27,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
      * been downloaded previously, we start seeding the respective torrent; otherwise we leave it
      */
     fun start(): Int {
-        var count = 0
-        if (!saveDir.isDirectory) throw Error("Content seeder active in non-directory")
-        val fileList = saveDir.listFiles()
-        if (fileList !is Array<File>) return count
-        // A maximum of maxTorrentThreads torrents are seeded, with LIFO ordering
-        Arrays.sort(fileList) { a, b -> a.lastModified().compareTo(b.lastModified()) }
-
+        // Set-up session manager.
         sessionManager.addListener(
             object : AlertListener {
                 override fun types(): IntArray {
@@ -57,22 +51,36 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
             sessionManager.start()
         }
 
-        saveDir.listFiles()?.forEachIndexed { index, file ->
-            if (index >= maxTorrentThreads) return count
-            if (file.name.endsWith(".torrent")) {
-                val torrentInfo = TorrentInfo(file)
-                if (torrentInfo.isValid) {
-                    // 'Downloading' the torrent file also starts seeding it after download has
-                    // already been completed
-                    // We only seed torrents that have previously already been fully downloaded
-                    if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
-                        downloadAndSeed(torrentInfo)
-                        count += 1
-                    }
-                }
+        // Set-up initial torrent seeding.
+        val files = saveDir.listFiles()
+
+        if (!saveDir.isDirectory) {
+            throw Error("Content seeder active in non-directory")
+        }
+        if (files !is Array<File>) {
+            return 0
+        }
+
+        // A maximum of maxTorrentThreads torrents are seeded, with LIFO ordering.
+        val torrentFiles = files
+            .filter { file -> file.name.endsWith(".torrent") }
+            .sortedBy { file -> file.lastModified() }
+            .take(maxTorrentThreads)
+
+        val validTorrentInfos = torrentFiles
+            .map { file -> TorrentInfo(file) }
+            .filter { torrentInfo -> torrentInfo.isValid }
+
+        // 'Downloading' the torrent file also starts seeding it after download has
+        // already been completed.
+        // We only seed torrents that have previously already been fully downloaded.
+        validTorrentInfos.forEach { torrentInfo ->
+            if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
+                downloadAndSeed(torrentInfo)
             }
         }
-        return count
+
+        return validTorrentInfos.size
     }
 
     /**
