@@ -9,7 +9,6 @@ import androidx.core.widget.doAfterTextChanged
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.button.MaterialButtonToggleGroup
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
@@ -93,7 +92,7 @@ class IdentityDetailsDialog : VTDialogFragment() {
             editTexts[KEY_GIVEN_NAMES]!!.setText(identity.content.givenNames)
             editTexts[KEY_SURNAME]!!.setText(identity.content.surname)
             editTexts[KEY_DATE_OF_BIRTH]!!.setText(dateOfBirthFormat.format(identity.content.dateOfBirth))
-            editTexts[KEY_DATE_OF_EXPIRY]!!.setText(dateOfBirthFormat.format(identity.content.dateOfBirth))
+            editTexts[KEY_DATE_OF_EXPIRY]!!.setText(dateOfBirthFormat.format(identity.content.dateOfExpiry))
             editTexts[KEY_NATIONALITY]!!.setText(identity.content.nationality)
             editTexts[KEY_PERSONAL_NUMBER]!!.setText(identity.content.personalNumber.toString())
             editTexts[KEY_DOCUMENT_NUMBER]!!.setText(identity.content.documentNumber)

@@ -1,22 +1,15 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.R.*
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.view.menu.MenuItemImpl
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.core.view.marginStart
 import androidx.core.view.updateMargins
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.mattskala.itemadapter.Item
-import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
@@ -50,12 +43,6 @@ class OptionsDialog(
                 }
             }
 
-//            val bigOptionsMenu = mutableListOf<View>()
-//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionOne))
-//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionTwo))
-//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionThree))
-//            bigOptionsMenu.add(view.findViewById(R.id.bigOptionFour))
-
             var menu = MenuBuilder(requireContext())
             parentActivity.menuInflater.inflate(optionsMenu, menu)
 
@@ -63,19 +50,11 @@ class OptionsDialog(
                 menu = it
             }
 
-//            val optionsBigView = view.findViewById<LinearLayout>(R.id.llOptionsBig)
-//            optionsBigView.isVisible = bigOptionsEnabled == true
-
             val optionsBigView = view.findViewById<LinearLayout>(R.id.llOptionsBig)
             optionsBigView.isVisible = bigOptionsEnabled == true
 
             val originalItems = menu.nonActionItems
             val menuItems = if (bigOptionsEnabled == true && bigOptionsNumber > 0) {
-//                bigOptionsNumber = when {
-////                    bigOptionsNumber > 4 -> 4
-////                    bigOptionsNumber < 0 ->
-//                    else -> kotlin.math.min(bigOptionsNumber, originalItems.size)
-//                }
                 bigOptionsNumber = kotlin.math.min(bigOptionsNumber, originalItems.size)
                 val items = originalItems.take(kotlin.math.min(bigOptionsNumber, originalItems.size))
 
@@ -100,10 +79,16 @@ class OptionsDialog(
 
                 for (index in items.indices) {
                     val inflatedView = LayoutInflater.from(requireContext()).inflate(R.layout.item_option_big, null, true)
-                    inflatedView.findViewById<TextView>(R.id.tvOptionBig).text = items[index].title
-                    inflatedView.findViewById<ImageView>(R.id.ivOptionBig).let {
-                        if (items[index].icon != null) {
-                            it.setImageDrawable(items[index].icon)
+                    inflatedView.findViewById<TextView>(R.id.tvOptionBig).apply {
+                        isVisible = bigOptionsTextEnabled == true
+                        if (isVisible) {
+                            text = items[index].title
+                        }
+                    }
+                    inflatedView.findViewById<ImageView>(R.id.ivOptionBig).apply {
+                        isVisible = bigOptionsIconEnabled == true
+                        if (isVisible && items[index].icon != null) {
+                            setImageDrawable(items[index].icon)
                         }
                     }
                     inflatedView.setOnClickListener {
@@ -115,19 +100,6 @@ class OptionsDialog(
                         updateMargins(left = 8.dpToPixels(requireContext()))
                     }
                     layoutRows[index / bigOptionsCols].addView(inflatedView)
-
-//                    bigOptionsMenu[index].apply {
-////                        isVisible = true
-//                        findViewById<TextView>(R.id.tvOptionBig).text = items[index].title
-//                        findViewById<ImageView>(R.id.ivOptionBig).let {
-//                            if (items[index].icon != null) {
-//                                it.setImageDrawable(items[index].icon)
-//                            }
-//                        }
-//                    }.setOnClickListener {
-//                        optionSelected(bottomSheetDialog, items[index])
-//                        bottomSheetDialog.dismiss()
-//                    }
                 }
 
                 layoutRows.forEach {
@@ -140,7 +112,7 @@ class OptionsDialog(
             view.findViewById<ListView>(R.id.listOptions).apply {
                 adapter = object : ArrayAdapter<MenuItemImpl>(
                     requireContext(),
-                    layout.simple_list_item_1,
+                    android.R.layout.simple_list_item_1,
                     menuItems
                 ) {
                     override fun getView(
