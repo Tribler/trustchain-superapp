@@ -157,7 +157,10 @@ class ChatMediaDialog(
                         if (chatMediaItem == null) {
                             galleryView(true)
                         } else {
-                            viewPager!!.setCurrentItem(chatMediaDetailAdapter.getIndexOf(chatMediaItem), false)
+                            val index = chatMediaDetailAdapter.getIndexOf(chatMediaItem)
+                            viewPager!!.setCurrentItem(index, false)
+                            senderTitle.text = chatMediaDetailAdapter.getItem(index).senderName
+                            dateTitle.text = dateFormat.format(chatMediaDetailAdapter.getItem(index).sendDate)
                             galleryView(false)
                         }
                         initialLaunch = false

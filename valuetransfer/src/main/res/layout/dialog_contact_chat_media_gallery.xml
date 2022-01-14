@@ -31,7 +31,8 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="All"
-            android:textColor="?attr/onWidgetColor" />
+            android:textColor="?attr/onWidgetColor"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvShowImages"
@@ -44,8 +45,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:text="Images"
-            android:textColor="?attr/onWidgetColor"
-            android:textStyle="bold" />
+            android:textColor="?attr/onWidgetColor" />
 
         <TextView
             android:id="@+id/tvShowFiles"
