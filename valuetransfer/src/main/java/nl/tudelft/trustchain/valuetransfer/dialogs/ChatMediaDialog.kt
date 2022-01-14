@@ -8,14 +8,9 @@ import android.view.*
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.coroutines.flow.map
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
@@ -31,6 +26,11 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaDetailAdapter
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaItem
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatMediaItemRenderer
 import android.graphics.BitmapFactory
+import android.graphics.Typeface
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import kotlinx.coroutines.flow.combine
 import nl.tudelft.trustchain.valuetransfer.util.*
 
 class ChatMediaDialog(
@@ -42,10 +42,19 @@ class ChatMediaDialog(
     private lateinit var bottomSheetDialog: Dialog
     private lateinit var dialogView: View
 
-    private val itemsChatMedia: LiveData<List<Item>> by lazy {
-        getPeerChatStore().getAllByPublicKey(publicKey).map { messages ->
+    private var filterType = MutableLiveData(FILTER_TYPE_ALL)
+    private var isFiltering = false
+
+    private val itemsChatMedia: LiveData<List<ChatMediaItem>> by lazy {
+        combine(getPeerChatStore().getAllByPublicKey(publicKey), filterType.asFlow()) { messages, type ->
+            val filterTypes = when (type) {
+                FILTER_TYPE_IMAGES -> listOf(MessageAttachment.TYPE_IMAGE)
+                FILTER_TYPE_FILES -> listOf(MessageAttachment.TYPE_FILE)
+                else -> listOf(MessageAttachment.TYPE_IMAGE, MessageAttachment.TYPE_FILE)
+            }
+
             val items = messages.filter {
-                listOf(MessageAttachment.TYPE_IMAGE, MessageAttachment.TYPE_FILE).contains(it.attachment?.type) && it.attachment?.getFile(requireContext()) != null
+                filterTypes.contains(it.attachment?.type) && it.attachment?.getFile(requireContext()) != null
             }.asReversed()
             createMediaItems(items)
         }.asLiveData()
@@ -54,15 +63,9 @@ class ChatMediaDialog(
     private lateinit var rvChatMediaItems: RecyclerView
     private val adapterChatMedia = ItemAdapter()
     private var viewPager: ViewPager? = null
-    private val chatMediaDetailAdapter: ChatMediaDetailAdapter = ChatMediaDetailAdapter(
-        c,
-        {
-            initView(false, it as ChatMediaItem)
-        },
-        {
-            initView(true, null)
-        }
-    )
+    private val chatMediaDetailAdapter: ChatMediaDetailAdapter = ChatMediaDetailAdapter(c) {
+        galleryView(it)
+    }
 
     private lateinit var actionBar: Toolbar
     private lateinit var galleryView: LinearLayout
@@ -106,12 +109,27 @@ class ChatMediaDialog(
             // Viewpager and custom adapter for the detail display
             viewPager = view.findViewById(R.id.viewPager) as ViewPager
             viewPager!!.adapter = chatMediaDetailAdapter
+            viewPager!!.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+                override fun onPageSelected(p0: Int) {
+                    chatMediaDetailAdapter.getItem(p0).let { item ->
+                        senderTitle.text = item.senderName
+                        dateTitle.text = dateFormat.format(item.sendDate)
+                    }
+                }
+
+                override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
+                override fun onPageScrollStateChanged(p0: Int) {}
+            })
 
             // Recyclerview and adapter for chat image gallery
             adapterChatMedia.registerRenderer(
                 ChatMediaItemRenderer {
+                    senderTitle.text = it.senderName
+                    dateTitle.text = dateFormat.format(it.sendDate)
+
+                    chatMediaDetailAdapter.notifyDataSetChanged()
                     viewPager!!.setCurrentItem(chatMediaDetailAdapter.getIndexOf(it), false)
-                    initView(false, it)
+                    galleryView(false)
                 }
             )
 
@@ -127,15 +145,20 @@ class ChatMediaDialog(
 
                     noMediaText.isVisible = list.isEmpty()
 
-                    chatMediaDetailAdapter.setItems(list)
+                    chatMediaDetailAdapter.setItems(list, isFiltering)
                     viewPager!!.invalidate()
+
+                    if (isFiltering) {
+                        isFiltering = false
+                        return@Observer
+                    }
 
                     if (initialLaunch) {
                         if (chatMediaItem == null) {
-                            initView(true, null)
+                            galleryView(true)
                         } else {
                             viewPager!!.setCurrentItem(chatMediaDetailAdapter.getIndexOf(chatMediaItem), false)
-                            initView(false, chatMediaItem)
+                            galleryView(false)
                         }
                         initialLaunch = false
                     }
@@ -146,6 +169,20 @@ class ChatMediaDialog(
                     }
                 }
             )
+
+            val showAll = view.findViewById<TextView>(R.id.tvShowAll)
+            val showImages = view.findViewById<TextView>(R.id.tvShowImages)
+            val showFiles = view.findViewById<TextView>(R.id.tvShowFiles)
+
+            showAll.setOnClickListener {
+                (it as TextView).filterMedia(FILTER_TYPE_ALL, listOf(showImages, showFiles))
+            }
+            showImages.setOnClickListener {
+                (it as TextView).filterMedia(FILTER_TYPE_IMAGES, listOf(showAll, showFiles))
+            }
+            showFiles.setOnClickListener {
+                (it as TextView).filterMedia(FILTER_TYPE_FILES, listOf(showAll, showImages))
+            }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
@@ -165,7 +202,7 @@ class ChatMediaDialog(
         when (item?.itemId) {
             R.id.actionSaveFile -> {
                 val index = viewPager!!.currentItem
-                val currentItem = chatMediaDetailAdapter.getItem(index) as ChatMediaItem
+                val currentItem = chatMediaDetailAdapter.getItem(index)
 
                 if (!storageIsWritable()) {
                     parentActivity.displayToast(c, resources.getString(R.string.text_storage_not_writable))
@@ -180,18 +217,15 @@ class ChatMediaDialog(
                 }
             }
             R.id.actionAllMedia -> {
-                initView(true, null)
+                senderTitle.text = resources.getString(R.string.text_all_media)
+                dateTitle.text = resources.getString(R.string.text_number_media, adapterChatMedia.itemCount)
+                galleryView(true)
             }
         }
         return true
     }
 
-    private fun initView(isGallery: Boolean = true, item: ChatMediaItem? = null) {
-        senderTitle.text = item?.senderName ?: resources.getString(R.string.text_all_media)
-        dateTitle.text = if (item == null) {
-            resources.getString(R.string.text_number_media, adapterChatMedia.itemCount)
-        } else dateFormat.format(item.sendDate)
-
+    private fun galleryView(isGallery: Boolean) {
         galleryView.isVisible = isGallery
         detailView.isVisible = !isGallery
 
@@ -199,7 +233,26 @@ class ChatMediaDialog(
         actionBar.menu.getItem(1).isVisible = !isGallery
     }
 
-    private fun createMediaItems(messages: List<ChatMessage>): List<Item> {
+    private fun TextView.filterMedia(type: String, others: List<TextView>) {
+        if (filterType.value == type) return
+        isFiltering = true
+        filterType.postValue(type)
+        this.apply {
+            setTypeface(null, Typeface.BOLD)
+            background =
+                ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded_selected)
+        }
+
+        others.forEach {
+            it.apply {
+                setTypeface(null, Typeface.NORMAL)
+                background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.pill_rounded)
+            }
+        }
+    }
+
+    private fun createMediaItems(messages: List<ChatMessage>): List<ChatMediaItem> {
         val myKey = getTrustChainCommunity().myPeer.publicKey
         return messages.map { item ->
             val senderName = if (myKey == item.sender) {
@@ -220,5 +273,11 @@ class ChatMediaDialog(
                 fileName
             )
         }
+    }
+
+    companion object {
+        const val FILTER_TYPE_ALL = "filter_all"
+        const val FILTER_TYPE_IMAGES = "filter_images"
+        const val FILTER_TYPE_FILES = "filter_files"
     }
 }

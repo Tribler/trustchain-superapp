@@ -11,7 +11,6 @@ import android.widget.TextView
 import androidx.viewpager.widget.PagerAdapter
 import com.bumptech.glide.Glide
 import com.jsibbold.zoomage.ZoomageView
-import com.mattskala.itemadapter.Item
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.util.OnSwipeTouchListener
@@ -20,16 +19,15 @@ import nl.tudelft.trustchain.valuetransfer.util.getFormattedSize
 @SuppressLint("ClickableViewAccessibility")
 class ChatMediaDetailAdapter(
     context: Context,
-    private val onItemInit: (Item) -> Unit,
-    private val onCloseItem: (Item) -> Unit
+    private val onItem: (Boolean) -> Unit
 ) : PagerAdapter() {
     var layoutInflater: LayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    private var items: List<Item> = listOf()
+    private var items: List<ChatMediaItem> = listOf()
 
-    fun setItems(items: List<Item>) {
+    fun setItems(items: List<ChatMediaItem>, silent: Boolean = false) {
         this.items = items
-        notifyDataSetChanged()
+        if (!silent) notifyDataSetChanged()
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {
@@ -40,13 +38,13 @@ class ChatMediaDetailAdapter(
         return POSITION_NONE
     }
 
-    fun getIndexOf(item: Item): Int {
+    fun getIndexOf(item: ChatMediaItem): Int {
         return items.indexOfFirst {
-            (it as ChatMediaItem).areItemsTheSame(item)
+            it.areItemsTheSame(item)
         }
     }
 
-    fun getItem(index: Int): Item {
+    fun getItem(index: Int): ChatMediaItem {
         return items[index]
     }
 
@@ -57,9 +55,9 @@ class ChatMediaDetailAdapter(
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view: View
         val imageView: ImageView
-        val item = items[position] as ChatMediaItem
+        val item = items[position]
 
-        onItemInit(item)
+        onItem(false)
 
         if (item.type == MessageAttachment.TYPE_IMAGE) { // TYPE_IMAGE
             view = layoutInflater.inflate(R.layout.item_contact_chat_media_detail_image, container, false)
@@ -77,9 +75,9 @@ class ChatMediaDetailAdapter(
         imageView.setOnTouchListener(object : OnSwipeTouchListener(view.context) {
             override fun onSwipeDown() {
                 if ((item.type == MessageAttachment.TYPE_IMAGE && (imageView as ZoomageView).currentScaleFactor == 1.0f)) {
-                    onCloseItem(item)
+                    onItem(true)
                 } else if (item.type == MessageAttachment.TYPE_FILE) {
-                    onCloseItem(item)
+                    onItem(true)
                 }
             }
         })
