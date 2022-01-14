@@ -116,7 +116,6 @@ class PeerChatStore(context: Context) {
                             isBlocked -> stateOfContact.any { it.isBlocked }
                             else -> false
                         }
-//                        (isArchive && stateOfContact.any { it.isArchived }) || (!isArchive && (stateOfContact.isEmpty() || stateOfContact.any { !it.isArchived }))
                     }
                 }
                 .toList()

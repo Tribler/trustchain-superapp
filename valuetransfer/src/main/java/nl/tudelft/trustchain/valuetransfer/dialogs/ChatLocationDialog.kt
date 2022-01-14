@@ -8,6 +8,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
@@ -240,7 +241,12 @@ class ChatLocationDialog(
     @Suppress("MissingPermission")
     private fun enableMyLocation() {
         if (isPermissionGranted()) {
-            map.isMyLocationEnabled = true
+            try {
+                map.isMyLocationEnabled = true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
         } else requestPermissions(
             arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION),
             PERMISSION_LOCATION
