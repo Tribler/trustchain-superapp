@@ -22,7 +22,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup"
         android:requestLegacyExternalStorage="true"
-
         android:largeHeap="true">
 
         <activity

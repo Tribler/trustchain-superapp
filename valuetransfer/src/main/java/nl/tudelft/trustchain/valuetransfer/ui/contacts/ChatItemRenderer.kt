@@ -38,6 +38,7 @@ class ChatItemRenderer(
                 MessageAttachment.TYPE_LOCATION -> this.context.resources.getString(R.string.text_attachment_location)
                 MessageAttachment.TYPE_TRANSFER_REQUEST -> this.context.resources.getString(R.string.text_attachment_transfer_request)
                 MessageAttachment.TYPE_CONTACT -> this.context.resources.getString(R.string.text_attachment_contact)
+                MessageAttachment.TYPE_IDENTITY_UPDATED -> this.context.resources.getString(R.string.text_attachment_identity_updated)
                 else -> this.context.resources.getString(R.string.text_attachment)
             }
             else -> item.lastMessage.message

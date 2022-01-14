@@ -853,6 +853,7 @@ class ValueTransferMainActivity : BaseActivity() {
         val idInfo = currentContactState?.identityInfo
         val messageIdInfo = chatMessage.identityInfo
         var identityIsUpdated = idInfo?.isVerified != messageIdInfo?.isVerified || idInfo?.initials != messageIdInfo?.initials || idInfo?.surname != messageIdInfo?.surname
+        var newMessages: MutableList<ChatMessage> = mutableListOf()
 
         // When a message is sent but not received, and this activity hasn't been initialized,
         // the message may be sent without identity info. This tells the user that the info is unknown
@@ -870,7 +871,7 @@ class ValueTransferMainActivity : BaseActivity() {
                 attachmentFetched = true,
                 transactionHash = null,
             ).let {
-                community.getDatabase().addMessage(it)
+                newMessages.add(it)
             }
             identityIsUpdated = false
         }
@@ -918,16 +919,14 @@ class ValueTransferMainActivity : BaseActivity() {
                 messages.add(resources.getString(R.string.text_identity_updated_careful))
             }
 
-            val attachment = MessageAttachment(
-                MessageAttachment.TYPE_IDENTITY_UPDATED,
-                0,
-                byteArrayOf()
-            )
-
             val updatedIdentityChatMessage = ChatMessage(
                 UUID.randomUUID().toString(),
                 messages.joinToString(" "),
-                attachment,
+                MessageAttachment(
+                    MessageAttachment.TYPE_IDENTITY_UPDATED,
+                    0,
+                    byteArrayOf()
+                ),
                 peer.publicKey,
                 getCommunity<TrustChainCommunity>()!!.myPeer.publicKey,
                 false,
@@ -937,8 +936,16 @@ class ValueTransferMainActivity : BaseActivity() {
                 attachmentFetched = true,
                 transactionHash = null,
             )
+            newMessages.add(updatedIdentityChatMessage)
+        }
 
-            community.getDatabase().addMessage(updatedIdentityChatMessage)
+        newMessages.add(chatMessage)
+        newMessages.forEach { message ->
+            try {
+                community.getDatabase().addMessage(message)
+            } catch (e: SQLiteConstraintException) {
+                e.printStackTrace()
+            }
         }
 
         // Check whether a new contact image should be requested
@@ -946,17 +953,12 @@ class ValueTransferMainActivity : BaseActivity() {
             community.sendContactImageRequest(chatMessage.sender)
         }
 
-        try {
-            community.getDatabase().addMessage(chatMessage)
-        } catch (e: SQLiteConstraintException) {
-            e.printStackTrace()
-        }
-
         // Only show notification when contact is not archived or muted (and thus blocked)
         if (currentContactState == null || !(currentContactState.isArchived || currentContactState.isMuted)) {
             notificationHandler.notify(peer, chatMessage, isAppInForeground)
         }
 
+        // Acknowledge the received chatmessage
         community.sendAck(peer, chatMessage.id)
 
         // Request attachment
@@ -966,7 +968,8 @@ class ValueTransferMainActivity : BaseActivity() {
                 MessageAttachment.TYPE_CONTACT -> return
                 MessageAttachment.TYPE_LOCATION -> return
                 MessageAttachment.TYPE_TRANSFER_REQUEST -> return
-                else -> {
+                MessageAttachment.TYPE_IDENTITY_UPDATED -> return
+                else -> { // for image or file
                     val fileID = chatMessage.attachment!!.content.toHex()
                     val file = MessageAttachment.getFile(this, fileID)
                     if (file.exists()) {
@@ -1124,7 +1127,7 @@ class ValueTransferMainActivity : BaseActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == ContactChatFragment.PERMISSION_CAMERA) {
+        if (requestCode == PERMISSION_CAMERA) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 Log.d("VTLOG", "CAMERA PERMISSION GRANTED")
                 displayToast(
