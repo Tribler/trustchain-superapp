@@ -9,6 +9,8 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
@@ -18,6 +20,7 @@ import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
 import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
+import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
@@ -30,6 +33,7 @@ import java.util.*
 class ContactChatItemRenderer(
     private val parentActivity: ValueTransferMainActivity,
     private val onItemClick: (ContactChatItem) -> Unit,
+    private val onProgressClick: (Pair<PublicKey, String>) -> Unit,
     private val onLoadMoreClick: (ContactChatItem) -> Unit,
 ) : ItemLayoutRenderer<ContactChatItem, View>(
     ContactChatItem::class.java
@@ -62,6 +66,8 @@ class ContactChatItemRenderer(
         tvAttachmentProgress.text = ""
         tvAttachmentProgressStatus.isVisible = false
         tvAttachmentProgressStatus.text = ""
+        ivAttachmentProgressPlay.isVisible = false
+        ivAttachmentProgressStop.isVisible = false
         tvAttachmentProgressSize.isVisible = false
         tvAttachmentProgressSize.text = ""
         tvAttachmentProgressType.isVisible = false
@@ -167,26 +173,46 @@ class ContactChatItemRenderer(
                             tvAttachmentProgressSize.isVisible = true
                             tvAttachmentProgressSize.text = size
                             tvAttachmentProgressType.isVisible = true
-                            tvAttachmentProgressType.text = "File"
+                            tvAttachmentProgressType.text = this.context.getString(R.string.text_file)
 
                             val transferProgress = item.attachtmentTransferProgress
-                            tvAttachmentProgressStatus.text =
-                                when (transferProgress?.state) {
-                                    TransferState.INITIALIZING -> "Initializing"
-                                    TransferState.SCHEDULED -> "Scheduled"
-                                    TransferState.DOWNLOADING -> "Downloading"
-                                    TransferState.FINISHED -> {
-                                        clAttachmentProgress.isVisible = false
-                                        "Downloaded!"
-                                    }
-                                    else -> {
-                                        tvAttachmentProgressStatus.isVisible = false
-                                        ""
-                                    }
+
+                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                                val stopState = transferProgress?.state == TransferState.STOPPED
+                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
+                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+
+                                if (stopState || isStopped) {
+                                    ivAttachmentProgressPlay.isVisible = true
+                                    ivAttachmentProgressStop.isVisible = false
+                                } else {
+                                    ivAttachmentProgressPlay.isVisible = false
+                                    ivAttachmentProgressStop.isVisible = true
                                 }
 
+                                clAttachmentProgress.setOnClickListener {
+                                    onProgressClick(Pair(item.chatMessage.sender, id))
+                                }
+                            }
+
+                            tvAttachmentProgressStatus.text = when (transferProgress?.state) {
+                                TransferState.INITIALIZING -> this.context.getString(R.string.text_state_initializing)
+                                TransferState.SCHEDULED -> this.context.getString(R.string.text_state_scheduled)
+                                TransferState.DOWNLOADING -> this.context.getString(R.string.text_state_downloading)
+                                TransferState.STOPPED -> this.context.getString(R.string.text_state_stopped)
+                                TransferState.UNKNOWN -> this.context.getString(R.string.text_state_unknown_state)
+                                TransferState.FINISHED -> {
+                                    clAttachmentProgress.isVisible = false
+                                    this.context.getString(R.string.text_state_downloaded)
+                                }
+                                else -> {
+                                    tvAttachmentProgressStatus.isVisible = false
+                                    ""
+                                }
+                            }
+
                             pbAttachmentProgressLoadingSpinner.apply {
-                                isVisible = !item.chatMessage.attachmentFetched
+                                isVisible = !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
                                 if (transferProgress != null) {
                                     progress = transferProgress.progress.toInt()
                                 }
@@ -234,26 +260,46 @@ class ContactChatItemRenderer(
                             tvAttachmentProgressSize.isVisible = true
                             tvAttachmentProgressSize.text = size
                             tvAttachmentProgressType.isVisible = true
-                            tvAttachmentProgressType.text = "Image"
+                            tvAttachmentProgressType.text = this.context.getString(R.string.text_image)
 
                             val transferProgress = item.attachtmentTransferProgress
-                            tvAttachmentProgressStatus.text =
-                                when (transferProgress?.state) {
-                                    TransferState.INITIALIZING -> "Initializing"
-                                    TransferState.SCHEDULED -> "Scheduled"
-                                    TransferState.DOWNLOADING -> "Downloading"
-                                    TransferState.FINISHED -> {
-                                        clAttachmentProgress.isVisible = false
-                                        "Downloaded!"
-                                    }
-                                    else -> {
-                                        tvAttachmentProgressStatus.isVisible = false
-                                        ""
-                                    }
+
+                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                                val stopState = transferProgress?.state == TransferState.STOPPED
+                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
+                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+
+                                if (stopState || isStopped) {
+                                    ivAttachmentProgressPlay.isVisible = true
+                                    ivAttachmentProgressStop.isVisible = false
+                                } else {
+                                    ivAttachmentProgressPlay.isVisible = false
+                                    ivAttachmentProgressStop.isVisible = true
                                 }
 
+                                clAttachmentProgress.setOnClickListener {
+                                    onProgressClick(Pair(item.chatMessage.sender, id))
+                                }
+                            }
+
+                            tvAttachmentProgressStatus.text = when (transferProgress?.state) {
+                                TransferState.INITIALIZING -> this.context.getString(R.string.text_state_initializing)
+                                TransferState.SCHEDULED -> this.context.getString(R.string.text_state_scheduled)
+                                TransferState.DOWNLOADING -> this.context.getString(R.string.text_state_downloading)
+                                TransferState.STOPPED -> this.context.getString(R.string.text_state_stopped)
+                                TransferState.UNKNOWN -> this.context.getString(R.string.text_state_unknown_state)
+                                TransferState.FINISHED -> {
+                                    clAttachmentProgress.isVisible = false
+                                    this.context.getString(R.string.text_state_downloaded)
+                                }
+                                else -> {
+                                    tvAttachmentProgressStatus.isVisible = false
+                                    ""
+                                }
+                            }
+
                             pbAttachmentProgressLoadingSpinner.apply {
-                                isVisible = !item.chatMessage.attachmentFetched
+                                isVisible = !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
                                 if (transferProgress != null) {
                                     progress = transferProgress.progress.toInt()
                                 }

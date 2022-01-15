@@ -440,4 +440,13 @@
     <string name="snackbar_identity_update_error">Identity couldn\'t be updated</string>
     <string name="snackbar_identity_add_cancelled">Adding identity cancelled. Without an identity you\'ll not be able to use this application.</string>
     <string name="snackbar_identity_create_error">An error occurred while creating your identity</string>
+    <string name="text_file">File</string>
+    <string name="text_image">Image</string>
+    <string name="text_state_initializing">Initializing</string>
+    <string name="text_state_scheduled">Scheduled</string>
+    <string name="text_state_downloading">Downloading</string>
+    <string name="text_state_stopped">Stopped</string>
+    <string name="text_state_unknown_state">Unknown State</string>
+    <string name="text_state_downloaded">Downloaded!</string>
+
 </resources>

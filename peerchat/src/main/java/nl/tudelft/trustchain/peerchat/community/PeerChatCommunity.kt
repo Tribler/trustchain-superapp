@@ -107,7 +107,10 @@ class PeerChatCommunity(
                         val mid = message.sender.keyToHash().toHex()
                         val peer = getPeers().find { it.mid == mid }
                         if (peer != null && message.attachment != null) {
-                            sendAttachmentRequest(peer, message.attachment.content.toHex())
+                            val id = message.attachment.content.toHex()
+                            if (!evaProtocol!!.isStopped(peer.key, id)) {
+                                sendAttachmentRequest(peer, id)
+                            }
                         }
                     }
                 } catch (e: Exception) {

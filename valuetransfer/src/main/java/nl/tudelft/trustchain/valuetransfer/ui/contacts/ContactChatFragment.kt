@@ -398,6 +398,21 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                     }
                 },
                 {
+                    val peer = Peer(it.first)
+                    val id = it.second
+                    val toggleState = getPeerChatCommunity().evaProtocol!!.toggleIncomingTransfer(peer, id)
+
+                    downloadProgress.value?.let { map ->
+                        val transferProgress = TransferProgress(
+                            id,
+                            toggleState,
+                            0.0
+                        )
+                        map[id] = transferProgress
+                        downloadProgress.postValue(map)
+                    }
+                },
+                {
                     showMoreMessages()
                 }
             )
