@@ -9,6 +9,7 @@ import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -16,6 +17,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.ipv8.SwarmHealth
 import com.example.musicdao.net.ContentSeeder
@@ -97,9 +99,25 @@ class MusicService : AppCompatActivity() {
         }
     }
 
+    fun createSessionParams(): SessionParams {
+        val settingsPack = SettingsPack()
+
+        val port =
+            PreferenceManager.getDefaultSharedPreferences(this).getString("musicdao_port", "")?.toIntOrNull()
+        Log.d("Kappa", "$port")
+        if (port != null) {
+            val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"
+            settingsPack.listenInterfaces(String.format(interfaceFormat, port))
+        }
+
+        return SessionParams(settingsPack)
+    }
+
     private fun startup() {
         val ses = SessionManager()
-        ses.start()
+        val params = createSessionParams()
+        ses.start(params)
+
         registerBlockSigner()
         iterativelyUpdateSwarmHealth()
 
@@ -150,6 +168,10 @@ class MusicService : AppCompatActivity() {
             }
             R.id.action_search -> {
                 onSearchRequested()
+                true
+            }
+            R.id.action_settings -> {
+                navController.navigate(R.id.action_playlistsOverviewFragment_to_settingsFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -229,8 +251,8 @@ class MusicService : AppCompatActivity() {
         val sessionManager = sessionManager ?: return "Starting torrent client..."
         if (!sessionManager.isRunning) return "Starting torrent client..."
         return "up: ${Util.readableBytes(sessionManager.uploadRate())}, down: ${
-        Util.readableBytes(sessionManager.downloadRate())
-        }, dht nodes (torrent): ${sessionManager.dhtNodes()}"
+            Util.readableBytes(sessionManager.downloadRate())
+        }, dht nodes (torrent): ${sessionManager.dhtNodes()}, ${sessionManager.listenInterfaces()}"
     }
 
     /**
