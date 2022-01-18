@@ -146,7 +146,7 @@ class ReleaseFragment(
             sessionManager.download(currentTorrent, saveDir)
         } else {
             // The torrent has not been finished yet previously, so start downloading
-            val torrentInfo = fetchTorrentInfo(saveDir)
+            val torrentInfo = fetchTorrentInfo()
             if (torrentInfo == null) {
                 return
             } else {
@@ -200,13 +200,13 @@ class ReleaseFragment(
         sessionManager.addListener(torrentListener)
     }
 
-    private fun fetchTorrentInfo(saveDir: File): TorrentInfo? {
+    private fun fetchTorrentInfo(): TorrentInfo? {
         magnet = Util.addTrackersToMagnet(magnet)
         val torrentData =
             sessionManager.fetchMagnet(magnet, 100) ?: return null // 100 second time-out for
         // fetching the TorrentInfo metadata from peers, when no torrent file is available locally
         val torrentInfo = TorrentInfo.bdecode(torrentData)
-        ContentSeeder.getInstance(saveDir, sessionManager)
+        (activity as MusicService).appContainer.contentSeeder
             .saveTorrentInfoToFile(torrentInfo, torrentInfo.name())
         return torrentInfo
     }

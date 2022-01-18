@@ -11,8 +11,6 @@ import org.apache.commons.io.FileUtils
 import java.io.File
 import java.util.*
 
-lateinit var contentSeederInstance: ContentSeeder
-
 /**
  * This maintains an implementation of a strategy of libtorrent seeding.
  * Currently, a max. of 10 torrents, in LIFO ordering, from the cache directory, are being seeded.
@@ -137,12 +135,4 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
         return false
     }
 
-    companion object {
-        fun getInstance(cacheDir: File, sessionManager: SessionManager): ContentSeeder {
-            if (!::contentSeederInstance.isInitialized) {
-                contentSeederInstance = ContentSeeder(cacheDir, sessionManager)
-            }
-            return contentSeederInstance
-        }
-    }
 }

@@ -44,6 +44,7 @@ class MusicService : AppCompatActivity() {
     private lateinit var musicGossipingService: MusicGossipingService
     private var mBound = false // Whether the musicGossipingService is bound to the current activity
     private val navigationGraph: Int = R.navigation.musicdao_navgraph
+    lateinit var appContainer: AppContainer
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -104,7 +105,6 @@ class MusicService : AppCompatActivity() {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(this).getString("musicdao_port", "")?.toIntOrNull()
-        Log.d("Kappa", "$port")
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"
             settingsPack.listenInterfaces(String.format(interfaceFormat, port))
@@ -122,10 +122,8 @@ class MusicService : AppCompatActivity() {
         iterativelyUpdateSwarmHealth()
 
         // Start ContentSeeder service: for serving music torrents to other devices
-        ContentSeeder.getInstance(
-            applicationContext.cacheDir,
-            ses
-        ).start()
+        appContainer = AppContainerImpl(applicationContext, ses)
+        appContainer.contentSeeder.start()
 
         // Start WalletService, for maintaining and sending coins
         WalletService.getInstance(applicationContext.cacheDir, this@MusicService)
@@ -224,8 +222,7 @@ class MusicService : AppCompatActivity() {
      */
     private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
         val sessionManager = sessionManager ?: return mutableMapOf()
-        val contentSeeder =
-            ContentSeeder.getInstance(cacheDir, sessionManager)
+        val contentSeeder = appContainer.contentSeeder
         val localMap = contentSeeder.swarmHealthMap
         for (infoHash in localMap.keys) {
             // Update all connectivity stats of the torrents that we are currently seeding

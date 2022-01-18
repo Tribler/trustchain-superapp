@@ -102,6 +102,7 @@ class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOvervi
         } else {
             Toast.makeText(context, "Form is not complete", Toast.LENGTH_SHORT).show()
         }
+        (activity as MusicService).appContainer.contentSeeder.start()
     }
 
     /**
