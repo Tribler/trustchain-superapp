@@ -1,5 +1,3 @@
-
-
 createIdentitiesTable:
 CREATE TABLE IF NOT EXISTS identities (
     id TEXT NOT NULL,
@@ -14,21 +12,20 @@ CREATE TABLE IF NOT EXISTS identities (
     document_number TEXT,
     added INTEGER NOT NULL,
     modified INTEGER NOT NULL,
+    verified INTEGER NOT NULL DEFAULT 0,
+    date_of_expiry INTEGER,
     PRIMARY KEY (id)
 );
 
 addIdentity:
-INSERT INTO identities (id, public_key, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, added, modified)
-VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT INTO identities (id, public_key, name, surname, gender, date_of_birth, place_of_birth, nationality, personal_number, document_number, added, modified, verified, date_of_expiry)
+VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 updateIdentity:
-UPDATE identities SET public_key = ?, name = ?, surname = ?, gender = ?, date_of_birth = ?, place_of_birth = ?, nationality = ?, personal_number = ?, document_number = ?, modified = ? WHERE id = ?;
+UPDATE identities SET public_key = ?, name = ?, surname = ?, gender = ?, date_of_birth = ?, place_of_birth = ?, nationality = ?, personal_number = ?, document_number = ?, modified = ?, verified = ?, date_of_expiry = ? WHERE id = ?;
 
 deleteIdentity:
-DELETE FROM identities WHERE id = ?;
-
-deleteIdentityByPublicKey:
-DELETE FROM identities WHERE public_key = ?;
+DELETE FROM identities;
 
 getAll:
 SELECT * FROM identities ORDER BY added ASC;
@@ -36,8 +33,5 @@ SELECT * FROM identities ORDER BY added ASC;
 getIdentity:
 SELECT * FROM identities LIMIT 1;
 
-getIdentityByPublicKey:
-SELECT * FROM identities WHERE public_key = ?;
-
-getIdentityByID:
-SELECT * FROM identities WHERE id = ?;
+isVerified:
+SELECT verified FROM identities LIMIT 1;

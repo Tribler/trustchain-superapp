@@ -2,26 +2,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/walletOverviewFragment"
-        android:icon="@drawable/ic_wallet"
-        android:title="Wallet" />
+        android:icon="@drawable/selector_wallet"
+        android:title="@string/menu_navigation_wallet_overview" />
 
     <item
         android:id="@+id/identityFragment"
         android:icon="@drawable/ic_identity"
-        android:title="Identity" />
+        android:title="@string/menu_navigation_identity" />
 
     <item
         android:id="@+id/qrScanControllerFragment"
         android:icon="@drawable/ic_qr_code_scan"
-        android:title="" />
+        android:title="@string/menu_navigation_qrcode_scan_controller" />
 
     <item
         android:id="@+id/exchangeFragment"
-        android:icon="@drawable/ic_exchange"
-        android:title="Exchange" />
+        android:icon="@drawable/selector_exchange"
+        android:title="@string/menu_navigation_exchange" />
 
     <item
         android:id="@+id/contactsFragment"
-        android:icon="@drawable/ic_contacts"
-        android:title="Contacts" />
+        android:icon="@drawable/selector_contacts"
+        android:title="@string/menu_navigation_contacts" />
 </menu>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionAddIdentityImage"
+        android:icon="@drawable/ic_media"
+        android:title="@string/text_identity_add_image" />
+    <item
+        android:id="@+id/actionDeleteIdentityImage"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/text_identity_delete_image" />
+
+</menu>

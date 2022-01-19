@@ -4,6 +4,7 @@ import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
 import nl.tudelft.common.sqldelight.Database
 import nl.tudelft.ipv8.keyvault.PublicKey
@@ -30,6 +31,15 @@ class ContactStore(context: Context) {
                 defaultCryptoProvider.keyFromPublicBin(contact.public_key)
             )
         } else null
+    }
+
+    fun getContactFromPublickey(publicKey: PublicKey): Flow<Contact?> {
+        return database.dbContactQueries.getContact(publicKey.keyToBin()) { name, public_key ->
+            Contact(
+                name,
+                defaultCryptoProvider.keyFromPublicBin(public_key)
+            )
+        }.asFlow().mapToOneOrNull()
     }
 
     fun getContacts(): Flow<List<Contact>> {

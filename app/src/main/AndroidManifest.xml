@@ -20,7 +20,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="AllowBackup">
+        tools:ignore="AllowBackup"
+        android:requestLegacyExternalStorage="true"
+        android:largeHeap="true">
 
         <activity
             android:name=".ui.dashboard.DashboardActivity"
@@ -94,7 +96,15 @@
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.ValueTransfer" />
+            android:theme="@style/Theme.ValueTransfer"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop" />
+
+        <activity
+            android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:windowSoftInputMode="stateAlwaysHidden" />
 
         <activity
             android:name="com.example.musicdao.MusicService"
@@ -115,6 +125,10 @@
             android:name="com.example.musicdao.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBAGd8-KwX1epS_0CPl5RF0hD8VeTmM-7Y"/>
     </application>
 
 </manifest>

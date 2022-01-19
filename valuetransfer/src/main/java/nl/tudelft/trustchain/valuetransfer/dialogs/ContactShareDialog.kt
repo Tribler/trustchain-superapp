@@ -10,30 +10,21 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 
 class ContactShareDialog(
     private val contact: Contact?,
     private val recipient: Contact?
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var trustChainCommunity: TrustChainCommunity
-    private lateinit var peerChatCommunity: PeerChatCommunity
-    private lateinit var contactStore: ContactStore
+) : VTDialogFragment() {
     private lateinit var dialogView: View
 
     private var selectedContact: Contact? = contact
@@ -50,14 +41,14 @@ class ContactShareDialog(
             val view = layoutInflater.inflate(R.layout.dialog_contact_share, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
             dialogView = view
+
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val spinnerRecipient = view.findViewById<Spinner>(R.id.spinnerSelectRecipient)
             val selectedRecipientView = view.findViewById<TextView>(R.id.tvSelectedRecipient)
@@ -66,10 +57,10 @@ class ContactShareDialog(
             buttonShareContact = view.findViewById<Button>(R.id.btnShareContact)
 
             lifecycleScope.launch(Dispatchers.Main) {
-                var contacts: MutableList<Contact> = contactStore.getContacts()
+                val contacts: MutableList<Contact> = getContactStore().getContacts()
                     .first()
                     .filter {
-                        it.publicKey != trustChainCommunity.myPeer.publicKey
+                        it.publicKey != getTrustChainCommunity().myPeer.publicKey
                     }
                     .sortedBy {
                         it.name
@@ -77,7 +68,13 @@ class ContactShareDialog(
                     .toMutableList()
 
                 if (contacts.size > 1) {
-                    contacts.add(0, Contact("No contact selected", trustChainCommunity.myPeer.publicKey))
+                    contacts.add(
+                        0,
+                        Contact(
+                            resources.getString(R.string.text_no_contact_selected),
+                            getTrustChainCommunity().myPeer.publicKey
+                        )
+                    )
 
                     // Adapter for selecting the recipient
                     if (recipient != null) {
@@ -88,9 +85,8 @@ class ContactShareDialog(
                         recipientAdapter = spinnerAdapter(contacts, spinnerRecipient, true)
                         spinnerRecipient.adapter = recipientAdapter
 
-                        if (selectedRecipient != null) {
-                            val selectedPosition = contacts.indexOf(selectedRecipient)
-                            spinnerRecipient.setSelection(selectedPosition)
+                        selectedRecipient?.let {
+                            spinnerRecipient.setSelection(contacts.indexOf(it))
                         }
 
                         spinnerSelection(spinnerRecipient, true)
@@ -105,9 +101,8 @@ class ContactShareDialog(
                         contactAdapter = spinnerAdapter(contacts, spinnerContact, false)
                         spinnerContact.adapter = contactAdapter
 
-                        if (selectedContact != null) {
-                            val selectedPosition = contacts.indexOf(selectedContact)
-                            spinnerContact.setSelection(selectedPosition)
+                        selectedContact?.let {
+                            spinnerContact.setSelection(contacts.indexOf(it))
                         }
 
                         spinnerSelection(spinnerContact, false)
@@ -116,12 +111,12 @@ class ContactShareDialog(
                     spinnerContact.isVisible = false
                     spinnerRecipient.isVisible = false
 
-                    if (selectedRecipient != null) {
-                        selectedRecipientView.text = selectedRecipient!!.name
+                    selectedRecipient?.let {
+                        selectedRecipientView.text = it.name
                     }
 
-                    if (selectedContact != null) {
-                        selectedContactView.text = selectedContact!!.name
+                    selectedContact?.let {
+                        selectedContactView.text = it.name
                     }
                 }
             }
@@ -130,14 +125,31 @@ class ContactShareDialog(
 
             buttonShareContact.setOnClickListener {
                 try {
-                    peerChatCommunity.sendContact(selectedContact!!, selectedRecipient!!.publicKey)
+                    getPeerChatCommunity().sendContact(
+                        selectedContact!!,
+                        selectedRecipient!!.publicKey,
+                        getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+                    )
 
-                    parentActivity.displaySnackbar(requireContext(), "Contact shared to ${selectedContact!!.name}")
+                    // Only show snackbar if contact of chat is shared to another contact (and not some contact that is shared to the contact of the chat)
+                    if (recipient != null) {
+                        parentActivity.displayToast(
+                            requireContext(),
+                            resources.getString(
+                                R.string.snackbar_contact_shared_to,
+                                selectedContact!!.name,
+                                selectedRecipient!!.name
+                            )
+                        )
+                    }
 
                     bottomSheetDialog.dismiss()
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(requireContext(), "Unexpected error occurred, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_unexpected_error_occurred)
+                    )
                 }
             }
 
@@ -145,7 +157,7 @@ class ContactShareDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     private fun spinnerSelection(spinner: Spinner, isRecipient: Boolean) {
@@ -155,18 +167,9 @@ class ContactShareDialog(
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, p3: Long) {
-                if (isRecipient) {
-                    selectedRecipient = if (position == 0) {
-                        null
-                    } else {
-                        spinner.selectedItem as Contact
-                    }
-                } else {
-                    selectedContact = if (position == 0) {
-                        null
-                    } else {
-                        spinner.selectedItem as Contact
-                    }
+                when (isRecipient) {
+                    true -> selectedRecipient = if (position == 0) null else spinner.selectedItem as Contact
+                    else -> selectedContact = if (position == 0) null else spinner.selectedItem as Contact
                 }
 
                 toggleButton(buttonShareContact, selectedContact != null && selectedRecipient != null)
@@ -185,37 +188,49 @@ class ContactShareDialog(
 
         return object : ArrayAdapter<Contact>(requireContext(), android.R.layout.simple_spinner_item, contacts) {
             override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-                val params = textView.layoutParams
-                params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                textView.layoutParams = params
-                textView.gravity = Gravity.CENTER_VERTICAL
+                return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                    layoutParams.apply {
+                        height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                    }
+                    gravity = Gravity.CENTER_VERTICAL
+                    text = contacts[position].name
 
-                textView.text = contacts[position].name
+                    if (position == 0) {
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
+                        setTypeface(null, Typeface.ITALIC)
+                    } else {
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                    }
 
-                if (position == 0) {
-                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
-                    textView.setTypeface(null, Typeface.ITALIC)
+                    background = if (position == spinner.selectedItemPosition) {
+                        ColorDrawable(Color.LTGRAY)
+                    } else {
+                        ColorDrawable(Color.WHITE)
+                    }
                 }
-
-                if (position == spinner.selectedItemPosition) {
-                    textView.background = ColorDrawable(Color.LTGRAY)
-                }
-
-                return textView
             }
 
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val textView: TextView = super.getView(position, convertView, parent) as TextView
+                return (super.getView(position, convertView, parent) as TextView).apply {
+                    text = contacts[position].name
 
-                textView.text = contacts[position].name
-
-                if (position == 0) {
-                    textView.setTextColor(ContextCompat.getColor(requireContext(), R.color.dark_gray))
-                    textView.setTypeface(null, Typeface.ITALIC)
+                    if (position == 0) {
+                        setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.dark_gray
+                            )
+                        )
+                        setTypeface(null, Typeface.ITALIC)
+                    } else {
+                        setTextColor(
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.black
+                            )
+                        )
+                    }
                 }
-
-                return textView
             }
         }
     }

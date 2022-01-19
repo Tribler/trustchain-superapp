@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents">
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+        <item name="colorPrimary">@color/colorGray</item>
+
+        <item name="backgroundColor">?attr/colorPrimary</item>
+        <item name="onBackgroundColor">@color/white</item>
+        <item name="onBackgroundSecondaryColor">?attr/mutedColor</item>
+
+        <item name="widgetColor">@color/colorBlack</item>
+        <item name="onWidgetColor">@color/white</item>
+        <item name="onWidgetSecondaryColor">?attr/mutedColor</item>
+
+        <item name="dialogColor">?attr/colorPrimary</item>
+        <item name="onDialogColor">@color/white</item>
+        <item name="onDialogSecondaryColor">@color/colorLightGray</item>
+
+        <item name="mutedLightColor">@color/colorGrayMute</item>
+        <item name="mutedColor">@color/colorLightGray</item>
+        <item name="mutedDarkColor">@color/dark_gray</item>
+
+        <item name="chatFromColor">@color/colorPrimaryValueTransfer</item>
+        <item name="onChatFromColor">@color/white</item>
+        <item name="chatToColor">@color/colorBlack</item>
+        <item name="onChatToColor">@color/white</item>
+
+        <item name="colorAccent">@color/colorBlue</item>
+        <item name="colorError">@color/colorRed</item>
+        <item name="colorOnError">@color/white</item>
+        <item name="android:colorBackground">?attr/colorPrimary</item>
+        <item name="android:statusBarColor">?attr/colorPrimary</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:navigationBarColor">@color/colorBlack</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="actionBarStyle">@style/ActionBar</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
+        <item name="android:windowBackground">?attr/colorPrimary</item>
+        <item name="popupMenuStyle">@style/OptionsMenu</item>
+        <item name="android:itemBackground">?attr/colorPrimary</item>
+    </style>
+</resources>

@@ -6,36 +6,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
-        android:id="@+id/tvTitleContactShare"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Share Contact"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/tvTitle"
+        style="@style/DialogTitle"
+        android:layout_marginTop="8dp"
+        android:text="@string/dialog_title_contact_share"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clSelectedContact"
@@ -45,15 +31,15 @@
         android:layout_marginEnd="4dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/clSelectedRecipient"
-        app:layout_constraintTop_toBottomOf="@+id/clTitle">
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
         <TextView
             android:id="@+id/tvSelectContactTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Select the contact to share"
-            android:textColor="@color/white"
+            android:text="@string/text_select_contact_share"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +52,7 @@
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/light_gray"
             android:paddingVertical="8dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
@@ -80,14 +66,15 @@
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/light_gray"
             android:gravity="center_vertical"
-            android:hint="There are no contacts"
+            android:hint="@string/text_no_contacts"
             android:clickable="false"
             android:paddingVertical="8dp"
             android:paddingStart="8dp"
             android:paddingRight="8dp"
             android:textColor="@color/gray"
+            android:textColorHint="@color/gray"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvSelectContactTitle" />
@@ -101,15 +88,15 @@
         android:layout_marginStart="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clSelectedContact"
-        app:layout_constraintTop_toBottomOf="@+id/clTitle">
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
         <TextView
             android:id="@+id/tvSelectRecipientTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Select the recipient"
-            android:textColor="@color/white"
+            android:text="@string/text_select_recipient"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
@@ -122,7 +109,7 @@
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/light_gray"
             android:paddingVertical="8dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
@@ -136,14 +123,15 @@
             android:layout_height="40dp"
             android:layout_marginTop="4dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="@color/light_gray"
             android:gravity="center_vertical"
-            android:hint="There are no contacts"
+            android:hint="@string/text_no_contacts"
             android:clickable="false"
             android:paddingVertical="8dp"
             android:paddingStart="8dp"
             android:paddingRight="8dp"
             android:textColor="@color/gray"
+            android:textColorHint="@color/gray"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tvSelectRecipientTitle" />
@@ -151,10 +139,10 @@
 
     <Button
         android:id="@+id/btnShareContact"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_marginTop="8dp"
         android:enabled="false"
-        android:text="SHARE"
+        android:text="@string/btn_share"
         app:layout_constraintTop_toBottomOf="@+id/clSelectedContact"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -9,17 +9,22 @@ import androidx.core.view.*
 import com.bumptech.glide.Glide
 import com.mattskala.itemadapter.ItemLayoutRenderer
 import kotlinx.android.synthetic.main.item_contacts_chat_detail.view.*
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.getColorByHash
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityAttribute
+import nl.tudelft.trustchain.common.valuetransfer.entity.TransferRequest
+import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
+import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
+import nl.tudelft.trustchain.valuetransfer.util.getFormattedSize
 import org.json.JSONObject
 import java.math.BigInteger
 import java.text.SimpleDateFormat
@@ -28,40 +33,56 @@ import java.util.*
 class ContactChatItemRenderer(
     private val parentActivity: ValueTransferMainActivity,
     private val onItemClick: (ContactChatItem) -> Unit,
+    private val onProgressClick: (Pair<PublicKey, String>) -> Unit,
     private val onLoadMoreClick: (ContactChatItem) -> Unit,
-    private val transactionRepository: TransactionRepository,
-    private val blocks: List<TrustChainBlock>
 ) : ItemLayoutRenderer<ContactChatItem, View>(
     ContactChatItem::class.java
 ) {
-    private val timeFormat = SimpleDateFormat("HH:mm")
-    private val dateFormat = SimpleDateFormat("EEEE, d MMM")
-    private val previousYearsDateFormat = SimpleDateFormat("EEEE, d MMM yyyy")
-    private val yearFormat = SimpleDateFormat("yyyy")
+    private val timeFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
+    private val dateFormat = SimpleDateFormat("EEEE, d MMM", Locale.ENGLISH)
+    private val previousYearsDateFormat = SimpleDateFormat("EEEE, d MMM yyyy", Locale.ENGLISH)
+    private val yearFormat = SimpleDateFormat("yyyy", Locale.ENGLISH)
 
     override fun bindView(item: ContactChatItem, view: View) = with(view) {
-
-        // Necessary to hide content types because the recycler view displays wrong data sometimes
+        // Necessary to hide content types because the recycler view sometimes displays wrong data
         clChatMessage.isVisible = false
         clTransaction.isVisible = false
         clTransactionResend.isVisible = false
         clAttachmentPhotoVideo.isVisible = false
-        clAttachmentIdentityAttribute.isVisible = false
         clAttachmentFile.isVisible = false
+        clAttachmentIdentityAttribute.isVisible = false
         clAttachmentLocation.isVisible = false
         clAttachmentTransferRequest.isVisible = false
         clAttachmentContact.isVisible = false
+        clIdentityUpdated.isVisible = false
+        clAttachmentProgress.isVisible = false
+        llChatItemTimeStatus.isVisible = true
 
         tvChatMessage.text = ""
         tvChatMessage.isVisible = false
         tvTransactionMessage.text = ""
         tvTransactionMessage.isVisible = false
+        tvAttachmentProgress.isVisible = false
+        tvAttachmentProgress.text = ""
+        tvAttachmentProgressStatus.isVisible = false
+        tvAttachmentProgressStatus.text = ""
+        ivAttachmentProgressPlay.isVisible = false
+        ivAttachmentProgressStop.isVisible = false
+        tvAttachmentProgressSize.isVisible = false
+        tvAttachmentProgressSize.text = ""
+        tvAttachmentProgressType.isVisible = false
+        tvAttachmentProgressType.text = ""
+        tvAttachmentFileName.text = ""
+        tvAttachmentFileName.isVisible = false
+        tvAttachmentFileSize.text = ""
+        tvAttachmentFileSize.isVisible = false
         tvAttachmentTransferRequestDescription.text = ""
         tvAttachmentTransferRequestDescription.isVisible = false
         tvAttachmentContactName.text = ""
         tvAttachmentContactName.isVisible = false
         tvAttachmentContactPublicKey.text = ""
         tvAttachmentContactPublicKey.isVisible = false
+        tvIdentityUpdatedMessage.text = ""
         ivChatItemStatus.isVisible = false
 
         // Show the load more messages button
@@ -101,12 +122,12 @@ class ContactChatItemRenderer(
 
         when {
             item.chatMessage.outgoing -> {
-                backgroundResource = R.drawable.pill_rounded_dark_green
-                textColor = R.color.white
+                backgroundResource = R.drawable.pill_rounded_chat_from
+                textColor = getColorIDFromThemeAttribute(parentActivity, R.attr.onChatFromColor)
             }
             else -> {
-                backgroundResource = R.drawable.pill_rounded_white
-                textColor = R.color.black
+                backgroundResource = R.drawable.pill_rounded_chat_to
+                textColor = getColorIDFromThemeAttribute(parentActivity, R.attr.onChatToColor)
             }
         }
 
@@ -123,37 +144,187 @@ class ContactChatItemRenderer(
 
         // Show the different types of attachments
         item.chatMessage.attachment?.let { attachment ->
-            when (attachment.type) {
-                MessageAttachment.TYPE_IMAGE -> {
-                    clAttachmentPhotoVideo.isVisible = true
-                    clAttachmentPhotoVideo.setBackgroundResource(backgroundResource)
+            val size = getFormattedSize(item.chatMessage.attachment?.size!!.toDouble())
 
-                    val file = attachment.getFile(view.context)
-                    if (file.exists()) {
-                        Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
-                        ivAttachmentPhotoVideo.clipToOutline = true
+            when (attachment.type) {
+                MessageAttachment.TYPE_FILE -> {
+                    if (item.chatMessage.attachmentFetched) {
+                        clAttachmentProgress.isVisible = false
+                        clAttachmentFile.isVisible = true
+                        clAttachmentFile.setBackgroundResource(backgroundResource)
+
+                        tvAttachmentFileName.isVisible = true
+                        tvAttachmentFileName.text = item.chatMessage.message
+                        tvAttachmentFileName.setTextColor(ContextCompat.getColor(this.context, textColor))
+
+                        tvAttachmentFileSize.isVisible = item.chatMessage.attachment?.size != null
+                        tvAttachmentFileSize.text = size
                     } else {
-                        ivAttachmentPhotoVideo.setImageBitmap(null)
+                        clAttachmentFile.isVisible = false
+                        clAttachmentProgress.setBackgroundResource(backgroundResource)
+                        tvAttachmentProgressStatus.setTextColor(ContextCompat.getColor(this.context, textColor))
+                        tvAttachmentProgress.setTextColor(ContextCompat.getColor(this.context, textColor))
+
+                        if (item.chatMessage.outgoing) {
+                            clAttachmentProgress.isVisible = false
+                        } else {
+                            clAttachmentProgress.isVisible = true
+                            tvAttachmentProgressStatus.isVisible = true
+                            tvAttachmentProgressSize.isVisible = true
+                            tvAttachmentProgressSize.text = size
+                            tvAttachmentProgressType.isVisible = true
+                            tvAttachmentProgressType.text = this.context.getString(R.string.text_file)
+
+                            val transferProgress = item.attachtmentTransferProgress
+
+                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                                val stopState = transferProgress?.state == TransferState.STOPPED
+                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
+                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+
+                                if (stopState || isStopped) {
+                                    ivAttachmentProgressPlay.isVisible = true
+                                    ivAttachmentProgressStop.isVisible = false
+                                } else {
+                                    ivAttachmentProgressPlay.isVisible = false
+                                    ivAttachmentProgressStop.isVisible = true
+                                }
+
+                                clAttachmentProgress.setOnClickListener {
+                                    onProgressClick(Pair(item.chatMessage.sender, id))
+                                }
+                            }
+
+                            tvAttachmentProgressStatus.text = when (transferProgress?.state) {
+                                TransferState.INITIALIZING -> this.context.getString(R.string.text_state_initializing)
+                                TransferState.SCHEDULED -> this.context.getString(R.string.text_state_scheduled)
+                                TransferState.DOWNLOADING -> this.context.getString(R.string.text_state_downloading)
+                                TransferState.STOPPED -> this.context.getString(R.string.text_state_stopped)
+                                TransferState.UNKNOWN -> this.context.getString(R.string.text_state_unknown_state)
+                                TransferState.FINISHED -> {
+                                    clAttachmentProgress.isVisible = false
+                                    this.context.getString(R.string.text_state_downloaded)
+                                }
+                                else -> {
+                                    tvAttachmentProgressStatus.isVisible = false
+                                    ""
+                                }
+                            }
+
+                            pbAttachmentProgressLoadingSpinner.apply {
+                                isVisible = !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
+                                if (transferProgress != null) {
+                                    progress = transferProgress.progress.toInt()
+                                }
+                            }
+                            tvAttachmentProgress.isVisible =
+                                !item.chatMessage.attachmentFetched
+                            tvAttachmentProgress.text =
+                                if (!item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING) {
+                                    "${transferProgress.progress.toInt()}%"
+                                } else ""
+                        }
+                    }
+
+                    attachment.getFile(view.context).let { file ->
+                        if (file.exists()) {
+                            clAttachmentProgress.isVisible = false
+                        }
+                    }
+
+                    clAttachmentFile.setOnClickListener {
+                        onItemClick(item)
+                    }
+                }
+                MessageAttachment.TYPE_IMAGE -> {
+                    if (item.chatMessage.attachmentFetched) {
+                        clAttachmentProgress.isVisible = false
+                        clAttachmentPhotoVideo.isVisible = true
+                        clAttachmentPhotoVideo.setBackgroundResource(backgroundResource)
+
+                        tvAttachmentPhotoVideoSize.isVisible = item.chatMessage.attachment?.size != null
+                        tvAttachmentPhotoVideoSize.setBackgroundResource(backgroundResource)
+                        tvAttachmentPhotoVideoSize.setTextColor(ContextCompat.getColor(this.context, textColor))
+                        tvAttachmentPhotoVideoSize.text = size
+                    } else {
+                        clAttachmentPhotoVideo.isVisible = false
+                        clAttachmentProgress.setBackgroundResource(backgroundResource)
+                        tvAttachmentProgressStatus.setTextColor(ContextCompat.getColor(this.context, textColor))
+                        tvAttachmentProgress.setTextColor(ContextCompat.getColor(this.context, textColor))
+
+                        if (item.chatMessage.outgoing) {
+                            clAttachmentProgress.isVisible = false
+                        } else { // if (!item.chatMessage.outgoing)
+                            clAttachmentProgress.isVisible = true
+                            tvAttachmentProgressStatus.isVisible = true
+                            tvAttachmentProgressSize.isVisible = true
+                            tvAttachmentProgressSize.text = size
+                            tvAttachmentProgressType.isVisible = true
+                            tvAttachmentProgressType.text = this.context.getString(R.string.text_image)
+
+                            val transferProgress = item.attachtmentTransferProgress
+
+                            item.chatMessage.attachment?.content?.toHex()?.let { id ->
+                                val stopState = transferProgress?.state == TransferState.STOPPED
+                                val isStopped = parentActivity.getCommunity<PeerChatCommunity>()!!
+                                    .evaProtocol!!.isStopped(Peer(item.chatMessage.sender).key, id)
+
+                                if (stopState || isStopped) {
+                                    ivAttachmentProgressPlay.isVisible = true
+                                    ivAttachmentProgressStop.isVisible = false
+                                } else {
+                                    ivAttachmentProgressPlay.isVisible = false
+                                    ivAttachmentProgressStop.isVisible = true
+                                }
+
+                                clAttachmentProgress.setOnClickListener {
+                                    onProgressClick(Pair(item.chatMessage.sender, id))
+                                }
+                            }
+
+                            tvAttachmentProgressStatus.text = when (transferProgress?.state) {
+                                TransferState.INITIALIZING -> this.context.getString(R.string.text_state_initializing)
+                                TransferState.SCHEDULED -> this.context.getString(R.string.text_state_scheduled)
+                                TransferState.DOWNLOADING -> this.context.getString(R.string.text_state_downloading)
+                                TransferState.STOPPED -> this.context.getString(R.string.text_state_stopped)
+                                TransferState.UNKNOWN -> this.context.getString(R.string.text_state_unknown_state)
+                                TransferState.FINISHED -> {
+                                    clAttachmentProgress.isVisible = false
+                                    this.context.getString(R.string.text_state_downloaded)
+                                }
+                                else -> {
+                                    tvAttachmentProgressStatus.isVisible = false
+                                    ""
+                                }
+                            }
+
+                            pbAttachmentProgressLoadingSpinner.apply {
+                                isVisible = !item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING
+                                if (transferProgress != null) {
+                                    progress = transferProgress.progress.toInt()
+                                }
+                            }
+                            tvAttachmentProgress.isVisible =
+                                !item.chatMessage.attachmentFetched
+                            tvAttachmentProgress.text =
+                                if (!item.chatMessage.attachmentFetched && transferProgress != null && transferProgress.state == TransferState.DOWNLOADING) {
+                                    "${transferProgress.progress.toInt()}%"
+                                } else ""
+                        }
+                    }
+
+                    attachment.getFile(view.context).let { file ->
+                        if (file.exists()) {
+                            clAttachmentProgress.isVisible = false
+                            Glide.with(view).load(file).into(ivAttachmentPhotoVideo)
+                            ivAttachmentPhotoVideo.clipToOutline = true
+                        } else {
+                            ivAttachmentPhotoVideo.setImageBitmap(null)
+                        }
                     }
 
                     ivAttachmentPhotoVideo.setOnClickListener {
                         onItemClick(item)
-                    }
-                }
-                MessageAttachment.TYPE_FILE -> {
-                    clAttachmentFile.isVisible = true
-
-                    clAttachmentFile.setBackgroundResource(backgroundResource)
-                    tvAttachmentFileTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
-                    tvAttachmentFilename.setTextColor(ContextCompat.getColor(this.context, textColor))
-
-                    val file = attachment.getFile(view.context)
-                    if (file.exists()) {
-                        tvAttachmentFilename.text = item.chatMessage.message
-
-                        clAttachmentFile.setOnClickListener {
-                            onItemClick(item)
-                        }
                     }
                 }
                 MessageAttachment.TYPE_CONTACT -> {
@@ -170,10 +341,13 @@ class ContactChatItemRenderer(
                     val publicKey = contact.publicKey.keyToBin().toHex()
                     tvAttachmentContactPublicKey.text = publicKey
 
-                    val input = publicKey.substring(20, publicKey.length).toByteArray()
-                    val color = getColorByHash(context, publicKey)
-                    val identicon = generateIdenticon(input, color, resources)
-                    ivAttachmentContactIdenticon.setImageBitmap(identicon)
+                    generateIdenticon(
+                        publicKey.substring(20, publicKey.length).toByteArray(),
+                        getColorByHash(context, publicKey),
+                        resources
+                    ).let {
+                        ivAttachmentContactIdenticon.setImageBitmap(it)
+                    }
 
                     if (!item.chatMessage.outgoing) {
                         clAttachmentContactIcon.isVisible = true
@@ -187,14 +361,10 @@ class ContactChatItemRenderer(
 
                     clAttachmentLocation.setBackgroundResource(backgroundResource)
                     tvLocation.setTextColor(ContextCompat.getColor(this.context, textColor))
+                    tvLocation.text = item.chatMessage.message.replace(", ", "\n")
 
-                    val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
-                    JSONObject(offsetBuffer.decodeToString()).let { json ->
-                        tvLocation.text = json.getString("address_line").replace(", ", "\n")
-
-                        clAttachmentLocation.setOnClickListener {
-                            onItemClick(item)
-                        }
+                    clAttachmentLocation.setOnClickListener {
+                        onItemClick(item)
                     }
                 }
                 MessageAttachment.TYPE_IDENTITY_ATTRIBUTE -> {
@@ -221,23 +391,50 @@ class ContactChatItemRenderer(
                     tvAttachmentTransferRequestTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
                     tvAttachmentTransferRequestDescription.setTextColor(ContextCompat.getColor(this.context, textColor))
 
-                    val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
-                    JSONObject(offsetBuffer.decodeToString()).let { json ->
-                        tvAttachmentTransferRequestTitle.text = "Request to transfer €${formatBalance(json.optLong("amount"))}"
+                    try {
+                        TransferRequest.deserialize(
+                            attachment.content,
+                            0
+                        ).first.let { transferRequest ->
+                            tvAttachmentTransferRequestTitle.text =
+                                this.context.resources.getString(
+                                    R.string.text_contact_chat_request_transfer,
+                                    formatBalance(transferRequest.amount)
+                                )
+
+                            tvAttachmentTransferRequestDescription.isVisible =
+                                transferRequest.description != ""
+                            tvAttachmentTransferRequestDescription.text =
+                                transferRequest.description
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        val offsetBuffer = attachment.content.copyOfRange(0, attachment.content.size)
+                        JSONObject(offsetBuffer.decodeToString()).let { json ->
+                            tvAttachmentTransferRequestTitle.text = this.context.resources.getString(
+                                R.string.text_contact_chat_request_transfer,
+                                formatBalance(json.optLong(TransferRequest.TRANSFER_REQUEST_AMOUNT))
+                            )
+                        }
 
                         item.chatMessage.message.let { description ->
-                            tvAttachmentTransferRequestDescription.isVisible = description.isNotEmpty()
+                            tvAttachmentTransferRequestDescription.isVisible = description != ""
                             tvAttachmentTransferRequestDescription.text = description
                         }
+                    }
 
-                        if (!item.chatMessage.outgoing) {
-                            ivAttachmentTransferRequestContinueIcon.isVisible = true
+                    if (!item.chatMessage.outgoing) {
+                        ivAttachmentTransferRequestContinueIcon.isVisible = true
 
-                            clAttachmentTransferRequest.setOnClickListener {
-                                onItemClick(item)
-                            }
+                        clAttachmentTransferRequest.setOnClickListener {
+                            onItemClick(item)
                         }
                     }
+                }
+                MessageAttachment.TYPE_IDENTITY_UPDATED -> {
+                    llChatItemTimeStatus.isVisible = false
+                    clIdentityUpdated.isVisible = true
+                    tvIdentityUpdatedMessage.text = item.chatMessage.message
                 }
             }
         }
@@ -261,16 +458,20 @@ class ContactChatItemRenderer(
                 val amount = formatBalance((item.transaction.transaction["amount"] as BigInteger).toLong())
 
                 if (item.chatMessage.outgoing) {
-                    "Outgoing transfer of €$amount"
+                    this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_of, amount)
                 } else {
-                    "Incoming transfer of €$amount"
+                    this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_of, amount)
                 }
             } else {
                 if (item.chatMessage.outgoing) {
-                    "Outgoing transfer failed"
+                    this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_failed)
                 } else {
-                    "Unknown incoming transfer, ask to resend transfer"
+                    this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_unknown)
                 }
+            }
+
+            clTransaction.setOnClickListener {
+                onItemClick(item)
             }
         }
 

@@ -7,28 +7,24 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_BIG
 import nl.tudelft.ipv8.attestation.schema.ID_METADATA_HUGE
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.attestation.wallet.cryptography.bonehexact.BonehPrivateKey
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import nl.tudelft.trustchain.valuetransfer.util.toggleButton
 import java.lang.IllegalStateException
 
 class IdentityAttestationRequestDialog(
     private val peer: Peer,
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var trustChainCommunity: TrustChainCommunity
-    private lateinit var attestationCommunity: AttestationCommunity
+) : VTDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -36,12 +32,12 @@ class IdentityAttestationRequestDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_request, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val attributeTypeSpinner = view.findViewById<Spinner>(R.id.spinnerAttributeType)
             val attributeNameView = view.findViewById<EditText>(R.id.etAttributeNameValue)
@@ -49,19 +45,31 @@ class IdentityAttestationRequestDialog(
             val requestButton = view.findViewById<Button>(R.id.btnRequestAttestation)
             toggleButton(requestButton, attributeNameView.text.toString().isNotEmpty())
 
-            val attributeNameAdapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, attestationCommunity.schemaManager.getSchemaNames().sorted()) {
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val textView: TextView = super.getDropDownView(position, convertView, parent) as TextView
-                    val params = textView.layoutParams
-                    params.height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
-                    textView.layoutParams = params
-                    textView.gravity = Gravity.CENTER_VERTICAL
-
-                    if (position == attributeTypeSpinner.selectedItemPosition) {
-                        textView.background = ColorDrawable(Color.LTGRAY)
+            val attributeNameAdapter = object : ArrayAdapter<String>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                getAttestationCommunity().schemaManager.getSchemaNames().sorted()
+            ) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    return (super.getView(position, convertView, parent) as TextView).apply {
+                        text = getAttestationCommunity().schemaManager.getSchemaNames().sorted()[position]
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
                     }
+                }
 
-                    return textView
+                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    return (super.getDropDownView(position, convertView, parent) as TextView).apply {
+                        layoutParams.apply {
+                            height = resources.getDimensionPixelSize(R.dimen.textViewHeight)
+                        }
+                        gravity = Gravity.CENTER_VERTICAL
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                        background = if (position == attributeTypeSpinner.selectedItemPosition) {
+                            ColorDrawable(Color.LTGRAY)
+                        } else {
+                            ColorDrawable(Color.WHITE)
+                        }
+                    }
                 }
             }
 
@@ -89,7 +97,7 @@ class IdentityAttestationRequestDialog(
             requestButton.setOnClickListener {
                 attributeNameView.text.toString().let { attributeName ->
                     val idFormat = attributeTypeSpinner.selectedItem.toString()
-                    val myPeer = trustChainCommunity.myPeer
+                    val myPeer = getTrustChainCommunity().myPeer
 
                     var privateKey: BonehPrivateKey? = null
 
@@ -102,11 +110,11 @@ class IdentityAttestationRequestDialog(
                     } catch (e: Exception) {
                         e.printStackTrace()
                     } finally {
-                        attestationCommunity.requestAttestation(
+                        getAttestationCommunity().requestAttestation(
                             peer,
                             attributeName,
                             privateKey!!,
-                            hashMapOf("id_format" to idFormat),
+                            hashMapOf(QRScanController.KEY_ID_FORMAT to idFormat),
                             true
                         )
                     }
@@ -116,6 +124,6 @@ class IdentityAttestationRequestDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

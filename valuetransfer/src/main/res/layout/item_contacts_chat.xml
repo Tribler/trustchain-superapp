@@ -5,26 +5,27 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingBottom="4dp"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:paddingBottom="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
         android:paddingHorizontal="8dp"
         android:paddingVertical="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:id="@+id/flIdenticon"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvContactImage"
             android:layout_width="46dp"
             android:layout_height="46dp"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/cornerRadius"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
+            android:backgroundTint="?attr/backgroundColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/clChatContentOverview"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,132 +35,160 @@
                 android:id="@+id/ivIdenticon"
                 android:layout_width="@dimen/identiconWidth"
                 android:layout_height="@dimen/identiconHeight"
-                android:layout_gravity="center" />
-        </FrameLayout>
+                android:layout_gravity="center"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
-<!--        <TextView-->
-<!--            android:id="@+id/tvChatInitialsOverview"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="40dp"-->
-<!--            android:layout_marginHorizontal="8dp"-->
-<!--            android:gravity="center"-->
-<!--            android:padding="5dp"-->
-<!--            tools:text="AA"-->
-<!--            android:textColor="@color/white"-->
-<!--            android:textSize="16sp"-->
-<!--            android:textStyle="bold"-->
-<!--            app:layout_constraintBottom_toBottomOf="@+id/flIdenticon"-->
-<!--            app:layout_constraintEnd_toEndOf="@+id/flIdenticon"-->
-<!--            app:layout_constraintStart_toStartOf="@+id/flIdenticon"-->
-<!--            app:layout_constraintTop_toTopOf="@+id/flIdenticon" />-->
+            <ImageView
+                android:id="@+id/ivContactImage"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_gravity="center"
+                tools:src="@drawable/ic_contact"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"/>
+        </androidx.cardview.widget.CardView>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/clChatContentOverview"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            app:layout_constraintBottom_toBottomOf="@+id/flIdenticon"
+            app:layout_constraintBottom_toBottomOf="@+id/cvContactImage"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/flIdenticon"
-            app:layout_constraintTop_toTopOf="@+id/flIdenticon">
+            app:layout_constraintStart_toEndOf="@+id/cvContactImage"
+            app:layout_constraintTop_toTopOf="@+id/cvContactImage">
 
-            <TextView
-                android:id="@+id/tvContactNameOverview"
+            <RelativeLayout
+                android:id="@+id/rlNameStatus"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Name"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:textStyle="bold"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/tvContactTimeOverview">
 
-            <ImageView
-                android:id="@+id/ivOnlineStatusOverview"
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/circle"
-                android:backgroundTint="@color/colorPrimaryValueTransfer"
-                app:layout_constraintBottom_toBottomOf="@+id/tvContactNameOverview"
-                app:layout_constraintStart_toEndOf="@+id/tvContactNameOverview"
-                app:layout_constraintTop_toTopOf="@+id/tvContactNameOverview" />
+                <TextView
+                    android:id="@+id/tvContactNameOverview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginRight="20dp"
+                    android:ellipsize="end"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:textColor="?attr/onWidgetColor"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="Name" />
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="-16dp"
+                    android:layout_toRightOf="@+id/tvContactNameOverview">
+
+                    <ImageView
+                        android:id="@+id/ivContactUnverifiedStatus"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_verified_not_smaller"
+                        app:tint="?attr/colorError"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <ImageView
+                        android:id="@+id/ivContactVerifiedStatus"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_verified_smaller"
+                        app:tint="?attr/colorAccent"
+                        android:layout_gravity="center_vertical"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </FrameLayout>
+            </RelativeLayout>
 
             <ImageView
                 android:id="@+id/ivMessageStatusOverview"
                 android:layout_width="12dp"
                 android:layout_height="12dp"
-                android:layout_marginTop="3dp"
                 android:layout_marginEnd="4dp"
                 android:src="@drawable/ic_check_double"
                 app:layout_constraintEnd_toStartOf="@+id/tvContactMessageOverview"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview"
-                app:tint="@color/white"
-                tools:tint="@color/white" />
+                app:layout_constraintTop_toTopOf="@+id/tvContactMessageOverview"
+                app:layout_constraintBottom_toBottomOf="@+id/tvContactMessageOverview"
+                app:tint="?attr/colorAccent" />
 
             <TextView
                 android:id="@+id/tvContactMessageOverview"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:paddingVertical="3dp"
                 android:ellipsize="end"
                 android:lines="1"
                 android:text="Message"
-                android:textColor="@color/white"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/ivMuted"
                 app:layout_constraintStart_toEndOf="@+id/ivMessageStatusOverview"
-                app:layout_constraintTop_toBottomOf="@+id/tvContactNameOverview" />
+                app:layout_constraintTop_toBottomOf="@+id/rlNameStatus" />
+
+            <ImageView
+                android:id="@+id/ivMuted"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:padding="2dp"
+                android:src="@drawable/ic_mute_filled"
+                app:tint="?attr/onWidgetSecondaryColor"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/tvContactMessageOverview"
+                app:layout_constraintBottom_toBottomOf="@+id/tvContactMessageOverview" />
 
             <TextView
                 android:id="@+id/tvContactTimeOverview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="12:00"
-                android:textColor="@color/white"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="12sp"
                 android:typeface="monospace"
+                app:layout_constraintBottom_toBottomOf="@+id/rlNameStatus"
+                app:layout_constraintEnd_toStartOf="@+id/flOnlineStatusOverview"
+                app:layout_constraintTop_toTopOf="@+id/rlNameStatus" />
+
+            <FrameLayout
+                android:id="@+id/flOnlineStatusOverview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                app:layout_constraintBottom_toBottomOf="@+id/rlNameStatus"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="@+id/rlNameStatus">
+
+                <ImageView
+                    android:id="@+id/ivOnlineStatusOverview"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/circle_online" />
+
+                <ImageView
+                    android:id="@+id/ivOfflineStatusOverview"
+                    android:layout_width="6dp"
+                    android:layout_height="6dp"
+                    android:background="@drawable/circle_offline" />
+            </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:id="@+id/clContactExchange"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="62dp"-->
-<!--        android:layout_marginStart="4dp"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toEndOf="@+id/clChatCard"-->
-<!--        app:layout_constraintTop_toTopOf="parent">-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/ivRequest"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="29dp"-->
-<!--            android:padding="5dp"-->
-<!--            android:background="@drawable/square_rounded_dark_green"-->
-<!--            android:src="@drawable/ic_request"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            app:tint="@color/colorPrimaryValueTransfer"-->
-<!--            tools:tint="@color/white" />-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/ivTransfer"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="29dp"-->
-<!--            android:padding="6dp"-->
-<!--            android:background="@drawable/square_rounded_dark_green"-->
-<!--            android:src="@drawable/ic_exchange"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:tint="@color/red"-->
-<!--            tools:tint="@color/red" />-->
-
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 </androidx.constraintlayout.widget.ConstraintLayout>
