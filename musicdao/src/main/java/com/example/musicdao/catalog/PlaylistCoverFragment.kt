@@ -14,6 +14,7 @@ import java.util.*
 /**
  * An 'album cover' or other visual display of a playlist, that can be clicked to view its contents
  */
+@Suppress("DEPRECATION")
 class PlaylistCoverFragment(
     private val trustChainBlock: TrustChainBlock,
     private val connectivity: Int = 0,

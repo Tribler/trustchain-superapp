@@ -6,6 +6,7 @@ import java.nio.ByteOrder
 
 class Messages {
 
+    @Suppress("DEPRECATION")
     companion object {
         fun serCompactSize(l: Int): ByteArray {
             var ssBuf: ByteArray = byteArrayOf()

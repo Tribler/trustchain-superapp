@@ -13,6 +13,7 @@ import nl.tudelft.ipv8.messaging.Packet
 import java.util.*
 import kotlin.random.Random
 
+@Suppress("DEPRECATION")
 class MusicCommunity(
     settings: TrustChainSettings,
     database: TrustChainStore,

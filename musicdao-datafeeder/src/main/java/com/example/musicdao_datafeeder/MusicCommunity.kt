@@ -60,6 +60,7 @@ class MusicCommunity(
      * blocks to find whether I have something. If I do, send the corresponding block directly back
      * to the original asker. If I don't, I will ask my peers to find it
      */
+    @Suppress("DEPRECATION")
     private fun onKeywordSearch(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage)
         val keyword = payload.keyword.toLowerCase(Locale.ROOT)
@@ -93,6 +94,7 @@ class MusicCommunity(
      * Filter local databse to find a release block that matches a certain title or artist, using
      * keyword search
      */
+    @Suppress("DEPRECATION")
     fun localKeywordSearch(keyword: String): TrustChainBlock? {
         database.getBlocksWithType("publish_release").forEach {
             val transaction = it.transaction

@@ -33,6 +33,7 @@ class PresentAttestationDialog(
             builder.setView(mView)
 
             val dialog: Dialog
+            @Suppress("DEPRECATION")
             val title = "Attestation for <font color='#EE0000'>${attributeName.capitalize()}</font>"
             val message = "<b>$attributeName:</b> $attributeValue"
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
