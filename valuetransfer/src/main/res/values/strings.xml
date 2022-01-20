@@ -118,6 +118,8 @@
     <string name="btn_contact_add">Add Contact</string>
     <string name="btn_attestation_add">Add Attestation</string>
     <string name="btn_show_more">Show more…</string>
+    <string name="btn_transaction_resend">Resend Transaction</string>
+    <string name="btn_transaction_resend_trying">Trying to resend…</string>
     <string name="btn_transaction_sign">Sign Transaction</string>
     <string name="btn_send">Send</string>
     <string name="btn_load_more_messages">Load more messages…</string>
@@ -227,7 +229,7 @@
     <string name="text_contact_chat_incoming_transfer_with_message">%s for \'%s\'</string>
     <string name="text_contact_chat_incoming_transfer_request_with_message">for \'%s\'</string>
     <string name="text_contact_chat_outgoing_transfer_failed">Outgoing transfer failed</string>
-    <string name="text_contact_chat_incoming_transfer_unknown">"Unknown incoming transfer, ask to resend transfer"</string>
+    <string name="text_contact_chat_incoming_transfer_unknown">Ask to resend transfer</string>
     <string name="text_exchange_incoming_transfer_portal">Incoming transaction from EuroToken Exchange of €%s</string>
     <string name="text_exchange_incoming_transfer_portal_of">Incoming transaction from EuroToken Exchange of €%s</string>
     <string name="text_title_identity_attributes">Identity Attributes</string>

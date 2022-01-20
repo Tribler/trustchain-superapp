@@ -91,7 +91,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         requireArguments().getString(ValueTransferMainActivity.ARG_PARENT)!!
     }
 
-    private var blocks: List<TrustChainBlock> = emptyList()
+    private var blocks = MutableLiveData<List<TrustChainBlock>>(listOf())
 
     private var oldMessageCount: Int = 0
     private var newMessageCount: Int = 0
@@ -102,7 +102,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             downloadProgress.asFlow(),
             searchFilterLimit.asFlow(),
             limitedMessageCount.asFlow(),
-        ) { messages, downloadTransferProgress, searchFilterLimitValues, _ ->
+            blocks.asFlow()
+        ) { messages, downloadTransferProgress, searchFilterLimitValues, _, blocks ->
             val filteredMessages = messages.filter { item ->
                 val hasMessage = item.message.isNotEmpty()
                 val hasAttachment = item.attachment != null
@@ -129,7 +130,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             newMessageCount = totalMessageCount
             val limitMessages = filteredMessages.takeLast(limitedMessageCount.value?.toInt()!!)
 
-            createMessagesItems(limitMessages, downloadTransferProgress)
+            createMessagesItems(limitMessages, downloadTransferProgress, blocks)
         }.asLiveData()
     }
 
@@ -165,8 +166,12 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         lifecycleScope.launchWhenCreated {
             while (isActive) {
-                blocks = getTrustChainHelper().getChainByUser(trustchain.getMyPublicKey())
-                delay(2000)
+                getTrustChainHelper().getChainByUser(trustchain.getMyPublicKey()).let { blockList ->
+                    if (blockList != blocks.value) {
+                        blocks.postValue(blockList)
+                    }
+                }
+                delay(2000L)
             }
         }
     }
@@ -1202,7 +1207,8 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
     private fun createMessagesItems(
         messages: List<ChatMessage>,
-        transferProgress: MutableMap<String, TransferProgress>
+        transferProgress: MutableMap<String, TransferProgress>,
+        blocks: List<TrustChainBlock>
     ): List<Item> {
         return messages.mapIndexed { index, chatMessage ->
             val progress = if (chatMessage.attachment != null && !chatMessage.attachmentFetched) {
@@ -1216,6 +1222,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             ContactChatItem(
                 chatMessage,
                 getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash),
+                blocks,
                 (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!), // (index == 0) && (totalMessageCount > searchFilterLimit.value?.third!!)
                 (index == 0) || (index > 0 && !dateFormat.format(messages[index-1].timestamp).equals(dateFormat.format(chatMessage.timestamp))),
                 false,

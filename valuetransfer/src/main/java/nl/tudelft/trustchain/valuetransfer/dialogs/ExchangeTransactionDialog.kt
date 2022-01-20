@@ -10,9 +10,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
@@ -57,6 +60,8 @@ class ExchangeTransactionDialog(
             val sizeView = view.findViewById<TextView>(R.id.tvTransactionSize)
             val blockHashView = view.findViewById<TextView>(R.id.tvTransactionBlockHash)
             val signatureView = view.findViewById<TextView>(R.id.tvTransactionSignature)
+            val transactionResendButton = view.findViewById<ConstraintLayout>(R.id.clTransactionResendButton)
+            val transactionResendButtonView = view.findViewById<TextView>(R.id.tvTransactionResendButton)
             val transactionSignButton = view.findViewById<ConstraintLayout>(R.id.clTransactionSignButton)
             val transactionSignButtonView = view.findViewById<TextView>(R.id.tvTransactionSignButton)
 
@@ -183,13 +188,33 @@ class ExchangeTransactionDialog(
             blockHashView.text = transactionItem.transaction.block.calculateHash().toHex()
             signatureView.text = transactionItem.transaction.block.signature.toHex()
 
-            transactionSignButton.isVisible = transactionItem.canSign
+            val trustChainHelper = parentActivity.getStore<TrustChainHelper>()!!
+            val transactionRepository = parentActivity.getStore<TransactionRepository>()!!
+            val transaction = transactionRepository.getTransactionWithHash(transactionItem.transaction.block.calculateHash())
 
+            transactionResendButton.isVisible = if(outgoing && transactionItem.transaction.type == TransactionRepository.BLOCK_TYPE_TRANSFER && transaction != null) {
+                trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
+            } else false
+
+            transactionResendButton.setOnClickListener {
+                transactionResendButtonView.text = resources.getString(R.string.btn_transaction_resend_trying)
+                val receiver = defaultCryptoProvider.keyFromPublicBin(transactionItem.transaction.block.linkPublicKey)
+                val peer = Peer(receiver)
+                transactionRepository.trustChainCommunity.sendBlock(transaction!!, peer)
+                    Handler().postDelayed(
+                        Runnable {
+                            transactionResendButton.isVisible = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
+                            transactionResendButtonView.text = resources.getString(R.string.btn_transaction_resend)
+                        }, 10000
+                    )
+            }
+
+            transactionSignButton.isVisible = transactionItem.canSign
             transactionSignButton.setOnClickListener {
                 transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
+                getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
                 Handler().postDelayed(
                     Runnable {
-                        getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
                         transactionSignButton.isVisible = false
                     },
                     2000
