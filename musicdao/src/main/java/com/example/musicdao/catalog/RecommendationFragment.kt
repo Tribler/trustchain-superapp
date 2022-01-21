@@ -15,6 +15,7 @@ import nl.tudelft.trustchain.gossipML.models.feature_based.Pegasos
 import java.io.File
 import java.lang.Double.NEGATIVE_INFINITY
 
+@Suppress("DEPRECATION")
 class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendation) {
     private var isActive = true
     private val test = false
@@ -27,7 +28,7 @@ class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendatio
         lifecycleScope.launchWhenCreated {
             while (isActive) {
                 getRecommenderCommunity().initiateWalkingModel()
-                delay(60 * 1000)
+                delay((60 * 1000).toLong())
             }
         }
         refreshRecommend.setOnRefreshListener {

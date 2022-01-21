@@ -76,6 +76,7 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                         } else {
                             attestationCommunity.requestAttestation(
                                 peer,
+                                @Suppress("DEPRECATION")
                                 attrInput.text.toString().toUpperCase(Locale.getDefault()),
                                 key,
                                 hashMapOf("id_format" to idFormat),

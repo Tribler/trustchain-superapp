@@ -12,6 +12,7 @@ import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
 import java.util.*
 
+@Suppress("DEPRECATION")
 class MusicCommunity(
     settings: TrustChainSettings,
     database: TrustChainStore,
