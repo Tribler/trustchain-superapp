@@ -2,6 +2,7 @@ package com.example.musicdao.net
 
 import android.util.Log
 import com.example.musicdao.ipv8.SwarmHealth
+import com.example.musicdao.repositories.TorrentRepository
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.Alert
@@ -68,6 +69,8 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
         val validTorrentInfos = torrentFiles
             .map { file -> TorrentInfo(file) }
             .filter { torrentInfo -> torrentInfo.isValid }
+            .filter { torrentInfo -> Util.isTorrentCompleted(torrentInfo, saveDir) }
+
 
         // 'Downloading' the torrent file also starts seeding it after download has
         // already been completed.
@@ -75,6 +78,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
         validTorrentInfos.forEach { torrentInfo ->
             if (Util.isTorrentCompleted(torrentInfo, saveDir)) {
                 downloadAndSeed(torrentInfo)
+
             }
         }
 
@@ -107,6 +111,7 @@ class ContentSeeder(private val saveDir: File, private val sessionManager: Sessi
             torrentInfo.addTracker("http://130.161.119.207:8000/announce")
             torrentInfo.addTracker("udp://130.161.119.207:8000")
             torrentInfo.addTracker("http://130.161.119.207:8000")
+//            TorrentRepository.addTrackers(torrentInfo)
             sessionManager.download(torrentInfo, saveDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))

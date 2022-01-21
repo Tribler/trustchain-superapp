@@ -1,9 +1,10 @@
-package com.example.musicdao
+package com.example.musicdao.services
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import android.util.Log
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.ipv8.SwarmHealth
 import com.frostwire.jlibtorrent.Sha1Hash
@@ -41,6 +42,7 @@ class MusicGossipingService :
     }
 
     override fun onCreate() {
+
         super.onCreate()
         scope.launch {
             iterativelySendReleaseBlocks()
@@ -51,6 +53,7 @@ class MusicGossipingService :
     }
 
     override fun onDestroy() {
+
         scope.cancel()
         super.onDestroy()
 
@@ -68,6 +71,7 @@ class MusicGossipingService :
     private suspend fun iterativelySendReleaseBlocks() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         while (scope.isActive) {
+//            Log.d("Brian", "Sending release Blocks.")
             musicCommunity?.communicateReleaseBlocks()
             delay(4000)
         }

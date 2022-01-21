@@ -2,6 +2,7 @@ package com.example.musicdao.util
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentHandle
@@ -180,6 +181,7 @@ object Util {
         if (!directory.isDirectory) return null
         val allowedExtensions =
             listOf(".jpg", ".png")
+
         val files = directory.listFiles() ?: return null
         // Give priority to files named "Cover"
         for (ext in allowedExtensions) {
@@ -190,6 +192,7 @@ object Util {
         }
         // If no file named "Cover" exists, we try to extract the albumImage from the first MP3 we
         // see, and assume it is the album image for the whole Release
+
         for (file in files) {
             try {
                 val mp3File = Mp3File(file)

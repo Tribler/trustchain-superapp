@@ -1,7 +1,7 @@
 package com.example.musicdao.wallet
 
 import android.widget.Toast
-import com.example.musicdao.MusicService
+import com.example.musicdao.MusicActivity
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -24,7 +24,7 @@ import java.util.*
 /**
  * Interaction with a BitcoinJ wallet
  */
-class WalletService(val walletDir: File, private val musicService: MusicService) {
+class WalletService(val walletDir: File, private val musicService: MusicActivity) {
     val app: WalletAppKit
     private val bitcoinFaucetEndpoint = "http://134.122.59.107:3000"
     private val params = CryptoCurrencyConfig.networkParams
@@ -50,10 +50,10 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
                     if (value != wallet().balance && value != wallet().getBalance(Wallet.BalanceType.ESTIMATED)) {
-                        musicService.showToast(
-                            "Received coins: ${value.toFriendlyString()}",
-                            Toast.LENGTH_SHORT
-                        )
+//                        musicService.showToast(
+//                            "Received coins: ${value.toFriendlyString()}",
+//                            Toast.LENGTH_SHORT
+//                        )
                     }
                 }
             }
@@ -139,7 +139,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         val coins = try {
             BigDecimal(coinsAmount.toDouble())
         } catch (e: NumberFormatException) {
-            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
+//            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
             return
         }
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
@@ -147,23 +147,23 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         try {
             targetAddress = Address.fromString(params, publicKey)
         } catch (e: Exception) {
-            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
+//            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
             return
         }
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
         try {
             app.wallet().sendCoins(sendRequest)
-            musicService.showToast(
-                "Sending funds: ${
-                Coin.valueOf(satoshiAmount).toFriendlyString()
-                }",
-                Toast.LENGTH_SHORT
-            )
+//            musicService.showToast(
+//                "Sending funds: ${
+//                Coin.valueOf(satoshiAmount).toFriendlyString()
+//                }",
+//                Toast.LENGTH_SHORT
+//            )
         } catch (e: Exception) {
-            musicService.showToast(
-                "Error creating transaction (do you have sufficient funds?)",
-                Toast.LENGTH_SHORT
-            )
+//            musicService.showToast(
+//                "Error creating transaction (do you have sufficient funds?)",
+//                Toast.LENGTH_SHORT
+//            )
         }
     }
 
@@ -186,7 +186,7 @@ class WalletService(val walletDir: File, private val musicService: MusicService)
         /**
          * Singleton pattern for WalletService
          */
-        fun getInstance(walletDir: File, musicService: MusicService): WalletService {
+        fun getInstance(walletDir: File, musicService: MusicActivity): WalletService {
             val instance = walletService
             if (instance is WalletService) return instance
             val newInstance = WalletService(walletDir, musicService)

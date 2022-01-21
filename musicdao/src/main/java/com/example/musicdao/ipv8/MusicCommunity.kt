@@ -80,7 +80,6 @@ class MusicCommunity(
     private fun onSwarmHealth(packet: Packet) {
         val (_, swarmHealth) = packet.getAuthPayload(SwarmHealth)
         swarmHealthMap[Sha1Hash(swarmHealth.infoHash)] = swarmHealth
-        Log.d("SwarmHealth", "Received swarm health info for ${swarmHealth.infoHash}")
     }
 
     /**

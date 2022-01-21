@@ -97,10 +97,11 @@
             android:theme="@style/Theme.ValueTransfer" />
 
         <activity
-            android:name="com.example.musicdao.MusicService"
-            android:label="Music app"
+            android:name="com.example.musicdao.MusicActivity"
+            android:label=" "
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.MusicDaoTheme">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -112,7 +113,7 @@
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
 
         <service
-            android:name="com.example.musicdao.MusicGossipingService"
+            android:name="com.example.musicdao.services.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
     </application>

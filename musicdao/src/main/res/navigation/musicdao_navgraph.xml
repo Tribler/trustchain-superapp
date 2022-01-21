@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/playlistsOverviewFragment"
         android:name="com.example.musicdao.catalog.PlaylistsOverviewFragment"
-        android:label="Music app">
+        android:label="Home">
 
         <action
             android:id="@+id/action_playlistsOverviewFragment_to_playlistFragment"
@@ -31,9 +31,10 @@
                 android:name="torrentInfoName"
                 app:argType="string" />
         </action>
+
         <action
-            android:id="@+id/action_playlistsOverviewFragment_to_settingsFragment"
-            app:destination="@id/settingsFragment" />
+            android:id="@+id/action_playlistsOverviewFragment_to_walletFragment"
+            app:destination="@id/walletFragment" />
     </fragment>
 
     <fragment
@@ -45,8 +46,9 @@
         android:id="@+id/walletFragment"
         android:name="com.example.musicdao.wallet.WalletFragment"
         android:label="Wallet overview" />
+
     <fragment
-        android:id="@+id/settingsFragment"
-        android:name="com.example.musicdao.ui.settings.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:id="@+id/newPlaylistOverviewFragment"
+        android:name="com.example.musicdao.new.NewReleaseFragment"
+        android:label="new one" />
 </navigation>
