@@ -1,28 +1,35 @@
 package nl.tudelft.trustchain.datavault.ui
 
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.vault_browser_fragment.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
-import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.R
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessPolicy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val binding by viewBinding(VaultBrowserFragmentBinding::bind)
@@ -34,6 +41,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
 
+    private var areFABsVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,22 +50,33 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         attestationCommunity = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
+        Log.e(logTag, "my peer: ${attestationCommunity.myPeer.publicKey.keyToBin().toHex()}")
 
         getDataVaultCommunity().setDataVaultActivity(parentActivity)
         getDataVaultCommunity().setVaultBrowserFragment(this)
 
         initVault()
 
-        //writeTestFiles()
         //deleteTestFiles()
 
         adapter.registerRenderer(VaultFileItemRenderer {
             Log.e(logTag, "${it.absolutePath} exists: ${it.exists()}")
-            val builder: AlertDialog.Builder = activity.let {
-                AlertDialog.Builder(requireContext())
+            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
+            val inflater = requireActivity().layoutInflater
+            val view = inflater.inflate(R.layout.vault_file_fragment, null)
+            val textView = view.findViewById<TextView>(R.id.text)
+            textView.setText(it.readText())
+            val checkBox: CheckBox = view.findViewById<CheckBox>(R.id.public_file_checkbox)
+
+            val accessPolicy = AccessPolicy(it, attestationCommunity)
+            checkBox.setChecked(!accessPolicy.isTokenRequired())
+
+            checkBox.setOnCheckedChangeListener { _, value ->
+                Log.e(logTag, "button checked: $value")
+                accessPolicy.setTokenRequired(!value)
             }
 
-            builder.setMessage(it.readText())
+            builder.setTitle(it.name).setView(view)
 
             val dialog: AlertDialog = builder.create()
             dialog.show()
@@ -75,19 +95,112 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             )
         )
 
-        requestButton.setOnClickListener {
-            val publicKey = defaultCryptoProvider.keyFromPublicBin("4c69624e61434c504b3a77a4c00e7a40a611c7f079c5d7d7505ea2f59622c443bfa4e6bf9a18a8467a7d106d8a3691e061eb80cd43fbeed9d1f50217e7f619167768395ebac401a76795".hexToBytes())
-            val peer = getDataVaultCommunity().getPeers().find { it.mid == publicKey.keyToHash().toHex() }
-            if (peer == null){
-                Toast.makeText(requireContext(), "Test peer not found", Toast.LENGTH_SHORT).show()
+        setFABs()
+
+        updateAdapter()
+    }
+
+    private fun setFABs() {
+        binding.requestAccessibleFilesFab.visibility = View.GONE
+        binding.requestAccessibleFilesText.visibility = View.GONE
+
+        binding.deleteFilesFab.visibility = View.GONE
+        binding.deleteFilesText.visibility = View.GONE
+
+        binding.addFileFab.visibility = View.GONE
+        binding.addFileText.visibility = View.GONE
+
+        binding.actionFab.setOnClickListener {
+            if (!areFABsVisible) {
+                showFabs()
             } else {
-                // Currently all attestations. There must come a way to choose your attestations
-                val attestations = attestationCommunity.database.getAllAttestations()
-                getDataVaultCommunity().sendFileRequest(peer, "testfile1", attestations)
+                hideFabs()
             }
         }
 
-        initAdapter()
+        binding.requestAccessibleFilesFab.setOnClickListener {
+            selectPeerDialog()
+            hideFabs()
+        }
+
+        binding.deleteFilesFab.setOnClickListener {
+            hideFabs()
+            deleteTestFiles()
+        }
+
+        binding.addFileFab.setOnClickListener {
+            hideFabs()
+            addTestFile()
+        }
+    }
+
+    private fun showFabs() {
+        binding.requestAccessibleFilesFab.show()
+        binding.deleteFilesFab.show()
+        binding.addFileFab.show()
+
+        binding.requestAccessibleFilesText.visibility = View.VISIBLE
+        binding.deleteFilesText.visibility = View.VISIBLE
+        binding.addFileText.visibility = View.VISIBLE
+        areFABsVisible = true
+    }
+
+    private fun hideFabs() {
+        binding.requestAccessibleFilesFab.hide()
+        binding.deleteFilesFab.hide()
+        binding.addFileFab.hide()
+
+        binding.requestAccessibleFilesText.visibility = View.GONE
+        binding.deleteFilesText.visibility = View.GONE
+        binding.addFileText.visibility = View.GONE
+        areFABsVisible = false
+    }
+
+    private fun selectPeerDialog() {
+        var peers = getDataVaultCommunity().getPeers()
+        peers.forEach {
+            Log.e(logTag, "Peer: ${it.publicKey.keyToBin().toHex()}")
+        }
+
+        val builder = AlertDialog.Builder(context)
+
+        if (peers.isEmpty()) {
+            builder.setTitle("No peers found")
+        } else {
+            builder.setTitle("Select peer")
+        }
+
+        builder.setPositiveButton("Ok",
+            DialogInterface.OnClickListener { _, _ ->
+                // User clicked OK button
+            }).
+        setNegativeButton("Cancel",
+            DialogInterface.OnClickListener { _, _ ->
+                // User cancelled the dialog
+            }).
+        setItems(peers.map { peer ->  peer.mid}.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
+            var peer = peers.get(index)
+            Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
+
+            // Currently all attestations. There must come a way to choose your attestations
+            val attestations = attestationCommunity.database.getAllAttestations().filter { attestationBlob ->  attestationBlob.signature != null}
+
+
+            /*val entries = attestationCommunity.database.getAllAttestations()
+            .mapIndexed { index, blob -> DatabaseItem(index, blob) }.sortedBy {
+                if (it.attestationBlob.metadata != null) {
+                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString("attribute")
+                } else {
+                    return@sortedBy ""
+                }
+            }*/
+
+            getDataVaultCommunity().sendAccessibleFilesRequest(peer, attestations)
+        })
+
+        // Create the AlertDialog
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
     }
 
     override fun onResume() {
@@ -102,28 +215,28 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
     }
 
-    private fun initAdapter() {
-        Log.e(logTag, "vault dir: $VAULT")
-        Log.e(logTag, "free space: ${VAULT.freeSpace}")
-        //Log.e(logTag, "is directory: ${vaultFile.isDirectory}")
-        if (!VAULT.canRead()) {
-            //setTitle(getTitle().toString() + " (inaccessible)")
-            Log.e(logTag, "$VAULT inaccessible")
-            return
-        }
+    private fun updateAdapter() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            if (!VAULT.canRead()) {
+                //setTitle(getTitle().toString() + " (inaccessible)")
+                Log.e(logTag, "$VAULT inaccessible")
+            } else {
+                val list = VAULT.list()
+                if (list != null) {
+                    val vaultFileItems = list.asList().
+                    filter { fileName -> !fileName.startsWith(".") && !fileName.endsWith(".acl")}.
+                    map { fileName: String ->
+                        VaultFileItem(File(VAULT, fileName), null)
+                    }
 
+                    withContext(Dispatchers.Main) {
+                        adapter.updateItems(vaultFileItems)
+                    }
 
-        val list = VAULT.list()
-        if (list != null) {
-            val vaultFileItems = list.asList().
-                filter { fileName -> !fileName.startsWith(".") }.
-                map { fileName: String ->
-                    VaultFileItem(File(VAULT, fileName), null)
-            }
-            adapter.updateItems(vaultFileItems)
-
-            if (!list.isEmpty()) {
-                Log.e(logTag + " files", list.asList().reduce { acc, s ->  acc + " $s"}?: "empty")
+                    if (!list.isEmpty()) {
+                        Log.e(logTag + " files", list.asList().reduce { acc, s ->  acc + " $s"}?: "empty")
+                    }
+                }
             }
         }
     }
@@ -137,46 +250,74 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         val VAULT_DIR = "data_vault"
     }
 
-    fun notify(message: String) {
-        val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
+    fun selectRequestableFile(peer: Peer, accessToken: String, files: List<String>) {
+        Log.e(logTag, "Selecting requestable file")
         requireActivity().runOnUiThread {
-            Log.e(logTag, "NOTICE: $message")
-            Log.e(logTag, myPublicKey)
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Select file to request").
+            setPositiveButton("Ok",
+                DialogInterface.OnClickListener { _, _ ->
+                    // User clicked OK button
+                }).
+            setNegativeButton("Cancel",
+                DialogInterface.OnClickListener { _, _ ->
+                    // User cancelled the dialog
+                }).
+            setItems(files.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
+                Log.e(logTag, "item $index chosen")
+                val file = files.get(index)
+                getDataVaultCommunity().sendFileRequest(peer, file, accessToken = accessToken)
+            })
 
-            Toast.makeText(requireActivity(), message, Toast.LENGTH_LONG).show()
-            /*val builder: AlertDialog.Builder = requireContext().let {
-                AlertDialog.Builder(requireContext())
-            }
-            builder.setMessage(message)
-
-            val dialog: AlertDialog = builder.create()
-            dialog.show()*/
-
-
-            status.text = message
-            adapter.notifyDataSetChanged()
+            // Create the AlertDialog
+            val alertDialog: AlertDialog = builder.create()
+            alertDialog.show()
         }
     }
 
-    private fun writeTestFiles() {
-        var filename = "testfile1"
-        var fileContents = "Testing data vault"
+    fun notify(id: String, message: String) {
+        requireActivity().runOnUiThread {
+            Log.e(logTag, "File: $id")
+
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(id).setMessage(message).setPositiveButton("Ok", DialogInterface.OnClickListener { _, _ ->
+                // close dialog
+            })
+
+            val alertDialog: AlertDialog = builder.create()
+            alertDialog.show()
+        }
+    }
+
+    private fun addTestFile() {
+        val timestamp = Date().time
+        val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
+        val filename: String = sdf.format(timestamp)
+
+        var fileContents = "Test file created on " + filename
         var fos = FileOutputStream (File(VAULT, filename))
         fos.write(fileContents.toByteArray())
         fos.close()
 
+        fos = FileOutputStream (File(VAULT, "$filename.acl"))
+        fos.write(AccessPolicy.TRUE.toByteArray())
+        fos.close()
 
-        /*filename = "testfile2"
-        fileContents = "Hello world twice!"
-        fos = FileOutputStream (File(VAULT, filename))
-        fos.write(fileContents.toByteArray())
-        fos.close()*/
+        updateAdapter()
     }
 
     private fun deleteTestFiles() {
-        var testFile = File(VAULT,"testfile1")
-        testFile.delete()
-        testFile = File(VAULT,"testfile2")
-        testFile.delete()
+        if (!VAULT.canRead()) {
+        } else {
+            val list = VAULT.list()
+            if (list != null) {
+                list.forEach { fileName ->
+                    var testFile = File(VAULT,fileName)
+                    testFile.delete()
+                 }
+            }
+        }
+
+        updateAdapter()
     }
 }
