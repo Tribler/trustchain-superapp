@@ -73,7 +73,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
-            .padding(bottom = 150.dp)
+            .padding(bottom = 150.dp, top = 25.dp)
     ) {
         when (uiState) {
             is ReleaseUIState.Nothing -> {

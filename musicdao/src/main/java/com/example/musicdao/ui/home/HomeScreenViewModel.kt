@@ -28,6 +28,9 @@ class HomeScreenViewModel(
     fun getCover(releaseBlock: ReleaseBlock): File? {
         val torrentInfoName = releaseBlock.torrentInfoName
         val isDownloaded = torrentRepository.isDownloaded(torrentInfoName)
+        if (!isDownloaded) {
+            return null
+        }
         val files = torrentRepository.getFiles(torrentInfoName)
         if (files.size != 0) {
             return Util.findCoverArt(files.get(0).parentFile)
