@@ -164,6 +164,7 @@ class ExchangeTransactionDialog(
                     } else null
 
                     fromToNameView.text = when {
+                        identityName != null && contactName != null && identityName == contactName -> identityName
                         identityName != null && contactName != null -> StringBuilder().append(identityName).append(" (").append(contactName).append(")").toString()
                         identityName != null && contactName == null -> identityName
                         identityName == null && contactName != null -> contactName
@@ -201,12 +202,15 @@ class ExchangeTransactionDialog(
                 val receiver = defaultCryptoProvider.keyFromPublicBin(transactionItem.transaction.block.linkPublicKey)
                 val peer = Peer(receiver)
                 transactionRepository.trustChainCommunity.sendBlock(transaction!!, peer)
-                    Handler().postDelayed(
-                        Runnable {
-                            transactionResendButton.isVisible = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
-                            transactionResendButtonView.text = resources.getString(R.string.btn_transaction_resend)
-                        }, 10000
-                    )
+
+                val resendText = resources.getString(R.string.btn_transaction_resend)
+
+                Handler().postDelayed(
+                    Runnable {
+                        transactionResendButton.isVisible = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
+                        transactionResendButtonView.text = resendText
+                    }, 2000
+                )
             }
 
             transactionSignButton.isVisible = transactionItem.canSign
@@ -229,9 +233,12 @@ class ExchangeTransactionDialog(
                             parentActivity.closeAllDialogs()
                             val publicKey = transactionItem.transaction.sender
                             val contact = getContactStore().getContactFromPublicKey(publicKey)
+                            val identityName = getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
+                                "${it.initials} ${it.surname}"
+                            }
                             val args = Bundle().apply {
                                 putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, publicKey.keyToBin().toHex())
-                                putString(ValueTransferMainActivity.ARG_NAME, contact?.name ?: resources.getString(R.string.text_unknown_contact))
+                                putString(ValueTransferMainActivity.ARG_NAME, contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)))
                                 putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.exchangeFragmentTag)
                             }
 

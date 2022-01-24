@@ -11,10 +11,12 @@ import android.provider.MediaStore
 import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
@@ -40,6 +42,8 @@ import nl.tudelft.trustchain.common.valuetransfer.extensions.encodeImage
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
 import org.json.JSONObject
 import java.util.*
 
@@ -107,7 +111,9 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 { identity ->
                     val map = mapOf(
                         QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to identity.content.givenNames
+                        QRScanController.KEY_NAME to identity.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                     )
 
                     QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
@@ -244,11 +250,15 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         binding.rvAttributes.apply {
             adapter = adapterAttributes
             layoutManager = LinearLayoutManager(context)
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         binding.rvAttestations.apply {
             adapter = adapterAttestations
             layoutManager = LinearLayoutManager(context)
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_attestation, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         itemsIdentity.observe(
@@ -277,7 +287,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         binding.ivAddAttributeAttestation.setOnClickListener {
             OptionsDialog(
                 R.menu.identity_add_options,
-                "Choose Option",
+                resources.getString(R.string.dialog_choose_option),
                 menuMods = { menu ->
                     menu.apply {
                         findItem(R.id.actionAddIdentityAttribute).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
@@ -335,7 +345,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         OptionsDialog(
             R.menu.identity_options,
-            "Choose Option"
+            resources.getString(R.string.dialog_choose_option),
         ) { _, selectedItem ->
             when (selectedItem.itemId) {
                 R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(

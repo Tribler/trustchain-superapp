@@ -282,8 +282,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                             }
                             MessageAttachment.TYPE_CONTACT -> {
                                 val contact = Contact.deserialize(attachment.content, 0).first
+                                val contactLocal = getContactStore().getContactFromPublicKey(contact.publicKey)
 
-                                if (getContactStore().getContactFromPublicKey(contact.publicKey) == null) {
+                                if (contactLocal == null) {
                                     when (contact.publicKey) {
                                         getTrustChainCommunity().myPeer.publicKey -> parentActivity.displayToast(
                                             requireContext(),
@@ -314,7 +315,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                                         }
                                     }
                                 } else {
-                                    goToContactFragment(contact)
+                                    goToContactFragment(contactLocal)
                                 }
                             }
                             MessageAttachment.TYPE_LOCATION -> {
@@ -431,9 +432,12 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
         contact.observe(
             viewLifecycleOwner,
-            Observer {
+            Observer { contact ->
+                val identityName = getPeerChatStore().getContactState(publicKey)?.identityInfo?.let {
+                    "${it.initials} ${it.surname}"
+                }
                 parentActivity.setActionBarTitle(
-                    it?.name ?: resources.getString(R.string.text_unknown_contact),
+                    contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)),
                     resources.getString(
                         if (isConnected) {
                             R.string.text_contact_connected
@@ -935,8 +939,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         ) { dialog ->
                             try {
                                 getContactStore().deleteContact(contact)
-                                getPeerChatStore().removeContactState(contact.publicKey)
-                                getPeerChatStore().removeContactImage(contact.publicKey)
 
                                 parentActivity.displayToast(
                                     requireContext(),
@@ -1221,9 +1223,9 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
             ContactChatItem(
                 chatMessage,
-                getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash),
-                blocks,
-                (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!), // (index == 0) && (totalMessageCount > searchFilterLimit.value?.third!!)
+                if (chatMessage.transactionHash != null) getTransactionRepository().getTransactionWithHash(chatMessage.transactionHash) else null,
+                if (chatMessage.transactionHash != null) blocks else listOf(),
+                (index == 0) && (totalMessageCount >= limitedMessageCount.value?.toInt()!!),
                 (index == 0) || (index > 0 && !dateFormat.format(messages[index-1].timestamp).equals(dateFormat.format(chatMessage.timestamp))),
                 false,
                 progress

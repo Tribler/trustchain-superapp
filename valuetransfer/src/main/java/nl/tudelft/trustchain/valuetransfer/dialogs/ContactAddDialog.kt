@@ -144,7 +144,9 @@ class ContactAddDialog(
                     val map = mapOf(
                         QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
                         QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                     )
 
                     myPublicKeyImageView.setImageBitmap(

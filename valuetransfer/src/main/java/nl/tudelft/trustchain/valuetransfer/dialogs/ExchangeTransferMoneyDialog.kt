@@ -360,11 +360,14 @@ class ExchangeTransferMoneyDialog(
             requestQRSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
                     view.closeKeyboard(requireContext())
+
                     val map = mapOf(
                         QRScanController.KEY_PUBLIC_KEY to getTrustChainCommunity().myPeer.publicKey.keyToBin()
                             .toHex(),
                         QRScanController.KEY_AMOUNT to transactionAmount.toString(),
-                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames,
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                         QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
                         QRScanController.KEY_MESSAGE to transactionMessage
                     )

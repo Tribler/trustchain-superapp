@@ -96,9 +96,4 @@ abstract class VTDialogFragment : DialogFragment() {
     companion object {
         const val RECEIVE_TYPE_NFC = "type_nfc"
     }
-
-//    interface DialogFragmentListener {
-//        fun onReceive(type: String, data: Any? = null)
-//        fun onError(type: String, data: Any? = null)
-//    }
 }
