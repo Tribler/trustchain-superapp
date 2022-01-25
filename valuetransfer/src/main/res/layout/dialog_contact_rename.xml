@@ -6,26 +6,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Contact Name"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
+        style="@style/DialogTitle"
+        android:layout_marginTop="8dp"
+        android:text="@string/dialog_title_contact_nickname"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <EditText
         android:id="@+id/etContactName"
@@ -33,21 +29,24 @@
         android:layout_height="40dp"
         android:layout_weight="1"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:inputType="textCapWords"
         android:paddingVertical="8dp"
         android:paddingStart="8dp"
         android:layout_marginTop="12dp"
         android:textSize="14sp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/gray"
+        android:hint="@string/text_provide_name_for_contact"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
     <Button
         android:id="@+id/btnSaveContactName"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:enabled="false"
-        android:text="Save"
+        android:text="@string/btn_save"
         android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/colorPrimaryValueTransfer">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clSearchFilter"
@@ -14,9 +13,8 @@
         android:paddingVertical="8dp"
         android:visibility="gone"
         tools:visibility="visible"
-        android:background="@drawable/dialog_rounded_inverse"
-        android:backgroundTint="@color/colorYellow"
-        android:elevation="5dp"
+        android:background="@drawable/dialog_rounded_bottom"
+        android:backgroundTint="?attr/colorAccent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -29,17 +27,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <Spinner
-                android:id="@+id/spinnerFilter"
+            <ImageView
+                android:id="@+id/ivFilterByType"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/pill_rounded"
                 android:backgroundTint="@color/white"
                 android:padding="6dp"
+                app:tint="@color/gray"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:src="@drawable/ic_everything"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -60,16 +60,17 @@
                 android:layout_height="40dp"
                 android:background="@drawable/pill_rounded"
                 android:backgroundTint="@color/white"
-                android:hint="Search in chat..."
+                android:hint="@string/text_search_chat"
                 android:inputType="text"
                 android:paddingStart="12dp"
                 android:paddingEnd="8dp"
                 android:singleLine="true"
                 android:textColor="@color/black"
+                android:textColorHint="@color/gray"
                 android:textSize="12sp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
@@ -78,92 +79,252 @@
                 android:layout_height="15dp"
                 android:layout_marginEnd="12dp"
                 android:src="@drawable/ic_baseline_close_24"
+                android:visibility="gone"
+                tools:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/etSearchMessage"
                 app:layout_constraintEnd_toEndOf="@+id/etSearchMessage"
                 app:layout_constraintTop_toTopOf="@+id/etSearchMessage"
-                app:tint="@color/gray"
-                tools:tint="@color/gray"/>
+                app:tint="@color/gray"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clNewChatRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="?attr/widgetColor"
+        app:layout_constraintTop_toBottomOf="@+id/clSearchFilter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginVertical="4dp"
+            android:text="@string/text_chatting_unknown_person"
+            android:textColor="?attr/onBackgroundColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnNewChatAdd"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnNewChatAdd"
+            style="@style/ButtonGreenRounded"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginVertical="4dp"
+            android:layout_marginEnd="8dp"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:text="@string/btn_add"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnNewChatBlock"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnNewChatBlock"
+            style="@style/ButtonRedRounded"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginVertical="4dp"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:text="@string/btn_block"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvMessages"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/clMessageInputRow"
-        app:layout_constraintTop_toBottomOf="@+id/clSearchFilter"
+        app:layout_constraintBottom_toTopOf="@+id/clBottomBar"
+        app:layout_constraintTop_toBottomOf="@+id/clNewChatRequest"
         tools:itemCount="1"
         tools:listitem="@layout/item_contacts_chat_detail" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clMessageInputRow"
+        android:id="@+id/clScrollToBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="2dp"
+        android:background="@drawable/pill_rounded_left"
+        app:layout_constraintBottom_toBottomOf="@+id/rvMessages"
+        app:layout_constraintEnd_toEndOf="@+id/rvMessages"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/ivScrollToBottom"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:padding="8dp"
+            android:src="@drawable/ic_circle_arrow_down"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:tint="@color/white" />
+
+        <TextView
+            android:id="@+id/tvScrollToBottomNewMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="4dp"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@+id/ivScrollToBottom"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/text_new" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clBottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimaryValueTransfer"
+        android:background="?attr/colorPrimary"
         android:elevation="20dp"
-        android:paddingHorizontal="8dp"
-        android:paddingVertical="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <ImageButton
-            android:id="@+id/ivAttachment"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_gravity="center"
-            android:background="@drawable/circle"
-            android:backgroundTint="@color/colorYellow"
-            android:padding="6dp"
-            android:src="@drawable/ic_baseline_attach_file_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:tint="@color/white" />
-
-        <EditText
-            android:id="@+id/etMessage"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBlockedContact"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/white"
-            android:hint="Type your message"
-            android:inputType="textMultiLine"
-            android:maxLines="4"
-            android:minHeight="35dp"
-            android:paddingVertical="8dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toBottomOf="@+id/ivAttachment"
-            app:layout_constraintEnd_toStartOf="@+id/btnSendMessage"
-            app:layout_constraintStart_toEndOf="@+id/ivAttachment" />
-
-        <Button
-            android:id="@+id/btnSendMessage"
-            style="@style/ButtonDarkGreenRounded"
-            android:alpha="0.5"
-            android:clickable="false"
-            android:enabled="false"
-            android:text="Send"
-            app:layout_constraintBottom_toBottomOf="@+id/etMessage"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:backgroundTint="@color/colorPrimaryDark" />
-
-        <ProgressBar
-            android:id="@+id/pbSendMessage"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            app:layout_constraintDimensionRatio="H,1:1"
-            android:layout_gravity="center"
-            android:indeterminateTint="@color/light_gray"
-            android:indeterminateTintMode="src_atop"
+            android:layout_margin="8dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
             android:visibility="gone"
             tools:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/etMessage"
-            app:layout_constraintTop_toTopOf="@+id/etMessage"
-            app:layout_constraintEnd_toEndOf="@+id/btnSendMessage"
-            app:layout_constraintStart_toStartOf="@+id/btnSendMessage" />
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/widgetColor"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
+                android:layout_marginVertical="4dp"
+                android:text="@string/text_chat_blocked"
+                android:textColor="?attr/onWidgetColor"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnUnblockContact"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <Button
+                android:id="@+id/btnUnblockContact"
+                style="@style/ButtonRedRounded"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_marginVertical="4dp"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="@string/btn_contact_unblock"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clMessageInputRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:elevation="20dp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageButton
+                android:id="@+id/ivAttachment"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center"
+                android:background="@drawable/circle"
+                android:backgroundTint="?attr/colorAccent"
+                android:padding="6dp"
+                android:src="@drawable/ic_attachment"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:tint="@color/white" />
+
+            <EditText
+                android:id="@+id/etMessage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="@color/light_gray"
+                android:hint="@string/text_message"
+                android:inputType="textCapSentences|textMultiLine"
+                android:maxLines="4"
+                android:minHeight="35dp"
+                android:paddingVertical="8dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                app:layout_constraintBottom_toBottomOf="@+id/ivAttachment"
+                app:layout_constraintEnd_toStartOf="@+id/btnSendMessage"
+                app:layout_constraintStart_toEndOf="@+id/ivAttachment" />
+
+            <ImageButton
+                android:id="@+id/btnSendMessage"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:padding="8dp"
+                android:alpha="0.5"
+                android:clickable="false"
+                android:enabled="false"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/colorPrimaryValueTransfer"
+                android:src="@drawable/ic_send"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="@+id/etMessage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:tint="@color/white" />
+
+            <ProgressBar
+                android:id="@+id/pbSendMessage"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:padding="4dp"
+                android:background="@drawable/circle"
+                android:backgroundTint="@color/colorPrimaryValueTransfer"
+                app:layout_constraintDimensionRatio="H,1:1"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/light_gray"
+                android:indeterminateTintMode="src_atop"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@+id/etMessage"
+                app:layout_constraintTop_toTopOf="@+id/etMessage"
+                app:layout_constraintEnd_toEndOf="@+id/btnSendMessage"
+                app:layout_constraintStart_toStartOf="@+id/btnSendMessage" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

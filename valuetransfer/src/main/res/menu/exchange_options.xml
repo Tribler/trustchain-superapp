@@ -1,7 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/actionVerifyBalance"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Verify Balance" />
+        android:id="@+id/actionDeposit"
+        android:icon="@drawable/ic_qr_code_scan"
+        android:title="@string/menu_exchange_deposit" />
+    <item
+        android:id="@+id/actionWithdraw"
+        android:icon="@drawable/ic_qr_code_scan"
+        android:title="@string/menu_exchange_withdraw" />
+    <item
+        android:id="@+id/actionTransferByQR"
+        android:icon="@drawable/ic_qr_code_scan"
+        android:title="@string/menu_exchange_transfer_qrcode" />
+    <item
+        android:id="@+id/actionTransferToContact"
+        android:icon="@drawable/ic_exchange"
+        android:title="@string/menu_exchange_transfer_contact" />
+    <item
+        android:id="@+id/actionRequestTransferContact"
+        android:icon="@drawable/ic_request"
+        android:title="@string/menu_exchange_transfer_request" />
 </menu>

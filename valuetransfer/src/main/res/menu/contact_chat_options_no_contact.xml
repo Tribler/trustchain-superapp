@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionViewContact"
+        android:icon="@drawable/ic_contact"
+        android:title="@string/menu_contact_chat_view_contact" />
+    <item
+        android:id="@+id/actionViewMedia"
+        android:icon="@drawable/ic_media_all"
+        android:title="@string/menu_contact_chat_view_media" />
+    <item
+        android:id="@+id/actionMuteContact"
+        android:icon="@drawable/ic_contact_mute"
+        android:title="@string/menu_contact_chat_options_contact_mute" />
+    <item
+        android:id="@+id/actionSearchFilterChat"
+        android:icon="@drawable/ic_search_filter"
+        android:title="@string/text_search_filter_chat" />
+    <item
+        android:id="@+id/actionAddContactFromChat"
+        android:icon="@drawable/ic_contact_add"
+        android:title="@string/menu_contact_chat_options_contact_add" />
+    <item
+        android:id="@+id/actionCopyPublicKey"
+        android:icon="@drawable/ic_copy_public_key"
+        android:title="@string/menu_contact_chat_options_copy_public_key" />
+    <item
+        android:id="@+id/actionArchiveContact"
+        android:icon="@drawable/ic_contact_archive"
+        android:title="@string/menu_contact_chat_options_contact_archive" />
+    <item
+        android:id="@+id/actionBlockContact"
+        android:icon="@drawable/ic_contact_block"
+        android:title="@string/menu_contact_chat_options_contact_block" />
+    <item
+        android:id="@+id/actionRemoveLocalConversation"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/menu_contact_chat_options_contact_remove_conversation" />
+</menu>

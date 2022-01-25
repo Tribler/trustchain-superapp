@@ -28,18 +28,21 @@ data class Contact(
 
     fun serialize(): ByteArray {
         val json = JSONObject()
-        json.put("name", name)
-        json.put("public_key", publicKey.keyToBin().toHex())
+        json.put(NAME, name)
+        json.put(PUBLIC_KEY, publicKey.keyToBin().toHex())
 
         return json.toString().toByteArray()
     }
 
     companion object : Deserializable<Contact> {
+        const val PUBLIC_KEY = "public_key"
+        const val NAME = "name"
+
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<Contact, Int> {
             val offsetBuffer = buffer.copyOfRange(0, buffer.size)
             val json = JSONObject(offsetBuffer.decodeToString())
-            val name = json.getString("name")
-            val publicKeyString = json.getString("public_key")
+            val name = json.getString(NAME)
+            val publicKeyString = json.getString(PUBLIC_KEY)
             val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyString.hexToBytes())
 
             return Pair(Contact(name, publicKey), 0)

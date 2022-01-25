@@ -1,28 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-<!--    <item-->
-<!--        android:id="@+id/actionAddIdentity"-->
-<!--        android:icon="@drawable/ic_device_hub_black_24dp"-->
-<!--        android:title="Add Identity" />-->
-    <item
-        android:id="@+id/actionEditIdentity"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Edit Identity" />
-    <item
-        android:id="@+id/actionRemoveIdentity"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="Remove Identity" />
     <item
         android:id="@+id/actionViewAuthorities"
-        android:icon="@drawable/ic_device_hub_black_24dp"
-        android:title="View Trusted Authorities" />
-<!--    <item-->
-<!--        android:id="@+id/actionAddAttestation"-->
-<!--        android:icon="@drawable/ic_device_hub_black_24dp"-->
-<!--        android:title="Add Attestation" />-->
-<!--    <item-->
-<!--        android:id="@+id/actionAddAttribute"-->
-<!--        android:icon="@drawable/ic_device_hub_black_24dp"-->
-<!--        android:title="Add Attribute" />-->
+        android:icon="@drawable/ic_authority"
+        android:title="@string/menu_identity_authorities_view" />
 
 </menu>

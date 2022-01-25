@@ -9,29 +9,46 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import org.json.JSONObject
+import java.math.RoundingMode
+import java.security.MessageDigest
 import java.util.*
 import kotlin.math.abs
 
-fun closeKeyboard(context: Context, view: View) {
+fun View.closeKeyboard(context: Context) {
     val inputMethodManager = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-    view.clearFocus()
+    inputMethodManager.hideSoftInputFromWindow(this.windowToken, 0)
+    clearFocus()
+}
+
+fun EditText.showKeyboard(context: Context) {
+    requestFocus()
+    val inputMethodManager = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
 }
 
 fun onFocusChange(editText: EditText, context: Context) {
     editText.onFocusChangeListener = View.OnFocusChangeListener { v, hasFocus ->
         if (!hasFocus) {
-            closeKeyboard(context, v)
+            v.closeKeyboard(context)
         }
     }
 }
@@ -45,8 +62,7 @@ fun scrollToBottom(recyclerView: RecyclerView) {
     recyclerView.post {
         val target = layoutManager.findViewByPosition(lastItemPosition)
         if (target != null) {
-            val offset = recyclerView.measuredHeight - target.measuredHeight
-            layoutManager.scrollToPositionWithOffset(lastItemPosition, offset)
+            layoutManager.scrollToPosition(lastItemPosition)
         }
     }
 }
@@ -70,6 +86,12 @@ fun createBitmap(context: Context, data: String, pColor: Int, bColor: Int): Bitm
 }
 
 fun toggleButton(button: Button, state: Boolean) {
+    button.isEnabled = state
+    button.alpha = if (state) 1f else 0.5f
+    button.isClickable = state
+}
+
+fun toggleButton(button: ImageButton, state: Boolean) {
     button.isEnabled = state
     button.alpha = if (state) 1f else 0.5f
     button.isClickable = state
@@ -168,4 +190,80 @@ fun betweenDates(first: Date, second: Date, days: Boolean? = false): Long {
     }
 
     return (dayCount / 365)
+}
+
+fun getColorIDFromThemeAttribute(parentActivity: ValueTransferMainActivity, color: Int): Int {
+    val typedValue = TypedValue()
+    parentActivity.theme.resolveAttribute(color, typedValue, true)
+    return typedValue.resourceId
+}
+
+fun DialogFragment.setNavigationBarColor(
+    context: Context,
+    parentActivity: ValueTransferMainActivity,
+    dialog: BottomSheetDialog
+) {
+    dialog.window!!.navigationBarColor = ContextCompat.getColor(context, getColorIDFromThemeAttribute(parentActivity, R.attr.colorPrimary))
+}
+
+fun Int.dpToPixels(context: Context): Int = TypedValue.applyDimension(
+    TypedValue.COMPLEX_UNIT_DIP,
+    this.toFloat(),
+    context.resources.displayMetrics
+).toInt()
+
+fun <R> CoroutineScope.executeAsyncTask(
+    onPreExecute: () -> Unit,
+    doInBackground: () -> R,
+    onPostExecute: (R) -> Unit
+) = launch {
+    onPreExecute()
+    val result = withContext(Dispatchers.IO) {
+        doInBackground()
+    }
+    onPostExecute(result)
+}
+
+fun hashString(input: String, algorithm: String): String {
+    return MessageDigest
+        .getInstance(algorithm)
+        .digest(input.toByteArray())
+        .fold("", { str, it -> str + "%02x".format(it) })
+}
+
+fun String.md5(): String {
+    return hashString(this, "MD5")
+}
+
+fun hashBytes(input: ByteArray, algorithm: String): String {
+    return MessageDigest
+        .getInstance(algorithm)
+        .digest(input)
+        .fold("", { str, it -> str + "%02x".format(it) })
+}
+
+fun ByteArray.md5(): String {
+    return hashBytes(this, "MD5")
+}
+
+fun String.getInitials(): String {
+    val initials = StringBuilder()
+    this.split(" ").forEach {
+        if (it.isNotEmpty()) initials.append("${it[0].toUpperCase()}.")
+    }
+    return initials.toString()
+}
+
+fun getFormattedSize(size: Double): String {
+    return when {
+        size >= 1E6 -> StringBuilder()
+            .append(size.div(1E6).toBigDecimal().setScale(2, RoundingMode.UP).toDouble())
+            .append("MB")
+        size >= 1E3 -> StringBuilder()
+            .append(size.div(1E3).toBigDecimal().setScale(0, RoundingMode.UP))
+            .append("KB")
+        else -> StringBuilder()
+            .append(size.div(1E0).toBigDecimal().setScale(0, RoundingMode.UP))
+            .append("B")
+    }.toString()
 }

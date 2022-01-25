@@ -5,14 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingBottom="4dp"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:paddingBottom="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark_green"
+        android:background="@drawable/square_rounded"
         android:paddingHorizontal="12dp"
         android:paddingVertical="12dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -31,7 +30,7 @@
                 android:id="@+id/tvAttestationNameValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+                android:textColor="?attr/onWidgetColor"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +45,7 @@
                 android:gravity="end"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/light_gray"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="12sp"
                 android:textStyle="italic"
                 app:layout_constraintEnd_toEndOf="@+id/tvAttestationHash"
@@ -62,7 +61,7 @@
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/white"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="14sp"
                 android:typeface="monospace"
                 app:layout_constraintEnd_toStartOf="@+id/clAttestationButton"
@@ -77,7 +76,7 @@
                 android:layout_marginEnd="8dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/white"
+                android:textColor="?attr/onWidgetSecondaryColor"
                 android:textSize="14sp"
                 android:typeface="monospace"
                 app:layout_constraintEnd_toStartOf="@+id/clAttestationButton"
@@ -90,7 +89,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="@drawable/pill_rounded"
-                android:backgroundTint="@color/colorPrimaryValueTransfer"
+                android:backgroundTint="?attr/backgroundColor"
                 app:layout_constraintDimensionRatio="1:1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -108,26 +107,23 @@
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/white"
-                    tools:tint="@color/white"/>
+                    app:tint="?attr/onWidgetColor" />
 
                 <ImageView
                     android:id="@+id/ivAttestationDelete"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:padding="12dp"
-                    android:src="@drawable/ic_baseline_delete_24"
+                    android:src="@drawable/ic_delete"
                     android:visibility="gone"
                     tools:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/white"
-                    tools:tint="@color/white"/>
+                    app:tint="?attr/onWidgetColor" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

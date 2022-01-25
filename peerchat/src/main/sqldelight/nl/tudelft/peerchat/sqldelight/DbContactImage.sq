@@ -1,0 +1,22 @@
+createContactImageTable:
+CREATE TABLE IF NOT EXISTS contact_image (
+    public_key BLOB NOT NULL,
+    image_hash TEXT NOT NULL,
+    image BLOB NOT NULL,
+    PRIMARY KEY (public_key)
+);
+
+getAll:
+SELECT * FROM contact_image;
+
+getContactImage:
+SELECT * FROM contact_image WHERE public_key = ? LIMIT 1;
+
+addContactImage:
+INSERT INTO contact_image (public_key, image_hash, image) VALUES (?, ?, ?);
+
+setContactImage:
+UPDATE contact_image SET image_hash = ?, image = ? WHERE public_key = ?;
+
+deleteContactImage:
+DELETE FROM contact_image WHERE public_key = ?;

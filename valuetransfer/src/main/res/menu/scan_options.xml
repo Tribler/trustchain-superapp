@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionAddContactOption"
+        android:icon="@drawable/ic_contact"
+        android:title="@string/menu_contacts_add" />
+    <item
+        android:id="@+id/actionAddAuthorityOption"
+        android:icon="@drawable/ic_authority"
+        android:title="@string/menu_identity_attestations_authority_add" />
+    <item
+        android:id="@+id/actionAddAttestationOption"
+        android:icon="@drawable/ic_attestation"
+        android:title="@string/menu_identity_attestations_add" />
+
+</menu>

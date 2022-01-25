@@ -205,7 +205,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     override fun onResume() {
         super.onResume()
-        parentActivity.setActionBarTitle("Data Vault")
+        //parentActivity.setActionBarTitle("Data Vault")
     }
 
     private fun initVault() {

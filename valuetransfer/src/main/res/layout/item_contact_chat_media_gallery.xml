@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clImageContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="1dp">
+
+    <ImageView
+        android:id="@+id/ivImageItem"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="centerCrop"
+        android:background="?attr/widgetColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="w,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_media" />
+
+    <TextView
+        android:id="@+id/tvFileName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="4dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="3"
+        android:textSize="14sp"
+        android:textColor="@color/dark_gray"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivImageItem"
+        tools:text="why-johnny-cant-encrypt.pdf"
+        tools:visibility="visible" />
+
+    <FrameLayout
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:padding="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/ivMediaTypeImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:tint="?attr/colorAccent"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/ic_media" />
+
+        <ImageView
+            android:id="@+id/ivMediaTypeFile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:tint="?attr/colorAccent"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:src="@drawable/ic_file" />
+
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

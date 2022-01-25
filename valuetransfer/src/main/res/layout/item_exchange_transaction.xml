@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
     android:paddingBottom="4dp">
 
@@ -12,8 +11,8 @@
         android:id="@+id/clTransactionCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded_dark_green"
-        android:paddingTop="8dp"
+        android:background="@drawable/square_rounded"
+        android:paddingVertical="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -23,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="12dp"
-            app:layout_constraintBottom_toTopOf="@+id/clTransactionSignButton"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -43,8 +42,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/colorPrimaryValueTransfer"
-                    tools:tint="@color/colorPrimaryValueTransfer" />
+                    app:tint="@color/colorPrimaryValueTransfer" />
 
                 <ImageView
                     android:id="@+id/ivDirectionIconDown"
@@ -54,17 +52,15 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/red"
-                    tools:tint="@color/red" />
+                    app:tint="@color/red" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clTransactionContentHeader"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/clTransactionContent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/clDirectionIcon"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -75,7 +71,7 @@
                     android:layout_marginEnd="8dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onWidgetColor"
                     android:textSize="14sp"
                     android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@+id/clTransactionAmount"
@@ -98,16 +94,16 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toStartOf="@+id/tvTransactionAmount"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/white"
-                        tools:tint="@color/white" />
+                        app:tint="?attr/onWidgetColor" />
 
                     <TextView
                         android:id="@+id/tvTransactionAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/white"
+                        android:textColor="?attr/onWidgetColor"
                         android:textSize="14sp"
                         android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="1150,00" />
@@ -117,7 +113,7 @@
                     android:id="@+id/tvTransactionDate"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/light_gray"
+                    android:textColor="?attr/onWidgetSecondaryColor"
                     android:textSize="12sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tvTransactionType"
@@ -149,8 +145,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/red"
-                        tools:tint="@color/red" />
+                        app:tint="@color/red" />
 
                     <ImageView
                         android:id="@+id/ivTransactionBlockStatusColorSelfSigned"
@@ -161,8 +156,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:tint="@color/colorPrimaryValueTransfer"
-                        tools:tint="@color/colorPrimaryValueTransfer" />
+                        app:tint="@color/colorPrimaryValueTransfer" />
 
                     <ImageView
                         android:id="@+id/ivTransactionBlockStatusColorSigned"
@@ -174,7 +168,6 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:tint="@color/green"
-                        tools:tint="@color/green"
                         tools:visibility="visible" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
@@ -185,173 +178,13 @@
                     android:layout_height="wrap_content"
                     tools:text="Signed"
                     android:gravity="end|center_vertical"
-                    android:textColor="@color/light_gray"
+                    android:textColor="?attr/onWidgetSecondaryColor"
                     android:textSize="12sp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <!--        <TextView-->
-                <!--            android:id="@+id/tvSignButton"-->
-                <!--            android:layout_width="wrap_content"-->
-                <!--            android:layout_height="wrap_content"-->
-                <!--            android:layout_marginTop="4dp"-->
-                <!--            android:paddingHorizontal="8dp"-->
-                <!--            android:paddingVertical="4dp"-->
-                <!--            android:text="Sign Block"-->
-                <!--            android:textColor="@color/white"-->
-                <!--            android:gravity="center"-->
-                <!--            android:visibility="visible"-->
-                <!--            tools:visibility="visible"-->
-                <!--            android:background="@drawable/pill_rounded"-->
-                <!--            android:backgroundTint="@color/colorPrimaryValueTransfer"-->
-                <!--            app:layout_constraintEnd_toEndOf="parent"-->
-                <!--            app:layout_constraintStart_toStartOf="@+id/tvTransactionDate"-->
-                <!--            app:layout_constraintTop_toBottomOf="@+id/tvTransactionDate" />-->
-
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clTransactionContent"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
-                android:layout_marginBottom="8dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/clTransactionContentHeader"
-                app:layout_constraintTop_toBottomOf="@+id/clTransactionContentHeader"
-                tools:visibility="visible">
-
-                <TextView
-                    android:id="@+id/tvTransactionContentTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Transaction Content"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="italic|bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvTransactionContentText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/light_gray"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionContentTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionContentTitle"
-                    tools:text="{amount=17500, payment_id=...}" />
-
-                <TextView
-                    android:id="@+id/tvTransactionSenderReceiverTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Receiver"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="italic|bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionContentText"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionContentText" />
-
-                <TextView
-                    android:id="@+id/tvTransactionSenderReceiverText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/light_gray"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionSenderReceiverTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionSenderReceiverTitle"
-                    tools:text="4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a4c969624e61434c504b3a" />
-
-                <TextView
-                    android:id="@+id/tvTransactionTypeTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Type"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="italic|bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionSenderReceiverText"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionSenderReceiverText" />
-
-                <TextView
-                    android:id="@+id/tvTransactionTypeText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/light_gray"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionTypeTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionTypeTitle"
-                    tools:text="eurotoken_creation" />
-
-                <TextView
-                    android:id="@+id/tvTransactionBlockHashTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="Block Hash"
-                    android:textColor="@color/white"
-                    android:textSize="10sp"
-                    android:textStyle="italic|bold"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionTypeText"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionTypeText" />
-
-                <TextView
-                    android:id="@+id/tvTransactionBlockHashText"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/light_gray"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="@+id/tvTransactionBlockHashTitle"
-                    app:layout_constraintTop_toBottomOf="@+id/tvTransactionBlockHashTitle"
-                    tools:text="dbe9ed53dfc4cac92704c9af8068e118352108d9190d859014f9f019cd045fba" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/clTransactionSignButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/pill_rounded_bottom_red"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/clTransactionCompleteContent"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/tvTransactionSignButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingHorizontal="4dp"
-                android:text="Sign Transaction"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:backgroundTint="@color/colorYellow" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

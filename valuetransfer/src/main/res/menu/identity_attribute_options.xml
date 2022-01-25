@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/actionEditIdentityAttribute"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/menu_identity_attribute_edit" />
+    <item
+        android:id="@+id/actionDeleteIdentityAttribute"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/menu_identity_attribute_delete" />
+    <item
+        android:id="@+id/actionShareIdentityAttribute"
+        android:icon="@drawable/ic_share"
+        android:title="@string/menu_identity_attribute_share" />
+</menu>

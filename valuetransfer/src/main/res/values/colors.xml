@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#009688</color>
-    <color name="colorPrimaryDark">@color/colorPrimaryDarkValueTransfer</color>
-    <color name="colorAccent">#D81B60</color>
-
     <color name="colorGreen">@color/colorPrimaryValueTransfer</color>
     <color name="colorYellow">#FFC145</color>
     <color name="colorOrange">#FFA500</color>
     <color name="colorRed">#ea4c46</color>
-
-    <color name="text_primary">#000000</color>
-    <color name="text_secondary">#666666</color>
-    <color name="text_tertiary">#AAAAAA</color>
+    <color name="colorBlack">#000000</color>
+    <color name="colorGray">#1c1b1d</color>
+    <color name="colorLightGray">#666666</color>
+    <color name="colorGrayMute">#999999</color>
+    <color name="colorBlue">#3685f4</color>
 </resources>

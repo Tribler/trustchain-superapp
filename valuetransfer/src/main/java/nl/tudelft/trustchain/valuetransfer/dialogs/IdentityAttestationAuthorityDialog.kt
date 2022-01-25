@@ -1,26 +1,19 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
-import android.view.View
 import android.widget.*
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import java.lang.IllegalStateException
 
 class IdentityAttestationAuthorityDialog(
     private val authorityKey: PublicKey,
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var attestationCommunity: AttestationCommunity
-
-    private lateinit var dialogView: View
+) : VTDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -28,12 +21,12 @@ class IdentityAttestationAuthorityDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_authority, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
-            dialogView = view
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val authorityAddressValue = view.findViewById<EditText>(R.id.etAuthorityAddressValue)
             val addAuthorityButton = view.findViewById<Button>(R.id.btnAddAuthority)
@@ -44,14 +37,21 @@ class IdentityAttestationAuthorityDialog(
             bottomSheetDialog.show()
 
             addAuthorityButton.setOnClickListener {
-                val authorityManager = attestationCommunity.trustedAuthorityManager
-                when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
-                    true -> {
-                        authorityManager.addTrustedAuthority(authorityKey)
-                        parentActivity.displaySnackbar(requireContext(), "Authority has been added")
-                    }
-                    else -> {
-                        parentActivity.displaySnackbar(requireContext(), "Authority already been added before", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                getAttestationCommunity().trustedAuthorityManager.let { authorityManager ->
+                    when (!authorityManager.contains(authorityKey.keyToHash().toHex())) {
+                        true -> {
+                            authorityManager.addTrustedAuthority(authorityKey)
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_authority_add_success)
+                            )
+                        }
+                        else -> {
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_authority_add_error)
+                            )
+                        }
                     }
                 }
 
@@ -59,6 +59,6 @@ class IdentityAttestationAuthorityDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }
