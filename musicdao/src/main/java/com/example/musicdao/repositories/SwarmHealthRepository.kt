@@ -2,7 +2,6 @@ package com.example.musicdao.repositories
 
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.ipv8.SwarmHealth
-import com.example.musicdao.net.ContentSeeder
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.android.IPv8Android
@@ -10,14 +9,14 @@ import nl.tudelft.ipv8.android.IPv8Android
 
 class SwarmHealthRepository(
     private val sessionManager: SessionManager,
-    val contentSeeder: ContentSeeder,
+    val torrentRepository: TorrentRepository,
     val musicCommunity: MusicCommunity
 ) {
 
     var mergedSwarmHealth: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf()
 
     val localSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
-        get() = contentSeeder.swarmHealthMap
+        get() = torrentRepository.swarmHealthMap
 
     val remoteSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
         get() = musicCommunity.swarmHealthMap
@@ -52,7 +51,7 @@ class SwarmHealthRepository(
      */
     private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
         val sessionManager = sessionManager
-        val contentSeeder = contentSeeder
+        val contentSeeder = torrentRepository
         val localMap = contentSeeder.swarmHealthMap
         for (infoHash in localMap.keys) {
             // Update all connectivity stats of the torrents that we are currently seeding

@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.example.musicdao.domain.usecases.CreateReleaseUseCase
 import com.example.musicdao.ipv8.MusicCommunity
-import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.repositories.SwarmHealthRepository
 import com.example.musicdao.repositories.TorrentRepository
@@ -17,7 +16,6 @@ import com.frostwire.jlibtorrent.SettingsPack
 object AppContainer {
     lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
-    lateinit var contentSeeder: ContentSeeder
 
     lateinit var currentCallback: (List<Uri>) -> Unit
 
@@ -38,23 +36,25 @@ object AppContainer {
         sessionManager = SessionManager().apply {
             start(createSessionParams(applicationContext))
         }
-        contentSeeder =
-            ContentSeeder(applicationContext.cacheDir, sessionManager).apply {
-                start()
-            }
-        swarmHealthRepository = SwarmHealthRepository(
-            sessionManager, contentSeeder, musicCommunity
-        )
+//        contentSeeder =
+//            ContentSeeder(applicationContext.cacheDir, sessionManager).apply {
+//                start()
+//            }
+
         releaseRepository = ReleaseRepository(musicCommunity)
 //        torrentRepository = TorrentRepository(sessionManager, applicationContext.cacheDir)
         releaseTorrentRepository = TorrentRepository(
             sessionManager,
             applicationContext.cacheDir,
+        ).apply {
+            startSeeding()
+        }
+        swarmHealthRepository = SwarmHealthRepository(
+            sessionManager, releaseTorrentRepository, musicCommunity
         )
         createReleaseUseCase = CreateReleaseUseCase(
             releaseTorrentRepository,
             releaseRepository,
-            contentSeeder
         )
     }
 
