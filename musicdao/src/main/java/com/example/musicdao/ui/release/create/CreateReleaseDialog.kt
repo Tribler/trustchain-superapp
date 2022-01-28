@@ -20,9 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.net.toFile
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
-import com.frostwire.jlibtorrent.TorrentInfo
+import com.example.musicdao.ui.release.create.CreateReleaseDialogViewModel
 
 
 @ExperimentalComposeUiApi
@@ -44,31 +44,20 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         startActivityForResult(AppContainer.activity, chooseFileActivity, 21, Bundle())
     }
 
+    val viewModel: CreateReleaseDialogViewModel =
+        viewModel(factory = CreateReleaseDialogViewModel.provideFactory())
+
+
     val localContext = LocalContext.current
     fun publishRelease() {
-        val file = AppContainer.releaseTorrentRepository.generateTorrent(
-            context = localContext,
-            uris = fileList.value
-        )
-        val torrentInfo = TorrentInfo(file)
-        val validateReleaseBlock = AppContainer.releaseRepository.validateReleaseBlock(
-            title.value,
+        viewModel.createRelease(
             artist.value,
-            "A",
-            magnet = torrentInfo.makeMagnetUri(),
-            torrentInfo
+            title.value,
+            releaseDate = "DEFAULT",
+            publisher = "DEFAULT",
+            uris = fileList.value,
+            localContext
         )
-        if (validateReleaseBlock == null) {
-        } else {
-            AppContainer.releaseRepository.publishRelease(
-                torrentInfo.makeMagnetUri(),
-                title.value,
-                artist.value,
-                "A",
-                validateReleaseBlock
-            )
-            AppContainer.contentSeeder.start()
-        }
     }
 
 

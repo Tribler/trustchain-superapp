@@ -3,6 +3,7 @@ package com.example.musicdao
 import android.content.Context
 import android.net.Uri
 import androidx.preference.PreferenceManager
+import com.example.musicdao.domain.usecases.CreateReleaseUseCase
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.net.ContentSeeder
 import com.example.musicdao.repositories.ReleaseRepository
@@ -14,6 +15,7 @@ import com.frostwire.jlibtorrent.SettingsPack
 
 
 object AppContainer {
+    lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
     lateinit var contentSeeder: ContentSeeder
 
@@ -48,6 +50,11 @@ object AppContainer {
         releaseTorrentRepository = TorrentRepository(
             sessionManager,
             applicationContext.cacheDir,
+        )
+        createReleaseUseCase = CreateReleaseUseCase(
+            releaseTorrentRepository,
+            releaseRepository,
+            contentSeeder
         )
     }
 
