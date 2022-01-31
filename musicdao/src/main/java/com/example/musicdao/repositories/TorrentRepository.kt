@@ -6,12 +6,14 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
 import com.example.musicdao.ipv8.SwarmHealth
+import com.example.musicdao.util.MyResult
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
 import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -25,7 +27,24 @@ class TorrentRepository(
     val dispatcher: CoroutineDispatcher = Dispatchers.IO
     private val maxTorrentThreads = 10
 
-    val seedingTorrents: MutableMap<String, String> = mutableMapOf()
+    val activeTorrents: MutableMap<String, MutableStateFlow<MyResult<TorrentHandle>>> =
+        mutableMapOf()
+
+    fun get(id: String): MutableStateFlow<MyResult<TorrentHandle>> {
+        val torrentHandle = activeTorrents[id]
+        Log.d("MusicDAO", "$torrentHandle")
+        return when (torrentHandle) {
+            null -> {
+                val value =
+                    MutableStateFlow<MyResult<TorrentHandle>>(MyResult.Failure(Throwable("Wtf")))
+                activeTorrents[id] = value
+                value
+            }
+            else -> torrentHandle
+
+        }
+    }
+
 
     var swarmHealthMap: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf<Sha1Hash, SwarmHealth>()
 
@@ -82,7 +101,6 @@ class TorrentRepository(
         validTorrentInfos.forEach { torrentInfo ->
             if (Util.isTorrentCompleted(torrentInfo, directory)) {
                 downloadAndSeed(torrentInfo)
-
             }
         }
 
@@ -125,6 +143,8 @@ class TorrentRepository(
             // state
             // Start by setting swarm connectivity to 1 as the current device is now 1 seeder
             updateSwarmHealth(torrentHandle)
+            Log.d("MusicDAO", "Seeding torrent: ${torrentHandle.name()}, ${torrentHandle}, magnet: ${torrentHandle.makeMagnetUri()}")
+            activeTorrents[torrentHandle.name()] = MutableStateFlow(MyResult.Success(torrentHandle))
         }
     }
 

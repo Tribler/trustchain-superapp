@@ -171,6 +171,7 @@ fun Search() {
 fun Debug() {
     val sessionManager = AppContainer.sessionManager
     var dhtRunning by rememberSaveable { mutableStateOf(false) }
+    var interfaces by rememberSaveable { mutableStateOf("") }
     var dhtNodes by rememberSaveable { mutableStateOf<Long>(0) }
     var uploadRate by rememberSaveable { mutableStateOf<Long>(0) }
     var downloadRate by rememberSaveable { mutableStateOf<Long>(0) }
@@ -179,6 +180,7 @@ fun Debug() {
     LaunchedEffect(Unit) {
         while (true) {
             dhtRunning = sessionManager.isDhtRunning
+            interfaces = sessionManager.listenInterfaces()
             dhtNodes = sessionManager.dhtNodes()
             uploadRate = sessionManager.uploadRate()
             downloadRate = sessionManager.downloadRate()
@@ -189,7 +191,8 @@ fun Debug() {
 
 
     Column(modifier = Modifier.padding(20.dp)) {
-        Text("DHT Running: ${dhtRunning}")
+        Text("Interfaces: ${dhtRunning}")
+        Text("DHT Running: ${interfaces}")
         Text("DHT Peers: ${dhtNodes}")
         Text("Upload-rate: ${uploadRate}")
         Text("Download-rate: ${downloadRate}")

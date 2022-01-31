@@ -1,10 +1,14 @@
 package com.example.musicdao.ui.release
 
+import android.util.Log
 import androidx.lifecycle.*
+import com.example.musicdao.AppContainer
 import com.example.musicdao.AppContainer.releaseRepository
+import com.example.musicdao.domain.usecases.GetTorrentUseCase
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.repositories.TorrentRepository
+import com.example.musicdao.util.MyResult
 import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentHandle
 import kotlinx.coroutines.*
@@ -154,11 +158,15 @@ class ReleaseScreenViewModel(
     val releaseId: String,
     releaseRepository: ReleaseRepository,
     private val torrentRepository: TorrentRepository,
+    private val getTorrentUseCase: GetTorrentUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ReleaseViewModelState(isLoading = true))
     val uiState = viewModelState.map { it.toUiState() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, viewModelState.value.toUiState())
+
+    val torrentState: MutableStateFlow<MyResult<TorrentHandle>> =
+        getTorrentUseCase.invoke(releaseId)
 
     private var attemptingToDownload: Boolean = false
 
@@ -268,13 +276,15 @@ class ReleaseScreenViewModel(
             releaseId: String,
             releaseRepository: ReleaseRepository,
             torrentRepository: TorrentRepository,
+            getTorrentUseCase: GetTorrentUseCase = AppContainer.getTorrentUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return ReleaseScreenViewModel(
                     releaseId,
                     releaseRepository,
-                    torrentRepository
+                    torrentRepository,
+                    getTorrentUseCase
                 ) as T
             }
         }

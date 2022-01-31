@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.example.musicdao.domain.usecases.CreateReleaseUseCase
+import com.example.musicdao.domain.usecases.GetTorrentUseCase
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.repositories.SwarmHealthRepository
@@ -14,6 +15,7 @@ import com.frostwire.jlibtorrent.SettingsPack
 
 
 object AppContainer {
+    lateinit var getTorrentUseCase: GetTorrentUseCase
     lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
 
@@ -56,6 +58,7 @@ object AppContainer {
             releaseTorrentRepository,
             releaseRepository,
         )
+        getTorrentUseCase = GetTorrentUseCase(releaseTorrentRepository)
     }
 
     private fun createSessionParams(applicationContext: Context): SessionParams {
@@ -63,7 +66,7 @@ object AppContainer {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                .getString("musicdao_port", "")
+                .getString("musicdao_port", "10148")
                 ?.toIntOrNull()
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"
