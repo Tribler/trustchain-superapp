@@ -198,7 +198,10 @@ class ReleaseScreenViewModel(
 
             var cover: File? = null
             if (files.size != 0) {
-                cover = Util.findCoverArt(files.get(0).parentFile)
+                val file = files.get(0).parentFile
+                if (file != null && file.exists()) {
+                    cover = Util.findCoverArt(file)
+                }
             }
             if (cover != null) {
                 viewModelState.value =

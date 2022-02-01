@@ -11,13 +11,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.musicdao.ui.release.BitmapCover
-import com.example.musicdao.ui.release.DefaultCover
+import com.example.musicdao.ui.Screen
+import com.example.musicdao.ui.components.ReleaseCover
 import java.io.File
 
 @ExperimentalMaterialApi
@@ -67,7 +66,13 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                 ListItem(
                     text = { Text(it.title) },
                     secondaryText = { Text(it.artist) },
-                    modifier = Modifier.clickable { navController.navigate("release/${it.torrentInfoName}") },
+                    modifier = Modifier.clickable {
+                        navController.navigate(
+                            Screen.Release.createRoute(
+                                it.torrentInfoName
+                            )
+                        )
+                    },
                     icon = {
                         IconButton(onClick = {}) {
                             ReleaseCover(
@@ -80,21 +85,6 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                 )
             }
         }
-    }
-}
-
-@Composable
-fun ReleaseCover(file: File?, modifier: Modifier = Modifier) {
-    if (file != null) {
-        BitmapCover(
-            file = file, modifier = modifier
-                .background(Color.DarkGray)
-        )
-    } else {
-        DefaultCover(
-            modifier = modifier
-                .background(Color.DarkGray)
-        )
     }
 }
 

@@ -1,11 +1,12 @@
 package com.example.musicdao.ui.release
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -18,18 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
-import com.example.musicdao.R
 import com.example.musicdao.repositories.ReleaseBlock
+import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.util.MyResult
-import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.TorrentHandle
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -84,16 +82,18 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                     (torrentState as MyResult.Success<TorrentHandle>).value.status().numPeers()
                 }," +
                     "\nNum Pieces: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.torrentFile().numPieces()
+                        (torrentState as MyResult.Success<TorrentHandle>).value.torrentFile()
+                            .numPieces()
                     }" +
                     "\nPiecesL ${
                         (torrentState as MyResult.Success<TorrentHandle>).value.status().pieces()
                     }" +
                     "\nFinished: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().isFinished()
+                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
+                            .isFinished
                     }" +
                     "\nSeeding: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().isSeeding()
+                        (torrentState as MyResult.Success<TorrentHandle>).value.status().isSeeding
                     }" +
                     "\nSeeders${
                         (torrentState as MyResult.Success<TorrentHandle>).value.status().numSeeds()
@@ -102,10 +102,12 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                         (torrentState as MyResult.Success<TorrentHandle>).value.makeMagnetUri()
                     }" +
                     "Up: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().totalUpload()
+                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
+                            .totalUpload()
                     }" +
                     "Down: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().totalDownload()
+                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
+                            .totalDownload()
                     }"
             )
         }
@@ -117,7 +119,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
             is ReleaseUIState.NoTracks -> {
                 val uiState = uiState as ReleaseUIState.NoTracks
                 Text("ReleaseUIState.NoTracks")
-                DefaultCover(
+                ReleaseCover(
                     modifier = Modifier
                         .height(200.dp)
                         .aspectRatio(1f)
@@ -132,7 +134,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
             is ReleaseUIState.Downloaded -> {
                 val uiState = uiState as ReleaseUIState.Downloaded
 
-                DefaultCover(
+                ReleaseCover(
                     modifier = Modifier
                         .height(200.dp)
                         .aspectRatio(1f)
@@ -157,7 +159,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
             }
             is ReleaseUIState.DownloadedWithCover -> {
                 val uiState = uiState as ReleaseUIState.DownloadedWithCover
-                BitmapCover(
+                ReleaseCover(
                     file = uiState.cover,
                     modifier = Modifier
                         .height(200.dp)
@@ -183,7 +185,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
             }
             is ReleaseUIState.Downloading -> {
                 val uiState = uiState as ReleaseUIState.Downloading
-                DefaultCover(
+                ReleaseCover(
                     modifier = Modifier
                         .height(200.dp)
                         .aspectRatio(1f)
@@ -275,47 +277,7 @@ fun Header(releaseBlock: ReleaseBlock) {
     }
 }
 
-@Composable
-fun CoverImage(folder: File, modifier: Modifier) {
-    Column {
-        var bitmap: Bitmap? = null
-        val cover = Util.findCoverArt(folder)
-        if (cover != null && cover.exists()) {
-            bitmap = BitmapFactory.decodeFile(cover.absolutePath)
-        }
-
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                modifier = modifier
-            )
-        } else {
-            Image(
-                painter = painterResource(R.drawable.ic_music),
-                contentDescription = null,
-                modifier = modifier
-            )
-        }
-    }
-}
 
 
-@Composable
-fun BitmapCover(file: File, modifier: Modifier = Modifier) {
-    val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-    Image(
-        bitmap = bitmap.asImageBitmap(),
-        contentDescription = null,
-        modifier
-    )
-}
 
-@Composable
-fun DefaultCover(modifier: Modifier = Modifier) {
-    Image(
-        painter = painterResource(R.drawable.ic_music),
-        contentDescription = null,
-        modifier = modifier
-    )
-}
+

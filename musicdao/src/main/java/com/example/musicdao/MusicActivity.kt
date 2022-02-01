@@ -51,7 +51,7 @@ class MusicActivity : AppCompatActivity() {
         }
 
         setContent {
-            MusicDAOApp()
+            MusicDAOApp(container)
         }
     }
 
