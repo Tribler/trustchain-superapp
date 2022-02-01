@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.ui.components.ReleaseCover
+import com.example.musicdao.ui.torrent.TorrentStatusScreen
 import com.example.musicdao.util.MyResult
 import com.frostwire.jlibtorrent.TorrentHandle
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -77,39 +78,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
     ) {
         when (torrentState) {
             is MyResult.Failure -> Text("Could not find torrent.")
-            is MyResult.Success<TorrentHandle> -> Text(
-                "Did find peers: ${
-                    (torrentState as MyResult.Success<TorrentHandle>).value.status().numPeers()
-                }," +
-                    "\nNum Pieces: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.torrentFile()
-                            .numPieces()
-                    }" +
-                    "\nPiecesL ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().pieces()
-                    }" +
-                    "\nFinished: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
-                            .isFinished
-                    }" +
-                    "\nSeeding: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().isSeeding
-                    }" +
-                    "\nSeeders${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status().numSeeds()
-                    }" +
-                    "Magnet: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.makeMagnetUri()
-                    }" +
-                    "Up: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
-                            .totalUpload()
-                    }" +
-                    "Down: ${
-                        (torrentState as MyResult.Success<TorrentHandle>).value.status()
-                            .totalDownload()
-                    }"
-            )
+            is MyResult.Success<TorrentHandle> -> TorrentStatusScreen(torrentHandle = (torrentState as MyResult.Success<TorrentHandle>).value)
         }
         when (uiState) {
             is ReleaseUIState.Nothing -> {
