@@ -9,5 +9,17 @@
         android:id="@+id/vaultBrowserFragment"
         android:name="nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment"
         android:label="Vault Browser">
+        <action
+            android:id="@+id/action_vaultBrowserFragment_to_accessManagementFragment"
+            app:destination="@id/accessManagementFragment"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+    </fragment>
+    <fragment
+        android:id="@+id/accessManagementFragment"
+        android:name="nl.tudelft.trustchain.datavault.ui.AccessManagementFragment"
+        android:label="Access Management">
     </fragment>
 </navigation>

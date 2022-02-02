@@ -11,11 +11,16 @@ import org.json.JSONArray
 import java.nio.charset.Charset
 
 class AccessibleFilesPayload(
-    val accessToken: String,
+    val accessToken: String?,
     val files: List<String>
 ): Serializable {
     override fun serialize(): ByteArray {
-        return serializeVarLen(accessToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
+        val finalToken = when (accessToken) {
+            null -> NULL
+            "" -> NULL
+            else -> accessToken
+        }
+        return serializeVarLen(finalToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
     }
 
     companion object Deserializer : Deserializable<AccessibleFilesPayload> {
@@ -32,7 +37,14 @@ class AccessibleFilesPayload(
                 files.add(jsonFiles.getString(i))
                 i++
             }
-            return Pair(AccessibleFilesPayload(token.toString(Charset.defaultCharset()), files), 0)
+
+            val finalToken: String? = when(token.toString(Charset.defaultCharset())) {
+                NULL -> null
+                else -> token.toString(Charset.defaultCharset())
+            }
+            return Pair(AccessibleFilesPayload(finalToken, files), 0)
         }
+
+        val NULL = "NULL"
     }
 }

@@ -11,19 +11,17 @@ import java.nio.charset.Charset
 
 class VaultFileRequestPayload(
     val id: String,
+    val accessMode: String,
     val accessToken: String?,
     val attestations: List<AttestationBlob>?
 ) : Serializable {
     override fun serialize(): ByteArray {
-        var serialized = serializeVarLen(id.toByteArray()) + serializeVarLen((accessToken ?: NULL).toByteArray())
+        var serialized = serializeVarLen(id.toByteArray()) +
+            serializeVarLen(accessMode.toByteArray()) +
+            serializeVarLen((accessToken ?: NULL).toByteArray())
+
         attestations?.forEach { attBlob ->
-            Log.e("VFRPayload.serialize", attBlob.attestationHash.toHex())
-
-            // TEMP REMOVED
-            // serialized += serializeVarLen(attBlob.serialize())
-
-            // TEMP ATTESTATION REPLACEMENT
-            serialized += serializeVarLen("AGE".toByteArray())
+            serialized += serializeVarLen(attBlob.serialize())
         }
         return  serialized
     }
@@ -33,6 +31,8 @@ class VaultFileRequestPayload(
             var localOffset = offset
             val (id, idSize) = deserializeVarLen(buffer, localOffset)
             localOffset += idSize
+            val (accessMode, accessModeSize) = deserializeVarLen(buffer, localOffset)
+            localOffset += accessModeSize
             val (accessToken, tokenSize) = deserializeVarLen(buffer, localOffset)
             localOffset += tokenSize
 
@@ -45,24 +45,14 @@ class VaultFileRequestPayload(
             while (buffer.lastIndex > localOffset) {
                 val (attBlobBytes, attBlobSize) = deserializeVarLen(buffer, localOffset)
                 localOffset += attBlobSize
-                // TEMP REMOVED
-                /*val attBlob = AttestationBlob.Deserializer.deserialize(attBlobBytes, 0).first
-                Log.e("VFRPayload.deserialize", attBlob.attestationHash.toHex())
-                atts.add(attBlob)*/
-
-                // TEMP ATTESTATION REPLACEMENT
-                var tempAtt = attBlobBytes.toString(Charset.defaultCharset())
-                if (tempAtt == "AGE") {
-                    Log.e("VFRPayload.deserialize", "ATT $tempAtt deserialized")
-                    var emptyBytes ="TEST".toByteArray()
-                    var attestation = AttestationBlob(emptyBytes, emptyBytes, emptyBytes, "", null, null, null)
-                    atts.add(attestation)
-                }
+                val attBlob = AttestationBlob.Deserializer.deserialize(attBlobBytes, 0).first
+                atts.add(attBlob)
             }
 
             return Pair(
                 VaultFileRequestPayload(
                     id.toString(Charset.defaultCharset()),
+                    accessMode.toString(Charset.defaultCharset()),
                     stringToken,
                     atts
                 ),

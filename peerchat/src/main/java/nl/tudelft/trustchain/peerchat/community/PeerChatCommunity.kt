@@ -36,7 +36,7 @@ private val logger = KotlinLogging.logger {}
 class PeerChatCommunity(
     private val database: PeerChatStore,
     private val context: Context
-) : Community() {
+) : EVACommunity() {
     override val serviceId = "ac9c01202e8d01e5f7d3cec88085dd842267c273"
 
     private lateinit var onMessageCallback: (
@@ -50,27 +50,6 @@ class PeerChatCommunity(
     ) -> Unit
     private lateinit var onContactImageCallback: (
         contactImage: ContactImage
-    ) -> Unit
-
-    private lateinit var evaSendCompleteCallback: (
-        peer: Peer,
-        info: String,
-        nonce: ULong
-    ) -> Unit
-    private lateinit var evaReceiveProgressCallback: (
-        peer: Peer,
-        info: String,
-        progress: TransferProgress
-    ) -> Unit
-    private lateinit var evaReceiveCompleteCallback: (
-        peer: Peer,
-        info: String,
-        id: String,
-        data: ByteArray?
-    ) -> Unit
-    private lateinit var evaErrorCallback: (
-        peer: Peer,
-        exception: TransferException
     ) -> Unit
 
     var identityInfo: IdentityInfo? = null
@@ -120,10 +99,10 @@ class PeerChatCommunity(
             }
         }
 
-        setOnEVASendCompleteCallback(::onEVASendCompleteCallback)
-        setOnEVAReceiveProgressCallback(::onEVAReceiveProgressCallback)
-        setOnEVAReceiveCompleteCallback(::onEVAReceiveCompleteCallback)
-        setOnEVAErrorCallback(::onEVAErrorCallback)
+        evaProtocol?.setOnEVASendCompleteCallback(::onEVASendCompleteCallback)
+        evaProtocol?.setOnEVAReceiveProgressCallback(::onEVAReceiveProgressCallback)
+        evaProtocol?.setOnEVAReceiveCompleteCallback(::onEVAReceiveCompleteCallback)
+        evaProtocol?.setOnEVAErrorCallback(::onEVAErrorCallback)
     }
 
     /**
@@ -145,30 +124,6 @@ class PeerChatCommunity(
         f: (contactImage: ContactImage) -> Unit
     ) {
         this.onContactImageCallback = f
-    }
-
-    fun setEVAOnSendCompleteCallback(
-        f: (peer: Peer, info: String, nonce: ULong) -> Unit
-    ) {
-        this.evaSendCompleteCallback = f
-    }
-
-    fun setEVAOnReceiveProgressCallback(
-        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit
-    ) {
-        this.evaReceiveProgressCallback = f
-    }
-
-    fun setEVAOnReceiveCompleteCallback(
-        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
-    ) {
-        this.evaReceiveCompleteCallback = f
-    }
-
-    fun setEVAOnErrorCallback(
-        f: (peer: Peer, exception: TransferException) -> Unit
-    ) {
-        this.evaErrorCallback = f
     }
 
     /**
@@ -578,7 +533,7 @@ class PeerChatCommunity(
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
-        if (this::evaSendCompleteCallback.isInitialized) {
+        if (isEvaSendCompleteCallbackInitialized) {
             this.evaSendCompleteCallback(peer, info, nonce)
         }
     }
@@ -588,7 +543,7 @@ class PeerChatCommunity(
 
         if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
-        if (this::evaReceiveProgressCallback.isInitialized) {
+        if (isEvaReceiveProgressCallbackInitialized) {
             this.evaReceiveProgressCallback(peer, info, progress)
         }
     }
@@ -603,7 +558,7 @@ class PeerChatCommunity(
             onAttachmentPacket(packet)
         }
 
-        if (this::evaReceiveCompleteCallback.isInitialized) {
+        if (isEvaReceiveCompleteCallbackInitialized) {
             this.evaReceiveCompleteCallback(peer, info, id, data)
         }
     }
@@ -613,7 +568,7 @@ class PeerChatCommunity(
 
         if (exception.info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
-        if (this::evaErrorCallback.isInitialized) {
+        if (isEvaErrorCallbackInitialized) {
             this.evaErrorCallback(peer, exception)
         }
     }
@@ -640,6 +595,16 @@ class PeerChatCommunity(
         const val ATTACHMENT = 4
         const val CONTACT_IMAGE_REQUEST = 5
         const val CONTACT_IMAGE = 6
+    }
+
+    /**
+     * Every community initializes a different version of the EVA protocol (if enabled).
+     * To distinguish the incoming packets/requests an ID must be used to hold/let through the
+     * EVA related packets.
+     */
+    object EVAId {
+        const val EVA_UNSPECIFIED = ""
+        const val EVA_PEERCHAT_ATTACHMENT = "eva_peerchat_attachment"
     }
 
     class Factory(

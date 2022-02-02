@@ -9,6 +9,7 @@ import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
@@ -24,8 +25,10 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.R
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessPolicy
+import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
+import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -39,7 +42,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val logTag = "DATA VAULT"
     private val adapter = ItemAdapter()
 
-    val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
+    private val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
 
     private var areFABsVisible = false
 
@@ -48,7 +51,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         parentActivity = requireActivity() as DataVaultMainActivity
 
-        attestationCommunity = IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+        attestationCommunity = IPv8Android.getInstance().getOverlay()!!
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
         Log.e(logTag, "my peer: ${attestationCommunity.myPeer.publicKey.keyToBin().toHex()}")
 
@@ -57,29 +60,31 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         initVault()
 
-        //deleteTestFiles()
-
         adapter.registerRenderer(VaultFileItemRenderer {
-            Log.e(logTag, "${it.absolutePath} exists: ${it.exists()}")
+            val args = Bundle()
+            args.putString(FILENAME, it.absolutePath)
+            // args.putString(ConversationFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+            findNavController().navigate(R.id.action_vaultBrowserFragment_to_accessManagementFragment, args)
+
+            /*Log.e(logTag, "${it.absolutePath} exists: ${it.exists()}")
             val builder: AlertDialog.Builder = AlertDialog.Builder(context)
             val inflater = requireActivity().layoutInflater
             val view = inflater.inflate(R.layout.vault_file_fragment, null)
             val textView = view.findViewById<TextView>(R.id.text)
-            textView.setText(it.readText())
-            val checkBox: CheckBox = view.findViewById<CheckBox>(R.id.public_file_checkbox)
+            textView.text = it.readText()
+            val checkBox: CheckBox = view.findViewById(R.id.public_file_checkbox)
 
             val accessPolicy = AccessPolicy(it, attestationCommunity)
-            checkBox.setChecked(!accessPolicy.isTokenRequired())
+            checkBox.isChecked = accessPolicy.isPublic()
 
             checkBox.setOnCheckedChangeListener { _, value ->
-                Log.e(logTag, "button checked: $value")
-                accessPolicy.setTokenRequired(!value)
+                accessPolicy.setPublic(value)
             }
 
             builder.setTitle(it.name).setView(view)
 
             val dialog: AlertDialog = builder.create()
-            dialog.show()
+            dialog.show()*/
         })
     }
 
@@ -119,8 +124,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
 
         binding.requestAccessibleFilesFab.setOnClickListener {
-            selectPeerDialog()
             hideFabs()
+            selectPeerDialog()
         }
 
         binding.deleteFilesFab.setOnClickListener {
@@ -157,7 +162,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun selectPeerDialog() {
-        var peers = getDataVaultCommunity().getPeers()
+        val peers = getDataVaultCommunity().getPeers()
         peers.forEach {
             Log.e(logTag, "Peer: ${it.publicKey.keyToBin().toHex()}")
         }
@@ -179,7 +184,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 // User cancelled the dialog
             }).
         setItems(peers.map { peer ->  peer.mid}.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
-            var peer = peers.get(index)
+            val peer = peers[index]
             Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
 
             // Currently all attestations. There must come a way to choose your attestations
@@ -195,17 +200,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 }
             }*/
 
-            getDataVaultCommunity().sendAccessibleFilesRequest(peer, attestations)
+            getDataVaultCommunity().sendAccessibleFilesRequest(peer, Policy.READ, attestations)
         })
 
         // Create the AlertDialog
         val alertDialog: AlertDialog = builder.create()
         alertDialog.show()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //parentActivity.setActionBarTitle("Data Vault")
     }
 
     private fun initVault() {
@@ -233,8 +233,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                         adapter.updateItems(vaultFileItems)
                     }
 
-                    if (!list.isEmpty()) {
-                        Log.e(logTag + " files", list.asList().reduce { acc, s ->  acc + " $s"}?: "empty")
+                    if (list.isNotEmpty()) {
+                        Log.e("$logTag files", list.asList().reduce { acc, s ->  "$acc $s"}?: "empty")
                     }
                 }
             }
@@ -247,10 +247,11 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     companion object {
-        val VAULT_DIR = "data_vault"
+        const val VAULT_DIR = "data_vault"
+        const val FILENAME = "file_name"
     }
 
-    fun selectRequestableFile(peer: Peer, accessToken: String, files: List<String>) {
+    fun selectRequestableFile(peer: Peer, accessToken: String?, files: List<String>) {
         Log.e(logTag, "Selecting requestable file")
         requireActivity().runOnUiThread {
             val builder = AlertDialog.Builder(context)
@@ -265,8 +266,8 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 }).
             setItems(files.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
                 Log.e(logTag, "item $index chosen")
-                val file = files.get(index)
-                getDataVaultCommunity().sendFileRequest(peer, file, accessToken = accessToken)
+                val file = files[index]
+                getDataVaultCommunity().sendFileRequest(peer, Policy.READ, file, accessToken)
             })
 
             // Create the AlertDialog
@@ -294,13 +295,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
         val filename: String = sdf.format(timestamp)
 
-        var fileContents = "Test file created on " + filename
-        var fos = FileOutputStream (File(VAULT, filename))
+        val fileContents = "Test file created on $filename"
+        val fos = FileOutputStream (File(VAULT, filename))
         fos.write(fileContents.toByteArray())
-        fos.close()
-
-        fos = FileOutputStream (File(VAULT, "$filename.acl"))
-        fos.write(AccessPolicy.TRUE.toByteArray())
         fos.close()
 
         updateAdapter()
@@ -308,13 +305,11 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private fun deleteTestFiles() {
         if (!VAULT.canRead()) {
+            //
         } else {
-            val list = VAULT.list()
-            if (list != null) {
-                list.forEach { fileName ->
-                    var testFile = File(VAULT,fileName)
-                    testFile.delete()
-                 }
+            VAULT.list()?.forEach { fileName ->
+                val testFile = File(VAULT, fileName)
+                testFile.delete()
             }
         }
 
