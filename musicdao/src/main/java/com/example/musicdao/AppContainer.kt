@@ -17,6 +17,7 @@ import com.example.musicdao.repositories.SwarmHealthRepository
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
+import com.frostwire.jlibtorrent.swig.settings_pack
 import java.nio.file.Paths
 
 object AppContainer {
@@ -73,6 +74,12 @@ object AppContainer {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"
             settingsPack.listenInterfaces(String.format(interfaceFormat, port))
         }
+
+        settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true);
+        settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true);
+        settingsPack.setBoolean(settings_pack.bool_types.listen_system_port_fallback.swigValue(), false);
+        settingsPack.setBoolean(settings_pack.bool_types.enable_upnp.swigValue(), false);
+        settingsPack.setBoolean(settings_pack.bool_types.enable_natpmp.swigValue(), false);
 
         return SessionParams(settingsPack)
     }
