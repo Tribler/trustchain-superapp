@@ -11,9 +11,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +38,9 @@ import java.io.File
 @ExperimentalMaterialApi
 @Composable
 fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
+
+    var state by remember { mutableStateOf(0) }
+    val titles = listOf("RELEASE", "TORRENT")
 
     val viewModel: ReleaseScreenViewModel = viewModel(
         factory = ReleaseScreenViewModel.provideFactory(
@@ -70,122 +71,132 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
     }
 
     val scrollState = rememberScrollState()
-
     Column(
         modifier = Modifier
             .verticalScroll(scrollState)
-            .padding(bottom = 150.dp, top = 25.dp)
+            .padding(bottom = 150.dp)
     ) {
-        when (torrentState) {
-            is MyResult.Failure -> Text("Could not find torrent.")
-            is MyResult.Success<TorrentHandle> -> TorrentStatusScreen(torrentHandle = (torrentState as MyResult.Success<TorrentHandle>).value)
+        TabRow(selectedTabIndex = state) {
+            titles.forEachIndexed { index, title ->
+                Tab(
+                    onClick = { state = index },
+                    selected = (index == state),
+                    text = { Text(title) })
+            }
         }
-        when (uiState) {
-            is ReleaseUIState.Nothing -> {
-                Text("ReleaseUIState.Nothing")
-                CircularProgressIndicator()
-            }
-            is ReleaseUIState.NoTracks -> {
-                val uiState = uiState as ReleaseUIState.NoTracks
-                Text("ReleaseUIState.NoTracks")
-                ReleaseCover(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Header(uiState.releaseBlock)
-                Text("ReleaseUIState.Nothing")
-            }
-            is ReleaseUIState.Downloaded -> {
-                val uiState = uiState as ReleaseUIState.Downloaded
-
-                ReleaseCover(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Header(uiState.releaseBlock)
-                uiState.tracks.map {
-                    ListItem(text = { Text(it.title) },
-                        secondaryText = { Text(it.artist) },
-                        trailing = {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable { play(file = it.file) })
+        if (state == 0) {
+            when (uiState) {
+                is ReleaseUIState.Nothing -> {
+                    Text("ReleaseUIState.Nothing")
+                    CircularProgressIndicator()
                 }
-                Text("ReleaseUIState.Downloaded")
-            }
-            is ReleaseUIState.DownloadedWithCover -> {
-                val uiState = uiState as ReleaseUIState.DownloadedWithCover
-                ReleaseCover(
-                    file = uiState.cover,
-                    modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Header(uiState.releaseBlock)
-                uiState.tracks.map {
-                    ListItem(text = { Text(it.title) },
-                        secondaryText = { Text(it.artist) },
-                        trailing = {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable { play(file = it.file) })
-                }
-                Text("ReleaseUIState.DownloadedWithCover")
-            }
-            is ReleaseUIState.Downloading -> {
-                val uiState = uiState as ReleaseUIState.Downloading
-                ReleaseCover(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Header(uiState.releaseBlock)
-                uiState.downloadingTracks.map {
-                    ListItem(text = { Text(it.title) },
-                        secondaryText = {
-                            Column {
-                                Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
-                                LinearProgressIndicator(progress = it.progress.toFloat() / 100)
-                            }
-                        },
-                        trailing = {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            viewModel.setFilePriority(it)
-                            play(it.file)
-                        }
+                is ReleaseUIState.NoTracks -> {
+                    val uiState = uiState as ReleaseUIState.NoTracks
+                    Text("ReleaseUIState.NoTracks")
+                    ReleaseCover(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
+                    Header(uiState.releaseBlock)
+                    Text("ReleaseUIState.Nothing")
                 }
-                HandleInfo(torrentHandle = uiState.torrentHandle)
-                Text("ReleaseUIState.Downloading")
+                is ReleaseUIState.Downloaded -> {
+                    val uiState = uiState as ReleaseUIState.Downloaded
+
+                    ReleaseCover(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Header(uiState.releaseBlock)
+                    uiState.tracks.map {
+                        ListItem(text = { Text(it.title) },
+                            secondaryText = { Text(it.artist) },
+                            trailing = {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = null
+                                )
+                            },
+                            modifier = Modifier.clickable { play(file = it.file) })
+                    }
+                    Text("ReleaseUIState.Downloaded")
+                }
+                is ReleaseUIState.DownloadedWithCover -> {
+                    val uiState = uiState as ReleaseUIState.DownloadedWithCover
+                    ReleaseCover(
+                        file = uiState.cover,
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Header(uiState.releaseBlock)
+                    uiState.tracks.map {
+                        ListItem(text = { Text(it.title) },
+                            secondaryText = { Text(it.artist) },
+                            trailing = {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = null
+                                )
+                            },
+                            modifier = Modifier.clickable { play(file = it.file) })
+                    }
+                    Text("ReleaseUIState.DownloadedWithCover")
+                }
+                is ReleaseUIState.Downloading -> {
+                    val uiState = uiState as ReleaseUIState.Downloading
+                    ReleaseCover(
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Header(uiState.releaseBlock)
+                    uiState.downloadingTracks.map {
+                        ListItem(text = { Text(it.title) },
+                            secondaryText = {
+                                Column {
+                                    Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
+                                    LinearProgressIndicator(progress = it.progress.toFloat() / 100)
+                                }
+                            },
+                            trailing = {
+                                Icon(
+                                    imageVector = Icons.Filled.Menu,
+                                    contentDescription = null
+                                )
+                            },
+                            modifier = Modifier.clickable {
+                                viewModel.setFilePriority(it)
+                                play(it.file)
+                            }
+                        )
+                    }
+                    HandleInfo(torrentHandle = uiState.torrentHandle)
+                    Text("ReleaseUIState.Downloading")
+                }
+            }
+        } else {
+            when (torrentState) {
+                is MyResult.Failure -> Text("Could not find torrent.")
+                is MyResult.Success<TorrentHandle> -> TorrentStatusScreen(torrentHandle = (torrentState as MyResult.Success<TorrentHandle>).value)
             }
         }
     }

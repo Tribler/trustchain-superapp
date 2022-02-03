@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.preference.PreferenceManager
 import com.example.musicdao.domain.usecases.CreateReleaseUseCase
+import com.example.musicdao.domain.usecases.GetReleaseUseCase
 import com.example.musicdao.domain.usecases.GetTorrentUseCase
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.repositories.ReleaseRepository
@@ -15,6 +16,7 @@ import com.frostwire.jlibtorrent.SettingsPack
 
 
 object AppContainer {
+    lateinit var getReleaseUseCase: GetReleaseUseCase
     lateinit var getTorrentUseCase: GetTorrentUseCase
     lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
@@ -59,6 +61,7 @@ object AppContainer {
             releaseRepository,
         )
         getTorrentUseCase = GetTorrentUseCase(releaseTorrentRepository)
+        getReleaseUseCase = GetReleaseUseCase(releaseRepository, releaseTorrentRepository)
     }
 
     private fun createSessionParams(applicationContext: Context): SessionParams {

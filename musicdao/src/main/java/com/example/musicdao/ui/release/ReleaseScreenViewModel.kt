@@ -1,10 +1,11 @@
 package com.example.musicdao.ui.release
 
-import android.util.Log
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
 import com.example.musicdao.AppContainer.releaseRepository
+import com.example.musicdao.domain.usecases.GetReleaseUseCase
 import com.example.musicdao.domain.usecases.GetTorrentUseCase
+import com.example.musicdao.domain.usecases.SaturatedRelease
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.repositories.TorrentRepository
@@ -158,7 +159,8 @@ class ReleaseScreenViewModel(
     val releaseId: String,
     releaseRepository: ReleaseRepository,
     private val torrentRepository: TorrentRepository,
-    private val getTorrentUseCase: GetTorrentUseCase
+    private val getTorrentUseCase: GetTorrentUseCase,
+    private val getReleaseUseCase: GetReleaseUseCase
 ) : ViewModel() {
 
     private val viewModelState = MutableStateFlow(ReleaseViewModelState(isLoading = true))
@@ -169,6 +171,10 @@ class ReleaseScreenViewModel(
         getTorrentUseCase.invoke(releaseId)
 
     private var attemptingToDownload: Boolean = false
+
+    fun get(): SaturatedRelease {
+        return getReleaseUseCase.invoke(releaseId)
+    }
 
     init {
         viewModelScope.launch {
@@ -279,7 +285,8 @@ class ReleaseScreenViewModel(
             releaseId: String,
             releaseRepository: ReleaseRepository,
             torrentRepository: TorrentRepository,
-            getTorrentUseCase: GetTorrentUseCase = AppContainer.getTorrentUseCase
+            getTorrentUseCase: GetTorrentUseCase = AppContainer.getTorrentUseCase,
+            getReleaseUseCase: GetReleaseUseCase = AppContainer.getReleaseUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -287,7 +294,8 @@ class ReleaseScreenViewModel(
                     releaseId,
                     releaseRepository,
                     torrentRepository,
-                    getTorrentUseCase
+                    getTorrentUseCase,
+                    getReleaseUseCase
                 ) as T
             }
         }
