@@ -1,25 +1,33 @@
 package com.example.musicdao
 
+import TorrentCache
+import TorrentEngine
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import com.example.musicdao.domain.usecases.CreateReleaseUseCase
 import com.example.musicdao.domain.usecases.GetReleaseUseCase
-import com.example.musicdao.domain.usecases.GetTorrentUseCase
+import com.example.musicdao.domain.usecases.torrents.DownloadIntentUseCase
+import com.example.musicdao.domain.usecases.torrents.GetTorrentStatusFlowUseCase
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.repositories.SwarmHealthRepository
-import com.example.musicdao.repositories.TorrentRepository
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
-
+import java.nio.file.Paths
 
 object AppContainer {
+    lateinit var getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
+    lateinit var downloadIntentuseCase: DownloadIntentUseCase
     lateinit var getReleaseUseCase: GetReleaseUseCase
-    lateinit var getTorrentUseCase: GetTorrentUseCase
     lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
+
+    lateinit var torrentEngine: TorrentEngine
+    lateinit var torrentCache: TorrentCache
 
     lateinit var currentCallback: (List<Uri>) -> Unit
 
@@ -28,9 +36,7 @@ object AppContainer {
     lateinit var releaseRepository: ReleaseRepository
     lateinit var activity: MusicActivity
 
-    //    lateinit var torrentRepository: TorrentRepository
-    lateinit var releaseTorrentRepository: TorrentRepository
-
+    @RequiresApi(Build.VERSION_CODES.O)
     fun provide(
         applicationContext: Context,
         musicCommunity: MusicCommunity,
@@ -40,28 +46,20 @@ object AppContainer {
         sessionManager = SessionManager().apply {
             start(createSessionParams(applicationContext))
         }
-//        contentSeeder =
-//            ContentSeeder(applicationContext.cacheDir, sessionManager).apply {
-//                start()
-//            }
-
         releaseRepository = ReleaseRepository(musicCommunity)
-//        torrentRepository = TorrentRepository(sessionManager, applicationContext.cacheDir)
-        releaseTorrentRepository = TorrentRepository(
-            sessionManager,
-            applicationContext.cacheDir,
-        ).apply {
-            startSeeding()
-        }
-        swarmHealthRepository = SwarmHealthRepository(
-            sessionManager, releaseTorrentRepository, musicCommunity
-        )
+        torrentEngine = TorrentEngine(sessionManager)
+        torrentCache = TorrentCache(torrentEngine, Paths.get("${applicationContext.cacheDir}"))
+
         createReleaseUseCase = CreateReleaseUseCase(
-            releaseTorrentRepository,
             releaseRepository,
+            torrentCache
         )
-        getTorrentUseCase = GetTorrentUseCase(releaseTorrentRepository)
-        getReleaseUseCase = GetReleaseUseCase(releaseRepository, releaseTorrentRepository)
+        getReleaseUseCase =
+            GetReleaseUseCase(releaseRepository, torrentCache)
+
+        downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
+        getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
+
     }
 
     private fun createSessionParams(applicationContext: Context): SessionParams {
@@ -69,7 +67,7 @@ object AppContainer {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                .getString("musicdao_port", "10148")
+                .getString("musicdao_port", "10021")
                 ?.toIntOrNull()
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"

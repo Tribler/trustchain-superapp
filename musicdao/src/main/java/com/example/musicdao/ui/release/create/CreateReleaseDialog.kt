@@ -60,7 +60,6 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         )
     }
 
-
     Dialog(
         onDismissRequest = {
             closeDialog()

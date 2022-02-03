@@ -9,14 +9,13 @@ import nl.tudelft.ipv8.android.IPv8Android
 
 class SwarmHealthRepository(
     private val sessionManager: SessionManager,
-    val torrentRepository: TorrentRepository,
     val musicCommunity: MusicCommunity
 ) {
 
     var mergedSwarmHealth: MutableMap<Sha1Hash, SwarmHealth> = mutableMapOf()
 
-    val localSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
-        get() = torrentRepository.swarmHealthMap
+//    val localSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
+//        get() = torrentRepository.swarmHealthMap
 
     val remoteSwarmHealthMap: MutableMap<Sha1Hash, SwarmHealth>
         get() = musicCommunity.swarmHealthMap
@@ -50,24 +49,25 @@ class SwarmHealthRepository(
      * Go through all the torrents that we are currently seeding and mark its connectivity to peers
      */
     private fun updateLocalSwarmHealthMap(): MutableMap<Sha1Hash, SwarmHealth> {
-        val sessionManager = sessionManager
-        val contentSeeder = torrentRepository
-        val localMap = contentSeeder.swarmHealthMap
-        for (infoHash in localMap.keys) {
-            // Update all connectivity stats of the torrents that we are currently seeding
-            if (sessionManager.isRunning) {
-                val handle = sessionManager.find(infoHash) ?: continue
-                val newSwarmHealth = SwarmHealth(
-                    infoHash.toString(),
-                    handle.status().numPeers().toUInt(),
-                    handle.status().numSeeds().toUInt()
-                )
-                // Never go below 1, because we know we are at least 1 seeder of our local files
-                if (newSwarmHealth.numSeeds.toInt() < 1) continue
-                localMap[infoHash] = newSwarmHealth
-            }
-        }
-        return localMap
+//        val sessionManager = sessionManager
+//        val contentSeeder = torrentRepository
+//        val localMap = contentSeeder.swarmHealthMap
+//        for (infoHash in localMap.keys) {
+//            // Update all connectivity stats of the torrents that we are currently seeding
+//            if (sessionManager.isRunning) {
+//                val handle = sessionManager.find(infoHash) ?: continue
+//                val newSwarmHealth = SwarmHealth(
+//                    infoHash.toString(),
+//                    handle.status().numPeers().toUInt(),
+//                    handle.status().numSeeds().toUInt()
+//                )
+//                // Never go below 1, because we know we are at least 1 seeder of our local files
+//                if (newSwarmHealth.numSeeds.toInt() < 1) continue
+//                localMap[infoHash] = newSwarmHealth
+//            }
+//        }
+//        return localMap
+        return mutableMapOf()
     }
 
 }

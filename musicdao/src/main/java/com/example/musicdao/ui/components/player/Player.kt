@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -20,24 +19,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 fun VideoPlayer(modifier: Modifier = Modifier, exoPlayer: SimpleExoPlayer) {
     val context = LocalContext.current
 
-    Column(
-        modifier = modifier
-            .background(Color.Black)
-    ) {
-        val (title, videoPlayer) = createRefs()
-
-        // video title
-//        Text(
-//            text = "Current Title",
-//            color = Color.White,
-//            modifier =
-//            Modifier
-//                .padding(start = 40.dp, top = 10.dp)
-//                .fillMaxWidth()
-//                .wrapContentHeight()
-//        )
-
-        // player view
+    Column(modifier = modifier.background(Color.Black)) {
         DisposableEffect(
             AndroidView(
                 modifier = Modifier.padding(bottom = 20.dp),

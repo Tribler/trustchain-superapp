@@ -1,16 +1,20 @@
 package com.example.musicdao.domain.usecases
 
+import TorrentCache
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.musicdao.repositories.ReleaseRepository
-import com.example.musicdao.repositories.TorrentRepository
-import com.frostwire.jlibtorrent.TorrentInfo
+import com.example.musicdao.util.MyResult
+import kotlin.io.path.name
 
 class CreateReleaseUseCase(
-    private val releaseTorrentRepository: TorrentRepository,
     private val releaseRepository: ReleaseRepository,
+    private val torrentCache: TorrentCache
 ) {
 
+    @RequiresApi(Build.VERSION_CODES.O)
     operator fun invoke(
         artist: String,
         title: String,
@@ -19,26 +23,21 @@ class CreateReleaseUseCase(
         uris: List<Uri>,
         context: Context
     ) {
-        val torrentFile = releaseTorrentRepository.generateTorrent(context, uris)
-        val torrentInfo = TorrentInfo(torrentFile)
+        val tempFolder = torrentCache.copyToTempFolder(context, uris)
+        val cacheFolder = torrentCache.copyIntoCache(tempFolder.toPath())
 
-        val validate = releaseRepository.validateReleaseBlock(
-            title,
-            artist,
-            releaseDate,
-            torrentInfo.makeMagnetUri(),
-            torrentInfo
-        )
-
-        if (validate != null) {
-            releaseRepository.publishRelease(
-                torrentInfo.makeMagnetUri(),
-                title,
-                artists = artist,
-                releaseDate,
-                validate
-            )
-            releaseTorrentRepository.startSeeding()
+        when (cacheFolder) {
+            is MyResult.Failure -> TODO()
+            is MyResult.Success -> {
+                releaseRepository.publishRelease(
+                    cacheFolder.value.parent.name,
+                    title,
+                    artists = artist,
+                    releaseDate,
+                    cacheFolder.value.parent.name
+                )
+                torrentCache.seedStrategy()
+            }
         }
     }
 }

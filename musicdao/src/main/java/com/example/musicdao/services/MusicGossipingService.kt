@@ -71,7 +71,6 @@ class MusicGossipingService :
     private suspend fun iterativelySendReleaseBlocks() {
         val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
         while (scope.isActive) {
-//            Log.d("Brian", "Sending release Blocks.")
             musicCommunity?.communicateReleaseBlocks()
             delay(4000)
         }

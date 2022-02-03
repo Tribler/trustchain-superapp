@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -31,6 +33,7 @@ class MusicActivity : AppCompatActivity() {
     lateinit var mService: MusicGossipingService
     var mBound: Boolean = false
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalMaterialApi
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,9 +45,10 @@ class MusicActivity : AppCompatActivity() {
         AppContainer.provide(this, musicCommunity = musicCommunity, this)
         container = AppContainer
         registerBlockSigner()
+        container.torrentCache.seedStrategy()
         container.releaseRepository.refreshReleases()
         iterativelyFetchReleases()
-        iterativelyUpdateSwarmHealth()
+//        iterativelyUpdateSwarmHealth()
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
@@ -112,8 +116,6 @@ class MusicActivity : AppCompatActivity() {
     }
 
 
-
-
     /**
      * On discovering a half block, with tag publish_release, agree it immediately (for now). In the
      * future there will be logic added here to determine whether an upload was done by the correct
@@ -125,7 +127,6 @@ class MusicActivity : AppCompatActivity() {
             "publish_release",
             object : BlockSigner {
                 override fun onSignatureRequest(block: TrustChainBlock) {
-                    Log.d("rian", "------ KOMT BLOK BINNEN")
                     musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
                 }
             }
@@ -135,19 +136,19 @@ class MusicActivity : AppCompatActivity() {
     /**
      * Keep track of Swarm Health for all torrents being monitored
      */
-    private fun iterativelyUpdateSwarmHealth() {
-        lifecycleScope.launchWhenStarted {
-            while (isActive) {
-                container.swarmHealthRepository.mergedSwarmHealth =
-                    container.swarmHealthRepository.filterSwarmHealthMap()
-
-                if (mBound) {
-                    mService.setSwarmHealthMap(container.swarmHealthRepository.mergedSwarmHealth)
-                }
-                delay(3000)
-            }
-        }
-    }
+//    private fun iterativelyUpdateSwarmHealth() {
+//        lifecycleScope.launchWhenStarted {
+//            while (isActive) {
+//                container.swarmHealthRepository.mergedSwarmHealth =
+//                    container.swarmHealthRepository.filterSwarmHealthMap()
+//
+//                if (mBound) {
+//                    mService.setSwarmHealthMap(container.swarmHealthRepository.mergedSwarmHealth)
+//                }
+//                delay(3000)
+//            }
+//        }
+//    }
 
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {

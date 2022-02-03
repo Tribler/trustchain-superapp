@@ -46,7 +46,6 @@ fun AppNavigation(
                 val homeScreenViewModel: HomeScreenViewModel = viewModel(
                     factory = HomeScreenViewModel.provideFactory(
                         appContainer.releaseRepository,
-                        appContainer.releaseTorrentRepository
                     )
                 )
                 HomeScreen(

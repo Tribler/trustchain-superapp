@@ -28,7 +28,6 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
 
     fun refreshReleases() {
         this._releaseBlocks.value = fetchReleases()
-
     }
 
     fun getReleaseBlock(releaseId: String): ReleaseBlock {
