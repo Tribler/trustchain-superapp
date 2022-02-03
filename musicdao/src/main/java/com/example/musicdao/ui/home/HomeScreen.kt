@@ -1,6 +1,5 @@
 package com.example.musicdao.ui.home
 
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +49,7 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                             it.title,
                             it.artist,
                             cover,
-                            modifier = Modifier.clickable { navController.navigate("release/${it.torrentInfoName}") })
+                            modifier = Modifier.clickable { navController.navigate("release/${it.releaseId}") })
                     }
                 }
 
@@ -70,7 +69,7 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                     modifier = Modifier.clickable {
                         navController.navigate(
                             Screen.Release.createRoute(
-                                it.torrentInfoName
+                                it.releaseId
                             )
                         )
                     },

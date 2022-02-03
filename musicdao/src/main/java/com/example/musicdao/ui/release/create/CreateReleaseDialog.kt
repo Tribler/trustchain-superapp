@@ -50,7 +50,7 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
 
     val localContext = LocalContext.current
     fun publishRelease() {
-        viewModel.createRelease(
+        val res = viewModel.createRelease(
             artist.value,
             title.value,
             releaseDate = "DEFAULT",
@@ -58,6 +58,9 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
             uris = fileList.value,
             localContext
         )
+        if (res) {
+            closeDialog()
+        }
     }
 
     Dialog(
@@ -84,7 +87,6 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
                         actions = {
                             IconButton(onClick = {
                                 publishRelease()
-                                closeDialog()
                             }) {
                                 Text(
                                     "Save",

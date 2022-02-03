@@ -1,22 +1,23 @@
 package com.example.musicdao.repositories
 
 import com.example.musicdao.ipv8.MusicCommunity
-import com.example.musicdao.util.Util
-import com.frostwire.jlibtorrent.TorrentInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
 data class ReleaseBlock(
+    val releaseId: String,
     val magnet: String,
-    val torrentInfoName: String,
     val title: String,
     val artist: String,
     val publisher: String,
+    val protocolVersion: String,
 )
 
 class ReleaseRepository(private val musicCommunity: MusicCommunity) {
+
+    val PROTOCOL_VERSION = "1"
 
     private val _releaseBlocks: MutableStateFlow<List<ReleaseBlock>> =
         MutableStateFlow(listOf())
@@ -31,58 +32,8 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
     }
 
     fun getReleaseBlock(releaseId: String): ReleaseBlock {
-        return _releaseBlocks.value.find { it.torrentInfoName == releaseId }!!
+        return _releaseBlocks.value.find { it.releaseId == releaseId }!!
     }
-
-    fun publishRelease(
-        magnet: String,
-        title: String,
-        artists: String,
-        releaseDate: String = "",
-        torrentInfoName: String
-    ) {
-        val myPeer = IPv8Android.getInstance().myPeer
-        val transaction = mutableMapOf<String, String>(
-            "magnet" to magnet,
-            "title" to title,
-            "artists" to artists,
-            "date" to releaseDate,
-            "torrentInfoName" to torrentInfoName
-        )
-//        val walletDir = context?.cacheDir
-//        if (walletDir != null) {
-//            val musicWallet = WalletService.getInstance(walletDir, (activity as MusicService))
-//            transaction["publisher"] = musicWallet.publicKey()
-//        }
-        musicCommunity.createProposalBlock(
-            "publish_release",
-            transaction,
-            myPeer.publicKey.keyToBin()
-        )
-    }
-
-    fun validateReleaseBlock(
-        title: String?,
-        artist: String?,
-        releaseDate: String?,
-        magnet: String?,
-        torrentInfo: TorrentInfo
-    ): String? {
-        return if (title == null || artist == null || releaseDate == null || magnet == null ||
-            title.isEmpty() || artist.isEmpty() || releaseDate.isEmpty() || magnet.isEmpty()
-        ) {
-            null
-        } else {
-            if (torrentInfo == null) {
-                // If we only have a magnet link, extract the name from it to use for the
-                // .torrent
-                Util.extractNameFromMagnet(magnet)
-            } else {
-                torrentInfo.name()
-            }
-        }
-    }
-
 
     private fun fetchReleases(): List<ReleaseBlock> {
         val releaseBlocks = musicCommunity.database.getBlocksWithType("publish_release")
@@ -92,23 +43,68 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
             .map { trustChainBlock -> trustChainBlockToRelease(trustChainBlock) }
     }
 
-    private fun trustChainBlockToRelease(block: TrustChainBlock): ReleaseBlock {
-        val magnet = block.transaction["magnet"] as String
-        val torrentInfoName = block.transaction["torrentInfoName"] as String
-        val title = block.transaction["title"] as String
-        val publisher = "dsad"
-        val artist = block.transaction["artists"] as String
+    fun publishRelease(
+        releaseId: String,
+        magnet: String,
+        title: String,
+        artist: String,
+        publisher: String,
+        releaseDate: String,
+        protocolVersion: String = PROTOCOL_VERSION
+    ) {
+        val myPeer = IPv8Android.getInstance().myPeer
+        val transaction = mutableMapOf(
+            "releaseId" to releaseId,
+            "magnet" to magnet,
+            "title" to title,
+            "artist" to artist,
+            "publisher" to publisher,
+            "releaseDate" to releaseDate,
+            "protocolVersion" to protocolVersion
+        )
+        musicCommunity.createProposalBlock(
+            "publish_release",
+            transaction,
+            myPeer.publicKey.keyToBin()
+        )
+    }
 
-        return ReleaseBlock(magnet, torrentInfoName, title, artist, publisher)
+    fun validateReleaseBlock(
+        releaseId: String,
+        magnet: String,
+        title: String,
+        artist: String,
+        releaseDate: String,
+        publisher: String,
+    ): Boolean {
+        return (releaseId.isNotEmpty() && magnet.isNotEmpty() && title.isNotEmpty() && artist.isNotEmpty() && releaseDate.isNotEmpty() &&
+            publisher.isNotEmpty())
+    }
+
+    private fun trustChainBlockToRelease(block: TrustChainBlock): ReleaseBlock {
+        val releaseId = block.transaction["releaseId"] as String
+        val magnet = block.transaction["magnet"] as String
+        val title = block.transaction["title"] as String
+        val artist = block.transaction["artist"] as String
+        val publisher = block.transaction["publisher"] as String
+        val protocolVersion = block.transaction["protocolVersion"] as String
+
+        return ReleaseBlock(releaseId, magnet, title, artist, publisher, protocolVersion)
     }
 
     private fun validateTrustChainReleaseBlock(block: TrustChainBlock): Boolean {
+        val releaseId = block.transaction["releaseId"]
         val magnet = block.transaction["magnet"]
-        val torrentInfoName = block.transaction["torrentInfoName"]
         val title = block.transaction["title"]
+        val artist = block.transaction["artist"]
+        val publisher = block.transaction["publisher"]
+        val protocolVersion = block.transaction["protocolVersion"]
 
-        return (magnet is String && magnet.length > 0 && title is String && title.length > 0 &&
-            torrentInfoName is String && torrentInfoName.length > 0)
+        return (releaseId is String && releaseId.isNotEmpty() &&
+            magnet is String && magnet.isNotEmpty() &&
+            title is String && title.isNotEmpty() &&
+            artist is String && artist.isNotEmpty() &&
+            publisher is String && publisher.isNotEmpty() &&
+            protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == PROTOCOL_VERSION)
     }
-
 }

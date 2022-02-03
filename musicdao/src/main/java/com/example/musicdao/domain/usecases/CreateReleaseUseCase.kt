@@ -22,21 +22,40 @@ class CreateReleaseUseCase(
         publisher: String,
         uris: List<Uri>,
         context: Context
-    ) {
+    ): Boolean {
+        // Copy the files into the cache with the appropiate folder
+        // i.e. simulating the download process
         val tempFolder = torrentCache.copyToTempFolder(context, uris)
         val cacheFolder = torrentCache.copyIntoCache(tempFolder.toPath())
 
         when (cacheFolder) {
-            is MyResult.Failure -> TODO()
+            is MyResult.Failure -> return false
             is MyResult.Success -> {
+                val infoHash = cacheFolder.value.parent.name
+
+                // Validate before publishing
+                if (!releaseRepository.validateReleaseBlock(
+                        releaseId = infoHash,
+                        magnet = "magnet:?xt=urn:btih:$infoHash",
+                        title = title,
+                        artist = artist,
+                        releaseDate = releaseDate,
+                        publisher = publisher
+                    )
+                ) {
+                    return false
+                }
+
                 releaseRepository.publishRelease(
-                    cacheFolder.value.parent.name,
-                    title,
-                    artists = artist,
-                    releaseDate,
-                    cacheFolder.value.parent.name
+                    releaseId = infoHash,
+                    magnet = "magnet:?xt=urn:btih:$infoHash",
+                    title = title,
+                    artist = artist,
+                    releaseDate = releaseDate,
+                    publisher = publisher
                 )
                 torrentCache.seedStrategy()
+                return true
             }
         }
     }
