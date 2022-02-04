@@ -2,18 +2,27 @@ package com.example.musicdao.ui.release
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -22,19 +31,26 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
+import com.example.musicdao.ui.dateToLongString
 import com.example.musicdao.ui.release.create.CreateReleaseDialogViewModel
+import com.google.android.material.datepicker.MaterialDatePicker
 import java.time.Instant
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalComposeUiApi
 @Composable
 fun CreateReleaseDialog(closeDialog: () -> Unit) {
 
-    var fileList: MutableState<List<Uri>> = remember { mutableStateOf(listOf<Uri>()) }
-    var title = rememberSaveable { mutableStateOf("") }
-    var artist = rememberSaveable { mutableStateOf("") }
+    val viewModel: CreateReleaseDialogViewModel =
+        viewModel(factory = CreateReleaseDialogViewModel.provideFactory())
 
-    fun start() {
+    val fileList: MutableState<List<Uri>> = remember { mutableStateOf(listOf<Uri>()) }
+    val title = rememberSaveable { mutableStateOf("") }
+    val artist = rememberSaveable { mutableStateOf("") }
+    val date = rememberSaveable { mutableStateOf("") }
+
+    fun openFilePickerDialog() {
         AppContainer.currentCallback = {
             fileList.value = it
         }
@@ -45,9 +61,16 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         startActivityForResult(AppContainer.activity, chooseFileActivity, 21, Bundle())
     }
 
-    val viewModel: CreateReleaseDialogViewModel =
-        viewModel(factory = CreateReleaseDialogViewModel.provideFactory())
-
+    val context = LocalContext.current
+    fun showDatePicker() {
+        val picker = MaterialDatePicker.Builder.datePicker().build()
+        (context as AppCompatActivity).let {
+            picker.show(it.supportFragmentManager, picker.toString())
+            picker.addOnPositiveButtonClickListener {
+                date.value = Instant.ofEpochMilli(it).toString()
+            }
+        }
+    }
 
     val localContext = LocalContext.current
     fun publishRelease() {
@@ -65,9 +88,7 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
     }
 
     Dialog(
-        onDismissRequest = {
-            closeDialog()
-        },
+        onDismissRequest = { closeDialog() },
         properties = DialogProperties(usePlatformDefaultWidth = false),
     ) {
         Surface(
@@ -79,55 +100,91 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
             Scaffold(
                 topBar = {
                     TopAppBar(
-                        title = { Text("New Release") },
+                        title = { Text("Create Release") },
                         navigationIcon = {
                             IconButton(onClick = { closeDialog() }) {
                                 Icon(Icons.Filled.Close, contentDescription = null)
                             }
                         },
-                        actions = {
-                            IconButton(onClick = {
-                                publishRelease()
-                            }) {
-                                Text(
-                                    "Save",
-                                    style = MaterialTheme.typography.button
-                                )
-                            }
-                        }
                     )
                 },
                 content = {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier
+                            .padding(20.dp)
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+
+                        Text(
+                            text = "Fill in the form below to create a new release",
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.padding(bottom = 10.dp)
+                        )
+
                         TextField(
-                            singleLine = true,
                             value = title.value,
-                            onValueChange = {
-                                title.value = it
-                            },
+                            onValueChange = { title.value = it },
+                            placeholder = { Text("The title of your release") },
                             label = { Text("Title") },
                             modifier = Modifier.fillMaxWidth()
                         )
+
                         TextField(
-                            singleLine = true,
                             value = artist.value,
-                            onValueChange = {
-                                artist.value = it
-                            },
+                            onValueChange = { artist.value = it },
+                            placeholder = { Text("Your artist name") },
                             label = { Text("Artist") },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        fileList.value.forEach {
-                            Text(it.toString())
+
+                        Row {
+                            IconButton(onClick = { openFilePickerDialog() }) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                                )
+                            }
+                            TextField(
+                                value = if (fileList.value.isEmpty()) "" else fileList.value.toString(),
+                                onValueChange = {},
+                                label = { Text("Files") },
+                                enabled = false,
+                            )
                         }
-                        Button(onClick = { start() }) {
-                            Text("File Picker")
+
+                        Row {
+                            IconButton(onClick = { showDatePicker() }) {
+                                Icon(
+                                    Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                                )
+                            }
+                            TextField(
+                                value = dateToLongString(date.value),
+                                onValueChange = {},
+                                enabled = false,
+                                label = { Text("Release Date") },
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(25.dp),
+                            modifier = Modifier.padding(vertical = 10.dp)
+                        ) {
+                            Checkbox(checked = true, enabled = false, onCheckedChange = {})
+                            Text("Start seeding", color = Color.Gray)
+                        }
+
+                        OutlinedButton(
+                            modifier = Modifier.align(Alignment.End),
+                            onClick = { publishRelease() }) {
+                            Text("Create Release")
                         }
                     }
-
                 })
         }
     }

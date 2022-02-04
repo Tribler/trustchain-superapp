@@ -34,7 +34,6 @@ fun Debug(debugScreenViewModel: DebugScreenViewModel) {
     var uploadRate by rememberSaveable { mutableStateOf<Long>(0) }
     var downloadRate by rememberSaveable { mutableStateOf<Long>(0) }
 
-
     LaunchedEffect(Unit) {
         while (true) {
             interfaces = sessionManager.listenInterfaces()

@@ -11,9 +11,9 @@ object MusicDAOTheme {
     val DarkColors = darkColors(
         primary = Red300,
         primaryVariant = Red700,
-        onPrimary = Color.Black,
+        onPrimary = Color.White,
         secondary = Red300,
-        onSecondary = Color.Black,
+        onSecondary = Color.White,
         error = Red200
     )
 }

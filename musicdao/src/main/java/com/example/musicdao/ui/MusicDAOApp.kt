@@ -1,5 +1,8 @@
 package com.example.musicdao.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
@@ -18,6 +21,8 @@ import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.release.CreateReleaseDialog
 import com.google.android.exoplayer2.ExoPlayerFactory
 
+@ExperimentalFoundationApi
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -43,7 +48,6 @@ fun MusicDAOApp(appContainer: AppContainer) {
                     Icon(
                         imageVector = Icons.Filled.Create,
                         contentDescription = null,
-                        tint = Color.White
                     )
                 }
             },
