@@ -1,5 +1,7 @@
 package com.example.musicdao.ui.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,10 +11,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -21,8 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.musicdao.ui.Screen
 import com.example.musicdao.ui.components.ReleaseCover
+import com.example.musicdao.ui.dateToShortString
 import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -38,7 +44,7 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                     style = MaterialTheme.typography.h6,
                     modifier = Modifier
                         .background(MaterialTheme.colors.background)
-                        .fillMaxWidth(  )
+                        .fillMaxWidth()
                         .padding(20.dp)
                 )
                 Divider()
@@ -46,12 +52,33 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
             items(releasesState) {
                 ListItem(
                     text = { Text(it.releaseBlock.title) },
-                    secondaryText = { Text("Album - ${it.releaseBlock.artist}") },
+                    secondaryText = {
+                        Row {
+                            Text("Album - ${it.releaseBlock.artist}")
+                            if (it.files != null) {
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    tint = MaterialTheme.colors.primary,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterVertically)
+                                        .padding(start = 5.dp)
+                                        .size(15.dp)
+                                )
+                            }
+                        }
+                    },
                     trailing = {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = null
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                dateToShortString(it.releaseBlock.releaseDate),
+                                modifier = Modifier.padding(end = 10.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = null
+                            )
+                        }
                     },
                     modifier = Modifier.clickable {
                         navController.navigate(

@@ -12,7 +12,8 @@ data class ReleaseBlock(
     val title: String,
     val artist: String,
     val publisher: String,
-    val protocolVersion: String,
+    val releaseDate: String,
+    val protocolVersion: String
 )
 
 class ReleaseRepository(private val musicCommunity: MusicCommunity) {
@@ -87,9 +88,18 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
         val title = block.transaction["title"] as String
         val artist = block.transaction["artist"] as String
         val publisher = block.transaction["publisher"] as String
+        val releaseDate = block.transaction["releaseDate"] as String
         val protocolVersion = block.transaction["protocolVersion"] as String
 
-        return ReleaseBlock(releaseId, magnet, title, artist, publisher, protocolVersion)
+        return ReleaseBlock(
+            releaseId = releaseId,
+            magnet = magnet,
+            title = title,
+            artist = artist,
+            publisher = publisher,
+            releaseDate = releaseDate,
+            protocolVersion = protocolVersion
+        )
     }
 
     private fun validateTrustChainReleaseBlock(block: TrustChainBlock): Boolean {
@@ -98,6 +108,7 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
         val title = block.transaction["title"]
         val artist = block.transaction["artist"]
         val publisher = block.transaction["publisher"]
+        val releaseDate = block.transaction["releaseDate"]
         val protocolVersion = block.transaction["protocolVersion"]
 
         return (releaseId is String && releaseId.isNotEmpty() &&
@@ -105,6 +116,7 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
             title is String && title.isNotEmpty() &&
             artist is String && artist.isNotEmpty() &&
             publisher is String && publisher.isNotEmpty() &&
+            releaseDate is String && releaseDate.isNotEmpty() &&
             protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == PROTOCOL_VERSION)
     }
 }

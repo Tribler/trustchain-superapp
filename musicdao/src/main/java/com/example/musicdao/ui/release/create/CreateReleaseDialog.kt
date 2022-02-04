@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.release.create.CreateReleaseDialogViewModel
+import java.time.Instant
 
 
 @ExperimentalComposeUiApi
@@ -53,7 +54,7 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         val res = viewModel.createRelease(
             artist.value,
             title.value,
-            releaseDate = "DEFAULT",
+            releaseDate = Instant.now().toString(),
             publisher = "DEFAULT",
             uris = fileList.value,
             localContext

@@ -1,7 +1,9 @@
 package com.example.musicdao.ui.release
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.ui.components.ReleaseCover
+import com.example.musicdao.ui.dateToShortString
 import com.example.musicdao.ui.torrent.TorrentStatusScreen
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -33,6 +36,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
 fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
@@ -149,6 +153,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(releaseBlock: ReleaseBlock) {
     Column(modifier = Modifier.padding(20.dp)) {
@@ -163,7 +168,8 @@ fun Header(releaseBlock: ReleaseBlock) {
             modifier = Modifier.padding(bottom = 5.dp)
         )
         Text(
-            "Album", style = MaterialTheme.typography.body2.merge(
+            "Album - ${dateToShortString(releaseBlock.releaseDate)}",
+            style = MaterialTheme.typography.body2.merge(
                 SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)
             ), modifier = Modifier.padding(bottom = 10.dp)
         )
@@ -178,7 +184,7 @@ fun Header(releaseBlock: ReleaseBlock) {
                 modifier = Modifier.then(Modifier.padding(0.dp))
             )
             Button(onClick = {}) {
-                Text("Tip", color = Color.White)
+                Text("Donate", color = Color.White)
             }
 
         }
