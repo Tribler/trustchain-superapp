@@ -1,27 +1,30 @@
 package com.example.musicdao.ui.home
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
-import com.example.musicdao.repositories.ReleaseBlock
+import com.example.musicdao.domain.usecases.GetReleaseUseCase
+import com.example.musicdao.domain.usecases.SaturatedRelease
 import com.example.musicdao.repositories.ReleaseRepository
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.O)
 class HomeScreenViewModel(
     releaseRepository: ReleaseRepository,
+    getReleaseUseCase: GetReleaseUseCase
 ) : ViewModel() {
-    fun getCover(it: ReleaseBlock): File? {
-        return null
-    }
-
-    private val _releases: MutableLiveData<List<ReleaseBlock>> = MutableLiveData()
-    val releases: LiveData<List<ReleaseBlock>> = _releases
+    private val _releases: MutableLiveData<List<SaturatedRelease>> = MutableLiveData()
+    val releases: LiveData<List<SaturatedRelease>> = _releases
 
     init {
         viewModelScope.launch {
-            releaseRepository.getReleaseBlocks().collect {
-                _releases.value = it
+            releaseRepository.getReleaseBlocks().collect { releaseBlock ->
+                val releases = releaseBlock.map {
+                    getReleaseUseCase.invoke(it.releaseId)
+                }
+                _releases.value = releases
             }
         }
     }
@@ -29,10 +32,11 @@ class HomeScreenViewModel(
     companion object {
         fun provideFactory(
             releaseRepository: ReleaseRepository = AppContainer.releaseRepository,
+            getReleaseUseCase: GetReleaseUseCase = AppContainer.getReleaseUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeScreenViewModel(releaseRepository) as T
+                return HomeScreenViewModel(releaseRepository, getReleaseUseCase) as T
             }
         }
     }

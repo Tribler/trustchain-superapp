@@ -1,11 +1,15 @@
 package com.example.musicdao.ui.home
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -25,64 +29,43 @@ import java.io.File
 fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreenViewModel) {
 
     val releasesState by homeScreenViewModel.releases.observeAsState(listOf())
-    val scrollState = rememberScrollState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.padding(20.dp)) {
-            item(1) {
-                Text(
-                    text = "Recommended",
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier
-                        .background(MaterialTheme.colors.background)
-                        .padding(bottom = 10.dp)
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(15.dp),
-                    modifier = Modifier
-                        .horizontalScroll(scrollState)
-                        .padding(bottom = 20.dp)
-                ) {
-                    releasesState.forEach {
-                        val cover = homeScreenViewModel.getCover(it)
-                        ReleaseCoverButton(
-                            it.title,
-                            it.artist,
-                            cover,
-                            modifier = Modifier.clickable { navController.navigate("release/${it.releaseId}") })
-                    }
-                }
-
-            }
+        LazyColumn {
             stickyHeader {
                 Text(
                     text = "All Releases",
                     style = MaterialTheme.typography.h6,
-                    modifier = Modifier.background(MaterialTheme.colors.background)
+                    modifier = Modifier
+                        .background(MaterialTheme.colors.background)
+                        .fillMaxWidth(  )
+                        .padding(20.dp)
                 )
+                Divider()
             }
             items(releasesState) {
-                val cover = homeScreenViewModel.getCover(it)
                 ListItem(
-                    text = { Text(it.title) },
-                    secondaryText = { Text(it.artist) },
+                    text = { Text(it.releaseBlock.title) },
+                    secondaryText = { Text("Album - ${it.releaseBlock.artist}") },
+                    trailing = {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = null
+                        )
+                    },
                     modifier = Modifier.clickable {
                         navController.navigate(
                             Screen.Release.createRoute(
-                                it.releaseId
+                                it.releaseBlock.releaseId
                             )
                         )
                     },
-                    icon = {
-                        IconButton(onClick = {}) {
-                            ReleaseCover(
-                                cover, modifier = Modifier
-                                    .clip(RoundedCornerShape(5))
-                            )
-
-                        }
-                    }
+                    icon = { ReleaseCover(it.cover, modifier = Modifier.size(40.dp)) }
                 )
+                Divider()
+            }
+            item("end") {
+                Column(modifier = Modifier.height(100.dp)) {}
             }
         }
     }

@@ -21,7 +21,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 sealed class Screen(val route: String) {
     object Home : Screen("home")
     object Release : Screen("release/{releaseId}") {
-        fun createRoute(releaseId: String) = "player/$releaseId"
+        fun createRoute(releaseId: String) = "release/$releaseId"
     }
 
     object Search : Screen("search")

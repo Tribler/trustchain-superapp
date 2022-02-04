@@ -14,12 +14,22 @@ import kotlinx.coroutines.flow.flow
 import java.io.File
 
 fun mapTorrentHandle(torrentHandle: TorrentHandle, directory: File): TorrentHandleStatus {
+    val files = torrentHandle.torrentFile()?.files()
+    val formatted = if (files != null) {
+        (0..(files.numFiles() - 1)).map {
+            files.filePath(it)
+        }.joinToString("\n")
+    } else {
+        ""
+    }
+
     return TorrentHandleStatus(
         id = torrentHandle.status().name().toString(),
+        infoHash = torrentHandle.infoHash().toString(),
         magnet = torrentHandle.makeMagnetUri(),
         finishedDownloading = torrentHandle.status().isFinished.toString(),
-        pieces = "${torrentHandle.status().numPieces()}/${torrentHandle.status().pieces().count()}",
-        files = torrentHandle.torrentFile()?.files().toString(),
+        pieces = "${torrentHandle.status().pieces().count()}/${torrentHandle.status().numPieces()}",
+        files = formatted,
         seeding = torrentHandle.status().isSeeding.toString(),
         peers = torrentHandle.status().numPeers().toString(),
         seeders = torrentHandle.status().numPeers().toString(),

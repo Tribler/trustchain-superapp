@@ -18,6 +18,7 @@ import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.release.CreateReleaseDialog
 import com.google.android.exoplayer2.ExoPlayerFactory
 
+@ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MusicDAOApp(appContainer: AppContainer) {
@@ -46,7 +47,7 @@ fun MusicDAOApp(appContainer: AppContainer) {
                     )
                 }
             },
-            drawerContent = { Text(text = "drawerContent") },
+            drawerContent = { Drawer() },
             content = { paddingValues ->
                 Box(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
                     AppNavigation(navController, appContainer, exoPlayer)

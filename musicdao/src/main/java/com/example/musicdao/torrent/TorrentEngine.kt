@@ -29,8 +29,8 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                         val a: AddTorrentAlert = alert as AddTorrentAlert
                         Log.d(
                             "MusicDAOTorrent",
-                            "ALERT: Torrent added ${a.handle().infoHash()} with ${
-                                a.handle().torrentFile()
+                            "ALERT: Torrent added ${a.handle().infoHash()} with \n${
+                                a.handle().makeMagnetUri()
                             }"
                         )
 

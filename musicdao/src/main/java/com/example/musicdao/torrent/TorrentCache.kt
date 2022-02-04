@@ -126,6 +126,7 @@ class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFo
 
 data class TorrentHandleStatus(
     val id: String,
+    val infoHash: String,
     val magnet: String,
     val finishedDownloading: String,
     val pieces: String,

@@ -25,7 +25,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.torrent.TorrentStatusScreen
-import com.frostwire.jlibtorrent.TorrentHandle
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -77,21 +76,24 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                     text = { Text(title) })
             }
         }
-        Text(saturatedRelease.toString())
         if (state == 0) {
-
             if (saturatedRelease.files != null) {
-                Text("ReleaseUIState.Downloaded")
-                ReleaseCover(
-                    file = saturatedRelease.cover,
+                Column(
                     modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
                         .align(Alignment.CenterHorizontally)
-                )
+                        .padding(top = 20.dp)
+                ) {
+                    ReleaseCover(
+                        file = saturatedRelease.cover,
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
                 Header(saturatedRelease.releaseBlock)
                 val files = saturatedRelease.files
                 files?.map {
@@ -141,25 +143,6 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                 Text("Could not find torrent.")
             }
         }
-    }
-}
-
-
-@Composable
-fun HandleInfo(torrentHandle: TorrentHandle) {
-    val seeders = torrentHandle.status().numSeeds()
-    val peers = torrentHandle.status().numPeers()
-    val seeding = torrentHandle.status().isSeeding
-    val upload = torrentHandle.status().allTimeUpload()
-    val download = torrentHandle.status().allTimeDownload()
-
-    Column {
-
-        Text("seeders: $seeders")
-        Text("peers: $peers")
-        Text("seeding: $seeding =")
-        Text("upload: $upload")
-        Text("download: $download")
     }
 }
 
