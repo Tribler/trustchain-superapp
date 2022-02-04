@@ -1,5 +1,8 @@
 package com.example.musicdao.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
@@ -16,6 +19,8 @@ import com.example.musicdao.ui.debug.Debug
 import com.example.musicdao.ui.home.HomeScreen
 import com.example.musicdao.ui.home.HomeScreenViewModel
 import com.example.musicdao.ui.release.ReleaseScreen
+import com.example.musicdao.ui.search.SearchScreen
+import com.example.musicdao.ui.search.SearchScreenViewModel
 import com.google.android.exoplayer2.SimpleExoPlayer
 
 sealed class Screen(val route: String) {
@@ -30,6 +35,8 @@ sealed class Screen(val route: String) {
 }
 
 
+@ExperimentalFoundationApi
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AppNavigation(
@@ -37,23 +44,27 @@ fun AppNavigation(
     appContainer: AppContainer,
     exoPlayer: SimpleExoPlayer,
 ) {
+    val homeScreenViewModel: HomeScreenViewModel = viewModel(
+        factory = HomeScreenViewModel.provideFactory(
+            appContainer.releaseRepository,
+        )
+    )
+    val searchScreenScreenViewModel: SearchScreenViewModel = viewModel(factory = SearchScreenViewModel.provideFactory())
+
     NavHost(
         modifier = Modifier.fillMaxSize(),
         navController = navController,
         startDestination = Screen.Home.route,
         builder = {
             composable(Screen.Home.route) {
-                val homeScreenViewModel: HomeScreenViewModel = viewModel(
-                    factory = HomeScreenViewModel.provideFactory(
-                        appContainer.releaseRepository,
-                    )
-                )
                 HomeScreen(
                     navController = navController,
                     homeScreenViewModel = homeScreenViewModel
                 )
             }
-            composable(Screen.Search.route) { Search() }
+            composable(Screen.Search.route) {
+                SearchScreen(navController, searchScreenScreenViewModel)
+            }
             composable(Screen.Debug.route) { Debug() }
             composable(
                 Screen.Release.route,
@@ -72,6 +83,3 @@ fun AppNavigation(
 
 }
 
-@Composable
-fun Search() {
-}

@@ -28,6 +28,12 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
         return this.releaseBlocks
     }
 
+    fun searchReleaseBlocksLocal(keyword: String): List<ReleaseBlock> {
+        return this.releaseBlocks.value.filter {
+            it.artist.lowercase().contains(keyword) || it.title.lowercase().contains(keyword)
+        }
+    }
+
     fun refreshReleases() {
         this._releaseBlocks.value = fetchReleases()
     }
