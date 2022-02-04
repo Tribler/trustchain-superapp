@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -21,7 +22,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
         BottomNavigationItem("Search", Screen.Search.route, Icons.Filled.Search),
-        BottomNavigationItem("Debug", Screen.Debug.route, Icons.Filled.Settings)
+        BottomNavigationItem("Torrents", Screen.Debug.route, Icons.Filled.Send)
     )
 
     BottomNavigation {

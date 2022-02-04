@@ -11,6 +11,7 @@ import com.example.musicdao.domain.usecases.CreateReleaseUseCase
 import com.example.musicdao.domain.usecases.GetReleaseUseCase
 import com.example.musicdao.domain.usecases.SearchUseCase
 import com.example.musicdao.domain.usecases.torrents.DownloadIntentUseCase
+import com.example.musicdao.domain.usecases.torrents.GetAllActiveTorrentsUseCase
 import com.example.musicdao.domain.usecases.torrents.GetTorrentStatusFlowUseCase
 import com.example.musicdao.ipv8.MusicCommunity
 import com.example.musicdao.repositories.ReleaseRepository
@@ -22,6 +23,7 @@ import com.frostwire.jlibtorrent.swig.settings_pack
 import java.nio.file.Paths
 
 object AppContainer {
+    lateinit var getAllActiveTorrentsUseCase: GetAllActiveTorrentsUseCase
     lateinit var searchUseCase: SearchUseCase
     lateinit var getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
     lateinit var downloadIntentuseCase: DownloadIntentUseCase
@@ -63,6 +65,7 @@ object AppContainer {
         downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
         getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
         searchUseCase = SearchUseCase(releaseRepository, getReleaseUseCase)
+        getAllActiveTorrentsUseCase = GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
 
     }
 
@@ -81,14 +84,14 @@ object AppContainer {
         settingsPack.setBoolean(
             settings_pack.bool_types.announce_to_all_trackers.swigValue(),
             true
-        );
-        settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true);
+        )
+        settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
         settingsPack.setBoolean(
             settings_pack.bool_types.listen_system_port_fallback.swigValue(),
             false
-        );
-        settingsPack.setBoolean(settings_pack.bool_types.enable_upnp.swigValue(), false);
-        settingsPack.setBoolean(settings_pack.bool_types.enable_natpmp.swigValue(), false);
+        )
+        settingsPack.setBoolean(settings_pack.bool_types.enable_upnp.swigValue(), false)
+        settingsPack.setBoolean(settings_pack.bool_types.enable_natpmp.swigValue(), false)
 
         return SessionParams(settingsPack)
     }

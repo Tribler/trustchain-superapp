@@ -3,10 +3,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.util.MyResult
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import com.frostwire.jlibtorrent.alerts.*
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.io.File
 import java.nio.file.Path
 
@@ -15,6 +13,14 @@ import java.nio.file.Path
  */
 @RequiresApi(Build.VERSION_CODES.O)
 class TorrentEngine(private val sessionManager: SessionManager) {
+
+    private val activeTorrents: MutableStateFlow<MutableList<TorrentHandle>> = MutableStateFlow(
+        mutableListOf()
+    )
+
+    fun getAllTorrents(): MutableStateFlow<MutableList<TorrentHandle>> {
+        return activeTorrents
+    }
 
     init {
         sessionManager.addListener(object : AlertListener {
@@ -35,6 +41,18 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                         )
 
                         alert.handle().resume()
+                        activeTorrents.value.add(alert.handle())
+
+                    }
+                    AlertType.TORRENT_REMOVED -> {
+                        val a: TorrentRemovedAlert = alert as TorrentRemovedAlert
+                        Log.d(
+                            "MusicDAOTorrent",
+                            "ALERT: Torrent removed ${a.handle().infoHash()} with \n${
+                                a.handle().makeMagnetUri()
+                            }"
+                        )
+                        activeTorrents.value.add(alert.handle())
                     }
                     AlertType.BLOCK_FINISHED -> {
                         val a: BlockFinishedAlert = alert as BlockFinishedAlert
@@ -46,7 +64,13 @@ class TorrentEngine(private val sessionManager: SessionManager) {
 
                     }
                     AlertType.TORRENT_FINISHED -> {
-                        println("Torrent finished")
+                        val a: TorrentFinishedAlert = alert as TorrentFinishedAlert
+                        Log.d(
+                            "MusicDAOTorrent",
+                            "ALERT: Torrent finished ${a.handle().infoHash()} with \n${
+                                a.handle().makeMagnetUri()
+                            }"
+                        )
                     }
                 }
             }

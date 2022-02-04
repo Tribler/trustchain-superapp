@@ -19,6 +19,7 @@ import com.example.musicdao.ui.debug.Debug
 import com.example.musicdao.ui.home.HomeScreen
 import com.example.musicdao.ui.home.HomeScreenViewModel
 import com.example.musicdao.ui.release.ReleaseScreen
+import com.example.musicdao.ui.search.DebugScreenViewModel
 import com.example.musicdao.ui.search.SearchScreen
 import com.example.musicdao.ui.search.SearchScreenViewModel
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -50,6 +51,7 @@ fun AppNavigation(
         )
     )
     val searchScreenScreenViewModel: SearchScreenViewModel = viewModel(factory = SearchScreenViewModel.provideFactory())
+    val debugScreenViewModel: DebugScreenViewModel = viewModel(factory = DebugScreenViewModel.provideFactory())
 
     NavHost(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +67,7 @@ fun AppNavigation(
             composable(Screen.Search.route) {
                 SearchScreen(navController, searchScreenScreenViewModel)
             }
-            composable(Screen.Debug.route) { Debug() }
+            composable(Screen.Debug.route) { Debug(debugScreenViewModel) }
             composable(
                 Screen.Release.route,
                 arguments = listOf(navArgument("releaseId") {
