@@ -1,6 +1,7 @@
 package com.example.musicdao.ui.release
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -57,6 +58,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
     fun play(file: File) {
         val mediaSource = buildMediaSource(Uri.fromFile(file))
             ?: throw Error("Media source could not be instantiated")
+        Log.d("MusicDAOTorrent", "Trying to play ${file}")
         exoPlayer.playWhenReady = true
         exoPlayer.seekTo(0, 0)
         exoPlayer.prepare(mediaSource, false, false)
@@ -77,40 +79,41 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
             }
         }
         if (state == 0) {
-            if (saturatedRelease.files != null) {
-                Column(
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 20.dp)
+            ) {
+                ReleaseCover(
+                    file = saturatedRelease.cover,
                     modifier = Modifier
+                        .height(200.dp)
+                        .aspectRatio(1f)
+                        .clip(RoundedCornerShape(10))
+                        .background(Color.DarkGray)
+                        .shadow(10.dp)
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp)
-                ) {
-                    ReleaseCover(
-                        file = saturatedRelease.cover,
-                        modifier = Modifier
-                            .height(200.dp)
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(10))
-                            .background(Color.DarkGray)
-                            .shadow(10.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
-                }
-                Header(saturatedRelease.releaseBlock)
+                )
+            }
+            Header(saturatedRelease.releaseBlock)
+            if (saturatedRelease.files != null) {
                 val files = saturatedRelease.files
                 files?.map {
                     ListItem(text = { Text(it.name) },
-                        secondaryText = { Text(it.name) },
+                        secondaryText = { Text(it.artist) },
                         trailing = {
                             Icon(
                                 imageVector = Icons.Filled.Menu,
                                 contentDescription = null
                             )
                         },
-                        modifier = Modifier.clickable { play(file = it) })
+                        modifier = Modifier.clickable { play(file = it.file) })
                 }
             } else {
                 if (torrentStatus != null) {
                     val downloadingTracks = torrentStatus?.downloadingTracks
                     downloadingTracks?.map {
+                        Text(text = it.file.absolutePath)
                         ListItem(text = { Text(it.title) },
                             secondaryText = {
                                 Column {

@@ -44,14 +44,16 @@ fun downloadingTracks(handle: TorrentHandle, directory: File): List<DownloadingT
     val fileProgress = handle.fileProgress()
 
     val downloadingTracks = (0..(files.numFiles() - 1)).map {
+        val file = File("${directory}/torrents/${handle.infoHash()}/${files.filePath(it)}")
         DownloadingTrack(
-            title = files.fileName(it),
-            artist = "Artist Name",
+            title = (Util.checkAndSanitizeTrackNames(file.name)
+                ?: file.name),
+            artist = "Artist",
             progress = Util.calculateDownloadProgress(
                 fileProgress.get(it),
                 files.fileSize(it)
             ),
-            file = File("${directory}/${files.filePath(it)}"),
+            file = file,
             fileIndex = it
         )
     }

@@ -24,10 +24,6 @@ class ReleaseScreenViewModel(
     private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
 ) : ViewModel() {
 
-    fun get(): SaturatedRelease {
-        return getReleaseUseCase.invoke(releaseId)
-    }
-
     private val _saturatedRelease: MutableStateFlow<SaturatedRelease> =
         MutableStateFlow(getReleaseUseCase.invoke(releaseId))
     val saturatedReleaseState: StateFlow<SaturatedRelease> = _saturatedRelease

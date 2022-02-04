@@ -6,12 +6,19 @@ import androidx.annotation.RequiresApi
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.repositories.ReleaseRepository
 import com.example.musicdao.util.Util
+import com.mpatric.mp3agic.Mp3File
 import java.io.File
 
 data class SaturatedRelease(
     val releaseBlock: ReleaseBlock,
-    val files: List<File>?,
+    val files: List<Track>?,
     val cover: File?
+)
+
+data class Track(
+    val file: File,
+    val name: String,
+    val artist: String
 )
 
 class GetReleaseUseCase(
@@ -24,13 +31,27 @@ class GetReleaseUseCase(
         val releaseBlock = releaseRepository.getReleaseBlock(id)
 
         val files = torrentCache.getFiles(id)
+        val tracks = files?.mapNotNull {
+            try {
+                val mp3 = Mp3File(it)
+                Track(
+                    file = it,
+                    name = Util.getTitle(mp3) ?: (Util.checkAndSanitizeTrackNames(it.name)
+                        ?: it.name),
+                    artist = releaseBlock.artist
+                )
+            } catch (e: Exception) {
+                null
+            }
+        }
+
         var cover: File? = null
         if (files != null && files.isNotEmpty()) {
             cover = Util.findCoverArt(files.get(0).parentFile.parentFile)
         }
         return SaturatedRelease(
             releaseBlock,
-            files,
+            tracks,
             cover
         )
     }
