@@ -19,8 +19,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.releases.ReleaseList
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -30,19 +33,29 @@ import java.io.File
 fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreenViewModel) {
 
     val releasesState by homeScreenViewModel.releases.observeAsState(listOf())
+    val isRefreshing by homeScreenViewModel.isRefreshing.observeAsState(false)
+    val refreshState = rememberSwipeRefreshState(isRefreshing)
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        ReleaseList(releasesState = releasesState, navController = navController, header = {
-            Text(
-                text = "All Releases",
-                style = MaterialTheme.typography.h6,
-                modifier = Modifier
-                    .background(MaterialTheme.colors.background)
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            )
-            Divider()
-        })
+    SwipeRefresh(state = refreshState, onRefresh = { homeScreenViewModel.refresh() }) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ReleaseList(releasesState = releasesState, navController = navController, header = {
+                Text(
+                    text = "All Releases",
+                    style = MaterialTheme.typography.h6,
+                    modifier = Modifier
+                        .background(MaterialTheme.colors.background)
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                )
+                Divider()
+            }, modifier = Modifier.fillMaxSize())
+            if (releasesState.isEmpty()) {
+                EmptyState(
+                    firstLine = "No releases found",
+                    secondLine = "Make a release yourself or wait for releases to come in",
+                )
+            }
+        }
     }
 }
 
