@@ -59,7 +59,6 @@ fun TorrentStatusScreen(torrentHandle: TorrentHandleStatus) {
                 modifier = Modifier.weight(1f)
             )
         }
-        Text(torrentHandle.downloadingTracks.toString())
         Divider()
     }
 }

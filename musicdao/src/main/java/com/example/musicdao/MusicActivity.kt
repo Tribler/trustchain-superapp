@@ -12,6 +12,8 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +35,8 @@ class MusicActivity : AppCompatActivity() {
     lateinit var mService: MusicGossipingService
     var mBound: Boolean = false
 
+    @ExperimentalAnimationApi
+    @ExperimentalFoundationApi
     @RequiresApi(Build.VERSION_CODES.O)
     @ExperimentalMaterialApi
     @ExperimentalComposeUiApi

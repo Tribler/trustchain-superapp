@@ -28,10 +28,11 @@ import com.example.musicdao.ui.dateToShortString
 fun ReleaseList(
     releasesState: List<SaturatedRelease>,
     navController: NavController,
-    header: @Composable (() -> Unit)? = null
+    header: @Composable (() -> Unit)? = null,
+    modifier: Modifier = Modifier
 ) {
 
-    LazyColumn {
+    LazyColumn(modifier = modifier) {
         if (header != null) {
             stickyHeader {
                 header()
@@ -79,8 +80,10 @@ fun ReleaseList(
             )
             Divider()
         }
-        item("end") {
-            Column(modifier = Modifier.height(100.dp)) {}
+        if (releasesState.isNotEmpty()) {
+            item("end") {
+                Column(modifier = Modifier.height(100.dp)) {}
+            }
         }
     }
 }

@@ -117,7 +117,6 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                 if (torrentStatus != null) {
                     val downloadingTracks = torrentStatus?.downloadingTracks
                     downloadingTracks?.map {
-                        Text(text = it.file.absolutePath)
                         ListItem(text = { Text(it.title) },
                             secondaryText = {
                                 Column {
@@ -136,6 +135,15 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                                 play(it.file)
                             }
                         )
+                    }
+                    if (downloadingTracks == null || downloadingTracks.isEmpty()) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            CircularProgressIndicator()
+                        }
                     }
                 }
             }

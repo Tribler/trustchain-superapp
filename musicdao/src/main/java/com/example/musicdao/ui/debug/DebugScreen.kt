@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicdao.AppContainer
+import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.search.DebugScreenViewModel
 import kotlinx.coroutines.delay
 
@@ -61,10 +62,14 @@ fun Debug(debugScreenViewModel: DebugScreenViewModel) {
                     Divider()
                 }
             }
-            item("end") {
-                Column(modifier = Modifier.height(height = 200.dp)) {}
-            }
         }
+        if (torrentHandleStatus.isEmpty()) {
+            EmptyState(
+                firstLine = "No torrents active",
+                secondLine = "Currently there are no torrents seeding or downloading",
+            )
+        }
+        Column(modifier = Modifier.height(height = 200.dp)) {}
     }
 }
 
