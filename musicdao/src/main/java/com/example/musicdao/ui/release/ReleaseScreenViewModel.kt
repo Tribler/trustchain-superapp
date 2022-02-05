@@ -31,6 +31,8 @@ class ReleaseScreenViewModel(
     val _torrentHandleState: MutableStateFlow<TorrentHandleStatus?> = MutableStateFlow(null)
     val torrentHandleState: StateFlow<TorrentHandleStatus?> = _torrentHandleState
 
+    private val _update: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     init {
         viewModelScope.launch {
             if (saturatedReleaseState.value.files == null) {
@@ -45,6 +47,12 @@ class ReleaseScreenViewModel(
                 )
                 stateFlow.collect {
                     _torrentHandleState.value = it
+                    // TODO: turn this into boolean
+                    val status = _torrentHandleState.value
+                    if (status != null && status.finishedDownloading == "true" && !_update.value) {
+                        _update.value = true
+                        _saturatedRelease.value = getReleaseUseCase(releaseId)
+                    }
                 }
             }
         }
