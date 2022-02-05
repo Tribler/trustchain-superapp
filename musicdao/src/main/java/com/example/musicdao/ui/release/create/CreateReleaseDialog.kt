@@ -57,6 +57,7 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         val selectFilesIntent = Intent(Intent.ACTION_GET_CONTENT)
         selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         selectFilesIntent.type = "audio/*"
+        selectFilesIntent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "audio/*"))
         val chooseFileActivity = Intent.createChooser(selectFilesIntent, "Choose a file")
         startActivityForResult(AppContainer.activity, chooseFileActivity, 21, Bundle())
     }

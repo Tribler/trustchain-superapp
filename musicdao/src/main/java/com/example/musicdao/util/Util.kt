@@ -192,7 +192,6 @@ object Util {
         }
         // If no file named "Cover" exists, we try to extract the albumImage from the first MP3 we
         // see, and assume it is the album image for the whole Release
-
         val contentFiles = File("$directory/content").listFiles() ?: return null
         for (file in contentFiles) {
             try {
@@ -210,7 +209,7 @@ object Util {
             } catch (e: Exception) {
             }
         }
-        for (file in files) {
+        for (file in contentFiles) {
             for (ext in allowedExtensions) {
                 if (file.name.endsWith(ext)) {
                     return file
