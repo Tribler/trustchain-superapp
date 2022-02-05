@@ -65,6 +65,7 @@ class MusicActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        container.sessionManager?.stop()
         if (mBound) {
             unbindService(mConnection)
         }
