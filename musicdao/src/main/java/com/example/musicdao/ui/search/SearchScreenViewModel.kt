@@ -18,7 +18,7 @@ class SearchScreenViewModel(
     private val searchUseCase: SearchUseCase
 ) : ViewModel() {
 
-    private val DEBOUNCE_DELAY = 500L
+    private val DEBOUNCE_DELAY = 200L
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery

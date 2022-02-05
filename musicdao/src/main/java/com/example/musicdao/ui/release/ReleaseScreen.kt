@@ -1,8 +1,7 @@
 package com.example.musicdao.ui.release
 
-import android.net.Uri
+import DownloadingTrack
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,21 +24,18 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.musicdao.domain.usecases.Track
 import com.example.musicdao.repositories.ReleaseBlock
 import com.example.musicdao.ui.components.ReleaseCover
+import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
 import com.example.musicdao.ui.torrent.TorrentStatusScreen
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DataSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
-fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
+fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
 
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
@@ -52,20 +48,19 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
 
     // Audio Player
     val context = LocalContext.current
-    fun buildMediaSource(uri: Uri): MediaSource? {
-        val dataSourceFactory: DataSource.Factory =
-            DefaultDataSourceFactory(context, "musicdao-audioplayer")
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(uri)
+
+    fun play(track: Track, cover: File?) {
+        playerViewModel.play(track, context, cover)
     }
 
-    fun play(file: File) {
-        val mediaSource = buildMediaSource(Uri.fromFile(file))
-            ?: throw Error("Media source could not be instantiated")
-        Log.d("MusicDAOTorrent", "Trying to play ${file}")
-        exoPlayer.playWhenReady = true
-        exoPlayer.seekTo(0, 0)
-        exoPlayer.prepare(mediaSource, false, false)
+    fun play(track: DownloadingTrack, cover: File?) {
+        playerViewModel.play(
+            Track(
+                file = track.file,
+                name = track.title,
+                artist = track.artist
+            ), context, cover
+        )
     }
 
     val scrollState = rememberScrollState()
@@ -111,7 +106,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                                 contentDescription = null
                             )
                         },
-                        modifier = Modifier.clickable { play(file = it.file) })
+                        modifier = Modifier.clickable { play(it, saturatedRelease.cover) })
                 }
             } else {
                 if (torrentStatus != null) {
@@ -132,7 +127,7 @@ fun ReleaseScreen(releaseId: String, exoPlayer: SimpleExoPlayer) {
                             },
                             modifier = Modifier.clickable {
 //                                viewModel.setFilePriority(it)
-                                play(it.file)
+                                play(it, saturatedRelease.cover)
                             }
                         )
                     }

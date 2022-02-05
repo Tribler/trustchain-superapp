@@ -37,6 +37,7 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
     val refreshState = rememberSwipeRefreshState(isRefreshing)
 
     SwipeRefresh(state = refreshState, onRefresh = { homeScreenViewModel.refresh() }) {
+        val modifier = if (releasesState.isEmpty()) Modifier else Modifier.fillMaxSize()
         Column(modifier = Modifier.fillMaxSize()) {
             ReleaseList(releasesState = releasesState, navController = navController, header = {
                 Text(
@@ -48,7 +49,7 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
                         .padding(20.dp)
                 )
                 Divider()
-            }, modifier = Modifier.fillMaxSize())
+            }, modifier = modifier)
             if (releasesState.isEmpty()) {
                 EmptyState(
                     firstLine = "No releases found",
