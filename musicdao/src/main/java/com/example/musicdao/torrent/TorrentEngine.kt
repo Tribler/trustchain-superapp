@@ -2,6 +2,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.util.MyResult
+import com.example.musicdao.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
 import com.turn.ttorrent.client.SharedTorrent
@@ -57,6 +58,16 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                         )
                         _activeTorrents.value =
                             _activeTorrents.value - alert.handle().infoHash().toString()
+                    }
+                    AlertType.TORRENT_CHECKED -> {
+                        val a: TorrentCheckedAlert = alert as TorrentCheckedAlert
+                        Log.d(
+                            "MusicDAOTorrent",
+                            "ALERT: Torrent checked ${a.handle().infoHash()} with \n${
+                                a.handle().makeMagnetUri()
+                            }"
+                        )
+                        Util.setTorrentPriorities(alert.handle())
                     }
                     AlertType.BLOCK_FINISHED -> {
                         val a: BlockFinishedAlert = alert as BlockFinishedAlert
