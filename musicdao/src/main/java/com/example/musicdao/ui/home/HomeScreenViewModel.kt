@@ -1,10 +1,10 @@
 package com.example.musicdao.ui.home
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
+import com.example.musicdao.AppContainer.getReleaseUseCase
 import com.example.musicdao.domain.usecases.GetReleaseUseCase
 import com.example.musicdao.domain.usecases.SaturatedRelease
 import com.example.musicdao.repositories.ReleaseRepository
@@ -39,7 +39,9 @@ class HomeScreenViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             delay(500)
-            releaseRepository.refreshReleases()
+            _releases.value = releaseRepository.getReleaseBlocks().value.map {
+                getReleaseUseCase.invoke(it.releaseId)
+            }
             _isRefreshing.value = false
         }
     }
