@@ -4,6 +4,7 @@ import androidx.annotation.RequiresApi
 import com.example.musicdao.util.MyResult
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
+import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
@@ -103,11 +104,7 @@ class TorrentEngine(private val sessionManager: SessionManager) {
             return MyResult.Failure("Folder $folder is empty or does not exist.")
         }
 
-        val builder = TorrentBuilder()
-        builder.path(files)
-        val bytes = builder.generate().entry().bencode()
-
-        val torrentInfo = TorrentInfo(bytes)
+        val torrentInfo = createTorrentInfo(folder)
         sessionManager.download(torrentInfo, files.parentFile)
         val handle = sessionManager.find(torrentInfo.infoHash())
         handle.pause()
@@ -148,12 +145,15 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                 return MyResult.Failure("Folder $folder is empty or does not exist.")
             }
 
-            val builder = TorrentBuilder()
-            builder.path(files)
-            val bytes = builder.generate().entry().bencode()
-            val torrentInfo = TorrentInfo(bytes)
+            val torrent = SharedTorrent.create(
+                folder.toFile(),
+                folder.toFile().listFiles().toList().sorted(),
+                65535,
+                listOf(),
+                ""
+            )
 
-            return MyResult.Success(torrentInfo.infoHash().toString())
+            return MyResult.Success(torrent.hexInfoHash)
         }
 
         /**
@@ -171,6 +171,23 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                     }
                 }
             }
+        }
+
+        /**
+         * @param folder the root folder of torrent; will be included
+         * in the torrent(!)
+         * NOTE: important to use this function, other libraries might
+         * create a different torrent file due to different specifications
+         */
+        fun createTorrentInfo(folder: Path): TorrentInfo {
+            val torrent = SharedTorrent.create(
+                folder.toFile(),
+                folder.toFile().listFiles()?.toList()?.sorted() ?: listOf(),
+                65535,
+                listOf(),
+                ""
+            )
+            return TorrentInfo(torrent.encoded)
         }
     }
 }
