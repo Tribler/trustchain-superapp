@@ -18,7 +18,7 @@ class GetAllActiveTorrentsUseCase(
         torrentEngine.getAllTorrents().collect { list ->
             emit(listOf())
             val result = list.mapNotNull {
-                getTorrentStatusFlowUseCase.invoke(it.infoHash().toString())
+                getTorrentStatusFlowUseCase.invoke(it)
             }
             emit(result)
         }

@@ -5,6 +5,7 @@ import com.example.musicdao.util.MyResult
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.nio.file.Path
 
@@ -14,11 +15,12 @@ import java.nio.file.Path
 @RequiresApi(Build.VERSION_CODES.O)
 class TorrentEngine(private val sessionManager: SessionManager) {
 
-    private val activeTorrents: MutableStateFlow<MutableList<TorrentHandle>> = MutableStateFlow(
+    private val _activeTorrents: MutableStateFlow<List<String>> = MutableStateFlow(
         mutableListOf()
     )
+    val activeTorrents: StateFlow<List<String>> = _activeTorrents
 
-    fun getAllTorrents(): MutableStateFlow<MutableList<TorrentHandle>> {
+    fun getAllTorrents(): StateFlow<List<String>> {
         return activeTorrents
     }
 
@@ -39,9 +41,9 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                                 a.handle().makeMagnetUri()
                             }"
                         )
-
                         alert.handle().resume()
-                        activeTorrents.value.add(alert.handle())
+                        _activeTorrents.value =
+                            _activeTorrents.value + alert.handle().infoHash().toString()
 
                     }
                     AlertType.TORRENT_REMOVED -> {
@@ -52,7 +54,8 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                                 a.handle().makeMagnetUri()
                             }"
                         )
-                        activeTorrents.value.add(alert.handle())
+                        _activeTorrents.value =
+                            _activeTorrents.value - alert.handle().infoHash().toString()
                     }
                     AlertType.BLOCK_FINISHED -> {
                         val a: BlockFinishedAlert = alert as BlockFinishedAlert
@@ -61,7 +64,6 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                             "MusicDAOTorrent",
                             "ALERT: Progress: " + p + " for torrent name: " + a.torrentName()
                         )
-
                     }
                     AlertType.TORRENT_FINISHED -> {
                         val a: TorrentFinishedAlert = alert as TorrentFinishedAlert
@@ -123,8 +125,10 @@ class TorrentEngine(private val sessionManager: SessionManager) {
             folder.toFile().parentFile
         )
         val handle = sessionManager.find(Sha1Hash(realInfoHash))
-        sessionManager.pause()
-        sessionManager.resume()
+
+        // Opt-out of the auto-managed queue system of libtorrent
+        handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
+        handle.resume()
 
         return if (handle == null) {
             MyResult.Failure("Did not get the torrent.")

@@ -92,6 +92,16 @@ object AppContainer {
         )
         settingsPack.setBoolean(settings_pack.bool_types.enable_upnp.swigValue(), false)
         settingsPack.setBoolean(settings_pack.bool_types.enable_natpmp.swigValue(), false)
+        settingsPack.setBoolean(settings_pack.bool_types.enable_natpmp.swigValue(), false)
+
+        // Disable Local Discovery
+        settingsPack.setBoolean(settings_pack.bool_types.enable_lsd.swigValue(), false)
+
+        // Increase the limits of auto-managed (queuing) torrents
+        settingsPack.setInteger(settings_pack.int_types.active_downloads.swigValue(), 1000)
+        settingsPack.setInteger(settings_pack.int_types.active_seeds.swigValue(), 1000)
+        settingsPack.setInteger(settings_pack.int_types.active_checking.swigValue(), 1000)
+        settingsPack.setInteger(settings_pack.int_types.active_limit.swigValue(), 1000)
 
         return SessionParams(settingsPack)
     }
