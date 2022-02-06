@@ -30,6 +30,7 @@ import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
 import com.example.musicdao.ui.torrent.TorrentStatusScreen
+import kotlinx.coroutines.flow.collect
 import java.io.File
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -62,6 +63,21 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
             ), context, cover
         )
     }
+
+    LaunchedEffect(key1 = playerViewModel, block = {
+        viewModel.torrentHandleState.collect {
+            val current = playerViewModel.playingTrack.value ?: return@collect
+            val downloadingTracks =
+                viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
+            val isPlaying = playerViewModel.exoPlayer.isPlaying
+            val targetTrack =
+                downloadingTracks.find { it.file.name == current.file.name } ?: return@collect
+
+            if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
+                play(targetTrack, saturatedRelease.cover)
+            }
+        }
+    })
 
     val scrollState = rememberScrollState()
     Column(

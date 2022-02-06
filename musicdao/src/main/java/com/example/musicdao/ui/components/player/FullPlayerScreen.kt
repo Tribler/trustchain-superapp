@@ -71,6 +71,9 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
                                 200
                             )
                             controllerShowTimeoutMs = -1
+                            controllerHideOnTouch = false
+                            useArtwork = false
+                            showController()
                         }
                     }
                 )

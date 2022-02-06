@@ -46,9 +46,7 @@ class PlayerViewModel(context: Context) : ViewModel() {
 
     fun play(track: Track, context: Context, cover: File? = null) {
         _playingTrack.value = track
-        if (cover != null) {
-            _coverFile.value = cover
-        }
+        _coverFile.value = cover
         val mediaSource = buildMediaSource(Uri.fromFile(track.file), context)
             ?: throw Error("Media source could not be instantiated")
         Log.d("MusicDAOTorrent", "Trying to play ${track.file}")
