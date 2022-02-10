@@ -318,18 +318,18 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         items.observe(
             owner,
             Observer {
-                 it.filter { item ->
+                it.filter { item ->
                     (item as ChatItem).contact.name.contains(searchFilter, ignoreCase = true) ||
                         item.contact.mid.contains(searchFilter, ignoreCase = true) ||
                         item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
                 }.let { list ->
-                     adapter.updateItems(list)
+                    adapter.updateItems(list)
 
-                     when (type) {
-                         ADAPTER_RECENT -> binding.tvNoRecentChats.isVisible = list.isEmpty()
-                         ADAPTER_ARCHIVE -> binding.tvNoArchivedChats.isVisible = list.isEmpty()
-                         ADAPTER_BLOCKED -> binding.tvNoBlockedChats.isVisible = list.isEmpty()
-                     }
+                    when (type) {
+                        ADAPTER_RECENT -> binding.tvNoRecentChats.isVisible = list.isEmpty()
+                        ADAPTER_ARCHIVE -> binding.tvNoArchivedChats.isVisible = list.isEmpty()
+                        ADAPTER_BLOCKED -> binding.tvNoBlockedChats.isVisible = list.isEmpty()
+                    }
                 }
             }
         )

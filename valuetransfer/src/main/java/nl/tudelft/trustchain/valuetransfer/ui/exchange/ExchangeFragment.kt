@@ -51,7 +51,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer(true) {
+            ExchangeTransactionItemRenderer(true, parentActivity) {
                 ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
             }
         )

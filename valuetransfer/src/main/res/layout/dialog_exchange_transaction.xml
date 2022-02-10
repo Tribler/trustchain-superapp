@@ -185,13 +185,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-                <TextView
-                    android:id="@+id/tvTransactionFromToName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    tools:text="EuroToken Exchange"
-                    android:textSize="14sp"
-                    android:textColor="?attr/onDialogColor"/>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/tvTransactionFromToName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        tools:text="EuroToken Exchange"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:textSize="14sp"
+                        android:textColor="?attr/onDialogColor"
+                        android:drawablePadding="4dp"/>
+                </FrameLayout>
 
                 <TextView
                     android:id="@+id/tvTransactionFromToAddress"

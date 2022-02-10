@@ -85,12 +85,6 @@ class ContactInfoDialog(
     private lateinit var bottomSheetDialog: Dialog
 
     init {
-        adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer(false) {
-                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
-            }
-        )
-
         lifecycleScope.launchWhenCreated {
             while (isActive) {
                 refreshTransactions()
@@ -101,6 +95,12 @@ class ContactInfoDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        adapterTransactions.registerRenderer(
+            ExchangeTransactionItemRenderer(false, parentActivity) {
+                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+            }
+        )
+
         return activity?.let {
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
