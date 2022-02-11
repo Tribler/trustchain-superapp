@@ -1,7 +1,7 @@
 package com.example.musicdao.cache.entities
 
 import androidx.room.Entity
-import com.example.musicdao.entities.Song
+import com.example.musicdao.model.Song
 import java.io.File
 
 @Entity

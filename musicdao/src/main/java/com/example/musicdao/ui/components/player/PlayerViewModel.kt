@@ -3,10 +3,9 @@ package com.example.musicdao.ui.components.player
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.musicdao.domain.usecases.Track
+import com.example.musicdao.model.Song
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.MediaSource
@@ -22,8 +21,8 @@ class PlayerViewModel(context: Context) : ViewModel() {
     private val _isPlaying: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val isPlaying: StateFlow<Boolean> = _isPlaying
 
-    private val _playingTrack: MutableStateFlow<Track?> = MutableStateFlow(null)
-    val playingTrack: StateFlow<Track?> = _playingTrack
+    private val _playingTrack: MutableStateFlow<Song?> = MutableStateFlow(null)
+    val playingTrack: StateFlow<Song?> = _playingTrack
 
     private val _coverFile: MutableStateFlow<File?> = MutableStateFlow(null)
     val coverFile: StateFlow<File?> = _coverFile
@@ -44,7 +43,7 @@ class PlayerViewModel(context: Context) : ViewModel() {
             .createMediaSource(uri)
     }
 
-    fun play(track: Track, context: Context, cover: File? = null) {
+    fun play(track: Song, context: Context, cover: File? = null) {
         _playingTrack.value = track
         _coverFile.value = cover
         val mediaSource = buildMediaSource(Uri.fromFile(track.file), context)

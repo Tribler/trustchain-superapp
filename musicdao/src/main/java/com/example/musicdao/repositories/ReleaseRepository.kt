@@ -1,5 +1,8 @@
 package com.example.musicdao.repositories
 
+import com.example.musicdao.AppContainer.database
+import com.example.musicdao.cache.CacheDatabase
+import com.example.musicdao.cache.entities.AlbumEntity
 import com.example.musicdao.ipv8.MusicCommunity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,17 +19,12 @@ data class ReleaseBlock(
     val protocolVersion: String
 )
 
-class ReleaseRepository(private val musicCommunity: MusicCommunity) {
+class ReleaseRepository(private val musicCommunity: MusicCommunity, database: CacheDatabase) {
 
     val PROTOCOL_VERSION = "1"
 
-    private val _releaseBlocks: MutableStateFlow<List<ReleaseBlock>> =
-        MutableStateFlow(listOf())
+    private val _releaseBlocks: MutableStateFlow<List<ReleaseBlock>> = MutableStateFlow(listOf())
     private var releaseBlocks: StateFlow<List<ReleaseBlock>> = _releaseBlocks
-
-    fun getReleaseBlocks(): StateFlow<List<ReleaseBlock>> {
-        return this.releaseBlocks
-    }
 
     fun searchReleaseBlocksLocal(keyword: String): List<ReleaseBlock> {
         return this.releaseBlocks.value.filter {
@@ -34,17 +32,28 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity) {
         }
     }
 
-    fun refreshReleases() {
+    suspend fun refreshReleases() {
         this._releaseBlocks.value = fetchReleases()
-    }
+        this._releaseBlocks.value.forEach {
+            database.dao.insert(
+                AlbumEntity(
+                    id = it.releaseId,
+                    magnet = it.magnet,
+                    title = it.title,
+                    artist = it.artist,
+                    publisher = it.publisher,
+                    releaseDate = it.releaseDate,
+                    songs = listOf(),
+                    cover = null,
+                    root = null
+                )
+            )
+        }
 
-    fun getReleaseBlock(releaseId: String): ReleaseBlock {
-        return _releaseBlocks.value.find { it.releaseId == releaseId }!!
     }
 
     private fun fetchReleases(): List<ReleaseBlock> {
         val releaseBlocks = musicCommunity.database.getBlocksWithType("publish_release")
-
         return releaseBlocks
             .filter { trustChainBlock -> validateTrustChainReleaseBlock(trustChainBlock) }
             .map { trustChainBlock -> trustChainBlockToRelease(trustChainBlock) }

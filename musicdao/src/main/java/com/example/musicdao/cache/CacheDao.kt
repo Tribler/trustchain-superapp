@@ -1,9 +1,6 @@
 package com.example.musicdao.cache
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.example.musicdao.cache.entities.AlbumEntity
 
 @Dao
@@ -14,6 +11,9 @@ interface CacheDao {
 
     @Query("DELETE FROM AlbumEntity WHERE id IS :id")
     suspend fun delete(id: String)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun update(entity: AlbumEntity)
 
     @Query("SELECT * FROM AlbumEntity")
     suspend fun getAll(): List<AlbumEntity>

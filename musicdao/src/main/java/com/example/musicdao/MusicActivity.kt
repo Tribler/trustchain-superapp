@@ -49,8 +49,10 @@ class MusicActivity : AppCompatActivity() {
         AppContainer.provide(this, musicCommunity = musicCommunity, this)
         container = AppContainer
         registerBlockSigner()
-        container.torrentCache.seedStrategy()
-        container.releaseRepository.refreshReleases()
+        lifecycleScope.launchWhenStarted {
+            container.releaseRepository.refreshReleases()
+            container.torrentCache.seedStrategy()
+        }
         iterativelyFetchReleases()
 //        iterativelyUpdateSwarmHealth()
         Intent(this, MusicGossipingService::class.java).also { intent ->

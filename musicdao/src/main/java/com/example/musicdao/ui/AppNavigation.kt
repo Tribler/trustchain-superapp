@@ -2,7 +2,10 @@ package com.example.musicdao.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,7 +29,6 @@ import com.example.musicdao.ui.search.SearchScreen
 import com.example.musicdao.ui.search.SearchScreenViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
-import com.google.android.exoplayer2.SimpleExoPlayer
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -52,9 +54,7 @@ fun AppNavigation(
     playerViewModel: PlayerViewModel,
 ) {
     val homeScreenViewModel: HomeScreenViewModel = viewModel(
-        factory = HomeScreenViewModel.provideFactory(
-            appContainer.releaseRepository,
-        )
+        factory = HomeScreenViewModel.provideFactory()
     )
     val searchScreenScreenViewModel: SearchScreenViewModel =
         viewModel(factory = SearchScreenViewModel.provideFactory())

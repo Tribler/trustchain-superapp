@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.SaturatedRelease
 import com.example.musicdao.domain.usecases.SearchUseCase
+import com.example.musicdao.model.Album
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,8 +23,8 @@ class SearchScreenViewModel(
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
-    private val _searchResult: MutableStateFlow<List<SaturatedRelease>> = MutableStateFlow(listOf())
-    val searchResult: StateFlow<List<SaturatedRelease>> = _searchResult
+    private val _searchResult: MutableStateFlow<List<Album>> = MutableStateFlow(listOf())
+    val searchResult: StateFlow<List<Album>> = _searchResult
 
     private var searchJob: Job? = null
 
@@ -40,7 +40,7 @@ class SearchScreenViewModel(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun search(searchText: String) {
+    private suspend fun search(searchText: String) {
         if (searchText.isEmpty()) {
             _searchResult.value = listOf()
         } else {

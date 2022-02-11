@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
+import com.example.musicdao.domain.usecases.GetRelease
 import com.example.musicdao.domain.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.domain.usecases.torrents.GetTorrentStatusFlowUseCase
-import com.example.musicdao.domain.usecases.GetReleaseUseCase
-import com.example.musicdao.domain.usecases.SaturatedRelease
+import com.example.musicdao.model.Album
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -19,14 +19,13 @@ import kotlinx.coroutines.launch
 class ReleaseScreenViewModel(
     private
     val releaseId: String,
-    private val getReleaseUseCase: GetReleaseUseCase,
+    private val getReleaseUseCase: GetRelease,
     private val downloadIntentUseCase: DownloadIntentUseCase,
     private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
 ) : ViewModel() {
 
-    private val _saturatedRelease: MutableStateFlow<SaturatedRelease> =
-        MutableStateFlow(getReleaseUseCase.invoke(releaseId))
-    val saturatedReleaseState: StateFlow<SaturatedRelease> = _saturatedRelease
+    private val _saturatedRelease: MutableStateFlow<Album?> = MutableStateFlow(null)
+    val saturatedReleaseState: StateFlow<Album?> = _saturatedRelease
 
     val _torrentHandleState: MutableStateFlow<TorrentHandleStatus?> = MutableStateFlow(null)
     val torrentHandleState: StateFlow<TorrentHandleStatus?> = _torrentHandleState
@@ -35,9 +34,14 @@ class ReleaseScreenViewModel(
 
     init {
         viewModelScope.launch {
-            if (saturatedReleaseState.value.files == null) {
+            _saturatedRelease.value = getReleaseUseCase.invoke(releaseId)
+
+            val release = _saturatedRelease.value
+
+            if (release?.songs == null || release.songs.isEmpty()) {
                 downloadIntentUseCase.invoke(releaseId)
             }
+
             val flow = getTorrentStatusFlowUseCase(releaseId)
             if (flow != null) {
                 val stateFlow = flow.stateIn(
@@ -61,7 +65,7 @@ class ReleaseScreenViewModel(
     companion object {
         fun provideFactory(
             releaseId: String,
-            getReleaseUseCase: GetReleaseUseCase = AppContainer.getReleaseUseCase,
+            getReleaseUseCase: GetRelease = AppContainer.getReleaseUseCase,
             downloadIntentUseCase: DownloadIntentUseCase = AppContainer.downloadIntentuseCase,
             getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase = AppContainer.getTorrentStatusFlowUseCase
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {

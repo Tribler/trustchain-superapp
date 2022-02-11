@@ -4,34 +4,25 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
-import com.example.musicdao.AppContainer.getReleaseUseCase
-import com.example.musicdao.domain.usecases.GetReleaseUseCase
-import com.example.musicdao.domain.usecases.SaturatedRelease
-import com.example.musicdao.repositories.ReleaseRepository
+import com.example.musicdao.domain.usecases.GetAllReleases
+import com.example.musicdao.model.Album
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 class HomeScreenViewModel(
-    val releaseRepository: ReleaseRepository,
-    getReleaseUseCase: GetReleaseUseCase
+    private val getAllReleases: GetAllReleases
 ) : ViewModel() {
 
-    private val _releases: MutableLiveData<List<SaturatedRelease>> = MutableLiveData()
-    val releases: LiveData<List<SaturatedRelease>> = _releases
+    private val _releases: MutableLiveData<List<Album>> = MutableLiveData()
+    val releases: LiveData<List<Album>> = _releases
 
     private val _isRefreshing: MutableLiveData<Boolean> = MutableLiveData()
     val isRefreshing: LiveData<Boolean> = _isRefreshing
 
     init {
         viewModelScope.launch {
-            releaseRepository.getReleaseBlocks().collect { releaseBlock ->
-                val releases = releaseBlock.map {
-                    getReleaseUseCase.invoke(it.releaseId)
-                }
-                _releases.value = releases
-            }
+            _releases.value = getAllReleases.invoke()
         }
     }
 
@@ -39,21 +30,20 @@ class HomeScreenViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             delay(500)
-            _releases.value = releaseRepository.getReleaseBlocks().value.map {
-                getReleaseUseCase.invoke(it.releaseId)
-            }
+            _releases.value = getAllReleases.invoke()
             _isRefreshing.value = false
         }
     }
 
     companion object {
         fun provideFactory(
-            releaseRepository: ReleaseRepository = AppContainer.releaseRepository,
-            getReleaseUseCase: GetReleaseUseCase = AppContainer.getReleaseUseCase
+            getAllReleases: GetAllReleases = AppContainer.getAllReleases
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeScreenViewModel(releaseRepository, getReleaseUseCase) as T
+                return HomeScreenViewModel(
+                    getAllReleases
+                ) as T
             }
         }
     }

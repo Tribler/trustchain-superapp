@@ -10,12 +10,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.nio.file.Path
+import kotlin.reflect.KSuspendFunction1
 
 /**
  * Cl
  */
 @RequiresApi(Build.VERSION_CODES.O)
-class TorrentEngine(private val sessionManager: SessionManager) {
+class TorrentEngine(
+    private val sessionManager: SessionManager,
+    torrentFinished: (String) -> Unit
+) {
 
     private val _activeTorrents: MutableStateFlow<List<String>> = MutableStateFlow(
         mutableListOf()
@@ -85,6 +89,7 @@ class TorrentEngine(private val sessionManager: SessionManager) {
                                 a.handle().makeMagnetUri()
                             }"
                         )
+                        torrentFinished(a.handle().infoHash().toString())
                     }
                 }
             }

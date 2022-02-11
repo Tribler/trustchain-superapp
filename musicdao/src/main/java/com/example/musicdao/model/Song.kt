@@ -1,4 +1,4 @@
-package com.example.musicdao.entities
+package com.example.musicdao.model
 
 import java.io.File
 

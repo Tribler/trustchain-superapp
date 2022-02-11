@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.musicdao.domain.usecases.SaturatedRelease
+import com.example.musicdao.model.Album
 import com.example.musicdao.ui.Screen
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.dateToShortString
@@ -26,7 +26,7 @@ import com.example.musicdao.ui.dateToShortString
 @ExperimentalFoundationApi
 @Composable
 fun ReleaseList(
-    releasesState: List<SaturatedRelease>,
+    releasesState: List<Album>,
     navController: NavController,
     header: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -40,11 +40,11 @@ fun ReleaseList(
         }
         items(releasesState) {
             ListItem(
-                text = { Text(it.releaseBlock.title) },
+                text = { Text(it.title) },
                 secondaryText = {
                     Row {
-                        Text("Album - ${it.releaseBlock.artist}")
-                        if (it.files != null) {
+                        Text("Album - ${it.artist}")
+                        if (it.songs != null && it.songs.isNotEmpty()) {
                             Icon(
                                 imageVector = Icons.Default.CheckCircle,
                                 tint = MaterialTheme.colors.primary,
@@ -60,7 +60,7 @@ fun ReleaseList(
                 trailing = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            dateToShortString(it.releaseBlock.releaseDate),
+                            dateToShortString(it.releaseDate.toString()),
                             modifier = Modifier.padding(end = 10.dp)
                         )
                         Icon(
@@ -72,7 +72,7 @@ fun ReleaseList(
                 modifier = Modifier.clickable {
                     navController.navigate(
                         Screen.Release.createRoute(
-                            it.releaseBlock.releaseId
+                            it.id
                         )
                     )
                 },

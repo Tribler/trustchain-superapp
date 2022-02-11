@@ -24,8 +24,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.musicdao.domain.usecases.Track
-import com.example.musicdao.repositories.ReleaseBlock
+import com.example.musicdao.model.Album
+import com.example.musicdao.model.Song
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
@@ -45,149 +45,156 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
         viewModel(factory = ReleaseScreenViewModel.provideFactory(releaseId))
 
     val torrentStatus by viewModel.torrentHandleState.collectAsState()
-    val saturatedRelease by viewModel.saturatedReleaseState.collectAsState()
+    val album by viewModel.saturatedReleaseState.collectAsState()
 
     // Audio Player
     val context = LocalContext.current
 
-    fun play(track: Track, cover: File?) {
+    fun play(track: Song, cover: File?) {
         playerViewModel.play(track, context, cover)
     }
 
     fun play(track: DownloadingTrack, cover: File?) {
         playerViewModel.play(
-            Track(
+            Song(
                 file = track.file,
                 name = track.title,
-                artist = track.artist
+                artist = track.artist,
+                title = track.title,
             ), context, cover
         )
     }
 
-    LaunchedEffect(key1 = playerViewModel, block = {
-        viewModel.torrentHandleState.collect {
-            val current = playerViewModel.playingTrack.value ?: return@collect
-            val downloadingTracks =
-                viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
-            val isPlaying = playerViewModel.exoPlayer.isPlaying
-            val targetTrack =
-                downloadingTracks.find { it.file.name == current.file.name } ?: return@collect
-
-            if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
-                play(targetTrack, saturatedRelease.cover)
-            }
-        }
-    })
-
     val scrollState = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .verticalScroll(scrollState)
-            .padding(bottom = 150.dp)
-    ) {
-        TabRow(selectedTabIndex = state) {
-            titles.forEachIndexed { index, title ->
-                Tab(
-                    onClick = { state = index },
-                    selected = (index == state),
-                    text = { Text(title) })
-            }
-        }
-        if (state == 0) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp)
-            ) {
-                ReleaseCover(
-                    file = saturatedRelease.cover,
-                    modifier = Modifier
-                        .height(200.dp)
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(10))
-                        .background(Color.DarkGray)
-                        .shadow(10.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-            Header(saturatedRelease.releaseBlock)
-            if (saturatedRelease.files != null) {
-                val files = saturatedRelease.files
-                files?.map {
-                    ListItem(text = { Text(it.name) },
-                        secondaryText = { Text(it.artist) },
-                        trailing = {
-                            Icon(
-                                imageVector = Icons.Filled.Menu,
-                                contentDescription = null
-                            )
-                        },
-                        modifier = Modifier.clickable { play(it, saturatedRelease.cover) })
+
+    album?.let { album ->
+        LaunchedEffect(key1 = playerViewModel, block = {
+            viewModel.torrentHandleState.collect {
+                val current = playerViewModel.playingTrack.value ?: return@collect
+                val downloadingTracks =
+                    viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
+                val isPlaying = playerViewModel.exoPlayer.isPlaying
+                val targetTrack =
+                    downloadingTracks.find { it.file.name == current.file?.name } ?: return@collect
+
+                if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
+                    play(targetTrack, album.cover)
                 }
-            } else {
-                if (torrentStatus != null) {
-                    val downloadingTracks = torrentStatus?.downloadingTracks
-                    downloadingTracks?.map {
-                        ListItem(text = { Text(it.title) },
-                            secondaryText = {
-                                Column {
-                                    Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
-                                    LinearProgressIndicator(progress = it.progress.toFloat() / 100)
-                                }
-                            },
+            }
+        })
+
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .padding(bottom = 150.dp)
+        ) {
+            TabRow(selectedTabIndex = state) {
+                titles.forEachIndexed { index, title ->
+                    Tab(
+                        onClick = { state = index },
+                        selected = (index == state),
+                        text = { Text(title) })
+                }
+            }
+            if (state == 0) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp)
+                ) {
+                    ReleaseCover(
+                        file = album.cover,
+                        modifier = Modifier
+                            .height(200.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(10))
+                            .background(Color.DarkGray)
+                            .shadow(10.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
+                Header(album)
+                if (album.songs != null && album.songs.isNotEmpty()) {
+                    val files = album.songs
+                    files.map {
+                        ListItem(text = { Text(it.name) },
+                            secondaryText = { Text(it.artist) },
                             trailing = {
                                 Icon(
                                     imageVector = Icons.Filled.Menu,
                                     contentDescription = null
                                 )
                             },
-                            modifier = Modifier.clickable {
-//                                viewModel.setFilePriority(it)
-                                play(it, saturatedRelease.cover)
-                            }
-                        )
+                            modifier = Modifier.clickable { play(it, album.cover) })
                     }
-                    if (downloadingTracks == null || downloadingTracks.isEmpty()) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            CircularProgressIndicator()
+                } else {
+                    if (torrentStatus != null) {
+                        val downloadingTracks = torrentStatus?.downloadingTracks
+                        downloadingTracks?.map {
+                            ListItem(text = { Text(it.title) },
+                                secondaryText = {
+                                    Column {
+                                        Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
+                                        LinearProgressIndicator(progress = it.progress.toFloat() / 100)
+                                    }
+                                },
+                                trailing = {
+                                    Icon(
+                                        imageVector = Icons.Filled.Menu,
+                                        contentDescription = null
+                                    )
+                                },
+                                modifier = Modifier.clickable {
+//                                viewModel.setFilePriority(it)
+                                    play(it, album.cover)
+                                }
+                            )
+                        }
+                        if (downloadingTracks == null || downloadingTracks.isEmpty()) {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                CircularProgressIndicator()
+                            }
                         }
                     }
                 }
-            }
 
 
-        }
-        if (state == 1) {
-            val current = torrentStatus
-            if (current != null) {
-                TorrentStatusScreen(current)
-            } else {
-                Text("Could not find torrent.")
+            }
+            if (state == 1) {
+                val current = torrentStatus
+                if (current != null) {
+                    TorrentStatusScreen(current)
+                } else {
+                    Text("Could not find torrent.")
+                }
             }
         }
+
+
     }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header(releaseBlock: ReleaseBlock) {
+fun Header(album: Album) {
     Column(modifier = Modifier.padding(20.dp)) {
         Text(
-            releaseBlock.title,
+            album.title,
             style = MaterialTheme.typography.h6.merge(SpanStyle(fontWeight = FontWeight.ExtraBold)),
             modifier = Modifier.padding(bottom = 5.dp)
         )
         Text(
-            releaseBlock.artist,
+            album.artist,
             style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
             modifier = Modifier.padding(bottom = 5.dp)
         )
         Text(
-            "Album - ${dateToShortString(releaseBlock.releaseDate)}",
+            "Album - ${dateToShortString(album.releaseDate.toString())}",
             style = MaterialTheme.typography.body2.merge(
                 SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)
             ), modifier = Modifier.padding(bottom = 10.dp)

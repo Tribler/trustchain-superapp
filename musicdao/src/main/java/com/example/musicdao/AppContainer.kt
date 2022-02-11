@@ -9,11 +9,9 @@ import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.example.musicdao.cache.CacheDatabase
-import com.example.musicdao.cache.Converters
 import com.example.musicdao.cache.GsonParser
-import com.example.musicdao.domain.usecases.CreateReleaseUseCase
-import com.example.musicdao.domain.usecases.GetReleaseUseCase
-import com.example.musicdao.domain.usecases.SearchUseCase
+import com.example.musicdao.cache.parser.Converters
+import com.example.musicdao.domain.usecases.*
 import com.example.musicdao.domain.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.domain.usecases.torrents.GetAllActiveTorrentsUseCase
 import com.example.musicdao.domain.usecases.torrents.GetTorrentStatusFlowUseCase
@@ -32,7 +30,7 @@ object AppContainer {
     lateinit var searchUseCase: SearchUseCase
     lateinit var getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
     lateinit var downloadIntentuseCase: DownloadIntentUseCase
-    lateinit var getReleaseUseCase: GetReleaseUseCase
+    lateinit var getReleaseUseCase: GetRelease
     lateinit var createReleaseUseCase: CreateReleaseUseCase
     lateinit var sessionManager: SessionManager
 
@@ -47,6 +45,7 @@ object AppContainer {
     lateinit var activity: MusicActivity
 
     lateinit var database: CacheDatabase
+    lateinit var getAllReleases: GetAllReleases
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun provide(
@@ -58,22 +57,6 @@ object AppContainer {
         sessionManager = SessionManager().apply {
             start(createSessionParams(applicationContext))
         }
-        releaseRepository = ReleaseRepository(musicCommunity)
-        torrentEngine = TorrentEngine(sessionManager)
-        torrentCache = TorrentCache(torrentEngine, Paths.get("${applicationContext.cacheDir}"))
-
-        createReleaseUseCase = CreateReleaseUseCase(
-            releaseRepository,
-            torrentCache
-        )
-        getReleaseUseCase =
-            GetReleaseUseCase(releaseRepository, torrentCache)
-
-        downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
-        getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
-        searchUseCase = SearchUseCase(releaseRepository, getReleaseUseCase)
-        getAllActiveTorrentsUseCase =
-            GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
 
         database = Room.databaseBuilder(
             applicationContext,
@@ -81,6 +64,27 @@ object AppContainer {
         ).fallbackToDestructiveMigration()
             .addTypeConverter(Converters(GsonParser(Gson())))
             .build()
+
+        releaseRepository = ReleaseRepository(musicCommunity, database = database)
+
+        val downloadFinishUseCase = DownloadFinishUseCase(database)::invoke
+        torrentEngine = TorrentEngine(sessionManager, downloadFinishUseCase::invoke)
+        torrentCache = TorrentCache(torrentEngine, Paths.get("${applicationContext.cacheDir}"))
+
+
+        createReleaseUseCase = CreateReleaseUseCase(
+            releaseRepository,
+            torrentCache
+        )
+        getReleaseUseCase = GetRelease(database)
+
+        downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
+        getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
+        searchUseCase = SearchUseCase(releaseRepository, getReleaseUseCase)
+        getAllActiveTorrentsUseCase =
+            GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
+        getAllReleases = GetAllReleases(database)
+
     }
 
     private fun createSessionParams(applicationContext: Context): SessionParams {

@@ -1,4 +1,4 @@
-package com.example.musicdao.entities
+package com.example.musicdao.model
 
 import java.io.File
 import java.time.Instant
@@ -11,5 +11,6 @@ data class Album(
     val publisher: String,
     val releaseDate: Instant,
     val songs: List<Song>?,
-    val cover: File?
+    val cover: File?,
+    val root: File?,
 )
