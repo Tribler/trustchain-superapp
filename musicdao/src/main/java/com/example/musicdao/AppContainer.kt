@@ -7,6 +7,10 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import androidx.room.Room
+import com.example.musicdao.cache.CacheDatabase
+import com.example.musicdao.cache.Converters
+import com.example.musicdao.cache.GsonParser
 import com.example.musicdao.domain.usecases.CreateReleaseUseCase
 import com.example.musicdao.domain.usecases.GetReleaseUseCase
 import com.example.musicdao.domain.usecases.SearchUseCase
@@ -20,6 +24,7 @@ import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
 import com.frostwire.jlibtorrent.swig.settings_pack
+import com.google.gson.Gson
 import java.nio.file.Paths
 
 object AppContainer {
@@ -40,6 +45,8 @@ object AppContainer {
     lateinit var swarmHealthRepository: SwarmHealthRepository
     lateinit var releaseRepository: ReleaseRepository
     lateinit var activity: MusicActivity
+
+    lateinit var database: CacheDatabase
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun provide(
@@ -65,8 +72,15 @@ object AppContainer {
         downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
         getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
         searchUseCase = SearchUseCase(releaseRepository, getReleaseUseCase)
-        getAllActiveTorrentsUseCase = GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
+        getAllActiveTorrentsUseCase =
+            GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
 
+        database = Room.databaseBuilder(
+            applicationContext,
+            CacheDatabase::class.java, "musicdao-database"
+        ).fallbackToDestructiveMigration()
+            .addTypeConverter(Converters(GsonParser(Gson())))
+            .build()
     }
 
     private fun createSessionParams(applicationContext: Context): SessionParams {

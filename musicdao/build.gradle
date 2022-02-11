@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs'
+apply plugin: 'kotlin-kapt'
 
 buildscript {
     ext.kotlin_version = '1.5.21'
@@ -152,6 +153,15 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-swiperefresh:0.17.0")
     implementation "com.google.accompanist:accompanist-navigation-animation:0.17.0"
+
+    // Room
+    implementation "androidx.room:room-runtime:2.3.0"
+    implementation("androidx.room:room-ktx:2.3.0")
+    annotationProcessor "androidx.room:room-compiler:2.3.0"
+    kapt("androidx.room:room-compiler:2.3.0")
+
+    // GSON
+    implementation("com.google.code.gson:gson:2.8.9")
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
