@@ -79,7 +79,6 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
             artist.value,
             title.value,
             releaseDate = Instant.now().toString(),
-            publisher = "DEFAULT",
             uris = fileList.value,
             localContext
         )

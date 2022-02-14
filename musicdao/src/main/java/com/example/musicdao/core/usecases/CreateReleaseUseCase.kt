@@ -5,13 +5,15 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.util.MyResult
 import kotlin.io.path.name
 
 class CreateReleaseUseCase(
     private val albumRepository: AlbumRepository,
-    private val torrentCache: TorrentCache
+    private val torrentCache: TorrentCache,
+    private val musicCommunity: MusicCommunity
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -19,7 +21,6 @@ class CreateReleaseUseCase(
         artist: String,
         title: String,
         releaseDate: String,
-        publisher: String,
         uris: List<Uri>,
         context: Context
     ): Boolean {
@@ -31,6 +32,7 @@ class CreateReleaseUseCase(
             is MyResult.Failure -> return false
             is MyResult.Success -> {
                 val infoHash = cacheFolder.value.parent.name
+                val publisher = musicCommunity.myPeer.publicKey
 
                 // Validate before publishing
                 if (!albumRepository.validateReleaseBlock(
@@ -39,7 +41,7 @@ class CreateReleaseUseCase(
                         title = title,
                         artist = artist,
                         releaseDate = releaseDate,
-                        publisher = publisher
+                        publisher = publisher.toString()
                     )
                 ) {
                     return false
@@ -51,7 +53,7 @@ class CreateReleaseUseCase(
                     title = title,
                     artist = artist,
                     releaseDate = releaseDate,
-                    publisher = publisher
+                    publisher = publisher.toString()
                 )
                 torrentCache.seedStrategy()
                 return true
