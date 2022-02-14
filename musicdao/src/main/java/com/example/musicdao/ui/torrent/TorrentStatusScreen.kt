@@ -1,6 +1,6 @@
 package com.example.musicdao.ui.torrent
 
-import TorrentHandleStatus
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding

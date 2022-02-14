@@ -1,6 +1,6 @@
 package com.example.musicdao.ui.search
 
-import TorrentHandleStatus
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel

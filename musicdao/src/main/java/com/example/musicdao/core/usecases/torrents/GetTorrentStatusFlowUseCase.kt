@@ -1,8 +1,8 @@
 package com.example.musicdao.core.usecases.torrents
 
-import DownloadingTrack
+import com.example.musicdao.core.torrent.api.DownloadingTrack
 import TorrentCache
-import TorrentHandleStatus
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.util.MyResult

@@ -1,6 +1,6 @@
 package com.example.musicdao.ui.release
 
-import DownloadingTrack
+import com.example.musicdao.core.torrent.api.DownloadingTrack
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background

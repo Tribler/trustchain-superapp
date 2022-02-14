@@ -5,12 +5,12 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.repositories.ReleaseRepository
+import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.util.MyResult
 import kotlin.io.path.name
 
 class CreateReleaseUseCase(
-    private val releaseRepository: ReleaseRepository,
+    private val albumRepository: AlbumRepository,
     private val torrentCache: TorrentCache
 ) {
 
@@ -23,8 +23,7 @@ class CreateReleaseUseCase(
         uris: List<Uri>,
         context: Context
     ): Boolean {
-        // Copy the files into the cache with the appropiate folder
-        // i.e. simulating the download process
+        // Copy the files into the cache with the appropriate folder i.e. simulating the download process
         val tempFolder = torrentCache.copyToTempFolder(context, uris)
         val cacheFolder = torrentCache.copyIntoCache(tempFolder.toPath())
 
@@ -34,7 +33,7 @@ class CreateReleaseUseCase(
                 val infoHash = cacheFolder.value.parent.name
 
                 // Validate before publishing
-                if (!releaseRepository.validateReleaseBlock(
+                if (!albumRepository.validateReleaseBlock(
                         releaseId = infoHash,
                         magnet = "magnet:?xt=urn:btih:$infoHash",
                         title = title,
@@ -46,7 +45,7 @@ class CreateReleaseUseCase(
                     return false
                 }
 
-                releaseRepository.publishRelease(
+                albumRepository.publishRelease(
                     releaseId = infoHash,
                     magnet = "magnet:?xt=urn:btih:$infoHash",
                     title = title,

@@ -1,40 +1,25 @@
 package com.example.musicdao.core.repositories
 
-import com.example.musicdao.AppContainer.database
-import com.example.musicdao.core.cache.CacheDatabase
-import com.example.musicdao.core.cache.entities.AlbumEntity
+import android.util.Log
+import com.example.musicdao.core.database.CacheDatabase
+import com.example.musicdao.core.database.entities.AlbumEntity
 import com.example.musicdao.core.ipv8.MusicCommunity
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.musicdao.core.ipv8.blocks.Constants
+import com.example.musicdao.core.ipv8.blocks.ReleasePublishBlock
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 
-data class ReleaseBlock(
-    val releaseId: String,
-    val magnet: String,
-    val title: String,
-    val artist: String,
-    val publisher: String,
-    val releaseDate: String,
-    val protocolVersion: String
-)
-
-class ReleaseRepository(private val musicCommunity: MusicCommunity, database: CacheDatabase) {
-
-    val PROTOCOL_VERSION = "1"
-
-    private val _releaseBlocks: MutableStateFlow<List<ReleaseBlock>> = MutableStateFlow(listOf())
-    private var releaseBlocks: StateFlow<List<ReleaseBlock>> = _releaseBlocks
-
-    fun searchReleaseBlocksLocal(keyword: String): List<ReleaseBlock> {
-        return this.releaseBlocks.value.filter {
-            it.artist.lowercase().contains(keyword) || it.title.lowercase().contains(keyword)
-        }
-    }
+/**
+ * CRUD for any operations on Albums
+ */
+class AlbumRepository(private val musicCommunity: MusicCommunity, val database: CacheDatabase) {
 
     suspend fun refreshReleases() {
-        this._releaseBlocks.value = fetchReleases()
-        this._releaseBlocks.value.forEach {
+        val releaseBlocks =
+            musicCommunity.database.getBlocksWithType(ReleasePublishBlock.BLOCK_TYPE)
+                .filter { trustChainBlock -> validateTrustChainReleaseBlock(trustChainBlock) }
+                .map { trustChainBlock -> trustChainBlockToRelease(trustChainBlock) }
+        releaseBlocks.forEach {
             database.dao.insert(
                 AlbumEntity(
                     id = it.releaseId,
@@ -49,14 +34,6 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity, database: Ca
                 )
             )
         }
-
-    }
-
-    private fun fetchReleases(): List<ReleaseBlock> {
-        val releaseBlocks = musicCommunity.database.getBlocksWithType("publish_release")
-        return releaseBlocks
-            .filter { trustChainBlock -> validateTrustChainReleaseBlock(trustChainBlock) }
-            .map { trustChainBlock -> trustChainBlockToRelease(trustChainBlock) }
     }
 
     fun publishRelease(
@@ -66,7 +43,7 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity, database: Ca
         artist: String,
         publisher: String,
         releaseDate: String,
-        protocolVersion: String = PROTOCOL_VERSION
+        protocolVersion: String = Constants.PROTOCOL_VERSION
     ) {
         val myPeer = IPv8Android.getInstance().myPeer
         val transaction = mutableMapOf(
@@ -97,7 +74,7 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity, database: Ca
             publisher.isNotEmpty())
     }
 
-    private fun trustChainBlockToRelease(block: TrustChainBlock): ReleaseBlock {
+    private fun trustChainBlockToRelease(block: TrustChainBlock): ReleasePublishBlock {
         val releaseId = block.transaction["releaseId"] as String
         val magnet = block.transaction["magnet"] as String
         val title = block.transaction["title"] as String
@@ -106,7 +83,7 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity, database: Ca
         val releaseDate = block.transaction["releaseDate"] as String
         val protocolVersion = block.transaction["protocolVersion"] as String
 
-        return ReleaseBlock(
+        return ReleasePublishBlock(
             releaseId = releaseId,
             magnet = magnet,
             title = title,
@@ -132,6 +109,6 @@ class ReleaseRepository(private val musicCommunity: MusicCommunity, database: Ca
             artist is String && artist.isNotEmpty() &&
             publisher is String && publisher.isNotEmpty() &&
             releaseDate is String && releaseDate.isNotEmpty() &&
-            protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == PROTOCOL_VERSION)
+            protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == Constants.PROTOCOL_VERSION)
     }
 }

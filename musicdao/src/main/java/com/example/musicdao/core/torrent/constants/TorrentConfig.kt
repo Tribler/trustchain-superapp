@@ -1,4 +1,4 @@
-package com.example.musicdao.core.net
+package com.example.musicdao.core.torrent.constants
 
 import com.frostwire.jlibtorrent.TcpEndpoint
 

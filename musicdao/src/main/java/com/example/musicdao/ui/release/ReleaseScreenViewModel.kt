@@ -1,13 +1,13 @@
 package com.example.musicdao.ui.release
 
-import TorrentHandleStatus
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
-import com.example.musicdao.core.usecases.GetRelease
+import com.example.musicdao.core.usecases.releases.GetRelease
 import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
 import com.example.musicdao.core.model.Album

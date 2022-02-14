@@ -1,4 +1,4 @@
-package com.example.musicdao.core.ipv8
+package com.example.musicdao.core.ipv8.search
 
 import nl.tudelft.ipv8.messaging.*
 

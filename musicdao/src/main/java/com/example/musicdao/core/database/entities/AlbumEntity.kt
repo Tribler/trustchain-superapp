@@ -1,4 +1,4 @@
-package com.example.musicdao.core.cache.entities
+package com.example.musicdao.core.database.entities
 
 import android.os.Build
 import androidx.annotation.RequiresApi

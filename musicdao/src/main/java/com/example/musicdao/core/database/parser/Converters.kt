@@ -1,9 +1,9 @@
-package com.example.musicdao.core.cache.parser
+package com.example.musicdao.core.database.parser
 
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
-import com.example.musicdao.core.cache.JsonParser
-import com.example.musicdao.core.cache.entities.SongEntity
+import com.example.musicdao.core.database.JsonParser
+import com.example.musicdao.core.database.entities.SongEntity
 import com.google.common.reflect.TypeToken
 
 @ProvidedTypeConverter

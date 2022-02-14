@@ -1,7 +1,7 @@
-package com.example.musicdao.core.cache
+package com.example.musicdao.core.database
 
 import androidx.room.*
-import com.example.musicdao.core.cache.entities.AlbumEntity
+import com.example.musicdao.core.database.entities.AlbumEntity
 
 @Dao
 interface CacheDao {
@@ -20,4 +20,7 @@ interface CacheDao {
 
     @Query("SELECT * FROM AlbumEntity WHERE id is :id")
     suspend fun get(id: String): AlbumEntity
+
+    @Query("SELECT * FROM AlbumEntity WHERE artist LIKE :keyword OR title LIKE :keyword")
+    suspend fun localSearch(keyword: String): List<AlbumEntity>
 }

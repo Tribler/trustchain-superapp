@@ -1,4 +1,4 @@
-package com.example.musicdao.core.services
+package com.example.musicdao.core.repositories
 
 import android.app.Service
 import android.content.Intent

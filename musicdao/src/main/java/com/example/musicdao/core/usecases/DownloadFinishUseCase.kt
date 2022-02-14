@@ -3,8 +3,8 @@ package com.example.musicdao.core.usecases
 import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.musicdao.AppContainer
-import com.example.musicdao.core.cache.CacheDatabase
-import com.example.musicdao.core.cache.entities.SongEntity
+import com.example.musicdao.core.database.CacheDatabase
+import com.example.musicdao.core.database.entities.SongEntity
 import com.example.musicdao.core.util.Util
 import com.mpatric.mp3agic.Mp3File
 import kotlinx.coroutines.CoroutineScope

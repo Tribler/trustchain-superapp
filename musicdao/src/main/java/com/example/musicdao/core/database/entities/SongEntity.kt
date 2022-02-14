@@ -1,4 +1,4 @@
-package com.example.musicdao.core.cache.entities
+package com.example.musicdao.core.database.entities
 
 import androidx.room.Entity
 import com.example.musicdao.core.model.Song

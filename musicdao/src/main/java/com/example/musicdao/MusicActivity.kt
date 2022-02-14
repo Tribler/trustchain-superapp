@@ -17,7 +17,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.services.MusicGossipingService
+import com.example.musicdao.core.repositories.MusicGossipingService
 import com.example.musicdao.ui.MusicDAOApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -49,7 +49,7 @@ class MusicActivity : AppCompatActivity() {
         container = AppContainer
         registerBlockSigner()
         lifecycleScope.launchWhenStarted {
-            container.releaseRepository.refreshReleases()
+            container.albumRepository.refreshReleases()
             container.torrentCache.seedStrategy()
         }
         iterativelyFetchReleases()
@@ -159,7 +159,7 @@ class MusicActivity : AppCompatActivity() {
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                container.releaseRepository.refreshReleases()
+                container.albumRepository.refreshReleases()
                 delay(3000)
             }
         }

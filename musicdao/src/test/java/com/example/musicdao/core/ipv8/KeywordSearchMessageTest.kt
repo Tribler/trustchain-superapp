@@ -1,5 +1,6 @@
 package com.example.musicdao.core.ipv8
 
+import com.example.musicdao.core.ipv8.search.KeywordSearchMessage
 import com.goterl.lazysodium.LazySodiumJava
 import com.goterl.lazysodium.SodiumJava
 import nl.tudelft.ipv8.keyvault.LibNaClSK
@@ -29,7 +30,7 @@ class KeywordSearchMessageTest {
     @Test
     fun serializeAndDeserialize() {
         val serialized = payload.serialize()
-        val (deserialized, size) = com.example.musicdao.core.ipv8.KeywordSearchMessage.deserialize(
+        val (deserialized, size) = KeywordSearchMessage.deserialize(
             serialized
         )
         Assert.assertEquals(serialized.size, size)

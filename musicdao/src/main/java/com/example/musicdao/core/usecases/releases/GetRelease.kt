@@ -1,8 +1,8 @@
-package com.example.musicdao.core.usecases
+package com.example.musicdao.core.usecases.releases
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.cache.CacheDatabase
+import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.model.Album
 
 class GetRelease(private val database: CacheDatabase) {

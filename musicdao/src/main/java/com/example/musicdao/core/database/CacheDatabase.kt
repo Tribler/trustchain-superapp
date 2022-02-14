@@ -1,10 +1,10 @@
-package com.example.musicdao.core.cache
+package com.example.musicdao.core.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.musicdao.core.cache.entities.AlbumEntity
-import com.example.musicdao.core.cache.parser.Converters
+import com.example.musicdao.core.database.entities.AlbumEntity
+import com.example.musicdao.core.database.parser.Converters
 
 @Database(
     entities = [AlbumEntity::class],

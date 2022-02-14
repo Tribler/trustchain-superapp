@@ -4,14 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
-import com.example.musicdao.core.usecases.GetAllReleases
+import com.example.musicdao.core.usecases.releases.GetReleases
 import com.example.musicdao.core.model.Album
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 class HomeScreenViewModel(
-    private val getAllReleases: GetAllReleases
+    private val getReleases: GetReleases
 ) : ViewModel() {
 
     private val _releases: MutableLiveData<List<Album>> = MutableLiveData()
@@ -22,7 +22,7 @@ class HomeScreenViewModel(
 
     init {
         viewModelScope.launch {
-            _releases.value = getAllReleases.invoke()
+            _releases.value = getReleases.invoke()
         }
     }
 
@@ -30,19 +30,19 @@ class HomeScreenViewModel(
         viewModelScope.launch {
             _isRefreshing.value = true
             delay(500)
-            _releases.value = getAllReleases.invoke()
+            _releases.value = getReleases.invoke()
             _isRefreshing.value = false
         }
     }
 
     companion object {
         fun provideFactory(
-            getAllReleases: GetAllReleases = AppContainer.getAllReleases
+            getReleases: GetReleases = AppContainer.getReleases
         ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return HomeScreenViewModel(
-                    getAllReleases
+                    getReleases
                 ) as T
             }
         }

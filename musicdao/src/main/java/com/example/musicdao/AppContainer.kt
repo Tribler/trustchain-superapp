@@ -8,16 +8,20 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.example.musicdao.core.cache.CacheDatabase
-import com.example.musicdao.core.cache.GsonParser
-import com.example.musicdao.core.cache.parser.Converters
-import com.example.musicdao.core.usecases.*
+import com.example.musicdao.core.database.CacheDatabase
+import com.example.musicdao.core.database.GsonParser
+import com.example.musicdao.core.database.parser.Converters
+import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.core.repositories.AlbumRepository
+import com.example.musicdao.core.repositories.SwarmHealthRepository
+import com.example.musicdao.core.usecases.CreateReleaseUseCase
+import com.example.musicdao.core.usecases.DownloadFinishUseCase
+import com.example.musicdao.core.usecases.releases.GetReleases
+import com.example.musicdao.core.usecases.releases.GetRelease
+import com.example.musicdao.core.usecases.releases.Search
 import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.core.usecases.torrents.GetAllActiveTorrentsUseCase
 import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
-import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.repositories.ReleaseRepository
-import com.example.musicdao.core.repositories.SwarmHealthRepository
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
@@ -27,7 +31,7 @@ import java.nio.file.Paths
 
 object AppContainer {
     lateinit var getAllActiveTorrentsUseCase: GetAllActiveTorrentsUseCase
-    lateinit var searchUseCase: SearchUseCase
+    lateinit var search: Search
     lateinit var getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
     lateinit var downloadIntentuseCase: DownloadIntentUseCase
     lateinit var getReleaseUseCase: GetRelease
@@ -41,11 +45,11 @@ object AppContainer {
 
     //    lateinit var swarmHealthMap = mutableMapOf<Sha1Hash, SwarmHealth>()
     lateinit var swarmHealthRepository: SwarmHealthRepository
-    lateinit var releaseRepository: ReleaseRepository
+    lateinit var albumRepository: AlbumRepository
     lateinit var activity: MusicActivity
 
     lateinit var database: CacheDatabase
-    lateinit var getAllReleases: GetAllReleases
+    lateinit var getReleases: GetReleases
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun provide(
@@ -65,25 +69,20 @@ object AppContainer {
             .addTypeConverter(Converters(GsonParser(Gson())))
             .build()
 
-        releaseRepository = ReleaseRepository(musicCommunity, database = database)
+        albumRepository = AlbumRepository(musicCommunity, database)
 
         val downloadFinishUseCase = DownloadFinishUseCase(database)::invoke
         torrentEngine = TorrentEngine(sessionManager, downloadFinishUseCase::invoke)
         torrentCache = TorrentCache(torrentEngine, Paths.get("${applicationContext.cacheDir}"))
 
-
-        createReleaseUseCase = CreateReleaseUseCase(
-            releaseRepository,
-            torrentCache
-        )
+        createReleaseUseCase = CreateReleaseUseCase(albumRepository, torrentCache)
         getReleaseUseCase = GetRelease(database)
-
         downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
         getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
-        searchUseCase = SearchUseCase(releaseRepository, getReleaseUseCase)
+        search = Search(database)
         getAllActiveTorrentsUseCase =
             GetAllActiveTorrentsUseCase(getTorrentStatusFlowUseCase, torrentEngine)
-        getAllReleases = GetAllReleases(database)
+        getReleases = GetReleases(database)
 
     }
 
