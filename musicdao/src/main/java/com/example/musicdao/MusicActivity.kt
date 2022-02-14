@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -17,8 +16,8 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
-import com.example.musicdao.ipv8.MusicCommunity
-import com.example.musicdao.services.MusicGossipingService
+import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.core.services.MusicGossipingService
 import com.example.musicdao.ui.MusicDAOApp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

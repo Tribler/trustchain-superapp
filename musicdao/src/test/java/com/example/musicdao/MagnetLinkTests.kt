@@ -1,6 +1,6 @@
 package com.example.musicdao
 
-import com.example.musicdao.util.Util
+import com.example.musicdao.core.util.Util
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

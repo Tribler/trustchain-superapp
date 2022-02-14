@@ -4,8 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.GetAllReleases
-import com.example.musicdao.model.Album
+import com.example.musicdao.core.usecases.GetAllReleases
+import com.example.musicdao.core.model.Album
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

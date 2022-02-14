@@ -6,7 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
-import com.example.musicdao.ipv8.MusicCommunity
+import com.example.musicdao.core.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import kotlinx.coroutines.DelicateCoroutinesApi

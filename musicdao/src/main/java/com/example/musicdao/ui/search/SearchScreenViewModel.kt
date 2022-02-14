@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.SearchUseCase
-import com.example.musicdao.model.Album
+import com.example.musicdao.core.usecases.SearchUseCase
+import com.example.musicdao.core.model.Album
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

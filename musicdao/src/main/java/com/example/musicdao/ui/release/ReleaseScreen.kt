@@ -24,8 +24,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.musicdao.model.Album
-import com.example.musicdao.model.Song
+import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.model.Song
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString

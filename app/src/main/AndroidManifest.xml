@@ -113,7 +113,7 @@
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
 
         <service
-            android:name="com.example.musicdao.services.MusicGossipingService"
+            android:name="com.example.musicdao.core.services.MusicGossipingService"
             android:enabled="true"
             android:exported="false" />
     </application>

@@ -7,10 +7,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.GetRelease
-import com.example.musicdao.domain.usecases.torrents.DownloadIntentUseCase
-import com.example.musicdao.domain.usecases.torrents.GetTorrentStatusFlowUseCase
-import com.example.musicdao.model.Album
+import com.example.musicdao.core.usecases.GetRelease
+import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
+import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
+import com.example.musicdao.core.model.Album
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 

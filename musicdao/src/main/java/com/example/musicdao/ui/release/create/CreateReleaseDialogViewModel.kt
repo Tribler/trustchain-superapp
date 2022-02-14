@@ -2,12 +2,10 @@ package com.example.musicdao.ui.release.create
 
 import android.content.Context
 import android.net.Uri
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.CreateReleaseUseCase
+import com.example.musicdao.core.usecases.CreateReleaseUseCase
 
 class CreateReleaseDialogViewModel(private val createReleaseUseCase: CreateReleaseUseCase) :
     ViewModel() {

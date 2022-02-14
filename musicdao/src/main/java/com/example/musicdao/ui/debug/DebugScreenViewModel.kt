@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.AppContainer
-import com.example.musicdao.domain.usecases.torrents.GetAllActiveTorrentsUseCase
+import com.example.musicdao.core.usecases.torrents.GetAllActiveTorrentsUseCase
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 

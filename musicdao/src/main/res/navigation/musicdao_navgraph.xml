@@ -44,7 +44,7 @@
 
     <fragment
         android:id="@+id/walletFragment"
-        android:name="com.example.musicdao.wallet.WalletFragment"
+        android:name="com.example.musicdao.core.wallet.WalletFragment"
         android:label="Wallet overview" />
 
     <fragment
