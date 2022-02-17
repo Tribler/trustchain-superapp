@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permissions_denied_message">You have denied the permissions, please go to settings to enable them or close the app.</string>
+    <string name="permissions_denied_ok_button">OPEN SETTINGS</string>
+</resources>
