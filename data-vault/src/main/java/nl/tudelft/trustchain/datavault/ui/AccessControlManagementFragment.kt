@@ -46,6 +46,7 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
         val fileSizeMb = file.length() / (1024.0 * 1024)
         binding.fileNameTextView.text = file.name
         binding.fileSizeTextView.text = "%.2f MB".format(fileSizeMb)
+        binding.lastModifiedTextView.text = accessControlList.lastModified
 
         val modifiedCredentialTriple = acmViewModel.getModifiedCredential()
 
@@ -78,6 +79,7 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
         }
 
         binding.saveButton.setOnClickListener {
+            savePolicies()
             requireActivity().onBackPressed()
         }
     }
@@ -87,6 +89,12 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
      */
     private fun getEditablePolicy(policyIndex: Int): Policy {
         return acmViewModel.getModifiedPolicy(policyIndex) ?: policies[policyIndex]
+    }
+
+    private fun savePolicies() {
+        val finalPolicies = policies.mapIndexed { index, _ -> getEditablePolicy(index) }
+        Log.e(logTag, "final policies: ${finalPolicies.map { p -> p.toString() }}")
+        accessControlList.savePolicies(finalPolicies)
     }
 
     private fun getPolicyView(policy: Policy, index: Int): View {

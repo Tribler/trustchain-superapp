@@ -1,6 +1,9 @@
 package nl.tudelft.trustchain.datavault.accesscontrol
 
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.attestation.wallet.AttestationBlob
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
@@ -10,6 +13,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,7 +24,13 @@ class AccessControlList(
     ) {
 
     private val logTag = "ACL"
-    private var acl: JSONObject? = null // Cached acl. Use getACL()
+    private var aclCache: JSONObject? = null // Cached acl. Use getACL()
+    private val aclFile: File get() {
+        return File(file.absolutePath + ".acl")
+    }
+    val lastModified: String get() {
+        return getACL().getString(LAST_CHANGED)
+    }
 
     fun verifyAccess(peer: Peer, accessMode: String, accessToken: String?, attestations: List<AttestationBlob>?) : Boolean {
         if (!isPublic()) {
@@ -65,22 +75,24 @@ class AccessControlList(
     }
 
     private fun getACL(): JSONObject {
-        if (acl == null) {
-            /*val aclFile = File(file.absolutePath + ".acl")
-            acl = if (aclFile.exists()) {
+        if (aclCache == null) {
+            aclCache = if (aclFile.exists()) {
                 try {
-                    JSONObject(aclFile.readText())
-                } catch (_: Exception) {
-                    Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}")
+                    Log.e(logTag, "acl file read")
+                    val rd = aclFile.readText()
+                    Log.e(logTag, "ACL contents: $rd")
+                    JSONObject(rd)
+                } catch (e: Exception) {
+                    Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
                     newACL()
                 }
             } else {
+                Log.e(logTag, "No acl file yet")
                 newACL()
-            }*/
-            acl = JSONObject(TEST_ACL)
+            }
         }
 
-        return acl!!
+        return aclCache!!
     }
 
     fun getPolicies(): List<Policy> {
@@ -99,15 +111,33 @@ class AccessControlList(
         }
     }
 
+    fun savePolicies(policies: List<Policy>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val acl = getACL()
+
+            val timestamp = Date().time
+            val sdf = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+            val lastChanged: String = sdf.format(timestamp)
+
+            acl.put(LAST_CHANGED, lastChanged)
+            acl.put(POLICIES, toJSONArray(policies))
+
+            val fos = FileOutputStream (aclFile)
+            fos.write(acl.toString().toByteArray())
+        }
+    }
+
     private fun newACL(): JSONObject {
-        val newACL = JSONObject()
+        /*val newACL = JSONObject()
         newACL.put(VERSION, AP_VERSION)
         newACL.put(RESOURCE, file.absolutePath)
         val timestamp = Date().time
-        val sdf = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+        val sdf = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
         newACL.put(LAST_CHANGED, sdf.format(timestamp))
         newACL.put(POLICIES, JSONArray())
-        return newACL
+        return newACL*/
+
+        return JSONObject(TEST_ACL)
     }
 
     fun isPublic(): Boolean {
@@ -133,6 +163,7 @@ class AccessControlList(
 
     companion object {
         const val AP_VERSION = "1.0"
+        const val DATE_FORMAT = "dd-MM-yyyy HH:mm:ss"
 
         const val TRUE = "TRUE"
         const val FALSE = "FALSE"
@@ -167,6 +198,13 @@ class AccessControlList(
 	]
 }
 """
+        private fun toJSONArray(policies: List<Policy>): JSONArray {
+            val jsonArray = JSONArray()
+            policies.forEach {
+                jsonArray.put(it.getPolicyJSON())
+            }
+            return jsonArray
+        }
     }
 }
 
@@ -189,6 +227,10 @@ class Policy(
 
     fun setRules(rules: Rules) {
         policy.put(AccessControlList.RULES, rules.rulesContainer)
+    }
+
+    fun getPolicyJSON(): JSONObject {
+        return policy
     }
 
     val accessMode: String get() {
