@@ -1,13 +1,14 @@
 package nl.tudelft.trustchain.datavault.ui
 
+import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.TextView
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -24,11 +25,9 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.R
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessPolicy
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
-import nl.tudelft.trustchain.peerchat.ui.conversation.ConversationFragment
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -38,9 +37,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val binding by viewBinding(VaultBrowserFragmentBinding::bind)
     private lateinit var parentActivity: DataVaultMainActivity
     private lateinit var attestationCommunity: AttestationCommunity
+    private val acmViewModel: ACMViewModel by activityViewModels()
 
     private val logTag = "DATA VAULT"
     private val adapter = ItemAdapter()
+    //private lateinit var adapter: PhotoGridAdapter
+    private val uriPathHelper = URIPathHelper()
 
     private val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
 
@@ -53,7 +55,6 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         attestationCommunity = IPv8Android.getInstance().getOverlay()!!
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
-        Log.e(logTag, "my peer: ${attestationCommunity.myPeer.publicKey.keyToBin().toHex()}")
 
         getDataVaultCommunity().setDataVaultActivity(parentActivity)
         getDataVaultCommunity().setVaultBrowserFragment(this)
@@ -61,36 +62,20 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         initVault()
 
         adapter.registerRenderer(VaultFileItemRenderer {
+            acmViewModel.clearModifiedPolicies()
             val args = Bundle()
             args.putString(FILENAME, it.absolutePath)
-            // args.putString(ConversationFragment.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-            findNavController().navigate(R.id.action_vaultBrowserFragment_to_accessManagementFragment, args)
+            findNavController().navigate(R.id.action_vaultBrowserFragment_to_accessControlManagementFragment, args)
 
-            /*Log.e(logTag, "${it.absolutePath} exists: ${it.exists()}")
-            val builder: AlertDialog.Builder = AlertDialog.Builder(context)
-            val inflater = requireActivity().layoutInflater
-            val view = inflater.inflate(R.layout.vault_file_fragment, null)
-            val textView = view.findViewById<TextView>(R.id.text)
-            textView.text = it.readText()
-            val checkBox: CheckBox = view.findViewById(R.id.public_file_checkbox)
-
-            val accessPolicy = AccessPolicy(it, attestationCommunity)
-            checkBox.isChecked = accessPolicy.isPublic()
-
-            checkBox.setOnCheckedChangeListener { _, value ->
-                accessPolicy.setPublic(value)
-            }
-
-            builder.setTitle(it.name).setView(view)
-
-            val dialog: AlertDialog = builder.create()
-            dialog.show()*/
+        /*val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(it.absolutePath)
+            findNavController().navigate(action)*/
         })
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //adapter = PhotoGridAdapter(requireContext(), this, listOf<VaultFileItem>())
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.addItemDecoration(
@@ -175,33 +160,22 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             builder.setTitle("Select peer")
         }
 
-        builder.setPositiveButton("Ok",
-            DialogInterface.OnClickListener { _, _ ->
-                // User clicked OK button
-            }).
-        setNegativeButton("Cancel",
-            DialogInterface.OnClickListener { _, _ ->
-                // User cancelled the dialog
-            }).
-        setItems(peers.map { peer ->  peer.mid}.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
+        builder.setPositiveButton("Ok") { _, _ ->
+            // User clicked OK button
+        }.
+        setNegativeButton("Cancel") { _, _ ->
+            // User cancelled the dialog
+        }.
+        setItems(peers.map { peer ->  peer.mid}.toTypedArray()) { _, index ->
             val peer = peers[index]
             Log.e(logTag, "Chosen peer: ${peer.publicKey.keyToBin().toHex()}")
 
             // Currently all attestations. There must come a way to choose your attestations
-            val attestations = attestationCommunity.database.getAllAttestations().filter { attestationBlob ->  attestationBlob.signature != null}
-
-
-            /*val entries = attestationCommunity.database.getAllAttestations()
-            .mapIndexed { index, blob -> DatabaseItem(index, blob) }.sortedBy {
-                if (it.attestationBlob.metadata != null) {
-                    return@sortedBy JSONObject(it.attestationBlob.metadata!!).optString("attribute")
-                } else {
-                    return@sortedBy ""
-                }
-            }*/
+            val attestations = attestationCommunity.database.getAllAttestations()
+                .filter { attestationBlob -> attestationBlob.signature != null }
 
             getDataVaultCommunity().sendAccessibleFilesRequest(peer, Policy.READ, attestations)
-        })
+        }
 
         // Create the AlertDialog
         val alertDialog: AlertDialog = builder.create()
@@ -210,7 +184,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     private fun initVault() {
         if (!VAULT.exists()) {
-            Log.e(logTag, "Data Vault not yet iniated. Initiating now.")
+            Log.e(logTag, "Data Vault not yet initiated. Initiating now.")
             VAULT.mkdir()
         }
     }
@@ -232,10 +206,6 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                     withContext(Dispatchers.Main) {
                         adapter.updateItems(vaultFileItems)
                     }
-
-                    if (list.isNotEmpty()) {
-                        Log.e("$logTag files", list.asList().reduce { acc, s ->  "$acc $s"}?: "empty")
-                    }
                 }
             }
         }
@@ -248,7 +218,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
     companion object {
         const val VAULT_DIR = "data_vault"
-        const val FILENAME = "file_name"
+        const val FILENAME = "fileName"
+
+        const val PICK_PHOTO = 100
     }
 
     fun selectRequestableFile(peer: Peer, accessToken: String?, files: List<String>) {
@@ -256,19 +228,17 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         requireActivity().runOnUiThread {
             val builder = AlertDialog.Builder(context)
             builder.setTitle("Select file to request").
-            setPositiveButton("Ok",
-                DialogInterface.OnClickListener { _, _ ->
-                    // User clicked OK button
-                }).
-            setNegativeButton("Cancel",
-                DialogInterface.OnClickListener { _, _ ->
-                    // User cancelled the dialog
-                }).
-            setItems(files.toTypedArray(), DialogInterface.OnClickListener{ _, index ->
+            setPositiveButton("Ok") { _, _ ->
+                // User clicked OK button
+            }.
+            setNegativeButton("Cancel") { _, _ ->
+                // User cancelled the dialog
+            }.
+            setItems(files.toTypedArray()) { _, index ->
                 Log.e(logTag, "item $index chosen")
                 val file = files[index]
                 getDataVaultCommunity().sendFileRequest(peer, Policy.READ, file, accessToken)
-            })
+            }
 
             // Create the AlertDialog
             val alertDialog: AlertDialog = builder.create()
@@ -281,9 +251,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             Log.e(logTag, "File: $id")
 
             val builder = AlertDialog.Builder(context)
-            builder.setTitle(id).setMessage(message).setPositiveButton("Ok", DialogInterface.OnClickListener { _, _ ->
+            builder.setTitle(id).setMessage(message).setPositiveButton("Ok") { _, _ ->
                 // close dialog
-            })
+            }
 
             val alertDialog: AlertDialog = builder.create()
             alertDialog.show()
@@ -291,6 +261,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun addTestFile() {
+        /*val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, PICK_PHOTO)*/
+
+         */
+
         val timestamp = Date().time
         val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
         val filename: String = sdf.format(timestamp)
@@ -299,6 +275,28 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         val fos = FileOutputStream (File(VAULT, filename))
         fos.write(fileContents.toByteArray())
         fos.close()
+
+        updateAdapter()
+    }
+
+    private fun addImageToVault(uri: Uri) {
+        val filePath = uriPathHelper.getPath(requireContext(), uri)
+        val file = File(filePath ?: "")
+        Log.e(logTag, "File exists?: ${file.exists()}")
+
+        //if (file.canRead()){
+            val timestamp = Date().time
+            val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
+            val filename: String = sdf.format(timestamp)
+
+            val fos = FileOutputStream (File(VAULT, filename))
+            fos.write(file.readBytes())
+            fos.close()
+
+            Log.e(logTag, "Imaged added to vault")
+       /* } else {
+            Log.e(logTag, "Can not add image to vault")
+        }*/
 
         updateAdapter()
     }
@@ -314,5 +312,15 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
 
         updateAdapter()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == PICK_PHOTO){
+            val uri = data?.data
+            if (uri != null) {
+                addImageToVault(uri)
+            }
+        }
     }
 }

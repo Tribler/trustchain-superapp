@@ -10,16 +10,49 @@
         android:name="nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment"
         android:label="Vault Browser">
         <action
-            android:id="@+id/action_vaultBrowserFragment_to_accessManagementFragment"
-            app:destination="@id/accessManagementFragment"
-            app:enterAnim="@anim/fragment_open_enter"
-            app:exitAnim="@anim/fragment_open_exit"
-            app:popEnterAnim="@anim/fragment_close_enter"
-            app:popExitAnim="@anim/fragment_close_exit" />
+            android:id="@+id/action_vaultBrowserFragment_to_accessControlManagementFragment"
+            app:destination="@id/accessControlManagementFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+
     </fragment>
     <fragment
-        android:id="@+id/accessManagementFragment"
-        android:name="nl.tudelft.trustchain.datavault.ui.AccessManagementFragment"
-        android:label="Access Management">
+        android:id="@+id/accessControlManagementFragment"
+        android:name="nl.tudelft.trustchain.datavault.ui.AccessControlManagementFragment"
+        android:label="Access Control Management">
+        <argument
+            android:name="fileName"
+            app:argType="string"
+            app:nullable="false" />
+        <action
+            android:id="@+id/action_accessControlManagementFragment_to_credentialEditorFragment"
+            app:destination="@id/credentialEditorFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+    <fragment
+        android:id="@+id/credentialEditorFragment"
+        android:name="nl.tudelft.trustchain.datavault.ui.CredentialEditorFragment"
+        android:label="Edit credential">
+        <argument
+            android:name="credential"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="isEdit"
+            app:argType="boolean"
+            app:nullable="false" />
+        <argument
+            android:name="policyIndex"
+            app:argType="integer"
+            app:nullable="false" />
+        <argument
+            android:name="credentialIndex"
+            app:argType="integer"
+            app:nullable="false" />
     </fragment>
 </navigation>

@@ -14,12 +14,12 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 
-class AccessPolicy(
+class AccessControlList(
     private val file: File,
-    private val attestationCommunity: AttestationCommunity
+    private val attestationCommunity: AttestationCommunity?
     ) {
 
-    private val logTag = "Access Policy"
+    private val logTag = "ACL"
     private var acl: JSONObject? = null // Cached acl. Use getACL()
 
     fun verifyAccess(peer: Peer, accessMode: String, accessToken: String?, attestations: List<AttestationBlob>?) : Boolean {
@@ -32,23 +32,16 @@ class AccessPolicy(
 
             val candidateAttestations = filterAttestations(peer, attestations)
             if (candidateAttestations != null && candidateAttestations.isNotEmpty()){
-                Log.e(logTag, "Verifying attestations")
 
                 val policies = getPolicies()
 
-                for (i in 0 until policies.length()) {
-                    Log.e(logTag, "Evaluating policy ${i+1}/${policies.length()}")
-                    val policy = Policy(policies.getJSONObject(i))
-                    if (policy.evaluate(accessMode, candidateAttestations, attestationCommunity)) return true
+                for (policy in policies) {
+                    if (policy.evaluate(accessMode, candidateAttestations)) return true
                 }
             }
 
-            Log.e(logTag, "No token or attestation")
-
             return false
         }
-
-        Log.e(logTag, "Public file")
 
         return true
     }
@@ -90,17 +83,19 @@ class AccessPolicy(
         return acl!!
     }
 
-    private fun getPolicies(): JSONArray {
+    fun getPolicies(): List<Policy> {
         return try{
-            val policies = getACL().getJSONArray(POLICIES)
-            val size = policies.length()
-            if (size > 0 && policies.isNull(size - 1)) {
-                policies.remove(size - 1)
+            val policiesJSON = getACL().getJSONArray(POLICIES).noLastNull()
+            val policies = mutableListOf<Policy>()
+
+            for (i in 0 until policiesJSON.length()) {
+                policies.add(Policy(policiesJSON.getJSONObject(i), attestationCommunity))
             }
+
             policies
         } catch (_: Exception) {
             Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}")
-            JSONArray()
+            listOf()
         }
     }
 
@@ -161,9 +156,12 @@ class AccessPolicy(
 		{
 			"mode": "read+write",
 			"rules": [
-				{"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true},
+				[{"attribute": "IG-SSI:id_metadata_range_18plus:ageIG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}],
 				"AND",
-				{"attribute": "IG-SSI:id_metadata:city", "value": "Delft", "trusted_authority": false}
+				[
+                {"attribute": "IG-SSI:id_metadata:city", "value": "Delft", "trusted_authority": false},
+                "OR",
+                [{"issuer": "IG-SSI:123456789"}]]
 			]
 		},
 	]
@@ -173,23 +171,32 @@ class AccessPolicy(
 }
 
 class Policy(
-    private val policy: JSONObject,
+    private var policy: JSONObject,
+    private val attestationCommunity: AttestationCommunity?
 ) {
     private val logTag = "Policy"
 
-    fun evaluate(accessMode: String, attestations: List<AttestationBlob>, attestationCommunity: AttestationCommunity): Boolean {
-        val policyMode = policy.getString(AccessPolicy.MODE)
-        Log.e(logTag, "Evaluating policy ($policyMode) [access mode: $accessMode]")
+    fun evaluate(accessMode: String, attestations: List<AttestationBlob>): Boolean {
+        if (!checkAccessMode(accessMode)) return false
 
-        if (!checkAccessMode(accessMode, policyMode)) return false
-
-        val rules = policy.getJSONArray(AccessPolicy.RULES)
-        return Rules(rules, attestations, attestationCommunity).evaluate()
+        return rules.evaluate(attestations)
     }
 
-    private fun checkAccessMode(requestMode: String, policyMode: String): Boolean {
-        val policyModes = policyMode.split("+")
+    private fun checkAccessMode(requestMode: String): Boolean {
+        val policyModes = accessMode.split("+")
         return policyModes.contains(requestMode)
+    }
+
+    fun setRules(rules: Rules) {
+        policy.put(AccessControlList.RULES, rules.rulesContainer)
+    }
+
+    val accessMode: String get() {
+        return policy.getString(AccessControlList.MODE)
+    }
+
+    val rules: Rules get() {
+        return Rules(policy.getJSONArray(AccessControlList.RULES).noLastNull(), attestationCommunity)
     }
 
     companion object {
@@ -200,64 +207,51 @@ class Policy(
 }
 
 class Rules(
-    private val rules: JSONArray,
-    private val attestations: List<AttestationBlob>,
-    private val attestationCommunity: AttestationCommunity
+    var rulesContainer: JSONArray,
+    private val attestationCommunity: AttestationCommunity?
 ) {
     private val logTag = "Rules"
 
-    fun evaluate(): Boolean {
+    fun evaluate(attestations: List<AttestationBlob>): Boolean {
         return when {
             isPublic() -> {
-                Log.e(logTag, "Public rule")
                 true
             }
             isLeaf() -> {
-                val credential = rules.getJSONObject(0)
-                val result = matchCredential(credential)
-                Log.e(logTag, "Evaluated credential: $credential [$result]")
+                val result = matchCredential(credential!!, attestations)
                 result
             }
             isNegation() -> {
-                val credential = rules.getJSONObject(1)
-                val result = !matchCredential(credential)
-                Log.e(logTag, "Evaluated negated credential: $credential [$result]")
+                val result = !matchCredential(credential!!, attestations)
                 result
             }
             isBinaryExpression() -> {
-                val operand = rules.getString(1)
                 val result = when (operand) {
-                    AND -> (childRule(true)?.evaluate() ?: false) &&
-                        (childRule(false)?.evaluate() ?: false)
-                    OR -> (childRule(true)?.evaluate() ?: false) ||
-                        (childRule(false)?.evaluate() ?: false)
+                    AND -> (childRule(true)?.evaluate(attestations) ?: false) &&
+                        (childRule(false)?.evaluate(attestations) ?: false)
+                    OR -> (childRule(true)?.evaluate(attestations) ?: false) ||
+                        (childRule(false)?.evaluate(attestations) ?: false)
                     else -> false
                 }
-                Log.e(logTag, "Evaluated $operand binary expression: [$result]")
                 result
             }
             else -> {
-                Log.e(logTag, "Invalid rule")
                 false
             }
         }
     }
 
-    private fun matchCredential(credential: JSONObject): Boolean{
+    private fun matchCredential(credential: JSONObject, attestations: List<AttestationBlob>): Boolean{
         val candidateAttestations = attestations.toMutableList()
-
-        Log.e(logTag, "${candidateAttestations.size} attestation(s)")
 
         if (credential.has(ISSUER)) candidateAttestations.retainAll {
             // {"issuer": "IG-SSI:123456789"}
-            // Log.e(logTag, "issuer match: att[${it.attestorKey!!.keyToHash().toHex()}] == ${credential.getString(ISSUER).split(":").last()}")
             it.attestorKey!!.keyToHash().toHex() == credential.getString(ISSUER).split(":").last()
         }
 
         if (credential.optBoolean(TRUSTED_AUTHORITY, false)) candidateAttestations.retainAll {
             // {"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}
-            // Log.e(logTag, "trusted auth match: att[${attestationCommunity.trustedAuthorityManager.contains(it.attestorKey!!.keyToHash().toHex())}]")
-            attestationCommunity.trustedAuthorityManager.contains(it.attestorKey!!.keyToHash().toHex())
+            attestationCommunity!!.trustedAuthorityManager.contains(it.attestorKey!!.keyToHash().toHex())
         }
 
         if (credential.has(ATTRIBUTE)) candidateAttestations.retainAll {
@@ -265,47 +259,98 @@ class Rules(
             val parsedMetadata = JSONObject(it.metadata!!)
             val idFormat = parsedMetadata.getString(QRScanController.KEY_ID_FORMAT)
             val attribute = parsedMetadata.getString(QRScanController.KEY_ATTRIBUTE)
-            // Log.e(logTag, "attributed match: att[${attribute.toUpperCase()}] == ${credential.getString(ATTRIBUTE).toUpperCase()}")
-            credential.getString(ATTRIBUTE).toUpperCase() == "$IG_SSI:$idFormat:${attribute}".toUpperCase()
+            credential.getString(ATTRIBUTE).equals("$IG_SSI:$idFormat:${attribute}", ignoreCase = true)
         }
 
         if (credential.has(VALUE)) candidateAttestations.retainAll {
             // {"attribute": "IG-SSI:id_metadata_range_18plus:age", "value": "18+", "trusted_authority": true}
             val parsedMetadata = JSONObject(it.metadata!!)
             val value = parsedMetadata.optString(QRScanController.KEY_VALUE)
-            // Log.e(logTag, "value match: att[$value] == ${credential.getString(VALUE)}")
             value == credential.getString(VALUE)
         }
 
-        Log.e(logTag, "attestations matched? ${candidateAttestations.isNotEmpty()}")
         return candidateAttestations.isNotEmpty()
     }
 
-    private fun isPublic(): Boolean {
-        return rules.length() == 0
+    fun updateCredential(index: Int, credential: JSONObject) {
+        assert(index < depth)
+
+        val steps = depth - index - 1
+
+        if (steps > 0) {
+            if (!isBinaryExpression()) {
+                // More steps to take but can go
+                return
+            }
+
+            val newRules = childRule(false)!!
+            newRules.updateCredential(index, credential)
+            rulesContainer.put(2, newRules.rulesContainer)
+        } else {
+            if (isLeaf() || isBinaryExpression()) {
+                rulesContainer.put(0, credential)
+            } else if (isNegation()) {
+                rulesContainer.put(1, credential)
+            }
+        }
     }
 
-    private fun isLeaf(): Boolean {
-        return rules.length() == 1
+    fun isPublic(): Boolean {
+        return rulesContainer.noLastNull().length() == 0
     }
 
-    private fun isNegation(): Boolean {
-        return rules.length() == 2 && rules.getString(0) == NOT
+    fun isLeaf(): Boolean {
+        return rulesContainer.noLastNull().length() == 1
     }
 
-    private fun isBinaryExpression(): Boolean {
-        return rules.length() == 3
+    fun isNegation(): Boolean {
+        return rulesContainer.noLastNull().length() == 2 && rulesContainer.getString(0) == NOT && Rules(toJSONArray(rulesContainer.get(1))!!, null).isLeaf()
     }
 
-    private fun childRule(left: Boolean): Rules? {
+    fun isBinaryExpression(): Boolean {
+        return rulesContainer.noLastNull().length() == 3
+    }
+
+    fun childRule(left: Boolean): Rules? {
         if (isBinaryExpression()) {
-            val rule = toJSONArray(rules.get(if (left) 0 else 2))
+            val rule = toJSONArray(rulesContainer.get(if (left) 0 else 2))
             if (rule != null) {
-                return Rules(rule, attestations, attestationCommunity)
+                return Rules(rule, attestationCommunity)
             }
         }
 
         return null
+    }
+
+    val credential: JSONObject? get() {
+        return when {
+            isLeaf() -> rulesContainer.getJSONObject(0)
+            isNegation() -> {
+                val credential = rulesContainer.get(1)
+                if (credential is JSONArray) credential.getJSONObject(0) else credential as JSONObject
+            }
+            isPublic() -> {
+                val publicRule = JSONObject()
+                publicRule.put(PUBLIC, "")
+            }
+            else -> null
+        }
+    }
+
+    val operand: String? get() {
+        return if (isBinaryExpression()) rulesContainer.getString(1) else null
+    }
+
+    val depth: Int get() {
+        return when {
+            isPublic() -> 0
+            isLeaf() -> 1
+            isNegation() -> 1
+            isBinaryExpression() -> {
+                (childRule(true)?.depth ?: 0) + (childRule(false)?.depth ?: 0)
+            }
+            else -> 0
+        }
     }
 
     companion object {
@@ -315,6 +360,7 @@ class Rules(
 
         const val IG_SSI = "IG-SSI"
 
+        const val PUBLIC = "Public"
         const val ATTRIBUTE = "attribute"
         const val VALUE = "value"
         const val TRUSTED_AUTHORITY = "trusted_authority"
@@ -329,6 +375,25 @@ class Rules(
         }
     }
 
+}
+
+fun JSONArray.noLastNull(): JSONArray {
+    val size = this.length()
+    if (size > 0 && this.isNull(size - 1)) {
+        this.remove(size - 1)
+    }
+
+    return this
+}
+
+class Domain {
+    companion object{
+        const val IGSSI = "IG-SSI"
+
+        fun formatAttribute(domain: String, schema: String, attribute: String): String {
+            return "$domain:$schema:$attribute"
+        }
+    }
 }
 
 /*

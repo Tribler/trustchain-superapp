@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.squareup.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
+apply plugin: "androidx.navigation.safeargs"
 
 ktlint {
     version = "$ktlint_version"
@@ -97,6 +98,7 @@ dependencies {
     implementation project(path: ':peerchat')
     implementation project(path: ':eurotoken')
     implementation project(path: ':ig-ssi')
+    implementation project(path: ':valuetransfer')
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Testing

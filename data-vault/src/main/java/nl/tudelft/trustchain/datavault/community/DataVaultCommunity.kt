@@ -16,7 +16,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
-import nl.tudelft.trustchain.datavault.accesscontrol.AccessPolicy
+import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment
 import nl.tudelft.trustchain.peerchat.community.AttachmentPayload
 import java.io.File
@@ -173,10 +173,10 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         notify("Failed", payload.message)
     }
 
-    private fun vaultFile(filename: String): Pair<File, AccessPolicy> {
+    private fun vaultFile(filename: String): Pair<File, AccessControlList> {
         val VAULT = File(context.filesDir, VaultBrowserFragment.VAULT_DIR)
         val file = File(VAULT, filename)
-        return Pair(file, AccessPolicy(file, attestationCommunity))
+        return Pair(file, AccessControlList(file, attestationCommunity))
     }
 
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {

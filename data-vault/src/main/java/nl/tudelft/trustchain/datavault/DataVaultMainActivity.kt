@@ -1,8 +1,5 @@
 package nl.tudelft.trustchain.datavault
 
-import android.app.AlertDialog
-import android.os.Bundle
-import android.util.Log
 import nl.tudelft.trustchain.common.BaseActivity
 
 class DataVaultMainActivity : BaseActivity() {

@@ -15,19 +15,30 @@
         android:paddingRight="10dp">
 
         <TextView
+            android:id="@+id/accessModeLabel"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="Access mode: Read"
+            android:text="Access mode:"
             android:textColor="@color/gray"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
+            android:paddingRight="10dp"
+            android:gravity="center_vertical"/>
+
+        <Spinner
+            android:id="@+id/accessModeSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textColor="@color/gray"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/accessModeLabel"
             android:gravity="center_vertical"/>
 
         <Button
             android:id="@+id/addRuleButton"
-            android:layout_width="40dp"
+            android:layout_width="wrap_content"
             android:layout_height="40dp"
-            android:text="+"
+            android:text="Add Rule"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintRight_toRightOf="parent"/>
 
@@ -42,49 +53,6 @@
         android:orientation="vertical"
         android:padding="20dp"
         android:background="@color/gray">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/white">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Attribute:"
-                    android:layout_marginRight="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="IG-SSI:id_metadata_range_18plus:age"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Value:"
-                    android:layout_marginRight="10dp"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="18+"/>
-            </LinearLayout>
-        </LinearLayout>
 
     </LinearLayout>
 
