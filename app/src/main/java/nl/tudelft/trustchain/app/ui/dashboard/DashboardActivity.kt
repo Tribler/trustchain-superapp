@@ -85,7 +85,8 @@ class DashboardActivity : AppCompatActivity() {
                 BLUETOOTH_PERMISSIONS_ADVERTISE,
                 BLUETOOTH_PERMISSIONS_CONNECT,
                 BLUETOOTH_PERMISSIONS_SCAN
-            ), BLUETOOTH_PERMISSIONS_REQUEST_CODE
+            ),
+            BLUETOOTH_PERMISSIONS_REQUEST_CODE
         )
     }
 
