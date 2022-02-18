@@ -13,7 +13,7 @@ import nl.tudelft.trustchain.datavault.R
 
 class PhotoGridAdapter(
     private val context: Context,
-    private val fragment: Fragment,
+    private val fragment: VaultBrowserFragment,
     private var images: List<VaultFileItem>
     ): RecyclerView.Adapter<ImageViewHolder>() {
 
@@ -27,6 +27,7 @@ class PhotoGridAdapter(
         holder.iv.setImageURI(vaultFile.file.toUri())
 
         holder.iv.setOnClickListener {
+            fragment.acmViewModel.clearModifiedPolicies()
             val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(vaultFile.file.absolutePath)
             fragment.findNavController().navigate(action)
         }
@@ -38,6 +39,7 @@ class PhotoGridAdapter(
 
     fun updateItems(vaultFileItems: List<VaultFileItem>) {
         images = vaultFileItems
+        notifyDataSetChanged()
     }
 }
 

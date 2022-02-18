@@ -3,11 +3,13 @@ package nl.tudelft.trustchain.datavault.ui
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -32,16 +34,17 @@ import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.jar.Manifest
 
 class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val binding by viewBinding(VaultBrowserFragmentBinding::bind)
     private lateinit var parentActivity: DataVaultMainActivity
     private lateinit var attestationCommunity: AttestationCommunity
-    private val acmViewModel: ACMViewModel by activityViewModels()
+    val acmViewModel: ACMViewModel by activityViewModels()
 
     private val logTag = "DATA VAULT"
-    private val adapter = ItemAdapter()
-    //private lateinit var adapter: PhotoGridAdapter
+    //private val adapter = ItemAdapter()
+    private lateinit var adapter: PhotoGridAdapter
     private val uriPathHelper = URIPathHelper()
 
     private val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
@@ -61,21 +64,21 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         initVault()
 
-        adapter.registerRenderer(VaultFileItemRenderer {
+        /*adapter.registerRenderer(VaultFileItemRenderer {
             acmViewModel.clearModifiedPolicies()
             val args = Bundle()
             args.putString(FILENAME, it.absolutePath)
             findNavController().navigate(R.id.action_vaultBrowserFragment_to_accessControlManagementFragment, args)
 
-        /*val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(it.absolutePath)
-            findNavController().navigate(action)*/
-        })
+        val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(it.absolutePath)
+            findNavController().navigate(action)
+        })*/
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        //adapter = PhotoGridAdapter(requireContext(), this, listOf<VaultFileItem>())
+        adapter = PhotoGridAdapter(requireContext(), this, listOf<VaultFileItem>())
         binding.recyclerView.adapter = adapter
         binding.recyclerView.layoutManager = LinearLayoutManager(context)
         binding.recyclerView.addItemDecoration(
@@ -202,7 +205,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                     map { fileName: String ->
                         VaultFileItem(File(VAULT, fileName), null)
                     }
-
+                    Log.e(logTag, "Adapter updated. Vault files: $vaultFileItems")
                     withContext(Dispatchers.Main) {
                         adapter.updateItems(vaultFileItems)
                     }
@@ -221,6 +224,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         const val FILENAME = "fileName"
 
         const val PICK_PHOTO = 100
+        const val PERMISSION_REQUEST_CODE = 101
     }
 
     fun selectRequestableFile(peer: Peer, accessToken: String?, files: List<String>) {
@@ -261,13 +265,19 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun addTestFile() {
-        /*val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, PICK_PHOTO)*/
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(requireContext(),
+            android.Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.ACCESS_MEDIA_LOCATION), PERMISSION_REQUEST_CODE)
+        } else {
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            startActivityForResult(intent, PICK_PHOTO)
+        }
 
-         */
-
-        val timestamp = Date().time
+        /*val timestamp = Date().time
         val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
         val filename: String = sdf.format(timestamp)
 
@@ -276,7 +286,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         fos.write(fileContents.toByteArray())
         fos.close()
 
-        updateAdapter()
+        updateAdapter()*/
     }
 
     private fun addImageToVault(uri: Uri) {
@@ -320,6 +330,35 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             val uri = data?.data
             if (uri != null) {
                 addImageToVault(uri)
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int,
+                                            permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSION_REQUEST_CODE -> {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.isNotEmpty() &&
+                        grantResults.all { result -> result == PackageManager.PERMISSION_GRANTED}) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+                    addTestFile()
+                } else {
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                    notify("Permission denied", "Permissions required to access photo library was not granted.")
+                }
+                return
+            }
+
+            // Add other 'when' lines to check for other
+            // permissions this app might request.
+            else -> {
+                // Ignore all other requests.
             }
         }
     }
