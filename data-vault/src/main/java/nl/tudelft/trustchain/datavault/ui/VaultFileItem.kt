@@ -8,4 +8,8 @@ class VaultFileItem(
     val file: File,
     val accessControlList: AccessControlList?
 ) : Item() {
+
+    override fun toString(): String {
+        return "VaultFile(${file.path})"
+    }
 }

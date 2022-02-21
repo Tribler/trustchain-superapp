@@ -86,7 +86,7 @@
         app:layout_constraintTop_toTopOf="@id/delete_files_fab" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_file_fab"
+        android:id="@+id/create_folder_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
@@ -96,6 +96,33 @@
         app:layout_constraintBottom_toTopOf="@id/delete_files_fab"
         app:layout_constraintEnd_toEndOf="@id/delete_files_fab"
         app:layout_constraintStart_toStartOf="@id/delete_files_fab"
+        app:srcCompat="@drawable/ic_round_storage_24"
+        app:tint="@color/white" />
+
+    <TextView
+        android:id="@+id/create_folder_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/rounded_corners"
+        android:padding="5dp"
+        android:text="Create folder"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@id/create_folder_fab"
+        app:layout_constraintEnd_toStartOf="@id/create_folder_fab"
+        app:layout_constraintTop_toTopOf="@id/create_folder_fab" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_file_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        app:borderWidth="0dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toTopOf="@id/create_folder_fab"
+        app:layout_constraintEnd_toEndOf="@id/create_folder_fab"
+        app:layout_constraintStart_toStartOf="@id/create_folder_fab"
         app:srcCompat="@drawable/ic_round_storage_24"
         app:tint="@color/white" />
 

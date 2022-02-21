@@ -6,10 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.LinearLayout
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -88,7 +85,12 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
      * Get the modified version of the policy if available, else the original.
      */
     private fun getEditablePolicy(policyIndex: Int): Policy {
-        return acmViewModel.getModifiedPolicy(policyIndex) ?: policies[policyIndex]
+        val policy = acmViewModel.getModifiedPolicy(policyIndex) ?: policies[policyIndex]
+        val modifiedActive = acmViewModel.isPolicyActive(policyIndex)
+        val active = if (modifiedActive != null) modifiedActive else policy.isActive
+        // Log.e(logTag, "Policy $policyIndex active (cache): $modifiedActive, (stored) ${policy.isActive}, (final): $active")
+        policy.setActive(active)
+        return policy
     }
 
     private fun savePolicies() {
@@ -99,7 +101,14 @@ class AccessControlManagementFragment :BaseFragment(R.layout.access_control_mana
 
     private fun getPolicyView(policy: Policy, index: Int): View {
         val policyView = layoutInflater.inflate(R.layout.policy_layout, null)
+        val activeSwitch = policyView.findViewById<Switch>(R.id.activeSwitch)
         val accessModeSpinner = policyView.findViewById<Spinner>(R.id.accessModeSpinner)
+
+        activeSwitch.isChecked = policy.isActive
+
+        activeSwitch.setOnCheckedChangeListener {_, isChecked ->
+            acmViewModel.setActivePolicy(index, isChecked)
+        }
 
         ArrayAdapter.createFromResource(requireContext(), R.array.access_modes,  android.R.layout.simple_spinner_item).also {
             accessModeSpinner.adapter = it

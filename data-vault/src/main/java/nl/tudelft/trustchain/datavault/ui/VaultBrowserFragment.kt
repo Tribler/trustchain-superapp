@@ -8,14 +8,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,55 +30,43 @@ import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.*
-import java.util.jar.Manifest
 
 class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private val binding by viewBinding(VaultBrowserFragmentBinding::bind)
-    private lateinit var parentActivity: DataVaultMainActivity
+    private val logTag = "DATA VAULT"
+
+    private lateinit var dataVaultActivity: DataVaultMainActivity
     private lateinit var attestationCommunity: AttestationCommunity
     val acmViewModel: ACMViewModel by activityViewModels()
 
-    private val logTag = "DATA VAULT"
-    //private val adapter = ItemAdapter()
-    private lateinit var adapter: PhotoGridAdapter
+    private val currentFolder: File get() {
+        return dataVaultActivity.getCurrentFolder().value!!
+    }
+
+    private lateinit var adapter: BrowserGridAdapter
     private val uriPathHelper = URIPathHelper()
 
-    private val VAULT by lazy { File(requireContext().filesDir, VAULT_DIR) }
-
     private var areFABsVisible = false
+    private var gridLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        parentActivity = requireActivity() as DataVaultMainActivity
+        dataVaultActivity = requireActivity() as DataVaultMainActivity
 
         attestationCommunity = IPv8Android.getInstance().getOverlay()!!
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
 
-        getDataVaultCommunity().setDataVaultActivity(parentActivity)
+        getDataVaultCommunity().setDataVaultActivity(dataVaultActivity)
         getDataVaultCommunity().setVaultBrowserFragment(this)
-
-        initVault()
-
-        /*adapter.registerRenderer(VaultFileItemRenderer {
-            acmViewModel.clearModifiedPolicies()
-            val args = Bundle()
-            args.putString(FILENAME, it.absolutePath)
-            findNavController().navigate(R.id.action_vaultBrowserFragment_to_accessControlManagementFragment, args)
-
-        val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(it.absolutePath)
-            findNavController().navigate(action)
-        })*/
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = PhotoGridAdapter(requireContext(), this, listOf<VaultFileItem>())
+        adapter = BrowserGridAdapter(requireContext(), this, listOf<VaultFileItem>())
         binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = LinearLayoutManager(context)
+        binding.recyclerView.layoutManager = VaultBrowserLayoutManager(requireContext(), 2)
         binding.recyclerView.addItemDecoration(
             DividerItemDecoration(
                 context,
@@ -90,7 +76,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         setFABs()
 
-        updateAdapter()
+        dataVaultActivity.getCurrentFolder().observe(viewLifecycleOwner, {
+                _ -> updateAdapter()
+        })
     }
 
     private fun setFABs() {
@@ -99,6 +87,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         binding.deleteFilesFab.visibility = View.GONE
         binding.deleteFilesText.visibility = View.GONE
+
+        binding.createFolderFab.visibility = View.GONE
+        binding.createFolderText.visibility = View.GONE
 
         binding.addFileFab.visibility = View.GONE
         binding.addFileText.visibility = View.GONE
@@ -121,6 +112,11 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             deleteTestFiles()
         }
 
+        binding.createFolderFab.setOnClickListener {
+            hideFabs()
+            createFolder()
+        }
+
         binding.addFileFab.setOnClickListener {
             hideFabs()
             addTestFile()
@@ -130,10 +126,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private fun showFabs() {
         binding.requestAccessibleFilesFab.show()
         binding.deleteFilesFab.show()
+        binding.createFolderFab.show()
         binding.addFileFab.show()
 
         binding.requestAccessibleFilesText.visibility = View.VISIBLE
         binding.deleteFilesText.visibility = View.VISIBLE
+        binding.createFolderText.visibility = View.VISIBLE
         binding.addFileText.visibility = View.VISIBLE
         areFABsVisible = true
     }
@@ -141,10 +139,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     private fun hideFabs() {
         binding.requestAccessibleFilesFab.hide()
         binding.deleteFilesFab.hide()
+        binding.createFolderFab.hide()
         binding.addFileFab.hide()
 
         binding.requestAccessibleFilesText.visibility = View.GONE
         binding.deleteFilesText.visibility = View.GONE
+        binding.createFolderText.visibility = View.GONE
         binding.addFileText.visibility = View.GONE
         areFABsVisible = false
     }
@@ -185,46 +185,26 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         alertDialog.show()
     }
 
-    private fun initVault() {
-        if (!VAULT.exists()) {
-            Log.e(logTag, "Data Vault not yet initiated. Initiating now.")
-            VAULT.mkdir()
-        }
-    }
-
     private fun updateAdapter() {
         lifecycleScope.launch(Dispatchers.IO) {
-            if (!VAULT.canRead()) {
+            if (!currentFolder.canRead()) {
                 //setTitle(getTitle().toString() + " (inaccessible)")
-                Log.e(logTag, "$VAULT inaccessible")
+                Log.e(logTag, "$currentFolder inaccessible")
             } else {
-                val list = VAULT.list()
+                val list = currentFolder.list()
                 if (list != null) {
                     val vaultFileItems = list.asList().
                     filter { fileName -> !fileName.startsWith(".") && !fileName.endsWith(".acl")}.
                     map { fileName: String ->
-                        VaultFileItem(File(VAULT, fileName), null)
+                        VaultFileItem(File(currentFolder, fileName), null)
                     }
-                    Log.e(logTag, "Adapter updated. Vault files: $vaultFileItems")
+                    // Log.e(logTag, "Adapter updated. Vault files: $vaultFileItems")
                     withContext(Dispatchers.Main) {
                         adapter.updateItems(vaultFileItems)
                     }
                 }
             }
         }
-    }
-
-    private fun getDataVaultCommunity(): DataVaultCommunity {
-        return getIpv8().getOverlay()
-            ?: throw java.lang.IllegalStateException("DataVaultCommunity is not configured")
-    }
-
-    companion object {
-        const val VAULT_DIR = "data_vault"
-        const val FILENAME = "fileName"
-
-        const val PICK_PHOTO = 100
-        const val PERMISSION_REQUEST_CODE = 101
     }
 
     fun selectRequestableFile(peer: Peer, accessToken: String?, files: List<String>) {
@@ -250,27 +230,14 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
     }
 
-    fun notify(id: String, message: String) {
-        requireActivity().runOnUiThread {
-            Log.e(logTag, "File: $id")
-
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle(id).setMessage(message).setPositiveButton("Ok") { _, _ ->
-                // close dialog
-            }
-
-            val alertDialog: AlertDialog = builder.create()
-            alertDialog.show()
-        }
-    }
-
     private fun addTestFile() {
         if (ContextCompat.checkSelfPermission(requireContext(),
                 android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
             ContextCompat.checkSelfPermission(requireContext(),
             android.Manifest.permission.ACCESS_MEDIA_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,
-                android.Manifest.permission.ACCESS_MEDIA_LOCATION), PERMISSION_REQUEST_CODE)
+                // Request permissions
+                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                    android.Manifest.permission.ACCESS_MEDIA_LOCATION), PERMISSION_REQUEST_CODE)
         } else {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
@@ -289,39 +256,80 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         updateAdapter()*/
     }
 
+    private fun createFolder() {
+        val builder = AlertDialog.Builder(context)
+
+        val view = layoutInflater.inflate(R.layout.create_folder_dialog, null)
+        builder.setView(view)
+
+        val folderNameEditText = view.findViewById<EditText>(R.id.folderName)
+
+        builder.setTitle("Create folder").setNegativeButton("Cancel", {_, _ ->}).setPositiveButton("Ok") { _, _ ->
+            Log.e(logTag, "folder name: ${folderNameEditText.text}")
+            lifecycleScope.launch(Dispatchers.IO) {
+                val newFolder = File(currentFolder, folderNameEditText.text.toString())
+                newFolder.mkdir()
+            }
+        }
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
+
+        updateAdapter()
+    }
+
+    fun navigateToFolder(folder: File) {
+        dataVaultActivity.pushFolderToStack(currentFolder)
+        dataVaultActivity.setCurrentFolder(folder)
+    }
+
     private fun addImageToVault(uri: Uri) {
         val filePath = uriPathHelper.getPath(requireContext(), uri)
         val file = File(filePath ?: "")
-        Log.e(logTag, "File exists?: ${file.exists()}")
 
-        //if (file.canRead()){
-            val timestamp = Date().time
-            val sdf = SimpleDateFormat("MM-dd-yyyy--HH:mm:ss", Locale.getDefault())
-            val filename: String = sdf.format(timestamp)
+        if (!file.canRead()) {
+            return
+        }
 
-            val fos = FileOutputStream (File(VAULT, filename))
-            fos.write(file.readBytes())
-            fos.close()
+        val fos = FileOutputStream (File(currentFolder, file.name))
+        fos.write(file.readBytes())
+        fos.close()
 
-            Log.e(logTag, "Imaged added to vault")
-       /* } else {
-            Log.e(logTag, "Can not add image to vault")
-        }*/
+        Log.e(logTag, "Imaged added to vault")
 
         updateAdapter()
     }
 
     private fun deleteTestFiles() {
-        if (!VAULT.canRead()) {
+        if (!currentFolder.canRead()) {
             //
         } else {
-            VAULT.list()?.forEach { fileName ->
-                val testFile = File(VAULT, fileName)
+            currentFolder.list()?.forEach { fileName ->
+                val testFile = File(currentFolder, fileName)
                 testFile.delete()
             }
         }
 
         updateAdapter()
+    }
+
+    fun notify(id: String, message: String) {
+        requireActivity().runOnUiThread {
+            Log.e(logTag, "File: $id")
+
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle(id).setMessage(message).setPositiveButton("Ok") { _, _ ->
+                // close dialog
+            }
+
+            val alertDialog: AlertDialog = builder.create()
+            alertDialog.show()
+        }
+    }
+
+    private fun getDataVaultCommunity(): DataVaultCommunity {
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("DataVaultCommunity is not configured")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -361,5 +369,13 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
                 // Ignore all other requests.
             }
         }
+    }
+
+    companion object {
+        const val VAULT_DIR = "data_vault"
+        const val FILENAME = "fileName"
+
+        const val PICK_PHOTO = 100
+        const val PERMISSION_REQUEST_CODE = 101
     }
 }

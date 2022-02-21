@@ -121,8 +121,8 @@
 
         <activity
             android:name="nl.tudelft.trustchain.datavault.DataVaultMainActivity"
-            android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:theme="@style/Theme.DataVault" />
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+        <!--android:theme="@style/Theme.DataVault"-->
 
         <service android:name="nl.tudelft.trustchain.app.service.TrustChainService" />
 

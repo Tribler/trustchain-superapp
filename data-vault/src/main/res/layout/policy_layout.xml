@@ -10,9 +10,17 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:paddingTop="10dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp">
+
+        <Switch
+            android:id="@+id/activeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"/>
 
         <TextView
             android:id="@+id/accessModeLabel"
@@ -20,7 +28,7 @@
             android:layout_height="40dp"
             android:text="Access mode:"
             android:textColor="@color/gray"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/activeSwitch"
             app:layout_constraintLeft_toLeftOf="parent"
             android:paddingRight="10dp"
             android:gravity="center_vertical"/>
@@ -30,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:textColor="@color/gray"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/accessModeLabel"
             app:layout_constraintLeft_toRightOf="@id/accessModeLabel"
             android:gravity="center_vertical"/>
 
@@ -40,7 +48,7 @@
             android:layout_height="40dp"
             android:text="Add Rule"
             style="@style/ButtonWhiteRounded"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/accessModeLabel"
             app:layout_constraintRight_toRightOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
