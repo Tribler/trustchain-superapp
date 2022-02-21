@@ -1,6 +1,9 @@
+package com.example.musicdao.core.torrent
+
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.musicdao.core.usecases.DownloadFinishUseCase
 import com.example.musicdao.core.util.MyResult
 import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.*
@@ -10,14 +13,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.io.File
 import java.nio.file.Path
+import javax.inject.Inject
 
 /**
  * Cl
  */
 @RequiresApi(Build.VERSION_CODES.O)
-class TorrentEngine(
+class TorrentEngine @Inject constructor(
     private val sessionManager: SessionManager,
-    torrentFinished: (String) -> Unit
+    private val torrentFinished: DownloadFinishUseCase
 ) {
 
     private val _activeTorrents: MutableStateFlow<List<String>> = MutableStateFlow(

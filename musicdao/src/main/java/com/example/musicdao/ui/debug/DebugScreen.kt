@@ -1,6 +1,5 @@
 package com.example.musicdao.ui.debug
 
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,44 +12,29 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.musicdao.AppContainer
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.search.DebugScreenViewModel
-import kotlinx.coroutines.delay
 
 @ExperimentalMaterialApi
 @Composable
 fun Debug(debugScreenViewModel: DebugScreenViewModel) {
 
     val torrentHandleStatus by debugScreenViewModel.status.collectAsState(listOf())
-
-    val sessionManager = AppContainer.sessionManager
-    var interfaces by rememberSaveable { mutableStateOf("") }
-    var dhtNodes by rememberSaveable { mutableStateOf<Long>(0) }
-    var uploadRate by rememberSaveable { mutableStateOf<Long>(0) }
-    var downloadRate by rememberSaveable { mutableStateOf<Long>(0) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            interfaces = sessionManager.listenInterfaces()
-            dhtNodes = sessionManager.dhtNodes()
-            uploadRate = sessionManager.uploadRate()
-            downloadRate = sessionManager.downloadRate()
-            delay(2000)
-        }
-    }
+    val sessionStatus by debugScreenViewModel.sessionStatus.collectAsState()
 
     Column {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text("Interface: ${interfaces}")
-            Text("DHT Peers: ${dhtNodes}")
-            Text("Upload-rate: ${uploadRate}")
-            Text("Download-rate: ${downloadRate}")
+            Text("Interface: ${sessionStatus?.interfaces}")
+            Text("DHT Peers: ${sessionStatus?.dhtNodes}")
+            Text("Upload-rate: ${sessionStatus?.uploadRate}")
+            Text("Download-rate: ${sessionStatus?.downloadRate}")
         }
         Divider()
         LazyColumn {

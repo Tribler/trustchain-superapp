@@ -3,18 +3,19 @@ package com.example.musicdao.ui.search
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.musicdao.AppContainer
-import com.example.musicdao.core.usecases.releases.Search
 import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.usecases.releases.Search
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchScreenViewModel(
+@HiltViewModel
+class SearchScreenViewModel @Inject constructor(
     private val search: Search
 ) : ViewModel() {
 
@@ -46,17 +47,6 @@ class SearchScreenViewModel(
         } else {
             val result = search.invoke(searchText)
             _searchResult.value = result
-        }
-    }
-
-    companion object {
-        fun provideFactory(
-            search: Search = AppContainer.search
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return SearchScreenViewModel(search) as T
-            }
         }
     }
 }

@@ -1,10 +1,10 @@
 package com.example.musicdao.core.usecases.torrents
 
-import com.example.musicdao.core.torrent.api.DownloadingTrack
-import TorrentCache
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.musicdao.core.torrent.TorrentCache
+import com.example.musicdao.core.torrent.api.DownloadingTrack
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import com.example.musicdao.core.util.MyResult
 import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.TorrentHandle
@@ -12,6 +12,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.File
+import javax.inject.Inject
 
 fun mapTorrentHandle(torrentHandle: TorrentHandle, directory: File): TorrentHandleStatus {
     val files = torrentHandle.torrentFile()?.files()
@@ -64,7 +65,7 @@ fun downloadingTracks(handle: TorrentHandle, directory: File): List<DownloadingT
     return downloadingTracks
 }
 
-class GetTorrentStatusFlowUseCase(private val torrentCache: TorrentCache) {
+class GetTorrentStatusFlowUseCase @Inject constructor(private val torrentCache: TorrentCache) {
 
     private val REFRESH_DELAY = 1000L
 
@@ -75,7 +76,7 @@ class GetTorrentStatusFlowUseCase(private val torrentCache: TorrentCache) {
             is MyResult.Success -> flow {
                 while (true) {
                     val handle = result.value
-                    emit(mapTorrentHandle(handle, torrentCache.path.toFile()))
+                    emit(mapTorrentHandle(handle, torrentCache.specialPath.getPath()!!.toFile()))
                     delay(REFRESH_DELAY)
                 }
             }

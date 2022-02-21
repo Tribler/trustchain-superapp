@@ -17,22 +17,40 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
+import com.example.musicdao.core.torrent.TorrentCache
 import com.example.musicdao.ui.MusicDAOApp
+import com.example.musicdao.ui.release.ReleaseScreenViewModel
+import com.frostwire.jlibtorrent.SessionManager
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import javax.inject.Inject
 
 /**
  * This maintains the interactions between the UI and seeding/trustchain
  */
+@AndroidEntryPoint
 class MusicActivity : AppCompatActivity() {
 
-    lateinit var container: AppContainer
     lateinit var mService: MusicGossipingService
     var mBound: Boolean = false
+
+    @Inject
+    lateinit var albumRepository: AlbumRepository
+
+    @Inject
+    lateinit var torrentCache: TorrentCache
+
+    @Inject
+    lateinit var sessionManager: SessionManager
 
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
@@ -41,16 +59,11 @@ class MusicActivity : AppCompatActivity() {
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
-            ?: throw IllegalStateException("MusicCommunity is not configured")
-        AppContainer.provide(this, musicCommunity = musicCommunity, this)
-        container = AppContainer
         registerBlockSigner()
+        AppContainer.provide(this)
         lifecycleScope.launchWhenStarted {
-            container.albumRepository.refreshReleases()
-            container.torrentCache.seedStrategy()
+            albumRepository.refreshReleases()
+            torrentCache.seedStrategy()
         }
         iterativelyFetchReleases()
 //        iterativelyUpdateSwarmHealth()
@@ -60,13 +73,12 @@ class MusicActivity : AppCompatActivity() {
         }
 
         setContent {
-            MusicDAOApp(container)
+            MusicDAOApp()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        container.sessionManager?.stop()
         if (mBound) {
             unbindService(mConnection)
         }
@@ -159,7 +171,7 @@ class MusicActivity : AppCompatActivity() {
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                container.albumRepository.refreshReleases()
+                albumRepository.refreshReleases()
                 delay(3000)
             }
         }
@@ -168,6 +180,12 @@ class MusicActivity : AppCompatActivity() {
     override fun startActivityForResult(intent: Intent?, requestCode: Int) {
         require(!(requestCode != -1 && requestCode and -0x10000 != 0)) { "Can only use lower 16 bits for requestCode" }
         super.startActivityForResult(intent, requestCode)
+    }
+
+    @EntryPoint
+    @InstallIn(ActivityComponent::class)
+    interface ViewModelFactoryProvider {
+        fun noteDetailViewModelFactory(): ReleaseScreenViewModel.ReleaseScreenViewModelFactory
     }
 
 

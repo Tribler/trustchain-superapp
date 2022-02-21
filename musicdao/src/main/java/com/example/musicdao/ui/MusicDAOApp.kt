@@ -18,7 +18,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.release.CreateReleaseDialog
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -29,7 +28,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 @ExperimentalMaterialApi
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun MusicDAOApp(appContainer: AppContainer) {
+fun MusicDAOApp() {
     MaterialTheme(colors = MusicDAOTheme.DarkColors) {
         val navController = rememberAnimatedNavController()
 
@@ -58,7 +57,7 @@ fun MusicDAOApp(appContainer: AppContainer) {
             content = { paddingValues ->
                 Column(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
                     Column(modifier = Modifier.weight(2f)) {
-                        AppNavigation(navController, appContainer, playerViewModel)
+                        AppNavigation(navController, playerViewModel)
                     }
                     MinimizedPlayer(
                         playerViewModel = playerViewModel,

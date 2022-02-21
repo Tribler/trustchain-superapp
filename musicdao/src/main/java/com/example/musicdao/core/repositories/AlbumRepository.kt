@@ -1,6 +1,5 @@
 package com.example.musicdao.core.repositories
 
-import android.util.Log
 import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.database.entities.AlbumEntity
 import com.example.musicdao.core.ipv8.MusicCommunity
@@ -8,11 +7,15 @@ import com.example.musicdao.core.ipv8.blocks.Constants
 import com.example.musicdao.core.ipv8.blocks.ReleasePublishBlock
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import javax.inject.Inject
 
 /**
  * CRUD for any operations on Albums
  */
-class AlbumRepository(private val musicCommunity: MusicCommunity, val database: CacheDatabase) {
+class AlbumRepository @Inject constructor(
+    private val musicCommunity: MusicCommunity,
+    private val database: CacheDatabase
+) {
 
     suspend fun refreshReleases() {
         val releaseBlocks =

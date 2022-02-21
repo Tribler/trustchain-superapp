@@ -1,6 +1,6 @@
 package com.example.musicdao.ui.release
 
-import com.example.musicdao.core.torrent.api.DownloadingTrack
+import android.app.Activity
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -24,12 +24,15 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.musicdao.MusicActivity
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.model.Song
+import com.example.musicdao.core.torrent.api.DownloadingTrack
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
 import com.example.musicdao.ui.torrent.TorrentStatusScreen
+import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.collect
 import java.io.File
 
@@ -41,8 +44,15 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
 
-    val viewModel: ReleaseScreenViewModel =
-        viewModel(factory = ReleaseScreenViewModel.provideFactory(releaseId))
+    val viewModelFactory = EntryPointAccessors.fromActivity(
+        LocalContext.current as Activity,
+        MusicActivity.ViewModelFactoryProvider::class.java
+    ).noteDetailViewModelFactory()
+
+    val viewModel: ReleaseScreenViewModel = viewModel(
+        factory = ReleaseScreenViewModel.provideFactory(viewModelFactory, releaseId = releaseId)
+
+    )
 
     val torrentStatus by viewModel.torrentHandleState.collectAsState()
     val album by viewModel.saturatedReleaseState.collectAsState()

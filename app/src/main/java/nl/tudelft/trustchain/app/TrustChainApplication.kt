@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -58,6 +59,7 @@ import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
 @OptIn(DelicateCoroutinesApi::class)
 @ExperimentalUnsignedTypes
+@HiltAndroidApp
 class TrustChainApplication : Application() {
     override fun onCreate() {
         super.onCreate()

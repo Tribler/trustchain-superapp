@@ -12,12 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
-import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.components.player.FullPlayerScreen
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.debug.Debug
@@ -50,16 +49,11 @@ sealed class Screen(val route: String) {
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
-    appContainer: AppContainer,
     playerViewModel: PlayerViewModel,
 ) {
-    val homeScreenViewModel: HomeScreenViewModel = viewModel(
-        factory = HomeScreenViewModel.provideFactory()
-    )
-    val searchScreenScreenViewModel: SearchScreenViewModel =
-        viewModel(factory = SearchScreenViewModel.provideFactory())
-    val debugScreenViewModel: DebugScreenViewModel =
-        viewModel(factory = DebugScreenViewModel.provideFactory())
+    val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
+    val searchScreenScreenViewModel: SearchScreenViewModel = hiltViewModel()
+    val debugScreenViewModel: DebugScreenViewModel = hiltViewModel()
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
@@ -77,7 +71,9 @@ fun AppNavigation(
             composable(Screen.Search.route) {
                 SearchScreen(navController, searchScreenScreenViewModel)
             }
-            composable(Screen.Debug.route) { Debug(debugScreenViewModel) }
+            composable(Screen.Debug.route) {
+                Debug(debugScreenViewModel)
+            }
             composable(
                 Screen.Release.route,
                 arguments = listOf(navArgument("releaseId") {

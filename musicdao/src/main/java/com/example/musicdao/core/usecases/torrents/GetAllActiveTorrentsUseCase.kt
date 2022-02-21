@@ -1,14 +1,15 @@
 package com.example.musicdao.core.usecases.torrents
 
-import TorrentEngine
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.musicdao.core.torrent.TorrentEngine
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class GetAllActiveTorrentsUseCase(
+class GetAllActiveTorrentsUseCase @Inject constructor(
     private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase,
     private val torrentEngine: TorrentEngine
 ) {

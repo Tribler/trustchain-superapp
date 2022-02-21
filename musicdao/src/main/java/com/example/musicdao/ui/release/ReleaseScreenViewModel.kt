@@ -1,28 +1,46 @@
 package com.example.musicdao.ui.release
 
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.musicdao.AppContainer
+import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import com.example.musicdao.core.usecases.releases.GetRelease
 import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
-import com.example.musicdao.core.model.Album
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-class ReleaseScreenViewModel(
-    private
-    val releaseId: String,
+
+class ReleaseScreenViewModel @AssistedInject constructor(
+    @Assisted private val releaseId: String,
     private val getReleaseUseCase: GetRelease,
     private val downloadIntentUseCase: DownloadIntentUseCase,
-    private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase
+    private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface ReleaseScreenViewModelFactory {
+        fun create(plantId: String): ReleaseScreenViewModel
+    }
+
+    companion object {
+        fun provideFactory(
+            assistedFactory: ReleaseScreenViewModelFactory,
+            releaseId: String
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return assistedFactory.create(releaseId) as T
+            }
+        }
+    }
 
     private val _saturatedRelease: MutableStateFlow<Album?> = MutableStateFlow(null)
     val saturatedReleaseState: StateFlow<Album?> = _saturatedRelease
@@ -58,25 +76,6 @@ class ReleaseScreenViewModel(
                         _saturatedRelease.value = getReleaseUseCase(releaseId)
                     }
                 }
-            }
-        }
-    }
-
-    companion object {
-        fun provideFactory(
-            releaseId: String,
-            getReleaseUseCase: GetRelease = AppContainer.getReleaseUseCase,
-            downloadIntentUseCase: DownloadIntentUseCase = AppContainer.downloadIntentuseCase,
-            getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase = AppContainer.getTorrentStatusFlowUseCase
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ReleaseScreenViewModel(
-                    releaseId,
-                    getReleaseUseCase,
-                    downloadIntentUseCase,
-                    getTorrentStatusFlowUseCase
-                ) as T
             }
         }
     }

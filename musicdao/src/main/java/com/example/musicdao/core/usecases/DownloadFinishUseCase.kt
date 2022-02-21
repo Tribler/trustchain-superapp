@@ -2,9 +2,9 @@ package com.example.musicdao.core.usecases
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.AppContainer
 import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.database.entities.SongEntity
+import com.example.musicdao.core.torrent.FilesHelper
 import com.example.musicdao.core.util.Util
 import com.mpatric.mp3agic.Mp3File
 import kotlinx.coroutines.CoroutineScope
@@ -13,7 +13,10 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.nio.file.Paths
 
-class DownloadFinishUseCase(val database: CacheDatabase) {
+class DownloadFinishUseCase constructor(
+    val database: CacheDatabase,
+    private val filesHelper: FilesHelper
+) {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -22,7 +25,7 @@ class DownloadFinishUseCase(val database: CacheDatabase) {
 
         coroutineScope.launch {
             val albumEntity = database.dao.get(id)
-            val files = AppContainer.torrentCache.getFiles(id)
+            val files = filesHelper.getFiles(id)
 
             val songs = files?.mapNotNull {
                 try {
@@ -44,7 +47,8 @@ class DownloadFinishUseCase(val database: CacheDatabase) {
                 cover = Util.findCoverArt(files.get(0).parentFile.parentFile)
             }
 
-            val root = Paths.get("${AppContainer.torrentCache.path}/torrents/$id/content").toFile()
+            val root =
+                Paths.get("${filesHelper.specialPath.getPath()!!}/torrents/$id/content").toFile()
             val updatedAlbumEntity = albumEntity.copy(
                 songs = songs ?: listOf(),
                 cover = cover?.absolutePath,

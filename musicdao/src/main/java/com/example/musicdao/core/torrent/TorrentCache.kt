@@ -1,25 +1,36 @@
+package com.example.musicdao.core.torrent
+
 import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import com.example.musicdao.SpecialPath
 import com.example.musicdao.core.util.MyResult
 import com.frostwire.jlibtorrent.TorrentHandle
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
+import javax.inject.Inject
 import kotlin.random.Random
 
 @RequiresApi(Build.VERSION_CODES.O)
-class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFolder: Path) {
+class TorrentCache @Inject constructor() {
+
+    @Inject
+    lateinit var torrentEngine: TorrentEngine
+
+    @Inject
+    lateinit var specialPath: SpecialPath
 
     fun copyIntoCache(files: Path): MyResult<Path> {
         when (val infoHash = TorrentEngine.generateInfoHash(files)) {
             is MyResult.Failure -> return MyResult.Failure(infoHash.message)
             is MyResult.Success -> {
-                val output = Paths.get("$cacheFolder/torrents/${infoHash.value}/content")
+                val output =
+                    Paths.get("${specialPath.getPath()}/torrents/${infoHash.value}/content")
                 try {
                     files.toFile().copyRecursively(output.toFile(), overwrite = true)
                 } catch (exception: Exception) {
@@ -29,8 +40,6 @@ class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFo
             }
         }
     }
-
-    val path = cacheFolder
 
     fun seedStrategy(): List<TorrentHandle> {
         val infoHashes = getAllDownloadedInfoHashes()
@@ -44,12 +53,12 @@ class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFo
     }
 
     fun verifyAndSeed(realInfoHash: String): MyResult<TorrentHandle> {
-        val folder = Paths.get("$cacheFolder/torrents/$realInfoHash/content")
+        val folder = Paths.get("${specialPath.getPath()}/torrents/$realInfoHash/content")
         return torrentEngine.verifyAndSeed(folder, realInfoHash)
     }
 
     fun download(realInfoHash: String): MyResult<TorrentHandle> {
-        val folder = Paths.get("$cacheFolder/torrents/$realInfoHash/content")
+        val folder = Paths.get("${specialPath.getPath()}/torrents/$realInfoHash/content")
         return torrentEngine.download(folder, realInfoHash)
     }
 
@@ -58,7 +67,7 @@ class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFo
     }
 
     fun getAllDownloadedInfoHashes(): List<String> {
-        val files = Paths.get("$cacheFolder/torrents")
+        val files = Paths.get("${specialPath.getPath()}/torrents")
             ?.toFile()
             ?.listFiles()
 
@@ -75,7 +84,7 @@ class TorrentCache(private val torrentEngine: TorrentEngine, private val cacheFo
     }
 
     fun getFiles(realInfoHash: String): List<File>? {
-        val folder = Paths.get("$cacheFolder/torrents/$realInfoHash/content").toFile()
+        val folder = Paths.get("${specialPath.getPath()}/torrents/$realInfoHash/content").toFile()
         val verify = TorrentEngine.verify(folder.toPath(), folder.parentFile.name)
 
         when (verify) {

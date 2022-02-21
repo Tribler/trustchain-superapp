@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.dateToLongString
@@ -42,8 +43,7 @@ import java.time.Instant
 @Composable
 fun CreateReleaseDialog(closeDialog: () -> Unit) {
 
-    val viewModel: CreateReleaseDialogViewModel =
-        viewModel(factory = CreateReleaseDialogViewModel.provideFactory())
+    val viewModel: CreateReleaseDialogViewModel = hiltViewModel()
 
     val fileList: MutableState<List<Uri>> = remember { mutableStateOf(listOf<Uri>()) }
     val title = rememberSaveable { mutableStateOf("") }
