@@ -6,7 +6,7 @@ buildscript {
     ext.coroutines_version = '1.4.2'
     ext.ktlint_gradle_version = '10.0.0'
     ext.sqldelight_version = '1.2.1'
-    ext.nav_version = "2.2.1"
+    ext.nav_version = "2.3.1"
     ext.fragment_version = '1.2.4'
     ext.lifecycle_version = "2.2.0"
     ext.dokka_version = "0.10.1"
