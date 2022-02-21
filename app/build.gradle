@@ -6,8 +6,12 @@ apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'kotlinx-serialization'
+apply plugin: "dagger.hilt.android.plugin"
+apply plugin: "kotlin-kapt"
 
 buildscript {
+    ext.hilt_ver = '2.38.1'
+
     repositories {
         google()
         mavenCentral()
@@ -15,6 +19,8 @@ buildscript {
 
     dependencies {
         classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'
+        classpath("com.google.dagger:hilt-android-gradle-plugin:$hilt_ver")
+
     }
 }
 
@@ -176,6 +182,18 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:$hilt_ver")
+    implementation("androidx.hilt:hilt-navigation-fragment:1.0.0-alpha03")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
+    kapt("com.google.dagger:hilt-android-compiler:$hilt_ver")
+
+    // Room
+    implementation "androidx.room:room-runtime:2.3.0"
+    implementation("androidx.room:room-ktx:2.3.0")
+    annotationProcessor "androidx.room:room-compiler:2.3.0"
+    kapt("androidx.room:room-compiler:2.3.0")
 }
 
 
