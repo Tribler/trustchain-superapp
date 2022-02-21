@@ -75,7 +75,7 @@ object AppContainer {
         torrentEngine = TorrentEngine(sessionManager, downloadFinishUseCase::invoke)
         torrentCache = TorrentCache(torrentEngine, Paths.get("${applicationContext.cacheDir}"))
 
-        createReleaseUseCase = CreateReleaseUseCase(albumRepository, torrentCache)
+        createReleaseUseCase = CreateReleaseUseCase(albumRepository, torrentCache, musicCommunity)
         getReleaseUseCase = GetRelease(database)
         downloadIntentuseCase = DownloadIntentUseCase(torrentCache)
         getTorrentStatusFlowUseCase = GetTorrentStatusFlowUseCase(torrentCache)
