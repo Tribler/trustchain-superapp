@@ -35,29 +35,14 @@ class CreateReleaseUseCase @Inject constructor(
                 val infoHash = cacheFolder.value.parent.name
                 val publisher = musicCommunity.myPeer.publicKey
 
-                // Validate before publishing
-                if (!albumRepository.validateReleaseBlock(
-                        releaseId = infoHash,
-                        magnet = "magnet:?xt=urn:btih:$infoHash",
-                        title = title,
-                        artist = artist,
-                        releaseDate = releaseDate,
-                        publisher = publisher.toString()
-                    )
-                ) {
-                    return false
-                }
-
-                albumRepository.publishRelease(
+                return albumRepository.create(
                     releaseId = infoHash,
                     magnet = "magnet:?xt=urn:btih:$infoHash",
                     title = title,
                     artist = artist,
                     releaseDate = releaseDate,
-                    publisher = publisher.toString()
                 )
                 torrentCache.seedStrategy()
-                return true
             }
         }
     }

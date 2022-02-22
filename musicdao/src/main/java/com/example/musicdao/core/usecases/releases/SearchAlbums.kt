@@ -2,15 +2,15 @@ package com.example.musicdao.core.usecases.releases
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.repositories.AlbumRepository
 import javax.inject.Inject
 
-class Search @Inject constructor(private val database: CacheDatabase) {
+class SearchAlbums @Inject constructor(private val albumRepository: AlbumRepository) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(keyword: String): List<Album> {
-        return database.dao.localSearch(keyword).map { it.toAlbum() }
+        return albumRepository.searchAlbums(keyword = keyword)
     }
 
 }

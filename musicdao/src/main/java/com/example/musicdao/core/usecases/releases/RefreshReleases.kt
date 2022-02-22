@@ -8,6 +8,7 @@ class RefreshReleases(private val albumRepository: AlbumRepository) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke() {
-        albumRepository.refreshReleases()
+        albumRepository.refreshCache()
     }
+
 }

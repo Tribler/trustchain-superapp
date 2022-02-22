@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.usecases.releases.Search
+import com.example.musicdao.core.usecases.releases.SearchAlbums
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
-    private val search: Search
+    private val searchAlbums: SearchAlbums
 ) : ViewModel() {
 
     private val DEBOUNCE_DELAY = 200L
@@ -45,7 +45,7 @@ class SearchScreenViewModel @Inject constructor(
         if (searchText.isEmpty()) {
             _searchResult.value = listOf()
         } else {
-            val result = search.invoke(searchText)
+            val result = searchAlbums.invoke(searchText)
             _searchResult.value = result
         }
     }

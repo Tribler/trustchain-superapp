@@ -4,13 +4,14 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.repositories.AlbumRepository
 import javax.inject.Inject
 
-class GetRelease @Inject constructor(private val database: CacheDatabase) {
+class GetRelease @Inject constructor(private val albumRepository: AlbumRepository) {
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend operator fun invoke(id: String): Album {
-        return database.dao.get(id).toAlbum()
+        return albumRepository.get(id)
     }
 
 }

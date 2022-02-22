@@ -16,7 +16,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
-import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
 import com.example.musicdao.core.torrent.TorrentCache
@@ -29,9 +29,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.attestation.trustchain.BlockSigner
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import javax.inject.Inject
 
 /**
@@ -52,6 +49,9 @@ class MusicActivity : AppCompatActivity() {
     @Inject
     lateinit var sessionManager: SessionManager
 
+    @Inject
+    lateinit var setupMusicCommunity: SetupMusicCommunity
+
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
     @RequiresApi(Build.VERSION_CODES.O)
@@ -59,14 +59,13 @@ class MusicActivity : AppCompatActivity() {
     @ExperimentalComposeUiApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        registerBlockSigner()
         AppContainer.provide(this)
         lifecycleScope.launchWhenStarted {
-            albumRepository.refreshReleases()
+            setupMusicCommunity.registerListeners()
+            albumRepository.refreshCache()
             torrentCache.seedStrategy()
         }
         iterativelyFetchReleases()
-//        iterativelyUpdateSwarmHealth()
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
@@ -77,6 +76,11 @@ class MusicActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * On discovering a half block, with tag publish_release, agree it immediately (for now). In the
+     * future there will be logic added here to determine whether an upload was done by the correct
+     * artist/label (artist passport).
+     */
     override fun onDestroy() {
         super.onDestroy()
         if (mBound) {
@@ -97,13 +101,6 @@ class MusicActivity : AppCompatActivity() {
         override fun onServiceDisconnected(className: ComponentName) {
             mBound = false
         }
-    }
-
-    /**
-     * Show libtorrent connectivity stats
-     */
-    fun getStatsOverview(): String {
-        return "Starting torrent client..."
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -134,44 +131,10 @@ class MusicActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * On discovering a half block, with tag publish_release, agree it immediately (for now). In the
-     * future there will be logic added here to determine whether an upload was done by the correct
-     * artist/label (artist passport).
-     */
-    private fun registerBlockSigner() {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
-        musicCommunity?.registerBlockSigner(
-            "publish_release",
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
-                }
-            }
-        )
-    }
-
-    /**
-     * Keep track of Swarm Health for all torrents being monitored
-     */
-//    private fun iterativelyUpdateSwarmHealth() {
-//        lifecycleScope.launchWhenStarted {
-//            while (isActive) {
-//                container.swarmHealthRepository.mergedSwarmHealth =
-//                    container.swarmHealthRepository.filterSwarmHealthMap()
-//
-//                if (mBound) {
-//                    mService.setSwarmHealthMap(container.swarmHealthRepository.mergedSwarmHealth)
-//                }
-//                delay(3000)
-//            }
-//        }
-//    }
-
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                albumRepository.refreshReleases()
+                albumRepository.refreshCache()
                 delay(3000)
             }
         }

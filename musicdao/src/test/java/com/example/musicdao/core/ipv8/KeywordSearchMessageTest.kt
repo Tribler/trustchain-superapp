@@ -1,6 +1,6 @@
 package com.example.musicdao.core.ipv8
 
-import com.example.musicdao.core.ipv8.search.KeywordSearchMessage
+import com.example.musicdao.core.ipv8.modules.search.KeywordSearchMessage
 import com.goterl.lazysodium.LazySodiumJava
 import com.goterl.lazysodium.SodiumJava
 import nl.tudelft.ipv8.keyvault.LibNaClSK
