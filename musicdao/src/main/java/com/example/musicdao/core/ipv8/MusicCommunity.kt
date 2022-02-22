@@ -116,24 +116,6 @@ class MusicCommunity(
         return peers.random()
     }
 
-    /**
-     * Communicate a few release blocks to one or a few random peers
-     * @return the amount of blocks that were sent
-     */
-    fun communicateReleaseBlocks(): Int {
-        Log.i("Music Community", "Communicating blocks")
-        val peer = pickRandomPeer() ?: return 0
-        val releaseBlocks = database.getBlocksWithType("publish_release")
-        val maxBlocks = 3
-        var count = 0
-        releaseBlocks.shuffled().withIndex().forEach {
-            count += 1
-            if (it.index >= maxBlocks) return count
-            sendBlock(it.value, peer, ttl = 3)
-        }
-        return count
-    }
-
     object MessageId {
         const val KEYWORD_SEARCH_MESSAGE = 10
         const val SWARM_HEALTH_MESSAGE = 11

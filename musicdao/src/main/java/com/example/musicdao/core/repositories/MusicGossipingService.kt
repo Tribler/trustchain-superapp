@@ -5,23 +5,29 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import com.example.musicdao.core.ipv8.MusicCommunity
+import com.example.musicdao.core.ipv8.ReleaseBlockGossiper
 import com.example.musicdao.core.ipv8.SwarmHealth
 import com.frostwire.jlibtorrent.Sha1Hash
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
+import javax.inject.Inject
 import kotlin.system.exitProcess
 
 /**
  * This is a service that runs in the background, also when the Android app is closed. It gossips
  * data about Release blocks and swarm health with a few random peers every couple seconds
  */
-class MusicGossipingService :
-    Service() {
+@AndroidEntryPoint
+class MusicGossipingService : Service() {
     private var swarmHealthMap: Map<Sha1Hash, SwarmHealth> = mutableMapOf()
     private val gossipTopTorrents = 5
     private val gossipRandomTorrents = 5
     private val binder = LocalBinder()
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    @Inject
+    lateinit var releaseBlockGossiper: ReleaseBlockGossiper
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -41,11 +47,8 @@ class MusicGossipingService :
     }
 
     override fun onCreate() {
-
         super.onCreate()
-        scope.launch {
-            iterativelySendReleaseBlocks()
-        }
+        releaseBlockGossiper.startGossip(scope)
         scope.launch {
             iterativelyGossipSwarmHealth()
         }
@@ -58,21 +61,6 @@ class MusicGossipingService :
 
         // We need to kill the app as IPv8 is started in Application.onCreate
         exitProcess(0)
-    }
-
-    fun setSwarmHealthMap(swarmHealthMap: Map<Sha1Hash, SwarmHealth>) {
-        this.swarmHealthMap = swarmHealthMap
-    }
-
-    /**
-     * This is a very simplistic way to crawl all chains from the peers you know
-     */
-    private suspend fun iterativelySendReleaseBlocks() {
-        val musicCommunity = IPv8Android.getInstance().getOverlay<MusicCommunity>()
-        while (scope.isActive) {
-            musicCommunity?.communicateReleaseBlocks()
-            delay(4000)
-        }
     }
 
     /**
