@@ -299,7 +299,8 @@ class TrustChainApplication : Application() {
 
     private fun createMusicCommunity(): OverlayConfiguration<MusicCommunity> {
         val settings = TrustChainSettings()
-        val driver = AndroidSqliteDriver(Database.Schema, this, "music.db")
+        // TODO: Re-concile this community with Reccomender Community
+        val driver = AndroidSqliteDriver(Database.Schema, this, "music-private.db")
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
