@@ -24,6 +24,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.musicdao.MusicActivity
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.model.Song
@@ -31,6 +32,7 @@ import com.example.musicdao.core.torrent.api.DownloadingTrack
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
+import com.example.musicdao.ui.navigation.Screen
 import com.example.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.collect
@@ -39,7 +41,11 @@ import java.io.File
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
-fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
+fun ReleaseScreen(
+    releaseId: String,
+    playerViewModel: PlayerViewModel,
+    navController: NavController
+) {
 
     var state by remember { mutableStateOf(0) }
     val titles = listOf("RELEASE", "TORRENT")
@@ -51,7 +57,6 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
 
     val viewModel: ReleaseScreenViewModel = viewModel(
         factory = ReleaseScreenViewModel.provideFactory(viewModelFactory, releaseId = releaseId)
-
     )
 
     val torrentStatus by viewModel.torrentHandleState.collectAsState()
@@ -123,7 +128,7 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
                             .align(Alignment.CenterHorizontally)
                     )
                 }
-                Header(album)
+                Header(album, navController = navController)
                 if (album.songs != null && album.songs.isNotEmpty()) {
                     val files = album.songs
                     files.map {
@@ -191,7 +196,7 @@ fun ReleaseScreen(releaseId: String, playerViewModel: PlayerViewModel) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Header(album: Album) {
+fun Header(album: Album, navController: NavController) {
     Column(modifier = Modifier.padding(20.dp)) {
         Text(
             album.title,
@@ -214,15 +219,26 @@ fun Header(album: Album) {
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-                modifier = Modifier.then(Modifier.padding(0.dp))
-            )
-            Button(onClick = {}) {
+            Row {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .then(Modifier.padding(0.dp))
+                        .align(Alignment.CenterVertically)
+                )
+                OutlinedButton(onClick = {
+                    navController.navigate(
+                        Screen.Profile.createRoute(publicKey = album.publisher)
+                    )
+
+                }, modifier = Modifier.padding(start = 10.dp)) {
+                    Text("View Artist", color = Color.White)
+                }
+            }
+            OutlinedButton(onClick = {}) {
                 Text("Donate", color = Color.White)
             }
-
         }
     }
 }

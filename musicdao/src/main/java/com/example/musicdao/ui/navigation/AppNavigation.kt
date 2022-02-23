@@ -98,7 +98,8 @@ fun AppNavigation(
                     navBackStackEntry.arguments?.getString(
                         "releaseId"
                     )!!,
-                    playerViewModel = playerViewModel
+                    playerViewModel = playerViewModel,
+                    navController = navController
                 )
             }
             composable(
