@@ -11,6 +11,13 @@ import com.example.musicdao.core.database.parser.Converters
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.torrent.FilesHelper
 import com.example.musicdao.core.usecases.DownloadFinishUseCase
+import com.example.musicdao.core.wallet.WalletConfig
+import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FAUCET_ENDPOINT
+import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FILE_PREFIX
+import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_NETWORK_PARAMS
+import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_IP
+import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_REGTEST_BOOTSTRAP_PORT
+import com.example.musicdao.core.wallet.WalletService
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.SessionParams
 import com.frostwire.jlibtorrent.SettingsPack
@@ -104,6 +111,24 @@ class HiltModules {
         filesHelper: FilesHelper
     ): DownloadFinishUseCase {
         return DownloadFinishUseCase(database = database, filesHelper = filesHelper)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Provides
+    @Singleton
+    fun provideWalletService(
+        @ApplicationContext applicationContext: Context,
+    ): WalletService {
+        return WalletService(
+            WalletConfig(
+                networkParams = DEFAULT_NETWORK_PARAMS,
+                filePrefix = DEFAULT_FILE_PREFIX,
+                cacheDir = Paths.get("${applicationContext.cacheDir}").toFile(),
+                regtestFaucetEndPoint = DEFAULT_FAUCET_ENDPOINT,
+                regtestBootstrapIp = DEFAULT_REGTEST_BOOTSTRAP_IP,
+                regtestBootstrapPort = DEFAULT_REGTEST_BOOTSTRAP_PORT
+            )
+        )
     }
 
 }

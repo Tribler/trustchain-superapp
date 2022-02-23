@@ -1,6 +1,5 @@
 package com.example.musicdao.core.wallet
 
-import com.example.musicdao.MusicActivity
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -11,7 +10,6 @@ import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.utils.BriefLogFormatter
 import org.bitcoinj.wallet.SendRequest
 import org.bitcoinj.wallet.Wallet
-import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.math.BigDecimal
@@ -20,32 +18,24 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.util.*
 
-/**
- * Interaction with a BitcoinJ wallet
- */
-class WalletService(val walletDir: File, private val musicService: MusicActivity) {
-    val app: WalletAppKit
-    private val bitcoinFaucetEndpoint = "http://134.122.59.107:3000"
-    private val params = CryptoCurrencyConfig.networkParams
-    private val filePrefix = CryptoCurrencyConfig.chainFileName
+class WalletService(val config: WalletConfig) {
     private var started = false
-    var percentageSynced = 0
+    private var percentageSynced = 0
+    private val app: WalletAppKit
 
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
-        app = object : WalletAppKit(params, walletDir, filePrefix) {
+
+        app = object : WalletAppKit(config.networkParams, config.cacheDir, config.filePrefix) {
             override fun onSetupCompleted() {
                 if (wallet().keyChainGroupSize < 1) {
                     val key = ECKey()
                     wallet().importKey(key)
                 }
-
                 if (wallet().balance.isZero) {
                     val address = wallet().issuedReceiveAddresses[0].toString()
-                    // Ask, using REST call to faucet to get some coins to start with
-                    requestStarterCoins(address)
+                    requestFaucet(address)
                 }
-
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
                     if (value != wallet().balance && value != wallet().getBalance(Wallet.BalanceType.ESTIMATED)) {
@@ -61,6 +51,7 @@ class WalletService(val walletDir: File, private val musicService: MusicActivity
 
     fun start() {
         if (started) return
+
         app.setBlockingStartup(false)
         app.setDownloadListener(
             object : DownloadProgressTracker() {
@@ -79,53 +70,60 @@ class WalletService(val walletDir: File, private val musicService: MusicActivity
                 }
             }
         )
-        if (params == RegTestParams.get()) {
+
+        if (isRegTest()) {
             try {
-                // This is a bootstrap node (a digitalocean droplet, running a full bitcoin regtest
-                // node and a miner
-                val localHost = InetAddress.getByName("134.122.59.107")
-                app.setPeerNodes(PeerAddress(params, localHost, params.port))
+                val bootstrap = InetAddress.getByName(config.regtestBootstrapIp)
+                app.setPeerNodes(
+                    PeerAddress(
+                        config.networkParams,
+                        bootstrap,
+                        config.networkParams.port
+                    )
+                )
             } catch (e: UnknownHostException) {
                 // Borked machine with no loopback adapter configured properly.
                 throw RuntimeException(e)
             }
         }
+
         app.startAsync()
         started = true
     }
 
-    fun status(): String {
-        val status = app.state().name
-        return "Status: $status"
+    private fun isRegTest(): Boolean {
+        return config.networkParams == RegTestParams.get()
     }
 
-    fun balanceText(): String {
+    fun walletStatus(): String {
+        return app.state().name
+    }
+
+    fun percentageSynced(): Int {
+        return percentageSynced
+    }
+
+    fun confirmedBalance(): String? {
         return try {
-            val confirmedBalance = app.wallet().balance.toFriendlyString()
-            val estimatedBalance =
-                app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
-            "Current balance: $confirmedBalance (confirmed) \nCurrent balance: $estimatedBalance (estimated)"
-        } catch (e: Exception) {
-            e.printStackTrace()
-            "Current balance: "
+            app.wallet().balance.toFriendlyString()
+        } catch (e: java.lang.Exception) {
+            null
         }
     }
 
-    fun publicKeyText(): String {
+    fun estimatedBalance(): String? {
         return try {
-            "Wallet public key: " + app.wallet().currentReceiveAddress().toString()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
+            app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+        } catch (e: java.lang.Exception) {
+            null
         }
     }
 
-    fun publicKey(): String {
+    fun publicKey(): String? {
         return try {
             app.wallet().currentReceiveAddress().toString()
         } catch (e: Exception) {
-            e.printStackTrace()
-            ""
+            null
         }
     }
 
@@ -144,7 +142,7 @@ class WalletService(val walletDir: File, private val musicService: MusicActivity
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
         val targetAddress: Address?
         try {
-            targetAddress = Address.fromString(params, publicKey)
+            targetAddress = Address.fromString(config.networkParams, publicKey)
         } catch (e: Exception) {
 //            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
             return
@@ -169,8 +167,8 @@ class WalletService(val walletDir: File, private val musicService: MusicActivity
     /**
      * Query the bitcoin faucet for some starter bitcoins
      */
-    fun requestStarterCoins(id: String) {
-        val obj = URL("$bitcoinFaucetEndpoint?id=$id")
+    fun requestFaucet(id: String) {
+        val obj = URL("${config.regtestFaucetEndPoint}?id=$id")
         try {
             val con: InputStream? = obj.openStream()
             con?.close()
@@ -180,19 +178,6 @@ class WalletService(val walletDir: File, private val musicService: MusicActivity
     }
 
     companion object {
-        var walletService: WalletService? = null
-
-        /**
-         * Singleton pattern for WalletService
-         */
-        fun getInstance(walletDir: File, musicService: MusicActivity): WalletService {
-            val instance = walletService
-            if (instance is WalletService) return instance
-            val newInstance = WalletService(walletDir, musicService)
-            walletService = newInstance
-            return newInstance
-        }
-
         val SATS_PER_BITCOIN = BigDecimal(100_000_000)
     }
 }
