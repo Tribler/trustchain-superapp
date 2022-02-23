@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 
 
 @RequiresApi(Build.VERSION_CODES.O)
-
 class ReleaseScreenViewModel @AssistedInject constructor(
     @Assisted private val releaseId: String,
     private val getReleaseUseCase: GetRelease,
@@ -28,7 +27,7 @@ class ReleaseScreenViewModel @AssistedInject constructor(
 
     @AssistedFactory
     interface ReleaseScreenViewModelFactory {
-        fun create(plantId: String): ReleaseScreenViewModel
+        fun create(releaseId: String): ReleaseScreenViewModel
     }
 
     companion object {

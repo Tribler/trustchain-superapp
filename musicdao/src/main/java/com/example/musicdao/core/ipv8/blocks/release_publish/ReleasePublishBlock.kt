@@ -1,4 +1,4 @@
-package com.example.musicdao.core.ipv8.blocks
+package com.example.musicdao.core.ipv8.blocks.release_publish
 
 data class ReleasePublishBlock(
     val releaseId: String,

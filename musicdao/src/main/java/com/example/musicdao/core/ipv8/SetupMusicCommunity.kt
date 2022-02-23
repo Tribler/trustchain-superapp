@@ -1,8 +1,7 @@
 package com.example.musicdao.core.ipv8
 
-import android.util.Log
-import com.example.musicdao.core.ipv8.signers.ReleasePublishBlockSigner
-import com.example.musicdao.core.ipv8.signers.ReleasePublishBlockValidator
+import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockSigner
+import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
 import javax.inject.Inject
 
 class SetupMusicCommunity @Inject constructor(

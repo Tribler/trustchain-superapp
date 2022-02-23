@@ -1,11 +1,10 @@
 package com.example.musicdao.core.repositories
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.database.entities.AlbumEntity
-import com.example.musicdao.core.ipv8.repositories.ReleasePublishBlockRepository
+import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockRepository
 import com.example.musicdao.core.model.Album
 import javax.inject.Inject
 

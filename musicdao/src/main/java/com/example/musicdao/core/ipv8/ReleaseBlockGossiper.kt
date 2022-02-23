@@ -1,7 +1,7 @@
 package com.example.musicdao.core.ipv8
 
-import com.example.musicdao.core.ipv8.blocks.ReleasePublishBlock
-import com.example.musicdao.core.ipv8.signers.ReleasePublishBlockValidator
+import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
+import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive

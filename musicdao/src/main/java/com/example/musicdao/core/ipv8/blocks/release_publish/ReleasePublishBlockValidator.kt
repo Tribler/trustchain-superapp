@@ -1,8 +1,7 @@
-package com.example.musicdao.core.ipv8.signers
+package com.example.musicdao.core.ipv8.blocks.release_publish
 
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
-import com.example.musicdao.core.ipv8.blocks.ReleasePublishBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainTransaction
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore

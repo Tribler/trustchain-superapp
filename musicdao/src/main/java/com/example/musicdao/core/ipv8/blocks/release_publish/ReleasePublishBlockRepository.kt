@@ -1,9 +1,7 @@
-package com.example.musicdao.core.ipv8.repositories
+package com.example.musicdao.core.ipv8.blocks.release_publish
 
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
-import com.example.musicdao.core.ipv8.blocks.ReleasePublishBlock
-import com.example.musicdao.core.ipv8.signers.ReleasePublishBlockValidator
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -11,12 +9,12 @@ import javax.inject.Inject
 
 class ReleasePublishBlockRepository @Inject constructor(
     private val musicCommunity: MusicCommunity,
-    private val releasePublishBlockSigner: ReleasePublishBlockValidator,
+    private val releasePublishBlockValidator: ReleasePublishBlockValidator,
 ) {
 
     fun getValidBlocks(): List<ReleasePublishBlock> {
         val blocks = musicCommunity.database.getBlocksWithType(ReleasePublishBlock.BLOCK_TYPE)
-            .filter { releasePublishBlockSigner.validateTransaction(it.transaction) }
+            .filter { releasePublishBlockValidator.validateTransaction(it.transaction) }
         return blocks.map { toBlock(it) }
     }
 
@@ -38,7 +36,7 @@ class ReleasePublishBlockRepository @Inject constructor(
             "protocolVersion" to Constants.PROTOCOL_VERSION
         )
 
-        if (!releasePublishBlockSigner.validateTransaction(transaction)) {
+        if (!releasePublishBlockValidator.validateTransaction(transaction)) {
             return null
         }
 

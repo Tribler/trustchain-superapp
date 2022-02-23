@@ -22,6 +22,10 @@ import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.debug.Debug
 import com.example.musicdao.ui.home.HomeScreen
 import com.example.musicdao.ui.home.HomeScreenViewModel
+import com.example.musicdao.ui.ownProfile.EditProfileScreen
+import com.example.musicdao.ui.ownProfile.OwnProfileScreen
+import com.example.musicdao.ui.profile.ProfileMenuScreen
+import com.example.musicdao.ui.profile.ProfileScreen
 import com.example.musicdao.ui.release.ReleaseScreen
 import com.example.musicdao.ui.search.DebugScreenViewModel
 import com.example.musicdao.ui.search.SearchScreen
@@ -39,6 +43,14 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Debug : Screen("debug")
     object FullPlayerScreen : Screen("fullPlayerScreen")
+
+    object CreatorMenu : Screen("me")
+    object MyProfile : Screen("me/profile")
+    object EditProfile : Screen("me/edit")
+
+    object Profile : Screen("profile/{publicKey}") {
+        fun createRoute(publicKey: String) = "profile/$publicKey"
+    }
 }
 
 
@@ -54,6 +66,7 @@ fun AppNavigation(
     val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
     val searchScreenScreenViewModel: SearchScreenViewModel = hiltViewModel()
     val debugScreenViewModel: DebugScreenViewModel = hiltViewModel()
+
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
@@ -74,6 +87,27 @@ fun AppNavigation(
             composable(Screen.Debug.route) {
                 Debug(debugScreenViewModel)
             }
+            composable(Screen.MyProfile.route) {
+                OwnProfileScreen()
+            }
+            composable(Screen.EditProfile.route) {
+                EditProfileScreen()
+            }
+            composable(Screen.CreatorMenu.route) {
+                ProfileMenuScreen(navController = navController)
+            }
+            composable(
+                Screen.Profile.route,
+                arguments = listOf(navArgument("publicKey") {
+                    type = NavType.StringType
+                })
+            ) { navBackStackEntry ->
+                ProfileScreen(
+                    navBackStackEntry.arguments?.getString(
+                        "publicKey"
+                    )!!,
+                )
+            }
             composable(
                 Screen.Release.route,
                 arguments = listOf(navArgument("releaseId") {
@@ -89,25 +123,17 @@ fun AppNavigation(
             }
             composable(
                 Screen.FullPlayerScreen.route,
-                enterTransition = { initial, _ ->
-                    // Check to see if the previous screen is in the login graph
-                    if (true) {
-                        slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Up,
-                            animationSpec = tween(200)
-                        )
-                    } else
-                        null // use the defaults
+                enterTransition = { _, _ ->
+                    slideIntoContainer(
+                        AnimatedContentScope.SlideDirection.Up,
+                        animationSpec = tween(200)
+                    )
                 },
                 exitTransition = { initial, _ ->
-                    // Check to see if the previous screen is in the login graph
-                    if (true) {
-                        slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Down,
-                            animationSpec = tween(200)
-                        )
-                    } else
-                        null // use the defaults
+                    slideOutOfContainer(
+                        AnimatedContentScope.SlideDirection.Down,
+                        animationSpec = tween(200)
+                    )
                 },
             ) {
                 FullPlayerScreen(playerViewModel)
