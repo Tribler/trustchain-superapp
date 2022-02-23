@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.musicdao.core.model.Album
-import com.example.musicdao.ui.Screen
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.dateToShortString
+import com.example.musicdao.ui.navigation.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi

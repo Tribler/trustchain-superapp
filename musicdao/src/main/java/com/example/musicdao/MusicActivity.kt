@@ -21,8 +21,8 @@ import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
 import com.example.musicdao.core.torrent.TorrentCache
 import com.example.musicdao.ui.MusicDAOApp
-import com.example.musicdao.ui.profile.ProfileScreenViewModel
-import com.example.musicdao.ui.release.ReleaseScreenViewModel
+import com.example.musicdao.ui.screens.profile.ProfileScreenViewModel
+import com.example.musicdao.ui.screens.release.ReleaseScreenViewModel
 import com.frostwire.jlibtorrent.SessionManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn

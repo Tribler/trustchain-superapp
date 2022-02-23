@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.profile
+package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
 import androidx.annotation.RequiresApi

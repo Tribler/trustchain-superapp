@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.search
+package com.example.musicdao.ui.screens.search
 
 import android.os.Build
 import androidx.annotation.RequiresApi

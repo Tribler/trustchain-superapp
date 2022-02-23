@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.torrent
+package com.example.musicdao.ui.screens.torrent
 
 import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import androidx.compose.foundation.layout.Column

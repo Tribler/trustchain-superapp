@@ -19,9 +19,9 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.musicdao.ui.Screen
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
+import com.example.musicdao.ui.navigation.Screen
 
 @ExperimentalMaterialApi
 @ExperimentalComposeUiApi

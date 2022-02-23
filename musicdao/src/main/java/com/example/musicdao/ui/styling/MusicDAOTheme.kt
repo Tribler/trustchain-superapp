@@ -1,4 +1,4 @@
-package com.example.musicdao.ui
+package com.example.musicdao.ui.styling
 
 import androidx.compose.material.darkColors
 import androidx.compose.ui.graphics.Color

@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.ui.components.player.PlayerViewModel
-import com.example.musicdao.ui.release.CreateReleaseDialog
+import com.example.musicdao.ui.navigation.AppNavigation
+import com.example.musicdao.ui.screens.release.CreateReleaseDialog
+import com.example.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 @ExperimentalAnimationApi

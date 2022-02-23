@@ -1,11 +1,10 @@
-package com.example.musicdao.ui.release.create
+package com.example.musicdao.ui.screens.release.create
 
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.example.musicdao.core.usecases.CreateReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

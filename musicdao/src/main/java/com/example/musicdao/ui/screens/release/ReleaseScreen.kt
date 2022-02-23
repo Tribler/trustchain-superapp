@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.release
+package com.example.musicdao.ui.screens.release
 
 import android.app.Activity
 import android.os.Build
@@ -31,7 +31,7 @@ import com.example.musicdao.core.torrent.api.DownloadingTrack
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
-import com.example.musicdao.ui.torrent.TorrentStatusScreen
+import com.example.musicdao.ui.screens.torrent.TorrentStatusScreen
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.collect
 import java.io.File

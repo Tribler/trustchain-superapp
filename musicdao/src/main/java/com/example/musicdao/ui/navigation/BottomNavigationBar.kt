@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavHostController
+import com.example.musicdao.ui.navigation.Screen
 
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {

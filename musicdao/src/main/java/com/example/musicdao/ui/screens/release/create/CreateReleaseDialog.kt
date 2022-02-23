@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.release
+package com.example.musicdao.ui.screens.release
 
 import android.content.Intent
 import android.net.Uri
@@ -30,10 +30,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.AppContainer
 import com.example.musicdao.ui.dateToLongString
-import com.example.musicdao.ui.release.create.CreateReleaseDialogViewModel
+import com.example.musicdao.ui.screens.release.create.CreateReleaseDialogViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.time.Instant
 

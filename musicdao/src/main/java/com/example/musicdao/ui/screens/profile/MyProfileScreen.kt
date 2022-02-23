@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.ownProfile
+package com.example.musicdao.ui.screens.profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,12 +8,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicdao.ui.components.EmptyState
-import com.example.musicdao.ui.profile.Profile
 
 @Composable
-fun OwnProfileScreen() {
+fun MyProfileScreen() {
 
-    val ownProfileViewScreenModel: OwnProfileViewScreenModel = hiltViewModel()
+    val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
     val profile = ownProfileViewScreenModel.profile.collectAsState()
 
     profile.value?.let {

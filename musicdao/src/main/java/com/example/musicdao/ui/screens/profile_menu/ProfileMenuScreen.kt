@@ -1,7 +1,6 @@
-package com.example.musicdao.ui.profile
+package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,14 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.musicdao.ui.Screen
-import com.example.musicdao.ui.ownProfile.OwnProfileViewScreenModel
+import com.example.musicdao.ui.navigation.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileMenuScreen(navController: NavController) {
 
-    val ownProfileViewScreenModel: OwnProfileViewScreenModel = hiltViewModel()
+    val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
 
     Column {
         Box(

@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.debug
+package com.example.musicdao.ui.screens.debug
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,7 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import com.example.musicdao.ui.components.EmptyState
-import com.example.musicdao.ui.search.DebugScreenViewModel
+import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 
 @ExperimentalMaterialApi
 @Composable

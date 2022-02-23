@@ -1,4 +1,4 @@
-package com.example.musicdao.ui
+package com.example.musicdao.ui.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -19,39 +19,19 @@ import androidx.navigation.compose.navArgument
 import androidx.navigation.compose.rememberNavController
 import com.example.musicdao.ui.components.player.FullPlayerScreen
 import com.example.musicdao.ui.components.player.PlayerViewModel
-import com.example.musicdao.ui.debug.Debug
-import com.example.musicdao.ui.home.HomeScreen
-import com.example.musicdao.ui.home.HomeScreenViewModel
-import com.example.musicdao.ui.ownProfile.EditProfileScreen
-import com.example.musicdao.ui.ownProfile.OwnProfileScreen
-import com.example.musicdao.ui.profile.ProfileMenuScreen
-import com.example.musicdao.ui.profile.ProfileScreen
-import com.example.musicdao.ui.release.ReleaseScreen
-import com.example.musicdao.ui.search.DebugScreenViewModel
-import com.example.musicdao.ui.search.SearchScreen
-import com.example.musicdao.ui.search.SearchScreenViewModel
+import com.example.musicdao.ui.screens.debug.Debug
+import com.example.musicdao.ui.screens.home.HomeScreen
+import com.example.musicdao.ui.screens.home.HomeScreenViewModel
+import com.example.musicdao.ui.screens.profile.EditProfileScreen
+import com.example.musicdao.ui.screens.profile.MyProfileScreen
+import com.example.musicdao.ui.screens.profile.ProfileMenuScreen
+import com.example.musicdao.ui.screens.profile.ProfileScreen
+import com.example.musicdao.ui.screens.release.ReleaseScreen
+import com.example.musicdao.ui.screens.search.DebugScreenViewModel
+import com.example.musicdao.ui.screens.search.SearchScreen
+import com.example.musicdao.ui.screens.search.SearchScreenViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
-
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object Release : Screen("release/{releaseId}") {
-        fun createRoute(releaseId: String) = "release/$releaseId"
-    }
-
-    object Search : Screen("search")
-    object Settings : Screen("settings")
-    object Debug : Screen("debug")
-    object FullPlayerScreen : Screen("fullPlayerScreen")
-
-    object CreatorMenu : Screen("me")
-    object MyProfile : Screen("me/profile")
-    object EditProfile : Screen("me/edit")
-
-    object Profile : Screen("profile/{publicKey}") {
-        fun createRoute(publicKey: String) = "profile/$publicKey"
-    }
-}
 
 
 @ExperimentalAnimationApi
@@ -88,7 +68,7 @@ fun AppNavigation(
                 Debug(debugScreenViewModel)
             }
             composable(Screen.MyProfile.route) {
-                OwnProfileScreen()
+                MyProfileScreen()
             }
             composable(Screen.EditProfile.route) {
                 EditProfileScreen()

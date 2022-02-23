@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.ownProfile
+package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
-class OwnProfileViewScreenModel @Inject constructor(
+class MyProfileScreenViewModel @Inject constructor(
     private val artistRepository: ArtistRepository,
     private val getOwnPublicKey: GetOwnPublicKey,
     private val artistAnnounceBlockRepository: ArtistAnnounceBlockRepository

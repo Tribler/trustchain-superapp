@@ -1,4 +1,4 @@
-package com.example.musicdao.ui.ownProfile
+package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -18,13 +18,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
-import com.example.musicdao.ui.Screen
+import com.example.musicdao.ui.navigation.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditProfileScreen() {
 
-    val ownProfileViewScreenModel: OwnProfileViewScreenModel = hiltViewModel()
+    val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
     val profile = ownProfileViewScreenModel.profile.collectAsState()
 
     val name = remember { mutableStateOf(profile.value?.name) }
@@ -45,7 +45,6 @@ fun EditProfileScreen() {
             navController.popBackStack(route = Screen.CreatorMenu.route, inclusive = false)
         }
     }
-
 
     Column(
         modifier = Modifier
