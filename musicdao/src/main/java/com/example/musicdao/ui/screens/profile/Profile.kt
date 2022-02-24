@@ -22,6 +22,7 @@ import androidx.navigation.NavController
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.model.Artist
 import com.example.musicdao.ui.components.releases.NonLazyReleaseList
+import com.example.musicdao.ui.navigation.Screen
 
 @ExperimentalFoundationApi
 @ExperimentalMaterialApi
@@ -55,7 +56,7 @@ fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: Nav
                 OutlinedButton(onClick = { }, modifier = Modifier.padding(end = 10.dp)) {
                     Text(text = "Follow")
                 }
-                OutlinedButton(onClick = { }) {
+                OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
                     Text(text = "Donate")
                 }
             }

@@ -236,7 +236,7 @@ fun Header(album: Album, navController: NavController) {
                     Text("View Artist", color = Color.White)
                 }
             }
-            OutlinedButton(onClick = {}) {
+            OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
                 Text("Donate", color = Color.White)
             }
         }

@@ -16,6 +16,8 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("me/edit")
     object BitcoinWallet : Screen("me/wallet")
 
+    object Donate : Screen("donate")
+
 
     object Profile : Screen("profile/{publicKey}") {
         fun createRoute(publicKey: String) = "profile/$publicKey"

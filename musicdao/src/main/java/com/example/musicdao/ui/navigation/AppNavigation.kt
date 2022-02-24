@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.musicdao.ui.components.player.FullPlayerScreen
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.screens.debug.Debug
+import com.example.musicdao.ui.screens.donate.DonateScreen
 import com.example.musicdao.ui.screens.home.HomeScreen
 import com.example.musicdao.ui.screens.home.HomeScreenViewModel
 import com.example.musicdao.ui.screens.profile.EditProfileScreen
@@ -79,6 +80,9 @@ fun AppNavigation(
             }
             composable(Screen.BitcoinWallet.route) {
                 BitcoinWalletScreen()
+            }
+            composable(Screen.Donate.route) {
+                DonateScreen()
             }
             composable(
                 Screen.Profile.route,
