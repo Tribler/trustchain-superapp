@@ -5,5 +5,8 @@
         <domain includeSubdomains="true">134.122.59.107</domain>
         <!--        This is for RegTest faucet, to claim some starter money -->
         <domain includeSubdomains="true">131.180.27.224</domain>
+
+        <!--        This is for RegTest faucet, to claim some starter money -->
+        <domain includeSubdomains="true">95.179.182.243</domain>
     </domain-config>
 </network-security-config>
