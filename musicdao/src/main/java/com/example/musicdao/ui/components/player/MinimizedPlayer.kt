@@ -1,12 +1,10 @@
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -63,7 +61,7 @@ fun MinimizedPlayer(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        track?.name?.uppercase() ?: "SONG NAME",
+                        track?.title?.uppercase() ?: "SONG NAME",
                         style = MaterialTheme.typography.button.merge(SpanStyle(fontWeight = FontWeight.Bold))
                     )
                     Text(
@@ -72,26 +70,26 @@ fun MinimizedPlayer(
                     )
                 }
             }
-            Row {
-                IconButton(onClick = { playerViewModel.pauseOrResume() }) {
-                    if (track != null) {
-                        if (isPlaying) {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = null,
-                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
-                            )
-                        } else {
-                            Icon(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = null,
-                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
-                            )
-                        }
-
-                    }
-                }
-            }
+//            Row {
+//                IconButton(onClick = { playerViewModel.pauseOrResume() }) {
+//                    if (track != null) {
+//                        if (isPlaying) {
+//                            Icon(
+//                                imageVector = Icons.Filled.PlayArrow,
+//                                contentDescription = null,
+//                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
+//                            )
+//                        } else {
+//                            Icon(
+//                                imageVector = Icons.Filled.Close,
+//                                contentDescription = null,
+//                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
+//                            )
+//                        }
+//
+//                    }
+//                }
+//            }
         }
     }, effect = {
         onDispose {

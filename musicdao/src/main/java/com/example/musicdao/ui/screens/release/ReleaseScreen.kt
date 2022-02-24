@@ -62,6 +62,8 @@ fun ReleaseScreen(
     val torrentStatus by viewModel.torrentHandleState.collectAsState()
     val album by viewModel.saturatedReleaseState.collectAsState()
 
+    val playingTrack = playerViewModel.playingTrack.collectAsState()
+
     // Audio Player
     val context = LocalContext.current
 
@@ -132,8 +134,17 @@ fun ReleaseScreen(
                 if (album.songs != null && album.songs.isNotEmpty()) {
                     val files = album.songs
                     files.map {
-                        ListItem(text = { Text(it.name) },
-                            secondaryText = { Text(it.artist) },
+
+                        val isPlayingModifier = playingTrack.value?.let { current ->
+                            if (it.title == current.title) {
+                                MaterialTheme.colors.primary
+                            } else {
+                                MaterialTheme.colors.onBackground
+                            }
+                        } ?: MaterialTheme.colors.onBackground
+
+                        ListItem(text = { Text(it.title, color = isPlayingModifier) },
+                            secondaryText = { Text(it.artist, color = isPlayingModifier) },
                             trailing = {
                                 Icon(
                                     imageVector = Icons.Filled.Menu,
