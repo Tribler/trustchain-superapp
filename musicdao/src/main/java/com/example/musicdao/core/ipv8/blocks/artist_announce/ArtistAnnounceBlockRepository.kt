@@ -1,6 +1,5 @@
 package com.example.musicdao.core.ipv8.repositories
 
-import android.util.Log
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
 import com.example.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
@@ -46,6 +45,17 @@ class ArtistAnnounceBlockRepository @Inject constructor(
         } else {
             null
         }
+    }
+
+    /**
+     * Try to get the latest information on all locally known artists.
+     */
+    fun getAllLocal(): List<ArtistAnnounceBlock> {
+        return musicCommunity.database.getBlocksWithType(ArtistAnnounceBlock.BLOCK_TYPE)
+            .filter { artistAnnounceBlockValidator.validateTransaction(it.transaction) }
+            .sortedByDescending { it.sequenceNumber }
+            .distinctBy { it.publicKey.toHex() }
+            .map { ArtistAnnounceBlock.fromTrustChainTransaction(it.transaction) }
     }
 
     private suspend fun crawl(publicKey: String) {

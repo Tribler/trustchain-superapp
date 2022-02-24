@@ -23,6 +23,7 @@ fun BottomNavigationBar(navController: NavHostController) {
 
     val items = listOf(
         BottomNavigationItem("Home", Screen.Home.route, Icons.Filled.Home),
+        BottomNavigationItem("Artists", Screen.DiscoverArtists.route, Icons.Filled.Person),
         BottomNavigationItem("Search", Screen.Search.route, Icons.Filled.Search),
         BottomNavigationItem("Torrents", Screen.Debug.route, Icons.Filled.Send),
         BottomNavigationItem("Creator", Screen.CreatorMenu.route, Icons.Filled.Person),
