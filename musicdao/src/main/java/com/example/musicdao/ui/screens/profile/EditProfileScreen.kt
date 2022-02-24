@@ -17,12 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.compose.rememberNavController
-import com.example.musicdao.ui.navigation.Screen
+import androidx.navigation.NavController
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun EditProfileScreen() {
+fun EditProfileScreen(navController: NavController) {
 
     val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
     val profile = ownProfileViewScreenModel.profile.collectAsState()
@@ -32,8 +31,6 @@ fun EditProfileScreen() {
     val biography = remember { mutableStateOf(profile.value?.biography) }
     val socials = remember { mutableStateOf(profile.value?.socials) }
 
-    val navController = rememberNavController()
-
     fun save() {
         val result = ownProfileViewScreenModel.publishEdit(
             name = name.value ?: "",
@@ -42,7 +39,7 @@ fun EditProfileScreen() {
             biography = biography.value ?: ""
         )
         if (result) {
-            navController.popBackStack(route = Screen.CreatorMenu.route, inclusive = false)
+            navController.popBackStack()
         }
     }
 

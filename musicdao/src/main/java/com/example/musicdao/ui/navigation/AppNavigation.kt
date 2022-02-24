@@ -72,7 +72,7 @@ fun AppNavigation(
                 MyProfileScreen(navController = navController)
             }
             composable(Screen.EditProfile.route) {
-                EditProfileScreen()
+                EditProfileScreen(navController = navController)
             }
             composable(Screen.CreatorMenu.route) {
                 ProfileMenuScreen(navController = navController)

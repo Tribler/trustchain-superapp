@@ -51,13 +51,10 @@ fun ProfileMenuScreen(navController: NavController) {
             CustomMenuItem(
                 text = "View Public Profile",
                 onClick = {
-                    navController.navigate(
-                        Screen.Profile.createRoute(publicKey = ownProfileViewScreenModel.publicKey())
-                    )
+                    navController.navigate(Screen.MyProfile.route)
                 })
             CustomMenuItem(text = "Edit Profile", onClick = {
                 navController.navigate(Screen.EditProfile.route)
-
             })
             CustomMenuItem(text = "Wallet", onClick = {
                 navController.navigate(Screen.BitcoinWallet.route)
