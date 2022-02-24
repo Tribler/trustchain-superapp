@@ -1,6 +1,7 @@
 package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -14,10 +15,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.musicdao.ui.SnackbarHandler
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -31,6 +34,8 @@ fun EditProfileScreen(navController: NavController) {
     val biography = remember { mutableStateOf(profile.value?.biography) }
     val socials = remember { mutableStateOf(profile.value?.socials) }
 
+    val context = LocalContext.current
+
     fun save() {
         val result = ownProfileViewScreenModel.publishEdit(
             name = name.value ?: "",
@@ -40,6 +45,9 @@ fun EditProfileScreen(navController: NavController) {
         )
         if (result) {
             navController.popBackStack()
+            SnackbarHandler.displaySnackbar(text = "Successfully published your profile")
+        } else {
+            SnackbarHandler.displaySnackbar(text = "Could not publish, please fill in all fields")
         }
     }
 

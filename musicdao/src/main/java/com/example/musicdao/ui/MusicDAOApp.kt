@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -23,6 +24,8 @@ import com.example.musicdao.ui.navigation.AppNavigation
 import com.example.musicdao.ui.screens.release.CreateReleaseDialog
 import com.example.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -44,8 +47,12 @@ fun MusicDAOApp() {
         val playerViewModel: PlayerViewModel =
             viewModel(factory = PlayerViewModel.provideFactory(context = context))
 
+        val scaffoldState = rememberScaffoldState()
+        SnackbarHandler.coroutineScope = rememberCoroutineScope()
+        SnackbarHandler.snackbarHostState = scaffoldState.snackbarHostState
+
         Scaffold(
-            scaffoldState = rememberScaffoldState(),
+            scaffoldState = scaffoldState,
             floatingActionButtonPosition = FabPosition.End,
             floatingActionButton = {
                 FloatingActionButton(onClick = { openCreateReleaseDialog.value = true }) {
@@ -72,11 +79,37 @@ fun MusicDAOApp() {
                     }
                 }
             },
-            bottomBar = { BottomNavigationBar(navController) }
+            bottomBar = { BottomNavigationBar(navController) },
+            snackbarHost = {
+                SnackbarHost(it) { data ->
+                    Snackbar(
+                        snackbarData = data,
+                        backgroundColor = MaterialTheme.colors.secondary,
+                        contentColor = MaterialTheme.colors.onSecondary,
+                        actionColor = MaterialTheme.colors.onSecondary
+                    )
+                }
+            },
         )
     }
 }
 
+
+object SnackbarHandler {
+    var snackbarHostState: SnackbarHostState? = null
+    var coroutineScope: CoroutineScope? = null
+
+    fun displaySnackbar(text: String) {
+        val snackbarHostState = snackbarHostState
+        val coroutineScope = coroutineScope
+
+        if (snackbarHostState != null && coroutineScope != null) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(message = text)
+            }
+        }
+    }
+}
 
 
 

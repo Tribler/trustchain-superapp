@@ -31,6 +31,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicdao.AppContainer
+import com.example.musicdao.ui.SnackbarHandler
 import com.example.musicdao.ui.dateToLongString
 import com.example.musicdao.ui.screens.release.create.CreateReleaseDialogViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -74,15 +75,18 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
 
     val localContext = LocalContext.current
     fun publishRelease() {
-        val res = viewModel.createRelease(
+        val result = viewModel.createRelease(
             artist.value,
             title.value,
             releaseDate = Instant.now().toString(),
             uris = fileList.value,
             localContext
         )
-        if (res) {
+        if (result) {
+            SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
             closeDialog()
+        } else {
+            SnackbarHandler.displaySnackbar(text = "Could not publish your release.")
         }
     }
 
