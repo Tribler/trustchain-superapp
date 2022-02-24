@@ -20,6 +20,7 @@ import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
 import com.example.musicdao.core.torrent.TorrentCache
+import com.example.musicdao.core.wallet.WalletService
 import com.example.musicdao.ui.MusicDAOApp
 import com.example.musicdao.ui.screens.profile.ProfileScreenViewModel
 import com.example.musicdao.ui.screens.release.ReleaseScreenViewModel
@@ -28,8 +29,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.components.ActivityComponent
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /**
@@ -51,6 +51,9 @@ class MusicActivity : AppCompatActivity() {
     lateinit var sessionManager: SessionManager
 
     @Inject
+    lateinit var walletService: WalletService
+
+    @Inject
     lateinit var setupMusicCommunity: SetupMusicCommunity
 
     @ExperimentalAnimationApi
@@ -65,6 +68,9 @@ class MusicActivity : AppCompatActivity() {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
             torrentCache.seedStrategy()
+                GlobalScope.launch(Dispatchers.IO) {
+                    walletService.start()
+                }
         }
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->

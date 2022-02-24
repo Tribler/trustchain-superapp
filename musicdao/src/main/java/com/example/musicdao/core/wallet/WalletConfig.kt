@@ -16,6 +16,6 @@ data class WalletConfig(
         val DEFAULT_FILE_PREFIX = "regtest-musicdao"
         val DEFAULT_REGTEST_BOOTSTRAP_IP = "95.179.182.243"
         val DEFAULT_REGTEST_BOOTSTRAP_PORT = "3000"
-        val DEFAULT_FAUCET_ENDPOINT = "http://95.179.182.243:3000"
+        val DEFAULT_FAUCET_ENDPOINT = "http://95.179.182.243:3000/faucet"
     }
 }

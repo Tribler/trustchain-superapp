@@ -1,5 +1,9 @@
 package com.example.musicdao.core.wallet
 
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -33,8 +37,7 @@ class WalletService(val config: WalletConfig) {
                     wallet().importKey(key)
                 }
                 if (wallet().balance.isZero) {
-                    val address = wallet().issuedReceiveAddresses[0].toString()
-                    requestFaucet(address)
+                    defaultFaucetRequest(amount = "1")
                 }
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
@@ -49,6 +52,7 @@ class WalletService(val config: WalletConfig) {
         }
     }
 
+    @DelicateCoroutinesApi
     fun start() {
         if (started) return
 
@@ -167,14 +171,22 @@ class WalletService(val config: WalletConfig) {
     /**
      * Query the bitcoin faucet for some starter bitcoins
      */
-    fun requestFaucet(id: String) {
-        val obj = URL("${config.regtestFaucetEndPoint}?id=$id")
-        try {
-            val con: InputStream? = obj.openStream()
-            con?.close()
-        } catch (exception: IOException) {
-            exception.printStackTrace()
+    @DelicateCoroutinesApi
+    fun requestFaucet(address: String, amount: String) {
+        GlobalScope.launch(Dispatchers.IO) {
+            val obj = URL("${config.regtestFaucetEndPoint}/$address/$amount")
+            try {
+                val con: InputStream? = obj.openStream()
+                con?.close()
+            } catch (exception: IOException) {
+                exception.printStackTrace()
+            }
         }
+    }
+
+    fun defaultFaucetRequest(amount: String = "1") {
+        val address = app.wallet().issuedReceiveAddresses[0].toString()
+        requestFaucet(address, amount)
     }
 
     companion object {
