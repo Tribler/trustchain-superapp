@@ -24,6 +24,6 @@ interface CacheDao {
     @Query("SELECT * FROM AlbumEntity WHERE publisher is :publicKey")
     suspend fun getFromArtist(publicKey: String): List<AlbumEntity>
 
-    @Query("SELECT * FROM AlbumEntity WHERE artist LIKE :keyword OR title LIKE :keyword")
+    @Query("SELECT * FROM AlbumEntity WHERE artist LIKE '%' || :keyword || '%' OR title LIKE '%' || :keyword || '%'")
     suspend fun localSearch(keyword: String): List<AlbumEntity>
 }
