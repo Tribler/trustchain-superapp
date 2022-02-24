@@ -1,9 +1,13 @@
 package com.example.musicdao.ui.screens.profile
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
@@ -14,10 +18,16 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.model.Artist
+import com.example.musicdao.ui.components.releases.NonLazyReleaseList
 
+@ExperimentalFoundationApi
+@ExperimentalMaterialApi
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Profile(artist: Artist) {
+fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: NavController) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -52,7 +62,11 @@ fun Profile(artist: Artist) {
 
             Column(modifier = Modifier.padding(bottom = 20.dp)) {
                 Text(text = "Releases", fontWeight = FontWeight.Bold)
-                Text(text = "Release List here")
+                if (releases.isEmpty()) {
+                    Text("No releases by this artist")
+                } else {
+                    NonLazyReleaseList(releasesState = releases, navController = navController)
+                }
             }
 
             Column(modifier = Modifier.padding(bottom = 20.dp)) {

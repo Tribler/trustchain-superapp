@@ -29,9 +29,8 @@ fun ReleaseList(
     releasesState: List<Album>,
     navController: NavController,
     header: @Composable (() -> Unit)? = null,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-
     LazyColumn(modifier = modifier) {
         if (header != null) {
             stickyHeader {
@@ -39,45 +38,7 @@ fun ReleaseList(
             }
         }
         items(releasesState) {
-            ListItem(
-                text = { Text(it.title) },
-                secondaryText = {
-                    Row {
-                        Text("Album - ${it.artist}")
-                        if (it.songs != null && it.songs.isNotEmpty()) {
-                            Icon(
-                                imageVector = Icons.Default.CheckCircle,
-                                tint = MaterialTheme.colors.primary,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .align(Alignment.CenterVertically)
-                                    .padding(start = 5.dp)
-                                    .size(15.dp)
-                            )
-                        }
-                    }
-                },
-                trailing = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            dateToShortString(it.releaseDate.toString()),
-                            modifier = Modifier.padding(end = 10.dp)
-                        )
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = null
-                        )
-                    }
-                },
-                modifier = Modifier.clickable {
-                    navController.navigate(
-                        Screen.Release.createRoute(
-                            it.id
-                        )
-                    )
-                },
-                icon = { ReleaseCover(it.cover, modifier = Modifier.size(40.dp)) }
-            )
+            ReleaseListItem(album = it, navController = navController)
             Divider()
         }
         if (releasesState.isNotEmpty()) {
@@ -86,4 +47,66 @@ fun ReleaseList(
             }
         }
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@ExperimentalMaterialApi
+@ExperimentalFoundationApi
+@Composable
+fun NonLazyReleaseList(
+    releasesState: List<Album>,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        releasesState.map {
+            ReleaseListItem(album = it, navController = navController)
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@ExperimentalMaterialApi
+@ExperimentalFoundationApi
+@Composable
+fun ReleaseListItem(album: Album, navController: NavController) {
+    ListItem(
+        text = { Text(album.title) },
+        secondaryText = {
+            Row {
+                Text("Album - ${album.artist}")
+                if (album.songs != null && album.songs.isNotEmpty()) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        tint = MaterialTheme.colors.primary,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(start = 5.dp)
+                            .size(15.dp)
+                    )
+                }
+            }
+        },
+        trailing = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    dateToShortString(album.releaseDate.toString()),
+                    modifier = Modifier.padding(end = 10.dp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = null
+                )
+            }
+        },
+        modifier = Modifier.clickable {
+            navController.navigate(
+                Screen.Release.createRoute(
+                    album.id
+                )
+            )
+        },
+        icon = { ReleaseCover(album.cover, modifier = Modifier.size(40.dp)) }
+    )
 }

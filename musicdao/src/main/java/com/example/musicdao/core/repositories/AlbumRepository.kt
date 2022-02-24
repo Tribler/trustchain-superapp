@@ -26,6 +26,10 @@ class AlbumRepository @Inject constructor(
         return database.dao.getAll().map { it.toAlbum() }
     }
 
+    suspend fun getAlbumsFromArtist(publicKey: String): List<Album> {
+        return database.dao.getFromArtist(publicKey = publicKey).map { it.toAlbum() }
+    }
+
     suspend fun searchAlbums(keyword: String): List<Album> {
         return database.dao.localSearch(keyword).map { it.toAlbum() }
     }

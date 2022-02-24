@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.model.Artist
 import com.example.musicdao.core.repositories.ArtistRepository
 import dagger.assisted.Assisted
@@ -23,9 +24,13 @@ class ProfileScreenViewModel @AssistedInject constructor(
     private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
     val profile: StateFlow<Artist?> = _profile
 
+    private val _releases: MutableStateFlow<List<Album>> = MutableStateFlow(listOf())
+    val releases: StateFlow<List<Album>> = _releases
+
     init {
         viewModelScope.launch {
             _profile.value = artistRepository.getArtist(publicKey = publicKey)
+            _releases.value = artistRepository.getArtistReleases(publicKey = publicKey)
         }
     }
 

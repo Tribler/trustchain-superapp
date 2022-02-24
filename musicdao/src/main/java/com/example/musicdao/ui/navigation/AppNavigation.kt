@@ -69,7 +69,7 @@ fun AppNavigation(
                 Debug(debugScreenViewModel)
             }
             composable(Screen.MyProfile.route) {
-                MyProfileScreen()
+                MyProfileScreen(navController = navController)
             }
             composable(Screen.EditProfile.route) {
                 EditProfileScreen()
@@ -90,6 +90,7 @@ fun AppNavigation(
                     navBackStackEntry.arguments?.getString(
                         "publicKey"
                     )!!,
+                    navController = navController
                 )
             }
             composable(
