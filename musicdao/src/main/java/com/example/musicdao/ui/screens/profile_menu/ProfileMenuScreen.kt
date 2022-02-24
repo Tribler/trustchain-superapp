@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,7 +59,9 @@ fun ProfileMenuScreen(navController: NavController) {
                 navController.navigate(Screen.EditProfile.route)
 
             })
-            CustomMenuItem(text = "Bitcoin Wallet", onClick = {})
+            CustomMenuItem(text = "Wallet", onClick = {
+                navController.navigate(Screen.BitcoinWallet.route)
+            })
         }
     }
 
@@ -66,11 +69,18 @@ fun ProfileMenuScreen(navController: NavController) {
 }
 
 @Composable
-fun CustomMenuItem(text: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.clickable(
+fun CustomMenuItem(text: String, onClick: () -> Unit, enabled: Boolean = true) {
+
+    val modifier = if (enabled) {
+        Modifier.clickable(
             onClick = { onClick() },
         )
+    } else {
+        Modifier.graphicsLayer(alpha = 0.4f)
+    }
+
+    Row(
+        modifier = modifier
     ) {
         Row(
             modifier = Modifier

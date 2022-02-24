@@ -46,6 +46,34 @@ fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modif
         )
 
     }
+}
 
+@Composable
+fun EmptyStateNotScrollable(firstLine: String, secondLine: String, modifier: Modifier = Modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .graphicsLayer(alpha = 0.4f)
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Info,
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+                .padding(bottom = 20.dp)
+        )
+        Text(
+            firstLine,
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.padding(bottom = 10.dp)
+        )
+        Text(
+            secondLine,
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(300.dp)
+        )
 
+    }
 }

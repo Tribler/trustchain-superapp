@@ -30,6 +30,7 @@ import com.example.musicdao.ui.screens.release.ReleaseScreen
 import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 import com.example.musicdao.ui.screens.search.SearchScreen
 import com.example.musicdao.ui.screens.search.SearchScreenViewModel
+import com.example.musicdao.ui.screens.wallet.BitcoinWalletScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 
@@ -75,6 +76,9 @@ fun AppNavigation(
             }
             composable(Screen.CreatorMenu.route) {
                 ProfileMenuScreen(navController = navController)
+            }
+            composable(Screen.BitcoinWallet.route) {
+                BitcoinWalletScreen()
             }
             composable(
                 Screen.Profile.route,
