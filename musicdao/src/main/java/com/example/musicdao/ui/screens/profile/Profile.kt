@@ -79,6 +79,11 @@ fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: Nav
                 Text(text = "Bitcoin Address", fontWeight = FontWeight.Bold)
                 Text(text = artist.bitcoinAddress)
             }
+
+            Column(modifier = Modifier.padding(bottom = 20.dp)) {
+                Text(text = "Biography", fontWeight = FontWeight.Bold)
+                Text(text = artist.biography)
+            }
         }
     }
 
