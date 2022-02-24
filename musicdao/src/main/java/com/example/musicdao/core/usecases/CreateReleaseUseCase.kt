@@ -33,16 +33,20 @@ class CreateReleaseUseCase @Inject constructor(
             is MyResult.Failure -> return false
             is MyResult.Success -> {
                 val infoHash = cacheFolder.value.parent.name
-                val publisher = musicCommunity.myPeer.publicKey
 
-                return albumRepository.create(
+                val result = albumRepository.create(
                     releaseId = infoHash,
                     magnet = "magnet:?xt=urn:btih:$infoHash",
                     title = title,
                     artist = artist,
                     releaseDate = releaseDate,
                 )
-                torrentCache.seedStrategy()
+
+                if (result) {
+                    torrentCache.seedStrategy()
+                }
+
+                return result
             }
         }
     }
