@@ -10,13 +10,13 @@ import nl.tudelft.ipv8.util.toHex
 import java.nio.charset.Charset
 
 class VaultFileRequestPayload(
-    val id: String,
+    val id: String?,
     val accessMode: String,
     val accessToken: String?,
     val attestations: List<AttestationBlob>?
 ) : Serializable {
     override fun serialize(): ByteArray {
-        var serialized = serializeVarLen(id.toByteArray()) +
+        var serialized = serializeVarLen((id ?: NULL).toByteArray()) +
             serializeVarLen(accessMode.toByteArray()) +
             serializeVarLen((accessToken ?: NULL).toByteArray())
 
@@ -36,6 +36,11 @@ class VaultFileRequestPayload(
             val (accessToken, tokenSize) = deserializeVarLen(buffer, localOffset)
             localOffset += tokenSize
 
+            var stringId: String? = id.toString(Charset.defaultCharset())
+            if (stringId == NULL) {
+                stringId = null
+            }
+
             var stringToken: String? = accessToken.toString(Charset.defaultCharset())
             if (stringToken == NULL) {
                 stringToken = null
@@ -51,7 +56,7 @@ class VaultFileRequestPayload(
 
             return Pair(
                 VaultFileRequestPayload(
-                    id.toString(Charset.defaultCharset()),
+                    stringId,
                     accessMode.toString(Charset.defaultCharset()),
                     stringToken,
                     atts

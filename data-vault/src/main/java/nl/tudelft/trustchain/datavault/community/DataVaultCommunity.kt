@@ -3,6 +3,9 @@ package nl.tudelft.trustchain.datavault.community
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
@@ -17,10 +20,11 @@ import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.datavault.DataVaultMainActivity
 import nl.tudelft.trustchain.datavault.accesscontrol.AccessControlList
+import nl.tudelft.trustchain.datavault.ui.ImageViewHolder
+import nl.tudelft.trustchain.datavault.ui.PeerVaultFileItem
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment
 import nl.tudelft.trustchain.peerchat.community.AttachmentPayload
 import java.io.File
-import java.nio.charset.Charset
 
 private val logger = KotlinLogging.logger {}
 
@@ -33,6 +37,12 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private lateinit var vaultBrowserFragment: VaultBrowserFragment
     val attestationCommunity: AttestationCommunity by lazy {
         IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
+    }
+
+    val pendingImageViewHolders = mutableMapOf<String, Pair<PeerVaultFileItem, ImageViewHolder>>()
+
+    fun addPendingImageViewHolders(peerVaultFileItem: PeerVaultFileItem, imageViewHolder: ImageViewHolder) {
+        pendingImageViewHolders[peerVaultFileItem.cacheKey] = Pair(peerVaultFileItem, imageViewHolder)
     }
 
     val VAULT by lazy { File(context.filesDir, VaultBrowserFragment.VAULT_DIR) }
@@ -72,7 +82,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onEVAReceiveProgressCallback(peer: Peer, info: String, progress: TransferProgress) {
-        Log.e(simpleName, "ON EVA receive progress callback for '$info'. Progress: ${progress.progress}")
+        //Log.e(simpleName, "ON EVA receive progress callback for '$info'. Progress: ${progress.progress}")
 
         if (!isDataVaultEVA(info)) return
 
@@ -82,15 +92,15 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
-        Log.e(simpleName, "ON EVA receive complete callback for '$info'")
+        //Log.e(simpleName, "ON EVA receive complete callback for '$info'")
 
         if (!isDataVaultEVA(info)) return
 
-        data?.let {
+        /*data?.let {
             val packet = Packet(peer.address, it)
             //onAttachmentPacket(packet)
             Log.e(simpleName, packet.source.toString())
-        }
+        }*/
 
         if (isEvaReceiveCompleteCallbackInitialized) {
             this.evaReceiveCompleteCallback(peer, info, id, data)
@@ -114,11 +124,11 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     ///////////////////////////////////
 
     private fun onFilePacket(packet: Packet) {
-        val (_, payload) = packet.getDecryptedAuthPayload(
+        val (peer, payload) = packet.getDecryptedAuthPayload(
             AttachmentPayload.Deserializer, myPeer.key as PrivateKey
         )
         logger.debug { "<- $payload" }
-        onFile(payload)
+        onFile(peer, payload)
     }
 
     private fun onAccessibleFilesPacket(packet: Packet) {
@@ -127,17 +137,25 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         onAccessibleFiles(peer, payload)
     }
 
-    private fun onFile(payload: AttachmentPayload) {
-        val message = payload.data.toString(Charset.defaultCharset())
-        notify(payload.id, message)
+    private fun onFile(peer: Peer, payload: AttachmentPayload) {
+        Log.e(logTag, "File received ${payload.id}")
+        onFile(peer, payload.id, payload.data)
+    }
 
-        // Store file locally
-        /*val (file, _) = vaultFile(payload.id)
-        Log.e(logTag, "Received file: ${file.absolutePath}")
-        // Save attachment
-        val fos = FileOutputStream(file)
-        fos.write(payload.data)
-        fos.close()*/
+    fun onFile(peer: Peer, id: String, data: ByteArray) {
+        val peerFileId = "${peer.mid}_$id"
+        val pair = pendingImageViewHolders[peerFileId]
+
+        if (pair != null) {
+            Log.e(logTag, "pending view holder and vault item found ($peerFileId)")
+            val peerVaultFileItem = pair.first
+            pendingImageViewHolders.remove(peerFileId)
+            val cacheFile = peerVaultFileItem.writeDataCacheFile(context, data)
+            CoroutineScope(Dispatchers.Main).launch {
+                val imageViewHolder = pair.second
+                imageViewHolder.setRemoteFileImage(peerVaultFileItem, cacheFile)
+            }
+        }
     }
 
     private fun onAccessibleFiles(peer: Peer, payload: AccessibleFilesPayload) {
@@ -146,7 +164,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         if (!::vaultBrowserFragment.isInitialized) {
             return
         }
-        vaultBrowserFragment.selectRequestableFile(peer, payload.accessToken, payload.files)
+        vaultBrowserFragment.browseRequestableFiles(peer, payload.accessToken, payload.files)
     }
 
     private fun onFileRequestPacket(packet: Packet) {
@@ -169,8 +187,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     private fun onFileRequestFailed(payload: VaultFileRequestFailedPayload) {
         Log.e(logTag, payload.message)
-        //Toast.makeText(context, payload.message, Toast.LENGTH_LONG).show()
-        notify("Failed", payload.message)
+        // notify("Failed", payload.message)
     }
 
     private fun vaultFile(filename: String): Pair<File, AccessControlList> {
@@ -182,10 +199,13 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     private fun onFileRequest(peer: Peer, payload: VaultFileRequestPayload) {
         Log.e(logTag, "Received file request. Access token: ${payload.accessToken}")
         try {
-            val (file, accessPolicy) = vaultFile(payload.id)
+            val (file, accessPolicy) = vaultFile(payload.id!!)
             if (!file.exists()) {
                 Log.e(logTag, "The requested file does not exist")
                 sendFileRequestFailed(peer, payload.id, "The requested file does not exist")
+            } else if (file.isDirectory) {
+                Log.e(logTag, "The requested file is a directory")
+                sendFileRequestFailed(peer, payload.id, "The requested file is a directory")
             } else if (!accessPolicy.verifyAccess(peer, payload.accessMode, payload.accessToken, payload.attestations)) {
                 Log.e(logTag, "Access Policy not met")
                 sendFileRequestFailed(peer, payload.id, "Access Policy not met")
@@ -200,14 +220,15 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
     }
 
     private fun onAccessibleFilesRequest(peer: Peer, payload: VaultFileRequestPayload) {
-        var allFiles = VAULT.list()?.asList()
+        Log.e(logTag, "accessible files request id: ${payload.id}, accessmode: ${payload.accessMode}, token: ${payload.accessToken}")
+        val allFiles = if (payload.id == null) {
+            VAULT.list()?.asList()
+        } else {
+            File(VAULT, payload.id).list()?.asList()
+        }
 
         if (payload.attestations != null && !payload.attestations.isEmpty()) {
             Log.e(logTag, "Attestations for accessible files (${payload.attestations.size} att(s))")
-            for (attestation in payload.attestations) {
-                // VERIFIY ATTESTATIONS & FILTER FILES
-            }
-
             val accessToken: String? = generateToken(payload.attestations)
             sendAccessibleFiles(peer, accessToken, filterFiles(peer, payload.accessMode, null, payload.attestations, allFiles))
         } else if (payload.accessToken != null) {
@@ -268,10 +289,10 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
         send(peer, packet)
     }
 
-    fun sendAccessibleFilesRequest(peer: Peer, accessMode: String, attestations: List<AttestationBlob>) {
+    fun sendAccessibleFilesRequest(peer: Peer, accessMode: String, attestations: List<AttestationBlob>, folder: String?) {
         Log.e(logTag, "Sending accessible files request")
         Log.e(logTag, "including ${attestations.size} attestation(s)")
-        val payload = VaultFileRequestPayload("ACCFILES", accessMode, null, attestations)
+        val payload = VaultFileRequestPayload(folder, accessMode, null, attestations)
         val packet = serializePacket(MessageId.ACCESSIBLE_FILES_REQUEST, payload)
         logger.debug { "-> $payload" }
         send(peer, packet)
@@ -279,7 +300,7 @@ class DataVaultCommunity(private val context: Context) : EVACommunity() {
 
     fun sendFileRequest(peer: Peer, accessMode: String, id: String, accessToken: String? = null, attestations: List<AttestationBlob>? = null) {
         Log.e(logTag, "Sending file request")
-        Log.e(logTag, "accessToken: $accessToken, including ${attestations?.size ?: 0} attestation(s)")
+        // Log.e(logTag, "accessToken: $accessToken, including ${attestations?.size ?: 0} attestation(s)")
 
         val payload = VaultFileRequestPayload(id, accessMode, accessToken, attestations)
         val packet = serializePacket(MessageId.FILE_REQUEST, payload)

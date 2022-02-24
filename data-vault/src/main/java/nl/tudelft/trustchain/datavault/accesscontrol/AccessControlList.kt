@@ -75,7 +75,6 @@ class AccessControlList(
     private fun getACL(): JSONObject {
         if (aclCache == null) {
             if (aclFile.exists()) {
-                CoroutineScope(Dispatchers.IO).launch {
                     try {
                         val rd = aclFile.readText()
                         Log.e(logTag, "ACL contents: $rd")
@@ -84,7 +83,6 @@ class AccessControlList(
                         Log.e(logTag, "Corrupt ACL file: ${file.absolutePath}", e)
                         aclCache = newACL()
                     }
-                }
             } else {
                 Log.e(logTag, "No acl file yet")
                 aclCache = newACL()
@@ -140,6 +138,8 @@ class AccessControlList(
     }
 
     fun isPublic(): Boolean {
+        if (1==1) return true
+
         val acl = File(file.absolutePath + ".acl")
         if (acl.exists()) {
             val aclContent = acl.readText()

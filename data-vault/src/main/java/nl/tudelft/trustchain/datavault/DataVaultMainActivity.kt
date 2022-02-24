@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.navigation.fragment.findNavController
 import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.trustchain.datavault.ui.LocalVaultFileItem
 import nl.tudelft.trustchain.datavault.ui.VaultBrowserFragment
+import nl.tudelft.trustchain.datavault.ui.VaultFileItem
 import java.io.File
 import java.util.*
 
@@ -13,8 +16,8 @@ class DataVaultMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_datavault
     private val logTag = "Data Vault"
 
-    private val currentFolder = MutableLiveData<File>()
-    private val browserNavigationStack = Stack<File>()
+    private val currentFolder = MutableLiveData<VaultFileItem>()
+    private val browserNavigationStack = Stack<VaultFileItem>()
 
     val VAULT by lazy { File(filesDir, VaultBrowserFragment.VAULT_DIR) }
 
@@ -22,7 +25,7 @@ class DataVaultMainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         initVault()
-        currentFolder.value = VAULT
+        currentFolder.value = LocalVaultFileItem(this, VAULT, null)
     }
 
     private fun initVault() {
@@ -32,23 +35,38 @@ class DataVaultMainActivity : BaseActivity() {
         }
     }
 
-    fun setCurrentFolder(folder: File) {
+    fun setCurrentFolder(folder: VaultFileItem) {
         currentFolder.value = folder
     }
 
-    fun getCurrentFolder(): LiveData<File> {
+    fun getCurrentFolder(): LiveData<VaultFileItem> {
         return currentFolder
     }
 
-    fun pushFolderToStack(folder: File) {
+    fun pushFolderToStack(folder: VaultFileItem) {
         browserNavigationStack.push(folder)
     }
 
+    fun setActionBarTitle(title: String?) {
+        supportActionBar?.subtitle = title
+    }
+
     override fun onBackPressed() {
-        if (browserNavigationStack.isEmpty()) {
-            super.onBackPressed()
+        // Check when browsing else regular onBackPressed
+        val currentFragmentId = supportFragmentManager.primaryNavigationFragment?.findNavController()?.currentDestination?.id
+        if (currentFragmentId == R.id.vaultBrowserFragment) {
+            if (browserNavigationStack.isEmpty()) {
+                super.onBackPressed()
+            } else if (browserNavigationStack.size == 1) {
+                // Local vault home
+                currentFolder.value = browserNavigationStack.pop()
+                setActionBarTitle(null)
+            } else {
+                currentFolder.value = browserNavigationStack.pop()
+                setActionBarTitle("${currentFolder.value!!.name}")
+            }
         } else {
-            currentFolder.value = browserNavigationStack.pop()
+            super.onBackPressed()
         }
     }
 }
