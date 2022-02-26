@@ -5,7 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.example.musicdao.MusicService
 import nl.tudelft.trustchain.FOC.MainActivityFOC
-import nl.tudelft.trustchain.atomicswap.ui.AtomicSwapActivity
+import nl.tudelft.trustchain.atomicswap.AtomicSwapActivity
 import nl.tudelft.trustchain.common.R
 import nl.tudelft.trustchain.explorer.ui.TrustChainExplorerActivity
 import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity

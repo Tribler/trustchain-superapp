@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.atomicswap.ui
+package nl.tudelft.trustchain.atomicswap
 
 import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.common.BaseActivity
