@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/atomic_swap_navigation_graph"
+    app:startDestination="@id/atomicSwapFragment">
+
+    <fragment
+        android:id="@+id/atomicSwapFragment"
+        android:name="nl.tudelft.trustchain.atomicswap.ui.AtomicSwapFragment"
+        android:label="AtomicSwapFragment" />
+</navigation>
