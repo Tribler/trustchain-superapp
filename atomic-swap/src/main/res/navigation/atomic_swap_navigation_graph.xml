@@ -9,11 +9,11 @@
         android:id="@+id/navigation_wallet"
         android:name="nl.tudelft.trustchain.atomicswap.ui.wallet.WalletFragment"
         android:label="@string/title_wallet"
-        tools:layout="@layout/fragment_wallet" />
+        tools:layout="@layout/fragment_atomic_wallet" />
     <fragment
         android:id="@+id/navigation_swap"
         android:name="nl.tudelft.trustchain.atomicswap.ui.swap.SwapFragment"
         android:label="@string/title_swap"
-        tools:layout="@layout/fragment_swap"/>
+        tools:layout="@layout/fragment_atomic_swap"/>
 
 </navigation>

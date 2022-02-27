@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.atomicswap.ui.wallet
 
-import androidx.fragment.app.Fragment
+import nl.tudelft.trustchain.atomicswap.R
+import nl.tudelft.trustchain.common.ui.BaseFragment
 
-class WalletFragment : Fragment()
+class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet)
