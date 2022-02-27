@@ -84,6 +84,7 @@ allprojects {
 
 dependencies {
     implementation project(":common")
+    implementation project(":common-bitcoin")
     implementation project(":ipv8-android")
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -106,7 +107,6 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0"
 
     // Wallet libraries
-    implementation group: 'org.bitcoinj', name: 'bitcoinj-core', version: '0.15.10'
     implementation(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
         exclude group: 'org.bouncycastle'
     }

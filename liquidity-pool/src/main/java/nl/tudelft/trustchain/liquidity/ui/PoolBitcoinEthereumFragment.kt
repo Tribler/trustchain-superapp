@@ -9,8 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
-import nl.tudelft.trustchain.liquidity.data.BitcoinMultiSigWallet
-import nl.tudelft.trustchain.liquidity.data.BitcoinWallet
+import com.example.common.bitcoin.BitcoinMultiSigWallet
+import com.example.common.bitcoin.BitcoinWallet
 import nl.tudelft.trustchain.liquidity.data.EthereumWeb3jWallet
 import nl.tudelft.trustchain.liquidity.util.TrustChainInteractor
 import org.bitcoinj.core.Coin
@@ -29,10 +29,10 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         TRADE_ETH_BTC
     }
 
-    private lateinit var bitcoinWallet: BitcoinWallet
+    private lateinit var bitcoinWallet: com.example.common.bitcoin.BitcoinWallet
     private lateinit var ethereumWallet: EthereumWeb3jWallet
 
-    private lateinit var bitcoinMultiSigWallet: BitcoinMultiSigWallet
+    private lateinit var bitcoinMultiSigWallet: com.example.common.bitcoin.BitcoinMultiSigWallet
     private lateinit var ethereumMultiSigWallet: EthereumWeb3jWallet
 
     private var debugLogLineNumber = 0
@@ -86,7 +86,8 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         val walletDirectory = context?.cacheDir ?: throw Error("CacheDir not found")
 
         debugLog("Creating personal bitcoin wallet.")
-        bitcoinWallet = BitcoinWallet(params, seed, walletDirectory, seed)
+        bitcoinWallet =
+            com.example.common.bitcoin.BitcoinWallet(params, seed, walletDirectory, seed)
         debugLog("Waiting for the wallet app kit to start running.")
 
         while (!bitcoinWallet.kit.isRunning) {
@@ -96,7 +97,8 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         debugLog("Created personal bitcoin wallet with address: ${bitcoinWallet.address()}.")
 
         debugLog("Creating multi-signature bitcoin wallet.")
-        bitcoinMultiSigWallet = BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
+        bitcoinMultiSigWallet =
+            com.example.common.bitcoin.BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
         debugLog("Created multi-signature bitcoin wallet with address: ${bitcoinMultiSigWallet.address()}.")
     }
 

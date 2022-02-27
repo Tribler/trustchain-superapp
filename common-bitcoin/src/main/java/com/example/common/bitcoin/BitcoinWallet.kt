@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.liquidity.data
+package com.example.common.bitcoin
 
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature
