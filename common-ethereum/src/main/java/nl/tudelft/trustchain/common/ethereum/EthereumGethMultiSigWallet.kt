@@ -1,8 +1,8 @@
-package nl.tudelft.trustchain.liquidity.data
+package nl.tudelft.trustchain.common.ethereum
 
 import kotlinx.coroutines.delay
-import nl.tudelft.trustchain.liquidity.BuildConfig
-import nl.tudelft.trustchain.liquidity.data.ethereum.contracts.geth.MultiSigWallet
+import nl.tudelft.trustchain.common.ethereum.BuildConfig
+import nl.tudelft.trustchain.common.ethereum.contracts.geth.MultiSigWallet
 import org.ethereum.geth.*
 
 class EthereumGethMultiSigWallet(gethWallet: EthereumGethWallet) {

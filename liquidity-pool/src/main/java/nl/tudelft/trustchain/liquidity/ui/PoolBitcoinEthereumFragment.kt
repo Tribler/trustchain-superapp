@@ -9,9 +9,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
-import com.example.common.bitcoin.BitcoinMultiSigWallet
-import com.example.common.bitcoin.BitcoinWallet
-import nl.tudelft.trustchain.liquidity.data.EthereumWeb3jWallet
+import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.liquidity.util.TrustChainInteractor
 import org.bitcoinj.core.Coin
 import org.bitcoinj.params.RegTestParams
@@ -30,10 +28,10 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
     }
 
     private lateinit var bitcoinWallet: com.example.common.bitcoin.BitcoinWallet
-    private lateinit var ethereumWallet: EthereumWeb3jWallet
+    private lateinit var ethereumWallet: nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 
     private lateinit var bitcoinMultiSigWallet: com.example.common.bitcoin.BitcoinMultiSigWallet
-    private lateinit var ethereumMultiSigWallet: EthereumWeb3jWallet
+    private lateinit var ethereumMultiSigWallet: nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 
     private var debugLogLineNumber = 0
     private val BTC_TO_ETH_RATIO = 2.0
@@ -110,12 +108,22 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         val password = "123456"
         val keyPair = ECKeyPair.create(BigInteger.valueOf(85678567585858758))
         val walletDirectory = context?.cacheDir ?: throw Error("CacheDir not found")
-        ethereumWallet = EthereumWeb3jWallet(web3j, walletDirectory, keyPair, password)
+        ethereumWallet = nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet(
+            web3j,
+            walletDirectory,
+            keyPair,
+            password
+        )
         debugLog("Created personal ethereum wallet with address: ${ethereumWallet.address()}")
 
         val multiSigPassword = "123456"
         val multiSigKeyPair = ECKeyPair.create(BigInteger.valueOf(74587348957389457))
-        ethereumMultiSigWallet = EthereumWeb3jWallet(web3j, walletDirectory, multiSigKeyPair, multiSigPassword)
+        ethereumMultiSigWallet = nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet(
+            web3j,
+            walletDirectory,
+            multiSigKeyPair,
+            multiSigPassword
+        )
         debugLog("Created multi-signature ethereum wallet with address: ${ethereumMultiSigWallet.address()}")
     }
 

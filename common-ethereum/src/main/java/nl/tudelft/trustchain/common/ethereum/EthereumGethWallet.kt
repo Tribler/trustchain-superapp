@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.liquidity.data
+package nl.tudelft.trustchain.common.ethereum
 
 import org.ethereum.geth.*
 

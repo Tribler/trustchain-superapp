@@ -1,6 +1,6 @@
-package nl.tudelft.trustchain.liquidity.data
+package nl.tudelft.trustchain.common.ethereum
 
-import nl.tudelft.trustchain.liquidity.data.ethereum.contracts.web3j.MultiSigWallet
+import nl.tudelft.trustchain.common.ethereum.contracts.web3j.MultiSigWallet
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.tx.gas.StaticGasProvider

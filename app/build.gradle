@@ -128,6 +128,9 @@ dependencies {
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }
+    api(project(':common-ethereum')){
+        exclude group: 'net.java.dev.jna'
+    }
     api(project(':currencyii')){
         exclude group: 'net.java.dev.jna'
     }

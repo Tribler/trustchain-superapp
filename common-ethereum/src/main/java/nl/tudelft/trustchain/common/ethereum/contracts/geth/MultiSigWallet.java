@@ -2,7 +2,7 @@
 // This file is an automatically generated Java binding. Do not modify as any
 // change will likely be lost upon the next re-generation!
 
-package nl.tudelft.trustchain.liquidity.data.ethereum.contracts.geth;
+package nl.tudelft.trustchain.common.ethereum.contracts.geth;
 
 import org.ethereum.geth.*;
 

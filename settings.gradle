@@ -16,6 +16,8 @@ project(':demo-jvm').projectDir = new File(settingsDir, 'kotlin-ipv8/demo-jvm')
 
 include ':app'
 include ':common'
+include ':common-bitcoin'
+include ':common-ethereum'
 include ':currencyii'
 include ':debug'
 include ':distributedai'
@@ -33,4 +35,3 @@ include ':trustchain-voter'
 include ':liquidity-pool'
 include ':valuetransfer'
 include ':atomic-swap'
-include ':common-bitcoin'

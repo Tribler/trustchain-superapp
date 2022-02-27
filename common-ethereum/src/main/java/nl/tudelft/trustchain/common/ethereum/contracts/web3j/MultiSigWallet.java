@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.liquidity.data.ethereum.contracts.web3j;
+package nl.tudelft.trustchain.common.ethereum.contracts.web3j;
 
 import io.reactivex.Flowable;
 import java.math.BigInteger;
