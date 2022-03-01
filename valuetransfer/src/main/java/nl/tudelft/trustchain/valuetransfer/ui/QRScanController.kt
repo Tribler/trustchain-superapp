@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui
 
 import android.content.Intent
-import android.util.Log
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -38,13 +37,11 @@ class QRScanController : VTFragment() {
     }
 
     fun addAuthority(publicKey: String) {
-        Log.d("VTLOG", "ADD AUTHORITY")
 
         IdentityAttestationAuthorityDialog(defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())).show(parentFragmentManager, tag)
     }
 
     fun addAttestation(publicKey: String) {
-        Log.d("VTLOG", "ADD ATTESTATION")
 
         val peer = getAttestationCommunity().getPeers().find { peer -> peer.publicKey.keyToBin().toHex() == publicKey }
 
@@ -58,9 +55,7 @@ class QRScanController : VTFragment() {
         }
     }
 
-    fun verifyAttestation(data: JSONObject) {
-        Log.d("VTLOG", "VERIFY ATTESTATION")
-        Log.d("VTLOG", data.toString())
+    private fun verifyAttestation(data: JSONObject) {
 
         val variables = listOf(KEY_METADATA, KEY_ATTESTATION_HASH, KEY_SIGNATURE, KEY_SIGNEE_KEY, KEY_ATTESTOR_KEY)
         checkRequiredVariables(variables, data)
@@ -84,9 +79,6 @@ class QRScanController : VTFragment() {
         val variables = listOf(KEY_PUBLIC_KEY)
         checkRequiredVariables(variables, data)
 
-        Log.d("VTLOG", "ADD CONTACT")
-        Log.d("VTLOG", data.toString())
-
         try {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
             val name = data.optString(KEY_NAME)
@@ -108,9 +100,6 @@ class QRScanController : VTFragment() {
     fun transferMoney(data: JSONObject) {
         val variables = listOf(KEY_PUBLIC_KEY, KEY_NAME, KEY_AMOUNT)
         checkRequiredVariables(variables, data)
-
-        Log.d("VTLOG", "TRANSFER MONEY")
-        Log.d("VTLOG", data.toString())
 
         try {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
@@ -153,9 +142,6 @@ class QRScanController : VTFragment() {
         }
 
         checkRequiredVariables(variables, data)
-
-        Log.d("VTLOG", "EXCHANGE MONEY")
-        Log.d("VTLOG", data.toString())
 
         try {
             val publicKey = defaultCryptoProvider.keyFromPublicBin(data.optString(KEY_PUBLIC_KEY).hexToBytes())
