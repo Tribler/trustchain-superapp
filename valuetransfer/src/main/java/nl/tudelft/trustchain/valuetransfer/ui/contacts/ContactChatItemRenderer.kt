@@ -47,7 +47,6 @@ class ContactChatItemRenderer(
         // Necessary to hide content types because the recycler view sometimes displays wrong data
         clChatMessage.isVisible = false
         clTransaction.isVisible = false
-        clTransactionResend.isVisible = false
         clAttachmentPhotoVideo.isVisible = false
         clAttachmentFile.isVisible = false
         clAttachmentIdentityAttribute.isVisible = false
@@ -62,6 +61,7 @@ class ContactChatItemRenderer(
         tvChatMessage.isVisible = false
         tvTransactionMessage.text = ""
         tvTransactionMessage.isVisible = false
+        ivTransactionErrorIcon.isVisible = false
         tvAttachmentProgress.isVisible = false
         tvAttachmentProgress.text = ""
         tvAttachmentProgressStatus.isVisible = false
@@ -440,7 +440,7 @@ class ContactChatItemRenderer(
         }
 
         // Show the transaction w/o its message
-        item.chatMessage.transactionHash?.let {
+        item.chatMessage.transactionHash?.let { _ ->
             clTransaction.isVisible = true
             clTransaction.setBackgroundResource(backgroundResource)
             tvTransactionTitle.setTextColor(ContextCompat.getColor(this.context, textColor))
@@ -458,14 +458,17 @@ class ContactChatItemRenderer(
                 val amount = formatBalance((item.transaction.transaction["amount"] as BigInteger).toLong())
 
                 if (item.chatMessage.outgoing) {
+                    ivTransactionErrorIcon.isVisible = item.blocks.find { it.linkedBlockId == item.transaction.blockId } == null
                     this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_of, amount)
                 } else {
+                    ivTransactionErrorIcon.isVisible = item.blocks.find { it.linkedBlockId == item.transaction.blockId && it.isAgreement } == null
                     this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_of, amount)
                 }
             } else {
                 if (item.chatMessage.outgoing) {
                     this.context.resources.getString(R.string.text_contact_chat_outgoing_transfer_failed)
                 } else {
+                    ivTransactionErrorIcon.isVisible = true
                     this.context.resources.getString(R.string.text_contact_chat_incoming_transfer_unknown)
                 }
             }

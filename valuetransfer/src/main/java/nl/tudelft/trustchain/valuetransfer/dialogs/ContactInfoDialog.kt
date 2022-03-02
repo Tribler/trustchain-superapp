@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.*
@@ -40,6 +41,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItemRenderer
 import nl.tudelft.trustchain.valuetransfer.util.copyToClipboard
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
 import nl.tudelft.trustchain.valuetransfer.util.generateIdenticon
 import nl.tudelft.trustchain.valuetransfer.util.toExchangeTransactionItem
 
@@ -83,12 +85,6 @@ class ContactInfoDialog(
     private lateinit var bottomSheetDialog: Dialog
 
     init {
-        adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer(false) {
-                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
-            }
-        )
-
         lifecycleScope.launchWhenCreated {
             while (isActive) {
                 refreshTransactions()
@@ -99,6 +95,12 @@ class ContactInfoDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        adapterTransactions.registerRenderer(
+            ExchangeTransactionItemRenderer(false, parentActivity) {
+                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
+            }
+        )
+
         return activity?.let {
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -181,6 +183,7 @@ class ContactInfoDialog(
             contact.observe(
                 this,
                 Observer {
+
                     nickName.text = it?.name ?: resources.getString(R.string.text_unknown_contact)
                 }
             )
@@ -207,6 +210,8 @@ class ContactInfoDialog(
             rvIdentityAttributes.apply {
                 adapter = adapterIdentityAttributes
                 layoutManager = LinearLayoutManager(context)
+                val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+                addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
             itemsAttributes.observe(
@@ -221,6 +226,8 @@ class ContactInfoDialog(
             rvTransactions.apply {
                 adapter = adapterTransactions
                 layoutManager = LinearLayoutManager(requireContext())
+                val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_transaction, requireContext().theme)
+                addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
             }
 
             buttonMoreTransactions.setOnClickListener {

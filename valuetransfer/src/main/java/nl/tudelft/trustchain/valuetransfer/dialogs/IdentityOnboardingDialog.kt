@@ -53,6 +53,7 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
 
     private var nfcSupported = false
     private var nfcEnabled = false
+    private var nfcSwitchCount = 0
 
     private var eDocument: EDocument? = null
 
@@ -77,6 +78,7 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             startImportingButton.setOnClickListener(this)
             startOpenNFCSettingsButton = view.findViewById(R.id.btnOpenNFCSettings)
             startOpenNFCSettingsButton.setOnClickListener(this)
+            view.findViewById<TextView>(R.id.tvStepTwo).setOnClickListener(this)
             view.findViewById<Button>(R.id.btnStartCancel).setOnClickListener(this)
 
             // Scan Document View
@@ -140,6 +142,13 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
                 initScanView()
                 startView.exitEnterView(requireContext(), scanView)
             }
+            R.id.tvStepTwo -> {
+                nfcSwitchCount += 1
+                if (nfcSwitchCount % 5 == 0) {
+                    nfcSupported = !nfcSupported
+                    getNFCDeviceStatus(true)
+                }
+            }
             R.id.btnStartCancel -> dismissDialog()
             R.id.llScanSelectPassport -> startPassportScan(PassportHandler.DOCUMENT_TYPE_PASSPORT)
             R.id.llScanSelectIDCard -> startPassportScan(PassportHandler.DOCUMENT_TYPE_ID_CARD)
@@ -163,9 +172,11 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     /**
      * Fetch NFC device status and apply to views
      */
-    private fun getNFCDeviceStatus() {
+    private fun getNFCDeviceStatus(override: Boolean = false) {
         val nfcAdapter = NfcAdapter.getDefaultAdapter(parentActivity)
-        nfcSupported = nfcAdapter != null
+        if (!override) {
+            nfcSupported = nfcAdapter != null
+        }
         nfcEnabled = nfcSupported && nfcAdapter?.isEnabled == true
 
         dialogView.findViewById<LinearLayout>(R.id.llNFCSupported).isVisible = nfcSupported

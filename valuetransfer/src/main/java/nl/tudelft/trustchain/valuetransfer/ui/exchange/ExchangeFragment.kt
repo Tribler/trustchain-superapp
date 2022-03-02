@@ -3,10 +3,13 @@ package nl.tudelft.trustchain.valuetransfer.ui.exchange
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
@@ -48,7 +51,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer(true) {
+            ExchangeTransactionItemRenderer(true, parentActivity) {
                 ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
             }
         )
@@ -119,17 +122,23 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             }.show(parentFragmentManager, tag)
         }
 
+        binding.ivReloadBalance.setOnClickListener {
+            binding.ivReloadBalance.isVisible = false
+            binding.pbBalanceUpdating.isVisible = true
+            verifyBalance()
+        }
+
         binding.ivReloadTransactions.setOnClickListener {
             binding.ivReloadTransactions.isVisible = false
             binding.btnShowMoreTransactions.isVisible = false
-            binding.pbLoadingSpinner.isVisible = true
+            binding.pbTransactionsUpdating.isVisible = true
             transactionForceUpdate = true
         }
 
         binding.btnShowMoreTransactions.setOnClickListener {
             transactionShowCount += 5
             transactionForceUpdate = true
-            binding.pbLoadingSpinner.isVisible = true
+            binding.pbTransactionsUpdating.isVisible = true
             binding.ivReloadTransactions.isVisible = false
             binding.btnShowMoreTransactions.isVisible = false
         }
@@ -140,9 +149,22 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             binding.tvBalanceVerifiedAmount.isVisible = !binding.tvBalanceVerifiedAmount.isVisible
         }
 
-        binding.clBalance.setOnClickListener(onBalanceClickListener)
-        binding.rvTransactions.adapter = adapterTransactions
-        binding.rvTransactions.layoutManager = LinearLayoutManager(requireContext())
+        binding.ivBalanceErrorIcon.setOnClickListener(onBalanceClickListener)
+
+        val onHideBalanceClickListener = View.OnClickListener {
+            binding.llExchangeBalanceHidden.isVisible = !binding.llExchangeBalanceHidden.isVisible
+            binding.llExchangeBalance.isVisible = !binding.llExchangeBalance.isVisible
+        }
+
+        binding.llExchangeBalance.setOnClickListener(onHideBalanceClickListener)
+        binding.llExchangeBalanceHidden.setOnClickListener(onHideBalanceClickListener)
+
+        binding.rvTransactions.apply {
+            adapter = adapterTransactions
+            layoutManager = LinearLayoutManager(requireContext())
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_transaction, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+        }
 
         parentActivity.getBalance(false).observe(
             viewLifecycleOwner,
@@ -236,8 +258,10 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     private suspend fun refreshTransactions(forceUpdate: Boolean = false) {
         if (forceUpdate) {
             binding.ivReloadTransactions.isVisible = false
-            binding.pbLoadingSpinner.isVisible = true
+            binding.pbTransactionsUpdating.isVisible = true
             binding.btnShowMoreTransactions.isVisible = false
+            binding.pbBalanceUpdating.isVisible = true
+            binding.ivReloadBalance.isVisible = false
         }
 
         var items: List<Item>
@@ -268,8 +292,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
         binding.tvNoTransactions.isVisible = items.isEmpty()
         adapterTransactions.updateItems(items)
         binding.rvTransactions.setItemViewCacheSize(items.size)
-        binding.pbBalanceUpdating.isVisible = false
-        binding.pbLoadingSpinner.isVisible = false
+        binding.pbTransactionsUpdating.isVisible = false
         binding.ivReloadTransactions.isVisible = true
         binding.btnShowMoreTransactions.isVisible = items.size >= transactionShowCount
     }
@@ -288,6 +311,14 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                 resources.getString(R.string.snackbar_exchange_balance_verification_error)
             )
         }
+
+        Handler().postDelayed(
+            Runnable {
+                binding.pbBalanceUpdating.isVisible = false
+                binding.ivReloadBalance.isVisible = true
+            },
+            1000
+        )
     }
 
     private fun createTransactionItems(transactions: List<Transaction>): List<Item> {

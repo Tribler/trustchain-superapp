@@ -125,12 +125,9 @@ class IdentityItemRenderer(
                 ivShowDetails.isVisible = true
                 ivHideDetails.isVisible = false
 
-                llVerificationStatus.isVisible = !rlRowExtra.isVisible
-
                 setContentVisible(view, content, false)
             }
 
-            llVerificationStatus.isVisible = !rlRowExtra.isVisible
             rlStatusVerified.isVisible = item.identity.content.verified
             rlStatusNotVerified.isVisible = !item.identity.content.verified
 

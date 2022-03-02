@@ -16,6 +16,7 @@
     <string name="menu_navigation_exchange">Exchange</string>
     <string name="menu_navigation_contacts">Contacts</string>
     <string name="menu_navigation_settings">Settings</string>
+    <string name="menu_navigation_exchange_balance">Wallet Balance</string>
     <string name="menu_exchange_deposit">Deposit Money from online Bank</string>
     <string name="menu_exchange_withdraw">Withdraw Money to online Bank</string>
     <string name="menu_exchange_transfer_qrcode">Money Transfer using QR-code</string>
@@ -31,8 +32,6 @@
     <string name="menu_contact_chat_attachment_transfer_request">Request Money</string>
     <string name="menu_contact_chat_view_contact">Contact</string>
     <string name="menu_contact_chat_view_media">Media</string>
-    <string name="menu_contact_chat_send_connect_invitation">Send Connect Invitation</string>
-    <string name="menu_contact_chat_send_connect_confirmation">Send Connect Confirmation</string>
     <string name="menu_contact_chat_options_contact_name">Rename Contact</string>
     <string name="menu_contact_chat_options_contact_remove">Remove Contact</string>
     <string name="menu_contact_chat_options_contact_archive">Archive Chat</string>
@@ -94,6 +93,7 @@
     <string name="dialog_choose_option">Choose Option</string>
     <string name="dialog_contact_options">Contact Options</string>
     <string name="dialog_exchange_options">Exchange Options</string>
+    <string name="dialog_contacts_chats_view">View Chats</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -118,6 +118,8 @@
     <string name="btn_contact_add">Add Contact</string>
     <string name="btn_attestation_add">Add Attestation</string>
     <string name="btn_show_more">Show more…</string>
+    <string name="btn_transaction_resend">Resend Transaction</string>
+    <string name="btn_transaction_resend_trying">Trying to resend…</string>
     <string name="btn_transaction_sign">Sign Transaction</string>
     <string name="btn_send">Send</string>
     <string name="btn_load_more_messages">Load more messages…</string>
@@ -184,7 +186,7 @@
     <string name="text_unverified">Not verified</string>
     <string name="text_verified_lower">verified</string>
     <string name="text_unverified_lower">unverified</string>
-    <string name="text_verified_info">A contact is verified when during import both the camera and NFC chip are used to ensure legitimacy of the document. When a contact is not verified, it\'s identity name below may be forged.</string>
+    <string name="text_verified_info">A contact is verified when during import both the camera and NFC chip are used to ensure legitimacy and authenticity of the document. When a contact is not verified, it\'s identity name below may be forged.</string>
     <string name="text_identity_name">Identity Name</string>
     <string name="text_identity_name_info">The identity name consists of the initials and surname of the contact that are on the official identity document. If the contact is unverified, the contact can choose it\'s own name.</string>
     <string name="text_title_transactions">Transactions</string>
@@ -218,6 +220,7 @@
     <string name="text_title_recent_chats">Recent Chats</string>
     <string name="text_title_archived_chats">Archived Chats</string>
     <string name="text_title_blocked_chats">Blocked Chats</string>
+    <string name="text_title_shared_with_contact">Shared by Contact</string>
     <string name="text_chats_back_to_recent">Back to Recent</string>
     <string name="text_search_contact">Search Contact…</string>
     <string name="text_contact_chat_request_transfer">Request to transfer €%s</string>
@@ -227,7 +230,7 @@
     <string name="text_contact_chat_incoming_transfer_with_message">%s for \'%s\'</string>
     <string name="text_contact_chat_incoming_transfer_request_with_message">for \'%s\'</string>
     <string name="text_contact_chat_outgoing_transfer_failed">Outgoing transfer failed</string>
-    <string name="text_contact_chat_incoming_transfer_unknown">"Unknown incoming transfer, ask to resend transfer"</string>
+    <string name="text_contact_chat_incoming_transfer_unknown">Ask to resend transfer</string>
     <string name="text_exchange_incoming_transfer_portal">Incoming transaction from EuroToken Exchange of €%s</string>
     <string name="text_exchange_incoming_transfer_portal_of">Incoming transaction from EuroToken Exchange of €%s</string>
     <string name="text_title_identity_attributes">Identity Attributes</string>
@@ -304,7 +307,8 @@
     <string name="text_theme_choose">Choose Theme</string>
     <string name="text_general">General</string>
     <string name="text_about_app">About App</string>
-    <string name="text_confirm_replace_identity">Are you sure to replace your current identity?</string>
+    <string name="text_confirm_delete_identity">Are you sure to delete your current identity? Your information will be lost and cannot be recovered! Without identity the app cannot be used.</string>
+    <string name="text_confirm_replace_identity">Are you sure to replace your current identity? Your information will be lost and cannot be recovered!</string>
     <string name="text_error_passport">An error occurred.\nPlease read again or start over again.</string>
     <string name="text_error_passport_service">An error occurred activating the passport service.\nPlease read again or start over.</string>
     <string name="text_error_passport_nfc_unavailable">NFC is not activated.\nPlease try again.</string>
@@ -363,7 +367,7 @@
     <string name="text_number_media">%d items</string>
     <string name="text_no_media">No media</string>
     <string name="text_location">Location</string>
-    <string name="text_address_not_found">No address found</string>
+    <string name="text_address_not_found">Address currently not found</string>
     <string name="text_send_current_location">Send current location</string>
     <string name="text_send_this_location">Send this location</string>
     <string name="text_you">You</string>
@@ -448,5 +452,8 @@
     <string name="text_state_stopped">Stopped</string>
     <string name="text_state_unknown_state">Unknown State</string>
     <string name="text_state_downloaded">Downloaded!</string>
+    <string name="text_identity_ssi">* You will always remain the owner of your own identity. As an owner of a self-sovereign identity (SSI) you decide who is able to view the identity and what information is visible.</string>
+    <string name="btn_identity_create">Create identity</string>
+    <string name="text_identity_required">A personal identity is required for this application. It is important to provide the correct details.</string>
 
 </resources>

@@ -146,6 +146,10 @@ class ExchangeTransferMoneyDialog(
                                     gravity = Gravity.CENTER_VERTICAL
                                     text = contacts[position].name
 
+                                    getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
+                                        this.setVerifiedIcon(info.isVerified)
+                                    }
+
                                     // Create a request for an unspecified contact/person
                                     if (!isTransfer && position == 0) {
                                         setTextColor(
@@ -180,6 +184,10 @@ class ExchangeTransferMoneyDialog(
                             ): View {
                                 return (super.getView(position, convertView, parent) as TextView).apply {
                                     text = contacts[position].name
+
+                                    getPeerChatStore().getContactState(contacts[position].publicKey)?.identityInfo?.let { info ->
+                                        this.setVerifiedIcon(info.isVerified)
+                                    }
 
                                     // No contact selected option for money request
                                     if (!isTransfer && position == 0) {
@@ -242,6 +250,10 @@ class ExchangeTransferMoneyDialog(
                     addNewContactView.isVisible = true
                 } else {
                     selectedContactView.text = getContactStore().getContactFromPublicKey(selectedContact!!.publicKey)!!.name
+
+                    getPeerChatStore().getContactState(selectedContact!!.publicKey)?.identityInfo?.let { info ->
+                        selectedContactView.setVerifiedIcon(info.isVerified)
+                    }
                 }
 
                 toggleAllSliders()
@@ -360,11 +372,14 @@ class ExchangeTransferMoneyDialog(
             requestQRSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
                     view.closeKeyboard(requireContext())
+
                     val map = mapOf(
                         QRScanController.KEY_PUBLIC_KEY to getTrustChainCommunity().myPeer.publicKey.keyToBin()
                             .toHex(),
                         QRScanController.KEY_AMOUNT to transactionAmount.toString(),
-                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.givenNames,
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                         QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
                         QRScanController.KEY_MESSAGE to transactionMessage
                     )
@@ -383,6 +398,16 @@ class ExchangeTransferMoneyDialog(
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+    }
+
+    fun TextView.setVerifiedIcon(isVerified: Boolean) {
+        if (isVerified) {
+            R.drawable.ic_verified_smaller
+        } else {
+            R.drawable.ic_verified_not_smaller
+        }.let { drawable ->
+            this.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, drawable, 0)
+        }
     }
 
     private fun toggleAllSliders() {
