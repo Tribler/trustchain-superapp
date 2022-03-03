@@ -63,6 +63,8 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
+
+            @Suppress("DEPRECATION")
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
             val view = layoutInflater.inflate(R.layout.dialog_identity_onboarding, null)
@@ -244,7 +246,10 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
             PassportHandler.DOCUMENT_TYPE_ID_CARD -> scanIDCardSelected.viewFadeIn(requireContext(), 500)
         }
 
+        @Suppress("DEPRECATION")
         Handler().postDelayed({ passportHandler.startPassportScanActivity(this, nfcSupported) }, 500)
+
+        @Suppress("DEPRECATION")
         Handler().postDelayed({ initScanView() }, 1000)
     }
 

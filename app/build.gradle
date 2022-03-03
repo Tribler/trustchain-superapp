@@ -33,13 +33,13 @@ static def generateVersionCode() {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode generateVersionCode()
         versionName "0.3"
 

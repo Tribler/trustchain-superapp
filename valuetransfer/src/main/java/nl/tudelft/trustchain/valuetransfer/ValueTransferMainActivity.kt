@@ -315,6 +315,8 @@ class ValueTransferMainActivity : BaseActivity() {
         when {
             intent.action == NfcAdapter.ACTION_TECH_DISCOVERED -> nfcIntentController(intent)
             getCommunity<IdentityCommunity>()!!.hasIdentity() -> {
+
+                @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     {
                         notificationIntentController(intent)

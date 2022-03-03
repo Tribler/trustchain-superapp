@@ -45,6 +45,7 @@ class QRCodeDialog(
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
                     view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
