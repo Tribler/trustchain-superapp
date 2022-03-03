@@ -460,6 +460,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
             binding.etMessage.text = null
             binding.etMessage.clearFocus()
 
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
                     getPeerChatCommunity().sendMessage(

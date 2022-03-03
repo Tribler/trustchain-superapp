@@ -221,6 +221,7 @@ class ExchangeTransactionDialog(
 
                 val resendText = resources.getString(R.string.btn_transaction_resend)
 
+                @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     Runnable {
                         transactionResendButton.isVisible = trustChainHelper.getChainByUser(trustChainHelper.getMyPublicKey()).find { it.linkedBlockId == transaction.blockId } == null
@@ -234,6 +235,8 @@ class ExchangeTransactionDialog(
             transactionSignButton.setOnClickListener {
                 transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
                 getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
+
+                @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     Runnable {
                         transactionSignButton.isVisible = false

@@ -274,6 +274,8 @@ class ExchangeTransferMoneyDialog(
 
             transferSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
+
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         {
                             try {
@@ -340,6 +342,7 @@ class ExchangeTransferMoneyDialog(
                         selectedContact!!.publicKey
                     )
 
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         {
                             requestSlider.isLocked = true

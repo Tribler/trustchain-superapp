@@ -312,6 +312,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             )
         }
 
+        @Suppress("DEPRECATION")
         Handler().postDelayed(
             Runnable {
                 binding.pbBalanceUpdating.isVisible = false
