@@ -19,8 +19,6 @@ class SearchScreenViewModel @Inject constructor(
     private val searchAlbums: SearchAlbums
 ) : ViewModel() {
 
-    private val DEBOUNCE_DELAY = 200L
-
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery
 
@@ -48,5 +46,9 @@ class SearchScreenViewModel @Inject constructor(
             val result = searchAlbums.invoke(searchText)
             _searchResult.value = result
         }
+    }
+
+    companion object {
+        private val DEBOUNCE_DELAY = 200L
     }
 }

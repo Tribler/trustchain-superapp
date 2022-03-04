@@ -69,8 +69,6 @@ fun downloadingTracks(handle: TorrentHandle, directory: File): List<DownloadingT
 
 class GetTorrentStatusFlowUseCase @Inject constructor(private val torrentCache: TorrentCache) {
 
-    private val REFRESH_DELAY = 1000L
-
     @RequiresApi(Build.VERSION_CODES.O)
     operator fun invoke(id: String): Flow<TorrentHandleStatus>? {
         return when (val result = torrentCache.get(id)) {
@@ -83,5 +81,9 @@ class GetTorrentStatusFlowUseCase @Inject constructor(private val torrentCache: 
                 }
             }
         }
+    }
+
+    companion object {
+        private val REFRESH_DELAY = 1000L
     }
 }

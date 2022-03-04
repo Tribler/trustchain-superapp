@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.torrent.TorrentCache
 import com.example.musicdao.core.util.MyResult
@@ -13,8 +12,7 @@ import kotlin.io.path.name
 
 class CreateReleaseUseCase @Inject constructor(
     private val albumRepository: AlbumRepository,
-    private val torrentCache: TorrentCache,
-    private val musicCommunity: MusicCommunity
+    private val torrentCache: TorrentCache
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
