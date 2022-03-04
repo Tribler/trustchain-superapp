@@ -107,6 +107,7 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             SETTINGS_INTENT_CODE -> {
@@ -131,6 +132,7 @@ class DashboardActivity : AppCompatActivity() {
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
+                        @Suppress("DEPRECATION")
                         startActivityForResult(intent, SETTINGS_INTENT_CODE)
                     }
                 }.create()
