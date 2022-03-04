@@ -1,19 +1,18 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/pill_rounded"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    android:padding="28dp">
+    android:padding="28dp"
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
 
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Are you sure?"
-        android:textColor="@color/white"
+        android:text="@string/text_confirm_are_you_sure"
+        android:textColor="?attr/onDialogColor"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -22,13 +21,11 @@
 
     <Button
         android:id="@+id/btnPositive"
-        style="@style/ButtonWhiteRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_width="wrap_content"
         android:layout_height="35dp"
         android:layout_marginTop="12dp"
-        android:text="OK"
-        tools:background="@drawable/button_rounded"
-        tools:backgroundTint="@color/white"
+        android:text="@string/text_confirm_ok"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
@@ -39,23 +36,7 @@
         android:layout_height="35dp"
         android:layout_marginRight="12dp"
         android:layout_marginTop="12dp"
-        android:text="CANCEL"
-        tools:background="@drawable/button_rounded"
-        tools:backgroundTint="@color/white"
-        app:layout_constraintEnd_toStartOf="@+id/btnPositive"
+        android:text="@string/text_confirm_cancel"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
-
-
-
-    <!--    <Button-->
-    <!--        android:id="@+id/btnCloseDialog"-->
-    <!--        style="@style/ButtonDarkGreenRounded"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="35dp"-->
-    <!--        android:layout_marginTop="8dp"-->
-    <!--        android:text="CLOSE"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/ivImageFullScreen"-->
-    <!--        app:layout_constraintStart_toStartOf="parent" />-->
 </androidx.constraintlayout.widget.ConstraintLayout>

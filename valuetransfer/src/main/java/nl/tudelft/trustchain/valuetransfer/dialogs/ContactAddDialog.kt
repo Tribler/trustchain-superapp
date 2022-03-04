@@ -7,29 +7,24 @@ import android.view.View
 import android.widget.*
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.util.*
-import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.*
 import org.json.JSONObject
 
 class ContactAddDialog(
     private val myPublicKey: PublicKey,
     private val peerPublicKey: PublicKey?,
     private val name: String?
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var contactStore: ContactStore
+) : VTDialogFragment() {
     private lateinit var dialogView: View
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -38,14 +33,15 @@ class ContactAddDialog(
             val view = layoutInflater.inflate(R.layout.dialog_contact_add, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
             dialogView = view
 
-            val myPublicKeyTextView = view.findViewById<EditText>(R.id.etMyPublicKey)
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
+
             val myPublicKeyImageView = view.findViewById<ImageView>(R.id.ivMyQRCode)
             val copyMyPublicKeyView = view.findViewById<ImageView>(R.id.ivCopyMyPublicKey)
             val scanContactPublicKeyView = view.findViewById<ImageView>(R.id.btnScanContactPublicKey)
@@ -53,29 +49,51 @@ class ContactAddDialog(
             val contactPublicKeyView = view.findViewById<EditText>(R.id.etContactPublicKey)
             val addContactView = view.findViewById<Button>(R.id.btnAddContact)
 
-            myPublicKeyTextView.setText(myPublicKey.keyToBin().toHex())
             contactPublicKeyView.setText(peerPublicKey?.keyToBin()?.toHex())
             contactNameView.setText(name)
-            toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
+            toggleButton(
+                addContactView,
+                contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+            )
 
             onFocusChange(contactNameView, requireContext())
             onFocusChange(contactPublicKeyView, requireContext())
 
             contactNameView.doAfterTextChanged {
-                toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
+                toggleButton(
+                    addContactView,
+                    contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+                )
             }
 
             contactPublicKeyView.doAfterTextChanged {
-                toggleButton(addContactView, contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty())
+                toggleButton(
+                    addContactView,
+                    contactNameView.text.toString().isNotEmpty() && contactPublicKeyView.text.toString().isNotEmpty()
+                )
             }
 
             copyMyPublicKeyView.setOnClickListener {
-                copyToClipboard(requireContext(), myPublicKey.keyToBin().toHex(), "Public key")
-                parentActivity.displaySnackbar(requireContext(), "Public key has been copied")
+                copyToClipboard(
+                    requireContext(),
+                    myPublicKey.keyToBin().toHex(),
+                    resources.getString(R.string.text_public_key)
+                )
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(
+                        R.string.snackbar_copied_clipboard,
+                        resources.getString(R.string.text_public_key)
+                    )
+                )
             }
 
             scanContactPublicKeyView.setOnClickListener {
-                QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan QR Code to import contact", vertical = true)
+                QRCodeUtils(requireContext()).startQRScanner(
+                    this,
+                    promptText = resources.getString(R.string.text_scan_qr_contact_import),
+                    vertical = true
+                )
             }
 
             addContactView.setOnClickListener {
@@ -86,35 +104,50 @@ class ContactAddDialog(
 
                         when {
                             publicKeyBin == myPublicKey.keyToBin().toHex() -> {
-                                parentActivity.displaySnackbar(requireContext(), "You can't add yourself as contact", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_contact_add_error_self)
+                                )
                             }
-                            contactStore.getContactFromPublicKey(publicKey) != null -> {
-                                parentActivity.displaySnackbar(requireContext(), "Contact already in address book", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                            getContactStore().getContactFromPublicKey(publicKey) != null -> {
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_contact_add_error_exists)
+                                )
                             }
                             else -> {
-                                contactStore.addContact(publicKey, contactName)
-                                parentActivity.displaySnackbar(requireContext(), "Contact $contactName added to address book")
+                                getContactStore().addContact(publicKey, contactName)
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_contact_add_success, contactName)
+                                )
                                 bottomSheetDialog.dismiss()
                             }
                         }
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    parentActivity.displaySnackbar(requireContext(), "Please provide a valid public key", view = view.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_provide_valid_public_key)
+                    )
                 }
             }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
-                Runnable {
+                {
                     view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
 
                     val map = mapOf(
-                        "type" to "contact",
-                        "public_key" to IdentityStore.getInstance(requireContext()).getIdentity()!!.publicKey.keyToBin().toHex(),
-                        "name" to IdentityStore.getInstance(requireContext()).getIdentity()!!.content.givenNames
+                        QRScanController.KEY_TYPE to QRScanController.VALUE_CONTACT,
+                        QRScanController.KEY_PUBLIC_KEY to getIdentityStore().getIdentity()!!.publicKey.keyToBin().toHex(),
+                        QRScanController.KEY_NAME to getIdentityStore().getIdentity()!!.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                     )
 
                     myPublicKeyImageView.setImageBitmap(
@@ -122,7 +155,7 @@ class ContactAddDialog(
                             requireContext(),
                             mapToJSON(map).toString(),
                             R.color.black,
-                            R.color.colorPrimaryValueTransfer
+                            R.color.light_gray
                         )
                     )
                 },
@@ -130,7 +163,7 @@ class ContactAddDialog(
             )
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -140,10 +173,13 @@ class ContactAddDialog(
 
                 this.dismiss()
 
-                (requireActivity() as ValueTransferMainActivity).getQRScanController().addContact(obj)
+                parentActivity.getQRScanController().addContact(obj)
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", view = dialogView.rootView, type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, extraPadding = true)
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
+                )
             }
         }
     }

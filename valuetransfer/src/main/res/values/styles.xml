@@ -1,38 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme" />
-
-    <style name="Theme.ValueTransfer" parent="Theme.MaterialComponents.Light.DarkActionBar">
-        <item name="colorPrimary">@color/white</item>
-        <item name="colorPrimaryDark">@color/light_gray</item>
+    // ACTION BAR TEXT STYLE
+    <style name="ActionBar" parent="@style/Widget.AppCompat.ActionBar.Solid">
+        <item name="titleTextStyle">@style/ActionBarTitleStyle</item>
+        <item name="subtitleTextStyle">@style/ActionBarSubTitleStyle</item>
     </style>
 
+    <style name="ActionBarTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">@dimen/actionBarTitleSize</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="ActionBarSubTitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
+        <item name="android:textSize">@dimen/actionBarSubTitleSize</item>
+        <item name="android:textColor">?attr/onBackgroundSecondaryColor</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:maxLines">1</item>
+    </style>
+
+    // OPTIONS MENU STYLE
+    <style name="OptionsMenu" parent="Widget.AppCompat.PopupMenu.Overflow" >
+        <item name="android:overlapAnchor">false</item>
+        <item name="android:dropDownVerticalOffset">4.0dip</item>
+        <item name="android:textColor">?attr/onBackgroundColor</item>
+        <item name="android:backgroundTint">?attr/backgroundColor</item>
+        <item name="android:itemBackground">?attr/backgroundColor</item>
+    </style>
+
+    // BOTTOM NAVIGATION STYLE
+    <style name="BottomNavigation">
+        <item name="android:background">?attr/backgroundColor</item>
+        <item name="itemBackground">?attr/backgroundColor</item>
+        <item name="itemIconTint">@drawable/selector_bottom_navigation</item>
+        <item name="itemTextColor">@drawable/selector_bottom_navigation</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="paddingStart">10dp</item>
+        <item name="paddingEnd">10dp</item>
+    </style>
+
+    // Menu Label Style
     <style name="MenuLabelStyle">
-        <item name="android:textColor">@color/text_tertiary</item>
+        <item name="android:textColor">@color/colorRed</item>
         <item name="android:textStyle">bold</item>
     </style>
 
+    // Rounded Shape
     <style name="Rounded" parent="ShapeAppearance.MaterialComponents.SmallComponent">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">10dp</item>
+        <item name="cornerSize">@dimen/cornerRadius</item>
     </style>
 
-    <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:backgroundTint">@drawable/dialog_rounded</item>
-    </style>
-
-    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryValueTransfer</item>
-    </style>
-
+    // Dialogs
     <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/dialog_rounded</item>
-    </style>
-
-    <style name="BottomSheetRed" parent="@style/Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/dialog_rounded_red</item>
+        <item name="android:background">@drawable/dialog_rounded_top</item>
     </style>
 
     <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.Light.BottomSheetDialog">
@@ -40,21 +63,33 @@
         <item name="bottomSheetStyle">@style/BottomSheet</item>
         <item name="android:windowSoftInputMode">adjustResize</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryValueTransfer</item>
     </style>
 
-    <style name="BaseBottomSheetDialogRed" parent="@style/Theme.Design.Light.BottomSheetDialog">
-        <item name="android:windowIsFloating">false</item>
-        <item name="bottomSheetStyle">@style/BottomSheetRed</item>
-        <item name="android:windowSoftInputMode">adjustResize</item>
+    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog">
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorRed</item>
     </style>
 
-    <style name="ButtonRounded" >
+    <style name="FullscreenDialog" parent="@style/Theme.AppCompat.Light">
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">?attr/backgroundColor</item>
+        <item name="android:windowAnimationStyle">@style/OpenDialogAnimation</item>
+    </style>
+
+<!--    <style name="FullscreenDialogTheme" parent="FullscreenDialog">-->
+<!--        <item name="android:statusBarColor">@android:color/transparent</item>-->
+<!--    </style>-->
+
+    <style name="OpenDialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/slide_up</item>
+        <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
+    // Buttons
+    <style name="ButtonRounded">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">35dp</item>
-        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:background">@drawable/button_rounded</item>
         <item name="backgroundTint">@color/white</item>
         <item name="android:paddingTop">4dp</item>
@@ -62,14 +97,29 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="ButtonWhiteRounded" parent="ButtonRounded">
-        <item name="backgroundTint">@color/white</item>
-        <item name="android:textColor">@color/colorPrimaryValueTransfer</item>
+    <style name="ButtonLightGrayRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/widgetColor</item>
+        <item name="android:textColor">?attr/onWidgetColor</item>
+    </style>
+
+    <style name="ButtonMutedRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedColor</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ButtonMutedLightRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedLightColor</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ButtonMutedDarkRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/mutedDarkColor</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
     <style name="ButtonRedRounded" parent="ButtonRounded">
-        <item name="backgroundTint">@color/white</item>
-        <item name="android:textColor">#FF6961</item>
+        <item name="backgroundTint">?attr/colorError</item>
+        <item name="android:textColor">?attr/colorOnError</item>
     </style>
 
     <style name="ButtonGreenRounded" parent="ButtonRounded">
@@ -82,35 +132,61 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="ButtonAccentRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/colorAccent</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="ButtonWidgetRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/dialogColor</item>
+        <item name="android:textColor">?attr/onDialogColor</item>
+    </style>
+
+    // Date Picker Dialog
     <style name="DatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/colorPrimaryValueTransfer</item>
         <item name="android:buttonBarPositiveButtonStyle">@style/ButtonGreenRounded</item>
-        <item name="android:buttonBarNegativeButtonStyle">@style/ButtonWhiteRounded</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/ButtonLightGrayRounded</item>
     </style>
 
+    // Chat Message item style
     <style name="ChatMessageItem">
         <item name="android:ellipsize">end</item>
         <item name="android:paddingStart">12dp</item>
         <item name="android:paddingEnd">12dp</item>
-<!--        <item name="android:paddingTop">8dp</item>-->
-<!--        <item name="android:paddingBottom">8dp</item>-->
         <item name="android:textSize">14sp</item>
     </style>
 
     <style name="ChatMessageItemTime">
-        <item name="android:textColor">@color/gray</item>
+        <item name="android:textColor">?attr/onBackgroundColor</item>
         <item name="android:textSize">10sp</item>
         <item name="android:typeface">monospace</item>
     </style>
 
-    <style name="BottomNavigation">
-        <item name="android:background">@color/colorPrimaryValueTransfer</item>
-        <item name="itemBackground">@color/colorPrimaryValueTransfer</item>
-        <item name="itemIconTint">@drawable/bottom_navigation_color</item>
-        <item name="itemTextColor">@drawable/bottom_navigation_color</item>
-        <item name="labelVisibilityMode">labeled</item>
-        <item name="paddingStart">10dp</item>
-        <item name="paddingEnd">10dp</item>
+    // Dialog title
+    <style name="DialogTitle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textColor">?attr/onDialogColor</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
+    // Fragment title
+    <style name="FragmentTitle" parent="Widget.AppCompat.TextView">
+        <item name="android:layout_marginStart">20dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:textColor">?attr/onBackgroundColor</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    // Divider
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">?android:attr/listDivider</item>
+    </style>
 </resources>

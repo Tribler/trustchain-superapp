@@ -5,34 +5,31 @@
     android:id="@+id/clVerificationDialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <TextView
         android:id="@+id/tvAuthorityTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="ADD AUTHORITY"
-        android:textAlignment="center"
-        android:textAllCaps="true"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="8dp"
+        style="@style/DialogTitle"
+        android:text="@string/dialog_title_attestation_authority_add"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle" />
 
     <TextView
         android:id="@+id/tvAuthorityAddressTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
-        android:text="Address"
-        android:textColor="@color/white"
+        android:text="@string/text_address"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +42,7 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:cursorVisible="false"
         android:focusable="false"
         android:focusableInTouchMode="false"
@@ -53,7 +50,7 @@
         android:minHeight="40dp"
         android:paddingHorizontal="8dp"
         android:paddingVertical="8dp"
-        android:textColor="@color/dark_gray"
+        android:textColor="@color/black"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -61,9 +58,9 @@
 
     <Button
         android:id="@+id/btnAddAuthority"
-        style="@style/ButtonDarkGreenRounded"
+        style="@style/ButtonGreenRounded"
         android:layout_marginTop="8dp"
-        android:text="Add"
+        android:text="@string/btn_add"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etAuthorityAddressValue" />

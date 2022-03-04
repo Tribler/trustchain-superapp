@@ -2,55 +2,59 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.os.Bundle
 import android.os.Handler
-import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.util.createBitmap
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import java.lang.IllegalStateException
 
 class QRCodeDialog(
     private val title: String?,
     private val subtitle: String?,
     private val data: String
-) : DialogFragment() {
+) : VTDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val bottomSheetDialog =
-                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
             val view = layoutInflater.inflate(R.layout.dialog_qrcode, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            val tvTitle = view.findViewById<TextView>(R.id.tvTitle)
-            val tvSubTitle = view.findViewById<TextView>(R.id.tvSubTitle)
-            val ivQRCode = view.findViewById<ImageView>(R.id.ivQRCode)
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
-            tvTitle.isVisible = (title != null)
-            tvSubTitle.isVisible = (subtitle != null)
-            tvTitle.text = title
-            tvSubTitle.text = subtitle
+            view.findViewById<TextView>(R.id.tvTitle).apply {
+                isVisible = title != null
+                text = title
+            }
+            view.findViewById<TextView>(R.id.tvSubTitle).apply {
+                isVisible = subtitle != null
+                text = subtitle
+            }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
-                Runnable {
-                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).visibility = View.GONE
-                    ivQRCode.setImageBitmap(
+                {
+                    view.findViewById<ProgressBar>(R.id.pbLoadingSpinner).isVisible = false
+                    view.findViewById<ImageView>(R.id.ivQRCode).setImageBitmap(
                         createBitmap(
                             requireContext(),
                             data,
                             R.color.black,
-                            R.color.colorPrimaryValueTransfer
+                            R.color.light_gray
                         )
                     )
                 },
@@ -58,6 +62,6 @@ class QRCodeDialog(
             )
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

@@ -4,16 +4,18 @@ import android.os.Bundle
 import android.os.Handler
 import android.widget.*
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 import org.json.JSONObject
 import java.lang.IllegalStateException
 
@@ -23,10 +25,7 @@ class IdentityAttestationVerifyDialog(
     private val metadata: String,
     private val signature: ByteArray,
     private val authorityKey: ByteArray
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var attestationCommunity: AttestationCommunity
+) : VTDialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -34,11 +33,12 @@ class IdentityAttestationVerifyDialog(
             val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_verify, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            attestationCommunity = parentActivity.getCommunity(ValueTransferMainActivity.attestationCommunityTag) as AttestationCommunity
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val verificationSummaryView = view.findViewById<ConstraintLayout>(R.id.clVerificationSummary)
             val attestationFromValue = view.findViewById<EditText>(R.id.etAttestationFromValue)
@@ -49,8 +49,8 @@ class IdentityAttestationVerifyDialog(
             val metadataObject = JSONObject(metadata)
 
             attestationFromValue.setText(attesteeKey.toHex())
-            attestationAttributeValue.setText(metadataObject.getString("attribute"))
-            attestationTypeValue.setText(metadataObject.getString("id_format"))
+            attestationAttributeValue.setText(metadataObject.getString(QRScanController.KEY_ATTRIBUTE))
+            attestationTypeValue.setText(metadataObject.getString(QRScanController.KEY_ID_FORMAT))
 
             val loadingSpinner = view.findViewById<ProgressBar>(R.id.pbLoadingSpinner)
 
@@ -61,13 +61,14 @@ class IdentityAttestationVerifyDialog(
                 verificationSummaryView.isVisible = false
                 loadingSpinner.isVisible = true
 
-                attestationCommunity.verifyAttestationLocally(
+                getAttestationCommunity().verifyAttestationLocally(
                     Peer(defaultCryptoProvider.keyFromPublicBin(attesteeKey)),
                     attestationHash,
                     metadata,
                     signature,
                     defaultCryptoProvider.keyFromPublicBin(authorityKey)
                 ).let { result ->
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         {
                             loadingSpinner.isVisible = false
@@ -81,7 +82,7 @@ class IdentityAttestationVerifyDialog(
             }
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }
 
@@ -91,27 +92,22 @@ class IdentityAttestationVerificationResultDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
-            val view = layoutInflater.inflate(R.layout.dialog_identity_attestation_verify, null)
-            val verificationSummaryView = view.findViewById<ConstraintLayout>(R.id.clVerificationSummary)
-            val verificationResultView = view.findViewById<ConstraintLayout>(R.id.clVerificationResult)
-            val verificationResultValidView = view.findViewById<ConstraintLayout>(R.id.clVerificationResultValid)
-            val verificationResultInvalidView = view.findViewById<ConstraintLayout>(R.id.clVerificationResultInvalid)
-
-            verificationSummaryView.isVisible = false
-            verificationResultView.isVisible = true
-            verificationResultValidView.isVisible = isValid
-            verificationResultInvalidView.isVisible = !isValid
-
-            val bottomSheetDialog = if (isValid) {
-                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
+            val view = if (isValid) {
+                layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_valid, null)
             } else {
-                BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialogRed)
+                layoutInflater.inflate(R.layout.dialog_identity_attestation_verify_invalid, null)
             }
+
+            bottomSheetDialog.window!!.navigationBarColor = ContextCompat.getColor(
+                requireContext(),
+                if (isValid) R.color.colorPrimaryValueTransfer else R.color.colorRed
+            )
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

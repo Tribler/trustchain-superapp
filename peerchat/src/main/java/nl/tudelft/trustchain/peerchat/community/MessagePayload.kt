@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.peerchat.community
 
 import mu.KotlinLogging
 import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 
 private val logger = KotlinLogging.logger {}
 
@@ -11,16 +12,20 @@ class MessagePayload constructor(
     val attachmentType: String,
     val attachmentSize: Long,
     val attachmentContent: ByteArray,
-    val transactionHash: ByteArray?
+    val transactionHash: ByteArray?,
+    val identityInfo: IdentityInfo? = null,
 ) : Serializable {
     override fun serialize(): ByteArray {
         val thash = (transactionHash ?: "NONE".toByteArray())
+        val serializedIdentityInfo = identityInfo?.serialize()
+        val idInfo = (serializedIdentityInfo ?: "NONE".toByteArray())
         return serializeVarLen(id.toByteArray()) +
             serializeVarLen(message.toByteArray()) +
             serializeVarLen(attachmentType.toByteArray()) +
             serializeLong(attachmentSize) +
             serializeVarLen(attachmentContent) +
-            serializeVarLen(thash)
+            serializeVarLen(thash) +
+            serializeVarLen(idInfo)
     }
 
     companion object Deserializer : Deserializable<MessagePayload> {
@@ -36,8 +41,10 @@ class MessagePayload constructor(
             localOffset += SERIALIZED_LONG_SIZE
             val (attachmentContent, attachmentContentSize) = deserializeVarLen(buffer, localOffset)
             localOffset += attachmentContentSize
-            var (transactionHash, transactionHashSize) = deserializeVarLen(buffer, localOffset)
+            val (transactionHash, transactionHashSize) = deserializeVarLen(buffer, localOffset)
             localOffset += transactionHashSize
+            val (identityInfo, identityInfoHashSize) = deserializeVarLen(buffer, localOffset)
+            localOffset += identityInfoHashSize
 
             logger.debug { "after deserialisation: ${String(transactionHash)}" }
 
@@ -48,7 +55,8 @@ class MessagePayload constructor(
                     attachmentType.toString(Charsets.UTF_8),
                     attachmentSize,
                     attachmentContent,
-                    if (String(transactionHash) == "NONE") null else transactionHash
+                    if (String(transactionHash) == "NONE") null else transactionHash,
+                    if (String(identityInfo) == "NONE") null else IdentityInfo.deserialize(identityInfo, 0).first
                 ),
                 localOffset - offset
             )

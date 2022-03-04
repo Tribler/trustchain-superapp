@@ -70,8 +70,18 @@ data class PersonalIdentity(
      * Document number of the identity.
      */
     var documentNumber: String,
+
+    /**
+     * Identity is verified when NFC is also used during importing
+     */
+    var verified: Boolean,
+
+    /**
+     * Identity expiration date
+     */
+    var dateOfExpiry: Date,
 ) {
     override fun toString(): String {
-        return "$givenNames $surname ($gender) born on $dateOfBirth at $placeOfBirth as $nationality. Personal number $personalNumber, document number $documentNumber"
+        return "$givenNames $surname ($gender) born on $dateOfBirth as $nationality. Personal number $personalNumber, document number $documentNumber. Identity is verified: $verified. Expires on $dateOfExpiry"
     }
 }

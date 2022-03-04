@@ -6,50 +6,38 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingHorizontal="12dp"
-    android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-    <TextView
-        android:id="@+id/tvTitleTransfer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Transfer Money"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        <TextView
+            android:id="@+id/tvTitleTransfer"
+            style="@style/DialogTitle"
+            android:text="@string/dialog_title_exchange_transfer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <TextView
-        android:id="@+id/tvTitleRequest"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Request Money"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        <TextView
+            android:id="@+id/tvTitleRequest"
+            style="@style/DialogTitle"
+            android:text="@string/dialog_title_exchange_request"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -59,8 +47,8 @@
         android:layout_height="wrap_content"
         android:paddingStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="Select the recipient"
-        android:textColor="@color/white"
+        android:text="@string/text_select_recipient"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
@@ -83,7 +71,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:paddingVertical="8dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
@@ -98,15 +86,16 @@
         android:layout_height="40dp"
         android:minWidth="150dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:paddingVertical="8dp"
         android:inputType="text"
         android:gravity="center_vertical"
         android:paddingStart="8dp"
         android:paddingRight="8dp"
         android:textSize="14sp"
-        android:textColor="@color/gray"
-        android:hint="There are no contacts"
+        android:textColor="?attr/onWidgetSecondaryColor"
+        android:textColorHint="@color/gray"
+        android:hint="@string/text_no_contacts"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -118,8 +107,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:paddingStart="8dp"
-        android:text="Enter the transaction amount"
-        android:textColor="@color/white"
+        android:text="@string/text_transaction_amount"
+        android:textColor="?attr/onDialogColor"
         android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintStart_toStartOf="@+id/etTransactionAmount"
@@ -132,12 +121,14 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:inputType="numberDecimal"
         android:paddingVertical="8dp"
         android:paddingStart="34dp"
         android:paddingEnd="8dp"
         android:textSize="14sp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/gray"
         tools:hint="39918,55 max"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clSelectedContact"
@@ -151,8 +142,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/etTransactionAmount"
         app:layout_constraintStart_toStartOf="@+id/etTransactionAmount"
         app:layout_constraintTop_toTopOf="@+id/etTransactionAmount"
-        app:tint="@color/black"
-        tools:tint="@color/black" />
+        app:tint="@color/black" />
 
     <EditText
         android:id="@+id/etTransactionMessage"
@@ -160,14 +150,16 @@
         android:minHeight="40dp"
         android:layout_height="wrap_content"
         android:background="@drawable/pill_rounded"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="@color/light_gray"
         android:paddingVertical="8dp"
         android:inputType="textCapSentences"
         android:paddingStart="8dp"
         android:paddingRight="8dp"
         android:layout_marginTop="12dp"
         android:textSize="14sp"
-        android:hint="(Optional) message to receiver..."
+        android:textColor="@color/black"
+        android:textColorHint="@color/gray"
+        android:hint="@string/text_optional_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clSelectedContact" />
@@ -188,8 +180,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="8dp"
-            android:text="Add contact to address book"
-            android:textColor="@color/white"
+            android:text="@string/text_add_to_address_book"
+            android:textColor="?attr/onDialogColor"
             android:textSize="12sp"
             android:textStyle="italic"
             app:layout_constraintStart_toStartOf="parent"
@@ -205,34 +197,79 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <Button
-        android:id="@+id/btnTransferMoney"
-        style="@style/ButtonDarkGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideTransferMoney"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="Transfer"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_transfer"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
-    <Button
-        android:id="@+id/btnRequestMoneyContact"
-        style="@style/ButtonDarkGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideRequestMoney"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="Send request"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_request"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
-    <Button
-        android:id="@+id/btnRequestMoneyQR"
-        style="@style/ButtonDarkGreenRounded"
+    <com.ncorti.slidetoact.SlideToActView
+        android:id="@+id/slideRequestMoneyQR"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:enabled="false"
-        android:text="Create Request QR"
+        android:elevation="6dp"
+        app:area_margin="5dp"
+        app:icon_margin="8dp"
+        app:animation_duration="250"
+        app:outer_color="@color/colorPrimaryValueTransfer"
+        app:inner_color="@color/white"
+        app:border_radius="@dimen/cornerRadius"
+        app:text="@string/btn_slide_to_request_qr"
+        app:text_size="16sp"
+        app:text_style="bold"
+        app:slider_height="50dp"
+        app:slider_locked="true"
+        app:slider_icon="@drawable/ic_baseline_arrow_forward_ios_24"
+        app:slider_icon_color="@color/colorPrimaryValueTransfer"
+        app:rotate_icon="false"
+        app:complete_icon="@drawable/ic_check_single"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact" />
+        app:layout_constraintTop_toBottomOf="@+id/clAddNewContact"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

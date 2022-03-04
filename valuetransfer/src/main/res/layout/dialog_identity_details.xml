@@ -8,24 +8,16 @@
     android:paddingHorizontal="12dp"
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:backgroundTint="@color/colorPrimaryValueTransfer"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="?attr/dialogColor">
 
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Identity Details"
-        android:textSize="20sp"
-        android:textAlignment="center"
-        android:gravity="center_horizontal"
-        android:textColor="@color/white"
-        android:textAllCaps="true"
-        android:textStyle="bold"
+        style="@style/DialogTitle"
+        android:text="@string/dialog_title_identity_details"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <LinearLayout
         android:id="@+id/clContent"
@@ -57,10 +49,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Given Names"
+                    android:text="@string/text_given_names"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"
                     android:inputType="textCapWords"/>
@@ -71,11 +63,12 @@
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
+                    android:backgroundTint="@color/light_gray"
                     android:paddingVertical="8dp"
                     android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp"
+                    android:textColor="@color/black" />
 
             </LinearLayout>
 
@@ -91,10 +84,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Surname"
+                    android:text="@string/text_surname"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -104,11 +97,12 @@
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
+                    android:backgroundTint="@color/light_gray"
                     android:paddingVertical="8dp"
                     android:paddingStart="8dp"
                     android:inputType="textCapWords"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:textColor="@color/black" />
             </LinearLayout>
         </LinearLayout>
 
@@ -133,25 +127,41 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Place of Birth"
+                    android:text="@string/text_date_of_birth"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etPlaceOfBirth"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapWords"
-                    android:textSize="14sp" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etDateOfBirth"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:focusable="false"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
 
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -166,24 +176,42 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Date of Birth"
+                    android:text="@string/text_date_of_expiry"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etDateOfBirth"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:focusable="false"
-                    android:textSize="14sp" />
+                    android:layout_height="40dp">
+
+                    <EditText
+                        android:id="@+id/etDateOfExpiry"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:focusable="false"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -208,24 +236,40 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Nationality"
+                    android:text="@string/text_nationality"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etNationality"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapWords"
-                    android:textSize="14sp" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etNationality"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:inputType="textCapWords"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -241,10 +285,10 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Gender"
+                    android:text="@string/text_gender"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
@@ -252,6 +296,7 @@
                     android:id="@+id/btnGenderGroup"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
+                    app:selectionRequired="true"
                     app:singleSelection="true"
                     android:weightSum="2">
 
@@ -263,11 +308,11 @@
                         android:insetBottom="0dp"
                         android:insetTop="0dp"
                         android:layout_weight="1"
-                        android:backgroundTint="@color/white"
-                        android:text="Male"
+                        android:backgroundTint="@color/light_gray"
+                        android:text="@string/text_gender_male"
                         android:textAllCaps="false"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimaryValueTransfer"
+                        android:textColor="@color/black"
                         app:shapeAppearance="@style/Rounded" />
 
                     <com.google.android.material.button.MaterialButton
@@ -277,11 +322,11 @@
                         android:layout_height="match_parent"
                         android:insetBottom="0dp"
                         android:insetTop="0dp"
-                        android:text="Female"
+                        android:text="@string/text_gender_female"
                         app:shapeAppearance="@style/Rounded"
-                        android:backgroundTint="@color/white"
+                        android:backgroundTint="@color/light_gray"
                         android:textSize="12sp"
-                        android:textColor="@color/colorPrimaryValueTransfer"
+                        android:textColor="@color/black"
                         android:textAllCaps="false"
                         android:layout_weight="1" />
 
@@ -310,24 +355,42 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Personal Number"
+                    android:text="@string/text_personal_number"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etPersonalNumber"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:inputType="number"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:textSize="14sp" />
+                    android:layout_height="40dp">
+
+                    <EditText
+                        android:id="@+id/etPersonalNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:inputType="number"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
 
             </LinearLayout>
 
@@ -343,43 +406,61 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Document Number"
+                    android:text="@string/text_document_number"
                     android:paddingStart="8dp"
                     android:layout_marginBottom="4dp"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/onDialogColor"
                     android:textStyle="italic"
                     android:textSize="12sp"/>
 
-                <EditText
-                    android:id="@+id/etDocumentNumber"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/white"
-                    android:paddingVertical="8dp"
-                    android:paddingStart="8dp"
-                    android:inputType="textCapCharacters"
-                    android:textSize="14sp" />
+                    android:layout_height="40dp">
+                    <EditText
+                        android:id="@+id/etDocumentNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:paddingEnd="32dp"
+                        android:layout_weight="1"
+                        android:enabled="false"
+                        android:background="@drawable/pill_rounded"
+                        android:backgroundTint="@color/light_gray"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="8dp"
+                        android:inputType="textCapCharacters"
+                        android:textSize="14sp"
+                        android:textColor="@color/black" />
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_baseline_lock_24"
+                        app:tint="?attr/mutedLightColor"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentBottom="true" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clCancel"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/clContent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/clSaveIdentity"
-        app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone"
-        tools:visibility="visible">
+        app:layout_constraintStart_toStartOf="parent">
 
         <Button
             android:id="@+id/btnCancel"
             style="@style/ButtonRedRounded"
-            android:layout_marginTop="12dp"
-            android:text="Cancel"
+            android:text="@string/btn_cancel"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
@@ -387,19 +468,22 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clSaveIdentity"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/clContent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@+id/clCancel"
         app:layout_constraintEnd_toEndOf="parent">
+
         <Button
             android:id="@+id/btnSaveIdentity"
-            style="@style/ButtonDarkGreenRounded"
-            android:layout_marginTop="12dp"
-            android:text="Save"
+            style="@style/ButtonGreenRounded"
+            android:text="@string/btn_save"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

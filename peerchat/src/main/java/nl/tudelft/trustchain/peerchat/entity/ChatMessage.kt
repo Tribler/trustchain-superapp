@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.peerchat.entity
 
 import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.trustchain.common.valuetransfer.entity.IdentityInfo
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import java.util.*
 
@@ -58,6 +59,11 @@ data class ChatMessage(
     /**
      * Optional reference to a TrustChain proposal block that includes a TrustChain transaction
      */
-    val transactionHash: ByteArray?
+    val transactionHash: ByteArray?,
+
+    /**
+     * Optional pair containing info of the identity of the sender
+     */
+    val identityInfo: IdentityInfo? = null
 
 )

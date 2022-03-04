@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clVerificationDialog"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_top"
+    android:backgroundTint="@color/colorRed"
+    android:paddingHorizontal="12dp"
+    android:paddingBottom="12dp">
+
+    <include
+        android:id="@+id/dialogHandle"
+        layout="@layout/handle_dialog" />
+
+    <TextView
+        android:id="@+id/tvVerificationResultInvalidTitle"
+        style="@style/DialogTitle"
+        android:layout_marginTop="8dp"
+        android:text="@string/dialog_title_attestation_invalid"
+        android:textColor="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dialogHandle" />
+
+    <ImageView
+        android:id="@+id/ivAttestationResultFail"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:padding="50dp"
+        android:layout_marginTop="12dp"
+        app:tint="@color/white"
+        android:src="@drawable/ic_badge_fail"
+        app:layout_constraintDimensionRatio="H,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvVerificationResultInvalidTitle" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

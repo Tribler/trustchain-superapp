@@ -1,461 +1,370 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="@color/colorPrimaryValueTransfer">
+    android:fillViewport="true"
+    android:scrollbars="none">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/clNoIdentity"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:paddingBottom="12dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clNoIdentity"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/ivNoIdentity"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:src="@drawable/ic_identity"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/white"
-                tools:tint="@color/white" />
-
-            <TextView
-                android:id="@+id/tvNoIdentityExplanation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:background="@drawable/pill_rounded"
-                android:gravity="center"
-                android:paddingHorizontal="8dp"
-                android:text="A personal identity is required for this application. It is important to provide the correct details."
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ivNoIdentity" />
-
-            <Button
-                android:id="@+id/btnCreateIdentity"
-                style="@style/ButtonDarkGreenRounded"
-                android:layout_marginTop="24dp"
-                android:text="Create identity"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoIdentityExplanation" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="* You will always remain the owner of your own identity. As an owner of a self-sovereign identity (SSI) you decide who is able to view the identity and what information is visible."
-            android:textColor="@color/light_gray"
-            android:textSize="12sp"
-            android:textStyle="italic"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ScrollView
-        android:id="@+id/svHasIdentity"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="12dp">
-
-            // Identity
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
+                <ImageView
+                    android:id="@+id/ivNoIdentity"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:src="@drawable/ic_identity"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/onBackgroundColor" />
+
+                <TextView
+                    android:id="@+id/tvNoIdentityExplanation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/pill_rounded"
+                    android:gravity="center"
+                    android:padding="12dp"
+                    android:paddingHorizontal="8dp"
+                    android:text="@string/text_identity_required"
+                    android:textColor="?attr/onBackgroundColor"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/ivNoIdentity" />
+
+                <Button
+                    android:id="@+id/btnCreateIdentity"
+                    style="@style/ButtonGreenRounded"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/btn_identity_create"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvNoIdentityExplanation" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:text="@string/text_identity_ssi"
+                android:textColor="@color/gray"
+                android:textSize="12sp"
+                android:textStyle="italic"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/svHasIdentity"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
                 <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clIdentity"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
-                    <TextView
-                        android:id="@+id/tvIdentityTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Identity"
-                        android:textColor="@color/white"
-                        android:textSize="32sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/ivGoToIdentity"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginTop="2dp"
-                        android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="@color/colorPrimaryDarkValueTransfer"
-                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvIdentityTitle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvIdentityTitle" />
-
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rvIdentities"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingVertical="8dp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvIdentityTitle"
+                        android:layout_marginTop="12dp"
+                        android:paddingBottom="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
                         tools:itemCount="1"
                         tools:listitem="@layout/item_identity" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                // Exchange
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clExchange"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/clIdentity">
-
-                    <TextView
-                        android:id="@+id/tvExchangeTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:text="Exchange"
-                        android:textColor="@color/white"
-                        android:textSize="32sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/ivGoToExchange"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginTop="2dp"
-                        android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="@color/colorPrimaryDarkValueTransfer"
-                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvExchangeTitle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvExchangeTitle" />
 
                     <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clBalances"
+                        android:id="@+id/clExchange"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="12dp"
-                        android:paddingTop="12dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:background="@drawable/square_rounded"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvExchangeTitle">
+                        app:layout_constraintTop_toBottomOf="@+id/rvIdentities">
+
+                        <TextView
+                            android:id="@+id/tvExchangeTitle"
+                            style="@style/FragmentTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/menu_navigation_exchange"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="0dp"
-                            android:layout_height="70dp"
-                            android:background="@drawable/square_rounded_dark_green"
-                            android:paddingStart="16dp"
-                            android:paddingEnd="8dp"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/clExchangeOptions"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/pill_rounded"
+                            android:backgroundTint="?attr/dialogColor"
+                            app:layout_constraintDimensionRatio="H1,1"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:background="@drawable/square_rounded_dark_green">
+                            app:layout_constraintTop_toTopOf="parent">
 
                             <ImageView
-                                android:id="@+id/ivBalanceIcon"
-                                android:layout_width="30dp"
-                                android:layout_height="30dp"
-                                android:src="@drawable/ic_baseline_euro_symbol_24"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_exchange"
+                                android:padding="4dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:tint="@color/white"
-                                tools:tint="@color/white" />
-
-                            <TextView
-                                android:id="@+id/tvBalanceAmount"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:text="0.00"
-                                android:textColor="@color/white"
-                                android:textSize="24sp"
-                                android:textStyle="bold"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintStart_toEndOf="@+id/ivBalanceIcon"
                                 app:layout_constraintTop_toTopOf="parent" />
+                        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                            <ProgressBar
-                                android:id="@+id/pbBalanceUpdating"
-                                android:layout_width="15dp"
-                                android:layout_height="15dp"
-                                android:layout_marginStart="12dp"
-                                app:layout_constraintDimensionRatio="H,1:1"
-                                android:layout_gravity="center"
-                                android:indeterminateTint="@color/white"
-                                android:indeterminateTintMode="src_atop"
-                                app:layout_constraintBottom_toBottomOf="@+id/tvBalanceAmount"
-                                app:layout_constraintStart_toEndOf="@+id/tvBalanceAmount"
-                                app:layout_constraintTop_toTopOf="@+id/tvBalanceAmount" />
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/tvExchangeTitle">
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/clButtonBuy"
-                                android:layout_width="50dp"
-                                android:layout_height="24dp"
-                                android:layout_marginTop="8dp"
-                                android:background="@drawable/pill_rounded"
-                                android:backgroundTint="@color/colorPrimaryValueTransfer"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintTop_toTopOf="parent"
-                                tools:background="@color/colorPrimaryValueTransfer">
+                            <LinearLayout
+                                android:id="@+id/clExchangeBalanceHidden"
+                                android:layout_width="match_parent"
+                                android:layout_height="60dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="8dp">
+
+                                <ImageView
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:src="@drawable/ic_baseline_asterisk"
+                                    app:tint="?attr/onWidgetColor" />
+
+                                <ImageView
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:src="@drawable/ic_baseline_asterisk"
+                                    app:tint="?attr/onWidgetColor" />
+
+                                <ImageView
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:src="@drawable/ic_baseline_asterisk"
+                                    app:tint="?attr/onWidgetColor" />
+
+                                <ImageView
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:src="@drawable/ic_baseline_asterisk"
+                                    app:tint="?attr/onWidgetColor" />
+
+                                <FrameLayout
+                                    android:id="@+id/clExchangeBalanceToggle"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:background="@drawable/pill_rounded"
+                                    android:padding="8dp"
+                                    app:layout_constraintBottom_toBottomOf="@+id/tvExchangeTitle"
+                                    app:layout_constraintDimensionRatio="H1,1"
+                                    app:layout_constraintStart_toEndOf="@+id/tvExchangeTitle"
+                                    app:layout_constraintTop_toTopOf="@+id/tvExchangeTitle">
+
+                                    <ImageView
+                                        android:id="@+id/ivExchangeBalanceButtonShow"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_eye_show" />
+
+                                    <ImageView
+                                        android:id="@+id/ivExchangeBalanceButtonHidden"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_eye_hidden"
+                                        android:visibility="gone" />
+                                </FrameLayout>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/clExchangeBalance"
+                                android:layout_width="match_parent"
+                                android:layout_height="60dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="8dp"
+                                android:visibility="gone">
+
+                                <ImageView
+                                    android:id="@+id/ivBalanceIcon"
+                                    android:layout_width="30dp"
+                                    android:layout_height="30dp"
+                                    android:src="@drawable/ic_baseline_euro_symbol_24"
+                                    app:tint="?attr/onWidgetColor" />
 
                                 <TextView
-                                    android:layout_width="match_parent"
+                                    android:id="@+id/tvBalanceAmount"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center_horizontal"
-                                    android:text="Buy"
-                                    android:textColor="@color/white"
-                                    app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toEndOf="parent"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintTop_toTopOf="parent" />
+                                    android:layout_marginStart="8dp"
+                                    android:text="0.00"
+                                    android:textColor="?attr/onWidgetColor"
+                                    android:textSize="24sp"
+                                    android:textStyle="bold" />
 
-                            </androidx.constraintlayout.widget.ConstraintLayout>
+                                <ProgressBar
+                                    android:id="@+id/pbBalanceUpdating"
+                                    android:layout_width="15dp"
+                                    android:layout_height="15dp"
+                                    android:layout_gravity="center"
+                                    android:layout_marginStart="12dp"
+                                    android:indeterminateTint="?attr/onWidgetSecondaryColor"
+                                    android:indeterminateTintMode="src_atop"
+                                    app:layout_constraintDimensionRatio="H,1:1" />
 
-                            <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/clButtonSell"
-                                android:layout_width="50dp"
-                                android:layout_height="24dp"
-                                android:layout_marginBottom="8dp"
-                                android:background="@drawable/pill_rounded"
-                                android:backgroundTint="@color/red"
+                            </LinearLayout>
+                        </FrameLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clContacts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/square_rounded"
+                        android:paddingBottom="4dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/clExchange">
+
+                        <TextView
+                            android:id="@+id/tvContactsTitle"
+                            style="@style/FragmentTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/menu_navigation_contacts"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/clContactsOptions"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/pill_rounded"
+                            android:backgroundTint="?attr/dialogColor"
+                            app:layout_constraintDimensionRatio="H1,1"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:src="@drawable/ic_baseline_arrow_forward_ios_24"
+                                android:padding="8dp"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintEnd_toEndOf="parent"
-                                tools:background="@color/white">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center_horizontal"
-                                    android:text="Sell"
-                                    android:textColor="@color/white"
-                                    app:layout_constraintBottom_toBottomOf="parent"
-                                    app:layout_constraintEnd_toEndOf="parent"
-                                    app:layout_constraintStart_toStartOf="parent"
-                                    app:layout_constraintTop_toTopOf="parent" />
-
-                            </androidx.constraintlayout.widget.ConstraintLayout>
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
                         </androidx.constraintlayout.widget.ConstraintLayout>
-                    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clTransferQR"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toStartOf="@+id/clTransferContact"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
-
-                        <TextView
-                            android:id="@+id/tvSendQR"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Transfer"
-                            android:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/ivTransferQRIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_qr_code_scan"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/white"
-                            tools:tint="@color/white" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clTransferContact"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="2dp"
-                        android:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toStartOf="@+id/clRequest"
-                        app:layout_constraintStart_toEndOf="@+id/clTransferQR"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
+                        <!--                        <ImageView-->
+                        <!--                            android:id="@+id/ivGoToContacts"-->
+                        <!--                            android:layout_width="30dp"-->
+                        <!--                            android:layout_height="30dp"-->
+                        <!--                            android:layout_marginTop="2dp"-->
+                        <!--                            android:layout_marginEnd="12dp"-->
+                        <!--                            android:padding="4dp"-->
+                        <!--                            android:src="@drawable/ic_baseline_arrow_forward_ios_24"-->
+                        <!--                            app:layout_constraintBottom_toBottomOf="@+id/tvContactsTitle"-->
+                        <!--                            app:layout_constraintEnd_toEndOf="parent"-->
+                        <!--                            app:layout_constraintTop_toTopOf="@+id/tvContactsTitle"-->
+                        <!--                            app:tint="?attr/onBackgroundSecondaryColor" />-->
 
                         <TextView
-                            android:id="@+id/tvSendContact"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Transfer"
-                            android:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                        <ImageView
-                            android:id="@+id/ivTransferContactIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_exchange"
-                            app:layout_constraintBottom_toBottomOf="parent"
+                            android:id="@+id/tvNoChats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="12dp"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/pill_rounded"
+                            android:paddingVertical="12dp"
+                            android:text="@string/text_no_chats"
+                            android:textColor="?attr/onBackgroundColor"
+                            android:textStyle="italic"
+                            android:visibility="gone"
+                            tools:visibility="visible"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/white"
-                            tools:tint="@color/white" />
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clRequest"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="2dp"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginEnd="12dp"
-                        android:background="@drawable/square_rounded_dark_green"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/clTransferContact"
-                        app:layout_constraintTop_toBottomOf="@+id/clBalances">
-
-                        <TextView
-                            android:id="@+id/tvRequest"
-                            android:layout_width="wrap_content"
-                            android:layout_height="40dp"
-                            android:layout_marginStart="12dp"
-                            android:gravity="center_vertical"
-                            android:text="Request"
-                            android:textColor="@color/white"
-                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            app:layout_constraintTop_toBottomOf="@+id/clContactsOptions" />
 
-                        <ImageView
-                            android:id="@+id/ivRequestIcon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
-                            android:src="@drawable/ic_request"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:tint="@color/white"
-                            tools:tint="@color/white" />
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvContactChats"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layout_constraintTop_toBottomOf="@+id/tvNoChats"
+                            tools:itemCount="2"
+                            tools:listitem="@layout/item_contacts_chat" />
+
+                        <!--                        <Button-->
+                        <!--                            android:id="@+id/btnShowMoreChats"-->
+                        <!--                            style="@style/ButtonWidgetRounded"-->
+                        <!--                            android:layout_height="26dp"-->
+                        <!--                            android:layout_marginTop="4dp"-->
+                        <!--                            android:background="@drawable/pill_rounded"-->
+                        <!--                            android:paddingVertical="0dp"-->
+                        <!--                            android:text="@string/btn_show_more"-->
+                        <!--                            android:textColor="?attr/onWidgetSecondaryColor"-->
+                        <!--                            android:visibility="gone"-->
+                        <!--                            app:layout_constraintEnd_toEndOf="parent"-->
+                        <!--                            app:layout_constraintStart_toStartOf="parent"-->
+                        <!--                            app:layout_constraintTop_toBottomOf="@+id/rvContactChats"-->
+                        <!--                            tools:visibility="visible" />-->
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                // Contacts
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clContacts"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/clExchange">
-
-                    <TextView
-                        android:id="@+id/tvChatsSocialTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-                        android:layout_marginTop="12dp"
-                        android:text="Contacts"
-                        android:textColor="@color/white"
-                        android:textSize="32sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <ImageView
-                        android:id="@+id/ivGoToContacts"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginEnd="12dp"
-                        android:layout_marginTop="2dp"
-                        android:padding="4dp"
-                        tools:tint="@color/colorPrimaryDarkValueTransfer"
-                        app:tint="@color/colorPrimaryDarkValueTransfer"
-                        android:src="@drawable/ic_baseline_arrow_forward_ios_24"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvChatsSocialTitle"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvChatsSocialTitle" />
-
-                    <TextView
-                        android:id="@+id/tvNoChats"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="20dp"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/pill_rounded"
-                        android:paddingVertical="4dp"
-                        android:text="There are no conversations with contacts yet"
-                        android:textColor="@color/white"
-                        android:textStyle="italic"
-                        android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tvChatsSocialTitle"
-                        tools:visibility="visible" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvContactChats"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingVertical="8dp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvNoChats"
-                        tools:itemCount="2"
-                        tools:listitem="@layout/item_contacts_chat" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

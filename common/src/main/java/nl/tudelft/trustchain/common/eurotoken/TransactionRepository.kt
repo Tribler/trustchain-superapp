@@ -10,6 +10,7 @@ import nl.tudelft.ipv8.attestation.trustchain.*
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.attestation.trustchain.validation.TransactionValidator
 import nl.tudelft.ipv8.attestation.trustchain.validation.ValidationResult
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -434,6 +435,29 @@ class TransactionRepository(
             .first { block: TrustChainBlock ->
                 allowedTypes.contains(block.type)
             }
+    }
+
+    fun getTransactionsBetweenMeAndOther(other: PublicKey, trustchain: TrustChainHelper): List<Transaction> {
+        return trustchain.getChainByUser(trustchain.getMyPublicKey())
+            .asSequence()
+            .filter { block ->
+                block.publicKey.contentEquals(other.keyToBin())
+            }
+            .map { block: TrustChainBlock ->
+                val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+                Transaction(
+                    block,
+                    sender,
+                    defaultCryptoProvider.keyFromPublicBin(block.linkPublicKey),
+                    if (block.transaction.containsKey(KEY_AMOUNT)) {
+                        (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
+                    } else 0L,
+                    block.type,
+                    getBalanceChangeForBlock(block) < 0,
+                    block.timestamp
+                )
+            }
+            .toList()
     }
 
     fun getLatestNTransactionsOfType(

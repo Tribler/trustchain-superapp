@@ -7,18 +7,14 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
+import com.ncorti.slidetoact.SlideToActView
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.*
 
 class ExchangeGatewayDialog(
@@ -29,13 +25,7 @@ class ExchangeGatewayDialog(
     private val port: Int,
     private val name: String,
     private val amount: Long?,
-) : DialogFragment() {
-
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var trustChainCommunity: TrustChainCommunity
-    private lateinit var euroTokenCommunity: EuroTokenCommunity
-    private lateinit var gatewayStore: GatewayStore
-    private lateinit var transactionRepository: TransactionRepository
+) : VTDialogFragment() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
@@ -44,14 +34,12 @@ class ExchangeGatewayDialog(
             val view = layoutInflater.inflate(R.layout.dialog_exchange_gateway, null)
 
             // Fix keyboard exposing over content of dialog
-            bottomSheetDialog.behavior.skipCollapsed = true
-            bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            bottomSheetDialog.behavior.apply {
+                skipCollapsed = true
+                state = BottomSheetBehavior.STATE_EXPANDED
+            }
 
-            parentActivity = requireActivity() as ValueTransferMainActivity
-            trustChainCommunity = parentActivity.getCommunity(ValueTransferMainActivity.trustChainCommunityTag) as TrustChainCommunity
-            euroTokenCommunity = parentActivity.getCommunity(ValueTransferMainActivity.euroTokenCommunityTag) as EuroTokenCommunity
-            gatewayStore = parentActivity.getStore(ValueTransferMainActivity.gatewayStoreTag) as GatewayStore
-            transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
+            setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val gateWayName = view.findViewById<TextView>(R.id.tvGatewayName)
             val gateWayPublicKey = view.findViewById<TextView>(R.id.tvGatewayPublicKey)
@@ -59,23 +47,21 @@ class ExchangeGatewayDialog(
             val gateWaySaveSwitch = view.findViewById<Switch>(R.id.switchSaveGateway)
             val gateWayPreferredConstraintLayout = view.findViewById<ConstraintLayout>(R.id.clPreferredGateway)
             val gateWayPreferredSwitch = view.findViewById<Switch>(R.id.switchPreferredGateway)
-            val btnConnect = view.findViewById<Button>(R.id.btnConnectToGateway)
-            val btnContinueSell = view.findViewById<Button>(R.id.btnContinueSell)
+
+            val connectGatewaySlider = view.findViewById<SlideToActView>(R.id.slideConnectGateway)
+            val sellSlider = view.findViewById<SlideToActView>(R.id.slideSell)
 
             view.findViewById<TextView>(R.id.tvTitleBuy).isVisible = isCreation
             view.findViewById<TextView>(R.id.tvTitleSell).isVisible = !isCreation
             view.findViewById<ConstraintLayout>(R.id.clBalanceSellAmount).isVisible = !isCreation
-            btnConnect.isVisible = isCreation
-            btnContinueSell.isVisible = !isCreation
+            connectGatewaySlider.isVisible = isCreation
+            sellSlider.isVisible = !isCreation
 
-            val gateway = gatewayStore.getGatewayFromPublicKey(publicKey)
+            val gateway = getGatewayStore().getGatewayFromPublicKey(publicKey)
 
             gateWaySaveConstraintLayout.isVisible = gateway == null
 
-            gateWayName.text = when (gateway != null) {
-                true -> gateway.name
-                else -> name
-            }
+            gateWayName.text = gateway?.name ?: name
 
             if (!isCreation) {
                 parentActivity.getBalance(true).observe(
@@ -96,50 +82,82 @@ class ExchangeGatewayDialog(
             val saveGateway = gateWaySaveSwitch.isChecked
             val preferredGateway = gateWayPreferredSwitch.isChecked
 
-            btnConnect.setOnClickListener {
-                btnConnect.text = "Connecting..."
+            connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
 
-                Handler().postDelayed(
-                    Runnable {
-                        if (saveGateway) {
-                            gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
-                        }
+                    @Suppress("DEPRECATION")
+                    Handler().postDelayed(
+                        Runnable {
+                            if (saveGateway) {
+                                getGatewayStore().addGateway(
+                                    publicKey,
+                                    name,
+                                    ip,
+                                    port.toLong(),
+                                    preferredGateway
+                                )
+                            }
 
-                        euroTokenCommunity.connectToGateway(publicKey.keyToBin().toHex(), ip, port, paymentID)
-                        parentActivity.displaySnackbar(requireContext(), "Trying to connect to gateway, continue on exchange portal", isShort = false)
-                        bottomSheetDialog.dismiss()
-                    },
-                    500
-                )
+                            getEuroTokenCommunity().connectToGateway(
+                                publicKey.keyToBin().toHex(),
+                                ip,
+                                port,
+                                paymentID
+                            )
+
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_gateway_trying_connect),
+                                isShort = false
+                            )
+                            bottomSheetDialog.dismiss()
+                        },
+                        500
+                    )
+                }
             }
 
-            btnContinueSell.setOnClickListener {
-                btnContinueSell.text = "Trying to sell..."
+            sellSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
+                override fun onSlideComplete(view: SlideToActView) {
+                    @Suppress("DEPRECATION")
+                    Handler().postDelayed(
+                        Runnable {
+                            if (saveGateway) {
+                                getGatewayStore().addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
+                            }
 
-                Handler().postDelayed(
-                    Runnable {
-                        if (saveGateway) {
-                            gatewayStore.addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
-                        }
-
-                        val block = transactionRepository.sendDestroyProposalWithPaymentID(publicKey.keyToBin(), ip, port, paymentID, amount!!)
-
-                        if (block == null) {
-                            btnContinueSell.text = "Sell"
-                            parentActivity.displaySnackbar(requireContext(), "Sell of ${formatBalance(amount)} ET did not succeed, please try again", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-                        } else {
-                            parentActivity.displaySnackbar(requireContext(), "${formatBalance(amount)} ET sold to the selected gateway", isShort = false)
-                            bottomSheetDialog.dismiss()
-                        }
-                    },
-                    500
-                )
+                            getTransactionRepository().sendDestroyProposalWithPaymentID(publicKey.keyToBin(), ip, port, paymentID, amount!!).let { block ->
+                                if (block == null) {
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(
+                                            R.string.snackbar_exchange_sell_error,
+                                            formatBalance(amount)
+                                        ),
+                                        isShort = false
+                                    )
+                                } else {
+                                    parentActivity.displayToast(
+                                        requireContext(),
+                                        resources.getString(
+                                            R.string.snackbar_exchange_sell_success,
+                                            formatBalance(amount)
+                                        ),
+                                        isShort = false
+                                    )
+                                    bottomSheetDialog.dismiss()
+                                }
+                            }
+                        },
+                        500
+                    )
+                }
             }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             bottomSheetDialog
-        } ?: throw IllegalStateException("Activity cannot be null")
+        } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 }

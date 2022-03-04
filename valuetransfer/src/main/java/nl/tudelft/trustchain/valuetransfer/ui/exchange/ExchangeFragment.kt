@@ -1,48 +1,58 @@
 package nl.tudelft.trustchain.valuetransfer.ui.exchange
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.*
-import nl.tudelft.ipv8.attestation.trustchain.ANY_COUNTERPARTY_PK
-import nl.tudelft.ipv8.attestation.trustchain.UNKNOWN_SEQ
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.util.*
 import nl.tudelft.trustchain.valuetransfer.R
-import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeVtBinding
+import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransactionDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import org.json.JSONObject
 
-class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
+class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
     private val binding by viewBinding(FragmentExchangeVtBinding::bind)
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var transactionRepository: TransactionRepository
 
     private val adapterTransactions = ItemAdapter()
 
     private var transactionsItems: List<Transaction> = emptyList()
-    private var transactionShowCount: Int = 5
+    private var transactionShowCount: Int = 10
     private var scanIntent: Int = -1
     private var transactionForceUpdate: Boolean = false
 
-    init {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_exchange_vt, container, false)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
         setHasOptionsMenu(true)
 
         adapterTransactions.registerRenderer(
-            ExchangeTransactionItemRenderer {
-                trustchain.createAgreementBlock(it, it.transaction)
-                transactionForceUpdate = true
+            ExchangeTransactionItemRenderer(true, parentActivity) {
+                ExchangeTransactionDialog(it).show(parentFragmentManager, ExchangeTransactionDialog.TAG)
             }
         )
 
@@ -60,69 +70,77 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_exchange_vt, container, false)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        parentActivity.setActionBarTitle("Exchange")
-        parentActivity.toggleActionBar(false)
-        parentActivity.toggleBottomNavigation(true)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        parentActivity = requireActivity() as ValueTransferMainActivity
-        transactionRepository = parentActivity.getStore(ValueTransferMainActivity.transactionRepositoryTag) as TransactionRepository
-    }
-
+    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        onResume()
+        initView()
 
-        binding.clTransferQR.setOnClickListener {
-            scanIntent = TRANSFER_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan QR Code to transfer EuroToken(s)", vertical = true)
+        binding.clExchangeOptions.setOnClickListener {
+            OptionsDialog(
+                R.menu.exchange_options,
+                resources.getString(R.string.dialog_exchange_options),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 2,
+            ) { _, item ->
+                when (item.itemId) {
+                    R.id.actionDeposit -> {
+                        scanIntent = DEPOSIT_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_buy),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionWithdraw -> {
+                        scanIntent = WITHDRAW_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_sell),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionTransferByQR -> {
+                        scanIntent = TRANSFER_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_transfer),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionTransferToContact -> ExchangeTransferMoneyDialog(
+                        null,
+                        null,
+                        true
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                    R.id.actionRequestTransferContact -> ExchangeTransferMoneyDialog(
+                        null,
+                        null,
+                        false
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                }
+            }.show(parentFragmentManager, tag)
         }
 
-        binding.clTransferToContact.setOnClickListener {
-            ExchangeTransferMoneyDialog(null, null, true).show(parentFragmentManager, tag)
-        }
-
-        binding.clRequest.setOnClickListener {
-            ExchangeTransferMoneyDialog(null, null, false).show(parentFragmentManager, tag)
-        }
-
-        binding.clButtonBuy.setOnClickListener {
-            scanIntent = BUY_EXCHANGE_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan Buy EuroToken QR Code from Exchange", vertical = true)
-        }
-
-        binding.clButtonSell.setOnClickListener {
-            scanIntent = SELL_EXCHANGE_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan Sell EuroToken QR Code from Exchange", vertical = true)
+        binding.ivReloadBalance.setOnClickListener {
+            binding.ivReloadBalance.isVisible = false
+            binding.pbBalanceUpdating.isVisible = true
+            verifyBalance()
         }
 
         binding.ivReloadTransactions.setOnClickListener {
             binding.ivReloadTransactions.isVisible = false
-            binding.tvShowMoreTransactions.isVisible = false
-            binding.pbLoadingSpinner.isVisible = true
+            binding.btnShowMoreTransactions.isVisible = false
+            binding.pbTransactionsUpdating.isVisible = true
             transactionForceUpdate = true
         }
 
-        binding.tvShowMoreTransactions.setOnClickListener {
+        binding.btnShowMoreTransactions.setOnClickListener {
             transactionShowCount += 5
             transactionForceUpdate = true
-            binding.pbLoadingSpinner.isVisible = true
+            binding.pbTransactionsUpdating.isVisible = true
             binding.ivReloadTransactions.isVisible = false
-            binding.tvShowMoreTransactions.isVisible = false
+            binding.btnShowMoreTransactions.isVisible = false
         }
 
         val onBalanceClickListener = View.OnClickListener {
@@ -131,13 +149,26 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
             binding.tvBalanceVerifiedAmount.isVisible = !binding.tvBalanceVerifiedAmount.isVisible
         }
 
-        binding.clBalanceRow.setOnClickListener(onBalanceClickListener)
-        binding.rvTransactions.adapter = adapterTransactions
-        binding.rvTransactions.layoutManager = LinearLayoutManager(requireContext())
+        binding.ivBalanceErrorIcon.setOnClickListener(onBalanceClickListener)
+
+        val onHideBalanceClickListener = View.OnClickListener {
+            binding.llExchangeBalanceHidden.isVisible = !binding.llExchangeBalanceHidden.isVisible
+            binding.llExchangeBalance.isVisible = !binding.llExchangeBalance.isVisible
+        }
+
+        binding.llExchangeBalance.setOnClickListener(onHideBalanceClickListener)
+        binding.llExchangeBalanceHidden.setOnClickListener(onHideBalanceClickListener)
+
+        binding.rvTransactions.apply {
+            adapter = adapterTransactions
+            layoutManager = LinearLayoutManager(requireContext())
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_transaction, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+        }
 
         parentActivity.getBalance(false).observe(
             viewLifecycleOwner,
-            Observer {
+            {
                 if (it != binding.tvBalanceAmount.text.toString()) {
                     binding.tvBalanceAmount.text = it
                 }
@@ -146,7 +177,7 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
 
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
-            Observer {
+            {
                 if (it != binding.tvBalanceVerifiedAmount.text.toString()) {
                     binding.tvBalanceVerifiedAmount.text = it
                     binding.ivBalanceErrorIcon.isVisible = parentActivity.getBalance(false).value != it
@@ -156,29 +187,20 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         )
     }
 
+    override fun initView() {
+        parentActivity.apply {
+            setActionBarTitle(
+                resources.getString(R.string.menu_navigation_exchange),
+                null
+            )
+            toggleActionBar(false)
+            toggleBottomNavigation(true)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        inflater.inflate(R.menu.exchange_options, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.actionVerifyBalance -> {
-                verifyBalance()
-                true
-            }
-            else -> false
-        }
-    }
-
-    private fun verifyBalance() {
-        val gateway = transactionRepository.getGatewayPeer()
-        if (gateway != null) {
-            transactionRepository.sendCheckpointProposal(gateway)
-            parentActivity.displaySnackbar(requireContext(), "Balance verification succeeded")
-        } else {
-            parentActivity.displaySnackbar(requireContext(), "Balance verification failed", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-        }
+        menu.clear()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -187,32 +209,48 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
                 val obj = JSONObject(result)
 
                 when (scanIntent) {
+                    DEPOSIT_INTENT -> {
+                        if (obj.has(QRScanController.KEY_AMOUNT)) {
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_exchange_scan_buy_not_sell)
+                            )
+                            return
+                        }
+                        getQRScanController().exchangeMoney(obj, true)
+                    }
+                    WITHDRAW_INTENT -> {
+                        if (!obj.has(QRScanController.KEY_AMOUNT)) {
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_exchange_scan_sell_not_buy)
+                            )
+                            return
+                        }
+                        getQRScanController().exchangeMoney(obj, false)
+                    }
                     TRANSFER_INTENT -> {
-                        if (obj.has("payment_id")) {
-                            parentActivity.displaySnackbar(requireContext(), "Please scan a transfer QR-code instead of buy or sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
+                        if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell)
+                            )
                             return
                         }
-                        parentActivity.getQRScanController().transferMoney(obj)
-                    }
-                    BUY_EXCHANGE_INTENT -> {
-                        if (obj.has("amount")) {
-                            parentActivity.displaySnackbar(requireContext(), "Please scan a buy QR-code instead of sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-                            return
-                        }
-                        parentActivity.getQRScanController().exchangeMoney(obj, true)
-                    }
-                    SELL_EXCHANGE_INTENT -> {
-                        if (!obj.has("amount")) {
-                            parentActivity.displaySnackbar(requireContext(), "Please scan a sell QR-code instead of buy", type = ValueTransferMainActivity.SNACKBAR_TYPE_WARNING)
-                            return
-                        }
-                        parentActivity.getQRScanController().exchangeMoney(obj, false)
+                        getQRScanController().transferMoney(obj)
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                parentActivity.displaySnackbar(requireContext(), "Scanned QR code not in JSON format", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR)
-                QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan again", vertical = true)
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_qr_code_not_json_format)
+                )
+                QRCodeUtils(requireContext()).startQRScanner(
+                    this,
+                    promptText = resources.getString(R.string.text_scan_again),
+                    vertical = true
+                )
             }
         }
     }
@@ -220,63 +258,77 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
     private suspend fun refreshTransactions(forceUpdate: Boolean = false) {
         if (forceUpdate) {
             binding.ivReloadTransactions.isVisible = false
-            binding.pbLoadingSpinner.isVisible = true
-            binding.tvShowMoreTransactions.isVisible = false
+            binding.pbTransactionsUpdating.isVisible = true
+            binding.btnShowMoreTransactions.isVisible = false
+            binding.pbBalanceUpdating.isVisible = true
+            binding.ivReloadBalance.isVisible = false
         }
 
         var items: List<Item>
 
         withContext(Dispatchers.IO) {
-            transactionsItems = transactionRepository.getLatestNTransactionsOfType(trustchain, transactionShowCount, ALLOWED_EUROTOKEN_TYPES)
+            transactionsItems = getTransactionRepository().getLatestNTransactionsOfType(
+                trustchain,
+                transactionShowCount,
+                ALLOWED_EUROTOKEN_TYPES
+            )
+
             items = createTransactionItems(transactionsItems)
-            parentActivity.setBalance(formatBalance(transactionRepository.getMyBalance()), false)
-            parentActivity.setBalance(formatBalance(transactionRepository.getMyVerifiedBalance()), true)
+
+            parentActivity.setBalance(
+                formatBalance(
+                    getTransactionRepository().getMyBalance()
+                ),
+                false
+            )
+            parentActivity.setBalance(
+                formatBalance(
+                    getTransactionRepository().getMyVerifiedBalance()
+                ),
+                true
+            )
         }
 
+        binding.tvNoTransactions.isVisible = items.isEmpty()
         adapterTransactions.updateItems(items)
         binding.rvTransactions.setItemViewCacheSize(items.size)
-        binding.pbBalanceUpdating.isVisible = false
-        binding.pbLoadingSpinner.isVisible = false
+        binding.pbTransactionsUpdating.isVisible = false
         binding.ivReloadTransactions.isVisible = true
-        binding.tvShowMoreTransactions.isVisible = items.size >= transactionShowCount
+        binding.btnShowMoreTransactions.isVisible = items.size >= transactionShowCount
+    }
+
+    private fun verifyBalance() {
+        val gateway = getTransactionRepository().getGatewayPeer()
+        if (gateway != null) {
+            getTransactionRepository().sendCheckpointProposal(gateway)
+            parentActivity.displayToast(
+                requireContext(),
+                resources.getString(R.string.snackbar_exchange_balance_verification_success)
+            )
+        } else {
+            parentActivity.displayToast(
+                requireContext(),
+                resources.getString(R.string.snackbar_exchange_balance_verification_error)
+            )
+        }
+
+        @Suppress("DEPRECATION")
+        Handler().postDelayed(
+            Runnable {
+                binding.pbBalanceUpdating.isVisible = false
+                binding.ivReloadBalance.isVisible = true
+            },
+            1000
+        )
     }
 
     private fun createTransactionItems(transactions: List<Transaction>): List<Item> {
-        val myPk = getTrustChainCommunity().myPeer.publicKey.keyToBin()
-        val blocks = trustchain.getChainByUser(myPk)
+        val myPk = getTrustChainCommunity().myPeer.publicKey
+        val blocks = getTrustChainHelper().getChainByUser(myPk.keyToBin())
 
-        return transactions
-            .map { transaction ->
-                val block = transaction.block
-
-                val isAnyCounterpartyPk = block.linkPublicKey.contentEquals(ANY_COUNTERPARTY_PK)
-                val isMyPk = block.linkPublicKey.contentEquals(myPk)
-                val isProposalBlock = block.linkSequenceNumber == UNKNOWN_SEQ
-
-                // Some other (proposal) block is linked to the current agreement block. This is to find the status of incoming transactions.
-                val hasLinkedBlock = blocks.find { it.linkedBlockId == block.blockId } != null
-
-                // Some other (agreement) block is linked to the current proposal block. This is to find the status of outgoing transactions.
-                val outgoingIsLinkedBlock = blocks.find { block.linkedBlockId == it.blockId } != null
-                val status = when {
-                    hasLinkedBlock || outgoingIsLinkedBlock -> ExchangeTransactionItem.BlockStatus.SIGNED
-                    block.isSelfSigned -> ExchangeTransactionItem.BlockStatus.SELF_SIGNED
-                    isProposalBlock -> ExchangeTransactionItem.BlockStatus.WAITING_FOR_SIGNATURE
-                    else -> null
-                }
-
-                // Determine whether the transaction/block can be signed
-                val canSign = (isAnyCounterpartyPk || isMyPk) &&
-                    isProposalBlock &&
-                    !block.isSelfSigned &&
-                    !hasLinkedBlock
-
-                ExchangeTransactionItem(
-                    transaction,
-                    canSign,
-                    status,
-                )
-            }
+        return transactions.map { transaction ->
+            transaction.toExchangeTransactionItem(myPk, blocks)
+        }
     }
 
     companion object {
@@ -287,7 +339,7 @@ class ExchangeFragment : BaseFragment(R.layout.fragment_exchange_vt) {
         )
 
         private const val TRANSFER_INTENT = 0
-        private const val BUY_EXCHANGE_INTENT = 1
-        private const val SELL_EXCHANGE_INTENT = 2
+        private const val DEPOSIT_INTENT = 1
+        private const val WITHDRAW_INTENT = 2
     }
 }

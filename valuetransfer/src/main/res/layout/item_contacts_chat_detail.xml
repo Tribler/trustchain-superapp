@@ -5,7 +5,7 @@
     android:id="@+id/clItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryValueTransfer"
+    android:background="?attr/backgroundColor"
     android:paddingHorizontal="12dp"
     android:paddingTop="8dp"
     android:paddingBottom="4dp">
@@ -22,17 +22,18 @@
 
         <Button
             android:id="@+id/btnLoadMoreMessages"
-            style="@style/ButtonDarkGreenRounded"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
+            style="@style/ButtonLightGrayRounded"
+            android:layout_height="26dp"
             android:layout_marginBottom="8dp"
-            android:paddingHorizontal="12dp"
-            android:text="Load more messages..."
+            android:paddingVertical="0dp"
+            android:paddingHorizontal="8dp"
+            android:background="@drawable/pill_rounded"
+            android:text="@string/btn_load_more_messages"
+            android:textColor="?attr/onWidgetSecondaryColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:backgroundTint="@color/colorPrimaryDarkValueTransfer" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -52,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:background="@drawable/pill_rounded"
-            android:backgroundTint="@color/dark_gray"
+            android:backgroundTint="?attr/mutedDarkColor"
             android:gravity="center_horizontal"
             android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
@@ -66,13 +67,42 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clIdentityUpdated"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clDateSection"
+        tools:visibility="visible">
+
+        <TextView
+            android:id="@+id/tvIdentityUpdatedMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="@color/colorOrange"
+            android:gravity="center"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="4dp"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="The identity of the contact has been updated. The identity verification status changed to unverified. " />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <FrameLayout
         android:id="@+id/flContent"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clDateSection">
+        app:layout_constraintTop_toBottomOf="@+id/clIdentityUpdated">
 
         <FrameLayout
             android:id="@+id/flChatItemContent"
@@ -87,15 +117,14 @@
                 android:paddingVertical="8dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
 
                 <TextView
                     android:id="@+id/tvChatMessage"
                     style="@style/ChatMessageItem"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
+                    android:textColor="@color/white"
                     android:textIsSelectable="true"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -111,8 +140,7 @@
                 android:paddingTop="8dp"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clTransactionContent"
@@ -122,16 +150,16 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/clTransactionResend">
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clTransactionIcon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvTransactionTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvTransactionTitle">
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <ImageView
                         android:id="@+id/ivTransactionIconOutgoing"
@@ -164,17 +192,33 @@
                     android:layout_height="wrap_content"
                     android:paddingVertical="4dp"
                     android:paddingEnd="12dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/white"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@+id/clTransactionIcon"
+                    app:layout_constraintEnd_toStartOf="@+id/ivTransactionErrorIcon"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="Outgoing transfer of €50,00" />
+
+                <ImageView
+                    android:id="@+id/ivTransactionErrorIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/ic_baseline_info_24"
+                    app:tint="@color/red"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvTransactionTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tvTransactionTitle" />
 
                 <TextView
                     android:id="@+id/tvTransactionMessage"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/black"
+                    android:paddingEnd="12dp"
+                    android:textColor="@color/white"
                     android:textIsSelectable="true"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="@+id/tvTransactionTitle"
@@ -184,89 +228,208 @@
                     tools:visibility="visible" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clTransactionResend"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/pill_rounded_bottom_red"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/clTransactionContent">
-
-                    <TextView
-                        android:id="@+id/tvResendTransaction"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="4dp"
-                        android:text="Resend Transaction"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:gravity="center_horizontal"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        tools:backgroundTint="@color/colorYellow" />
-
-                    <ImageView
-                        android:id="@+id/ivResendTransactionIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:src="@drawable/ic_baseline_info_24"
-                        app:tint="@color/white"
-                        tools:tint="@color/white"
-                        android:tooltipText="Transaction has not been confirmed, possibly because the recipient is disconnected"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvResendTransaction"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvResendTransaction" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clAttachmentPhotoVideo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxWidth="100dp"
-                android:maxHeight="100dp"
+                android:maxHeight="120dp"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
 
-                <ProgressBar
-                    android:id="@+id/pbAttachmentPhotoVideoLoadingSpinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="0dp"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/colorPrimaryValueTransfer"
-                    android:indeterminateTintMode="src_atop"
-                    android:maxWidth="40dp"
-                    android:maxHeight="40dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="H,1:1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
                 <ImageView
                     android:id="@+id/ivAttachmentPhotoVideo"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="110dp"
                     android:layout_margin="3dp"
                     android:adjustViewBounds="true"
                     android:background="@drawable/pill_rounded"
-                    android:maxWidth="90dp"
-                    android:maxHeight="90dp"
+                    android:maxHeight="110dp"
                     android:scaleType="fitCenter"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAttachmentPhotoVideoSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    tools:text="4.86MB"
+                    android:textSize="10sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clAttachmentFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="12dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
+
+                <ImageView
+                    android:id="@+id/ivAttachmentFileIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_file"
+                    app:tint="@color/colorRed"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:id="@+id/llTest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintStart_toEndOf="@+id/ivAttachmentFileIcon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+
+                <TextView
+                    android:id="@+id/tvAttachmentFileName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    tools:text="why-johnny-cant-encrypt.pdf" />
+
+                <TextView
+                    android:id="@+id/tvAttachmentFileSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="2dp"
+                    tools:text="4.86MB"
+                    android:textSize="10sp"
+                    android:textStyle="italic"/>
+            </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clAttachmentProgress"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clAttachmentProgressInner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvAttachmentProgressStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:paddingHorizontal="4dp"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Starting..." />
+
+                    <ProgressBar
+                        android:id="@+id/pbAttachmentProgressLoadingSpinner"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:min="0"
+                        android:max="100"
+                        android:progress="0"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/colorPrimaryValueTransfer"
+                        android:indeterminateTintMode="src_atop"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tvAttachmentProgress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center"
+                        android:textSize="12sp"
+                        tools:text="20%"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="H,1:1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/pbAttachmentProgressLoadingSpinner" />
+
+                    <ImageView
+                        android:id="@+id/ivAttachmentProgressStop"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_baseline_stop_circle_24"
+                        app:tint="@color/colorPrimaryValueTransfer"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <ImageView
+                        android:id="@+id/ivAttachmentProgressPlay"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_baseline_play_circle_filled_24"
+                        app:tint="@color/colorPrimaryValueTransfer"
+                        android:visibility="gone"
+                        tools:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/tvAttachmentProgressType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    tools:text="Image"
+                    android:textSize="10sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAttachmentProgressSize"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    tools:text="4.86MB"
+                    android:textSize="10sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -281,8 +444,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ivAttachmentPhotoVideo"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/ivAttachmentPhotoVideo">
 
                 <ImageView
                     android:id="@+id/ivAttachmentIdentityAttributeIcon"
@@ -290,16 +452,16 @@
                     android:layout_height="20dp"
                     android:src="@drawable/ic_attribute"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvIdentityAttributeName"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray"/>
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:tint="@color/colorRed"/>
 
                 <TextView
                     android:id="@+id/tvIdentityAttributeName"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/white"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@+id/ivAttachmentIdentityAttributeIcon"
                     app:layout_constraintTop_toTopOf="parent"
@@ -310,75 +472,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/white"
                     android:textIsSelectable="true"
                     app:layout_constraintStart_toEndOf="@+id/ivAttachmentIdentityAttributeIcon"
                     app:layout_constraintTop_toBottomOf="@+id/tvIdentityAttributeName"
                     tools:text="Attribute Value" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clAttachmentFile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/pill_rounded"
-                android:paddingVertical="8dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="4dp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clAttachmentIdentityAttribute"
-                tools:backgroundTint="@color/white"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/ivAttachmentFileIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_baseline_attach_file_24"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvAttachmentFileTitle"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray"/>
-
-                <TextView
-                    android:id="@+id/tvAttachmentFileTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:text="Original Filename:"
-                    android:textColor="@color/black"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toStartOf="@+id/ivAttachmentFileContinueIcon"
-                    app:layout_constraintStart_toEndOf="@+id/ivAttachmentFileIcon"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <ImageView
-                    android:id="@+id/ivAttachmentFileContinueIcon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_baseline_arrow_forward_ios_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray" />
-
-                <TextView
-                    android:id="@+id/tvAttachmentFilename"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:textColor="@color/black"
-                    android:textStyle="italic"
-                    app:layout_constraintStart_toEndOf="@+id/ivAttachmentFileIcon"
-                    app:layout_constraintEnd_toStartOf="@+id/ivAttachmentFileContinueIcon"
-                    app:layout_constraintTop_toBottomOf="@+id/tvAttachmentFileTitle"
-                    tools:text="lorum_ipsum.txt" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -393,19 +491,17 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clAttachmentFile"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/clAttachmentIdentityAttribute">
 
                 <ImageView
                     android:id="@+id/ivLocationIcon"
-                    android:layout_width="wrap_content"
+                    android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_baseline_location_on_24"
+                    android:src="@drawable/ic_location"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/red"
-                    tools:tint="@color/red" />
+                    app:tint="@color/colorRed" />
 
                 <TextView
                     android:id="@+id/tvLocation"
@@ -414,12 +510,12 @@
                     android:layout_marginHorizontal="8dp"
                     android:singleLine="false"
                     android:textIsSelectable="true"
+                    android:textColor="@color/white"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ivLocationContinueIcon"
                     app:layout_constraintStart_toEndOf="@+id/ivLocationIcon"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Hollandse Straat 12\n1234AA Amsterdam\nNetherlands"
-                    tools:textColor="@color/black" />
+                    tools:text="Hollandse Straat 12\n1234AA Amsterdam\nNetherlands" />
 
                 <ImageView
                     android:id="@+id/ivLocationContinueIcon"
@@ -429,8 +525,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray" />
+                    app:tint="@color/gray" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -445,8 +540,7 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clAttachmentLocation"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/clAttachmentLocation">
 
                 <ImageView
                     android:id="@+id/ivAttachmentTransferRequestIcon"
@@ -454,9 +548,9 @@
                     android:layout_height="20dp"
                     android:layout_marginStart="8dp"
                     android:src="@drawable/ic_request"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvAttachmentTransferRequestTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvAttachmentTransferRequestTitle"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:tint="@color/colorRed" />
 
                 <TextView
@@ -464,6 +558,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
+                    android:textColor="@color/white"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tvAttachmentTransferRequestDescription"
                     app:layout_constraintEnd_toStartOf="@+id/ivAttachmentTransferRequestContinueIcon"
@@ -476,6 +571,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="8dp"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    tools:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/ivAttachmentTransferRequestContinueIcon"
                     app:layout_constraintStart_toEndOf="@+id/ivAttachmentTransferRequestIcon"
@@ -492,8 +590,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray" />
+                    app:tint="@color/gray" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -508,15 +605,14 @@
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/clAttachmentLocation"
-                tools:backgroundTint="@color/white">
+                app:layout_constraintTop_toBottomOf="@+id/clAttachmentLocation">
 
                 <FrameLayout
                     android:id="@+id/flAttachmentContactIdenticon"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
                     android:background="@drawable/pill_rounded"
-                    android:backgroundTint="@color/light_gray"
+                    android:backgroundTint="@color/white"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -544,6 +640,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="14sp"
                         android:textStyle="bold"
+                        android:textColor="@color/white"
                         app:layout_constraintBottom_toTopOf="@+id/tvAttachmentContactPublicKey"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
@@ -555,6 +652,7 @@
                         android:layout_height="wrap_content"
                         tools:text="4c69624e61434c504b3af0b7d61043e1043cdde4285074fe547f7e0ef20448207948dee70ad27579be698f9da2afc0dae3cb6ddd9bd5120441f8fbe579e2553bbd6dbf7965581294dbe3"
                         android:textSize="12sp"
+                        android:textColor="@color/white"
                         android:maxLines="2"
                         android:ellipsize="end"
                         app:layout_constraintStart_toStartOf="parent"
@@ -580,8 +678,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/gray"
-                    tools:tint="@color/gray" />
+                    app:tint="@color/gray" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -605,7 +702,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="12dp"
-            android:textColor="@color/white"
             tools:text="12:00" />
 
         <ImageView
@@ -615,9 +711,7 @@
             android:layout_marginStart="4dp"
             android:layout_marginTop="1dp"
             android:visibility="gone"
-            app:tint="@color/white"
             tools:src="@drawable/ic_check_double" />
 
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

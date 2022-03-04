@@ -1,73 +1,77 @@
 package nl.tudelft.trustchain.valuetransfer.ui.walletoverview
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.Contact
-import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
-import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
-import nl.tudelft.trustchain.peerchat.db.PeerChatStore
+import nl.tudelft.trustchain.common.valuetransfer.extensions.decodeImage
 import nl.tudelft.trustchain.peerchat.entity.ChatMessage
-import nl.tudelft.trustchain.peerchat.ui.contacts.ContactItem
+import nl.tudelft.trustchain.peerchat.entity.ContactImage
+import nl.tudelft.trustchain.peerchat.entity.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
-import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletVtBinding
-import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityDetailsDialog
 import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
+import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
+import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItem
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItemRenderer
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
+import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import org.json.JSONObject
 
-class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
-
+class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     private val binding by viewBinding(FragmentWalletVtBinding::bind)
-    private lateinit var parentActivity: ValueTransferMainActivity
-    private lateinit var identityCommunity: IdentityCommunity
-    private lateinit var peerChatCommunity: PeerChatCommunity
-    private lateinit var identityStore: IdentityStore
-    private lateinit var peerChatStore: PeerChatStore
-    private lateinit var contactStore: ContactStore
 
     private val adapterIdentity = ItemAdapter()
     private val adapterContacts = ItemAdapter()
 
+    private val identityImage = MutableLiveData<String?>()
+    private val myPeerConnected = MutableLiveData(false)
+
     private val itemsIdentity: LiveData<List<Item>> by lazy {
-        identityStore.getAllIdentities().map { identities ->
-            createIdentityItems(identities)
+        combine(getIdentityStore().getAllIdentities(), identityImage.asFlow(), myPeerConnected.asFlow()) { identities, identityImage, connected ->
+            createIdentityItems(identities, identityImage, connected)
         }.asLiveData()
     }
 
     private val peers = MutableStateFlow<List<Peer>>(listOf())
 
     private val itemsContacts: LiveData<List<Item>> by lazy {
-        combine(peerChatStore.getContactsWithLastMessages(), peers) { contacts, peers ->
-            createContactsItems(
-                contacts.filter {
-                    it.second?.timestamp != null && contactStore.getContactFromPublicKey(it.first.publicKey) != null
-                },
-                peers
-            )
+        combine(
+            getPeerChatStore().getLastMessages(
+                isRecent = true,
+                isArchive = false,
+                isBlocked = false
+            ),
+            peers,
+            getPeerChatStore().getAllContactState(),
+            getPeerChatStore().getAllContactImages()
+        ) { messages, peers, state, images ->
+            createChatItems(messages, peers, state, images)
         }.asLiveData()
     }
 
@@ -81,49 +85,57 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         return inflater.inflate(R.layout.fragment_wallet_vt, container, false)
     }
 
-    override fun onResume() {
-        super.onResume()
+    init {
+        setHasOptionsMenu(true)
 
-        parentActivity.setActionBarTitle("Wallet")
-        parentActivity.toggleActionBar(true)
-        parentActivity.toggleBottomNavigation(identityStore.hasIdentity())
+        lifecycleScope.launchWhenCreated {
+            while (isActive) {
+                if (appPreferences.getIdentityFace() != identityImage.value) {
+                    identityImage.postValue(appPreferences.getIdentityFace())
+                }
 
-        binding.clNoIdentity.isVisible = !identityStore.hasIdentity()
-        binding.svHasIdentity.isVisible = identityStore.hasIdentity()
+                if (getTrustChainCommunity().getPeers().isNotEmpty() != myPeerConnected.value) {
+                    myPeerConnected.postValue(getTrustChainCommunity().getPeers().isNotEmpty())
+                }
 
-        observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
+                delay(1000)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        parentActivity = requireActivity() as ValueTransferMainActivity
-        identityCommunity = parentActivity.getCommunity(ValueTransferMainActivity.identityCommunityTag) as IdentityCommunity
-        peerChatCommunity = parentActivity.getCommunity(ValueTransferMainActivity.peerChatCommunityTag) as PeerChatCommunity
-        identityStore = parentActivity.getStore(ValueTransferMainActivity.identityStoreTag) as IdentityStore
-        peerChatStore = parentActivity.getStore(ValueTransferMainActivity.peerChatStoreTag) as PeerChatStore
-        contactStore = parentActivity.getStore(ValueTransferMainActivity.contactStoreTag) as ContactStore
-
         // IDENTITY
-
         adapterIdentity.registerRenderer(
             IdentityItemRenderer(
                 0,
+                { identity ->
+                    val map = mapOf(
+                        QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
+                        QRScanController.KEY_NAME to identity.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
+                    )
+
+                    QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
+                        .show(parentFragmentManager, tag)
+                },
+                {},
                 {
                     parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
-                },
-                {}
+                }
             )
         )
 
         // CONTACTS
-
         adapterContacts.registerRenderer(
             ChatItemRenderer {
-                val args = Bundle()
-                args.putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
-                args.putString(ValueTransferMainActivity.ARG_NAME, it.name)
-                args.putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
+                val args = Bundle().apply {
+                    putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, it.publicKey.keyToBin().toHex())
+                    putString(ValueTransferMainActivity.ARG_NAME, it.name)
+                    putString(ValueTransferMainActivity.ARG_PARENT, ValueTransferMainActivity.walletOverviewFragmentTag)
+                }
 
                 parentActivity.detailFragment(ValueTransferMainActivity.contactChatFragmentTag, args)
             }
@@ -131,15 +143,36 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
 
         lifecycleScope.launchWhenResumed {
             while (isActive) {
-                peers.value = peerChatCommunity.getPeers()
+                peers.value = getPeerChatCommunity().getPeers()
                 delay(1000L)
             }
         }
     }
 
+    override fun initView() {
+        parentActivity.apply {
+            setActionBarTitle(
+                resources.getString(R.string.menu_navigation_wallet_overview),
+                null
+            )
+            toggleActionBar(false)
+            toggleBottomNavigation(getIdentityStore().hasIdentity())
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        binding.clNoIdentity.isVisible = !getIdentityStore().hasIdentity()
+        binding.svHasIdentity.isVisible = getIdentityStore().hasIdentity()
+
+        observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initView()
         onResume()
 
         // IDENTITY
@@ -147,7 +180,10 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         binding.rvIdentities.layoutManager = LinearLayoutManager(context)
 
         binding.btnCreateIdentity.setOnClickListener {
-            IdentityDetailsDialog().show(parentFragmentManager, tag)
+            IdentityOnboardingDialog().show(parentFragmentManager, tag)
+        }
+        binding.clNoIdentity.setOnClickListener {
+            IdentityOnboardingDialog().show(parentFragmentManager, tag)
         }
 
         itemsIdentity.observe(
@@ -157,12 +193,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
             }
         )
 
-        binding.ivGoToIdentity.setOnClickListener {
-            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
-        }
-
         // EXCHANGE
-
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
             Observer {
@@ -173,71 +204,142 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
             }
         )
 
-        binding.clTransferQR.setOnClickListener {
-            scanIntent = TRANSFER_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan QR Code to transfer EuroToken(s)", vertical = true)
+        binding.clExchangeBalanceHidden.setOnClickListener {
+            binding.clExchangeBalanceHidden.isVisible = !binding.clExchangeBalanceHidden.isVisible
+            binding.clExchangeBalance.isVisible = !binding.clExchangeBalance.isVisible
         }
 
-        binding.clTransferContact.setOnClickListener {
-            ExchangeTransferMoneyDialog(null, null, true).show(parentFragmentManager, tag)
+        binding.clExchangeBalance.setOnClickListener {
+            binding.clExchangeBalanceHidden.isVisible = !binding.clExchangeBalanceHidden.isVisible
+            binding.clExchangeBalance.isVisible = !binding.clExchangeBalance.isVisible
         }
 
-        binding.clRequest.setOnClickListener {
-            ExchangeTransferMoneyDialog(null, null, false).show(parentFragmentManager, tag)
+        binding.clExchangeOptions.setOnClickListener {
+            OptionsDialog(
+                R.menu.exchange_options,
+                resources.getString(R.string.dialog_exchange_options),
+                bigOptionsEnabled = true,
+                bigOptionsNumber = 2,
+            ) { _, item ->
+                when (item.itemId) {
+                    R.id.actionDeposit -> {
+                        scanIntent = DEPOSIT_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_buy),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionWithdraw -> {
+                        scanIntent = WITHDRAW_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_sell),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionTransferByQR -> {
+                        scanIntent = TRANSFER_INTENT
+                        QRCodeUtils(requireContext()).startQRScanner(
+                            this,
+                            promptText = resources.getString(R.string.text_scan_qr_exchange_transfer),
+                            vertical = true
+                        )
+                    }
+                    R.id.actionTransferToContact -> ExchangeTransferMoneyDialog(
+                        null,
+                        null,
+                        true
+                    ).show(parentFragmentManager, tag)
+                    R.id.actionRequestTransferContact -> ExchangeTransferMoneyDialog(
+                        null,
+                        null,
+                        false
+                    ).show(parentFragmentManager, tag)
+                }
+            }.show(parentFragmentManager, tag)
         }
 
-        binding.clButtonBuy.setOnClickListener {
-            scanIntent = BUY_EXCHANGE_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan Buy EuroToken QR Code from Exchange", vertical = true)
-        }
-
-        binding.clButtonSell.setOnClickListener {
-            scanIntent = SELL_EXCHANGE_INTENT
-            QRCodeUtils(requireContext()).startQRScanner(this, promptText = "Scan Sell EuroToken QR Code from Exchange", vertical = true)
-        }
-
-        binding.ivGoToExchange.setOnClickListener {
+        binding.tvExchangeTitle.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.exchangeFragmentTag)
         }
 
         // CONTACTS
-        binding.rvContactChats.adapter = adapterContacts
-        binding.rvContactChats.layoutManager = LinearLayoutManager(context)
+        val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_chat, requireContext().theme)
+        binding.rvContactChats.apply {
+            adapter = adapterContacts
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecorator(drawable!!) as ItemDecoration)
+        }
 
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
 
-        binding.ivGoToContacts.setOnClickListener {
+        binding.tvContactsTitle.setOnClickListener {
+            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
+        }
+
+        binding.clContactsOptions.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)?.let { result ->
-            val obj = JSONObject(result)
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.clear()
+        inflater.inflate(R.menu.wallet_overview_options, menu)
+    }
 
-            when (scanIntent) {
-                TRANSFER_INTENT -> {
-                    if (obj.has("payment_id")) {
-                        parentActivity.displaySnackbar(requireContext(), "Please scan a transfer QR-code instead of buy or sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-                        return
-                    }
-                    parentActivity.getQRScanController().transferMoney(obj)
-                }
-                BUY_EXCHANGE_INTENT -> {
-                    if (obj.has("amount")) {
-                        parentActivity.displaySnackbar(requireContext(), "Please scan a buy QR-code instead of sell", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-                        return
-                    }
-                    parentActivity.getQRScanController().exchangeMoney(obj, true)
-                }
-                SELL_EXCHANGE_INTENT -> {
-                    if (!obj.has("amount")) {
-                        parentActivity.displaySnackbar(requireContext(), "Please scan a sell QR-code instead of buy", type = ValueTransferMainActivity.SNACKBAR_TYPE_ERROR, isShort = false)
-                        return
-                    }
-                    parentActivity.getQRScanController().exchangeMoney(obj, false)
-                }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.actionSettings -> {
+                parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
             }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+                ?.let { result ->
+                    val obj = JSONObject(result)
+
+                    when (scanIntent) {
+                        DEPOSIT_INTENT -> {
+                            if (obj.has(QRScanController.KEY_AMOUNT)) {
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_buy_not_sell),
+                                    isShort = false
+                                )
+                                return
+                            }
+                            getQRScanController().exchangeMoney(obj, true)
+                        }
+                        WITHDRAW_INTENT -> {
+                            if (!obj.has(QRScanController.KEY_AMOUNT)) {
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_sell_not_buy),
+                                    isShort = false
+                                )
+                                return
+                            }
+                            getQRScanController().exchangeMoney(obj, false)
+                        }
+                        TRANSFER_INTENT -> {
+                            if (obj.has(QRScanController.KEY_PAYMENT_ID)) {
+                                parentActivity.displayToast(
+                                    requireContext(),
+                                    resources.getString(R.string.snackbar_exchange_scan_transfer_not_buy_sell),
+                                    isShort = false
+                                )
+                                return
+                            }
+                            getQRScanController().transferMoney(obj)
+                        }
+                    }
+                }
         }
     }
 
@@ -256,30 +358,50 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
         )
     }
 
-    private fun createIdentityItems(identities: List<Identity>): List<Item> {
+    private fun createIdentityItems(
+        identities: List<Identity>,
+        imageString: String?,
+        connected: Boolean
+    ): List<Item> {
         return identities.mapIndexed { _, identity ->
             IdentityItem(
-                identity
+                identity,
+                imageString?.let { decodeImage(it) },
+                connected
             )
         }
     }
 
-    private fun createContactsItems(contacts: List<Pair<Contact, ChatMessage?>>, peers: List<Peer>): List<Item> {
-        return contacts.filter { it.first.publicKey != getTrustChainCommunity().myPeer.publicKey }
-            .sortedByDescending { item ->
-                item.second?.timestamp?.time
-            }
+    private fun createChatItems(
+        messages: List<ChatMessage>,
+        peers: List<Peer>,
+        state: List<ContactState>,
+        images: List<ContactImage>
+    ): List<Item> {
+        return messages
             .filterIndexed { index, _ ->
                 index < MAX_CHATS
             }
-            .map { contactWithMessage ->
-                val (contact, message) = contactWithMessage
-                val peer = peers.find { it.mid == contact.mid }
-                ContactItem(
-                    contact,
+            .map { message ->
+                val publicKey = if (message.outgoing) message.recipient else message.sender
+                val peer = peers.find { it.publicKey == publicKey }
+                val contact = getContactStore().getContactFromPublicKey(publicKey)
+                val status = state.firstOrNull { it.publicKey == publicKey }
+                val image = images.firstOrNull { it.publicKey == publicKey }
+                val identityName = status?.identityInfo?.let {
+                    "${it.initials} ${it.surname}"
+                }
+
+                ChatItem(
+                    Contact(
+                        contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)),
+                        publicKey
+                    ),
                     message,
-                    peer != null && !peer.address.isEmpty(),
-                    peer?.bluetoothAddress != null
+                    isOnline = peer != null && !peer.address.isEmpty(),
+                    isBluetooth = peer?.bluetoothAddress != null,
+                    status,
+                    image
                 )
             }
     }
@@ -287,7 +409,7 @@ class WalletOverviewFragment : BaseFragment(R.layout.fragment_wallet_vt) {
     companion object {
         private const val MAX_CHATS = 3
         private const val TRANSFER_INTENT = 0
-        private const val BUY_EXCHANGE_INTENT = 1
-        private const val SELL_EXCHANGE_INTENT = 2
+        private const val DEPOSIT_INTENT = 1
+        private const val WITHDRAW_INTENT = 2
     }
 }
