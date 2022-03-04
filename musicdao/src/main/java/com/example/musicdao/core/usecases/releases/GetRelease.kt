@@ -2,7 +2,6 @@ package com.example.musicdao.core.usecases.releases
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.repositories.AlbumRepository
 import javax.inject.Inject
@@ -13,5 +12,4 @@ class GetRelease @Inject constructor(private val albumRepository: AlbumRepositor
     suspend operator fun invoke(id: String): Album {
         return albumRepository.get(id)
     }
-
 }

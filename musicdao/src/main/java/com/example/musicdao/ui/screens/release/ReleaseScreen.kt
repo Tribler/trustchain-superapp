@@ -78,27 +78,31 @@ fun ReleaseScreen(
                 name = track.title,
                 artist = track.artist,
                 title = track.title,
-            ), context, cover
+            ),
+            context, cover
         )
     }
 
     val scrollState = rememberScrollState()
 
     album?.let { album ->
-        LaunchedEffect(key1 = playerViewModel, block = {
-            viewModel.torrentHandleState.collect {
-                val current = playerViewModel.playingTrack.value ?: return@collect
-                val downloadingTracks =
-                    viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
-                val isPlaying = playerViewModel.exoPlayer.isPlaying
-                val targetTrack =
-                    downloadingTracks.find { it.file.name == current.file?.name } ?: return@collect
+        LaunchedEffect(
+            key1 = playerViewModel,
+            block = {
+                viewModel.torrentHandleState.collect {
+                    val current = playerViewModel.playingTrack.value ?: return@collect
+                    val downloadingTracks =
+                        viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
+                    val isPlaying = playerViewModel.exoPlayer.isPlaying
+                    val targetTrack =
+                        downloadingTracks.find { it.file.name == current.file?.name } ?: return@collect
 
-                if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
-                    play(targetTrack, album.cover)
+                    if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
+                        play(targetTrack, album.cover)
+                    }
                 }
             }
-        })
+        )
 
         Column(
             modifier = Modifier
@@ -110,7 +114,8 @@ fun ReleaseScreen(
                     Tab(
                         onClick = { state = index },
                         selected = (index == state),
-                        text = { Text(title) })
+                        text = { Text(title) }
+                    )
                 }
             }
             if (state == 0) {
@@ -143,7 +148,8 @@ fun ReleaseScreen(
                             }
                         } ?: MaterialTheme.colors.onBackground
 
-                        ListItem(text = { Text(it.title, color = isPlayingModifier) },
+                        ListItem(
+                            text = { Text(it.title, color = isPlayingModifier) },
                             secondaryText = { Text(it.artist, color = isPlayingModifier) },
                             trailing = {
                                 Icon(
@@ -151,13 +157,15 @@ fun ReleaseScreen(
                                     contentDescription = null
                                 )
                             },
-                            modifier = Modifier.clickable { play(it, album.cover) })
+                            modifier = Modifier.clickable { play(it, album.cover) }
+                        )
                     }
                 } else {
                     if (torrentStatus != null) {
                         val downloadingTracks = torrentStatus?.downloadingTracks
                         downloadingTracks?.map {
-                            ListItem(text = { Text(it.title) },
+                            ListItem(
+                                text = { Text(it.title) },
                                 secondaryText = {
                                     Column {
                                         Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
@@ -187,8 +195,6 @@ fun ReleaseScreen(
                         }
                     }
                 }
-
-
             }
             if (state == 1) {
                 val current = torrentStatus
@@ -199,10 +205,7 @@ fun ReleaseScreen(
                 }
             }
         }
-
-
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -223,7 +226,8 @@ fun Header(album: Album, navController: NavController) {
             "Album - ${dateToShortString(album.releaseDate.toString())}",
             style = MaterialTheme.typography.body2.merge(
                 SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)
-            ), modifier = Modifier.padding(bottom = 10.dp)
+            ),
+            modifier = Modifier.padding(bottom = 10.dp)
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -238,12 +242,14 @@ fun Header(album: Album, navController: NavController) {
                         .then(Modifier.padding(0.dp))
                         .align(Alignment.CenterVertically)
                 )
-                OutlinedButton(onClick = {
-                    navController.navigate(
-                        Screen.Profile.createRoute(publicKey = album.publisher)
-                    )
-
-                }, modifier = Modifier.padding(start = 10.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        navController.navigate(
+                            Screen.Profile.createRoute(publicKey = album.publisher)
+                        )
+                    },
+                    modifier = Modifier.padding(start = 10.dp)
+                ) {
                     Text("View Artist", color = Color.White)
                 }
             }
@@ -253,8 +259,3 @@ fun Header(album: Album, navController: NavController) {
         }
     }
 }
-
-
-
-
-

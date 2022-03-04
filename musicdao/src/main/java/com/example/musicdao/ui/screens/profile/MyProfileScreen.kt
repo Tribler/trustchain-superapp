@@ -31,6 +31,4 @@ fun MyProfileScreen(navController: NavController) {
             secondLine = "Please make one first."
         )
     }
-
 }
-

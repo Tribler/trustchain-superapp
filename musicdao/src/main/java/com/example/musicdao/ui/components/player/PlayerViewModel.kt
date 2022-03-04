@@ -71,5 +71,4 @@ class PlayerViewModel(context: Context) : ViewModel() {
             }
         }
     }
-
 }

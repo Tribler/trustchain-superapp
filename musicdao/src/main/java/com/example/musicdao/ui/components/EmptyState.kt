@@ -44,7 +44,6 @@ fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modif
             textAlign = TextAlign.Center,
             modifier = Modifier.width(300.dp)
         )
-
     }
 }
 
@@ -74,6 +73,5 @@ fun EmptyStateNotScrollable(firstLine: String, secondLine: String, modifier: Mod
             textAlign = TextAlign.Center,
             modifier = Modifier.width(300.dp)
         )
-
     }
 }

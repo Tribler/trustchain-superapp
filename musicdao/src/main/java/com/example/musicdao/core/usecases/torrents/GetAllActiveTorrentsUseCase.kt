@@ -24,5 +24,4 @@ class GetAllActiveTorrentsUseCase @Inject constructor(
             emit(result)
         }
     }
-
 }

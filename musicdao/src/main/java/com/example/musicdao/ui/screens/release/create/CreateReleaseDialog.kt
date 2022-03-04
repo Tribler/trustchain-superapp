@@ -37,7 +37,6 @@ import com.example.musicdao.ui.screens.release.create.CreateReleaseDialogViewMod
 import com.google.android.material.datepicker.MaterialDatePicker
 import java.time.Instant
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalComposeUiApi
 @Composable
@@ -184,13 +183,13 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
 
                         OutlinedButton(
                             modifier = Modifier.align(Alignment.End),
-                            onClick = { publishRelease() }) {
+                            onClick = { publishRelease() }
+                        ) {
                             Text("Create Release")
                         }
                     }
-                })
+                }
+            )
         }
     }
 }
-
-

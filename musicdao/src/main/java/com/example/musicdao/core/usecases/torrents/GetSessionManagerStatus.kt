@@ -13,7 +13,6 @@ class GetSessionManagerStatus @Inject constructor(val sessionManager: SessionMan
             downloadRate = sessionManager.downloadRate()
         )
     }
-
 }
 
 data class SessionManagerStatus(

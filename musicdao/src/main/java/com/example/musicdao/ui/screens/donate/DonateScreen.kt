@@ -44,6 +44,4 @@ fun DonateScreen() {
         Spacer(modifier = Modifier.weight(1f))
         CustomMenuItem(text = "Confirm Send", onClick = { send() })
     }
-
 }
-

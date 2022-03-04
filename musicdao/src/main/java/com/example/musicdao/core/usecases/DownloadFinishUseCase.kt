@@ -32,8 +32,10 @@ class DownloadFinishUseCase constructor(
                     val mp3 = Mp3File(it)
                     SongEntity(
                         file = it.absolutePath,
-                        title = Util.getTitle(mp3) ?: (Util.checkAndSanitizeTrackNames(it.name)
-                            ?: it.name),
+                        title = Util.getTitle(mp3) ?: (
+                            Util.checkAndSanitizeTrackNames(it.name)
+                                ?: it.name
+                            ),
                         name = "name",
                         artist = albumEntity.artist
                     )
@@ -58,5 +60,4 @@ class DownloadFinishUseCase constructor(
             database.dao.update(updatedAlbumEntity)
         }
     }
-
 }

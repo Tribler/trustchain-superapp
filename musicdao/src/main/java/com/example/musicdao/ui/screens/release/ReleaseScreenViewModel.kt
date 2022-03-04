@@ -16,7 +16,6 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 class ReleaseScreenViewModel @AssistedInject constructor(
     @Assisted private val releaseId: String,

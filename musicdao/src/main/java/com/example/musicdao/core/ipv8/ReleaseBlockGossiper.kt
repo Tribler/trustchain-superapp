@@ -45,5 +45,4 @@ class ReleaseBlockGossiper @Inject constructor(
         if (peers.isEmpty()) return null
         return peers.random()
     }
-
 }

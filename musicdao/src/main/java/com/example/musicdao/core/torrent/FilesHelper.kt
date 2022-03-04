@@ -25,5 +25,4 @@ class FilesHelper @Inject constructor(val specialPath: SpecialPath) {
             }
         }
     }
-
 }

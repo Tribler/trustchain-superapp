@@ -73,8 +73,6 @@ class ArtistAnnounceBlockRepository @Inject constructor(
             } catch (e: Exception) {
                 return
             }
-
-
         }
     }
 
@@ -107,6 +105,4 @@ class ArtistAnnounceBlockRepository @Inject constructor(
             val socials: String,
         )
     }
-
 }
-

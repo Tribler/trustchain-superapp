@@ -12,5 +12,4 @@ object AppContainer {
     fun provide(_activity: MusicActivity) {
         activity = _activity
     }
-
 }

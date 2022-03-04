@@ -52,17 +52,22 @@ fun ProfileMenuScreen(navController: NavController) {
                 text = "View Public Profile",
                 onClick = {
                     navController.navigate(Screen.MyProfile.route)
-                })
-            CustomMenuItem(text = "Edit Profile", onClick = {
-                navController.navigate(Screen.EditProfile.route)
-            })
-            CustomMenuItem(text = "Wallet", onClick = {
-                navController.navigate(Screen.BitcoinWallet.route)
-            })
+                }
+            )
+            CustomMenuItem(
+                text = "Edit Profile",
+                onClick = {
+                    navController.navigate(Screen.EditProfile.route)
+                }
+            )
+            CustomMenuItem(
+                text = "Wallet",
+                onClick = {
+                    navController.navigate(Screen.BitcoinWallet.route)
+                }
+            )
         }
     }
-
-
 }
 
 @Composable
@@ -88,5 +93,4 @@ fun CustomMenuItem(text: String, onClick: () -> Unit, enabled: Boolean = true) {
             Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null)
         }
     }
-
 }

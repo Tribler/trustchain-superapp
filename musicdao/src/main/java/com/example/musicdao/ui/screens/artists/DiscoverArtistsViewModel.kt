@@ -41,6 +41,4 @@ class DiscoverArtistsViewModel @Inject constructor(
             _isRefreshing.value = false
         }
     }
-
 }
-

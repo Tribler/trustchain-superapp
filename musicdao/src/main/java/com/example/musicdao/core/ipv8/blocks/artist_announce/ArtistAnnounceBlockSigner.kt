@@ -11,4 +11,3 @@ class ArtistAnnounceBlockSigner @Inject constructor(val musicCommunity: MusicCom
         musicCommunity.createAgreementBlock(block, mapOf<Any?, Any?>())
     }
 }
-

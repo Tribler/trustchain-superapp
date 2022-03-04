@@ -13,5 +13,4 @@ class DownloadIntentUseCase @Inject constructor(private val torrentCache: Torren
     operator fun invoke(id: String): MyResult<TorrentHandle> {
         return torrentCache.download(id)
     }
-
 }

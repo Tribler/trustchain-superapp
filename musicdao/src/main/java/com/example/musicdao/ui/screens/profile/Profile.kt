@@ -86,6 +86,4 @@ fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: Nav
             }
         }
     }
-
 }
-

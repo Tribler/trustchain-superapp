@@ -33,17 +33,18 @@ class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: Music
         val releaseDate = transaction["releaseDate"]
         val protocolVersion = transaction["protocolVersion"]
 
-        return (releaseId is String && releaseId.isNotEmpty() && transaction.containsKey("releaseId") &&
-            magnet is String && magnet.isNotEmpty() && transaction.containsKey("magnet") &&
-            title is String && title.isNotEmpty() && transaction.containsKey("title") &&
-            artist is String && artist.isNotEmpty() && transaction.containsKey("artist") &&
-            publisher is String && publisher.isNotEmpty() && transaction.containsKey("publisher") &&
-            releaseDate is String && releaseDate.isNotEmpty() && transaction.containsKey("releaseDate") &&
-            protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == Constants.PROTOCOL_VERSION)
+        return (
+            releaseId is String && releaseId.isNotEmpty() && transaction.containsKey("releaseId") &&
+                magnet is String && magnet.isNotEmpty() && transaction.containsKey("magnet") &&
+                title is String && title.isNotEmpty() && transaction.containsKey("title") &&
+                artist is String && artist.isNotEmpty() && transaction.containsKey("artist") &&
+                publisher is String && publisher.isNotEmpty() && transaction.containsKey("publisher") &&
+                releaseDate is String && releaseDate.isNotEmpty() && transaction.containsKey("releaseDate") &&
+                protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == Constants.PROTOCOL_VERSION
+            )
     }
 
     companion object {
         val BLOCK_TYPE = ReleasePublishBlock.BLOCK_TYPE
     }
-
 }

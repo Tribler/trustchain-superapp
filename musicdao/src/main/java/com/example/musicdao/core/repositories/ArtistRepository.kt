@@ -37,5 +37,3 @@ class ArtistRepository @Inject constructor(
         )
     }
 }
-
-

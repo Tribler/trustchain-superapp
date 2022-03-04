@@ -128,7 +128,4 @@ class TorrentCache @Inject constructor() {
 
         return File("${context.cacheDir}/temp/content")
     }
-
 }
-
-

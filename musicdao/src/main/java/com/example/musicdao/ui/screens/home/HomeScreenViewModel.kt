@@ -39,5 +39,4 @@ class HomeScreenViewModel @Inject constructor(
             _isRefreshing.value = false
         }
     }
-
 }

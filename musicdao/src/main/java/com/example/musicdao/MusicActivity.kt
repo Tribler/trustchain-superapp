@@ -68,9 +68,9 @@ class MusicActivity : AppCompatActivity() {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
             torrentCache.seedStrategy()
-                GlobalScope.launch(Dispatchers.IO) {
-                    walletService.start()
-                }
+            GlobalScope.launch(Dispatchers.IO) {
+                walletService.start()
+            }
         }
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->
@@ -137,7 +137,6 @@ class MusicActivity : AppCompatActivity() {
         return uriList
     }
 
-
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
@@ -158,6 +157,4 @@ class MusicActivity : AppCompatActivity() {
         fun noteDetailViewModelFactory(): ReleaseScreenViewModel.ReleaseScreenViewModelFactory
         fun profileScreenViewModelFactory(): ProfileScreenViewModel.ProfileScreenViewModelFactory
     }
-
-
 }

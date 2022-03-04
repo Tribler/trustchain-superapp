@@ -130,7 +130,6 @@ class HiltModules {
             )
         )
     }
-
 }
 
 class SpecialPath(val applicationContext: Context) {
@@ -139,4 +138,3 @@ class SpecialPath(val applicationContext: Context) {
         return Paths.get("${applicationContext.cacheDir}")
     }
 }
-

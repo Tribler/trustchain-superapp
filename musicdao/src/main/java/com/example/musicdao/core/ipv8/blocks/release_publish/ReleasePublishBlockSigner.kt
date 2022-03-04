@@ -15,4 +15,3 @@ class ReleasePublishBlockSigner @Inject constructor(val musicCommunity: MusicCom
         val BLOCK_TYPE = ReleasePublishBlock.BLOCK_TYPE
     }
 }
-

@@ -6,7 +6,6 @@ import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.Sha1Hash
 import nl.tudelft.ipv8.android.IPv8Android
 
-
 class SwarmHealthRepository(
     private val sessionManager: SessionManager,
     val musicCommunity: MusicCommunity
@@ -69,5 +68,4 @@ class SwarmHealthRepository(
 //        return localMap
         return mutableMapOf()
     }
-
 }

@@ -54,13 +54,13 @@ fun Drawer() {
             ListItem(
                 text = { Text("Wallet") },
                 icon = { Icon(imageVector = Icons.Default.Send, contentDescription = null) },
-                    modifier = Modifier.clickable {}
+                modifier = Modifier.clickable {}
 
             )
             ListItem(
                 text = { Text("Settings") },
                 icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = null) },
-                    modifier = Modifier.clickable {}
+                modifier = Modifier.clickable {}
 
             )
         }

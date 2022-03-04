@@ -13,4 +13,3 @@ data class ReleasePublishBlock(
         val BLOCK_TYPE = "publish_release"
     }
 }
-

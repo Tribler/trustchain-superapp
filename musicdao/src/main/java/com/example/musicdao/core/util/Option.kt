@@ -3,7 +3,7 @@ sealed class Option<out A> {
     data class Value<out A>(val value: A) : Option<A>()
 
     companion object {
-        fun <A>from(value: A?): Option<out A> {
+        fun <A> from(value: A?): Option<out A> {
             return value?.let { Value(value) } ?: None
         }
     }

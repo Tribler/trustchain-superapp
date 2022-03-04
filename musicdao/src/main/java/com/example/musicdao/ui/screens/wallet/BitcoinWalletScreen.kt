@@ -64,13 +64,14 @@ fun BitcoinWalletScreen() {
                         .padding(end = 1.dp)
                         .align(Alignment.CenterVertically)
                 )
-                LinearProgressIndicator(bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
-                    ?: 0f,
+                LinearProgressIndicator(
+                    bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
+                        ?: 0f,
                     color = MaterialTheme.colors.onPrimary,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .fillMaxWidth())
-
+                        .fillMaxWidth()
+                )
             }
         }
 
@@ -79,7 +80,8 @@ fun BitcoinWalletScreen() {
                 Tab(
                     onClick = { state = index },
                     selected = (index == state),
-                    text = { Text(title) })
+                    text = { Text(title) }
+                )
             }
         }
 
@@ -88,7 +90,8 @@ fun BitcoinWalletScreen() {
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     CustomMenuItem(
                         text = "Request from faucet",
-                        onClick = { bitcoinWalletViewModel.requestFaucet() })
+                        onClick = { bitcoinWalletViewModel.requestFaucet() }
+                    )
                     CustomMenuItem(
                         text = "Send",
                         onClick = { },
@@ -108,13 +111,15 @@ fun BitcoinWalletScreen() {
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(text = "Wallet Status", fontWeight = FontWeight.Bold)
                         Text(text = bitcoinWalletViewModel.status.value ?: "No Status")
-
                     }
 
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(text = "Syncing Progress", fontWeight = FontWeight.Bold)
-                        LinearProgressIndicator(bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
-                            ?: 0f, modifier = Modifier.padding(top = 10.dp))
+                        LinearProgressIndicator(
+                            bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
+                                ?: 0f,
+                            modifier = Modifier.padding(top = 10.dp)
+                        )
                     }
                 }
             }

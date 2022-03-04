@@ -30,13 +30,13 @@ class ArtistAnnounceBlockValidator @Inject constructor() : TransactionValidator 
         val socials = transaction["socials"]
         val protocolVersion = transaction["protocolVersion"]
 
-        return (publicKey is String && publicKey.isNotEmpty() && transaction.containsKey("publicKey") &&
-            bitcoinAddress is String && bitcoinAddress.isNotEmpty() && transaction.containsKey("bitcoinAddress") &&
-            name is String && name.isNotEmpty() && transaction.containsKey("name") &&
-            biography is String && biography.isNotEmpty() && transaction.containsKey("biography") &&
-            socials is String && socials.isNotEmpty() && transaction.containsKey("socials") &&
-            protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == Constants.PROTOCOL_VERSION)
+        return (
+            publicKey is String && publicKey.isNotEmpty() && transaction.containsKey("publicKey") &&
+                bitcoinAddress is String && bitcoinAddress.isNotEmpty() && transaction.containsKey("bitcoinAddress") &&
+                name is String && name.isNotEmpty() && transaction.containsKey("name") &&
+                biography is String && biography.isNotEmpty() && transaction.containsKey("biography") &&
+                socials is String && socials.isNotEmpty() && transaction.containsKey("socials") &&
+                protocolVersion is String && protocolVersion.isNotEmpty() && protocolVersion == Constants.PROTOCOL_VERSION
+            )
     }
-
-
 }

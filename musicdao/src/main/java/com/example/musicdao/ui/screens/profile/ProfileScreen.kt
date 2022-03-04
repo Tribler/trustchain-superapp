@@ -41,6 +41,4 @@ fun ProfileScreen(publicKey: String, navController: NavController) {
     } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
     }
-
 }
-

@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun TorrentStatusScreen(torrentHandle: TorrentHandleStatus) {
@@ -28,12 +27,15 @@ fun TorrentStatusScreen(torrentHandle: TorrentHandleStatus) {
         Divider()
         ListItem(
             text = { Text("Finished Downloading") },
-            secondaryText = { Text(torrentHandle.finishedDownloading) })
+            secondaryText = { Text(torrentHandle.finishedDownloading) }
+        )
         ListItem(text = { Text("Pieces") }, secondaryText = { Text(torrentHandle.pieces) })
         ListItem(text = { Text("Files") }, secondaryText = { Text("${torrentHandle.files}") })
         Divider()
-        ListItem(text = { Text("Seeding") },
-            secondaryText = { Text(torrentHandle.seeding) })
+        ListItem(
+            text = { Text("Seeding") },
+            secondaryText = { Text(torrentHandle.seeding) }
+        )
 
         Row {
             ListItem(

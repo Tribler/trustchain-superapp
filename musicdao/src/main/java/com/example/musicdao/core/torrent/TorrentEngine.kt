@@ -47,20 +47,19 @@ class TorrentEngine @Inject constructor(
                         Log.d(
                             "MusicDAOTorrent",
                             "ALERT: Torrent added ${a.handle().infoHash()} with \n${
-                                a.handle().makeMagnetUri()
+                            a.handle().makeMagnetUri()
                             }"
                         )
                         alert.handle().resume()
                         _activeTorrents.value =
                             _activeTorrents.value + alert.handle().infoHash().toString()
-
                     }
                     AlertType.TORRENT_REMOVED -> {
                         val a: TorrentRemovedAlert = alert as TorrentRemovedAlert
                         Log.d(
                             "MusicDAOTorrent",
                             "ALERT: Torrent removed ${a.handle().infoHash()} with \n${
-                                a.handle().makeMagnetUri()
+                            a.handle().makeMagnetUri()
                             }"
                         )
                         _activeTorrents.value =
@@ -71,7 +70,7 @@ class TorrentEngine @Inject constructor(
                         Log.d(
                             "MusicDAOTorrent",
                             "ALERT: Torrent checked ${a.handle().infoHash()} with \n${
-                                a.handle().makeMagnetUri()
+                            a.handle().makeMagnetUri()
                             }"
                         )
                         Util.setTorrentPriorities(alert.handle())
@@ -89,7 +88,7 @@ class TorrentEngine @Inject constructor(
                         Log.d(
                             "MusicDAOTorrent",
                             "ALERT: Torrent finished ${a.handle().infoHash()} with \n${
-                                a.handle().makeMagnetUri()
+                            a.handle().makeMagnetUri()
                             }"
                         )
                         torrentFinished(a.handle().infoHash().toString())

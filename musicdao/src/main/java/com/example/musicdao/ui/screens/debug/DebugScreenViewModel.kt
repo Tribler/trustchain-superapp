@@ -47,5 +47,4 @@ class DebugScreenViewModel @Inject constructor(
             }
         }
     }
-
 }

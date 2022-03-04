@@ -51,6 +51,4 @@ class MyProfileScreenViewModel @Inject constructor(
             _profile.value = artistRepository.getArtist(publicKey = publicKey)
         }
     }
-
 }
-

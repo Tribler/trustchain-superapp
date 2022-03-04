@@ -23,5 +23,4 @@ class CreateReleaseDialogViewModel @Inject constructor(private val createRelease
     ): Boolean {
         return createReleaseUseCase.invoke(artist, title, releaseDate, uris, context)
     }
-
 }

@@ -1,7 +1,6 @@
 package com.example.musicdao.ui.screens.profile
 
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -60,7 +59,8 @@ fun EditProfileScreen(navController: NavController) {
             Text(text = "Name", fontWeight = FontWeight.Bold)
             TextField(
                 value = name.value ?: "",
-                onValueChange = { name.value = it })
+                onValueChange = { name.value = it }
+            )
         }
 
         Column(modifier = Modifier.padding(bottom = 20.dp)) {
@@ -76,29 +76,32 @@ fun EditProfileScreen(navController: NavController) {
             Text(text = "Bitcoin Public Key", fontWeight = FontWeight.Bold)
             TextField(
                 value = bitcoinPublicKey.value ?: "",
-                onValueChange = { bitcoinPublicKey.value = it })
+                onValueChange = { bitcoinPublicKey.value = it }
+            )
         }
 
         Column(modifier = Modifier.padding(bottom = 20.dp)) {
             Text(text = "Socials", fontWeight = FontWeight.Bold)
             TextField(
                 value = socials.value ?: "",
-                onValueChange = { socials.value = it })
+                onValueChange = { socials.value = it }
+            )
         }
 
         Column(modifier = Modifier.padding(bottom = 20.dp)) {
             Text(text = "Biography", fontWeight = FontWeight.Bold)
             TextField(
                 value = biography.value ?: "",
-                onValueChange = { biography.value = it })
+                onValueChange = { biography.value = it }
+            )
         }
 
-        OutlinedButton(onClick = {
-            save()
-        }) {
+        OutlinedButton(
+            onClick = {
+                save()
+            }
+        ) {
             Text("Save")
         }
     }
-
 }
-

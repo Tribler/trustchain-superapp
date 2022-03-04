@@ -10,5 +10,4 @@ class RefreshReleases(private val albumRepository: AlbumRepository) {
     suspend operator fun invoke() {
         albumRepository.refreshCache()
     }
-
 }

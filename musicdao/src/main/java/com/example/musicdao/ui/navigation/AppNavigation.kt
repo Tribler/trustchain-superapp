@@ -36,7 +36,6 @@ import com.example.musicdao.ui.screens.wallet.BitcoinWalletScreen
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 
-
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
 @RequiresApi(Build.VERSION_CODES.O)
@@ -49,7 +48,6 @@ fun AppNavigation(
     val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
     val searchScreenScreenViewModel: SearchScreenViewModel = hiltViewModel()
     val debugScreenViewModel: DebugScreenViewModel = hiltViewModel()
-
 
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
@@ -90,9 +88,11 @@ fun AppNavigation(
             }
             composable(
                 Screen.Profile.route,
-                arguments = listOf(navArgument("publicKey") {
-                    type = NavType.StringType
-                })
+                arguments = listOf(
+                    navArgument("publicKey") {
+                        type = NavType.StringType
+                    }
+                )
             ) { navBackStackEntry ->
                 ProfileScreen(
                     navBackStackEntry.arguments?.getString(
@@ -103,9 +103,11 @@ fun AppNavigation(
             }
             composable(
                 Screen.Release.route,
-                arguments = listOf(navArgument("releaseId") {
-                    type = NavType.StringType
-                })
+                arguments = listOf(
+                    navArgument("releaseId") {
+                        type = NavType.StringType
+                    }
+                )
             ) { navBackStackEntry ->
                 ReleaseScreen(
                     navBackStackEntry.arguments?.getString(
@@ -132,7 +134,6 @@ fun AppNavigation(
             ) {
                 FullPlayerScreen(playerViewModel)
             }
-        })
-
+        }
+    )
 }
-

@@ -94,7 +94,6 @@ fun MusicDAOApp() {
     }
 }
 
-
 object SnackbarHandler {
     var snackbarHostState: SnackbarHostState? = null
     var coroutineScope: CoroutineScope? = null
@@ -110,6 +109,3 @@ object SnackbarHandler {
         }
     }
 }
-
-
-

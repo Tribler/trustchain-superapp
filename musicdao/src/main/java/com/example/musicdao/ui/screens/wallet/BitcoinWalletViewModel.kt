@@ -1,6 +1,5 @@
 package com.example.musicdao.ui.screens.wallet
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.core.wallet.WalletService
@@ -41,4 +40,3 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
         const val REFRESH_DELAY = 1000L
     }
 }
-

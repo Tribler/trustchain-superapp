@@ -12,5 +12,4 @@ class SearchAlbums @Inject constructor(private val albumRepository: AlbumReposit
     suspend operator fun invoke(keyword: String): List<Album> {
         return albumRepository.searchAlbums(keyword = keyword)
     }
-
 }

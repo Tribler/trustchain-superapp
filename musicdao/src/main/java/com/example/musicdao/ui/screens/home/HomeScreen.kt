@@ -39,17 +39,21 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
     SwipeRefresh(state = refreshState, onRefresh = { homeScreenViewModel.refresh() }) {
         val modifier = if (releasesState.isEmpty()) Modifier else Modifier.fillMaxSize()
         Column(modifier = Modifier.fillMaxSize()) {
-            ReleaseList(releasesState = releasesState, navController = navController, header = {
-                Text(
-                    text = "All Releases",
-                    style = MaterialTheme.typography.h6,
-                    modifier = Modifier
-                        .background(MaterialTheme.colors.background)
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                )
-                Divider()
-            }, modifier = modifier)
+            ReleaseList(
+                releasesState = releasesState, navController = navController,
+                header = {
+                    Text(
+                        text = "All Releases",
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier
+                            .background(MaterialTheme.colors.background)
+                            .fillMaxWidth()
+                            .padding(20.dp)
+                    )
+                    Divider()
+                },
+                modifier = modifier
+            )
             if (releasesState.isEmpty()) {
                 EmptyState(
                     firstLine = "No releases found",
@@ -64,7 +68,8 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
 fun ReleaseCoverButton(title: String, artist: String, file: File?, modifier: Modifier) {
     Column(modifier) {
         ReleaseCover(
-            file, modifier = Modifier
+            file,
+            modifier = Modifier
                 .height(115.dp)
                 .aspectRatio(1f)
                 .clip(RoundedCornerShape(5))
