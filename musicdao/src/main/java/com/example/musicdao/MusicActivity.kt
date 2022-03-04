@@ -33,7 +33,7 @@ import kotlinx.coroutines.*
 import javax.inject.Inject
 
 /**
- * This maintains the interactions between the UI and seeding/trustchain
+ * This maintains the interactions between the UI and seeding/trust-chain
  */
 @AndroidEntryPoint
 class MusicActivity : AppCompatActivity() {
@@ -56,6 +56,7 @@ class MusicActivity : AppCompatActivity() {
     @Inject
     lateinit var setupMusicCommunity: SetupMusicCommunity
 
+    @DelicateCoroutinesApi
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
     @RequiresApi(Build.VERSION_CODES.O)
@@ -111,12 +112,13 @@ class MusicActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
         val uris = uriListFromLocalFiles(intent = data!!)
         AppContainer.currentCallback(uris)
     }
 
-    fun uriListFromLocalFiles(intent: Intent): List<Uri> {
+    private fun uriListFromLocalFiles(intent: Intent): List<Uri> {
         // This should be reached when the chooseFile intent is completed and the user selected
         // an audio file
         val uriList = mutableListOf<Uri>()
@@ -137,6 +139,7 @@ class MusicActivity : AppCompatActivity() {
         return uriList
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun iterativelyFetchReleases() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
@@ -148,6 +151,7 @@ class MusicActivity : AppCompatActivity() {
 
     override fun startActivityForResult(intent: Intent?, requestCode: Int) {
         require(!(requestCode != -1 && requestCode and -0x10000 != 0)) { "Can only use lower 16 bits for requestCode" }
+        @Suppress("DEPRECATION")
         super.startActivityForResult(intent, requestCode)
     }
 
