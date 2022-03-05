@@ -1,4 +1,4 @@
-package com.example.common.bitcoin
+package nl.tudelft.trustchain.common.bitcoin
 
 import org.bitcoinj.core.*
 import org.bitcoinj.crypto.TransactionSignature

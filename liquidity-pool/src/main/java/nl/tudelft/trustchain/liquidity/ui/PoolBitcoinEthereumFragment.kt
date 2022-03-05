@@ -7,9 +7,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_pool_bitcoin_ethereum.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import nl.tudelft.trustchain.common.bitcoin.BitcoinMultiSigWallet
+import nl.tudelft.trustchain.common.bitcoin.BitcoinWallet
+import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
-import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.liquidity.util.TrustChainInteractor
 import org.bitcoinj.core.Coin
 import org.bitcoinj.params.RegTestParams
@@ -27,11 +29,11 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         TRADE_ETH_BTC
     }
 
-    private lateinit var bitcoinWallet: com.example.common.bitcoin.BitcoinWallet
-    private lateinit var ethereumWallet: nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
+    private lateinit var bitcoinWallet: BitcoinWallet
+    private lateinit var ethereumWallet: EthereumWeb3jWallet
 
-    private lateinit var bitcoinMultiSigWallet: com.example.common.bitcoin.BitcoinMultiSigWallet
-    private lateinit var ethereumMultiSigWallet: nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
+    private lateinit var bitcoinMultiSigWallet: BitcoinMultiSigWallet
+    private lateinit var ethereumMultiSigWallet: EthereumWeb3jWallet
 
     private var debugLogLineNumber = 0
     private val BTC_TO_ETH_RATIO = 2.0
@@ -84,8 +86,7 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         val walletDirectory = context?.cacheDir ?: throw Error("CacheDir not found")
 
         debugLog("Creating personal bitcoin wallet.")
-        bitcoinWallet =
-            com.example.common.bitcoin.BitcoinWallet(params, seed, walletDirectory, seed)
+        bitcoinWallet = BitcoinWallet(params, seed, walletDirectory, seed)
         debugLog("Waiting for the wallet app kit to start running.")
 
         while (!bitcoinWallet.kit.isRunning) {
@@ -96,7 +97,7 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
 
         debugLog("Creating multi-signature bitcoin wallet.")
         bitcoinMultiSigWallet =
-            com.example.common.bitcoin.BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
+            BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
         debugLog("Created multi-signature bitcoin wallet with address: ${bitcoinMultiSigWallet.address()}.")
     }
 
