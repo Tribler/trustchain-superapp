@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.atomicswap
 
-import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.common.BaseActivity
 
 class AtomicSwapActivity : BaseActivity() {
