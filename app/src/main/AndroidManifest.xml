@@ -60,6 +60,10 @@
             android:theme="@style/Theme.PeerChat" />
 
         <activity
+            android:name="nl.tudelft.trustchain.frost.FrostActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
