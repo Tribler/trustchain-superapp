@@ -34,9 +34,16 @@ android {
     }
 }
 
+repositories {
+    flatDir {
+        dirs '../common/libs'
+    }
+}
+
 dependencies {
     implementation project(":common")
     implementation project(":common-bitcoin")
+    implementation project(":common-ethereum")
     implementation project(":ipv8-android")
 
     // TODO: Newer than the rest of apps - should we leave or downgrade

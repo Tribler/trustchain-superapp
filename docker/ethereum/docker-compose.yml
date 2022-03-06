@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  geth:
+    image: ethereum/client-go:stable
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+    volumes:
+      - geth_data:/root/.ethereum
+    command:
+      - "--dev"
+      - "--http.addr=0.0.0.0"
+
+volumes:
+  geth_data:
