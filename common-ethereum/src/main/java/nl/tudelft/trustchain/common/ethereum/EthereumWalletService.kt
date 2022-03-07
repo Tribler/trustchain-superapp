@@ -70,6 +70,14 @@ class EthereumWalletService {
             var password = preferences.getString(SHARED_PREF_KEY_WALLET_PASSWORD, null)
             if (password == null) {
                 password = generateWalletPassword(SecureRandom())
+                Log.i(
+                    EthereumWalletService::class.simpleName,
+                    "Generated new password for the Web3j wallet: $password"
+                )
+
+                preferences.edit()
+                    .putString(SHARED_PREF_KEY_WALLET_PASSWORD, password)
+                    .apply()
             }
 
             return password
@@ -82,7 +90,18 @@ class EthereumWalletService {
             val publicKey = preferences.getString(SHARED_PREF_KEY_PUBLIC_KEY, null)
 
             return if (privateKey == null || publicKey == null) {
-                ECKeyPair.create(BigInteger.valueOf(SecureRandom().nextLong()))
+                val keypair = ECKeyPair.create(BigInteger.valueOf(SecureRandom().nextLong()))
+                Log.i(
+                    EthereumWalletService::class.simpleName,
+                    "Generated new keypair for the Web3j wallet (public key: ${keypair.publicKey})"
+                )
+
+                preferences.edit()
+                    .putString(SHARED_PREF_KEY_PRIVATE_KEY, keypair.privateKey.toString())
+                    .putString(SHARED_PREF_KEY_PUBLIC_KEY, keypair.publicKey.toString())
+                    .apply()
+
+                return keypair
             } else {
                 ECKeyPair(BigInteger(privateKey), BigInteger(publicKey))
             }
