@@ -17,9 +17,8 @@ import java.util.*
 
 class BrowserGridAdapter(
     private val vaultBrowserFragment: VaultBrowserFragment,
-    private var files: List<VaultFileItem>
+    private val files: MutableList<VaultFileItem>
     ): RecyclerView.Adapter<ImageViewHolder>() {
-    var requested = 0
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         return ImageViewHolder(LayoutInflater.from(vaultBrowserFragment.requireContext()).inflate(R.layout.browser_grid_item, parent, false))
@@ -31,37 +30,39 @@ class BrowserGridAdapter(
         val vaultFile = files[position]
 
         holder.name.text = vaultFile.name
-
-        if (vaultFile is LocalVaultFileItem) {
-            //holder.inBitmap = vaultFile.getImage(holder.inBitmap)
-            val bitmap = vaultFile.getImage(holder.inBitmap)
-            holder.iv.setImageBitmap(bitmap)
-            holder.setLoading(false)
-        } else if (vaultFile is PeerVaultFileItem) {
-            holder.container.tag = vaultFile
-
-            val dataCacheFile = vaultFile.getDataCacheFile(vaultBrowserFragment.requireContext())
-            if (!holder.setRemoteFileImage(vaultFile, dataCacheFile)) {
-                if (requested < 10) {
-                    vaultFile.requestRemoteBitmap(holder)
-                    requested++
-                }
-            }
-        }
+        holder.container.setOnClickListener(null)
 
         if (vaultFile.isDirectory()) {
-            //holder.iv.setImageResource(R.mipmap.folder_icon)
+            holder.name.visibility = View.VISIBLE
+            holder.setImageResource(R.mipmap.folder_icon)
+
             holder.container.setOnClickListener {
+                Log.e("Adapter", "Folder onClick")
                 vaultBrowserFragment.navigateToFolder(vaultFile)
             }
-        } else if (vaultFile is LocalVaultFileItem) {
-            holder.container.setOnClickListener {
-                vaultBrowserFragment.acmViewModel.clearModifiedPolicies()
-                val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(vaultFile.file.absolutePath)
-                vaultBrowserFragment.findNavController().navigate(action)
-            }
+
+            if (vaultFile is PeerVaultFileItem) vaultFile.fetchSubFolderAccessibleFiles()
         } else {
-            holder.container.setOnClickListener(null)
+            when (vaultFile) {
+                is LocalVaultFileItem -> {
+                    val bitmap = vaultFile.getImage(holder.inBitmap)!!
+                    holder.setImageBitmap(bitmap)
+
+                    holder.container.setOnClickListener {
+                        vaultBrowserFragment.acmViewModel.clearModifiedPolicies()
+                        val action = VaultBrowserFragmentDirections.actionVaultBrowserFragmentToAccessControlManagementFragment(vaultFile.file.absolutePath)
+                        vaultBrowserFragment.findNavController().navigate(action)
+                    }
+                }
+                is PeerVaultFileItem -> {
+                    holder.container.tag = vaultFile
+
+                    val dataCacheFile = vaultFile.getDataCacheFile(vaultBrowserFragment.requireContext())
+                    if (!holder.setRemoteFileImage(vaultFile, dataCacheFile)) {
+                        vaultFile.requestRemoteBitmap(holder)
+                    }
+                }
+            }
         }
 
     }
@@ -71,17 +72,35 @@ class BrowserGridAdapter(
     }
 
     fun updateItems(vaultFileItems: List<VaultFileItem>) {
-        files = vaultFileItems
-        notifyDataSetChanged()
+        clearItems()
+        files.addAll(vaultFileItems)
+        notifyItemRangeInserted(0, vaultFileItems.size)
+    }
+
+    fun clearItems() {
+        val count = itemCount
+        files.clear()
+        notifyItemRangeRemoved(0, count)
     }
 }
 
 class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val container: View = view.findViewById(R.id.container)
-    val iv: ImageView = view.findViewById(R.id.iv)
+    private val iv: ImageView = view.findViewById(R.id.iv)
     val name: TextView = view.findViewById(R.id.fileName)
     private val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
     var inBitmap: Bitmap? = null
+
+    fun setImageResource(resource: Int) {
+        iv.setImageResource(resource)
+        setLoading(false)
+    }
+
+    fun setImageBitmap(bitmap: Bitmap) {
+        inBitmap = bitmap
+        iv.setImageBitmap(bitmap)
+        setLoading(false)
+    }
 
     /***
      * Try to set the image bitmap if the vault file is still associated with this view holder.
@@ -92,23 +111,23 @@ class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val lastModified = file.lastModified()
             val currentTime = Date().time
             Log.e("Grid adapter", "last modified: ${file.lastModified()}, current time: $currentTime")
+
             if (file.exists() && file.canRead() && (currentTime - lastModified) < PeerVaultFileItem.CACHE_FILE_EXPIRY_MILLIS ) {
-                val options = BitmapFactory.Options().also {
-                    //it.outWidth = VaultFileItem.IMAGE_WIDTH
-                    it.inSampleSize = 6
-                }
-                inBitmap?.also {
-                    //options.inBitmap = inBitmap
-                }
                 try {
+                    val options = BitmapFactory.Options().also {
+                        it.outWidth = ImageViewHolder.IMAGE_WIDTH
+                        it.inBitmap = inBitmap
+                    }
+
                     val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
-                    Log.e("Grid Adapter", "decoding remote cache file (${file.length()} bytes) $bitmap")
-                    //inBitmap = Bitmap.createScaledBitmap(bitmap, VaultFileItem.IMAGE_WIDTH, VaultFileItem.IMAGE_WIDTH, true)
-                    iv.setImageBitmap(bitmap)
-                    setLoading(false)
+                    setImageBitmap(bitmap)
                 } catch (e: Exception) {
-                    Log.e("Grid Adapter", "decoding remote cache file failed")
-                    Log.e("Grid Adapter", e.toString())
+                    val options = BitmapFactory.Options().also {
+                        it.outWidth = ImageViewHolder.IMAGE_WIDTH
+                    }
+
+                    val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
+                    setImageBitmap(bitmap)
                 }
             } else {
                 return false
@@ -125,8 +144,12 @@ class ImageViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             progressBar.visibility = View.VISIBLE
         } else {
             iv.visibility = View.VISIBLE
-            name.visibility = View.VISIBLE
             progressBar.visibility = View.GONE
+            // name is made visible only for folders
         }
+    }
+
+    companion object {
+        const val IMAGE_WIDTH = 300
     }
 }

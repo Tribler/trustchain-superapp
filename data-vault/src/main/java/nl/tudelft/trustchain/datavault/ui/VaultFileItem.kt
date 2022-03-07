@@ -8,9 +8,20 @@ import java.io.File
 abstract class VaultFileItem(): Item() {
     abstract val file: File
     abstract val name: String
-    abstract fun isDirectory(): Boolean
 
-    companion object {
-        const val IMAGE_WIDTH = 300
+    open fun isDirectory(): Boolean {
+        return file.isDirectory
+    }
+
+    override fun toString(): String {
+        return "VaultFile(${file.path})"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is VaultFileItem) {
+            return file.path == other.file.path
+        }
+
+        return false
     }
 }

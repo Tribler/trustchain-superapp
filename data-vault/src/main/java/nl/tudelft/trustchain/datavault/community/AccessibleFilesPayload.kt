@@ -11,21 +11,26 @@ import org.json.JSONArray
 import java.nio.charset.Charset
 
 class AccessibleFilesPayload(
+    val id: String?,
     val accessToken: String?,
     val files: List<String>
 ): Serializable {
     override fun serialize(): ByteArray {
+        var serialized = serializeVarLen((id ?: NULL).toByteArray())
         val finalToken = when (accessToken) {
             null -> NULL
             "" -> NULL
             else -> accessToken
         }
-        return serializeVarLen(finalToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
+        serialized += serializeVarLen(finalToken.toByteArray()) + serializeVarLen(JSONArray(files).toString().toByteArray())
+        return serialized
     }
 
     companion object Deserializer : Deserializable<AccessibleFilesPayload> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<AccessibleFilesPayload, Int> {
             var localOffset = offset
+            val (id, idSize) = deserializeVarLen(buffer, localOffset)
+            localOffset += idSize
             val (token, tokenSize) = deserializeVarLen(buffer, localOffset)
             localOffset += tokenSize
             val (filesBin, _) = deserializeVarLen(buffer, localOffset)
@@ -38,13 +43,18 @@ class AccessibleFilesPayload(
                 i++
             }
 
+            var stringId: String? = id.toString(Charset.defaultCharset())
+            if (stringId == NULL) {
+                stringId = null
+            }
+
             val finalToken: String? = when(token.toString(Charset.defaultCharset())) {
                 NULL -> null
                 else -> token.toString(Charset.defaultCharset())
             }
-            return Pair(AccessibleFilesPayload(finalToken, files), 0)
+            return Pair(AccessibleFilesPayload(stringId, finalToken, files), 0)
         }
 
-        val NULL = "NULL"
+        const val NULL = "NULL"
     }
 }

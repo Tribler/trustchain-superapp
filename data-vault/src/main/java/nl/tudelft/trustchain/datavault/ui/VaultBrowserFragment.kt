@@ -4,18 +4,14 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.ColorSpace
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,6 +19,7 @@ import kotlinx.coroutines.withContext
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.wallet.AttestationCommunity
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -31,7 +28,7 @@ import nl.tudelft.trustchain.datavault.R
 import nl.tudelft.trustchain.datavault.accesscontrol.Policy
 import nl.tudelft.trustchain.datavault.community.DataVaultCommunity
 import nl.tudelft.trustchain.datavault.databinding.VaultBrowserFragmentBinding
-import java.io.ByteArrayOutputStream
+import nl.tudelft.trustchain.datavault.tools.URIPathHelper
 import java.io.File
 
 class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
@@ -63,13 +60,12 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
 
         getDataVaultCommunity().setDataVaultActivity(dataVaultActivity)
         getDataVaultCommunity().setVaultBrowserFragment(this)
-        getDataVaultCommunity().setEVAOnReceiveCompleteCallback { peer, info, id, data ->
+        getDataVaultCommunity().setEVAOnReceiveCompleteCallback { peer, info, _, data ->
             when (info) {
                 DataVaultCommunity.EVAId.EVA_DATA_VAULT_FILE -> {
-                    Log.e(logTag, "EVA Data vault file received from ${peer.mid}: $id")
                     CoroutineScope(Dispatchers.Main).launch {
                         if (data != null) {
-                            getDataVaultCommunity().onFile(peer, id, data)
+                            getDataVaultCommunity().onFilePacket(Packet(peer.address, data))
                         }
                     }
                 }
@@ -80,31 +76,18 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = BrowserGridAdapter(this, listOf())
+        adapter = BrowserGridAdapter(this, mutableListOf())
+        binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
         binding.recyclerView.adapter = adapter
-        binding.recyclerView.layoutManager = VaultBrowserLayoutManager(requireContext(), 2)
-        binding.recyclerView.addItemDecoration(
-            DividerItemDecoration(
-                context,
-                LinearLayout.VERTICAL
-            )
-        )
 
         setFABs()
 
-        /*dataVaultActivity.getCurrentLocalFolder().observe(viewLifecycleOwner, {
-                _ -> updateAdapter(localVaultFiles())
-        })
-
-        dataVaultActivity.getCurrentPeerFolder().observe(viewLifecycleOwner, {
-                vaultFile -> updateAdapter(vaultFile.children!!)
-        })*/
-
-        dataVaultActivity.getCurrentFolder().observe(viewLifecycleOwner, {
-                vaultFile -> when(vaultFile) {
-                    is LocalVaultFileItem -> updateAdapter(localVaultFiles())
-                    is PeerVaultFileItem -> updateAdapter(vaultFile.children!!)
-                }
+        dataVaultActivity.getCurrentFolder().observe(viewLifecycleOwner, { vaultFile ->
+            Log.e(logTag, "Current folder changed: ${vaultFile.name}")
+            when(vaultFile) {
+                is LocalVaultFileItem -> updateAdapter(localVaultFiles())
+                is PeerVaultFileItem -> updateAdapter(vaultFile.subFiles)
+            }
         })
     }
 
@@ -151,7 +134,7 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
     }
 
     private fun showFabs() {
-        if (dataVaultActivity.getCurrentFolder().value !is PeerVaultFileItem){
+        if (currentFolder !is PeerVaultFileItem){
             binding.requestAccessibleFilesFab.show()
             binding.deleteFilesFab.show()
             binding.createFolderFab.show()
@@ -207,8 +190,9 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             val attestations = attestationCommunity.database.getAllAttestations()
                 .filter { attestationBlob -> attestationBlob.signature != null }
 
-            getDataVaultCommunity().sendAccessibleFilesRequest(peer, Policy.READ, attestations, null)
-            adapter.requested = 0
+            val peerVaultFolder = PeerVaultFileItem(getDataVaultCommunity(), peer, null, VAULT_DIR, null)
+            getDataVaultCommunity().sendAccessibleFilesRequest(peerVaultFolder, VAULT_DIR, Policy.READ, null, attestations)
+            navigateToFolder(peerVaultFolder, peer.mid)
         }
 
         // Create the AlertDialog
@@ -239,50 +223,30 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         return listOf()
     }
 
-    private fun updateAdapter(vaultFileItems: List<VaultFileItem>) {
+    private fun updateAdapter(vaultFileItems: List<VaultFileItem>?) {
         // Can be more efficient to add/remove single item and notify item inserted or removed
-        adapter.updateItems(vaultFileItems)
+        CoroutineScope(Dispatchers.Main).launch {
+            when {
+                vaultFileItems.isNullOrEmpty() -> {
+                    adapter.clearItems()
+                }
+                vaultFileItems.isNotEmpty() -> {
+                    adapter.updateItems(vaultFileItems)
+                }
+            }
+        }
     }
 
-    fun browseRequestableFiles(peer: Peer, accessToken: String?, files: List<String>) {
-        files.forEach {
-            Log.e(logTag, "peer files: $it")
+    fun updateAccessibleFiles(peerVaultFolder: PeerVaultFileItem, accessToken: String?, files: List<String>) {
+        peerVaultFolder.updateSubFiles(accessToken, files)
+
+        if (currentFolder == peerVaultFolder) {
+            Log.e(logTag, "Refreshing browser view of ${peerVaultFolder.name} (${peerVaultFolder.subFiles?.size})")
+            updateAdapter(peerVaultFolder.subFiles)
+            // dataVaultActivity.setCurrentFolder(peerVaultFolder)
+        } else {
+            Log.e(logTag, "${peerVaultFolder.name} not current folder")
         }
-
-
-        val peerVaultFiles = files.map { fileName ->
-            PeerVaultFileItem(getDataVaultCommunity(), peer, accessToken, fileName, null)
-         }
-
-        val peerCurrentFolder = PeerVaultFileItem(getDataVaultCommunity(), peer, accessToken, VAULT_DIR, peerVaultFiles)
-
-        CoroutineScope(Dispatchers.Main).launch {
-            dataVaultActivity.setCurrentFolder(peerCurrentFolder)
-        }
-
-        //updateAdapter(peerVaultFiles)
-
-
-    /*Log.e(logTag, "Selecting requestable file")
-        requireActivity().runOnUiThread {
-            val builder = AlertDialog.Builder(context)
-            builder.setTitle("Select file to request").
-            setPositiveButton("Ok") { _, _ ->
-                // User clicked OK button
-            }.
-            setNegativeButton("Cancel") { _, _ ->
-                // User cancelled the dialog
-            }.
-            setItems(files.toTypedArray()) { _, index ->
-                Log.e(logTag, "item $index chosen")
-                val file = files[index]
-                getDataVaultCommunity().sendFileRequest(peer, Policy.READ, file, accessToken)
-            }
-
-            // Create the AlertDialog
-            val alertDialog: AlertDialog = builder.create()
-            alertDialog.show()
-        }*/
     }
 
     private fun addTestFile() {
@@ -323,29 +287,25 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         alertDialog.show()
     }
 
-    fun navigateToFolder(folder: VaultFileItem) {
+    fun navigateToFolder(folder: VaultFileItem, title: String? = null) {
         dataVaultActivity.pushFolderToStack(currentFolder)
         dataVaultActivity.setCurrentFolder(folder)
-        dataVaultActivity.setActionBarTitle("${folder.name}")
+        if (folder is PeerVaultFileItem) {
+            dataVaultActivity.setActionBarTitle("Peer: ${title ?: folder.name}")
+        } else {
+            dataVaultActivity.setActionBarTitle(title ?: folder.name)
+        }
     }
 
     private fun addImageToVault(uri: Uri) {
         val filePath = uriPathHelper.getPath(uri)
         val file = File(filePath ?: "")
 
-        val options = BitmapFactory.Options().also {
-            it.outWidth = VaultFileItem.IMAGE_WIDTH
-            it.outHeight = VaultFileItem.IMAGE_WIDTH
-        }
-        val bitmap = BitmapFactory.decodeFile(filePath, options)
-        val os = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 50, os)
-
-        /*if (!file.canRead()) {
+        if (!file.canRead()) {
             return
-        }*/
+        }
 
-        File(currentFolder.file, file.name).writeBytes(os.toByteArray())
+        File(currentFolder.file, file.name).writeBytes(file.readBytes())
 
         Log.e(logTag, "Imaged added to vault")
 

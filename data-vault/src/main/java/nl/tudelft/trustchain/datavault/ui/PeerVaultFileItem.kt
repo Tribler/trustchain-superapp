@@ -9,12 +9,16 @@ import java.io.File
 
 class PeerVaultFileItem(
     private val dataVaultCommunity: DataVaultCommunity,
-    private val peer: Peer,
+    val peer: Peer,
     private val accessToken: String?,
-    val fileName: String,
-    val children: List<PeerVaultFileItem>?
+    private val _fileName: String,
+    var subFiles: List<PeerVaultFileItem>?
 ): VaultFileItem() {
-    val cacheKey = "${peer.mid}_$fileName"
+
+    val fileName: String get() {
+        return if (_fileName.endsWith("/")) _fileName.dropLast(1) else _fileName
+    }
+    val cacheKey = getCacheKey(peer, fileName)
 
     override val file: File get() {
         return File(fileName)
@@ -26,6 +30,7 @@ class PeerVaultFileItem(
 
     fun writeDataCacheFile(context: Context, data: ByteArray): File {
         val cacheFile = File(context.cacheDir, "$cacheKey.tmp")
+        // cacheFile.createNewFile()
         cacheFile.writeBytes(data)
         return cacheFile
     }
@@ -36,16 +41,37 @@ class PeerVaultFileItem(
          dataVaultCommunity.sendFileRequest(peer, Policy.READ, fileName, accessToken)
     }
 
+    fun fetchSubFolderAccessibleFiles() {
+        Log.e("PeerVault", "Fetching sub files for $_fileName (${subFiles?.size ?: 0})")
+
+        if (isDirectory()) {
+            dataVaultCommunity.sendAccessibleFilesRequest(this, fileName, Policy.READ, accessToken, null)
+        }
+    }
+
+    fun updateSubFiles(accessToken: String?, files: List<String>) {
+        val peerVaultFiles = files.map { fileName ->
+            PeerVaultFileItem(dataVaultCommunity, peer, accessToken, fileName, null)
+        }
+
+        subFiles = peerVaultFiles
+    }
+
     override val name: String get() {
         return file.name
     }
 
     override fun isDirectory(): Boolean {
-        return fileName == "pics"
+        Log.e("PeerVault", "is directory: ${_fileName.endsWith("/")}")
+        return _fileName.endsWith("/")
     }
 
     companion object {
-        const val CACHE_FILE_EXPIRY_MILLIS: Long = 1 * 60 * 1000
+        const val CACHE_FILE_EXPIRY_MILLIS: Long = 10 * 60 * 1000 // 10 min expiry time
+
+        fun getCacheKey(peer: Peer, id: String): String {
+            return "${peer.mid}_${id.replace("/", "_")}"
+        }
 
     }
 }
