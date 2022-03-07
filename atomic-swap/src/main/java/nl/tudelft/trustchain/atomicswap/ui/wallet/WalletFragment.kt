@@ -21,6 +21,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.listeners.WalletChangeEventListener
+import org.web3j.utils.Convert
 
 class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChangeEventListener {
 
@@ -98,7 +99,8 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         bitcoinWallet.addChangeEventListener(this)
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                model.setEthereumBalance("${ethereumWallet.balance()} ETH")
+                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
+                model.setEthereumBalance("$ether ETH")
                 delay(1000)
             }
         }
