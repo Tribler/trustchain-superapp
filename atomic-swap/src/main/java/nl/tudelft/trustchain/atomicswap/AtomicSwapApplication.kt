@@ -3,10 +3,8 @@ package nl.tudelft.trustchain.atomicswap
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.os.Build
-import android.util.Log
 import androidx.core.content.getSystemService
 import androidx.preference.PreferenceManager
-import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.ipv8.IPv8Configuration
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.OverlayConfiguration
@@ -16,12 +14,10 @@ import nl.tudelft.ipv8.android.messaging.bluetooth.BluetoothLeDiscovery
 import nl.tudelft.ipv8.android.peerdiscovery.NetworkServiceDiscovery
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
-import nl.tudelft.ipv8.messaging.tftp.TFTPCommunity
 import nl.tudelft.ipv8.peerdiscovery.DiscoveryCommunity
 import nl.tudelft.ipv8.peerdiscovery.strategy.PeriodicSimilarity
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomChurn
 import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
-import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 
@@ -41,7 +37,7 @@ class AtomicSwapApplication : Application() {
     fun initIPv8() {
         val config = IPv8Configuration(overlays = listOf(
             createDiscoveryCommunity(),
-            createDemoCommunity()
+            createAtomicSwapCommunity()
         ), walkerInterval = 5.0)
 
         IPv8Android.Factory(this)
@@ -73,7 +69,7 @@ class AtomicSwapApplication : Application() {
         )
     }
 
-    private fun createDemoCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
+    private fun createAtomicSwapCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(AtomicSwapCommunity::class.java),

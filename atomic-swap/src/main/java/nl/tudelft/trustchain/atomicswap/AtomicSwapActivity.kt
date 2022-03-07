@@ -78,13 +78,13 @@ class AtomicSwapActivity : BaseActivity() {
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val demoCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
-                val peers = demoCommunity.getPeers()
+                val atomicSwapCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
+                val peers = atomicSwapCommunity.getPeers()
 
-                val discoveredAddresses = demoCommunity.network
-                    .getWalkableAddresses(demoCommunity.serviceId)
+                val discoveredAddresses = atomicSwapCommunity.network
+                    .getWalkableAddresses(atomicSwapCommunity.serviceId)
 
-                val discoveredBluetoothAddresses = demoCommunity.network
+                val discoveredBluetoothAddresses = atomicSwapCommunity.network
                     .getNewBluetoothPeerCandidates()
                     .map { it.address }
 
@@ -95,7 +95,7 @@ class AtomicSwapActivity : BaseActivity() {
                 }
 
                 val addressItems = discoveredAddresses.map { address ->
-                    val contacted = demoCommunity.discoveredAddressesContacted[address]
+                    val contacted = atomicSwapCommunity.discoveredAddressesContacted[address]
                     AddressItem(
                         address,
                         null,
@@ -114,18 +114,18 @@ class AtomicSwapActivity : BaseActivity() {
                 val items = peerItems + bluetoothAddressItems + addressItems
 
                 for (peer in peers) {
-                    Log.d("DemoCommunity", "FOUND PEER with id " + peer.mid)
+                    Log.d("AtomicSwapCommunity", "FOUND PEER with id " + peer.mid)
                 }
 
 
                 adapter.updateItems(items)
-                txtCommunityName.text = demoCommunity.javaClass.simpleName
+                txtCommunityName.text = atomicSwapCommunity.javaClass.simpleName
                 txtPeerCount.text = "${peers.size} peers"
                 val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 txtPeerCount.setTextColor(textColor)
                 imgEmpty.isVisible = items.isEmpty()
-                demoCommunity.broadcastTradeOffer(1, 0.5)
+                atomicSwapCommunity.broadcastTradeOffer(1, 0.5)
 
                 delay(3000)
             }
