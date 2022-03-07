@@ -9,11 +9,11 @@ class WalletViewModel : ViewModel() {
     val ethereumBalance = MutableLiveData<String>()
 
     fun setBitcoinBalance(balance: String) {
-        bitcoinBalance.value = balance
+        bitcoinBalance.postValue(balance)
     }
 
     fun setEthereumBalance(balance: String) {
-        ethereumBalance.value = balance
+        ethereumBalance.postValue(balance)
     }
 
 }
