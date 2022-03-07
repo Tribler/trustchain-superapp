@@ -14,7 +14,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
-        buildConfigField "String", "ETH_HTTP_URL", "\"http://10.0.2.2\""
+        buildConfigField "String", "ETH_HTTP_URL", "\"http://10.0.2.2:8545\""
 
         // The address of the MultiSig wallet deployed on the goerli test network.
         buildConfigField "String", "ETH_TEST_MULTISIG_ADDR", "\"0x2DfEecF7d2f5363149cC73cAb96C00575c732170\""

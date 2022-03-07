@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import nl.tudelft.trustchain.common.ethereum.utils.generateWalletPassword
 import org.web3j.crypto.ECKeyPair
-import org.web3j.crypto.Keys
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.http.HttpService
 import java.io.File
@@ -44,7 +43,7 @@ class EthereumWalletService {
                 "Connecting to Web3j HTTP service (URL: ${BuildConfig.ETH_HTTP_URL})"
             )
             val web3j = Web3j.build(HttpService(BuildConfig.ETH_HTTP_URL))
-            val clientVersion = web3j.web3ClientVersion().send().web3ClientVersion
+            val clientVersion = web3j.web3ClientVersion().sendAsync().get().web3ClientVersion
             Log.d(
                 EthereumWalletService::class.simpleName,
                 "Connected with Web3j HTTP service (version: $clientVersion)"
@@ -83,7 +82,7 @@ class EthereumWalletService {
             val publicKey = preferences.getString(SHARED_PREF_KEY_PUBLIC_KEY, null)
 
             return if (privateKey == null || publicKey == null) {
-                Keys.createEcKeyPair()
+                ECKeyPair.create(BigInteger.valueOf(SecureRandom().nextLong()))
             } else {
                 ECKeyPair(BigInteger(privateKey), BigInteger(publicKey))
             }

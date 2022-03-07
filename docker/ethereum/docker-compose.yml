@@ -10,6 +10,7 @@ services:
       - geth_data:/root/.ethereum
     command:
       - "--dev"
+      - "--http"
       - "--http.addr=0.0.0.0"
 
 volumes:

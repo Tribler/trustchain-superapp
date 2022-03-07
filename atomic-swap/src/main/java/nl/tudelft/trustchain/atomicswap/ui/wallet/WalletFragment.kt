@@ -51,7 +51,9 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         walletAppKit = WalletService.getGlobalWallet()
         bitcoinWallet = walletAppKit.wallet()
 
-        ethereumWallet = EthereumWalletService.createGlobalWeb3jWallet(requireContext())
+        lifecycleScope.launchWhenStarted {
+            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
+        }
     }
 
     override fun onCreateView(
