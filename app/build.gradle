@@ -125,6 +125,7 @@ dependencies {
     implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
     implementation project(':atomic-swap')
+    implementation project(':literaturedao')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }
