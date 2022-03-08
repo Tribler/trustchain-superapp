@@ -38,6 +38,7 @@ import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.app.service.TrustChainService
+import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
@@ -74,6 +75,7 @@ class TrustChainApplication : Application() {
                 createTFTPCommunity(),
                 createDemoCommunity(),
                 createWalletCommunity(),
+                createAtomicSwapCommunity(),
                 createMarketCommunity(),
                 createCoinCommunity(),
                 createVotingCommunity(),
@@ -184,6 +186,14 @@ class TrustChainApplication : Application() {
 
         return OverlayConfiguration(
             AttestationCommunity.Factory(store),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createAtomicSwapCommunity(): OverlayConfiguration<AtomicSwapCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            Overlay.Factory(AtomicSwapCommunity::class.java),
             listOf(randomWalk)
         )
     }
