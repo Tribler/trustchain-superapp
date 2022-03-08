@@ -13,6 +13,7 @@ import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
+import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
 import nl.tudelft.trustchain.peerchat.PeerChatActivity
 import nl.tudelft.trustchain.trader.ui.TrustChainTraderActivity
@@ -111,5 +112,11 @@ enum class AppDefinition(
         R.color.colorPrimaryValueTransfer,
         ValueTransferMainActivity::class.java,
         true,
-    )
+    ),
+    LITERATUREDAO(
+        R.drawable.ic_bug_report_black_24dp,
+        "LiteratureDao",
+        R.color.green,
+        LiteratureDaoActivity::class.java
+    ),
 }
