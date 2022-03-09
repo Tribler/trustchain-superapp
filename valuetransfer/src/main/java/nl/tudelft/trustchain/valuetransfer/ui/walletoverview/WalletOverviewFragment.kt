@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
@@ -36,6 +38,8 @@ import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItem
 import nl.tudelft.trustchain.valuetransfer.ui.contacts.ChatItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityItemRenderer
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
 import nl.tudelft.trustchain.valuetransfer.util.mapToJSON
 import org.json.JSONObject
 
@@ -109,7 +113,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 { identity ->
                     val map = mapOf(
                         QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to identity.content.givenNames
+                        QRScanController.KEY_NAME to identity.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                     )
 
                     QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
@@ -187,10 +193,6 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             }
         )
 
-        binding.ivGoToIdentity.setOnClickListener {
-            parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.identityFragmentTag)
-        }
-
         // EXCHANGE
         parentActivity.getBalance(true).observe(
             viewLifecycleOwner,
@@ -201,6 +203,16 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 }
             }
         )
+
+        binding.clExchangeBalanceHidden.setOnClickListener {
+            binding.clExchangeBalanceHidden.isVisible = !binding.clExchangeBalanceHidden.isVisible
+            binding.clExchangeBalance.isVisible = !binding.clExchangeBalance.isVisible
+        }
+
+        binding.clExchangeBalance.setOnClickListener {
+            binding.clExchangeBalanceHidden.isVisible = !binding.clExchangeBalanceHidden.isVisible
+            binding.clExchangeBalance.isVisible = !binding.clExchangeBalance.isVisible
+        }
 
         binding.clExchangeOptions.setOnClickListener {
             OptionsDialog(
@@ -248,21 +260,25 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             }.show(parentFragmentManager, tag)
         }
 
-        binding.ivGoToExchange.setOnClickListener {
+        binding.tvExchangeTitle.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.exchangeFragmentTag)
         }
 
         // CONTACTS
-        binding.rvContactChats.adapter = adapterContacts
-        binding.rvContactChats.layoutManager = LinearLayoutManager(context)
+        val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_chat, requireContext().theme)
+        binding.rvContactChats.apply {
+            adapter = adapterContacts
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecorator(drawable!!) as ItemDecoration)
+        }
 
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
 
-        binding.ivGoToContacts.setOnClickListener {
+        binding.tvContactsTitle.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
         }
 
-        binding.btnShowMoreChats.setOnClickListener {
+        binding.clContactsOptions.setOnClickListener {
             parentActivity.selectBottomNavigationItem(ValueTransferMainActivity.contactsFragmentTag)
         }
     }
@@ -364,7 +380,6 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     ): List<Item> {
         return messages
             .filterIndexed { index, _ ->
-                binding.btnShowMoreChats.isVisible = index >= MAX_CHATS
                 index < MAX_CHATS
             }
             .map { message ->
@@ -373,10 +388,13 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
                 val image = images.firstOrNull { it.publicKey == publicKey }
+                val identityName = status?.identityInfo?.let {
+                    "${it.initials} ${it.surname}"
+                }
 
                 ChatItem(
                     Contact(
-                        contact?.name ?: resources.getString(R.string.text_unknown_contact),
+                        contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)),
                         publicKey
                     ),
                     message,

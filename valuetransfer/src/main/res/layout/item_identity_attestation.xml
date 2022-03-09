@@ -3,17 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="12dp"
-    android:paddingBottom="4dp">
+    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clChatCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/square_rounded"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="12dp"
+        android:background="?attr/widgetColor"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"
+        android:paddingVertical="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">

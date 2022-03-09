@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -18,17 +17,20 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_margin="12dp"
-            android:visibility="gone"
-            tools:visibility="visible"
             android:animateLayoutChanges="true"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
 
             <EditText
                 android:id="@+id/etSearchContact"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
                 android:background="@drawable/pill_rounded"
                 android:backgroundTint="?attr/widgetColor"
                 android:hint="@string/text_search_contact"
@@ -38,301 +40,364 @@
                 android:singleLine="true"
                 android:textColor="?attr/onWidgetColor"
                 android:textColorHint="?attr/onWidgetSecondaryColor"
-                android:textSize="12dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentEnd="true"/>
+                android:textSize="12dp" />
 
             <ImageView
                 android:id="@+id/ivSearchBarIcon"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:layout_marginStart="12dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_search"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true"
-                app:tint="?attr/mutedColor"/>
+                android:layout_marginStart="12dp"
+                android:padding="4dp"
+                android:src="@drawable/ic_search"
+                app:tint="?attr/mutedColor" />
 
             <ImageView
                 android:id="@+id/ivSearchBarCancelIcon"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
                 android:layout_marginEnd="12dp"
                 android:padding="4dp"
                 android:src="@drawable/ic_baseline_close_24"
                 android:visibility="gone"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentBottom="true"
                 app:tint="?attr/mutedLightColor" />
 
         </RelativeLayout>
 
-        <TextView
-            android:id="@+id/tvAddressBookTitle"
-            style="@style/FragmentTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_title_address_book"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/clSearchbar" />
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/tvAddressBookTitle"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginStart="20dp"-->
-    <!--        android:layout_marginTop="12dp"-->
-    <!--        android:text="Address Book"-->
-    <!--        android:textColor="?attr/colorOnPrimary"-->
-    <!--        android:textSize="24sp"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/clSearchbar" />-->
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/clContacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="12dp"
             android:background="@drawable/square_rounded"
-            android:paddingHorizontal="4dp"
-            android:paddingVertical="4dp"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvAddressBookTitle">
+            app:layout_constraintTop_toBottomOf="@+id/clSearchbar">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/clSearchbar">
+
+                <TextView
+                    android:id="@+id/tvAddressBookTitle"
+                    style="@style/FragmentTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/text_title_address_book" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clAddNewContact"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="?attr/dialogColor"
+                    app:layout_constraintDimensionRatio="H1,1">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="4dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_contact_add"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/onWidgetColor" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tvNoContacts"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
                 android:background="@drawable/pill_rounded"
                 android:gravity="center"
-                android:paddingHorizontal="12dp"
                 android:paddingVertical="16dp"
                 android:text="@string/text_no_contacts"
                 android:textColor="?attr/onWidgetSecondaryColor"
                 android:textStyle="bold"
                 android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvContacts"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoContacts"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_contacts" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/clRecentChats"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/square_rounded"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
             app:layout_constraintTop_toBottomOf="@+id/clContacts">
 
-            <TextView
-                android:id="@+id/tvRecentTitle"
-                style="@style/FragmentTitle"
-                android:layout_width="wrap_content"
+            <RelativeLayout
+                android:id="@+id/rlRecentChatsTitle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/text_title_recent_chats"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvRecentTitle"
+                    style="@style/FragmentTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_toLeftOf="@+id/clRecentChatsOptions"
+                    android:text="@string/text_title_recent_chats" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clRecentChatsOptions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
-                    android:paddingHorizontal="4dp"
-                    android:paddingVertical="4dp"
-                    app:layout_constraintBottom_toBottomOf="@+id/tvRecentTitle"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/tvRecentTitle">
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="?attr/dialogColor"
+                    app:layout_constraintDimensionRatio="H1,1">
 
                     <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_baseline_more_vert_24"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="8dp"
                         android:scaleType="fitCenter"
-                        app:tint="?attr/onWidgetColor"
+                        android:src="@drawable/ic_baseline_more_vert_24"
                         app:layout_constraintDimensionRatio="1:1"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/onWidgetColor" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tvNoRecentChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/pill_rounded"
-                android:paddingVertical="4dp"
+                android:paddingVertical="12dp"
                 android:text="@string/text_no_chats"
                 android:textColor="?attr/onBackgroundColor"
                 android:textStyle="italic"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvRecentTitle"
+                app:layout_constraintTop_toBottomOf="@+id/rlRecentChatsTitle"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRecentChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 app:layout_constraintTop_toBottomOf="@+id/tvNoRecentChats"
-                tools:itemCount="1"
+                tools:itemCount="3"
                 tools:listitem="@layout/item_contacts_chat" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/clArchivedChats"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/square_rounded"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
             android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/clContacts">
 
-            <TextView
-                android:id="@+id/tvArchivedTitle"
-                style="@style/FragmentTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/text_title_archived_chats"
-                app:layout_constraintStart_toEndOf="@+id/clArchivedBackToRecent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <RelativeLayout
+                android:id="@+id/rlArchivedChatsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clArchivedBackToRecent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:paddingHorizontal="6dp"
-                android:paddingVertical="4dp"
-                app:layout_constraintBottom_toBottomOf="@+id/tvArchivedTitle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvArchivedTitle">
-
-                <ImageView
+                <TextView
+                    android:id="@+id/tvArchivedTitle"
+                    style="@style/FragmentTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_arrow_back_ios_24"
-                    android:scaleType="fitCenter"
-                    app:tint="?attr/onWidgetColor"
-                    app:layout_constraintDimensionRatio="1:1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_toLeftOf="@+id/clArchivedBackToRecent"
+                    android:text="@string/text_title_archived_chats" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clArchivedBackToRecent"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="?attr/dialogColor"
+                    app:layout_constraintDimensionRatio="H1,1">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="4dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_baseline_arrow_back_ios_24"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/onWidgetColor" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tvNoArchivedChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/pill_rounded"
-                android:paddingVertical="4dp"
+                android:paddingVertical="12dp"
                 android:text="@string/text_no_archived_chats"
                 android:textColor="?attr/onBackgroundColor"
                 android:textStyle="italic"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvArchivedTitle"
+                app:layout_constraintTop_toBottomOf="@+id/rlArchivedChatsTitle"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvArchivedChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
                 app:layout_constraintTop_toBottomOf="@+id/tvNoArchivedChats"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_contacts_chat" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/clBlockedChats"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/square_rounded"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
             android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/clContacts">
 
-            <TextView
-                android:id="@+id/tvBlockedTitle"
-                style="@style/FragmentTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:text="@string/text_title_blocked_chats"
-                app:layout_constraintStart_toEndOf="@+id/clBlockedBackToRecent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <RelativeLayout
+                android:id="@+id/rlBlockedChatsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clBlockedBackToRecent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:paddingHorizontal="6dp"
-                android:paddingVertical="4dp"
-
-                app:layout_constraintBottom_toBottomOf="@+id/tvBlockedTitle"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/tvBlockedTitle">
-
-                <ImageView
+                <TextView
+                    android:id="@+id/tvBlockedTitle"
+                    style="@style/FragmentTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_arrow_back_ios_24"
-                    android:scaleType="fitCenter"
-                    app:tint="?attr/onWidgetColor"
-                    app:layout_constraintDimensionRatio="1:1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_toLeftOf="@+id/clBlockedBackToRecent"
+                    android:text="@string/text_title_blocked_chats" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clBlockedBackToRecent"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/pill_rounded"
+                    android:backgroundTint="?attr/dialogColor"
+                    app:layout_constraintDimensionRatio="H1,1">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:paddingVertical="8dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="4dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_baseline_arrow_back_ios_24"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:tint="?attr/onWidgetColor" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </RelativeLayout>
 
             <TextView
                 android:id="@+id/tvNoBlockedChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="6dp"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="4dp"
                 android:background="@drawable/pill_rounded"
-                android:paddingVertical="4dp"
+                android:paddingVertical="12dp"
                 android:text="@string/text_no_blocked_chats"
                 android:textColor="?attr/onBackgroundColor"
                 android:textStyle="italic"
                 android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvBlockedTitle"
+                app:layout_constraintTop_toBottomOf="@+id/rlBlockedChatsTitle"
                 tools:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvBlockedChats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoBlockedChats"
+                app:layout_constraintTop_toBottomOf="@+id/tvNoArchivedChats"
                 tools:itemCount="1"
                 tools:listitem="@layout/item_contacts_chat" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

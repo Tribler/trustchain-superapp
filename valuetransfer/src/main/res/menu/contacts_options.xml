@@ -6,9 +6,4 @@
         android:icon="@drawable/ic_search_filter"
         android:title="@string/menu_contacts_search"
         app:showAsAction="always"/>
-    <item
-        android:id="@+id/actionAddContact"
-        android:icon="@drawable/ic_contact_add"
-        android:title="@string/menu_contacts_add"
-        app:showAsAction="always"/>
 </menu>

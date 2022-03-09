@@ -68,6 +68,7 @@ class IdentityAttestationVerifyDialog(
                     signature,
                     defaultCryptoProvider.keyFromPublicBin(authorityKey)
                 ).let { result ->
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         {
                             loadingSpinner.isVisible = false

@@ -91,44 +91,38 @@ class SettingsFragment : VTFragment(R.layout.fragment_settings) {
             }
         }
 
-        binding.clIdentityReplace.apply {
-            setOnClickListener {
+        binding.clIdentityReplace.setOnClickListener {
+            ConfirmDialog(resources.getString(R.string.text_confirm_replace_identity)) { dialog ->
+                dialog.dismiss()
                 IdentityOnboardingDialog().show(parentFragmentManager, this@SettingsFragment.tag)
-            }
+            }.show(parentFragmentManager, this@SettingsFragment.tag)
         }
 
-        binding.clIdentityRemove.apply {
-            setOnClickListener {
-                ConfirmDialog(
-                    resources.getString(
-                        R.string.text_confirm_delete,
-                        resources.getString(R.string.text_identity)
-                    )
-                ) {
-                    try {
-                        getIdentityCommunity().deleteIdentity()
+        binding.clIdentityRemove.setOnClickListener {
+            ConfirmDialog(resources.getString(R.string.text_confirm_delete_identity)) {
+                try {
+                    getIdentityCommunity().deleteIdentity()
 
-                        getAttestationCommunity().database.getAllAttestations().forEach {
-                            getAttestationCommunity().database.deleteAttestationByHash(it.attestationHash)
-                        }
-
-                        appPreferences.deleteIdentityFace()
-
-                        parentActivity.reloadActivity()
-                        parentActivity.displayToast(
-                            requireContext(),
-                            resources.getString(R.string.snackbar_identity_remove_success),
-                            isShort = false
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        parentActivity.displayToast(
-                            requireContext(),
-                            resources.getString(R.string.snackbar_identity_remove_error)
-                        )
+                    getAttestationCommunity().database.getAllAttestations().forEach {
+                        getAttestationCommunity().database.deleteAttestationByHash(it.attestationHash)
                     }
-                }.show(parentFragmentManager, this@SettingsFragment.tag)
-            }
+
+                    appPreferences.deleteIdentityFace()
+
+                    parentActivity.reloadActivity()
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_identity_remove_success),
+                        isShort = false
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.snackbar_identity_remove_error)
+                    )
+                }
+            }.show(parentFragmentManager, this@SettingsFragment.tag)
         }
 
         binding.tvAppVersion.text = parentActivity.packageManager.getPackageInfo(

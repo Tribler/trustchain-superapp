@@ -70,7 +70,7 @@ getOne:
 SELECT public_key, is_archived, is_muted, is_blocked, is_verified, image_hash, initials, surname FROM contact_state WHERE public_key = ? LIMIT 1;
 
 getAll:
-SELECT * FROM contact_state;
+SELECT public_key, is_archived, is_muted, is_blocked, is_verified, image_hash, initials, surname FROM contact_state;
 
 -- deleteTable:
 -- DROP TABLE IF EXISTS contact_state;

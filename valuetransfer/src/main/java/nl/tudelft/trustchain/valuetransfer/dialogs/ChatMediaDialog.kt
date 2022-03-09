@@ -79,6 +79,8 @@ class ChatMediaDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
+
+            @Suppress("DEPRECATION")
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
             val view = layoutInflater.inflate(R.layout.dialog_contact_chat_media, null)

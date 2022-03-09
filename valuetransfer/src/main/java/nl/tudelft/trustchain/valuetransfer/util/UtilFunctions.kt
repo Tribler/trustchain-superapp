@@ -6,7 +6,9 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
@@ -266,4 +268,21 @@ fun getFormattedSize(size: Double): String {
             .append(size.div(1E0).toBigDecimal().setScale(0, RoundingMode.UP))
             .append("B")
     }.toString()
+}
+
+class DividerItemDecorator(private val divider: Drawable) : RecyclerView.ItemDecoration() {
+
+    override fun onDrawOver(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
+        val dividerLeft = parent.paddingLeft
+        val dividerRight = parent.width - parent.paddingRight
+        val childCount = parent.childCount
+        for (i in 0 until childCount) {
+            val child = parent.getChildAt(i)
+            val params = child.layoutParams as RecyclerView.LayoutParams
+            val dividerTop = child.bottom + params.bottomMargin
+            val dividerBottom: Int = dividerTop + divider.intrinsicHeight
+            divider.setBounds(dividerLeft, dividerTop, dividerRight, dividerBottom)
+            divider.draw(canvas)
+        }
+    }
 }

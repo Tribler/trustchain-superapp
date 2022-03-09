@@ -302,10 +302,13 @@ class NotificationHandler(
 
     private fun sendInternalNotification(peer: Peer, text: String) = with(parentActivity) {
         val contact = contactStore.getContactFromPublicKey(peer.publicKey)
+        val identityName = peerChatStore.getContactState(peer.publicKey)?.identityInfo?.let {
+            "${it.initials} ${it.surname}"
+        }
 
         val args = Bundle().apply {
             putString(ValueTransferMainActivity.ARG_PUBLIC_KEY, peer.publicKey.keyToBin().toHex())
-            putString(ValueTransferMainActivity.ARG_NAME, contact?.name ?: resources.getString(R.string.text_unknown_contact))
+            putString(ValueTransferMainActivity.ARG_NAME, contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)))
             putString(ValueTransferMainActivity.ARG_PARENT, getActiveFragment()?.tag ?: ValueTransferMainActivity.walletOverviewFragmentTag)
         }
 
