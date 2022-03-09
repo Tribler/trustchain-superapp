@@ -118,6 +118,11 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                         null,
                         false
                     ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
+                    R.id.actionPaymentRequest -> ExchangeTransferMoneyDialog(
+                        null, //TODO: replace by self
+                        null,
+                        false
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }

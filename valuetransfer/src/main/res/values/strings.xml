@@ -19,9 +19,10 @@
     <string name="menu_navigation_exchange_balance">Wallet Balance</string>
     <string name="menu_exchange_deposit">Deposit Money from online Bank</string>
     <string name="menu_exchange_withdraw">Withdraw Money to online Bank</string>
-    <string name="menu_exchange_transfer_qrcode">Money Transfer using QR-code</string>
-    <string name="menu_exchange_transfer_contact">Money Transfer to Contact</string>
-    <string name="menu_exchange_transfer_request">Request Money Transfer</string>
+    <string name="menu_exchange_transfer_qrcode">Scan QR</string>
+    <string name="menu_exchange_transfer_contact">Transfer Money</string>
+    <string name="menu_exchange_transfer_request">QR Payment Request</string>
+    <string name="menu_exchange_payment_request">Payment Request</string>
     <string name="menu_contact_chat_attachment_camera">Camera</string>
     <string name="menu_contact_chat_attachment_photo">Photo from Library</string>
     <string name="menu_contact_chat_attachment_file">File</string>
@@ -375,7 +376,7 @@
     <string name="text_open_in_google_maps">Open in Google Maps</string>
     <string name="text_confirm_are_you_sure">Are you sure?</string>
     <string name="text_confirm_ok">OK</string>
-    <string name="text_confirm_cancel">CANCEL</string>
+    <string name="text_confirm_cancel">Cancel</string>
     <string name="text_new">New</string>
     <string name="text_eur">EUR</string>
     <string name="text_additional_details">Additional Details</string>
