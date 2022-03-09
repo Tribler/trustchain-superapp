@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
 
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -13,10 +14,13 @@ import androidx.fragment.app.FragmentTransaction;
 
 import dalvik.system.DexClassLoader;
 
+import java.util.concurrent.TimeUnit;
+
 //import com.google.gson.Gson;
 
 public class ExecutionActivity extends AppCompatActivity {
     private static Context context;
+    private static Fragment.SavedState savedState = null;
     LinearLayout mainLayoutContainer = null;
     LinearLayout tmpLayout = null;
     private Class fragmentClass = null;
@@ -24,7 +28,9 @@ public class ExecutionActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+        this.printToast("Saving state");
         FragmentManager manager = getSupportFragmentManager();
+        savedState = manager.saveFragmentInstanceState(mainFragment);
         FragmentTransaction transaction = manager.beginTransaction();
 
         transaction.remove(mainFragment);
@@ -39,10 +45,18 @@ public class ExecutionActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        this.printToast("attempting restore");
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     @SuppressLint({"ResourceType"})
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onResume() {
+        this.printToast("attempting resume");
+        super.onResume();
+
         setContentView(R.layout.activity_execution);
 
         context = getApplicationContext();
@@ -64,20 +78,36 @@ public class ExecutionActivity extends AppCompatActivity {
 
             fragmentClass = classLoader.loadClass("com.execmodule." + appName + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
+            if (savedState != null) {
+                this.printToast("savedState not null");
+                mainFragment.setInitialSavedState(savedState);
+            }
 
             tmpLayout = new LinearLayout(getApplicationContext());
             tmpLayout.setId(1);
 
             FragmentManager manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-
             transaction.add(tmpLayout.getId(), mainFragment, "mainFragment");
             transaction.commit();
 
             mainLayoutContainer.addView(tmpLayout);
         } catch (Exception e) {
+            this.printToast(e.toString());
             Log.i("personal", "Something went wrong");
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    /**
+     * Display a short message on the screen
+     */
+    private void printToast(String s) {
+        Toast.makeText(this.getApplicationContext(), s, Toast.LENGTH_LONG).show();
     }
 }
