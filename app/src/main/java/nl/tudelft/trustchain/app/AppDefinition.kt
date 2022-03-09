@@ -121,7 +121,7 @@ enum class AppDefinition(
         AtomicSwapActivity::class.java
     ),
     LITERATUREDAO(
-        R.drawable.ic_bug_report_black_24dp,
+        R.drawable.ic_book_hover_over_hand,
         "LiteratureDao",
         R.color.green,
         LiteratureDaoActivity::class.java
