@@ -75,7 +75,6 @@ public class ExecutionActivity extends AppCompatActivity {
         mainLayoutContainer = (LinearLayout) findViewById(R.id.llcontainer);
 
         try {
-            getMainFragmentClass(apkPath);
             String mainFragmentClass = getMainFragmentClass(apkPath);
             fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
