@@ -13,7 +13,11 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import dalvik.system.DexClassLoader;
+import dalvik.system.DexFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 
 public class ExecutionActivity extends AppCompatActivity {
@@ -71,8 +75,9 @@ public class ExecutionActivity extends AppCompatActivity {
         mainLayoutContainer = (LinearLayout) findViewById(R.id.llcontainer);
 
         try {
-
-            fragmentClass = classLoader.loadClass("com.execmodule." + activeApp + ".MainFragment");
+            getMainFragmentClass(apkPath);
+            String mainFragmentClass = getMainFragmentClass(apkPath);
+            fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
             if (savedStateMap.containsKey(activeApp)) {
                 this.printToast("savedState not null");
@@ -93,6 +98,22 @@ public class ExecutionActivity extends AppCompatActivity {
             Log.i("personal", "Something went wrong");
             e.printStackTrace();
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private String getMainFragmentClass(String path) {
+        try {
+            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", "dex",
+                getCacheDir()).getPath(), 0);
+            for(Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements();) {
+                String className = classNames.nextElement();
+                if(className.contains("MainFragment"))
+                    return className;
+            }
+        } catch (IOException e) {
+            Log.w("personal", "Error opening " + path, e);
+        }
+        return null;
     }
 
     /**
