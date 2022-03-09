@@ -14,48 +14,44 @@ import androidx.fragment.app.FragmentTransaction;
 
 import dalvik.system.DexClassLoader;
 
-import java.util.concurrent.TimeUnit;
-
-//import com.google.gson.Gson;
+import java.util.HashMap;
 
 public class ExecutionActivity extends AppCompatActivity {
-    private static Context context;
-    private static Fragment.SavedState savedState = null;
+    private Context context;
+    private static HashMap<String, Fragment.SavedState> savedStateMap = new HashMap<>(10);
     LinearLayout mainLayoutContainer = null;
     LinearLayout tmpLayout = null;
     private Class fragmentClass = null;
     private Fragment mainFragment = null;
+    private FragmentManager manager;
+    private String activeApp;
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         this.printToast("Saving state");
-        FragmentManager manager = getSupportFragmentManager();
-        savedState = manager.saveFragmentInstanceState(mainFragment);
-        FragmentTransaction transaction = manager.beginTransaction();
+        savedStateMap.put(activeApp, manager.saveFragmentInstanceState(mainFragment));
 
-        transaction.remove(mainFragment);
-        try {
-            transaction.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mainLayoutContainer.removeView(tmpLayout);
+        // TODO:: Check why this was added, this creates problems when app is tabbed out
+        // Remove if not needed, if it is then create a new transaction in onResume to restore
+//        FragmentTransaction transaction = manager.beginTransaction();
+//
+//        transaction.remove(mainFragment);
+//        try {
+//            transaction.commit();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        mainLayoutContainer.removeView(tmpLayout);
 
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        this.printToast("attempting restore");
-        super.onRestoreInstanceState(savedInstanceState);
-    }
-
     @SuppressLint({"ResourceType"})
     @Override
-    public void onResume() {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         this.printToast("attempting resume");
-        super.onResume();
 
         setContentView(R.layout.activity_execution);
 
@@ -68,7 +64,7 @@ public class ExecutionActivity extends AppCompatActivity {
         }
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
         final String apkPath = apkName;
-        String appName = apkName.substring(apkName.lastIndexOf("/") + 1, apkName.lastIndexOf("."));
+        activeApp = apkName.substring(apkName.lastIndexOf("/") + 1, apkName.lastIndexOf("."));
         //final String apkPath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + apkName;
         final ClassLoader classLoader = new DexClassLoader(apkPath, context.getCacheDir().getAbsolutePath(), null, this.getClass().getClassLoader());
 
@@ -76,17 +72,17 @@ public class ExecutionActivity extends AppCompatActivity {
 
         try {
 
-            fragmentClass = classLoader.loadClass("com.execmodule." + appName + ".MainFragment");
+            fragmentClass = classLoader.loadClass("com.execmodule." + activeApp + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
-            if (savedState != null) {
+            if (savedStateMap.containsKey(activeApp)) {
                 this.printToast("savedState not null");
-                mainFragment.setInitialSavedState(savedState);
+                mainFragment.setInitialSavedState(savedStateMap.get(activeApp));
             }
 
-            tmpLayout = new LinearLayout(getApplicationContext());
+            tmpLayout = new LinearLayout(context);
             tmpLayout.setId(1);
 
-            FragmentManager manager = getSupportFragmentManager();
+            manager = getSupportFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
             transaction.add(tmpLayout.getId(), mainFragment, "mainFragment");
             transaction.commit();
@@ -97,11 +93,6 @@ public class ExecutionActivity extends AppCompatActivity {
             Log.i("personal", "Something went wrong");
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     /**
