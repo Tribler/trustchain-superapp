@@ -106,7 +106,7 @@ public class ExecutionActivity extends AppCompatActivity {
                 getCacheDir()).getPath(), 0);
             for(Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements();) {
                 String className = classNames.nextElement();
-                if(className.contains("MainFragment"))
+                if(className.contains("MainFragment") && !className.contains("$"))
                     return className;
             }
         } catch (IOException e) {
