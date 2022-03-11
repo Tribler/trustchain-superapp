@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.main.fragment_hello.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.hello.databinding.FragmentHelloBinding
+import nl.tudelft.trustchain.hello.HelloCpp
 
 
 class HelloFragment : BaseFragment(R.layout.fragment_hello) {
@@ -16,7 +17,9 @@ class HelloFragment : BaseFragment(R.layout.fragment_hello) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 //        initClickListeners()
-//        sample_text.text = stringFromJNI()
+        sample_text.text = "potato"
+        val new_text = HelloCpp.stringFromJNI()
+        sample_text.text = new_text
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,7 +31,7 @@ class HelloFragment : BaseFragment(R.layout.fragment_hello) {
         // Example of a call to a native method
 //
     }
-//
+
 //    /**
 //     * A native method that is implemented by the 'hello_cmake' native library,
 //     * which is packaged with this application.

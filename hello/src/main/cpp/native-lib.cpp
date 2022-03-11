@@ -1,10 +1,14 @@
 #include <jni.h>
 #include <string>
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_example_hello_1cmake_MainActivity_stringFromJNI(
-        JNIEnv* env,
+using namespace std;
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_nl_tudelft_trustchain_hello_HelloCpp_stringFromJNI(
+        JNIEnv *env,
         jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
+    char hello[60] = "Hello from C++";
+    jstring message = env->NewStringUTF(hello);
+    return message;
 }

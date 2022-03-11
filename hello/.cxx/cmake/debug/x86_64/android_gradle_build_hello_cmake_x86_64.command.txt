@@ -1,0 +1,7 @@
+Executable : C:\Users\s\AppData\Local\Android\Sdk\cmake\3.18.1\bin\ninja.exe
+arguments : 
+-C
+C:\Users\s\Documents\GitHub\trustchain-superapp\hello\.cxx\cmake\debug\x86_64
+hello_cmake
+jvmArgs : 
+

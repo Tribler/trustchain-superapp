@@ -1,0 +1,43 @@
+{
+  "stringTable": {
+    "0": "C:/Users/s/Documents/GitHub/trustchain-superapp/hello/.cxx/cmake/debug/x86_64",
+    "1": "--target=x86_64-none-linux-android22 --gcc-toolchain=C:/Users/s/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/s/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dhello_cmake_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -std=c++17 -O0 -fno-limit-debug-info -fPIC"
+  },
+  "buildFiles": [
+    "C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\src\\main\\cpp\\CMakeLists.txt",
+    "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\build\\cmake\\android.toolchain.cmake",
+    "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\build\\cmake\\platforms.cmake"
+  ],
+  "cleanCommands": [
+    "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\cmake\\3.18.1\\bin\\ninja.exe -C \"C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\.cxx\\cmake\\debug\\x86_64\" clean"
+  ],
+  "buildTargetsCommand": "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\cmake\\3.18.1\\bin\\ninja.exe  -C \"C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\.cxx\\cmake\\debug\\x86_64\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "hello_cmake-Debug-x86_64": {
+      "buildCommand": "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\cmake\\3.18.1\\bin\\ninja.exe -C \"C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\.cxx\\cmake\\debug\\x86_64\" hello_cmake",
+      "buildType": "debug",
+      "toolchain": "798247765",
+      "abi": "x86_64",
+      "artifactName": "hello_cmake",
+      "files": [
+        {
+          "src": "C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\src\\main\\cpp\\native-lib.cpp",
+          "flagsOrdinal": 1,
+          "workingDirectoryOrdinal": 0
+        }
+      ],
+      "headers": [],
+      "output": "C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\build\\intermediates\\cmake\\debug\\obj\\x86_64\\libhello_cmake.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "798247765": {
+      "cppCompilerExecutable": "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

@@ -1,0 +1,15 @@
+# ninja log v5
+0	601	668733588	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+603	757	668733588	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	368	668734935	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+368	451	668734935	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	376	668735049	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+377	466	668735049	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	366	668735198	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+367	457	668735198	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	347	668735660	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+348	424	668735660	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	352	668735752	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+353	431	668735752	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
+2	343	668735818	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	28e6558561db7d1
+343	420	668735818	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	1d3d5f512a6a5acb
