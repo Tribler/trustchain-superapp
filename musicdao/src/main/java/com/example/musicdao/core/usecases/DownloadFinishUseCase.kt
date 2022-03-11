@@ -1,62 +1,55 @@
 package com.example.musicdao.core.usecases
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.musicdao.CachePath
 import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.database.entities.SongEntity
-import com.example.musicdao.core.torrent.FilesHelper
-import com.example.musicdao.core.util.Util
-import com.mpatric.mp3agic.Mp3File
+import com.example.musicdao.core.torrent.ReleaseProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 import java.nio.file.Paths
 
+@RequiresApi(Build.VERSION_CODES.O)
 class DownloadFinishUseCase constructor(
-    val database: CacheDatabase,
-    private val filesHelper: FilesHelper
+    private val database: CacheDatabase,
+    private val cachePath: CachePath
 ) {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    operator fun invoke(id: String) {
-
+    operator fun invoke(infoHash: String) {
         coroutineScope.launch {
-            val albumEntity = database.dao.get(id)
-            val files = filesHelper.getFiles(id)
+            Log.d("MusicDao", "DownloadFinishUseCase: $infoHash")
 
-            val songs = files?.mapNotNull {
-                try {
-                    val mp3 = Mp3File(it)
-                    SongEntity(
-                        file = it.absolutePath,
-                        title = Util.getTitle(mp3) ?: (
-                            Util.checkAndSanitizeTrackNames(it.name)
-                                ?: it.name
-                            ),
-                        name = "name",
-                        artist = albumEntity.artist
-                    )
-                } catch (e: Exception) {
-                    null
-                }
-            }
+            // TODO: fix, multiple releases can potentially have some info-hash, will break
+            val albumEntity = database.dao.getFromInfoHash(infoHash)
+            val releaseId = albumEntity.id
+            val root = Paths.get("${cachePath.getPath()}/torrents/$releaseId")
 
-            var cover: File? = null
-            if (files != null && files.isNotEmpty()) {
-                cover = Util.findCoverArt(files.get(0).parentFile.parentFile)
-            }
+            val mp3Files = ReleaseProcessor.getMP3Files(root)
+            Log.d("MusicDao", "DownloadFinishUseCase: mp3 files in $root: $mp3Files")
 
-            val root =
-                Paths.get("${filesHelper.specialPath.getPath()!!}/torrents/$id/content").toFile()
+            val songs = mp3Files?.map {
+                SongEntity(
+                    file = it.filename,
+                    title = FileProcessor.getTitle(it),
+                    name = FileProcessor.getTitle(it),
+                    artist = albumEntity.artist
+                )
+            } ?: listOf()
+
+            val cover = FileProcessor.getCoverArt(root)
             val updatedAlbumEntity = albumEntity.copy(
-                songs = songs ?: listOf(),
+                songs = songs,
                 cover = cover?.absolutePath,
-                root = root.absolutePath
+                root = root.toString(),
+                isDownloaded = true
             )
 
+            Log.d("MusicDao", "DownloadFinishUseCase: updated album with $updatedAlbumEntity")
             database.dao.update(updatedAlbumEntity)
         }
     }

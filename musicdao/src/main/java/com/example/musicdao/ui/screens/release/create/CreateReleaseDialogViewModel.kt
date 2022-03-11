@@ -14,7 +14,7 @@ class CreateReleaseDialogViewModel @Inject constructor(private val createRelease
     ViewModel() {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun createRelease(
+    suspend fun createRelease(
         artist: String,
         title: String,
         releaseDate: String,

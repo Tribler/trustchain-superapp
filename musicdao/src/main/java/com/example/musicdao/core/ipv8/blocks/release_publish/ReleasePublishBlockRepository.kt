@@ -47,7 +47,7 @@ class ReleasePublishBlockRepository @Inject constructor(
         )
     }
 
-    private fun toBlock(block: TrustChainBlock): ReleasePublishBlock {
+    fun toBlock(block: TrustChainBlock): ReleasePublishBlock {
         val releaseId = block.transaction["releaseId"] as String
         val magnet = block.transaction["magnet"] as String
         val title = block.transaction["title"] as String

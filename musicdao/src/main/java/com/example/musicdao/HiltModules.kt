@@ -9,7 +9,6 @@ import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.database.GsonParser
 import com.example.musicdao.core.database.parser.Converters
 import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.torrent.FilesHelper
 import com.example.musicdao.core.usecases.DownloadFinishUseCase
 import com.example.musicdao.core.wallet.WalletConfig
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FAUCET_ENDPOINT
@@ -55,7 +54,7 @@ class HiltModules {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                .getString("musicdao_port", "10312")
+                .getString("musicdao_port", "10181")
                 ?.toIntOrNull()
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"
@@ -99,8 +98,8 @@ class HiltModules {
     @RequiresApi(Build.VERSION_CODES.O)
     @Provides
     @Singleton
-    fun path(@ApplicationContext applicationContext: Context): SpecialPath {
-        return SpecialPath(applicationContext)
+    fun path(@ApplicationContext applicationContext: Context): CachePath {
+        return CachePath(applicationContext)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -108,9 +107,9 @@ class HiltModules {
     @Singleton
     fun downloadFinishUseCase(
         database: CacheDatabase,
-        filesHelper: FilesHelper
+        cachePath: CachePath
     ): DownloadFinishUseCase {
-        return DownloadFinishUseCase(database = database, filesHelper = filesHelper)
+        return DownloadFinishUseCase(database = database, cachePath = cachePath)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -132,7 +131,7 @@ class HiltModules {
     }
 }
 
-class SpecialPath(val applicationContext: Context) {
+class CachePath(val applicationContext: Context) {
     @RequiresApi(Build.VERSION_CODES.O)
     fun getPath(): Path? {
         return Paths.get("${applicationContext.cacheDir}")

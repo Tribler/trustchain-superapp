@@ -18,7 +18,9 @@ data class AlbumEntity(
     val releaseDate: String,
     val songs: List<SongEntity>,
     val cover: String?,
-    val root: String?
+    val root: String?,
+    val isDownloaded: Boolean,
+    val infoHash: String?,
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
     fun toAlbum(): Album {

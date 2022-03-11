@@ -21,6 +21,9 @@ interface CacheDao {
     @Query("SELECT * FROM AlbumEntity WHERE id is :id")
     suspend fun get(id: String): AlbumEntity
 
+    @Query("SELECT * FROM AlbumEntity WHERE infoHash is :infoHash")
+    suspend fun getFromInfoHash(infoHash: String): AlbumEntity
+
     @Query("SELECT * FROM AlbumEntity WHERE publisher is :publicKey")
     suspend fun getFromArtist(publicKey: String): List<AlbumEntity>
 

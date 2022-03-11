@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -16,10 +17,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
+import com.example.musicdao.core.BatchPublisher
 import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
-import com.example.musicdao.core.torrent.TorrentCache
+import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.wallet.WalletService
 import com.example.musicdao.ui.MusicDAOApp
 import com.example.musicdao.ui.screens.profile.ProfileScreenViewModel
@@ -45,13 +47,16 @@ class MusicActivity : AppCompatActivity() {
     lateinit var albumRepository: AlbumRepository
 
     @Inject
-    lateinit var torrentCache: TorrentCache
+    lateinit var torrentEngine: TorrentEngine
 
     @Inject
     lateinit var sessionManager: SessionManager
 
     @Inject
     lateinit var walletService: WalletService
+
+    @Inject
+    lateinit var batchPublisher: BatchPublisher
 
     @Inject
     lateinit var setupMusicCommunity: SetupMusicCommunity
@@ -68,10 +73,15 @@ class MusicActivity : AppCompatActivity() {
         lifecycleScope.launchWhenStarted {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
-            torrentCache.seedStrategy()
+            torrentEngine.seedStrategy()
             GlobalScope.launch(Dispatchers.IO) {
                 walletService.start()
             }
+            Log.d(
+                "MusicDao",
+                "Release: ${albumRepository.getAlbums()}"
+            )
+//            batchPublisher.run()
         }
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->

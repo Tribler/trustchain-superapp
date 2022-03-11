@@ -33,6 +33,8 @@ class ReleasePublishBlockValidator @Inject constructor(val musicCommunity: Music
         val releaseDate = transaction["releaseDate"]
         val protocolVersion = transaction["protocolVersion"]
 
+//        Log.d("MusicDao", "Validating: $protocolVersion === ${Constants.PROTOCOL_VERSION} = ${protocolVersion == Constants.PROTOCOL_VERSION}")
+
         return (
             releaseId is String && releaseId.isNotEmpty() && transaction.containsKey("releaseId") &&
                 magnet is String && magnet.isNotEmpty() && transaction.containsKey("magnet") &&

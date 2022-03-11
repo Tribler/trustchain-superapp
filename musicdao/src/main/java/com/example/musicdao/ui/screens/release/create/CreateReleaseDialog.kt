@@ -14,10 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -35,6 +32,7 @@ import com.example.musicdao.ui.SnackbarHandler
 import com.example.musicdao.ui.dateToLongString
 import com.example.musicdao.ui.screens.release.create.CreateReleaseDialogViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import kotlinx.coroutines.launch
 import java.time.Instant
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -72,20 +70,23 @@ fun CreateReleaseDialog(closeDialog: () -> Unit) {
         }
     }
 
+    val scope = rememberCoroutineScope()
     val localContext = LocalContext.current
     fun publishRelease() {
-        val result = viewModel.createRelease(
-            artist.value,
-            title.value,
-            releaseDate = Instant.now().toString(),
-            uris = fileList.value,
-            localContext
-        )
-        if (result) {
-            SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
-            closeDialog()
-        } else {
-            SnackbarHandler.displaySnackbar(text = "Could not publish your release.")
+        scope.launch {
+            val result = viewModel.createRelease(
+                artist.value,
+                title.value,
+                releaseDate = Instant.now().toString(),
+                uris = fileList.value,
+                localContext
+            )
+            if (result) {
+                SnackbarHandler.displaySnackbar(text = "Successfully published your release.")
+                closeDialog()
+            } else {
+                SnackbarHandler.displaySnackbar(text = "Could not publish your release.")
+            }
         }
     }
 

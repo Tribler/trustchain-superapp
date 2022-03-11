@@ -1,14 +1,11 @@
 package com.example.musicdao.core.util
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import com.frostwire.jlibtorrent.Priority
 import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentHandle
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
-import java.io.FileOutputStream
 
 object Util {
 
@@ -168,58 +165,6 @@ object Util {
             }
         }
         return length
-    }
-
-    /**
-     * Go through a directory that contains a musical Release and find an image that corresponds to
-     * the cover art
-     * @param directory the directory containing music files, possibly cover art and possibly other
-     * files
-     */
-    fun findCoverArt(directory: File): File? {
-        if (!directory.isDirectory) return null
-        val allowedExtensions =
-            listOf(".jpg", ".png")
-
-        val files = directory.listFiles() ?: return null
-        // Give priority to files named "Cover"
-        for (ext in allowedExtensions) {
-            val cover = File(directory.path + "/" + "cover" + ext)
-            if (cover.isFile) {
-                return cover
-            }
-        }
-        // If no file named "Cover" exists, we try to extract the albumImage from the first MP3 we
-        // see, and assume it is the album image for the whole Release
-        val contentFiles = File("$directory/content").listFiles() ?: return null
-        for (file in contentFiles) {
-            try {
-                val mp3File = Mp3File(file)
-                if (!mp3File.hasId3v2Tag()) continue
-                val imageBytes = mp3File.id3v2Tag.albumImage
-                val bmp = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
-                // Once a valid BMP is found, save this bitmap to a PNG file named cover.png
-                val coverFile = File(directory.path + "/cover.png")
-                val fOut = FileOutputStream(coverFile)
-                bmp.compress(Bitmap.CompressFormat.PNG, 85, fOut)
-                fOut.flush()
-                fOut.close()
-                return coverFile
-            } catch (e: Exception) {
-            }
-        }
-        for (file in contentFiles) {
-            for (ext in allowedExtensions) {
-                if (file.name.endsWith(ext)) {
-                    return file
-                }
-            }
-        }
-        return null
-    }
-
-    fun sanitizeString(input: String): String {
-        return input.replace("%20", " ")
     }
 
     /**

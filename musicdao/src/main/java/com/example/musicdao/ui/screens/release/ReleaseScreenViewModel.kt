@@ -5,7 +5,9 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.torrent.api.TorrentHandleStatus
 import com.example.musicdao.core.usecases.releases.GetRelease
 import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
@@ -22,6 +24,7 @@ class ReleaseScreenViewModel @AssistedInject constructor(
     private val getReleaseUseCase: GetRelease,
     private val downloadIntentUseCase: DownloadIntentUseCase,
     private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase,
+    private val database: CacheDatabase
 ) : ViewModel() {
 
     @AssistedFactory
@@ -50,28 +53,29 @@ class ReleaseScreenViewModel @AssistedInject constructor(
 
     init {
         viewModelScope.launch {
-            _saturatedRelease.value = getReleaseUseCase.invoke(releaseId)
+            val release = database.dao.get(releaseId)
+            _saturatedRelease.value = release.toAlbum()
 
-            val release = _saturatedRelease.value
-
-            if (release?.songs == null || release.songs.isEmpty()) {
-                downloadIntentUseCase.invoke(releaseId)
+            if (!release.isDownloaded) {
+                downloadIntentUseCase.invoke(release.id)
             }
 
-            val flow = getTorrentStatusFlowUseCase(releaseId)
-            if (flow != null) {
-                val stateFlow = flow.stateIn(
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000L),
-                    initialValue = null
-                )
-                stateFlow.collect {
-                    _torrentHandleState.value = it
-                    // TODO: turn this into boolean
-                    val status = _torrentHandleState.value
-                    if (status != null && status.finishedDownloading == "true" && !_update.value) {
-                        _update.value = true
-                        _saturatedRelease.value = getReleaseUseCase(releaseId)
+            TorrentEngine.magnetToInfoHash(release.magnet)?.let { infoHash ->
+                val flow = getTorrentStatusFlowUseCase(infoHash)
+                if (flow != null) {
+                    val stateFlow = flow.stateIn(
+                        scope = viewModelScope,
+                        started = SharingStarted.WhileSubscribed(5000L),
+                        initialValue = null
+                    )
+                    stateFlow.collect {
+                        _torrentHandleState.value = it
+                        // TODO: turn this into boolean
+                        val status = _torrentHandleState.value
+                        if (status != null && status.finishedDownloading == "true" && !_update.value) {
+                            _update.value = true
+                            _saturatedRelease.value = getReleaseUseCase(releaseId)
+                        }
                     }
                 }
             }

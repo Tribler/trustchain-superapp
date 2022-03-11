@@ -1,52 +1,239 @@
 package com.example.musicdao.core.torrent
 
+import android.content.Context
+import android.content.res.Resources
+import android.net.Uri
 import android.os.Build
+import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.musicdao.CachePath
+import com.example.musicdao.core.database.CacheDatabase
 import com.example.musicdao.core.usecases.DownloadFinishUseCase
-import com.example.musicdao.core.util.MyResult
 import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
 import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
+import java.nio.file.Paths
 import javax.inject.Inject
 
-/**
- * Cl
- */
 @RequiresApi(Build.VERSION_CODES.O)
 class TorrentEngine @Inject constructor(
     private val sessionManager: SessionManager,
-    private val torrentFinished: DownloadFinishUseCase
+    val cachePath: CachePath,
+    private val database: CacheDatabase,
+    private val downloadFinishUseCase: DownloadFinishUseCase
 ) {
+    private val _activeTorrents: MutableStateFlow<List<String>> = MutableStateFlow(mutableListOf())
+    private val activeTorrents: StateFlow<List<String>> = _activeTorrents
 
-    private val _activeTorrents: MutableStateFlow<List<String>> = MutableStateFlow(
-        mutableListOf()
-    )
-    val activeTorrents: StateFlow<List<String>> = _activeTorrents
+    private val torrentCacheFolder = Paths.get("${cachePath.getPath()}/torrents")
+
+    init {
+        setupListeners()
+    }
+
+    /**
+     * The main seed function for any torrent. Magnet is only used for external
+     * links.
+     *
+     * @param magnet magnet link
+     * @param root root folder, not the root folder of torrent
+     * @param initialSeed if torrent has never been seeded before
+     * @return torrentHandle
+     */
+    fun seed(
+        magnet: String,
+        root: Path,
+        initialSeed: Boolean = false
+    ): TorrentHandle? {
+        val contentFolder = rootToContentFolder(root) ?: return null
+        Log.d(
+            "MusicDao",
+            "seed(): torrent seed with $magnet, $root, $contentFolder, $initialSeed"
+        )
+        if (!ReleaseProcessor.folderExistsAndHasFiles(contentFolder.toFile())) {
+            Log.d("MusicDao", "seed(): Folder $contentFolder is empty or does not exist")
+            return null
+        }
+
+        // If initial seed, then "create" a torrent file and seed. Else, use the magnet link w/
+        // any trackers included.
+        if (initialSeed) {
+            val torrentInfo = createTorrentInfo(contentFolder)
+            sessionManager.download(torrentInfo, root.toFile())
+        } else {
+            sessionManager.download(magnet, root.toFile())
+        }
+        val handle = sessionManager.find(Sha1Hash(magnetToInfoHash(magnet)))
+
+        handle.pause()
+        handle.resume()
+
+        return handle
+    }
+
+    /**
+     * Downloads a torrent with the magnet link and trackers in it correctly.
+     */
+    private fun download(
+        magnet: String,
+        root: Path
+    ): TorrentHandle? {
+        Log.d(
+            "MusicDao",
+            "download(): torrent download with $magnet, $root"
+        )
+        sessionManager.download(magnet, root.toFile())
+        val infoHash = magnetToInfoHash(magnet)
+        val handle = sessionManager.find(Sha1Hash(infoHash))
+
+        // Opt-out of the auto-managed queue system of lib-torrent
+        handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
+        handle.resume()
+
+        return if (handle != null) {
+            handle
+        } else {
+            null
+        }
+    }
 
     fun getAllTorrents(): StateFlow<List<String>> {
         return activeTorrents
     }
 
-    init {
+    fun get(infoHash: String): TorrentHandle? {
+        val handle = sessionManager.find(Sha1Hash(infoHash))
+        return if (handle != null) {
+            handle
+        } else {
+            null
+        }
+    }
+
+    suspend fun seedStrategy(): List<TorrentHandle> {
+        val downloadedReleases = database.dao.getAll().filter { it.isDownloaded }
+        Log.d(
+            "MusicDao",
+            "SeedStrategy: attempting to seed (${downloadedReleases.size}): ${downloadedReleases.map { "[${it.magnet} - $it]" }}"
+        )
+
+        val result = downloadedReleases.mapNotNull {
+            it.root?.let { root ->
+                seed(magnet = it.magnet, Paths.get(root))
+            }
+        }
+
+        Log.d(
+            "MusicDao",
+            "SeedStrategy: result to seed (${result.size}): ${result.map { it.infoHash() }}"
+        )
+
+        return result
+    }
+
+    suspend fun download(releaseId: String): TorrentHandle? {
+        val release = database.dao.get(releaseId)
+        return download(release.magnet, Paths.get("$torrentCacheFolder/$releaseId"))
+    }
+
+    /**
+     * Simulates a download and puts content in cache/torrents/releaseId
+     * @return root folder of release in cache
+     */
+    fun simulateDownload(context: Context, uris: List<Uri>, releaseId: String): Path? {
+        copyReleaseToTempFolder(context, uris, releaseId)
+        copyIntoCache(Paths.get("${cachePath.getPath()}/temp"))
+        return Paths.get("$torrentCacheFolder/$releaseId")
+    }
+
+    /**
+     * Copies the file URIs given to the temp folder of the release.
+     *
+     * @param context android context
+     * @param uris uris of files
+     * @param releaseId releaseID for folder name
+     * @return root folder
+     */
+    private fun copyReleaseToTempFolder(
+        context: Context,
+        uris: List<Uri>,
+        releaseId: String
+    ): File {
+        val parentDir = Paths.get("${cachePath.getPath()}/temp/$releaseId/$DEFAULT_DIR_NAME")
+        return copyToTempFolder(context, uris, parentDir)
+    }
+
+    private fun copyToTempFolder(context: Context, uris: List<Uri>, parentDir: Path): File {
+        Log.d(
+            "MusicDao",
+            "copyToTempFolder: attempting to copy files ${uris.map { it.toString() }} into temp folder $parentDir"
+        )
+        val contentResolver = context.contentResolver
+
+        File("${context.cacheDir}/temp").deleteRecursively()
+
+        val fileList = mutableListOf<File>()
+        val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+        for (uri in uris) {
+            var fileName = ""
+            contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    fileName = cursor.getString(0)
+                }
+            }
+
+            if (fileName == "") throw Error("Source file name for creating torrent not found")
+            val input =
+                contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+            val fileLocation = "$parentDir/$fileName"
+
+            FileUtils.copyInputStreamToFile(input, File(fileLocation))
+            fileList.add(File(fileLocation))
+        }
+
+        return parentDir.toFile()
+    }
+
+    /**
+     * Copy whole folder contents into cache
+     *
+     * @param folder all the contents of this folder will be copied into cache
+     * @return if successful or not
+     */
+    private fun copyIntoCache(folder: Path): Boolean {
+        Log.d(
+            "MusicDao",
+            "copyIntoCache: attempting to copy files $folder into torrent cache $torrentCacheFolder"
+        )
+        try {
+            folder.toFile().copyRecursively(torrentCacheFolder.toFile(), overwrite = true)
+        } catch (exception: Exception) {
+            Log.d("MusicDao", "copyIntoCache: could not copy files")
+            return false
+        }
+        return true
+    }
+
+    private fun setupListeners() {
         sessionManager.addListener(object : AlertListener {
             override fun types(): IntArray? {
                 return null
             }
 
             override fun alert(alert: Alert<*>) {
-                val type: AlertType = alert.type()
-                when (type) {
+                when (alert.type()) {
                     AlertType.ADD_TORRENT -> {
                         val a: AddTorrentAlert = alert as AddTorrentAlert
                         Log.d(
-                            "MusicDAOTorrent",
-                            "ALERT: Torrent added ${a.handle().infoHash()} with \n${
+                            "MusicDao",
+                            "Torrent: Torrent added ${a.handle().infoHash()} with \n${
                             a.handle().makeMagnetUri()
                             }"
                         )
@@ -57,8 +244,8 @@ class TorrentEngine @Inject constructor(
                     AlertType.TORRENT_REMOVED -> {
                         val a: TorrentRemovedAlert = alert as TorrentRemovedAlert
                         Log.d(
-                            "MusicDAOTorrent",
-                            "ALERT: Torrent removed ${a.handle().infoHash()} with \n${
+                            "MusicDao",
+                            "Torrent: Torrent removed ${a.handle().infoHash()} with \n${
                             a.handle().makeMagnetUri()
                             }"
                         )
@@ -68,8 +255,8 @@ class TorrentEngine @Inject constructor(
                     AlertType.TORRENT_CHECKED -> {
                         val a: TorrentCheckedAlert = alert as TorrentCheckedAlert
                         Log.d(
-                            "MusicDAOTorrent",
-                            "ALERT: Torrent checked ${a.handle().infoHash()} with \n${
+                            "MusicDao",
+                            "Torrent: Torrent checked ${a.handle().infoHash()} with \n${
                             a.handle().makeMagnetUri()
                             }"
                         )
@@ -79,124 +266,44 @@ class TorrentEngine @Inject constructor(
                         val a: BlockFinishedAlert = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
                         Log.d(
-                            "MusicDAOTorrent",
-                            "ALERT: Progress: " + p + " for torrent name: " + a.torrentName()
+                            "MusicDao",
+                            "Torrent: Progress: " + p + " for torrent name: " + a.torrentName()
                         )
                     }
                     AlertType.TORRENT_FINISHED -> {
                         val a: TorrentFinishedAlert = alert as TorrentFinishedAlert
                         Log.d(
-                            "MusicDAOTorrent",
-                            "ALERT: Torrent finished ${a.handle().infoHash()} with \n${
+                            "MusicDao",
+                            "Torrent: Torrent finished ${a.handle().infoHash()} with \n${
                             a.handle().makeMagnetUri()
                             }"
                         )
-                        torrentFinished(a.handle().infoHash().toString())
+                        downloadFinishUseCase.invoke(a.handle().infoHash().toString())
                     }
                 }
             }
         })
     }
 
-    fun getTorrentHandle(realInfoHash: String): MyResult<TorrentHandle> {
-        val handle = sessionManager.find(Sha1Hash(realInfoHash))
-        if (handle == null) {
-            return MyResult.Failure("No handle.")
-        } else {
-            return MyResult.Success(handle)
-        }
-    }
-
-    fun verifyAndSeed(folder: Path, realInfoHash: String): MyResult<TorrentHandle> {
-        return when (val res = verify(folder, realInfoHash)) {
-            is MyResult.Failure -> MyResult.Failure(res.message)
-            is MyResult.Success -> seed(folder)
-        }
-    }
-
-    fun seed(
-        folder: Path
-    ): MyResult<TorrentHandle> {
-        val files = File(folder.toUri())
-        if (!files.exists() || files.listFiles().isEmpty()) {
-            return MyResult.Failure("Folder $folder is empty or does not exist.")
-        }
-
-        val torrentInfo = createTorrentInfo(folder)
-        sessionManager.download(torrentInfo, files.parentFile)
-        val handle = sessionManager.find(torrentInfo.infoHash())
-        handle.pause()
-        handle.resume()
-
-        return MyResult.Success(handle)
-    }
-
-    fun download(
-        folder: Path,
-        realInfoHash: String
-    ): MyResult<TorrentHandle> {
-        sessionManager.download(
-            "magnet:?xt=urn:btih:$realInfoHash",
-            folder.toFile().parentFile
-        )
-        val handle = sessionManager.find(Sha1Hash(realInfoHash))
-
-        // Opt-out of the auto-managed queue system of libtorrent
-        handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
-        handle.resume()
-
-        return if (handle == null) {
-            MyResult.Failure("Did not get the torrent.")
-        } else {
-            MyResult.Success(handle)
-        }
-    }
-
     companion object {
-        /**
-         * @param folder the folder is included in the torrent
-         * file and resulting info-hash
-         */
-        fun generateInfoHash(folder: Path): MyResult<String> {
-            val files = File(folder.toUri())
-            if (!files.exists() || files.listFiles().isEmpty()) {
-                return MyResult.Failure("Folder $folder is empty or does not exist.")
+        fun generateInfoHash(path: Path): String? {
+            val folder = path.toFile()
+            if (!ReleaseProcessor.folderExistsAndHasFiles(folder)) {
+                Log.d("MusicDao", "generateInfoHash: could not calculate info-hash for $folder")
+                return null
             }
 
             val torrent = SharedTorrent.create(
-                folder.toFile(),
-                folder.toFile().listFiles().toList().sorted(),
+                folder,
+                folder.listFiles()?.toList()?.sorted() ?: listOf(),
                 65535,
                 listOf(),
                 ""
             )
 
-            return MyResult.Success(torrent.hexInfoHash)
+            return torrent.hexInfoHash
         }
 
-        /**
-         * @param folder the folder is included in the torrent
-         * file and resulting info-hash
-         */
-        fun verify(folder: Path, realInfoHash: String): MyResult<Boolean> {
-            return when (val infoHash = generateInfoHash(folder)) {
-                is MyResult.Failure -> MyResult.Failure(infoHash.message)
-                is MyResult.Success -> {
-                    if (infoHash.value == realInfoHash) {
-                        MyResult.Success(true)
-                    } else {
-                        MyResult.Failure("Info-hash not the same: ${infoHash.value} and $realInfoHash")
-                    }
-                }
-            }
-        }
-
-        /**
-         * @param folder the root folder of torrent; will be included
-         * in the torrent(!)
-         * NOTE: important to use this function, other libraries might
-         * create a different torrent file due to different specifications
-         */
         fun createTorrentInfo(folder: Path): TorrentInfo {
             val torrent = SharedTorrent.create(
                 folder.toFile(),
@@ -207,5 +314,46 @@ class TorrentEngine @Inject constructor(
             )
             return TorrentInfo(torrent.encoded)
         }
+
+        fun magnetToInfoHash(magnet: String): String? {
+            val mark = "magnet:?xt=urn:btih:"
+            val start = magnet.indexOf(mark) + mark.length
+            if (start == -1) return null
+            return magnet.substring(20, start + 40)
+        }
+
+        fun infoHashToMagnet(infoHash: String): String {
+            Log.d("MusicDao", "infoHashToMagnet: $infoHash")
+
+            return "magnet:?xt=urn:btih:$infoHash"
+        }
+
+        /**
+         * Heuristically find the main folder of the torrent.
+         * TODO: support torrents which do not have a main folder
+         *
+         * @param root
+         * @return
+         */
+        fun rootToContentFolder(root: Path): Path? {
+            // 1. Default folder, if created by our protocol.
+            val contentFolder = Paths.get("$root/content").toFile()
+            if (contentFolder.exists()) {
+                return contentFolder.toPath()
+            }
+
+            // 2. First folder in root.
+            val potentialFolders = root.toFile().listFiles()
+            if (potentialFolders == null) return null
+
+            val folder = potentialFolders.toList().find { it.isDirectory }
+            if (folder != null) {
+                return folder.toPath()
+            }
+
+            return null
+        }
+
+        const val DEFAULT_DIR_NAME = "content"
     }
 }

@@ -3,49 +3,56 @@ package com.example.musicdao.core.usecases
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.repositories.AlbumRepository
-import com.example.musicdao.core.torrent.TorrentCache
-import com.example.musicdao.core.util.MyResult
+import com.example.musicdao.core.torrent.TorrentEngine
+import java.util.*
 import javax.inject.Inject
-import kotlin.io.path.name
 
 class CreateReleaseUseCase @Inject constructor(
     private val albumRepository: AlbumRepository,
-    private val torrentCache: TorrentCache
+    private val torrentEngine: TorrentEngine
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
-    operator fun invoke(
+    suspend operator fun invoke(
         artist: String,
         title: String,
         releaseDate: String,
         uris: List<Uri>,
         context: Context
     ): Boolean {
-        // Copy the files into the cache with the appropriate folder i.e. simulating the download process
-        val tempFolder = torrentCache.copyToTempFolder(context, uris)
-        val cacheFolder = torrentCache.copyIntoCache(tempFolder.toPath())
+        val releaseId = UUID.randomUUID().toString()
+        Log.d("MusicDao", "CreateReleaseUseCase: $releaseId")
 
-        when (cacheFolder) {
-            is MyResult.Failure -> return false
-            is MyResult.Success -> {
-                val infoHash = cacheFolder.value.parent.name
-
-                val result = albumRepository.create(
-                    releaseId = infoHash,
-                    magnet = "magnet:?xt=urn:btih:$infoHash",
-                    title = title,
-                    artist = artist,
-                    releaseDate = releaseDate,
-                )
-
-                if (result) {
-                    torrentCache.seedStrategy()
-                }
-
-                return result
-            }
+        val root = torrentEngine.simulateDownload(context, uris, releaseId)
+        if (root == null) {
+            Log.d("MusicDao", "CreateReleaseUseCase: could not simulate download")
+            return false
         }
+
+        val contentFolder = TorrentEngine.rootToContentFolder(root) ?: return false
+        val infoHash = TorrentEngine.generateInfoHash(contentFolder)
+        if (infoHash == null) {
+            Log.d("MusicDao", "CreateReleaseUseCase: could not calculate info-hash")
+            return false
+        }
+
+        val magnet = TorrentEngine.infoHashToMagnet(infoHash)
+        val publishResult = albumRepository.create(
+            releaseId = releaseId,
+            magnet = magnet,
+            title = title,
+            artist = artist,
+            releaseDate = releaseDate,
+        )
+        if (!publishResult) {
+            Log.d("MusicDao", "Release: publishing to network failed")
+            return false
+        }
+
+        torrentEngine.seed(magnet, root, true)
+        return true
     }
 }
