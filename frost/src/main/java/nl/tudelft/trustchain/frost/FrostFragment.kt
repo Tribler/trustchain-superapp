@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.frost
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,14 +9,22 @@ import kotlinx.android.synthetic.main.fragment_frost.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
+import nl.tudelft.trustchain.frost.FrostCommunity
+import java.io.File
+import java.io.PrintWriter
 
-
+@ExperimentalUnsignedTypes
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     private val binding by viewBinding(FragmentFrostBinding::bind)
 
+    private fun getFrostCommunity(): FrostCommunity {
+        return getIpv8().getOverlay()
+            ?: throw java.lang.IllegalStateException("FROSTCommunity is not configured")
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-//        initClickListeners()
+        initClickListeners()
         sample_text.text = "potato"
         val new_text = FrostCpp.stringFromJNI()
         sample_text.text = new_text
@@ -52,9 +61,13 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         return inflater.inflate(R.layout.fragment_frost, container, false)
     }
 //
-//    private fun initClickListeners() {
-//        val walletManager = WalletManagerAndroid.getInstance()
-//        button.setOnClickListener {
-//            copyToClipboard(walletManager.protocolAddress().toString())
-//        }
+    private fun initClickListeners() {
+        button.setOnClickListener {
+            // TODO: add FROST JNI
+            Log.i("FROST", "Key distribution started")
+            var file = File("key_share.txt")
+            file.writeText("keyFile")
+            getFrostCommunity().distributeKey("hello")
+        }
+    }
 }

@@ -2,13 +2,9 @@ package nl.tudelft.trustchain.frost
 
 import android.util.Log
 import nl.tudelft.ipv8.Community
-import nl.tudelft.ipv8.Overlay
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
-import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
-import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
-import java.util.*
+import java.io.File
+import java.io.PrintWriter
 import kotlin.random.Random
 
 @ExperimentalUnsignedTypes
@@ -26,11 +22,9 @@ class FrostCommunity: Community(){
     /**
      * Load / create walking models (feature based and collaborative filtering)
      */
-    fun initiateWalkingModel() {
+    private fun initiateWalkingModel() {
         try {
             Log.i("FROST", "Initiate random walk")
-//            val keyFragment = "Hello"
-//            onBroadcast(keyFragment=keyFragment)
         } catch (e: Exception) {
             Log.i("FROST", "Random walk failed")
             e.printStackTrace()
@@ -44,12 +38,21 @@ class FrostCommunity: Community(){
         val (_, payload) = packet.getAuthPayload(KeyPacketMessage)
 
         val keyShare = payload.keyShare
-        // TODO handle encryption
         Log.i("FROST", "Walking model is de-packaged")
 
+        // TODO handle encryption
+
         Log.i("FROST", "Key fragment saved $keyShare")
-        //save key fragment
+
+        saveKeyShare(keyShare)
     }
+
+
+    private fun saveKeyShare(keyShare: String){
+        var file = File("key_share.txt")
+        file.writeText(keyShare)
+    }
+
 
     @ExperimentalUnsignedTypes
     fun distributeKey(
@@ -58,14 +61,19 @@ class FrostCommunity: Community(){
         originPublicKey: ByteArray = myPeer.publicKey.keyToBin()
     ): Int {
         var count = 0
-        for (peer in getPeers().filter { it != myPeer }) {
-            val packet = serializePacket(
-                MessageId.ID,
-                KeyPacketMessage(originPublicKey, ttl, keyShare)
-            )
-            Log.i("FROST", "Sending key fragment to ${peer.address}")
-            send(peer, packet)
-            count += 1
+        for (peer in getPeers()) {
+            if(peer == myPeer){
+                saveKeyShare(keyShare)
+            }
+            else{
+                val packet = serializePacket(
+                    MessageId.ID,
+                    KeyPacketMessage(originPublicKey, ttl, keyShare)
+                )
+                Log.i("FROST", "Sending key fragment to ${peer.address}")
+                send(peer, packet)
+                count += 1
+            }
         }
         return count
     }
