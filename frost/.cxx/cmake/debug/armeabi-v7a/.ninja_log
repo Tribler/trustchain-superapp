@@ -1,3 +1,7 @@
 # ninja log v5
 0	310	1647047732	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	396b051dcbf7c55d
 310	328	1647047732	/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	272712c7953ec777
+0	308	1647049350	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	396b051dcbf7c55d
+308	325	1647049350	/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	272712c7953ec777
+0	5	0	clean	d016bfccce7928a4
+0	4	0	clean	d016bfccce7928a4
