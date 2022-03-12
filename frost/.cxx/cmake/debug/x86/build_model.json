@@ -175,6 +175,7 @@
       "project": {
         "compilerSettingsCacheFolder": "/home/pi/Desktop/trustchain-superapp/.cxx",
         "cxxFolder": "/home/pi/Desktop/trustchain-superapp/.cxx",
+        "ideBuildTargetAbi": "x86,armeabi-v7a,armeabi",
         "isBuildOnlyTargetAbiEnabled": true,
         "isCmakeBuildCohabitationEnabled": false,
         "isNativeCompilerSettingsCacheEnabled": false,
@@ -198,10 +199,7 @@
     "objFolder": "/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj",
     "variantName": "debug",
     "validAbiList": [
-      "ARMEABI_V7A",
-      "ARM64_V8A",
-      "X86",
-      "X86_64"
+      "X86"
     ],
     "prefabDirectory": "/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/prefab",
     "prefabPackageDirectoryList": []

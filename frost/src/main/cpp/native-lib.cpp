@@ -5,7 +5,7 @@ using namespace std;
 
 extern "C"
 JNIEXPORT jstring JNICALL
-Java_nl_tudelft_trustchain_hello_HelloCpp_stringFromJNI(
+Java_nl_tudelft_trustchain_frost_FrostCpp_stringFromJNI(
         JNIEnv *env,
         jobject /* this */) {
     char hello[60] = "Hello from C++";

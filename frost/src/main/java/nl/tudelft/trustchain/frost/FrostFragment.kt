@@ -8,7 +8,6 @@ import kotlinx.android.synthetic.main.fragment_frost.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
-import nl.tudelft.trustchain.frost.HelloCpp
 
 
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
@@ -18,7 +17,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         super.onActivityCreated(savedInstanceState)
 //        initClickListeners()
         sample_text.text = "potato"
-        val new_text = HelloCpp.stringFromJNI()
+        val new_text = FrostCpp.stringFromJNI()
         sample_text.text = new_text
     }
 

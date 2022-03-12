@@ -1,3 +1,0 @@
-/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86/CMakeFiles/rebuild_cache.dir
-/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86/CMakeFiles/edit_cache.dir
-/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86/CMakeFiles/hello_cmake.dir
