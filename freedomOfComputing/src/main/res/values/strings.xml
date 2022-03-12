@@ -1,9 +1,15 @@
 <resources>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="title_activity_main_FOC">FOC</string>
+    <string name="title_activity_main_FOC">Freedom Of Computing</string>
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="SearchHint">Search…</string>
+    <string name="numberOfTorrents">6 torrents</string>
+    <string name="downloadsInProgress">2</string>
+    <string name="torrentFileName">Another TorrentAPK</string>
+    <string name="addButtonDescription">Add</string>
+    <string name="progress">75</string>
 
 </resources>
