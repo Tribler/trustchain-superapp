@@ -4,6 +4,7 @@ build
 local.properties
 .gradle
 gossipML/.cxx
+frost/.cxx
 **.project
 **.settings
 **.classpath
