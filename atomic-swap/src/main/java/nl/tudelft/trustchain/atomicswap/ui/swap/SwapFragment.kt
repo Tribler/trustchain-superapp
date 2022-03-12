@@ -22,6 +22,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder
 
 
 class SwapFragment : BaseFragment(R.layout.fragment_peers) {
@@ -67,7 +68,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
     }
 
     private fun configureAtomicSwapCallbacks(){
-        atomicSwapCommunity.setOnTrade { trade, _ ->
+
+        atomicSwapCommunity.setOnTrade { trade, peer ->
 
             lifecycleScope.launch(Dispatchers.Main) {
 
@@ -76,8 +78,21 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setMessage(trade.toString())
                 alertDialogBuilder.setPositiveButton(android.R.string.yes) { _, _ ->
 
-                    //atomicSwapCommunity.sendAcceptMessgae(peer, trade.offerId)
+                    val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
+                    val freshKeyString  = freshKey.pubKey.toString()
+                    atomicSwapCommunity.sendAcceptMessgae(peer, trade.offerId, freshKeyString)
                 }
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
+        }
+
+        atomicSwapCommunity.setOnAccept {
+            lifecycleScope.launch(Dispatchers.Main) {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("Received Accept")
+                alertDialogBuilder.setMessage(it.toString())
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }

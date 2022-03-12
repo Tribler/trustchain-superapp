@@ -80,8 +80,6 @@ class AtomicSwapCommunity : Community() {
     private fun onTradeOfferMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TradeMessage.Deserializer)
         Log.d("AtomicSwapCommunity", peer.mid + ":PAYLOAD: " + payload.offerId)
-        // send back accept
-
         onTradeCallback(payload, peer)
     }
 
@@ -91,24 +89,25 @@ class AtomicSwapCommunity : Community() {
 //        val hash = "abcd"
 //        val txId = "1234"
         Log.d("AtomicSwapCommunity", peer.mid + ": got trade accept ")
+        onAcceptCallback(payload)
         /*
         BTC code goes here
             choose secret
             create swap script
          */
 
-        val (hash, txId, publicKey) = onAcceptCallback(payload)
-
-
-        // send initiate
-        Log.d("AtomicSwapCommunity", peer.mid + ": SENDING INITIATE")
-        send(
-            peer.address,
-            serializePacket(
-                Companion.INITIATE_MESSAGE_ID,
-                InitiateMessage(payload.offerId, hash, txId, publicKey)
-            )
-        )
+//        val (hash, txId, publicKey) = onAcceptCallback(payload)
+//
+//
+//        // send initiate
+//        Log.d("AtomicSwapCommunity", peer.mid + ": SENDING INITIATE")
+//        send(
+//            peer.address,
+//            serializePacket(
+//                Companion.INITIATE_MESSAGE_ID,
+//                InitiateMessage(payload.offerId, hash, txId, publicKey)
+//            )
+//        )
     }
 
     private fun onInitiateMessage(packet: Packet) {
@@ -148,12 +147,12 @@ class AtomicSwapCommunity : Community() {
         }
     }
 
-//    fun sendAcceptMessgae(peer: Peer, offerId:String){
-////        send(
-////            peer.address,
-////            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, ))
-////        )
-//    }
+    fun sendAcceptMessgae(peer: Peer, offerId:String, pubKey: String){
+        send(
+            peer.address,
+            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, pubKey ))
+        )
+    }
 
     companion object {
         private const val BROADCAST_TRADE_MESSAGE_ID = 1
@@ -173,7 +172,8 @@ data class OnAcceptReturn(
 )
 
 //todo better name
-typealias onAccept = (AcceptMessage) -> (OnAcceptReturn)
+//typealias onAccept = (AcceptMessage) -> (OnAcceptReturn)
+typealias onAccept = (AcceptMessage) -> Unit
 typealias onInitiate = (InitiateMessage) -> (String)
 typealias onTrade = (TradeMessage) -> Unit
 typealias onComplete = (CompleteSwapMessage) -> Unit
