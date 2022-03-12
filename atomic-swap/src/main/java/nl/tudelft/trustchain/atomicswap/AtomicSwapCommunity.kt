@@ -1,10 +1,10 @@
 package nl.tudelft.trustchain.atomicswap
 
 import android.util.Log
-import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.messaging.*
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import java.util.*
 
@@ -34,38 +34,84 @@ class AtomicSwapCommunity : Community() {
         messageHandlers[Companion.COMPLETE_MESSAGE_ID] = ::onCompleteTrade
     }
 
+    /**
+     *
+    typealias onAccept = (AcceptMessage) -> Unit
+    typealias onInitiate = (InitiateMessage) -> Unit
+    typealias onTrade = (TradeMessage) -> Unit
+    typealias onComplete = (CompleteSwapMessage) ->Unit
+     */
+
+    private lateinit var onAcceptCallback: onAccept
+    private lateinit var onInitiateCallback: onInitiate
+    private lateinit var onTradeCallback: onTrade
+    private lateinit var onCompleteCallback: onComplete
+
+    fun setOnAccept(callback: onAccept) = callback.also { onAcceptCallback = it }
+    fun setOnInitiate(callback: onInitiate) = callback.also { onInitiateCallback = it }
+    fun setOnTrade(callback: onTrade) = callback.also { onTradeCallback = it }
+    fun setOnComplete(callback: onComplete) = callback.also { onCompleteCallback = it }
+
     private fun onTradeOfferMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TradeMessage.Deserializer)
         Log.d("AtomicSwapCommunity", peer.mid + ":PAYLOAD: " + payload.offerId)
         // send back accept
-        send(peer.address, serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(payload.offerId, peer.mid)))
+
+        onTradeCallback(payload)
+
+        send(
+            peer.address,
+            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(payload.offerId, peer.mid))
+        )
     }
 
     private fun onAcceptMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(AcceptMessage.Deserializer)
-        val hash = "abcd"
-        val txId = "1234"
+//        val hash = "abcd"
+//        val txId = "1234"
         Log.d("AtomicSwapCommunity", peer.mid + ": got trade accept ")
         /*
         BTC code goes here
             choose secret
             create swap script
          */
+
+        val (hash, txId, publicKey) = onAcceptCallback(payload)
+
+
         // send initiate
         Log.d("AtomicSwapCommunity", peer.mid + ": SENDING INITIATE")
-        send(peer.address, serializePacket(Companion.INITIATE_MESSAGE_ID, InitiateMessage(payload.offerId, hash, txId, peer.mid)))
+        send(
+            peer.address,
+            serializePacket(
+                Companion.INITIATE_MESSAGE_ID,
+                InitiateMessage(payload.offerId, hash, txId, publicKey)
+            )
+        )
     }
 
     private fun onInitiateMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(InitiateMessage.Deserializer)
         /* Create and broadcast tx script */
+
+        val txId = onInitiateCallback(payload)
+
         Log.d("AtomicSwapCommunity", peer.mid + ": SENDING COMPLETE MESSAGE")
-        send(peer.address, serializePacket(Companion.COMPLETE_MESSAGE_ID, CompleteSwapMessage(payload.offerId, peer.mid)))
+        send(
+            peer.address,
+            serializePacket(
+                Companion.COMPLETE_MESSAGE_ID,
+                CompleteSwapMessage(payload.offerId, txId)
+            )
+        )
     }
 
     private fun onCompleteTrade(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
         // tell user that trade is complete
+
+//        onCompleteCallback(payload)
+
         Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
     }
 
@@ -88,3 +134,13 @@ class AtomicSwapCommunity : Community() {
         private const val COMPLETE_MESSAGE_ID = 4
     }
 }
+
+data class OnAcceptReturn(
+    val hash: String,
+    val txId: String,
+    val publicKey: String
+)//todo better name
+typealias onAccept = (AcceptMessage) -> (OnAcceptReturn)
+typealias onInitiate = (InitiateMessage) -> (String)
+typealias onTrade = (TradeMessage) -> Unit
+typealias onComplete = (CompleteSwapMessage) -> Unit
