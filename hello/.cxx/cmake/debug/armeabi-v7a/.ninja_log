@@ -1,15 +1,3 @@
 # ninja log v5
-1	2252	668733585	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-2253	2396	668733585	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-3	464	668734934	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-465	556	668734934	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-3	395	668735048	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-396	496	668735048	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-2	380	668735197	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-380	482	668735197	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-2	355	668735659	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-356	438	668735660	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-2	360	668735751	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-360	450	668735752	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
-2	354	668735817	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	ade840fcd634f9cc
-354	438	668735817	C:/Users/s/Documents/GitHub/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	7ce21b1154841ea2
+0	363	1647052677	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	2f3ae6a2b8383ec1
+363	381	1647052677	/home/pi/Desktop/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/armeabi-v7a/libhello_cmake.so	d147c8a963454b58

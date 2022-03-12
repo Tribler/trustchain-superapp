@@ -1,3 +1,3 @@
-C:/Users/s/Documents/GitHub/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/hello_cmake.dir
-C:/Users/s/Documents/GitHub/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/edit_cache.dir
-C:/Users/s/Documents/GitHub/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/rebuild_cache.dir
+/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/rebuild_cache.dir
+/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/edit_cache.dir
+/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86_64/CMakeFiles/hello_cmake.dir

@@ -1,21 +1,21 @@
-                Executable : C:\Users\s\AppData\Local\Android\Sdk\cmake\3.18.1\bin\cmake.exe
+                Executable : /home/pi/Android/Sdk/cmake/3.18.1/bin/cmake
 arguments : 
--HC:\Users\s\Documents\GitHub\trustchain-superapp\hello\src\main\cpp
+-H/home/pi/Desktop/trustchain-superapp/hello/src/main/cpp
 -DCMAKE_CXX_FLAGS=-std=c++17
--DCMAKE_FIND_ROOT_PATH=C:\Users\s\Documents\GitHub\trustchain-superapp\hello\.cxx\cmake\debug\prefab\x86_64\prefab
+-DCMAKE_FIND_ROOT_PATH=/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/prefab/x86_64/prefab
 -DCMAKE_BUILD_TYPE=Debug
--DCMAKE_TOOLCHAIN_FILE=C:\Users\s\AppData\Local\Android\Sdk\ndk\21.1.6352462\build\cmake\android.toolchain.cmake
+-DCMAKE_TOOLCHAIN_FILE=/home/pi/Android/Sdk/ndk/21.1.6352462/build/cmake/android.toolchain.cmake
 -DANDROID_ABI=x86_64
--DANDROID_NDK=C:\Users\s\AppData\Local\Android\Sdk\ndk\21.1.6352462
+-DANDROID_NDK=/home/pi/Android/Sdk/ndk/21.1.6352462
 -DANDROID_PLATFORM=android-22
 -DCMAKE_ANDROID_ARCH_ABI=x86_64
--DCMAKE_ANDROID_NDK=C:\Users\s\AppData\Local\Android\Sdk\ndk\21.1.6352462
+-DCMAKE_ANDROID_NDK=/home/pi/Android/Sdk/ndk/21.1.6352462
 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
--DCMAKE_LIBRARY_OUTPUT_DIRECTORY=C:\Users\s\Documents\GitHub\trustchain-superapp\hello\build\intermediates\cmake\debug\obj\x86_64
--DCMAKE_MAKE_PROGRAM=C:\Users\s\AppData\Local\Android\Sdk\cmake\3.18.1\bin\ninja.exe
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/pi/Desktop/trustchain-superapp/hello/build/intermediates/cmake/debug/obj/x86_64
+-DCMAKE_MAKE_PROGRAM=/home/pi/Android/Sdk/cmake/3.18.1/bin/ninja
 -DCMAKE_SYSTEM_NAME=Android
 -DCMAKE_SYSTEM_VERSION=22
--BC:\Users\s\Documents\GitHub\trustchain-superapp\hello\.cxx\cmake\debug\x86_64
+-B/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/x86_64
 -GNinja
 jvmArgs : 
 

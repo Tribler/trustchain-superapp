@@ -1,7 +1,7 @@
 [
 {
-  "directory": "C:/Users/s/Documents/GitHub/trustchain-superapp/hello/.cxx/cmake/debug/armeabi-v7a",
-  "command": "C:\\Users\\s\\AppData\\Local\\Android\\Sdk\\ndk\\21.1.6352462\\toolchains\\llvm\\prebuilt\\windows-x86_64\\bin\\clang++.exe --target=armv7-none-linux-androideabi22 --gcc-toolchain=C:/Users/s/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64 --sysroot=C:/Users/s/AppData/Local/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/windows-x86_64/sysroot -Dhello_cmake_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -std=c++17 -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles\\hello_cmake.dir\\native-lib.cpp.o -c C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\src\\main\\cpp\\native-lib.cpp",
-  "file": "C:\\Users\\s\\Documents\\GitHub\\trustchain-superapp\\hello\\src\\main\\cpp\\native-lib.cpp"
+  "directory": "/home/pi/Desktop/trustchain-superapp/hello/.cxx/cmake/debug/armeabi-v7a",
+  "command": "/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=armv7-none-linux-androideabi22 --gcc-toolchain=/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Dhello_cmake_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -march=armv7-a -mthumb -Wformat -Werror=format-security  -std=c++17 -O0 -fno-limit-debug-info  -fPIC -o CMakeFiles/hello_cmake.dir/native-lib.cpp.o -c /home/pi/Desktop/trustchain-superapp/hello/src/main/cpp/native-lib.cpp",
+  "file": "/home/pi/Desktop/trustchain-superapp/hello/src/main/cpp/native-lib.cpp"
 }
 ]
