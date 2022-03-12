@@ -63,7 +63,7 @@ class WalletService {
             }
 
             // Create an app-kit with testing bitcoins if empty.
-            val app = object : WalletAppKit(params, dir, name) {
+            val app = object : WalletAppKit(params, dir, name+"test") {
                 override fun onSetupCompleted() {
                     if (wallet().keyChainGroupSize < 1) {
                         wallet().importKey(ECKey())
@@ -85,6 +85,14 @@ class WalletService {
 //                    params.port
 //                )
 //            )
+
+            app.setPeerNodes(
+                PeerAddress(
+                    params,
+                    InetAddress.getByName("10.0.2.2"),
+                    params.port
+                )
+            )
 
             app.setAutoSave(true)
             app.setBlockingStartup(false)

@@ -39,7 +39,7 @@ sealed class SwapData {
         override val keyUsed: ByteArray,
         val secretUsed: ByteArray,
         override val amount: Coin,
-        override val relativeLock: Int = BitcoinSwap.relativeLock,
+        override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
         override val initiateTxId: ByteArray? = null,
         override val claimByInitiatorTxId: ByteArray? = null
@@ -57,7 +57,7 @@ sealed class SwapData {
     data class RecipientSwapData(
         override val keyUsed: ByteArray,
         override val amount: Coin,
-        override val relativeLock: Int = BitcoinSwap.relativeLock,
+        override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
         val hashUsed: ByteArray? = null,
         override val initiateTxId: ByteArray? = null,
@@ -70,21 +70,26 @@ sealed class SwapData {
  *
  * Think of the swap in terms of Btc <-> Btc is confusing and annoying.
  */
-object BitcoinSwap {
+class BitcoinSwap {
     var relativeLock: Int = 6
         private set
     var networkParams: NetworkParameters = RegTestParams()
         private set
 
-    /**
-     * Configure the swap option.
-     *
-     * Should probably only be used on startup.
-     */
-    operator fun invoke(relativeLock: Int = this.relativeLock, networkParams: NetworkParameters = this.networkParams) {
+
+    constructor(relativeLock: Int = 6, networkParams: NetworkParameters = RegTestParams()) {
         this.relativeLock = relativeLock
         this.networkParams = networkParams
     }
+//    /**
+//     * Configure the swap option.
+//     *
+//     * Should probably only be used on startup.
+//     */
+//    operator fun invoke(relativeLock: Int = this.relativeLock, networkParams: NetworkParameters = this.networkParams) {
+//        this.relativeLock = relativeLock
+//        this.networkParams = networkParams
+//    }
 
     /**
      * Used to store info about swaps we are involved in.
@@ -221,7 +226,7 @@ object BitcoinSwap {
 
     fun createClaimTx(txId: ByteArray,secret:ByteArray,offerId: Long,wallet: Wallet): Transaction {
         Log.d("bitcoinswap","attempting to claim tx : ${txId.toHex()} of offer : $offerId")
-        val tx = wallet.getTransaction(Sha256Hash.of(txId)) ?: error("Could not find tx")
+        val tx = wallet.getTransaction(Sha256Hash.wrap(txId)) ?: error("Could not find tx: ${txId.toHex()}")
         val details = swapStorage[offerId] ?: error("could not fine swap data. ")
 
         val key = ECKey.fromPrivate(details.keyUsed)

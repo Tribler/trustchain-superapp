@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.atomicswap.swap
 import junit.framework.TestCase
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.runBlocking
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.BitcoinSwap
 import org.bitcoinj.core.*
 import org.bitcoinj.params.UnitTestParams
@@ -13,12 +14,10 @@ import org.bitcoinj.wallet.Wallet
 import org.junit.Test
 
 class BitcoinSwapTest {
-    init {
-        initBitcoinSwap()
-    }
 
-    fun initBitcoinSwap() {
-        BitcoinSwap(relativeLock = 1,networkParams = UnitTestParams())
+
+    fun createBitcoinSwap(): BitcoinSwap {
+        return BitcoinSwap(relativeLock = 1,networkParams = UnitTestParams())
     }
 
     fun createWallet(): Wallet {
@@ -36,10 +35,12 @@ class BitcoinSwapTest {
     fun `A swap transaction should be able to be claimed`() {
         // the wallet that can reclaim
         val initiateWallet = createWallet()
+        val initiateBitcoinSwap = createBitcoinSwap()
 
         // the wallet that can claim
         val claimWallet = createWallet()
         val claimPublicKey = claimWallet.freshReceiveKey().pubKey
+        val claimBitcoinSwap = createBitcoinSwap()
 
         val fakeTx = Transaction(UnitTestParams())
         fakeTx.addInput(Sha256Hash.ZERO_HASH,0,ScriptBuilder.createEmpty())
@@ -48,16 +49,24 @@ class BitcoinSwapTest {
         initiateWallet.commitTx(fakeTx)
         initiateWallet.allowSpendingUnconfirmedTransactions() // allow us to use unconfirmed txs
 
-        val (tx, swapData) = BitcoinSwap.startSwapTx(
+        val (tx, swapData) = initiateBitcoinSwap.startSwapTx(
             offerId = 0,
             wallet = initiateWallet,
             claimPubKey = claimPublicKey,
             "1" //the wallet has no funds. todo: Figure out how to mock balance (?).
         )
 
+        println(tx.txId.bytes.toHex())
+        println(swapData.initiateTxId?.toHex())
+        claimWallet.commitTx(tx)
+        claimWallet.walletTransactions.forEach {
+            println("wallet tx " + it.transaction.txId.bytes.toHex())
+        }
+        claimBitcoinSwap.addInitialRecipientSwapdata(0,swapData.keyUsed,"1")
 
+        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretUsed,swapData.keyUsed,swapData.initiateTxId!!)
 
-        val claimTx = BitcoinSwap.createClaimTx(tx.txId.bytes, swapData.secretUsed, 0, claimWallet)
+        val claimTx = claimBitcoinSwap.createClaimTx(tx.txId.bytes, swapData.secretUsed, 0, claimWallet)
 
         val result = runCatching {
             claimTx.inputs.first().verify(tx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
