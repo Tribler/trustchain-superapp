@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.currencyii.CurrencyIIMainActivity
 import nl.tudelft.trustchain.debug.DebugActivity
 import nl.tudelft.trustchain.distributedAI.DistributedActivity
 import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
+import nl.tudelft.trustchain.frost.FrostActivity
 import nl.tudelft.trustchain.ssi.SSIMainActivity
 import nl.tudelft.trustchain.liquidity.LiquidityPoolMainActivity
 import nl.tudelft.trustchain.payloadgenerator.ui.TrustChainPayloadGeneratorActivity
@@ -111,5 +112,11 @@ enum class AppDefinition(
         R.color.colorPrimaryValueTransfer,
         ValueTransferMainActivity::class.java,
         true,
+    ),
+    FROST(
+    R.drawable.ic_ice,
+    "Frost",
+    R.color.blue,
+    FrostActivity::class.java
     )
 }
