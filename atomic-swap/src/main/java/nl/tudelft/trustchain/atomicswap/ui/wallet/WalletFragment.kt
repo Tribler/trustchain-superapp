@@ -22,6 +22,7 @@ import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.listeners.WalletChangeEventListener
 import org.web3j.utils.Convert
+import java.net.InetAddress
 
 class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChangeEventListener {
 
@@ -51,6 +52,9 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
 
         walletAppKit = WalletService.getGlobalWallet()
         bitcoinWallet = walletAppKit.wallet()
+        walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
+
+
 
 //        lifecycleScope.launchWhenStarted {
 //            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
