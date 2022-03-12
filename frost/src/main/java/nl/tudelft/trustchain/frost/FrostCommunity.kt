@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.frost
 
 import android.util.Log
+import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
@@ -11,21 +12,9 @@ import java.util.*
 import kotlin.random.Random
 
 @ExperimentalUnsignedTypes
-open class FrostCommunity(
-    settings: TrustChainSettings,
-    database: TrustChainStore,
-    crawler: TrustChainCrawler = TrustChainCrawler()
-) : TrustChainCommunity(settings, database, crawler){
+class FrostCommunity: Community(){
+    override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fb"
 
-    class Factory(
-        private val settings: TrustChainSettings,
-        private val database: TrustChainStore,
-        private val crawler: TrustChainCrawler = TrustChainCrawler()
-    ) : Overlay.Factory<FrostCommunity>(FrostCommunity::class.java) {
-        override fun create(): FrostCommunity {
-            return FrostCommunity(settings, database, crawler)
-        }
-    }
     init {
         messageHandlers[MessageId.ID] = ::onDistributeKey
     }
@@ -69,7 +58,7 @@ open class FrostCommunity(
         originPublicKey: ByteArray = myPeer.publicKey.keyToBin()
     ): Int {
         var count = 0
-        for (peer in getPeers()) {
+        for (peer in getPeers().filter { it != myPeer }) {
             val packet = serializePacket(
                 MessageId.ID,
                 KeyPacketMessage(originPublicKey, ttl, keyShare)

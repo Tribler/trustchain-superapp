@@ -45,6 +45,7 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
+import nl.tudelft.trustchain.frost.FrostCommunity
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
@@ -83,7 +84,8 @@ class TrustChainApplication : Application() {
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity()
+                createIdentityCommunity(),
+                createFrostCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -272,6 +274,14 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             Overlay.Factory(MarketCommunity::class.java),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createFrostCommunity(): OverlayConfiguration<FrostCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            Overlay.Factory(FrostCommunity::class.java),
             listOf(randomWalk)
         )
     }
