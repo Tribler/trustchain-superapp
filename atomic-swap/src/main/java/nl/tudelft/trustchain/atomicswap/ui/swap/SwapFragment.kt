@@ -47,7 +47,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 //        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayout.VERTICAL))
 //
 
-
         loadNetworkInfo()
         configureAtomicSwapCallbacks()
         //receiveGossips()
@@ -68,15 +67,16 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
     }
 
     private fun configureAtomicSwapCallbacks(){
-        atomicSwapCommunity.setOnTrade {
-            print("Trade offer received")
+        atomicSwapCommunity.setOnTrade { trade, _ ->
+
             lifecycleScope.launch(Dispatchers.Main) {
 
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("Received Trade Offer")
-                alertDialogBuilder.setMessage(it.toString())
+                alertDialogBuilder.setMessage(trade.toString())
                 alertDialogBuilder.setPositiveButton(android.R.string.yes) { _, _ ->
-                    print("Accepted")
+
+                    //atomicSwapCommunity.sendAcceptMessgae(peer, trade.offerId)
                 }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()

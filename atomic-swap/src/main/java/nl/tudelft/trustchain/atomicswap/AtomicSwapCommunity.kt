@@ -6,6 +6,7 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
+import org.bitcoinj.core.PeerAddress
 import java.util.*
 
 class AtomicSwapCommunity : Community() {
@@ -48,7 +49,7 @@ class AtomicSwapCommunity : Community() {
 
     private lateinit var onAcceptCallback: onAccept
     private lateinit var onInitiateCallback: onInitiate
-    private lateinit var onTradeCallback: (TradeMessage) -> Unit
+    private lateinit var onTradeCallback: (TradeMessage,Peer) -> Unit
     private lateinit var onCompleteCallback: onComplete
 
 //    // const hi = (param)=> console.log(param)
@@ -69,7 +70,7 @@ class AtomicSwapCommunity : Community() {
     fun setOnInitiate(callback: onInitiate) = callback.also {
         onInitiateCallback = it
     }
-    fun setOnTrade(callback: (TradeMessage) -> Unit) = callback.also {
+    fun setOnTrade(callback: (TradeMessage, Peer) -> Unit) = callback.also {
         onTradeCallback = it
     }
     fun setOnComplete(callback: onComplete) = callback.also {
@@ -81,13 +82,9 @@ class AtomicSwapCommunity : Community() {
         Log.d("AtomicSwapCommunity", peer.mid + ":PAYLOAD: " + payload.offerId)
         // send back accept
 
-        onTradeCallback(payload)
-
-        send(
-            peer.address,
-            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(payload.offerId, peer.mid))
-        )
+        onTradeCallback(payload, peer)
     }
+
 
     private fun onAcceptMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(AcceptMessage.Deserializer)
@@ -150,6 +147,13 @@ class AtomicSwapCommunity : Community() {
             send(peer.address, packet)
         }
     }
+
+//    fun sendAcceptMessgae(peer: Peer, offerId:String){
+////        send(
+////            peer.address,
+////            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, ))
+////        )
+//    }
 
     companion object {
         private const val BROADCAST_TRADE_MESSAGE_ID = 1

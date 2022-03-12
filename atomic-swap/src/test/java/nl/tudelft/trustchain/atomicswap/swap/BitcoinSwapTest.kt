@@ -25,7 +25,7 @@ class BitcoinSwapTest {
         return Wallet.createDeterministic(Context(UnitTestParams()), Script.ScriptType.P2PKH)
     }
 
-//    fun fundWallet(wallet: Wallet,amount:Coin){
+//    fun fundWallet(wallet: WalletHolder,amount:Coin){
 //        val blockStore =  MemoryBlockStore(UnitTestParams());
 //
 //        val chain = BlockChain(Context(UnitTestParams()),wallet,blockStore)

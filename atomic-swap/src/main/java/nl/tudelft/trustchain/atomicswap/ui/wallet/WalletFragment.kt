@@ -37,9 +37,6 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
 
     private lateinit var clipboard: ClipboardManager
 
-    private lateinit var walletAppKit: WalletAppKit
-    private lateinit var bitcoinWallet: Wallet
-
     private lateinit var ethereumWallet: EthereumWeb3jWallet
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,11 +46,6 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
             requireContext(),
             ClipboardManager::class.java
         ) as ClipboardManager
-
-        walletAppKit = WalletService.getGlobalWallet()
-        bitcoinWallet = walletAppKit.wallet()
-        walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
-
 
 
 //        lifecycleScope.launchWhenStarted {
@@ -74,7 +66,7 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
     }
 
     private fun initializeUi(binding: FragmentAtomicWalletBinding, model: WalletViewModel) {
-        model.setBitcoinBalance(bitcoinWallet.balance.toFriendlyString())
+        model.setBitcoinBalance(WalletHolder.bitcoinWallet.balance.toFriendlyString())
 
         val bitcoinBalance = binding.bitcoinBalance
         val ethereumBalance = binding.ethereumBalance
@@ -88,7 +80,7 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         }
 
         binding.bitcoinCopyButton.setOnClickListener {
-            val address = bitcoinWallet.currentReceiveAddress().toString()
+            val address = WalletHolder.bitcoinWallet.currentReceiveAddress().toString()
             clipboard.setPrimaryClip(ClipData.newPlainText("Bitcoin wallet address", address))
             Toast.makeText(requireContext(), "Copied address to clipboard", Toast.LENGTH_SHORT)
                 .show()
@@ -100,7 +92,7 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
                 .show()
         }
 
-        bitcoinWallet.addChangeEventListener(this)
+        WalletHolder.bitcoinWallet.addChangeEventListener(this)
 //        lifecycleScope.launchWhenStarted {
 //            while (isActive) {
 //                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
@@ -112,7 +104,7 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
 
     override fun onDestroyView() {
         super.onDestroyView()
-        bitcoinWallet.removeChangeEventListener(this)
+        WalletHolder.bitcoinWallet.removeChangeEventListener(this)
         _binding = null
         _model = null
     }
