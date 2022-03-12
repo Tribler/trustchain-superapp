@@ -32,6 +32,10 @@ class AtomicSwapCommunity : Community() {
         messageHandlers[Companion.ACCEPT_MESSAGE_ID] = ::onAcceptMessage
         messageHandlers[Companion.INITIATE_MESSAGE_ID] = ::onInitiateMessage
         messageHandlers[Companion.COMPLETE_MESSAGE_ID] = ::onCompleteTrade
+
+//        setOnTrade {
+//            print("Trade message received")
+//        }
     }
 
     /**
@@ -44,13 +48,33 @@ class AtomicSwapCommunity : Community() {
 
     private lateinit var onAcceptCallback: onAccept
     private lateinit var onInitiateCallback: onInitiate
-    private lateinit var onTradeCallback: onTrade
+    private lateinit var onTradeCallback: (TradeMessage) -> Unit
     private lateinit var onCompleteCallback: onComplete
 
-    fun setOnAccept(callback: onAccept) = callback.also { onAcceptCallback = it }
-    fun setOnInitiate(callback: onInitiate) = callback.also { onInitiateCallback = it }
-    fun setOnTrade(callback: onTrade) = callback.also { onTradeCallback = it }
-    fun setOnComplete(callback: onComplete) = callback.also { onCompleteCallback = it }
+//    // const hi = (param)=> console.log(param)
+//    val lambda : (String,String)->Unit= { p1, p2 ->
+//
+//    }
+//
+//    fun test(t:String) {}
+//
+//    init {
+//        listOf("").forEach(::test)
+//    }
+
+    fun setOnAccept(callback: onAccept) = callback.also {
+        onAcceptCallback = it
+    }
+
+    fun setOnInitiate(callback: onInitiate) = callback.also {
+        onInitiateCallback = it
+    }
+    fun setOnTrade(callback: (TradeMessage) -> Unit) = callback.also {
+        onTradeCallback = it
+    }
+    fun setOnComplete(callback: onComplete) = callback.also {
+        onCompleteCallback = it
+    }
 
     private fun onTradeOfferMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(TradeMessage.Deserializer)
@@ -135,11 +159,16 @@ class AtomicSwapCommunity : Community() {
     }
 }
 
+/**
+ * @param hash: hash of the secret needed to claim the swap.
+ */
 data class OnAcceptReturn(
-    val hash: String,
+    val secretHash: String,
     val txId: String,
     val publicKey: String
-)//todo better name
+)
+
+//todo better name
 typealias onAccept = (AcceptMessage) -> (OnAcceptReturn)
 typealias onInitiate = (InitiateMessage) -> (String)
 typealias onTrade = (TradeMessage) -> Unit

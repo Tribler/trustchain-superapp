@@ -9,7 +9,7 @@ object TradeConstants {
     const val ETHEREUM = "ETH"
 }
 
-class TradeMessage(val offerId: String, val fromCoin: String, val toCoin: String, val fromAmount: String, val toAmount: String) : Serializable {
+data class TradeMessage(val offerId: String, val fromCoin: String, val toCoin: String, val fromAmount: String, val toAmount: String) : Serializable {
     override fun serialize(): ByteArray {
         val msgString = "$offerId;$fromCoin;$toCoin;$fromAmount;$toAmount;"
         println("1234 " + msgString.toByteArray().toHex())

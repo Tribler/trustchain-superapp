@@ -2,8 +2,11 @@ package nl.tudelft.trustchain.atomicswap.ui.swap
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_peers.*
@@ -12,12 +15,18 @@ import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
 import nl.tudelft.trustchain.atomicswap.R
+import nl.tudelft.trustchain.atomicswap.databinding.FragmentPeersBinding
 import nl.tudelft.trustchain.atomicswap.ui.peers.AddressItem
 import nl.tudelft.trustchain.atomicswap.ui.peers.PeerItem
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import androidx.core.view.isVisible
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 
 class SwapFragment : BaseFragment(R.layout.fragment_peers) {
     private val adapter = ItemAdapter()
+    val atomicSwapCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,14 +46,47 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 //        recyclerView.layoutManager = LinearLayoutManager(this)
 //        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayout.VERTICAL))
 //
+
+
         loadNetworkInfo()
+        configureAtomicSwapCallbacks()
         //receiveGossips()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        val binding =  FragmentPeersBinding.inflate(inflater, container, false)
+        binding.button.setOnClickListener {
+            lifecycleScope.launchWhenStarted {
+                atomicSwapCommunity.broadcastTradeOffer(1,1.0)
+            }
+        }
+        return binding.root
+    }
+
+    private fun configureAtomicSwapCallbacks(){
+        atomicSwapCommunity.setOnTrade {
+            print("Trade offer received")
+            lifecycleScope.launch(Dispatchers.Main) {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("Received Trade Offer")
+                alertDialogBuilder.setMessage(it.toString())
+                alertDialogBuilder.setPositiveButton(android.R.string.yes) { _, _ ->
+                    print("Accepted")
+                }
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
+        }
     }
 
     private fun loadNetworkInfo() {
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val atomicSwapCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
                 val peers = atomicSwapCommunity.getPeers()
 
                 val discoveredAddresses = atomicSwapCommunity.network
@@ -91,7 +133,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
                 txtPeerCount.setTextColor(textColor)
                 imgEmpty.isVisible = items.isEmpty()
-                atomicSwapCommunity.broadcastTradeOffer(1, 0.5)
 
                 delay(3000)
             }
