@@ -1,0 +1,22 @@
+                Executable : /home/pi/Android/Sdk/cmake/3.18.1/bin/cmake
+arguments : 
+-H/home/pi/Desktop/trustchain-superapp/frost/src/main/cpp
+-DCMAKE_CXX_FLAGS=-std=c++17
+-DCMAKE_FIND_ROOT_PATH=/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/prefab/x86_64/prefab
+-DCMAKE_BUILD_TYPE=Debug
+-DCMAKE_TOOLCHAIN_FILE=/home/pi/Android/Sdk/ndk/21.1.6352462/build/cmake/android.toolchain.cmake
+-DANDROID_ABI=x86_64
+-DANDROID_NDK=/home/pi/Android/Sdk/ndk/21.1.6352462
+-DANDROID_PLATFORM=android-22
+-DCMAKE_ANDROID_ARCH_ABI=x86_64
+-DCMAKE_ANDROID_NDK=/home/pi/Android/Sdk/ndk/21.1.6352462
+-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86_64
+-DCMAKE_MAKE_PROGRAM=/home/pi/Android/Sdk/cmake/3.18.1/bin/ninja
+-DCMAKE_SYSTEM_NAME=Android
+-DCMAKE_SYSTEM_VERSION=22
+-B/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/x86_64
+-GNinja
+jvmArgs : 
+
+Build command args:

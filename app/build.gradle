@@ -123,6 +123,7 @@ dependencies {
     implementation project(':ig-ssi')
     implementation project(':liquidity-pool')
     implementation project(':valuetransfer')
+    implementation project(':frost')
     api(project(':common')){
         exclude group: 'net.java.dev.jna'
     }
@@ -133,6 +134,9 @@ dependencies {
         exclude group: 'net.java.dev.jna'
     }
     api(project(':gossipML')){
+        exclude group: 'net.java.dev.jna'
+    }
+    api(project(':frost')){
         exclude group: 'net.java.dev.jna'
     }
 

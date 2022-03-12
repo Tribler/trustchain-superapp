@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="nl.tudelft.trustchain.app">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="nl.tudelft.trustchain.app">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -74,6 +74,10 @@
             android:name="nl.tudelft.trustchain.peerchat.PeerChatActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.PeerChat" />
+
+        <activity
+            android:name="nl.tudelft.trustchain.frost.FrostActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
             android:name="nl.tudelft.trustchain.distributedAI.DistributedActivity"
