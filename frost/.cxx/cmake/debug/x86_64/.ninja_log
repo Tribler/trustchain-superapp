@@ -1,0 +1,9 @@
+# ninja log v5
+0	295	1647047733	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	2c49bd3819330374
+296	310	1647047733	/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86_64/libhello_cmake.so	c3b22d366a85e9aa
+0	289	1647049351	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	2c49bd3819330374
+289	302	1647049351	/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86_64/libhello_cmake.so	c3b22d366a85e9aa
+0	5	0	clean	d016bfccce7928a4
+0	4	0	clean	d016bfccce7928a4
+1	310	1647050425	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	2c49bd3819330374
+310	323	1647050425	/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86_64/libhello_cmake.so	c3b22d366a85e9aa

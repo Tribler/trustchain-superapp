@@ -19,6 +19,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+            }
+        }
     }
 
     buildTypes {
@@ -34,6 +39,17 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         allWarningsAsErrors = true
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.18.1'
+        }
+    }
+
+    buildFeatures {
+        viewBinding = true
+        dataBinding = true
     }
 
     testOptions {
@@ -83,6 +99,7 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
     implementation ('net.java.dev.jna:jna:5.5.0@aar')
     implementation('com.github.tony19:logback-android:2.0.0')
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Testing
     testImplementation 'junit:junit:4.12'

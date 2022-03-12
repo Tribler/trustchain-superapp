@@ -1,0 +1,43 @@
+{
+  "stringTable": {
+    "0": "/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/x86",
+    "1": "--target=i686-none-linux-android22 --gcc-toolchain=/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64 --sysroot=/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/sysroot -Dhello_cmake_EXPORTS -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -mstackrealign -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security -std=c++17 -O0 -fno-limit-debug-info -fPIC"
+  },
+  "buildFiles": [
+    "/home/pi/Desktop/trustchain-superapp/frost/src/main/cpp/CMakeLists.txt",
+    "/home/pi/Android/Sdk/ndk/21.1.6352462/build/cmake/android.toolchain.cmake",
+    "/home/pi/Android/Sdk/ndk/21.1.6352462/build/cmake/platforms.cmake"
+  ],
+  "cleanCommands": [
+    "/home/pi/Android/Sdk/cmake/3.18.1/bin/ninja -C \"/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/x86\" clean"
+  ],
+  "buildTargetsCommand": "/home/pi/Android/Sdk/cmake/3.18.1/bin/ninja  -C \"/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/x86\" {LIST_OF_TARGETS_TO_BUILD}",
+  "libraries": {
+    "hello_cmake-Debug-x86": {
+      "buildCommand": "/home/pi/Android/Sdk/cmake/3.18.1/bin/ninja -C \"/home/pi/Desktop/trustchain-superapp/frost/.cxx/cmake/debug/x86\" hello_cmake",
+      "buildType": "debug",
+      "toolchain": "2708937542",
+      "abi": "x86",
+      "artifactName": "hello_cmake",
+      "files": [
+        {
+          "src": "/home/pi/Desktop/trustchain-superapp/frost/src/main/cpp/native-lib.cpp",
+          "flagsOrdinal": 1,
+          "workingDirectoryOrdinal": 0
+        }
+      ],
+      "headers": [],
+      "output": "/home/pi/Desktop/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so",
+      "runtimeFiles": []
+    }
+  },
+  "toolchains": {
+    "2708937542": {
+      "cppCompilerExecutable": "/home/pi/Android/Sdk/ndk/21.1.6352462/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": [
+    "cpp"
+  ]
+}

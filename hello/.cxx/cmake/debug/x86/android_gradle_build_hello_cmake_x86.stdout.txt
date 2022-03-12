@@ -1,3 +1,0 @@
-ninja: Entering directory `C:\Users\s\Documents\GitHub\trustchain-superapp\hello\.cxx\cmake\debug\x86'
-[1/2] Building CXX object CMakeFiles/hello_cmake.dir/native-lib.cpp.o
-[2/2] Linking CXX shared library C:\Users\s\Documents\GitHub\trustchain-superapp\hello\build\intermediates\cmake\debug\obj\x86\libhello_cmake.so
