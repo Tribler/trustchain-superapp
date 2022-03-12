@@ -81,7 +81,7 @@ object BitcoinSwap {
      *
      * Should probably only be used on startup.
      */
-    operator fun invoke(relativeLock: Int, networkParams: NetworkParameters) {
+    operator fun invoke(relativeLock: Int = this.relativeLock, networkParams: NetworkParameters = this.networkParams) {
         this.relativeLock = relativeLock
         this.networkParams = networkParams
     }
@@ -151,6 +151,8 @@ object BitcoinSwap {
         contractTx.addOutput(amountInCoins, ScriptBuilder.createP2SHOutputScript(swapScript))
 
         val sendRequest = SendRequest.forTx(contractTx)
+
+
         wallet.completeTx(sendRequest)
 
         val swapData = SwapData.CreatorSwapData(
@@ -197,7 +199,7 @@ object BitcoinSwap {
             is SwapData.RecipientSwapData -> data
             else -> error("We are not the recipient, Did you call the wrong function?")
         }
-        
+
         val key = wallet.findKeyFromPubKey(details.keyUsed) ?: error("cannot get private key from pub key")// todo change this once we aren't dong btc<->btc
 
         val swapScript = createSwapScript(
