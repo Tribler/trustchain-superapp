@@ -10,6 +10,7 @@ import org.bitcoinj.params.UnitTestParams
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.store.MemoryBlockStore
+import org.bitcoinj.wallet.KeyChain
 import org.bitcoinj.wallet.Wallet
 import org.junit.Test
 
@@ -56,21 +57,28 @@ class BitcoinSwapTest {
             "1" //the wallet has no funds. todo: Figure out how to mock balance (?).
         )
 
+
         println(tx.txId.bytes.toHex())
         println(swapData.initiateTxId?.toHex())
         claimWallet.commitTx(tx)
         claimWallet.walletTransactions.forEach {
             println("wallet tx " + it.transaction.txId.bytes.toHex())
         }
-        claimBitcoinSwap.addInitialRecipientSwapdata(0,swapData.keyUsed,"1")
 
-        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretUsed,swapData.keyUsed,swapData.initiateTxId!!)
+        println("key used by claimer : ${claimPublicKey.toHex()}")
+        println("key len : ${claimPublicKey.size}")
+
+        claimBitcoinSwap.addInitialRecipientSwapdata(0,claimPublicKey,"1")
+
+        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTxId!!)
 
         val claimTx = claimBitcoinSwap.createClaimTx(tx.txId.bytes, swapData.secretUsed, 0, claimWallet)
 
         val result = runCatching {
             claimTx.inputs.first().verify(tx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
         }
+
+        println(result)
 
         assertTrue("Swap Tx should be claimable",result.isSuccess)
 
