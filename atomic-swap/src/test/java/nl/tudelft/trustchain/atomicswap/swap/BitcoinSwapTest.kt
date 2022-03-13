@@ -25,12 +25,20 @@ class BitcoinSwapTest {
         return Wallet.createDeterministic(Context(UnitTestParams()), Script.ScriptType.P2PKH)
     }
 
-//    fun fundWallet(wallet: Wallet,amount:Coin){
-//        val blockStore =  MemoryBlockStore(UnitTestParams());
-//
-//        val chain = BlockChain(Context(UnitTestParams()),wallet,blockStore)
-//
-//    }
+    /**
+     * Creates a fake transaction that pays [amount] coins to the wallet and sets the wallet to
+     * allow spending unconfirmed outputs.
+     *
+     * This is usefully for tests that need the wallets to have funds.
+     */
+    fun fundWallet(wallet: Wallet,amount:Coin){
+        val fakeTx = Transaction(UnitTestParams())
+        fakeTx.addInput(Sha256Hash.ZERO_HASH,0,ScriptBuilder.createEmpty())
+        fakeTx.addOutput(amount,wallet.currentReceiveAddress())
+
+        wallet.commitTx(fakeTx)
+        wallet.allowSpendingUnconfirmedTransactions() // allow us to use unconfirmed txs
+    }
 
     @Test
     fun `A swap transaction should be able to be claimed`() {
@@ -38,35 +46,21 @@ class BitcoinSwapTest {
         val initiateWallet = createWallet()
         val initiateBitcoinSwap = createBitcoinSwap()
 
+        fundWallet(initiateWallet,Coin.parseCoin("10"))
+
         // the wallet that can claim
         val claimWallet = createWallet()
         val claimPublicKey = claimWallet.freshReceiveKey().pubKey
         val claimBitcoinSwap = createBitcoinSwap()
 
-        val fakeTx = Transaction(UnitTestParams())
-        fakeTx.addInput(Sha256Hash.ZERO_HASH,0,ScriptBuilder.createEmpty())
-        fakeTx.addOutput(Coin.parseCoin("100"),initiateWallet.currentReceiveAddress())
-
-        initiateWallet.commitTx(fakeTx)
-        initiateWallet.allowSpendingUnconfirmedTransactions() // allow us to use unconfirmed txs
-
         val (tx, swapData) = initiateBitcoinSwap.startSwapTx(
             offerId = 0,
             wallet = initiateWallet,
             claimPubKey = claimPublicKey,
-            "1" //the wallet has no funds. todo: Figure out how to mock balance (?).
+            "1"
         )
 
-
-        println(tx.txId.bytes.toHex())
-        println(swapData.initiateTxId?.toHex())
         claimWallet.commitTx(tx)
-        claimWallet.walletTransactions.forEach {
-            println("wallet tx " + it.transaction.txId.bytes.toHex())
-        }
-
-        println("key used by claimer : ${claimPublicKey.toHex()}")
-        println("key len : ${claimPublicKey.size}")
 
         claimBitcoinSwap.addInitialRecipientSwapdata(0,claimPublicKey,"1")
 
@@ -78,9 +72,9 @@ class BitcoinSwapTest {
             claimTx.inputs.first().verify(tx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
         }
 
-        println(result)
 
         assertTrue("Swap Tx should be claimable",result.isSuccess)
 
     }
+
 }
