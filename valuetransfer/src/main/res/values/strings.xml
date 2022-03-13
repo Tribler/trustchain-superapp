@@ -22,6 +22,7 @@
     <string name="menu_exchange_transfer_qrcode">Money Transfer using QR-code</string>
     <string name="menu_exchange_transfer_contact">Money Transfer to Contact</string>
     <string name="menu_exchange_transfer_request">Request Money Transfer</string>
+    <string name="menu_exchange_transfer_request_link">Request Money Transfer (Link)</string>
     <string name="menu_contact_chat_attachment_camera">Camera</string>
     <string name="menu_contact_chat_attachment_photo">Photo from Library</string>
     <string name="menu_contact_chat_attachment_file">File</string>
@@ -65,6 +66,7 @@
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
     <string name="dialog_title_exchange_request">Request Money</string>
+    <string name="dialog_title_exchange_request_link">Request Money (Link)</string>
     <string name="dialog_title_exchange_transaction">Transaction</string>
     <string name="dialog_title_contact_share">Share Contact</string>
     <string name="dialog_title_contact_name">Contact Name</string>
@@ -209,6 +211,9 @@
     <string name="text_exchange_waiting_for_signature">Waiting for signature</string>
     <string name="text_exchange_unknown">Status unknown</string>
     <string name="text_exchange_signing_transaction">Signing transaction…</string>
+    <string name="text_exchange_copy_link">Copy link</string>
+    <string name="text_exchange_share_link">Share link</string>
+    <string name="text_exchange_type">Type</string>
     <string name="text_unknown_contact">Unknown contact</string>
     <string name="text_unknown_contact_extra">Unknown contact (%s)</string>
     <string name="text_to_contact">to %s</string>
@@ -456,4 +461,8 @@
     <string name="btn_identity_create">Create identity</string>
     <string name="text_identity_required">A personal identity is required for this application. It is important to provide the correct details.</string>
 
+    <string-array name="exchange_types">
+        <item>EuroToken</item>
+        <item>Euro</item>
+    </string-array>
 </resources>
