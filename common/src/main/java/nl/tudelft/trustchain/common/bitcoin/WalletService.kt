@@ -86,13 +86,13 @@ class WalletService {
 //                )
 //            )
 
-            app.setPeerNodes(
-                PeerAddress(
-                    params,
-                    InetAddress.getByName("10.0.2.2"),
-                    params.port
-                )
-            )
+//            app.setPeerNodes(
+//                PeerAddress(
+//                    params,
+//                    InetAddress.getByName("10.0.2.2"),
+//                    params.port
+//                )
+//            )
 
             app.setAutoSave(true)
             app.setBlockingStartup(false)

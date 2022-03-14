@@ -15,9 +15,10 @@ object WalletHolder {
     val bitcoinSwap = BitcoinSwap()
 
     init {
-            walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
-            bitcoinWallet.addTransactionConfidenceEventListener(monitor)
+        // phone
+        walletAppKit.peerGroup().addAddress(InetAddress.getByName("192.168.178.200"))
+        // emulator
+        walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
+        bitcoinWallet.addTransactionConfidenceEventListener(monitor)
     }
-
-
 }
