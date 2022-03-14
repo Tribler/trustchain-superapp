@@ -13,8 +13,6 @@ import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
-import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentPeersBinding
 import nl.tudelft.trustchain.atomicswap.ui.peers.AddressItem
 import nl.tudelft.trustchain.atomicswap.ui.peers.PeerItem
@@ -22,7 +20,9 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.atomicswap.*
+import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
 class SwapFragment : BaseFragment(R.layout.fragment_peers) {
@@ -67,7 +67,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
         return binding.root
     }
 
-    private fun configureAtomicSwapCallbacks(){
+    private fun configureAtomicSwapCallbacks() {
 
         atomicSwapCommunity.setOnTrade { trade, peer ->
 
@@ -79,25 +79,82 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
 
                     val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
-                    val freshKeyString  = freshKey.pubKey.toString()
-                    atomicSwapCommunity.sendAcceptMessgae(peer, trade.offerId, freshKeyString)
+                    val freshKeyString = freshKey.pubKey.toString()
+                    atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, freshKeyString)
                 }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }
         }
 
-        atomicSwapCommunity.setOnAccept {
+        atomicSwapCommunity.setOnAccept { accept, peer ->
             lifecycleScope.launch(Dispatchers.Main) {
 
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("Received Accept")
-                alertDialogBuilder.setMessage(it.toString())
+                alertDialogBuilder.setMessage(accept.toString())
                 alertDialogBuilder.setPositiveButton("Create transaction") { _, _ ->
-
+                    val pubKey = WalletHolder.bitcoinWallet.freshReceiveKey().pubKey
+                    val (transaction, data) = WalletHolder.bitcoinSwap.startSwapTx(
+                        accept.offerId.toLong(),
+                        WalletHolder.bitcoinWallet,
+                        pubKey,
+                        "1"
+                    )
+                    print(transaction)
+                    print(data)
+                    WalletHolder.monitor.addTransactionToListener(
+                        TransactionMonitorEntry(
+                            transaction.txId.toString(),
+                            accept.offerId,
+                            peer
+                        )
+                    )
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                 }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
+            }
+        }
+
+        atomicSwapCommunity.setOnInitiate { initiateMessage, _ ->
+            lifecycleScope.launch(Dispatchers.Main) {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("You counterparty has published his transaction")
+                alertDialogBuilder.setMessage(initiateMessage.toString())
+//                alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
+//                    val bitcoinSwap = BitcoinSwap()
+//                    bitcoinSwap.startSwapTx()
+//                }
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
+        }
+
+
+
+        WalletHolder.monitor.setOnTransactionConfirmed {
+            if (WalletHolder.bitcoinSwap.swapStorage.containsKey(it.offerId.toLong())) {
+                val data: SwapData.CreatorSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(it.offerId.toLong()) as SwapData.CreatorSwapData
+                if (data.initiateTxId != null) {
+                    val d = OnAcceptReturn(
+                        data.secretHash.toHex(),
+                        data.initiateTxId.toHex(),
+                        data.keyUsed.toHex()
+                    )
+
+
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                        alertDialogBuilder.setTitle("You transaction is confirmed")
+                        alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
+                            atomicSwapCommunity.sendInitiateMessage(it.peer, it.offerId, d)
+                        }
+                        alertDialogBuilder.setCancelable(true)
+                        alertDialogBuilder.show()
+                    }
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.util.toHex
 
-class InitiateMessage(val offerId: String, val hash:String, val txId: String, val publicKey: String) : Serializable {
+data class InitiateMessage(val offerId: String, val hash:String, val txId: String, val publicKey: String) : Serializable {
     override fun serialize(): ByteArray {
         val msgString = "$offerId;$hash;$txId;$publicKey;"
         println(msgString.toByteArray().toHex())
