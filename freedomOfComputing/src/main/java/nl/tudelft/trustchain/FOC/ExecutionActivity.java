@@ -28,8 +28,12 @@ public class ExecutionActivity extends AppCompatActivity {
     private Fragment mainFragment;
     private FragmentManager manager;
 
+    /**
+     * Stores the current state of the dynamically loaded code.
+     */
     @SuppressWarnings("deprecation")
     private void storeState() {
+        // TODO: Do not store in root of phone
         String fileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
         try {
             FileOutputStream stream = new FileOutputStream(fileName);
@@ -45,9 +49,14 @@ public class ExecutionActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieves the state of the dynamically loaded code (including any performed UI actions)
+     * @return the latest known state of the dynamically loaded code or null if it does not exist
+     */
     @SuppressWarnings("deprecation")
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Fragment.SavedState getState() {
+        // TODO: Do not store in root of phone
         String fileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
         try {
             Path path = Paths.get(fileName);
@@ -64,12 +73,24 @@ public class ExecutionActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method is called by Android indicating that the state should be saved
+     * @param savedInstanceState Default Android savedInstanceState
+     */
     @Override
     public void onSaveInstanceState(@NotNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         this.storeState();
     }
 
+    /**
+     * Performs all required initials actions when loading the dynamic code:
+     *      - Retrieve filename of APK from MainActivityFOC
+     *      - Dynamically load code of the APK using the DexClassLoader
+     *      - Restore the state of the dynamically loaded code, if any
+     *      - Load the dynamic code on a view on the users screen.
+     * @param savedInstanceState Default Android savedInstanceState
+     */
     @SuppressLint({"ResourceType"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,6 +141,12 @@ public class ExecutionActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Retrieves the main fragment class from the specificied APK.
+     * This class can be in any package. The only requirement is the main fragment should be called exactly 'MainFragment'
+     * @param path to the APK.
+     * @return the exact location of the main fragment class
+     */
     @SuppressWarnings("deprecation")
     private String getMainFragmentClass(String path) {
         try {
