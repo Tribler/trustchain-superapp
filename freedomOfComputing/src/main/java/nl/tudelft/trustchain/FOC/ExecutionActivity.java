@@ -13,6 +13,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,22 +22,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
+import java.util.Objects;
 
 public class ExecutionActivity extends AppCompatActivity {
-    private Context context;
-    LinearLayout mainLayoutContainer = null;
-    LinearLayout tmpLayout = null;
-    private Class fragmentClass = null;
-    private Fragment mainFragment = null;
+    private Fragment mainFragment;
     private FragmentManager manager;
-    private String activeApp;
 
+    @SuppressWarnings("deprecation")
     private void storeState() {
-        String fileName= Environment.getExternalStorageDirectory().getAbsolutePath()  + "/state.dat";
+        String fileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
         try {
             FileOutputStream stream = new FileOutputStream(fileName);
             Parcel p = Parcel.obtain();
-            manager.saveFragmentInstanceState(mainFragment).writeToParcel(p, 0);
+            Objects.requireNonNull(manager.saveFragmentInstanceState(mainFragment)).writeToParcel(p, 0);
             byte[] bytes = p.marshall();
             stream.write(bytes);
             stream.close();
@@ -46,9 +44,11 @@ public class ExecutionActivity extends AppCompatActivity {
             this.printToast(e.toString());
         }
     }
+
+    @SuppressWarnings("deprecation")
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Fragment.SavedState getState() {
-        String fileName= Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
+        String fileName = Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
         try {
             Path path = Paths.get(fileName);
             byte[] data = Files.readAllBytes(path);
@@ -65,23 +65,9 @@ public class ExecutionActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        this.storeState();
-
-        // TODO:: Check why this was added, this creates problems when app is tabbed out
-        // Remove if not needed, if it is then create a new transaction in onResume to restore
-//        FragmentTransaction transaction = manager.beginTransaction();
-//
-//        transaction.remove(mainFragment);
-//        try {
-//            transaction.commit();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        mainLayoutContainer.removeView(tmpLayout);
-
+    public void onSaveInstanceState(@NotNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
+        this.storeState();
     }
 
     @SuppressLint({"ResourceType"})
@@ -89,26 +75,28 @@ public class ExecutionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_execution);
-
-        context = getApplicationContext();
-
-        String apkName = "";
+        String apkName;
         Bundle extras = this.getIntent().getExtras();
         if (extras.containsKey("fileName")) {
             apkName = this.getIntent().getStringExtra("fileName");
+            assert apkName != null;
+        } else {
+            this.printToast("No APK name supplied");
+            return;
         }
+
+        setContentView(R.layout.activity_execution);
+        Context context = getApplicationContext();
+
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
         final String apkPath = apkName;
-        activeApp = apkName.substring(apkName.lastIndexOf("/") + 1, apkName.lastIndexOf("."));
+        String activeApp = apkName.substring(apkName.lastIndexOf("/") + 1, apkName.lastIndexOf("."));
         //final String apkPath = context.getExternalFilesDir(null).getAbsolutePath() + "/" + apkName;
         final ClassLoader classLoader = new DexClassLoader(apkPath, context.getCacheDir().getAbsolutePath(), null, this.getClass().getClassLoader());
 
-        mainLayoutContainer = (LinearLayout) findViewById(R.id.llcontainer);
-
         try {
             String mainFragmentClass = getMainFragmentClass(apkPath);
-            fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
+            Class<?> fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 Fragment.SavedState state = this.getState();
@@ -117,7 +105,7 @@ public class ExecutionActivity extends AppCompatActivity {
                 }
             }
 
-            tmpLayout = new LinearLayout(context);
+            LinearLayout tmpLayout = new LinearLayout(context);
             tmpLayout.setId(1);
 
             manager = getSupportFragmentManager();
@@ -125,11 +113,10 @@ public class ExecutionActivity extends AppCompatActivity {
             transaction.add(tmpLayout.getId(), mainFragment, "mainFragment");
             transaction.commit();
 
-            mainLayoutContainer.addView(tmpLayout);
+            ((LinearLayout) findViewById(R.id.llcontainer)).addView(tmpLayout);
         } catch (Exception e) {
             this.printToast(e.toString());
             Log.i("personal", "Something went wrong");
-            e.printStackTrace();
         }
     }
 
@@ -138,9 +125,9 @@ public class ExecutionActivity extends AppCompatActivity {
         try {
             DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", "dex",
                 getCacheDir()).getPath(), 0);
-            for(Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements();) {
+            for (Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements(); ) {
                 String className = classNames.nextElement();
-                if(className.contains("MainFragment") && !className.contains("$"))
+                if (className.contains("MainFragment") && !className.contains("$"))
                     return className;
             }
         } catch (IOException e) {
