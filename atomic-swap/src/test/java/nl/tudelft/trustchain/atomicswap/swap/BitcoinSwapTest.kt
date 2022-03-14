@@ -77,4 +77,41 @@ class BitcoinSwapTest {
 
     }
 
+    @Test
+    fun `A swap transaction should be able to be reclaimed`() {
+        // the wallet that can reclaim
+        val initiateWallet = createWallet()
+        val initiateBitcoinSwap = createBitcoinSwap()
+
+        fundWallet(initiateWallet,Coin.parseCoin("10"))
+
+        // the wallet that can claim
+        val claimWallet = createWallet()
+        val claimPublicKey = claimWallet.freshReceiveKey().pubKey
+//        val claimBitcoinSwap = createBitcoinSwap()
+
+        val (tx, swapData) = initiateBitcoinSwap.startSwapTx(
+            offerId = 0,
+            wallet = initiateWallet,
+            claimPubKey = claimPublicKey,
+            "1"
+        )
+
+        initiateWallet.commitTx(tx)
+
+        val reclaimTx = initiateBitcoinSwap.createReclaimTx(swapData.offerId,initiateWallet)
+
+
+
+        val result = runCatching {
+            reclaimTx.inputs.first().verify(tx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
+        }
+
+        println(result)
+
+
+        assertTrue("Swap Tx should be claimable",result.isSuccess)
+
+    }
+
 }
