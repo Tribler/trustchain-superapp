@@ -11,4 +11,9 @@
         android:icon="@drawable/ic_currency_exchange"
         android:title="@string/title_swap" />
 
+    <item
+        android:id="@+id/navigation_trade_offers"
+        android:icon="@drawable/ic_swap_horizontal_circle_black"
+        android:title="@string/title_trade_offers" />
+
 </menu>

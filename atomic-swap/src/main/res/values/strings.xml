@@ -3,6 +3,7 @@
     <string name="app_name">Atomic Swap</string>
     <string name="title_wallet">Wallet</string>
     <string name="title_swap">Swap</string>
+    <string name="title_trade_offers">Trade offers</string>
 
     <string name="bitcoin">Bitcoin</string>
     <string name="ethereum">Ethereum</string>
