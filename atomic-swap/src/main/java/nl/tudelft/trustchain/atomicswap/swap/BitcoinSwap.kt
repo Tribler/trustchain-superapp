@@ -18,6 +18,7 @@ sealed class SwapData {
     abstract val amount: Coin
     abstract val relativeLock: Int
     abstract val counterpartyKey : ByteArray?
+    abstract val offerId : Long
     /**
      * The transaction Id of the transaction that initiated the swap
      */
@@ -39,10 +40,11 @@ sealed class SwapData {
         override val keyUsed: ByteArray,
         val secretUsed: ByteArray,
         override val amount: Coin,
+        override val offerId: Long,
         override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
         override val initiateTxId: ByteArray? = null,
-        override val claimByInitiatorTxId: ByteArray? = null
+        override val claimByInitiatorTxId: ByteArray? = null,
     ) : SwapData() {
         val secretHash = Sha256Hash.hash(secretUsed)
     }
@@ -57,6 +59,7 @@ sealed class SwapData {
     data class RecipientSwapData(
         override val keyUsed: ByteArray,
         override val amount: Coin,
+        override val offerId: Long,
         override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
         val hashUsed: ByteArray? = null,
@@ -166,7 +169,8 @@ class BitcoinSwap {
             amount = amountInCoins,
             relativeLock = relativeLock,
             initiateTxId = sendRequest.tx.txId.bytes,
-            counterpartyKey = claimPubKey
+            counterpartyKey = claimPubKey,
+            offerId = offerId
         )
 
         swapStorage[offerId] = swapData
@@ -192,14 +196,77 @@ class BitcoinSwap {
     fun addInitialRecipientSwapdata(offerId: Long,keyUsed: ByteArray,amount: String){
         swapStorage[offerId] = SwapData.RecipientSwapData(
             keyUsed = keyUsed,
-            amount = Coin.parseCoin(amount)
+            amount = Coin.parseCoin(amount),
+            offerId = offerId
         )
+    }
+
+    /**
+     * Creates the reclaim transaction.
+     *
+     * Depending on who it was invoked, the transaction will either reclaim the Transaction claimable
+     * by the initiator or the Transaction claimable by the acceptor.
+     */
+    fun createReclaimTx(offerId: Long,wallet: Wallet): Transaction {
+        val txId = when(val data = swapStorage[offerId]){
+            is SwapData.RecipientSwapData -> data.claimByInitiatorTxId
+            is SwapData.CreatorSwapData -> data.initiateTxId
+            null -> null
+        } ?: error("cannot find the transaction for this offer")
+
+        val tx = wallet.getTransaction(Sha256Hash.wrap(txId)) ?: error("Could not find tx: ${txId.toHex()}")
+
+        Log.d("bitcoinswap","attempting to reclaim tx : $txId of offer : $offerId")
+
+        val details = swapStorage[offerId] ?: error("could not fine swap data. ")
+
+        val key = wallet.findKeyFromPubKey(details.keyUsed)
+
+        val contract = Transaction(networkParams)
+        contract.setVersion(2)
+        // find the output by checking if it is P2SH
+        val prevTxOut =tx.outputs.find {
+            it.scriptPubKey.scriptType == Script.ScriptType.P2SH
+        } ?: error("could not find transaction output")
+        contract.addOutput(prevTxOut.value.div(10).multiply(9), wallet.currentReceiveAddress())
+
+        val secretHash = when(details){
+            is SwapData.RecipientSwapData -> details.hashUsed
+            is SwapData.CreatorSwapData -> details.secretHash
+        } ?: error("could not get the secret hash")
+
+        val originalLockScript = createSwapScript(
+            details.keyUsed ,
+            details.counterpartyKey?: error("could not find counterparty key"),
+            secretHash
+        )
+
+        val input = contract.addInput(prevTxOut)
+        contract.inputs[0].sequenceNumber = (0xFFFF0000L + details.relativeLock ) xor  (1 shl 31) xor (1 shl 22)
+
+
+        val sig = contract.calculateSignature(0,key,originalLockScript,Transaction.SigHash.ALL,false)
+        val sigscript = ScriptBuilder()
+            .op(ScriptOpCodes.OP_1)
+            .data(sig.encodeToBitcoin())
+            .smallNum(1)
+            .data(originalLockScript.program)
+            .build()
+
+
+        input.scriptSig = sigscript
+
+        Log.d("bitcoinswap","created reclaim tx for offer : $offerId and tx: $txId")
+
+
+        return contract
+
     }
 
     /**
      * Creates a swap tx for the initiator to claim.
      */
-    fun createSwapTxForInitiator(offerId: Long,counterpartyKey:ByteArray, wallet: Wallet): Transaction? {
+    fun createSwapTxForInitiator(offerId: Long,counterpartyKey:ByteArray, wallet: Wallet): Transaction {
         val details = when(val data = swapStorage[offerId]){
             is SwapData.RecipientSwapData -> data
             else -> error("We are not the recipient, Did you call the wrong function?")
@@ -210,7 +277,7 @@ class BitcoinSwap {
         val swapScript = createSwapScript(
             reclaimPubKey = key.pubKey,
             claimPubKey = counterpartyKey,
-            secretHash = Sha256Hash.hash(details.hashUsed)
+            secretHash = details.hashUsed ?: error("could not find hash")
         )
 
         val contractTx = Transaction(networkParams)
@@ -224,6 +291,20 @@ class BitcoinSwap {
 
     }
 
+    /**
+     * Creates a tx that claims the contract created by the recipient.
+     */
+    fun createClaimTxForInitiator(offerId: Long,txId: ByteArray,wallet: Wallet): Transaction {
+        val swapData = swapStorage[offerId] as SwapData.CreatorSwapData? ?: error("cannot find swap details")
+
+//        val txId = swapData.claimByInitiatorTxId ?: error("could not find the transaction id")
+
+        return createClaimTx(txId,swapData.secretUsed,offerId,wallet)
+    }
+
+    /**
+     * Creates a tx that claims the contract created by the initiator.
+     */
     fun createClaimTx(txId: ByteArray,secret:ByteArray,offerId: Long,wallet: Wallet): Transaction {
         Log.d("bitcoinswap","attempting to claim tx : ${txId.toHex()} of offer : $offerId")
         val tx = wallet.getTransaction(Sha256Hash.wrap(txId)) ?: error("Could not find tx: ${txId.toHex()}")
@@ -250,7 +331,8 @@ class BitcoinSwap {
             secretHash
         )
         val input = contract.addInput(prevTxOut)
-        contract.inputs[0].sequenceNumber = (0xFFFF0000L + details.relativeLock) xor  (1 shl 31) xor (1 shl 22)
+        // we don't need to do this since we are claiming and not reclaiming
+        //contract.inputs[0].sequenceNumber = (0xFFFF0000L + details.relativeLock) xor  (1 shl 31) xor (1 shl 22)
 
 
         val sig = contract.calculateSignature(0,key,originalLockScript,Transaction.SigHash.ALL,false)
