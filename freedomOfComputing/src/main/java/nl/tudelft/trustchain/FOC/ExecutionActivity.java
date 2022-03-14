@@ -2,27 +2,28 @@ package nl.tudelft.trustchain.FOC;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Bundle;
+import android.os.*;
 import android.util.Log;
 import android.widget.LinearLayout;
-
 import android.widget.Toast;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
-import java.util.HashMap;
 
 public class ExecutionActivity extends AppCompatActivity {
     private Context context;
-    private static HashMap<String, Fragment.SavedState> savedStateMap = new HashMap<>(10);
     LinearLayout mainLayoutContainer = null;
     LinearLayout tmpLayout = null;
     private Class fragmentClass = null;
@@ -30,10 +31,42 @@ public class ExecutionActivity extends AppCompatActivity {
     private FragmentManager manager;
     private String activeApp;
 
+    private void storeState() {
+        String fileName= Environment.getExternalStorageDirectory().getAbsolutePath()  + "/state.dat";
+        try {
+            FileOutputStream stream = new FileOutputStream(fileName);
+            Parcel p = Parcel.obtain();
+            manager.saveFragmentInstanceState(mainFragment).writeToParcel(p, 0);
+            byte[] bytes = p.marshall();
+            stream.write(bytes);
+            stream.close();
+            p.recycle();
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.printToast(e.toString());
+        }
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private Fragment.SavedState getState() {
+        String fileName= Environment.getExternalStorageDirectory().getAbsolutePath() + "/state.dat";
+        try {
+            Path path = Paths.get(fileName);
+            byte[] data = Files.readAllBytes(path);
+            Parcel parcel = Parcel.obtain();
+            parcel.unmarshall(data, 0, data.length);
+            parcel.setDataPosition(0);
+            Parcelable.Creator<Fragment.SavedState> classLoader = Fragment.SavedState.CREATOR;
+            return classLoader.createFromParcel(parcel);
+        } catch (IOException e) {
+            e.printStackTrace();
+            this.printToast(e.toString());
+            return null;
+        }
+    }
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        this.printToast("Saving state");
-        savedStateMap.put(activeApp, manager.saveFragmentInstanceState(mainFragment));
+        this.storeState();
 
         // TODO:: Check why this was added, this creates problems when app is tabbed out
         // Remove if not needed, if it is then create a new transaction in onResume to restore
@@ -55,7 +88,6 @@ public class ExecutionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.printToast("attempting resume");
 
         setContentView(R.layout.activity_execution);
 
@@ -78,9 +110,11 @@ public class ExecutionActivity extends AppCompatActivity {
             String mainFragmentClass = getMainFragmentClass(apkPath);
             fragmentClass = classLoader.loadClass((mainFragmentClass != null) ? mainFragmentClass : "com.execmodule." + activeApp + ".MainFragment");
             mainFragment = (Fragment) fragmentClass.newInstance();
-            if (savedStateMap.containsKey(activeApp)) {
-                this.printToast("savedState not null");
-                mainFragment.setInitialSavedState(savedStateMap.get(activeApp));
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                Fragment.SavedState state = this.getState();
+                if (state != null) {
+                    mainFragment.setInitialSavedState(state);
+                }
             }
 
             tmpLayout = new LinearLayout(context);
