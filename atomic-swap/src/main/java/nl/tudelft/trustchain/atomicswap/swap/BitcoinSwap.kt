@@ -291,6 +291,20 @@ class BitcoinSwap {
 
     }
 
+    /**
+     * Creates a tx that claims the contract created by the recipient.
+     */
+    fun createClaimTxForInitiator(offerId: Long,txId: ByteArray,wallet: Wallet): Transaction {
+        val swapData = swapStorage[offerId] as SwapData.CreatorSwapData? ?: error("cannot find swap details")
+
+//        val txId = swapData.claimByInitiatorTxId ?: error("could not find the transaction id")
+
+        return createClaimTx(txId,swapData.secretUsed,offerId,wallet)
+    }
+
+    /**
+     * Creates a tx that claims the contract created by the initiator.
+     */
     fun createClaimTx(txId: ByteArray,secret:ByteArray,offerId: Long,wallet: Wallet): Transaction {
         Log.d("bitcoinswap","attempting to claim tx : ${txId.toHex()} of offer : $offerId")
         val tx = wallet.getTransaction(Sha256Hash.wrap(txId)) ?: error("Could not find tx: ${txId.toHex()}")

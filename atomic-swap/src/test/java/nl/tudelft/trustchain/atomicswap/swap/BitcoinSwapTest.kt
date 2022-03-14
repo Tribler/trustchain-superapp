@@ -1,16 +1,11 @@
 package nl.tudelft.trustchain.atomicswap.swap
 
-import junit.framework.TestCase
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.runBlocking
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.BitcoinSwap
 import org.bitcoinj.core.*
 import org.bitcoinj.params.UnitTestParams
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
-import org.bitcoinj.store.MemoryBlockStore
-import org.bitcoinj.wallet.KeyChain
 import org.bitcoinj.wallet.Wallet
 import org.junit.Test
 
@@ -71,6 +66,53 @@ class BitcoinSwapTest {
         val result = runCatching {
             claimTx.inputs.first().verify(tx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
         }
+
+
+        assertTrue("Swap Tx should be claimable",result.isSuccess)
+
+    }
+
+    @Test
+    fun `A swap transaction should be able to be claimed by the initiator`() {
+        // the wallet that can reclaim
+        val initiateWallet = createWallet()
+        val initiateBitcoinSwap = createBitcoinSwap()
+
+        fundWallet(initiateWallet,Coin.parseCoin("10"))
+
+        // the wallet that can claim
+        val claimWallet = createWallet()
+        val claimPublicKey = claimWallet.freshReceiveKey().pubKey
+        val claimBitcoinSwap = createBitcoinSwap()
+
+        fundWallet(claimWallet,Coin.parseCoin("10"))
+
+
+        val (tx, swapData) = initiateBitcoinSwap.startSwapTx(
+            offerId = 0,
+            wallet = initiateWallet,
+            claimPubKey = claimPublicKey,
+            "1"
+        )
+
+        claimWallet.commitTx(tx)
+
+        claimBitcoinSwap.addInitialRecipientSwapdata(0,claimPublicKey,"1")
+
+        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTxId!!)
+
+        val swapForInitiatorTx = claimBitcoinSwap.createSwapTxForInitiator(0,swapData.keyUsed,claimWallet)
+
+        initiateWallet.commitTx(swapForInitiatorTx)
+
+        val claimByInitiatorTx =  initiateBitcoinSwap.createClaimTxForInitiator(0,swapForInitiatorTx.txId.bytes,initiateWallet)
+
+
+        val result = runCatching {
+            claimByInitiatorTx.inputs.first().verify(swapForInitiatorTx.outputs.find { it.scriptPubKey.scriptType == Script.ScriptType.P2SH })
+        }
+
+        println(result)
 
 
         assertTrue("Swap Tx should be claimable",result.isSuccess)
