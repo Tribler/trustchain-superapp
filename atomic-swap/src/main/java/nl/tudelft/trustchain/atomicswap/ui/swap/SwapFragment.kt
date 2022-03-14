@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
+import org.bitcoinj.wallet.WalletExtension
 import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
@@ -80,6 +81,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 
                     val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
                     val freshKeyString = freshKey.pubKey.toString()
+                    WalletHolder.bitcoinSwap.addInitialRecipientSwapdata(trade.offerId.toLong(),freshKey.pubKey, trade.toAmount)
                     atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, freshKeyString)
                 }
                 alertDialogBuilder.setCancelable(true)
@@ -123,10 +125,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("You counterparty has published his transaction")
                 alertDialogBuilder.setMessage(initiateMessage.toString())
-//                alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
-//                    val bitcoinSwap = BitcoinSwap()
-//                    bitcoinSwap.startSwapTx()
-//                }
+                alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
+                    WalletHolder.bitcoinSwap.updateRecipientSwapData(initiateMessage.offerId.toLong(), initiateMessage.hash.encodeToByteArray(), initiateMessage.publicKey.encodeToByteArray(), initiateMessage.txId.toByteArray())
+                }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }
