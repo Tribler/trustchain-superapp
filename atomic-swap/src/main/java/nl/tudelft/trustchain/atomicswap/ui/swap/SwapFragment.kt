@@ -22,7 +22,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
-import org.bitcoinj.wallet.WalletExtension
 import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
@@ -119,7 +118,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
             }
         }
 
-        atomicSwapCommunity.setOnInitiate { initiateMessage, _ ->
+        atomicSwapCommunity.setOnInitiate { initiateMessage, peer ->
             lifecycleScope.launch(Dispatchers.Main) {
 
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
@@ -127,6 +126,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setMessage(initiateMessage.toString())
                 alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
                     WalletHolder.bitcoinSwap.updateRecipientSwapData(initiateMessage.offerId.toLong(), initiateMessage.hash.encodeToByteArray(), initiateMessage.publicKey.encodeToByteArray(), initiateMessage.txId.toByteArray())
+                    val transaction = WalletHolder.bitcoinSwap.createSwapTxForInitiator(initiateMessage.offerId.toLong(), initiateMessage.hash.encodeToByteArray(), WalletHolder.bitcoinWallet)
+                    WalletHolder.monitor.addTransactionToRecipientListener(TransactionMonitorEntry(transaction.txId.toString(),initiateMessage.offerId, peer))
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                 }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
@@ -157,6 +159,10 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                     }
                 }
             }
+        }
+
+        WalletHolder.monitor.setOnTransactionRecipientConfirmed {
+            print("Transaction confirmed")
         }
     }
 
