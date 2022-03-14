@@ -39,7 +39,7 @@ class ExchangeTransferMoneyLinkDialog(
             setNavigationBarColor(requireContext(), parentActivity, bottomSheetDialog)
 
             val typeSpinner = view.findViewById<Spinner>(R.id.spinnerType)
-//            val selectedTypeView = view.findViewById<TextView>(R.id.tvSelectedType)
+            val ibanView = view.findViewById<TextView>(R.id.etIBAN)
             val transactionAmountView = view.findViewById<EditText>(R.id.etTransactionAmount)
             messageView = view.findViewById(R.id.etTransactionMessage)
 
@@ -62,11 +62,20 @@ class ExchangeTransferMoneyLinkDialog(
 
             typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item);
             typeSpinner.adapter = typeAdapter
+            typeSpinner.onItemSelectedListener =
+                object : AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
+                        ibanView.visibility = if (pos == 0) View.GONE else View.VISIBLE
+                    }
+
+                    override fun onNothingSelected(p0: AdapterView<*>?) {}
+                }
 
             parentActivity.getBalance(true).observe(
                 this,
                 Observer {
-                    transactionAmountView.hint = if (isTransfer) resources.getString(R.string.text_balance_max, it) else ""
+                    transactionAmountView.hint =
+                        if (isTransfer) resources.getString(R.string.text_balance_max, it) else ""
                 }
             )
 

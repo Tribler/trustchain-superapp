@@ -118,6 +118,27 @@
         app:tint="@color/black" />
 
     <EditText
+        android:id="@+id/etIBAN"
+        android:layout_width="match_parent"
+        android:minHeight="40dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/pill_rounded"
+        android:backgroundTint="@color/light_gray"
+        android:paddingVertical="8dp"
+        android:inputType="textCapSentences"
+        android:paddingStart="8dp"
+        android:paddingRight="8dp"
+        android:layout_marginTop="12dp"
+        android:textSize="14sp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/gray"
+        android:hint="@string/text_exchange_iban"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clSelectedType" />
+
+    <EditText
         android:id="@+id/etTransactionMessage"
         android:layout_width="match_parent"
         android:minHeight="40dp"
@@ -135,7 +156,7 @@
         android:hint="@string/text_optional_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clSelectedType" />
+        app:layout_constraintTop_toBottomOf="@+id/etIBAN" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

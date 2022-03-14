@@ -84,6 +84,7 @@ import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.widget.Toast
+import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -97,6 +98,7 @@ class ValueTransferMainActivity : BaseActivity() {
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
     private val settingsFragment = SettingsFragment()
+    private val exchangeTransferMoneyLinkFragment = ExchangeTransferMoneyLinkFragment()
     private val qrScanController = QRScanController()
 
     private lateinit var customActionBar: View
@@ -198,6 +200,7 @@ class ValueTransferMainActivity : BaseActivity() {
             .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
             .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
             .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+            .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
             .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
             .commit()
 
@@ -388,11 +391,17 @@ class ValueTransferMainActivity : BaseActivity() {
 
                     fragmentManager.executePendingTransactions()
 
-                    if (fragmentTag == settingsFragmentTag) {
-                        detailFragment(settingsFragmentTag, Bundle())
-                    } else {
-                        selectBottomNavigationItem(fragmentTag)
-                        (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
+                    when (fragmentTag) {
+                        settingsFragmentTag -> {
+                            detailFragment(settingsFragmentTag, Bundle())
+                        }
+                        exchangeTransferMoneyLinkFragmentTag -> {
+                            detailFragment(exchangeTransferMoneyLinkFragmentTag, Bundle())
+                        }
+                        else -> {
+                            selectBottomNavigationItem(fragmentTag)
+                            (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
+                        }
                     }
                 }
             }
@@ -557,6 +566,16 @@ class ValueTransferMainActivity : BaseActivity() {
 
                 (settingsFragment as VTFragment).initView()
             }
+            exchangeTransferMoneyLinkFragmentTag -> {
+                fragmentManager.beginTransaction().apply {
+                    setCustomAnimations(0, R.anim.exit_to_left)
+                    if (activeFragment != null) hide(activeFragment)
+                    setCustomAnimations(R.anim.enter_from_right, 0)
+                    show(exchangeTransferMoneyLinkFragment)
+                }.commit()
+
+                (exchangeTransferMoneyLinkFragment as VTFragment).initView()
+            }
         }
     }
 
@@ -570,6 +589,7 @@ class ValueTransferMainActivity : BaseActivity() {
             exchangeFragmentTag -> exchangeFragment
             contactsFragmentTag -> contactsFragment
             settingsFragmentTag -> settingsFragment
+            exchangeTransferMoneyLinkFragmentTag -> exchangeTransferMoneyLinkFragment
             contactChatFragmentTag -> fragmentManager.findFragmentByTag(tag)
             else -> null
         }
@@ -1157,6 +1177,7 @@ class ValueTransferMainActivity : BaseActivity() {
         const val qrScanControllerTag = "qrscancontroller"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
+        const val exchangeTransferMoneyLinkFragmentTag = "exchange_transfer_money_link_fragment"
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"

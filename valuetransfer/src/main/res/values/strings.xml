@@ -214,6 +214,12 @@
     <string name="text_exchange_copy_link">Copy link</string>
     <string name="text_exchange_share_link">Share link</string>
     <string name="text_exchange_type">Type</string>
+    <string name="text_exchange_iban">IBAN</string>
+    <string name="text_exchange_payment_info">Information</string>
+    <string name="text_exchange_pay_with">Pay with</string>
+    <string name="text_exchange_receiver">Receiver</string>
+    <string name="text_exchange_amount">Amount</string>
+    <string name="text_exchange_message">Message</string>
     <string name="text_unknown_contact">Unknown contact</string>
     <string name="text_unknown_contact_extra">Unknown contact (%s)</string>
     <string name="text_to_contact">to %s</string>
@@ -460,6 +466,8 @@
     <string name="text_identity_ssi">* You will always remain the owner of your own identity. As an owner of a self-sovereign identity (SSI) you decide who is able to view the identity and what information is visible.</string>
     <string name="btn_identity_create">Create identity</string>
     <string name="text_identity_required">A personal identity is required for this application. It is important to provide the correct details.</string>
+    <string name="text_exchange_eurotoken">EuroToken</string>
+    <string name="text_exchange_euro">Euro</string>
 
     <string-array name="exchange_types">
         <item>EuroToken</item>
