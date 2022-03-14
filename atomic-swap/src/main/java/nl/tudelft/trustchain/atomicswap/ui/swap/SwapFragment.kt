@@ -76,7 +76,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("Received Trade Offer")
                 alertDialogBuilder.setMessage(trade.toString())
-                alertDialogBuilder.setPositiveButton(android.R.string.yes) { _, _ ->
+                alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
 
                     val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
                     val freshKeyString  = freshKey.pubKey.toString()
@@ -93,6 +93,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("Received Accept")
                 alertDialogBuilder.setMessage(it.toString())
+                alertDialogBuilder.setPositiveButton("Create transaction") { _, _ ->
+
+                }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }
