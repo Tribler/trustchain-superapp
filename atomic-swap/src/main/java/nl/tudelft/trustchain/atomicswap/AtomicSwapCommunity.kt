@@ -90,10 +90,7 @@ class AtomicSwapCommunity : Community() {
 
     private fun onCompleteTrade(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
-        // tell user that trade is complete
-
-//        onCompleteCallback(payload)
-
+        onCompleteCallback(payload)
         Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
     }
 

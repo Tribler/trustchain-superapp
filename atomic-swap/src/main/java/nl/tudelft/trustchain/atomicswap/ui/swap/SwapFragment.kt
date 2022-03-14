@@ -135,6 +135,16 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
             }
         }
 
+        atomicSwapCommunity.setOnComplete {
+            lifecycleScope.launch(Dispatchers.Main) {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("You counterparty has published his transaction")
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
+        }
+
 
 
         WalletHolder.monitor.setOnTransactionConfirmed {
@@ -162,7 +172,19 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
         }
 
         WalletHolder.monitor.setOnTransactionRecipientConfirmed {
-            print("Transaction confirmed")
+            if (WalletHolder.bitcoinSwap.swapStorage.containsKey(it.offerId.toLong())) {
+                val data: SwapData.RecipientSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(it.offerId.toLong()) as SwapData.RecipientSwapData
+
+                    lifecycleScope.launch(Dispatchers.Main) {
+                        val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                        alertDialogBuilder.setTitle("You transaction is confirmed")
+                        alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
+                            atomicSwapCommunity.sendCompleteMessage(it.peer, it.offerId, data.initiateTxId.toString())
+                        }
+                        alertDialogBuilder.setCancelable(true)
+                        alertDialogBuilder.show()
+                    }
+                }
         }
     }
 
