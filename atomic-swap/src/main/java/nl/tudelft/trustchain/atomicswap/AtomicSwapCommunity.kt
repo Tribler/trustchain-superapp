@@ -12,7 +12,7 @@ import java.util.*
 typealias onAccept = (AcceptMessage, Peer) -> Unit
 typealias onInitiate = (InitiateMessage, Peer) -> Unit
 typealias onTrade = (TradeMessage,Peer) -> Unit
-typealias onComplete = (CompleteSwapMessage) -> Unit
+typealias onComplete = (CompleteSwapMessage, Peer) -> Unit
 
 class AtomicSwapCommunity : Community() {
 
@@ -90,7 +90,7 @@ class AtomicSwapCommunity : Community() {
 
     private fun onCompleteTrade(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
-        onCompleteCallback(payload)
+        onCompleteCallback(payload, peer)
         Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
     }
 

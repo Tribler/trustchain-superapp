@@ -135,11 +135,27 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
             }
         }
 
-        atomicSwapCommunity.setOnComplete {
+        atomicSwapCommunity.setOnComplete { completeMessage, peer ->
             lifecycleScope.launch(Dispatchers.Main) {
 
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("You counterparty has published his transaction")
+                alertDialogBuilder.setPositiveButton("Claim money") { _, _ ->
+                    val data: SwapData.CreatorSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(completeMessage.offerId.toLong()) as SwapData.CreatorSwapData
+                    if(data.initiateTxId != null) {
+                        val transaction = WalletHolder.bitcoinSwap.createClaimTxForInitiator(
+                            completeMessage.offerId.toLong(),
+                            data.initiateTxId,
+                            WalletHolder.bitcoinWallet
+                        )
+
+                        WalletHolder.monitor.addClaimedTransactionListener(TransactionMonitorEntry(transaction.txId.toString(), completeMessage.offerId, peer))
+                        print("Mariana")
+                        val dd = transaction.bitcoinSerialize().toHex()
+                        print(dd)
+                        WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
+                    }
+                }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }
@@ -185,6 +201,10 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                         alertDialogBuilder.show()
                     }
                 }
+        }
+
+        WalletHolder.monitor.setOnClaimedConfirmed {
+            print("Confirmed")
         }
     }
 
