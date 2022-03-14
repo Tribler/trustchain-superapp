@@ -229,7 +229,7 @@ class BitcoinSwap {
         val tx = wallet.getTransaction(Sha256Hash.wrap(txId)) ?: error("Could not find tx: ${txId.toHex()}")
         val details = swapStorage[offerId] ?: error("could not fine swap data. ")
 
-        val key = ECKey.fromPrivate(details.keyUsed)
+        val key = wallet.findKeyFromPubKey(details.keyUsed)
 
         val contract = Transaction(networkParams)
         contract.setVersion(2)
@@ -258,7 +258,7 @@ class BitcoinSwap {
             .op(ScriptOpCodes.OP_1)
             .data(sig.encodeToBitcoin())
             .data(secret)
-            .op(ScriptOpCodes.OP_0)
+            .smallNum(0)
             .data(originalLockScript.program)
             .build()
 
