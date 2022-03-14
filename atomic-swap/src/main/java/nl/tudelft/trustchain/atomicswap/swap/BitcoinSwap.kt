@@ -277,7 +277,7 @@ class BitcoinSwap {
         val swapScript = createSwapScript(
             reclaimPubKey = key.pubKey,
             claimPubKey = counterpartyKey,
-            secretHash = Sha256Hash.hash(details.hashUsed)
+            secretHash = details.hashUsed
         )
 
         val contractTx = Transaction(networkParams)
