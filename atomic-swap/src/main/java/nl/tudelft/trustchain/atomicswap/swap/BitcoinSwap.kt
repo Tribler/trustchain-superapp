@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.atomicswap
 
 import android.util.Log
+import kotlinx.coroutines.runBlocking
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.*
@@ -280,6 +281,8 @@ class BitcoinSwap {
             secretHash = details.hashUsed ?: error("could not find hash")
         )
 
+        Log.d("swapscript","for init script: $swapScript")
+
         val contractTx = Transaction(networkParams)
 
         contractTx.addOutput(details.amount, ScriptBuilder.createP2SHOutputScript(swapScript))
@@ -330,6 +333,10 @@ class BitcoinSwap {
             details.keyUsed,
             secretHash
         )
+
+        Log.d("swapscript","claim script: $originalLockScript")
+
+
         val input = contract.addInput(prevTxOut)
         // we don't need to do this since we are claiming and not reclaiming
         //contract.inputs[0].sequenceNumber = (0xFFFF0000L + details.relativeLock) xor  (1 shl 31) xor (1 shl 22)
@@ -346,6 +353,11 @@ class BitcoinSwap {
 
 
         input.scriptSig = sigscript
+
+        val check = runBlocking {
+            contract.inputs.first().verify(prevTxOut)
+        }
+        println(check)
 
         Log.d("bitcoinswap","created claim tx for offer : $offerId and tx: $txId")
 

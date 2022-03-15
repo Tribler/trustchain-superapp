@@ -83,7 +83,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
 
                     val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
-                    val freshKeyString = freshKey.pubKey.toString()
+                    val freshKeyString = freshKey.pubKey.toHex()
                     WalletHolder.bitcoinSwap.addInitialRecipientSwapdata(trade.offerId.toLong(),freshKey.pubKey, trade.toAmount)
                     atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, freshKeyString)
                 }
@@ -99,11 +99,11 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setTitle("Received Accept")
                 alertDialogBuilder.setMessage(accept.toString())
                 alertDialogBuilder.setPositiveButton("Create transaction") { _, _ ->
-                    val pubKey = WalletHolder.bitcoinWallet.freshReceiveKey().pubKey
+//                    val pubKey = WalletHolder.bitcoinWallet.freshReceiveKey().pubKey
                     val (transaction, data) = WalletHolder.bitcoinSwap.startSwapTx(
                         accept.offerId.toLong(),
                         WalletHolder.bitcoinWallet,
-                        pubKey,
+                        accept.publicKey.hexToBytes(),
                         "1"
                     )
                     print(transaction)
@@ -129,8 +129,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setTitle("You counterparty has published his transaction")
                 alertDialogBuilder.setMessage(initiateMessage.toString())
                 alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
-                    WalletHolder.bitcoinSwap.updateRecipientSwapData(initiateMessage.offerId.toLong(), initiateMessage.hash.encodeToByteArray(), initiateMessage.publicKey.encodeToByteArray(), initiateMessage.txId.toByteArray())
-                    val transaction = WalletHolder.bitcoinSwap.createSwapTxForInitiator(initiateMessage.offerId.toLong(), initiateMessage.hash.encodeToByteArray(), WalletHolder.bitcoinWallet)
+                    WalletHolder.bitcoinSwap.updateRecipientSwapData(initiateMessage.offerId.toLong(), initiateMessage.hash.hexToBytes(), initiateMessage.publicKey.hexToBytes(), initiateMessage.txId.hexToBytes())
+                    val transaction = WalletHolder.bitcoinSwap.createSwapTxForInitiator(initiateMessage.offerId.toLong(), initiateMessage.publicKey.hexToBytes(), WalletHolder.bitcoinWallet)
                     WalletHolder.monitor.addTransactionToRecipientListener(TransactionMonitorEntry(transaction.txId.toString(),initiateMessage.offerId, peer))
                     WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                 }
@@ -195,7 +195,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 
         WalletHolder.monitor.setOnTransactionRecipientConfirmed {
             if (WalletHolder.bitcoinSwap.swapStorage.containsKey(it.offerId.toLong())) {
-                val data: SwapData.RecipientSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(it.offerId.toLong()) as SwapData.RecipientSwapData
+//                val data: SwapData.RecipientSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(it.offerId.toLong()) as SwapData.RecipientSwapData
 
                     lifecycleScope.launch(Dispatchers.Main) {
                         val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
