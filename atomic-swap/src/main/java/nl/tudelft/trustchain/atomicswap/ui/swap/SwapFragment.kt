@@ -20,8 +20,12 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
+import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.core.Transaction
+import org.bitcoinj.params.RegTestParams
 import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
@@ -143,9 +147,11 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setPositiveButton("Claim money") { _, _ ->
                     val data: SwapData.CreatorSwapData = WalletHolder.bitcoinSwap.swapStorage.getValue(completeMessage.offerId.toLong()) as SwapData.CreatorSwapData
                     if(data.initiateTxId != null) {
+                        val tx = Transaction(RegTestParams(),completeMessage.publicKey.hexToBytes())
+                        WalletHolder.bitcoinWallet.commitTx(tx)
                         val transaction = WalletHolder.bitcoinSwap.createClaimTxForInitiator(
                             completeMessage.offerId.toLong(),
-                            data.initiateTxId,
+                            tx.txId.bytes,
                             WalletHolder.bitcoinWallet
                         )
 
@@ -195,7 +201,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                         val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                         alertDialogBuilder.setTitle("You transaction is confirmed")
                         alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
-                            atomicSwapCommunity.sendCompleteMessage(it.peer, it.offerId, data.initiateTxId.toString())
+                            val tx = WalletHolder.bitcoinWallet.getTransaction(Sha256Hash.wrap(it.transactionId))!!
+                            atomicSwapCommunity.sendCompleteMessage(it.peer, it.offerId,tx.bitcoinSerialize().toHex())
                         }
                         alertDialogBuilder.setCancelable(true)
                         alertDialogBuilder.show()
