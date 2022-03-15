@@ -211,7 +211,12 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
         }
 
         WalletHolder.monitor.setOnClaimedConfirmed {
-            print("Confirmed")
+            lifecycleScope.launch(Dispatchers.Main) {
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("You claim transaction is confirmed")
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
         }
     }
 
