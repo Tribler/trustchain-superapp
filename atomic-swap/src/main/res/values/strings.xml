@@ -8,7 +8,14 @@
     <string name="bitcoin">Bitcoin</string>
     <string name="ethereum">Ethereum</string>
 
+    <string name="button_make_swap">Create swap offer</string>
+
     <string name="balance">Balance:</string>
     <string name="notification_copied_key">Copied wallet public key to clipboard</string>
+
+    <string-array name="currency_codes">
+        <item>BTC</item>
+        <item>ETH</item>
+    </string-array>
 
 </resources>
