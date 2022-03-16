@@ -280,10 +280,8 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        var hasIdentity=identityCommunity.hasIdentity()
-        hasIdentity=true
 
-        if (intent != null && hasIdentity && !lifecycle.currentState.isAtLeast(
+        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
         ) {
