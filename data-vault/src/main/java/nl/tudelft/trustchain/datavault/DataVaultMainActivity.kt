@@ -19,7 +19,7 @@ class DataVaultMainActivity : BaseActivity() {
     private val currentFolder = MutableLiveData<VaultFileItem>()
     private val browserNavigationStack = Stack<VaultFileItem>()
 
-    val VAULT by lazy { File(filesDir, VaultBrowserFragment.VAULT_DIR) }
+    val VAULT by lazy { File(filesDir, VaultBrowserFragment.VAULT_DIR).also { it.mkdir() } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

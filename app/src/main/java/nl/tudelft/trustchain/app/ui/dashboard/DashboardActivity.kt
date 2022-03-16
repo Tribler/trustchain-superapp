@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.mattskala.itemadapter.ItemAdapter
 import nl.tudelft.trustchain.app.AppDefinition
 import nl.tudelft.trustchain.app.databinding.ActivityDashboardBinding
+import nl.tudelft.trustchain.common.ebsi.ConformanceTest
 import nl.tudelft.trustchain.common.util.viewBinding
+import java.util.*
 
 class DashboardActivity : AppCompatActivity() {
     private val binding by viewBinding(ActivityDashboardBinding::inflate)
@@ -34,6 +36,8 @@ class DashboardActivity : AppCompatActivity() {
 
         val appList = getAppList().sortedBy { it.app.appName }
         adapter.updateItems(appList)
+
+        ConformanceTest(this, UUID.randomUUID()).run()
     }
 
     private fun getAppList(): List<DashboardItem> {

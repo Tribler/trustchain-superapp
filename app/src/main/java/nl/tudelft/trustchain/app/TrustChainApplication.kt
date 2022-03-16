@@ -41,6 +41,9 @@ import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
+import nl.tudelft.trustchain.common.ebsi.EBSIAPI
+import nl.tudelft.trustchain.common.ebsi.EBSIRequest
+import nl.tudelft.trustchain.common.ebsi.KeyStoreHelper
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
@@ -94,6 +97,7 @@ class TrustChainApplication : Application() {
 
         initWallet()
         initTrustChain()
+        initEBSI()
     }
 
     private fun initWallet() {
@@ -176,6 +180,11 @@ class TrustChainApplication : Application() {
                 }
             }
         )
+    }
+
+    private fun initEBSI() {
+        KeyStoreHelper.initProvider()
+        EBSIAPI.setup(this)
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
