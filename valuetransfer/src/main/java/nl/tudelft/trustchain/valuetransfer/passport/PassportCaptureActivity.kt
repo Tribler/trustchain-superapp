@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import net.sf.scuba.data.Gender
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.CameraSource
 import nl.tudelft.trustchain.valuetransfer.passport.mlkit.CameraSourcePreview
@@ -23,6 +24,7 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
     private var feedbackText: TextView? = null
     private var documentType: String = PassportHandler.DOCUMENT_TYPE_OTHER
     private var nfcSupported = false
+    private var overrideScan = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,6 +48,25 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
 
         findViewById<Button>(R.id.btnScanPrevious).setOnClickListener {
             onBackPressed()
+        }
+
+        // Override the scanning
+        findViewById<TextView>(R.id.tvScanTitle).setOnClickListener {
+            overrideScan += 1
+            if (overrideScan % 5 == 0) {
+                onSuccess(MRZInfo(
+                    "P",
+                    "NLD",
+                    "Test",
+                    "Dummy",
+                    "AA12345678",
+                    "NLD",
+                    "990101",
+                    Gender.MALE,
+                    "221212",
+                    "123456789"
+                ))
+            }
         }
 
         onResume()
