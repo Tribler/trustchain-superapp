@@ -11,10 +11,6 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.util.TypedValue
 import android.view.*
@@ -83,6 +79,8 @@ import org.json.JSONObject
 import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.net.Uri
+import android.os.*
 import android.widget.Toast
 import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
 
@@ -144,6 +142,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
 
+
+
         // Set status bar to black on Lollipop when in day mode
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             window.statusBarColor = if (currentTheme == AppPreferences.APP_THEME_NIGHT) {
@@ -160,6 +160,22 @@ class ValueTransferMainActivity : BaseActivity() {
         }
 
         setContentView(R.layout.main_activity_vt)
+
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+        var requestMoney=false
+        if(action!=null && data!=null)
+        {
+
+            val receiver=data.getQueryParameter("receiver")
+            val amount=data.getQueryParameter("amount")
+            val message=data.getQueryParameter("message")
+            if(receiver!=null && amount!=null) {
+                requestMoney = true
+                exchangeTransferMoneyLinkFragment.setData(receiver, amount, message)
+            }
+        }
+
 
         /**
          * Create identity database tables if not exist
@@ -194,15 +210,26 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
          */
-        fragmentManager.beginTransaction()
-            .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
-            .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
-            .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-            .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
-            .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-            .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
-            .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
-            .commit()
+        if(!requestMoney)
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
+                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
+                .commit()
+        else
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag)
+                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).hide(walletOverviewFragment)
+                .commit()
 
         fragmentManager.executePendingTransactions()
 
@@ -253,7 +280,10 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-        if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
+        var hasIdentity=identityCommunity.hasIdentity()
+        hasIdentity=true
+
+        if (intent != null && hasIdentity && !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
         ) {

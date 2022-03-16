@@ -114,7 +114,20 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.ValueTransfer"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop">
+            <tools:validation testUrl="http://trustchain.com/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="trustchain.com" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:pathPrefix="/requestMoney" />
+            </intent-filter>
+        </activity>
 
         <activity
             android:name="nl.tudelft.trustchain.valuetransfer.passport.PassportCaptureActivity"
@@ -144,7 +157,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBAGd8-KwX1epS_0CPl5RF0hD8VeTmM-7Y"/>
+            android:value="AIzaSyBAGd8-KwX1epS_0CPl5RF0hD8VeTmM-7Y" />
     </application>
 
 </manifest>
