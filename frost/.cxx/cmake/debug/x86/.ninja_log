@@ -1,0 +1,6 @@
+# ninja log v5
+1	389	668788213	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	aa7a677da7bf6459
+391	487	668788214	C:/Users/s/Documents/GitHub/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	c137a7a13e9c1fae
+0	8	0	clean	f753499a7fe8ca29
+3	392	669149016	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	aa7a677da7bf6459
+393	566	669149016	C:/Users/s/Documents/GitHub/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	c137a7a13e9c1fae

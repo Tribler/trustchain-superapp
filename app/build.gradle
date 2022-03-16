@@ -82,6 +82,11 @@ android {
     packagingOptions {
         exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
         exclude 'META-INF/DEPENDENCIES'
+        pickFirst 'protobuf.meta'
+    }
+
+    configurations {
+        implementation.exclude module:'protobuf-javalite'
     }
 }
 
