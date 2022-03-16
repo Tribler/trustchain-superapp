@@ -1,17 +1,20 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.*
-import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
-import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import nl.tudelft.trustchain.common.contacts.Contact
+import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
-import nl.tudelft.trustchain.valuetransfer.util.*
+import nl.tudelft.trustchain.valuetransfer.util.addDecimalLimiter
+import nl.tudelft.trustchain.valuetransfer.util.formatAmount
+import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
+import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
 
 class ExchangeTransferMoneyLinkDialog(
     private val amount: String?,
@@ -92,6 +95,16 @@ class ExchangeTransferMoneyLinkDialog(
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
+
+            bottomSheetDialog.clShareLink.setOnClickListener {
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "Would you please pay me €1 for 'MarktPlaats' via\nhttps://trustchain-superapp.nl")
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+            }
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
