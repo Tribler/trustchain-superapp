@@ -72,77 +72,47 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".LiteratureOverview">
+            android:layout_height="fill_parent">
+
+            <ImageView
+                android:id="@+id/imageView6"
+                android:layout_width="89dp"
+                android:layout_height="88dp"
+                android:layout_gravity="bottom|center"
+                app:srcCompat="@drawable/ic_search_literature_illustration" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
                 android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/textView8"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="10dp">
+                    android:layout_weight="1"
+                    android:fontFamily="@font/cheltenhamstd_bold"
+                    android:text="Search results"
+                    android:textColor="#000000"
+                    android:textSize="34sp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:paddingRight="10dp">
-
-                        <TextView
-                            android:id="@+id/textView8"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:fontFamily="@font/cheltenhamstd_bold"
-                            android:text="My Literature"
-                            android:textColor="#000000"
-                            android:textSize="34sp" />
-
-                        <SearchView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:background="#F5F9FC" />
-
-                    </LinearLayout>
-
-                    <ImageView
-                        android:id="@+id/imageView3"
-                        android:layout_width="225dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:src="@drawable/ic_undraw_bibliophile_re_xarc" />
-
-                </LinearLayout>
-
-                <androidx.gridlayout.widget.GridLayout
+                <SearchView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="10dp"
-                    app:columnCount="2"
-                    app:useDefaultMargins="true">
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_weight="1"
+                    android:background="#F5F9FC">
 
-                    <androidx.fragment.app.FragmentContainerView
-                        android:id="@+id/fragmentContainerView"
-                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:layout="@layout/fragment_literature" />
+                </SearchView>
 
-                    <androidx.fragment.app.FragmentContainerView
-                        android:id="@+id/fragmentContainerView4"
-                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:layout_column="1"
-                        tools:layout="@layout/fragment_literature" />
-
-                </androidx.gridlayout.widget.GridLayout>
+                <ListView
+                    android:layout_width="match_parent"
+                    android:layout_height="353dp"
+                    android:layout_marginBottom="120dp" />
 
             </LinearLayout>
 
@@ -183,6 +153,7 @@
                     android:fontFamily="@font/cheltenhamstd_bold"
                     android:text="My Literature"
                     android:textColor="#000000" />
+
             </LinearLayout>
 
             <LinearLayout
