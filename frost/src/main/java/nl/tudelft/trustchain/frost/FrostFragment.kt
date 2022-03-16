@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.frost
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,9 +10,7 @@ import kotlinx.android.synthetic.main.fragment_frost.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
-import nl.tudelft.trustchain.frost.FrostCommunity
-import java.io.File
-import java.io.PrintWriter
+
 
 @ExperimentalUnsignedTypes
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
@@ -61,12 +60,41 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         return inflater.inflate(R.layout.fragment_frost, container, false)
     }
 //
+    private fun writeToFile(filePath: String, text: String){
+    this.context?.openFileOutput(filePath, Context.MODE_PRIVATE).use {
+        it?.write(text.toByteArray())
+        Log.i("FROST", "Write: $text to $filePath")
+    }
+}
+
+    private fun readFile(filePath: String){
+        this.context?.openFileInput(filePath).use { stream ->
+            val text = stream?.bufferedReader().use {
+                it?.readText()
+            }
+            Log.i("FROST", "Read: $text from $filePath")
+        }
+    }
     private fun initClickListeners() {
         button.setOnClickListener {
             // TODO: add FROST JNI
             Log.i("FROST", "Key distribution started")
-            var file = File("key_share.txt")
-            file.writeText("keyFile")
+//            var file = File("key_share.txt")
+//            file.writeText("keyFile")
+
+            this.context?.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
+                val message = "hello"
+                it?.write(message.toByteArray())
+                Log.i("FROST", "File written")
+            }
+
+            this.context?.openFileInput("key_share.txt").use { stream ->
+                val text = stream?.bufferedReader().use {
+                    it?.readText()
+                }
+                Log.i("FROST", "LOADED: $text")
+            }
+
             getFrostCommunity().distributeKey("hello")
         }
     }

@@ -1,14 +1,14 @@
 package nl.tudelft.trustchain.frost
 
+import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
+import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.messaging.Packet
-import java.io.File
-import java.io.PrintWriter
 import kotlin.random.Random
 
 @ExperimentalUnsignedTypes
-class FrostCommunity: Community(){
+class FrostCommunity(private val context: Context): Community(){
     override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fb"
 
     init {
@@ -42,15 +42,29 @@ class FrostCommunity: Community(){
 
         // TODO handle encryption
 
+        saveKeyShare(keyShare)
+
         Log.i("FROST", "Key fragment saved $keyShare")
 
-        saveKeyShare(keyShare)
+        getKeyShare()
+
     }
 
 
     private fun saveKeyShare(keyShare: String){
-        var file = File("key_share.txt")
-        file.writeText(keyShare)
+        this.context.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
+            it?.write(keyShare.toByteArray())
+            Log.i("FROST", "File written ${myPeer.address}")
+        }
+    }
+
+    private fun getKeyShare(){
+        this.context.openFileInput("key_share.txt").use { stream ->
+            val text = stream?.bufferedReader().use {
+                it?.readText()
+            }
+            Log.i("FROST", "LOADED: $text ${myPeer.address}")
+        }
     }
 
 
@@ -63,7 +77,9 @@ class FrostCommunity: Community(){
         var count = 0
         for (peer in getPeers()) {
             if(peer == myPeer){
+                Log.i("FROST", "Key fragment saved $keyShare")
                 saveKeyShare(keyShare)
+                getKeyShare()
             }
             else{
                 val packet = serializePacket(
@@ -84,4 +100,11 @@ class FrostCommunity: Community(){
             get() { return 0 }
     }
 
+    class Factory(
+        private val context: Context
+    ) : Overlay.Factory<FrostCommunity>(FrostCommunity::class.java) {
+        override fun create(): FrostCommunity {
+            return FrostCommunity(context)
+        }
+    }
 }
