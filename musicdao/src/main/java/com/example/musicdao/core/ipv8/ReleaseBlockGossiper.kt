@@ -1,5 +1,6 @@
 package com.example.musicdao.core.ipv8
 
+import android.util.Log
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
 import kotlinx.coroutines.CoroutineScope
@@ -36,8 +37,8 @@ class ReleaseBlockGossiper @Inject constructor(
     }
 
     object Config {
-        const val BLOCKS = 5
-        const val DELAY = 10_000L
+        const val BLOCKS = 10
+        const val DELAY = 5_000L
     }
 
     private fun pickRandomPeer(): Peer? {

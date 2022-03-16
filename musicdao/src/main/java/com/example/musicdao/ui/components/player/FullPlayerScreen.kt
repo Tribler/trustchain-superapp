@@ -39,7 +39,7 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
             ReleaseCover(
                 file = coverFile,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .width(200.dp)
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(5))
                     .shadow(10.dp)

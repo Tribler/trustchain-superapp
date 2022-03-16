@@ -5,14 +5,17 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.musicdao.CachePath
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.torrent.TorrentEngine
+import java.nio.file.Paths
 import java.util.*
 import javax.inject.Inject
 
 class CreateReleaseUseCase @Inject constructor(
     private val albumRepository: AlbumRepository,
-    private val torrentEngine: TorrentEngine
+    private val torrentEngine: TorrentEngine,
+    private val cachePath: CachePath
 ) {
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -32,14 +35,16 @@ class CreateReleaseUseCase @Inject constructor(
             return false
         }
 
-        val contentFolder = TorrentEngine.rootToContentFolder(root) ?: return false
-        val infoHash = TorrentEngine.generateInfoHash(contentFolder)
-        if (infoHash == null) {
-            Log.d("MusicDao", "CreateReleaseUseCase: could not calculate info-hash")
-            return false
-        }
+//        val contentFolder = TorrentEngine.rootToContentFolder(root) ?: return false
+//        val torrentInfo = TorrentEngine.createTorrentInfo(contentFolder)
+//        val torrentFile = Paths.get("${cachePath.getPath()}/torrents/$releaseId.torrent").toFile()
+//        torrentFile.writeBytes(torrentInfo.bencode())
+//        if (torrentInfo == null) {
+//            Log.d("MusicDao", "CreateReleaseUseCase: could not calculate info-hash")
+//            return false
+//        }
 
-        val magnet = TorrentEngine.infoHashToMagnet(infoHash)
+        val magnet = root.second.makeMagnetUri()
         val publishResult = albumRepository.create(
             releaseId = releaseId,
             magnet = magnet,
@@ -52,7 +57,7 @@ class CreateReleaseUseCase @Inject constructor(
             return false
         }
 
-        torrentEngine.seed(magnet, root, true)
+        torrentEngine.download(magnet, root.first)
         return true
     }
 }

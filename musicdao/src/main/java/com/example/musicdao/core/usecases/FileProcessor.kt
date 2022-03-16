@@ -3,6 +3,7 @@ package com.example.musicdao.core.usecases
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.torrent.ReleaseProcessor
 import com.example.musicdao.core.util.Util
@@ -20,15 +21,14 @@ class FileProcessor {
         fun getTitle(mp3: Mp3File): String {
             val title = Util.getTitle(mp3)
             if (title != null) {
+                Log.d("MusicDao", "1 Get Title: $title")
                 return title
             }
 
-            val sanitizedFileName = Util.checkAndSanitizeTrackNames(mp3.filename)
-            if (sanitizedFileName != null) {
-                return sanitizedFileName
-            }
-
             return mp3.filename
+                .replace("_", " ")
+                .substringAfterLast("/")
+                .substringAfterLast("-")
         }
 
         /**
@@ -65,7 +65,7 @@ class FileProcessor {
             }
 
             if (second != null) {
-                return first
+                return second
             }
 
             // 3. parse from mp3 and return if found

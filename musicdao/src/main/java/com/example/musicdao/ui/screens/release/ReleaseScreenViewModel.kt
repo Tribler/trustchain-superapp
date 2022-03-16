@@ -1,11 +1,12 @@
 package com.example.musicdao.ui.screens.release
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.example.musicdao.CachePath
 import com.example.musicdao.core.database.CacheDatabase
+import com.example.musicdao.core.database.entities.AlbumEntity
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.torrent.api.TorrentHandleStatus
@@ -15,16 +16,23 @@ import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+@OptIn(DelicateCoroutinesApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
 class ReleaseScreenViewModel @AssistedInject constructor(
     @Assisted private val releaseId: String,
     private val getReleaseUseCase: GetRelease,
     private val downloadIntentUseCase: DownloadIntentUseCase,
     private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase,
-    private val database: CacheDatabase
+    private val database: CacheDatabase,
+    private val torrentEngine: TorrentEngine,
+    private val cachePath: CachePath
 ) : ViewModel() {
 
     @AssistedFactory
@@ -43,40 +51,36 @@ class ReleaseScreenViewModel @AssistedInject constructor(
         }
     }
 
-    private val _saturatedRelease: MutableStateFlow<Album?> = MutableStateFlow(null)
-    val saturatedReleaseState: StateFlow<Album?> = _saturatedRelease
+    private var releaseLiveData: LiveData<AlbumEntity> = MutableLiveData(null)
+    var saturatedReleaseState: LiveData<Album?> = MutableLiveData()
 
     val _torrentHandleState: MutableStateFlow<TorrentHandleStatus?> = MutableStateFlow(null)
     val torrentHandleState: StateFlow<TorrentHandleStatus?> = _torrentHandleState
 
-    private val _update: MutableStateFlow<Boolean> = MutableStateFlow(false)
-
     init {
         viewModelScope.launch {
+            releaseLiveData = database.dao.getLiveData(releaseId)
+            saturatedReleaseState = Transformations.map(releaseLiveData, { it.toAlbum() })
+
             val release = database.dao.get(releaseId)
-            _saturatedRelease.value = release.toAlbum()
 
-            if (!release.isDownloaded) {
-                downloadIntentUseCase.invoke(release.id)
-            }
+            release.let { release ->
+                if (!release.isDownloaded) {
+                    downloadIntentUseCase.invoke(release.magnet)
+                }
 
-            TorrentEngine.magnetToInfoHash(release.magnet)?.let { infoHash ->
-                val flow = getTorrentStatusFlowUseCase(infoHash)
-                if (flow != null) {
-                    val stateFlow = flow.stateIn(
-                        scope = viewModelScope,
-                        started = SharingStarted.WhileSubscribed(5000L),
-                        initialValue = null
-                    )
-                    stateFlow.collect {
-                        _torrentHandleState.value = it
-                        // TODO: turn this into boolean
-                        val status = _torrentHandleState.value
-                        if (status != null && status.finishedDownloading == "true" && !_update.value) {
-                            _update.value = true
-                            _saturatedRelease.value = getReleaseUseCase(releaseId)
+                while (isActive) {
+                    val infoHash = TorrentEngine.magnetToInfoHash(release.magnet)
+                    if (infoHash != null) {
+                        torrentEngine.get(infoHash)?.let {
+                            _torrentHandleState.value =
+                                GetTorrentStatusFlowUseCase.mapTorrentHandle(
+                                    it,
+                                    cachePath.getPath()!!.toFile()
+                                )
                         }
                     }
+                    delay(1000L)
                 }
             }
         }

@@ -14,14 +14,23 @@ import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
 import com.turn.ttorrent.client.SharedTorrent
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.writeBytes
 
+@DelicateCoroutinesApi
+@Singleton
 @RequiresApi(Build.VERSION_CODES.O)
 class TorrentEngine @Inject constructor(
     private val sessionManager: SessionManager,
@@ -33,6 +42,9 @@ class TorrentEngine @Inject constructor(
     private val activeTorrents: StateFlow<List<String>> = _activeTorrents
 
     private val torrentCacheFolder = Paths.get("${cachePath.getPath()}/torrents")
+
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val jobs: MutableMap<String, Job> = mutableMapOf()
 
     init {
         setupListeners()
@@ -81,27 +93,89 @@ class TorrentEngine @Inject constructor(
     /**
      * Downloads a torrent with the magnet link and trackers in it correctly.
      */
-    private fun download(
+    fun download(
         magnet: String,
-        root: Path
+        root: Path,
     ): TorrentHandle? {
+
+        val infoHash = magnetToInfoHash(magnet)!!
+
         Log.d(
             "MusicDao",
-            "download(): torrent download with $magnet, $root"
+            "download(): torrent download with: $infoHash, $root"
         )
-        sessionManager.download(magnet, root.toFile())
-        val infoHash = magnetToInfoHash(magnet)
-        val handle = sessionManager.find(Sha1Hash(infoHash))
 
-        // Opt-out of the auto-managed queue system of lib-torrent
-        handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
-        handle.resume()
+        Log.d(
+            "MusicDao",
+            "download(2): ${_activeTorrents.value.map { it }} $this"
+        )
 
-        return if (handle != null) {
-            handle
-        } else {
-            null
+        if(_activeTorrents.value.contains(infoHash)) {
+            Log.d(
+                "MusicDao",
+                "download(): torrent already started as a job"
+            )
+            downloadFinishUseCase.invoke(infoHash)
+            return null
         }
+
+        val job = GlobalScope.launch(dispatcher) {
+            Log.d(
+                "MusicDao",
+                "download(): attempt to get torrentFile"
+            )
+
+            val torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent")
+            val torrentFile = torrentPath.toFile()
+            var torrentInfo: TorrentInfo? = null
+
+            if (torrentFile.exists()) {
+                Log.d(
+                    "MusicDao",
+                    "download(): torrentFile fetched locally"
+                )
+                torrentInfo = TorrentInfo(torrentFile)
+            } else {
+                while (isActive && torrentInfo == null) {
+                    Log.d(
+                        "MusicDao",
+                        "download(): attempt to get torrentFile remotely for $infoHash - $magnet"
+                    )
+                    val bytes = sessionManager.fetchMagnet(magnet, 10)
+                    if (bytes != null) {
+                        Log.d(
+                            "MusicDao",
+                            "download(): found some bytes ${bytes.size}"
+                        )
+                        torrentInfo = TorrentInfo.bdecode(bytes)
+                    }
+                }
+
+                if (!torrentCacheFolder.toFile().exists()) {
+                    torrentCacheFolder.createDirectories()
+                }
+                Log.d(
+                    "MusicDao",
+                    "download(): torrent file found, writing to disk"
+                )
+                torrentFile.writeBytes(torrentInfo!!.bencode())
+            }
+
+            sessionManager.download(torrentInfo, root.toFile())
+            val infoHash = magnetToInfoHash(magnet)
+            val handle = sessionManager.find(Sha1Hash(infoHash))
+
+            // Opt-out of the auto-managed queue system of lib-torrent
+            handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
+            handle.resume()
+            Log.d(
+                "MusicDao",
+                "download(): download started successfully for $infoHash!"
+            )
+        }
+
+        jobs[infoHash] = job
+        return null
     }
 
     fun getAllTorrents(): StateFlow<List<String>> {
@@ -126,7 +200,7 @@ class TorrentEngine @Inject constructor(
 
         val result = downloadedReleases.mapNotNull {
             it.root?.let { root ->
-                seed(magnet = it.magnet, Paths.get(root))
+                download(magnet = it.magnet, Paths.get(root))
             }
         }
 
@@ -138,19 +212,46 @@ class TorrentEngine @Inject constructor(
         return result
     }
 
-    suspend fun download(releaseId: String): TorrentHandle? {
-        val release = database.dao.get(releaseId)
-        return download(release.magnet, Paths.get("$torrentCacheFolder/$releaseId"))
+    fun download(magnet: String): TorrentHandle? {
+        val infoHash = magnetToInfoHash(magnet = magnet)!!
+        return download(magnet, Paths.get("$torrentCacheFolder/$infoHash"))
     }
 
     /**
      * Simulates a download and puts content in cache/torrents/releaseId
      * @return root folder of release in cache
      */
-    fun simulateDownload(context: Context, uris: List<Uri>, releaseId: String): Path? {
-        copyReleaseToTempFolder(context, uris, releaseId)
-        copyIntoCache(Paths.get("${cachePath.getPath()}/temp"))
-        return Paths.get("$torrentCacheFolder/$releaseId")
+    fun simulateDownload(context: Context, uris: List<Uri>, releaseId: String): Pair<Path, TorrentInfo>? {
+        copyReleaseToTempFolder(context, uris)
+
+        val torrentInfo = createTorrentInfo(Paths.get("${cachePath.getPath()}/temp/$DEFAULT_DIR_NAME"))
+        val infoHash = torrentInfo.infoHash().toString()
+        val torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent")
+        val torrentFile = torrentPath.toFile()
+
+        if (!torrentCacheFolder.toFile().exists()) {
+            torrentCacheFolder.createDirectories()
+        }
+
+        Log.d(
+            "MusicDao",
+            "simulateDownload(): attempting to download to $torrentPath"
+        )
+        torrentFile.writeBytes(torrentInfo.bencode())
+
+        val folder = Paths.get("${cachePath.getPath()}/temp")
+        Log.d(
+            "MusicDao",
+            "copyIntoCache: attempting to copy files $folder into torrent cache $torrentCacheFolder"
+        )
+        try {
+            folder.toFile().copyRecursively(Paths.get("$torrentCacheFolder/${torrentInfo.infoHash()}").toFile(), overwrite = true)
+        } catch (exception: Exception) {
+            Log.d("MusicDao", "copyIntoCache: could not copy files")
+            return null
+        }
+//        copyIntoCache(Paths.get("${cachePath.getPath()}/temp"))
+        return Pair(Paths.get("$torrentCacheFolder/${torrentInfo.infoHash()}"), torrentInfo)
     }
 
     /**
@@ -158,15 +259,13 @@ class TorrentEngine @Inject constructor(
      *
      * @param context android context
      * @param uris uris of files
-     * @param releaseId releaseID for folder name
      * @return root folder
      */
     private fun copyReleaseToTempFolder(
         context: Context,
         uris: List<Uri>,
-        releaseId: String
     ): File {
-        val parentDir = Paths.get("${cachePath.getPath()}/temp/$releaseId/$DEFAULT_DIR_NAME")
+        val parentDir = Paths.get("${cachePath.getPath()}/temp/$DEFAULT_DIR_NAME")
         return copyToTempFolder(context, uris, parentDir)
     }
 
@@ -240,6 +339,10 @@ class TorrentEngine @Inject constructor(
                         alert.handle().resume()
                         _activeTorrents.value =
                             _activeTorrents.value + alert.handle().infoHash().toString()
+                        Log.d(
+                            "MusicDao",
+                            "Torrent: Torrent added 2 ${_activeTorrents.value.map { it }} ${this@TorrentEngine}"
+                        )
                     }
                     AlertType.TORRENT_REMOVED -> {
                         val a: TorrentRemovedAlert = alert as TorrentRemovedAlert
@@ -251,6 +354,10 @@ class TorrentEngine @Inject constructor(
                         )
                         _activeTorrents.value =
                             _activeTorrents.value - alert.handle().infoHash().toString()
+                        Log.d(
+                            "MusicDao",
+                            "Torrent: Torrent removed 2 ${_activeTorrents.value.map { it }}"
+                        )
                     }
                     AlertType.TORRENT_CHECKED -> {
                         val a: TorrentCheckedAlert = alert as TorrentCheckedAlert

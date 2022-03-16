@@ -25,32 +25,38 @@ class DownloadFinishUseCase constructor(
             Log.d("MusicDao", "DownloadFinishUseCase: $infoHash")
 
             // TODO: fix, multiple releases can potentially have some info-hash, will break
-            val albumEntity = database.dao.getFromInfoHash(infoHash)
-            val releaseId = albumEntity.id
-            val root = Paths.get("${cachePath.getPath()}/torrents/$releaseId")
+            val albumEntities = database.dao.getFromInfoHash(infoHash)
 
-            val mp3Files = ReleaseProcessor.getMP3Files(root)
-            Log.d("MusicDao", "DownloadFinishUseCase: mp3 files in $root: $mp3Files")
+            for (albumEntity in albumEntities) {
+                if (albumEntity.isDownloaded) {
+                    Log.d("MusicDao", "DownloadFinishUseCase: Skipping $infoHash of ${albumEntity.id}, already downloaded")
+                }
 
-            val songs = mp3Files?.map {
-                SongEntity(
-                    file = it.filename,
-                    title = FileProcessor.getTitle(it),
-                    name = FileProcessor.getTitle(it),
-                    artist = albumEntity.artist
+                val root = Paths.get("${cachePath.getPath()}/torrents/$infoHash")
+
+                val mp3Files = ReleaseProcessor.getMP3Files(root)
+                Log.d("MusicDao", "DownloadFinishUseCase: mp3 files in $root: $mp3Files")
+
+                val songs = mp3Files?.map {
+                    SongEntity(
+                        file = it.filename,
+                        title = FileProcessor.getTitle(it),
+                        name = FileProcessor.getTitle(it),
+                        artist = albumEntity.artist
+                    )
+                } ?: listOf()
+
+                val cover = FileProcessor.getCoverArt(root)
+                val updatedAlbumEntity = albumEntity.copy(
+                    songs = songs,
+                    cover = cover?.absolutePath,
+                    root = root.toString(),
+                    isDownloaded = true
                 )
-            } ?: listOf()
 
-            val cover = FileProcessor.getCoverArt(root)
-            val updatedAlbumEntity = albumEntity.copy(
-                songs = songs,
-                cover = cover?.absolutePath,
-                root = root.toString(),
-                isDownloaded = true
-            )
-
-            Log.d("MusicDao", "DownloadFinishUseCase: updated album with $updatedAlbumEntity")
-            database.dao.update(updatedAlbumEntity)
+                Log.d("MusicDao", "DownloadFinishUseCase: updated album with $updatedAlbumEntity")
+                database.dao.update(updatedAlbumEntity)
+            }
         }
     }
 }

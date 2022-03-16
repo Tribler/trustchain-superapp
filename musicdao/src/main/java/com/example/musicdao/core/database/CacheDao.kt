@@ -1,7 +1,9 @@
 package com.example.musicdao.core.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.musicdao.core.database.entities.AlbumEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CacheDao {
@@ -18,11 +20,17 @@ interface CacheDao {
     @Query("SELECT * FROM AlbumEntity")
     suspend fun getAll(): List<AlbumEntity>
 
+    @Query("SELECT * FROM AlbumEntity")
+    fun getAllLiveData(): LiveData<List<AlbumEntity>>
+
     @Query("SELECT * FROM AlbumEntity WHERE id is :id")
     suspend fun get(id: String): AlbumEntity
 
+    @Query("SELECT * FROM AlbumEntity WHERE id is :id")
+    fun getLiveData(id: String): LiveData<AlbumEntity>
+
     @Query("SELECT * FROM AlbumEntity WHERE infoHash is :infoHash")
-    suspend fun getFromInfoHash(infoHash: String): AlbumEntity
+    suspend fun getFromInfoHash(infoHash: String): List<AlbumEntity>
 
     @Query("SELECT * FROM AlbumEntity WHERE publisher is :publicKey")
     suspend fun getFromArtist(publicKey: String): List<AlbumEntity>

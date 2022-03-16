@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,7 +61,7 @@ fun ReleaseScreen(
     )
 
     val torrentStatus by viewModel.torrentHandleState.collectAsState()
-    val album by viewModel.saturatedReleaseState.collectAsState()
+    val album by viewModel.saturatedReleaseState.observeAsState()
 
     val playingTrack = playerViewModel.playingTrack.collectAsState()
 
