@@ -1,22 +1,25 @@
 
 package nl.tudelft.trustchain.literaturedao.controllers
 
+import android.R
 import android.util.Log
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
-class KeywordExtractor : BaseFragment() {
+
+class KeywordExtractor : LiteratureDaoActivity() {
 
     // Function that loads the acerage stemmed word occurance
+    /*
     fun instantiateAvgFreqMap(): Map<String, Long>{
-        var res = mutableMapOf<String, Long>()
 
+        var res = mutableMapOf<String, Long>()
+        //android.content.Context.getAssets()
         Log.d("litdao", "1")
-        val asset = activity?.assets?.open("stemmed_freqs.csv")
+        val asset = assets.open("stemmed_freqs.csv")
+        //val is = androidContext()
         Log.d("litdao", "2")
         val reader = BufferedReader(InputStreamReader(asset))
         Log.d("litdao", "3")
@@ -28,8 +31,10 @@ class KeywordExtractor : BaseFragment() {
             res[key] = num
         }
 
+
+
         return res
-    }
+    }*/
 
     // Custom data type in order to be able to sort
     class Result constructor(word: String, relativeFreq: Double) {
@@ -50,15 +55,16 @@ class KeywordExtractor : BaseFragment() {
     }
 
     // Quik fix alternative if the actual implementation does not work
-    fun quikFix(args: Array<String>){
+    fun quikFix(arg: String): kotlin.collections.MutableList<Result> {
 
         //List of frequently used words
         val banList = listOf("a", "about", "above", "actually", "after", "again", "against", "all", "almost", "also", "although", "always", "am", "an", "and", "any", "are", "as", "at", "be", "became", "become", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can", "could", "did", "do", "does", "doing", "down", "during", "each", "either", "else", "few", "for", "from", "further", "had", "has", "have", "having", "he", "hence", "her", "here", "hers", "herself", "him", "himself", "his", "how", "I", "if", "in", "into", "is", "it", "its", "itself", "just", "may", "maybe", "me", "might", "mine", "more", "most", "must", "my", "myself", "neither", "nor", "not", "of", "oh", "on", "once", "only", "ok", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she", "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "we", "were", "what", "when", "whenever", "where", "whereas", "wherever", "whether", "which", "while", "who", "whoever", "whose", "whom", "why", "will", "with", "within", "would", "yes", "yet", "you", "your", "yours", "yourself", "yourselves")
 
-
-        var input = args[0].split("\\s".toRegex())
+        var input = stem(arg)
+            .split("\\s".toRegex())
 
         var freqMap = mutableMapOf<String, Int>()
+
         var total = 0
 
         // Count words
@@ -81,10 +87,10 @@ class KeywordExtractor : BaseFragment() {
 
         pressenceList.sortBy { it.second }
         pressenceList.reverse()
-        println(pressenceList)
+        return pressenceList
     }
 
-    fun actualImplementation(text: String){
+    /*fun actualImplementation(text: String): kotlin.collections.MutableList<Result> {
 
         // Establish general averages
         val avgTotal = 588089694315
@@ -125,6 +131,6 @@ class KeywordExtractor : BaseFragment() {
         relativeFreqList.sortBy { it.second }
         relativeFreqList.reverse()
         Log.d("litdao", relativeFreqList.toString())
-        //return sorted to be implemented in android studio
-    }
+        return relativeFreqList
+    }*/
 }
