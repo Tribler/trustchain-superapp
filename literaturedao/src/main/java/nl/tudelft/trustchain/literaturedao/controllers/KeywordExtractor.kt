@@ -16,21 +16,14 @@ class KeywordExtractor : LiteratureDaoActivity() {
     fun instantiateAvgFreqMap(csv: BufferedReader): Map<String, Long>{
 
         var res = mutableMapOf<String, Long>()
-        Log.d("litdao", "1")
-        val asset = getAssets().open("stemmed_freqs.csv")
-        Log.d("litdao", "2")
-        val reader = BufferedReader(InputStreamReader(asset))
-        Log.d("litdao", "3")
 
+        val reader = csv
         var line : String
         while (reader.readLine().also { line = it } != null){
             val key = line.split(",".toRegex())[0]
             val num = line.split(",".toRegex())[1].toLong()
             res[key] = num
         }
-
-
-
         return res
     }
 

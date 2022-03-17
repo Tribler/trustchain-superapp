@@ -4,7 +4,9 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
+import java.io.BufferedReader
 import java.io.InputStream
+import java.io.InputStreamReader
 
 open class LiteratureDaoActivity : BaseActivity() {
     override val navigationGraph: Int = R.navigation.nav_literaturedao
@@ -19,14 +21,26 @@ open class LiteratureDaoActivity : BaseActivity() {
         var i = 1
         while (i < 2){
             val stream: InputStream = getAssets().open(i.toString() + ".pdf")
+            //val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+            //val result: String
             val result = KeywordExtractor()
-                .actualImplementation(pdfController
-                    .stripText(stream))
-                .toString()
-            /*val result = KeywordExtractor()
                 .quikFix(pdfController
                     .stripText(stream))
-                .toString()*/
+                .toString()
+            /*
+            if (csv != null){
+                val reader = BufferedReader(InputStreamReader(csv))
+                val result = KeywordExtractor()
+                    .actualImplementation(pdfController
+                        .stripText(stream), reader)
+                    .toString()
+            } else {
+                val result = KeywordExtractor()
+                    .quikFix(pdfController
+                        .stripText(stream))
+                    .toString()
+            }*/
+
             Log.e("litdao", "litdao: " + result)
             i += 1
         }
