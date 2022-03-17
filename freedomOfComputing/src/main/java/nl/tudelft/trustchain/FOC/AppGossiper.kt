@@ -71,7 +71,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
             if (demoCommunity != null) {
                 randomlyShareFiles(demoCommunity)
             }
-            delay(60000)
+            delay(10000)
         }
     }
 
@@ -86,7 +86,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
                     var magnetLink = payload.message.substringAfter("FOC:")
                     val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
                         .substringBefore("&dn=")
-                    if(torrentInfos.none { it.infoHash().toString() == torrentHash })
+                    if (torrentInfos.none { it.infoHash().toString() == torrentHash })
                         getMagnetLink(magnetLink)
                 }
             }
@@ -113,11 +113,14 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
         torrentInfos.shuffle()
         val toSeed: ArrayList<TorrentInfo> = ArrayList(torrentInfos.take(maxTorrentThreads))
         torrentHandles.forEach { torrentHandle ->
-            if(toSeed.any { it.infoHash() ==  torrentHandle.infoHash()}) {
+            if (toSeed.any { it.infoHash() == torrentHandle.infoHash() }) {
                 val dup = toSeed.find { it.infoHash() == torrentHandle.infoHash() }
                 toSeed.remove(dup)
-            }
-            else
+                if (dup != null) {
+                    val magnet_link = "magnet:?xt=urn:btih:" + dup.infoHash() + "&dn=" + dup.name()
+                    demoCommunity.informAboutTorrent(magnet_link)
+                }
+            } else
                 torrentHandle.pause()
         }
         toSeed.forEach {

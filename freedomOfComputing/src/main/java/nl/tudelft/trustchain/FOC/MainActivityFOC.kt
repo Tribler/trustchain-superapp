@@ -45,8 +45,7 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath + "/Download"), s, applicationContext)
-//        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
+        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
         appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
