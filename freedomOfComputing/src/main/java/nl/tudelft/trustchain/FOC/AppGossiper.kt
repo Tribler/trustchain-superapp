@@ -20,8 +20,7 @@ import java.util.concurrent.CountDownLatch
 import kotlin.collections.ArrayList
 
 /**
- * This is a service that runs in the background, also when the Android app is closed. It gossips
- * data about apps with a few random peers every couple seconds
+ * This gossips data about apps with a few random peers every couple seconds
  */
 
 lateinit var appGossiperInstance: AppGossiper
