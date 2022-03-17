@@ -71,8 +71,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
             if (demoCommunity != null) {
                 randomlyShareFiles(demoCommunity)
             }
-//            delay(60000)
-            delay(20000)
+            delay(60000)
         }
     }
 
