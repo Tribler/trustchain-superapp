@@ -19,7 +19,8 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="25dp">
+            android:padding="25dp"
+            android:background="@color/design_default_color_background">
 
 <!--            <ImageView-->
 <!--                android:id="@+id/imageView2"-->
