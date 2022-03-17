@@ -97,8 +97,20 @@ class MainActivityFOC : AppCompatActivity() {
         requestStoragePermission()
     }
 
+    @Suppress("deprecation")
     fun selectNewFileToUpload() {
         val intent = Intent(this, FileUploadActivity::class.java)
+
+        val listView = findViewById<ListView>(R.id.uploadList)
+        val dir = Environment.getExternalStorageDirectory().absolutePath + "/Download"
+        val listFileNames = arrayListOf<String>()
+        File(dir).walk().forEach {
+            listFileNames.add(it.toString())
+        }
+        listFileNames.add("test file")
+        val adapter = ArrayAdapter(this, android.R.layout.activity_list_item, listFileNames)
+        listView.adapter = adapter
+
 
     //        val apkName: String?
 //        val inputText = enterJar.text.toString()

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                               xmlns:app="http://schemas.android.com/apk/res-auto"
+                               android:layout_width="match_parent"
+                               android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools"
+                               app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
 
     <ScrollView
@@ -182,6 +182,14 @@
 
 
     </ScrollView>
+
+    <ListView
+        android:id="@+id/uploadList"
+        android:layout_width="409dp"
+        android:layout_height="729dp" tools:layout_editor_absoluteX="1dp" tools:layout_editor_absoluteY="1dp"/>
+
+
+
 
 
 </android.widget.RelativeLayout>
