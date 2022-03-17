@@ -17,13 +17,16 @@ open class LiteratureDaoActivity : BaseActivity() {
         PDFBoxResourceLoader.init(getApplicationContext());
         var pdfController = PdfController()
         var i = 1
-        while (i < 12){
+        while (i < 2){
             val stream: InputStream = getAssets().open(i.toString() + ".pdf")
             val result = KeywordExtractor()
-                .quikFix(pdfController
+                .actualImplementation(pdfController
                     .stripText(stream))
                 .toString()
-
+            /*val result = KeywordExtractor()
+                .quikFix(pdfController
+                    .stripText(stream))
+                .toString()*/
             Log.e("litdao", "litdao: " + result)
             i += 1
         }
