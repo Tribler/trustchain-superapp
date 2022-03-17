@@ -2,12 +2,16 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_literaturedao"
-    app:startDestination="@id/LiteratureOverview">
-
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/MyLiteratureFragment">
     <fragment
-        android:id="@+id/LiteratureOverview"
-        android:name="nl.tudelft.trustchain.literaturedao.LiteratureOverview"
-        android:label="LiteratureOverview"
-        tools:layout="@layout/fragment_literature_overview" />
+        android:id="@+id/MyLiteratureFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.MyLiteratureFragment"
+        android:label="My Literature"
+        tools:layout="@layout/fragment_literature_add" />
+    <fragment
+        android:id="@+id/LibraryFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.LibraryFragment"
+        android:label="Library"
+        tools:layout="@layout/fragment_library" />
 </navigation>
