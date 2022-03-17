@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch
 import kotlin.collections.ArrayList
 
 /**
- * This gossips data about 10 random apps with a peers every 10 seconds and fetches new apps every 20 seconds
+ * This gossips data about 5 random apps with a peers every 10 seconds and fetches new apps every 20 seconds
  */
 
 lateinit var appGossiperInstance: AppGossiper
