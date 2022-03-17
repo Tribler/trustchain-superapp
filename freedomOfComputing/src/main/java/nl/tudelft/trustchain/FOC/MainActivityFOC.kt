@@ -20,6 +20,7 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import nl.tudelft.ipv8.android.IPv8Android
@@ -44,6 +45,9 @@ class MainActivityFOC : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
+        fab.setOnClickListener { _ ->
+            printToast("clicked!")
+        }
 
 //        initializeTorrentSession()
 //
@@ -91,6 +95,26 @@ class MainActivityFOC : AppCompatActivity() {
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
+    }
+
+    fun selectNewFileToUpload() {
+        val intent = Intent(this, FileUploadActivity::class.java)
+
+    //        val apkName: String?
+//        val inputText = enterJar.text.toString()
+//        if (inputText == "") {
+//            printToast("No apk/jar name given, using default")
+//            apkName = "demoapp.apk"
+//        } else apkName = inputText
+//        try {
+//            val intent = Intent(this, ExecutionActivity::class.java)
+//            // uncomment if you want to read from the actual phone storage (needs "write" permission)
+//            intent.putExtra(
+//                "fileName",
+//                Environment.getExternalStorageDirectory().absolutePath + "/" + apkName
+//            )
+//            // intent.putExtra("fileName", apkName);
+//            startActivity(intent)
     }
 
     val MY_PERMISSIONS_REQUEST = 0

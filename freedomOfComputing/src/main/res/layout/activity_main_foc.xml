@@ -96,7 +96,7 @@
 
     <include layout="@layout/content_main_activity_foc" />
 
-    <include layout="@layout/fragment_download" />
+<!--    <include layout="@layout/fragment_download" />-->
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
