@@ -215,6 +215,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
             // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
             // uncomment if you want to write to the actual phone storage (needs "write" permission)
             sessionManager.download(ti, saveDir)
+            sessionActive = false
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
         }
