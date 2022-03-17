@@ -12,7 +12,6 @@ import android.widget.ArrayAdapter
 import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -46,7 +45,8 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
+        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath + "/Download"), s, applicationContext)
+//        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
         appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
@@ -130,7 +130,6 @@ class MainActivityFOC : AppCompatActivity() {
                 return null
             }
 
-            @RequiresApi(Build.VERSION_CODES.N)
             override fun alert(alert: Alert<*>) {
                 val type = alert.type()
 
