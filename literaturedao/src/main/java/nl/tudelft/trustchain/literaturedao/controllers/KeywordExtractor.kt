@@ -12,14 +12,12 @@ import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 class KeywordExtractor : LiteratureDaoActivity() {
 
     // Function that loads the acerage stemmed word occurance
-    /*
-    fun instantiateAvgFreqMap(): Map<String, Long>{
+
+    fun instantiateAvgFreqMap(csv: BufferedReader): Map<String, Long>{
 
         var res = mutableMapOf<String, Long>()
-        //android.content.Context.getAssets()
         Log.d("litdao", "1")
-        val asset = assets.open("stemmed_freqs.csv")
-        //val is = androidContext()
+        val asset = getAssets().open("stemmed_freqs.csv")
         Log.d("litdao", "2")
         val reader = BufferedReader(InputStreamReader(asset))
         Log.d("litdao", "3")
@@ -34,7 +32,7 @@ class KeywordExtractor : LiteratureDaoActivity() {
 
 
         return res
-    }*/
+    }
 
     // Custom data type in order to be able to sort
     class Result constructor(word: String, relativeFreq: Double) {
@@ -90,11 +88,11 @@ class KeywordExtractor : LiteratureDaoActivity() {
         return pressenceList
     }
 
-    /*fun actualImplementation(text: String): kotlin.collections.MutableList<Result> {
+    fun actualImplementation(text: String, csv: BufferedReader): kotlin.collections.MutableList<Result> {
 
         // Establish general averages
         val avgTotal = 588089694315
-        val avgFreqMap = instantiateAvgFreqMap()
+        val avgFreqMap = instantiateAvgFreqMap(csv)
 
         // Append a word to the input as the used library forgets about the last word
         // Stem the input using the snowball library and split into list of words
@@ -132,5 +130,5 @@ class KeywordExtractor : LiteratureDaoActivity() {
         relativeFreqList.reverse()
         Log.d("litdao", relativeFreqList.toString())
         return relativeFreqList
-    }*/
+    }
 }
