@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.FOC
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -11,6 +12,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -37,11 +39,16 @@ class MainActivityFOC : AppCompatActivity() {
     private var torrentList = ArrayList<String>() // Creating an empty arraylist
 
     private lateinit var adapterLV: ArrayAdapter<String>
+    private lateinit var appGossiper: AppGossiper
 
     private var uploadingTorrent = ""
 
+    @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath + "/Download"), s, applicationContext)
+//        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
+        appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
 
@@ -124,6 +131,7 @@ class MainActivityFOC : AppCompatActivity() {
                 return null
             }
 
+            @RequiresApi(Build.VERSION_CODES.N)
             override fun alert(alert: Alert<*>) {
                 val type = alert.type()
 
@@ -164,9 +172,15 @@ class MainActivityFOC : AppCompatActivity() {
         // Handling of the case where the user is already downloading the
         // same or another torrent
 
+        if(appGossiper.sessionActive && !sessionActive) {
+            printToast("The torrent session is busy fetching files, please try again later")
+            return
+        }
+
         if (sessionActive) {
             s.stop()
             sessionActive = false
+            appGossiper.sessionActive = false
             downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
             if (downloadMagnetButton.text.equals("STOP")) {
                 downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
@@ -245,6 +259,7 @@ class MainActivityFOC : AppCompatActivity() {
 
             val ti = TorrentInfo.bdecode(data)
             sessionActive = true
+            appGossiper.sessionActive = true
             downloadMagnetButton.setText("STOP")
             // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
             // uncomment if you want to write to the actual phone storage (needs "write" permission)
@@ -262,11 +277,18 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     fun getTorrent(uploadHappening: Boolean) {
 
+
+        if(appGossiper.sessionActive && !sessionActive) {
+            printToast("The torrent session is busy fetching files, please try again later")
+            return
+        }
+
         // Handling of the case where the user is already downloading the
         // same or another torrent
         if (sessionActive) {
             s.stop()
             sessionActive = false
+            appGossiper.sessionActive = false
             downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
             if (downloadTorrentButton.text.equals("STOP")) {
                 downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
@@ -316,6 +338,7 @@ class MainActivityFOC : AppCompatActivity() {
         Log.i("personal", "Storage of downloads: " + torrentFile.parentFile!!.toString())
 
         sessionActive = true
+        appGossiper.sessionActive = true
         if (!uploadHappening)
             downloadTorrentButton.setText("STOP")
         // uncomment if you want to write to the actual phone storage (needs "write" permission)
