@@ -1,33 +1,19 @@
 package nl.tudelft.trustchain.FOC
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.util.Log
-import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.provider.OpenableColumns
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import com.frostwire.jlibtorrent.swig.*
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.content_main_activity_foc.*
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.common.MyMessage
-import java.io.*
-import java.nio.channels.FileChannel
 import java.util.*
 
 class MainActivityFOC : AppCompatActivity() {
@@ -46,7 +32,7 @@ class MainActivityFOC : AppCompatActivity() {
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
         fab.setOnClickListener { _ ->
-            printToast("clicked!")
+            selectNewFileToUpload()
         }
 
 //        initializeTorrentSession()
@@ -97,36 +83,52 @@ class MainActivityFOC : AppCompatActivity() {
         requestStoragePermission()
     }
 
+    private var requestCode = 1
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        val torrentList = findViewById<LinearLayout>(R.id.torrentList)
+
+        if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                return
+            }
+            val button = Button(this)
+            button.text = getFileName(data.data!!)
+            button.isAllCaps = false
+            torrentList.addView(button)
+            printToast("File uploaded!")
+        }
+    }
+
+    private fun getFileName(uri: Uri): String? {
+        var result: String? = null
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            }
+        } finally {
+            cursor?.close()
+        }
+
+        if (result == null) {
+            result = uri.path
+            val cut = result!!.lastIndexOf('/')
+            if (cut != -1) {
+                result = result.substring(cut + 1)
+            }
+        }
+        return result
+    }
+
     @Suppress("deprecation")
     fun selectNewFileToUpload() {
-        val intent = Intent(this, FileUploadActivity::class.java)
-
-        val listView = findViewById<ListView>(R.id.uploadList)
-        val dir = Environment.getExternalStorageDirectory().absolutePath + "/Download"
-        val listFileNames = arrayListOf<String>()
-        File(dir).walk().forEach {
-            listFileNames.add(it.toString())
-        }
-        listFileNames.add("test file")
-        val adapter = ArrayAdapter(this, android.R.layout.activity_list_item, listFileNames)
-        listView.adapter = adapter
-
-
-    //        val apkName: String?
-//        val inputText = enterJar.text.toString()
-//        if (inputText == "") {
-//            printToast("No apk/jar name given, using default")
-//            apkName = "demoapp.apk"
-//        } else apkName = inputText
-//        try {
-//            val intent = Intent(this, ExecutionActivity::class.java)
-//            // uncomment if you want to read from the actual phone storage (needs "write" permission)
-//            intent.putExtra(
-//                "fileName",
-//                Environment.getExternalStorageDirectory().absolutePath + "/" + apkName
-//            )
-//            // intent.putExtra("fileName", apkName);
-//            startActivity(intent)
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.setType("*/*")
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        startActivityForResult(intent, requestCode)
     }
 
     val MY_PERMISSIONS_REQUEST = 0
