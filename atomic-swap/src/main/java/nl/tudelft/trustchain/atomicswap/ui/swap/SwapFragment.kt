@@ -156,9 +156,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                         )
 
                         WalletHolder.monitor.addClaimedTransactionListener(TransactionMonitorEntry(transaction.txId.toString(), completeMessage.offerId, peer))
-                        print("Mariana")
-                        val dd = transaction.bitcoinSerialize().toHex()
-                        print(dd)
                         WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                     }
                 }

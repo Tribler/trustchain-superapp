@@ -169,7 +169,7 @@ class BitcoinSwap {
             secretUsed = secret,
             amount = amountInCoins,
             relativeLock = relativeLock,
-            initiateTxId = sendRequest.tx.txId.bytes,
+            initiateTxId = sendRequest.tx.bitcoinSerialize(),
             counterpartyKey = claimPubKey,
             offerId = offerId
         )
