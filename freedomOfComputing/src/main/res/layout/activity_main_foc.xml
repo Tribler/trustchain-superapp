@@ -83,12 +83,11 @@
                 android:textColorHint="#8f8c83" />
 
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/torrentCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:paddingRight="10dp"
-                android:text="@string/numberOfTorrents"
+                android:paddingEnd="10dp"
                 android:textColor="#8f8c83" />
         </androidx.appcompat.widget.Toolbar>
 

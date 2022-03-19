@@ -22,7 +22,7 @@ class MainActivityFOC : AppCompatActivity() {
     val s = SessionManager()
     var sessionActive = false
 
-    private var torrentList = ArrayList<String>() // Creating an empty arraylist
+    private var torrentList = ArrayList<Button>() // Creating an empty arraylist
 
     private lateinit var adapterLV: ArrayAdapter<String>
 
@@ -35,6 +35,9 @@ class MainActivityFOC : AppCompatActivity() {
         fab.setOnClickListener { _ ->
             selectNewFileToUpload()
         }
+
+        val torrentCountString = torrentList.size.toString() + " torrent(s)"
+        torrentCount.text = torrentCountString
 
 //        initializeTorrentSession()
 //
@@ -84,6 +87,13 @@ class MainActivityFOC : AppCompatActivity() {
         requestStoragePermission()
     }
 
+    private fun updateTorrentCount(torrent: Button) {
+        torrentList.add(torrent)
+        val torrentCountString = torrentList.size.toString() + " torrent(s)"
+
+        torrentCount.text = torrentCountString
+    }
+
     private var requestCode = 1
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
@@ -95,6 +105,7 @@ class MainActivityFOC : AppCompatActivity() {
             if (data == null) {
                 return
             }
+            // Create a new button
             val button = Button(this)
             val fileName = getFileName(data.data!!)
             button.text = fileName
@@ -103,6 +114,7 @@ class MainActivityFOC : AppCompatActivity() {
             button.setOnClickListener {
                 loadDynamicCode(fileName)
             }
+            updateTorrentCount(button)
             printToast("File uploaded!")
         }
     }
