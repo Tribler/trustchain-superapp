@@ -42,7 +42,7 @@
                 </ImageButton>
 
                 <TextView
-                    android:id="@+id/cart_badge"
+                    android:id="@+id/download_count"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:layout_gravity="end|top"
@@ -52,7 +52,7 @@
                     android:gravity="center"
                     android:padding="3dp"
                     android:textColor="@android:color/white"
-                    android:text="2"
+                    android:text="@string/downloadsInProgress"
                     android:textSize="10sp"/>
 
             </FrameLayout>
@@ -88,6 +88,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
+                android:text="@string/torrentCount"
                 android:paddingEnd="10dp"
                 android:textColor="#8f8c83" />
         </androidx.appcompat.widget.Toolbar>
