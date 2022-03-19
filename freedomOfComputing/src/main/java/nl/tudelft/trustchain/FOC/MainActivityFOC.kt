@@ -9,12 +9,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.frostwire.jlibtorrent.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_download.*
 import java.util.*
 
 class MainActivityFOC : AppCompatActivity() {
@@ -28,12 +32,19 @@ class MainActivityFOC : AppCompatActivity() {
 
     private var uploadingTorrent = ""
 
+    private var progressVisible = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
         fab.setOnClickListener { _ ->
             selectNewFileToUpload()
+        }
+
+        popUp.visibility = View.GONE
+        download_progress.setOnClickListener{
+            toggleProgressBar(popUp)
         }
 
         val torrentCountString = torrentList.size.toString() + " torrent(s)"
@@ -85,6 +96,15 @@ class MainActivityFOC : AppCompatActivity() {
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
+    }
+
+    private fun toggleProgressBar(progress: RelativeLayout) {
+        if (progressVisible) {
+            progress.visibility = View.GONE
+        } else {
+            progress.visibility = View.VISIBLE
+        }
+        progressVisible = !progressVisible
     }
 
     private fun updateTorrentCount(torrent: Button) {
