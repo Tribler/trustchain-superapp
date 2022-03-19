@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.OpenableColumns
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -95,14 +96,34 @@ class MainActivityFOC : AppCompatActivity() {
                 return
             }
             val button = Button(this)
-            button.text = getFileName(data.data!!)
+            val fileName = getFileName(data.data!!)
+            button.text = fileName
             button.isAllCaps = false
             torrentList.addView(button)
+            button.setOnClickListener {
+                loadDynamicCode(fileName)
+            }
             printToast("File uploaded!")
         }
     }
 
-    private fun getFileName(uri: Uri): String? {
+    @Suppress("deprecation")
+    fun loadDynamicCode(fileName: String) {
+        try {
+            val intent = Intent(this, ExecutionActivity::class.java)
+            // uncomment if you want to read from the actual phone storage (needs "write" permission)
+            intent.putExtra(
+                "fileName",
+                Environment.getExternalStorageDirectory().absolutePath + "/Download/" + fileName
+            )
+//             intent.putExtra("fileName", fileName)
+            startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun getFileName(uri: Uri): String {
         var result: String? = null
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         try {
@@ -126,7 +147,7 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     fun selectNewFileToUpload() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.setType("*/*")
+        intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
         startActivityForResult(intent, requestCode)
     }
@@ -409,27 +430,6 @@ class MainActivityFOC : AppCompatActivity() {
 //     * The name of the class to be loaded, and the name of the
 //     * function to execute, have to be known beforehand
 //     */
-//    @Suppress("deprecation")
-//    fun loadDynamicCode() {
-//        val apkName: String?
-//        val inputText = enterJar.text.toString()
-//        if (inputText == "") {
-//            printToast("No apk/jar name given, using default")
-//            apkName = "demoapp.apk"
-//        } else apkName = inputText
-//        try {
-//            val intent = Intent(this, ExecutionActivity::class.java)
-//            // uncomment if you want to read from the actual phone storage (needs "write" permission)
-//            intent.putExtra(
-//                "fileName",
-//                Environment.getExternalStorageDirectory().absolutePath + "/" + apkName
-//            )
-//            // intent.putExtra("fileName", apkName);
-//            startActivity(intent)
-//        } catch (e: Exception) {
-//            e.printStackTrace()
-//        }
-//    }
 //
     /*
     Creates a torrent from a file given as input
