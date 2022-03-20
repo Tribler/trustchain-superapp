@@ -224,6 +224,16 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.show()
             }
         }
+
+        WalletHolder.transationListener.setOnSecretRevealed {
+            lifecycleScope.launch(Dispatchers.Main) {
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("The secret is revealed")
+                alertDialogBuilder.setMessage(it.toHex())
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
+            }
+        }
     }
 
     private fun loadNetworkInfo() {
