@@ -57,14 +57,14 @@ public class AtomicSwapContract extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> addSwap(String recipient, byte[] hashValue, BigInteger relativeLock) {
+    public RemoteFunctionCall<TransactionReceipt> addSwap(String recipient, byte[] hashValue, BigInteger relativeLock, BigInteger weiValue) {
         final Function function = new Function(
                 FUNC_ADDSWAP,
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, recipient),
                 new org.web3j.abi.datatypes.generated.Bytes32(hashValue),
                 new org.web3j.abi.datatypes.generated.Uint256(relativeLock)),
                 Collections.<TypeReference<?>>emptyList());
-        return executeRemoteCallTransaction(function);
+        return executeRemoteCallTransaction(function, weiValue);
     }
 
     public RemoteFunctionCall<TransactionReceipt> claim(byte[] preimage, byte[] hash) {
