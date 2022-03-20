@@ -205,7 +205,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                         alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
 
                             val addressToWatch = WalletHolder.bitcoinSwap.getAddresToBeWatched(it.offerId.toLong(), WalletHolder.bitcoinWallet)
-                            WalletHolder.bitcoinWallet.addWatchedAddress(addressToWatch)
+                            WalletHolder.transationListener.addWatchedAddress(TransactionListenerEntry(addressToWatch, it.offerId))
 
                             val tx = WalletHolder.bitcoinWallet.getTransaction(Sha256Hash.wrap(it.transactionId))!!
                             atomicSwapCommunity.sendCompleteMessage(it.peer, it.offerId,tx.bitcoinSerialize().toHex())
@@ -225,11 +225,11 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
             }
         }
 
-        WalletHolder.transationListener.setOnSecretRevealed {
+        WalletHolder.transationListener.setOnSecretRevealed {secret, offerId ->
             lifecycleScope.launch(Dispatchers.Main) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
-                alertDialogBuilder.setTitle("The secret is revealed")
-                alertDialogBuilder.setMessage(it.toHex())
+                alertDialogBuilder.setTitle("The secret is revealed for trade " + offerId)
+                alertDialogBuilder.setMessage(secret.toHex())
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
             }
