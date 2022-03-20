@@ -23,9 +23,13 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
+import org.bitcoinj.core.Address
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.Transaction
+import org.bitcoinj.crypto.DeterministicKey
+import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
+import org.bitcoinj.wallet.Wallet
 import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
@@ -131,6 +135,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 alertDialogBuilder.setPositiveButton("Create my own transaction") { _, _ ->
                     WalletHolder.bitcoinSwap.updateRecipientSwapData(initiateMessage.offerId.toLong(), initiateMessage.hash.hexToBytes(), initiateMessage.publicKey.hexToBytes(), initiateMessage.txId.hexToBytes())
                     val transaction = WalletHolder.bitcoinSwap.createSwapTxForInitiator(initiateMessage.offerId.toLong(), initiateMessage.publicKey.hexToBytes(), WalletHolder.bitcoinWallet)
+
                     WalletHolder.monitor.addTransactionToRecipientListener(TransactionMonitorEntry(transaction.txId.toString(),initiateMessage.offerId, peer))
                     WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                 }
@@ -198,6 +203,10 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                         val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                         alertDialogBuilder.setTitle("You transaction is confirmed")
                         alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
+
+                            val addressToWatch = WalletHolder.bitcoinSwap.getAddresToBeWatched(it.offerId.toLong(), WalletHolder.bitcoinWallet)
+                            WalletHolder.bitcoinWallet.addWatchedAddress(addressToWatch)
+
                             val tx = WalletHolder.bitcoinWallet.getTransaction(Sha256Hash.wrap(it.transactionId))!!
                             atomicSwapCommunity.sendCompleteMessage(it.peer, it.offerId,tx.bitcoinSerialize().toHex())
                         }

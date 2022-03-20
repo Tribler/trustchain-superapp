@@ -294,6 +294,25 @@ class BitcoinSwap {
 
     }
 
+    fun getAddresToBeWatched(offerId: Long, wallet: Wallet): Address{
+        val details = when(val data = swapStorage[offerId]){
+            is SwapData.RecipientSwapData -> data
+            else -> error("We are not the recipient, Did you call the wrong function?")
+        }
+
+        val key = wallet.findKeyFromPubKey(details.keyUsed) ?: error("cannot get private key from pub key")// todo change this once we aren't dong btc<->btc
+
+        val swapScript = createSwapScript(
+            reclaimPubKey = key.pubKey,
+            claimPubKey = details.counterpartyKey ?: error("could not find counterparty key") ,
+            secretHash = details.hashUsed ?: error("could not find hash")
+        )
+
+        val scriptFromSwapScript = ScriptBuilder.createP2SHOutputScript(swapScript)
+
+        return scriptFromSwapScript.getToAddress(RegTestParams.get())
+    }
+
     /**
      * Creates a tx that claims the contract created by the recipient.
      */
