@@ -4,15 +4,12 @@ import nl.tudelft.trustchain.atomicswap.BitcoinSwap
 import nl.tudelft.trustchain.atomicswap.TransactionListener
 import nl.tudelft.trustchain.atomicswap.TransactionMonitor
 import nl.tudelft.trustchain.common.bitcoin.WalletService
-import okhttp3.internal.wait
-import org.bitcoinj.kits.WalletAppKit
-import org.bitcoinj.wallet.Wallet
 import java.net.InetAddress
 
 object WalletHolder {
     val walletAppKit = WalletService.getGlobalWallet()
     val bitcoinWallet = walletAppKit.wallet()
-    val monitor = TransactionMonitor(4)
+    val monitor = TransactionMonitor(6)
     val transationListener = TransactionListener()
     val bitcoinSwap = BitcoinSwap()
 
