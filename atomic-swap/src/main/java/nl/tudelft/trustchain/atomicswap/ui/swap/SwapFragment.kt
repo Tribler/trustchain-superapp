@@ -21,7 +21,6 @@ import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.atomicswap.databinding.FragmentPeersBinding
 import nl.tudelft.trustchain.atomicswap.ui.peers.AddressItem
 import nl.tudelft.trustchain.atomicswap.ui.peers.PeerItem
 import androidx.core.view.isVisible
@@ -137,8 +136,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                         "1"
                     )
                     // add a confidence listener
-                    WalletHolder.monitor.addTransactionToListener(
-                        TransactionMonitorEntry(
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionInitiator(
+                        TransactionConfidenceEntry(
                             transaction.txId.toString(),
                             accept.offerId,
                             peer
@@ -155,7 +154,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
             }
         }
 
-        WalletHolder.monitor.setOnTransactionConfirmed {
+        WalletHolder.swapTransactionConfidenceListener.setOnTransactionConfirmed {
 
             // extract data of the swap
             if (WalletHolder.bitcoinSwap.swapStorage.containsKey(it.offerId.toLong())) {
@@ -212,8 +211,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                         WalletHolder.bitcoinWallet
                     )
                     // add a listener on transaction
-                    WalletHolder.monitor.addTransactionToRecipientListener(
-                        TransactionMonitorEntry(
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionRecipient(
+                        TransactionConfidenceEntry(
                             transaction.txId.toString(),
                             initiateMessage.offerId,
                             peer
@@ -230,7 +229,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
             }
         }
 
-        WalletHolder.monitor.setOnTransactionRecipientConfirmed {
+        WalletHolder.swapTransactionConfidenceListener.setOnTransactionRecipientConfirmed {
             if (WalletHolder.bitcoinSwap.swapStorage.containsKey(it.offerId.toLong())) {
 
                 lifecycleScope.launch(Dispatchers.Main) {
@@ -243,7 +242,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                             it.offerId.toLong(),
                             WalletHolder.bitcoinWallet
                         )
-                        WalletHolder.transationListener.addWatchedAddress(
+                        WalletHolder.swapTransactionBroadcastListener.addWatchedAddress(
                             TransactionListenerEntry(
                                 addressToWatch,
                                 it.offerId,
@@ -287,8 +286,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                             WalletHolder.bitcoinWallet
                         )
 
-                        WalletHolder.monitor.addClaimedTransactionListener(
-                            TransactionMonitorEntry(
+                        WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
+                            TransactionConfidenceEntry(
                                 transaction.txId.toString(),
                                 completeMessage.offerId,
                                 peer
@@ -304,7 +303,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
             }
         }
 
-        WalletHolder.monitor.setOnClaimedConfirmed {
+        WalletHolder.swapTransactionConfidenceListener.setOnClaimedConfirmed {
             lifecycleScope.launch(Dispatchers.Main) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("You claim transaction is confirmed")
@@ -318,7 +317,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
 
         // BOB GETS NOTIFIED THAT ALICE CLAIMED THE MONEY AND REVEALED THE SECRET -> HE CLAIMS THE MONEY
-        WalletHolder.transationListener.setOnSecretRevealed { secret, offerId ->
+        WalletHolder.swapTransactionBroadcastListener.setOnSecretRevealed { secret, offerId ->
             lifecycleScope.launch(Dispatchers.Main) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
                 alertDialogBuilder.setTitle("The secret is revealed for trade " + offerId)
@@ -338,8 +337,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                             WalletHolder.bitcoinWallet
                         )
 
-                        WalletHolder.monitor.addClaimedTransactionListener(
-                            TransactionMonitorEntry(
+                        WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
+                            TransactionConfidenceEntry(
                                 claimTransaction.txId.toString(),
                                 offerId,
                                 null
