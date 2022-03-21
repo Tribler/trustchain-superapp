@@ -1,80 +1,144 @@
 package nl.tudelft.trustchain.atomicswap.swap.eth
 
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
+import nl.tudelft.trustchain.atomicswap.BitcoinSwap
+import nl.tudelft.trustchain.atomicswap.SwapData
+import org.bitcoinj.core.Coin
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
 import java.math.BigInteger
 import kotlin.random.Random
 
-class EthereumSwap(val web3j: Web3j,val credentials: Credentials, /*contractAddress: String = "todo"*/ ) {
-    var swapContract : AtomicSwapContract? = null //todo change thi
+sealed class EthSwapInfo {
+    abstract val amount : String
+    abstract val relativeLock : Int
 
+    /**
+     * The creator is the person who locks the funds in the contract.
+     */
+    data class CreatorInfo(
+        val ricipientAddress: String,
+        val secret: ByteArray,
+        val secretHash: ByteArray,
+        val txHash: ByteArray,
+        override val relativeLock: Int,
+        override val amount: String
+    ) : EthSwapInfo()
+
+    /**
+     * The recipient is the person who can claim the locked funds.
+     */
+    data class RecipientInfo(
+        val counterpartyAddress: String? = null,
+        val hashUsed: ByteArray? = null,
+        override val amount: String,
+        override val relativeLock: Int
+    ) : EthSwapInfo()
+}
+
+class EthereumSwap(
+    web3j: Web3j,
+    val credentials: Credentials,
+    contractAddress : String,
+    val relativeLock: Int = 6
+) {
+
+    val swapContract = AtomicSwapContract.load(contractAddress,web3j,credentials,DefaultGasProvider())
+
+
+    val swapStorage = mutableMapOf<Long, EthSwapInfo>()
 
     /**
      * Note that the contract requires that the secret size be 32 bytes
+     * @param claimAddress: Address of the recipient of the swap.
+     * @param amount: Amount of eth to lock in the swap.
+     * @return: tx hash. web3j can actually get a tx from its hash
      */
-    fun createSwap(): Pair<ByteArray, ByteArray> {
-        if(swapContract == null){
-            swapContract = AtomicSwapContract.deploy(web3j,credentials,DefaultGasProvider()).send()
-        }
+    fun createSwapForRecipient(
+        offerId: Long,
+        claimAddress: String,
+        amount: String
+    ): EthSwapInfo.CreatorInfo {
 
         val secret = Random.nextBytes(32)
         val secretHash = sha256(secret)
 
-        val receipt = swapContract!!.addSwap(credentials.address,secretHash, BigInteger.valueOf(10),
-            Convert.toWei("1",Convert.Unit.ETHER).toBigInteger())
-            .send()
+        val tx = swapContract.addSwap(
+            credentials.address, secretHash, BigInteger.valueOf(10),
+            Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
+        ).send()
 
-        val getSwap = getSwap(secretHash)
-
-        println("""
-            ethswapreceipt
-            ${receipt.gasUsed}
-        """.trimIndent())
 
         println("""
-            ethswap
+            ETHSWAP
 
-            recipient : ${getSwap.recipient}
-            amount : ${getSwap.amount}
-            reclaim height : ${getSwap.reclaim_height}
-            sender : ${getSwap.reclaimer}
-
+            ${tx.transactionHash}
         """.trimIndent())
 
-        return secretHash to secret
+
+        val swapData = EthSwapInfo.CreatorInfo(
+            ricipientAddress = claimAddress,
+            secret = secret,
+            secretHash = secretHash,
+            amount = amount,
+            relativeLock = relativeLock,
+            // hash prob starts with "0x" or not (?)
+            txHash = tx.transactionHash.removePrefix("0x").hexToBytes()
+        )
+        swapStorage[offerId] = swapData
+
+        return swapData
     }
 
+
+    /**
+     * query the contract for the swap info of the given hash.
+     */
     fun getSwap(hash: ByteArray): AtomicSwapContract.Swap {
-        return swapContract!!.getSwap(hash)
+        return swapContract.getSwap(hash)
             .send()
     }
 
     /**
-     * Reclaim the swap represented by the hash.
+     * Claim the swap represented by the hash.
      * @param hash: The hash of the secret value. While this is not necessary it helps in checking
      * that the hash and secret value correspond to each other.
      * @param secret: The secret needed to claim the swap.
      */
-    fun claimSwap(hash: ByteArray,secret:ByteArray){
-        require(sha256(secret).contentEquals(hash)) { "hash should match the secret" }
-        val getSwap = getSwap(hash)
+    fun claimSwap(offerId: Long,secret:ByteArray): TransactionReceipt {
+        val swapInfo = when(val info = swapStorage[offerId]){
+            is EthSwapInfo.RecipientInfo -> info
+            null -> error("this trade is not known to us.")
+            is EthSwapInfo.CreatorInfo -> error("only the recipient can claim.")
+        }
+        require(sha256(secret).contentEquals(swapInfo.hashUsed)) { "hash should match the secret" }
 
-        println("""
-            ethswap
+        return swapContract.claim(secret, swapInfo.hashUsed).send()
+    }
 
-            recipient : ${getSwap.recipient}
-            amount : ${getSwap.amount}
-            reclaim height : ${getSwap.reclaim_height}
-            sender : ${getSwap.reclaimer}
+    /**
+     * Used when we are accepting an offer.
+     */
+    fun addInitialRecipientSwapdata(offerId: Long,amount: String) {
+        swapStorage[offerId] = EthSwapInfo.RecipientInfo(
+            amount = amount,
+            relativeLock = relativeLock
+        )
+    }
 
-        """.trimIndent())
-        println("me:${credentials.address}")
-
-        println("current height : ${web3j.ethBlockNumber().send().blockNumber}")
-        swapContract!!.claim(secret,hash).send()
+    /**
+     * Add the secret hash to info of the swap.
+     */
+    fun updateRecipientSwapdata(offerId: Long,secretHash:ByteArray){
+        swapStorage[offerId] = when(val info = swapStorage[offerId]){
+            is EthSwapInfo.RecipientInfo -> info.copy(hashUsed = secretHash)
+            null -> error("This offer is not known to us.")
+            else -> error("We are not the recipient in this trade.")
+        }
     }
 
     /**
@@ -82,22 +146,14 @@ class EthereumSwap(val web3j: Web3j,val credentials: Credentials, /*contractAddr
      *
      * Todo: check that we are at the reclaim height (?)
      */
-    fun reclaimSwap(hash: ByteArray){
-        val getSwap = getSwap(hash)
-
-        println("""
-            ethswap
-
-            recipient : ${getSwap.recipient}
-            amount : ${getSwap.amount}
-            reclaim height : ${getSwap.reclaim_height}
-            sender : ${getSwap.reclaimer}
-
-        """.trimIndent())
-        println("me:${credentials.address}")
-
-        println("current height : ${web3j.ethBlockNumber().send().blockNumber}")
-        swapContract!!.reclaim(hash).send()
+    fun reclaimSwap(offerId: Long): TransactionReceipt {
+//        val getSwap = getSwap(hash)
+        val swapInfo = when(val info = swapStorage[offerId]){
+            is EthSwapInfo.CreatorInfo -> info
+            null -> error("This offer is not known to us.")
+            else -> error("The recipient cannot reclaim")
+        }
+        return swapContract.reclaim(swapInfo.secretHash).send()
     }
 
 
