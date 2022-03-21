@@ -43,11 +43,11 @@ contract AtomicSwap {
 	// claim a swap if the hashed preimage is equal to the hash.
 	function claim(bytes32 preimage, bytes32 hash) public {
 		Swap memory swap;
+		swap = swaps[hash];
 		if (sha256(abi.encodePacked(preimage)) == hash) {
 			if (swap.recipient != msg.sender) {
 				revert();
 			}
-			swap = swaps[hash];
 			payable(swap.recipient).transfer(swap.amount);
 			delete swaps[hash];
 		} else {
