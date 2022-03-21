@@ -97,14 +97,14 @@ class AtomicSwapCommunity : Community() {
 
 
     // Function for sending messages
-    fun broadcastTradeOffer(offerId: Int, amount: Double) {
+    fun broadcastTradeOffer(offerId: Int, fromCoin: String, toCoin: String, fromAmount: String, toAmount: String) {
         for (peer in getPeers()) {
             val packet = serializePacket(
                 Companion.BROADCAST_TRADE_MESSAGE_ID, TradeMessage(offerId.toString(),
-                    TradeConstants.BITCOIN,
-                    TradeConstants.BITCOIN,
-                    amount.toString(),
-                    amount.toString()))
+                    fromCoin,
+                    toCoin,
+                    fromAmount,
+                    toAmount))
             send(peer.address, packet)
         }
     }
