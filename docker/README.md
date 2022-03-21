@@ -42,12 +42,24 @@ docker exec -u bitcoin trustchain-superapp-bitcoin-node bitcoin-cli -regtest get
 In order to send certain amount of Bitcoins to the address `<ADDR>`, execute:
 
 ```shell
+./add_bitcoin.sh <ADDR>
+```
+
+or
+
+```shell
 docker exec -u bitcoin trustchain-superapp-bitcoin-node bitcoin-cli -regtest generatetoaddress 100 '<ADDR>'
 ```
 
 ## Working with the Ethereum node
 
 In order to send 0.05 ETH to the address `<ADDR>`, execute:
+
+```shell
+./add_ethereum.sh <ADDR>
+```
+
+or
 
 ```shell
 docker exec trustchain-superapp-ethereum-node geth attach /tmp/geth.ipc --exec 'eth.sendTransaction({from:eth.coinbase, to: "<ADDR>", value: web3.toWei(0.05, "ether")})'
