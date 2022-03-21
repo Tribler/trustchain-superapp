@@ -22,6 +22,9 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.eurotoken.R
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.IOException
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
@@ -51,6 +54,9 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
         setHasOptionsMenu(true)
 
+        val map = loadTrustScores()
+        Toast.makeText(requireContext(), "Loaded map!" + map.getValue("fe75ca18bcbbc74d734a8df180de709afb3121c738c0cc27bbc42cef4c23435bef692195773c286207c2a3ffe855c34a988ea106be5d30f9f560ef9a3bf20af771fafdb6a4683e69b7e6"), Toast.LENGTH_LONG).show()
+
         lifecycleScope.launchWhenResumed {
         }
     }
@@ -65,6 +71,19 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length);
         player.prepare();
         player.start();
+    }
+
+    private fun loadTrustScores(): Map<String, *> {
+        lateinit var jsonString: String
+        try {
+            val fd = activity?.assets?.open("trust_scores.json")?:throw IOException()
+            jsonString = fd.bufferedReader().use{it.readText()}
+        } catch (ioException: IOException) {
+            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
+        }
+
+        val jsonObj = JSONObject(jsonString)
+        return jsonObj.toMap()
     }
 
 
@@ -152,4 +171,18 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
     }
 
 
+}
+
+private fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
+    when (val value = this[it])
+    {
+        is JSONArray ->
+        {
+            val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
+            JSONObject(map).toMap().values.toList()
+        }
+        is JSONObject -> value.toMap()
+        JSONObject.NULL -> null
+        else            -> value
+    }
 }
