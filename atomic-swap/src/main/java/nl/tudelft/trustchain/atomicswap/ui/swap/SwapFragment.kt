@@ -203,7 +203,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                     alertDialogBuilder.setTitle("You transaction is confirmed")
                     alertDialogBuilder.setPositiveButton("Notify partner") { _, _ ->
 
-                        val addressToWatch = WalletHolder.bitcoinSwap.getAddresToBeWatched(
+                        val (addressToWatch, script) = WalletHolder.bitcoinSwap.getAddresToBeWatched(
                             it.offerId.toLong(),
                             WalletHolder.bitcoinWallet
                         )
@@ -212,7 +212,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                             TransactionListenerEntry(
                                 addressToWatch,
                                 it.offerId,
-                                it.peer
+                                script
                             )
                         )
 
@@ -281,10 +281,10 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 
 
         // BOB GETS NOTIFIED THAT ALICE CLAIMED THE MONEY AND REVEALED THE SECRET -> HE CLAIMS THE MONEY
-        WalletHolder.transationListener.setOnSecretRevealed { secret ->
+        WalletHolder.transationListener.setOnSecretRevealed { secret, offerId ->
             lifecycleScope.launch(Dispatchers.Main) {
                 val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
-                alertDialogBuilder.setTitle("The secret is revealed for trade ")
+                alertDialogBuilder.setTitle("The secret is revealed for trade " + offerId)
                 alertDialogBuilder.setMessage(secret.toHex())
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()

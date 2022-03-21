@@ -294,7 +294,7 @@ class BitcoinSwap {
 
     }
 
-    fun getAddresToBeWatched(offerId: Long, wallet: Wallet): Address{
+    fun getAddresToBeWatched(offerId: Long, wallet: Wallet): Pair<Address,Script>{
         val details = when(val data = swapStorage[offerId]){
             is SwapData.RecipientSwapData -> data
             else -> error("We are not the recipient, Did you call the wrong function?")
@@ -308,9 +308,11 @@ class BitcoinSwap {
             secretHash = details.hashUsed ?: error("could not find hash")
         )
 
+        Log.d("Transaction Observer 1", swapScript.program.toHex())
+
         val scriptFromSwapScript = ScriptBuilder.createP2SHOutputScript(swapScript)
 
-        return scriptFromSwapScript.getToAddress(RegTestParams.get())
+        return Pair(scriptFromSwapScript.getToAddress(RegTestParams.get()), swapScript)
     }
 
     /**
