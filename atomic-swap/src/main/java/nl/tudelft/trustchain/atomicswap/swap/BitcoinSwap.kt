@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.atomicswap
 
 import android.util.Log
 import kotlinx.coroutines.runBlocking
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import org.bitcoinj.core.*
 import org.bitcoinj.params.RegTestParams
@@ -15,15 +14,15 @@ import org.bitcoinj.wallet.Wallet
 import kotlin.random.Random
 
 sealed class SwapData {
-    abstract val keyUsed: ByteArray
+    abstract val keyUsed: ByteArray?
     abstract val amount: Coin
     abstract val relativeLock: Int
     abstract val counterpartyKey : ByteArray?
     abstract val offerId : Long
     /**
-     * The transaction Id of the transaction that initiated the swap
+     * The transaction that initiated the swap
      */
-    abstract val initiateTxId: ByteArray?
+    abstract val initiateTx: ByteArray?
 
     /**
      * The transaction Id of the transaction that is meant to be claimed by the initiator of the swap.
@@ -38,16 +37,17 @@ sealed class SwapData {
      * @param amount: the amount our counterparty receives.
      */
     data class CreatorSwapData(
-        override val keyUsed: ByteArray,
-        val secretUsed: ByteArray,
+        override val keyUsed: ByteArray?,
+        val secretUsed: ByteArray?,
         override val amount: Coin,
         override val offerId: Long,
         override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
-        override val initiateTxId: ByteArray? = null,
+        override val initiateTx: ByteArray? = null,
         override val claimByInitiatorTxId: ByteArray? = null,
+        val secretHash: ByteArray?
     ) : SwapData() {
-        val secretHash = Sha256Hash.hash(secretUsed)
+
     }
 
     /**
@@ -64,7 +64,7 @@ sealed class SwapData {
         override val relativeLock: Int = 6,
         override val counterpartyKey: ByteArray? = null,
         val hashUsed: ByteArray? = null,
-        override val initiateTxId: ByteArray? = null,
+        override val initiateTx: ByteArray? = null,
         override val claimByInitiatorTxId: ByteArray? = null
     ) : SwapData()
 }
@@ -139,15 +139,28 @@ class BitcoinSwap {
      *
      * @return A pair of the transaction to be broadcast and some details of the swap.
      */
+
+    fun addSwapData(offerId: Long, amountInCoins: Coin){
+        val swapData = SwapData.CreatorSwapData(
+            amount = amountInCoins,
+            relativeLock = relativeLock,
+            offerId = offerId,
+            keyUsed = null,
+            secretUsed = null,
+            secretHash = null
+        )
+        swapStorage[offerId] = swapData
+    }
+
     fun startSwapTx(
         offerId: Long,
         wallet: Wallet,
         claimPubKey: ByteArray,
-        amount: String
     ): Pair<Transaction, SwapData.CreatorSwapData> {
-        val amountInCoins = Coin.parseCoin(amount)
         val key = wallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION)
         val secret = Random.nextBytes(20)
+
+        val d = swapStorage[offerId] as SwapData.CreatorSwapData
 
         val swapScript = createSwapScript(
             reclaimPubKey = key.pubKey,
@@ -157,26 +170,22 @@ class BitcoinSwap {
 
         val contractTx = Transaction(networkParams)
 
-        contractTx.addOutput(amountInCoins, ScriptBuilder.createP2SHOutputScript(swapScript))
+        contractTx.addOutput(d.amount, ScriptBuilder.createP2SHOutputScript(swapScript))
 
         val sendRequest = SendRequest.forTx(contractTx)
 
 
         wallet.completeTx(sendRequest)
 
-        val swapData = SwapData.CreatorSwapData(
+        swapStorage[offerId] = (swapStorage[offerId] as SwapData.CreatorSwapData).copy(
             keyUsed = key.pubKey,
             secretUsed = secret,
-            amount = amountInCoins,
-            relativeLock = relativeLock,
-            initiateTxId = sendRequest.tx.bitcoinSerialize(),
+            initiateTx = sendRequest.tx.bitcoinSerialize(),
             counterpartyKey = claimPubKey,
-            offerId = offerId
+            secretHash = Sha256Hash.hash(secret)
         )
 
-        swapStorage[offerId] = swapData
-
-        return sendRequest.tx to swapData
+        return sendRequest.tx to swapStorage[offerId] as SwapData.CreatorSwapData
     }
 
 
@@ -186,7 +195,7 @@ class BitcoinSwap {
     fun updateRecipientSwapData(offerId: Long, secretHash: ByteArray,counterPartyKey : ByteArray, txId: ByteArray) {
         swapStorage[offerId] = (swapStorage[offerId] as SwapData.RecipientSwapData).copy(
             hashUsed = secretHash,
-            initiateTxId = txId,
+            initiateTx = txId,
             counterpartyKey = counterPartyKey
         )
     }
@@ -211,7 +220,7 @@ class BitcoinSwap {
     fun createReclaimTx(offerId: Long,wallet: Wallet): Transaction {
         val txId = when(val data = swapStorage[offerId]){
             is SwapData.RecipientSwapData -> data.claimByInitiatorTxId
-            is SwapData.CreatorSwapData -> data.initiateTxId
+            is SwapData.CreatorSwapData -> data.initiateTx
             null -> null
         } ?: error("cannot find the transaction for this offer")
 
@@ -237,7 +246,7 @@ class BitcoinSwap {
         } ?: error("could not get the secret hash")
 
         val originalLockScript = createSwapScript(
-            details.keyUsed ,
+            details.keyUsed!! ,
             details.counterpartyKey?: error("could not find counterparty key"),
             secretHash
         )
@@ -323,7 +332,7 @@ class BitcoinSwap {
 
 //        val txId = swapData.claimByInitiatorTxId ?: error("could not find the transaction id")
 
-        return createClaimTx(txId,swapData.secretUsed,offerId,wallet)
+        return createClaimTx(txId,swapData.secretUsed!!,offerId,wallet)
     }
 
     /**
@@ -351,7 +360,7 @@ class BitcoinSwap {
 
         val originalLockScript = createSwapScript(
             details.counterpartyKey ?: error("could not find counterparty key"),
-            details.keyUsed,
+            details.keyUsed!!,
             secretHash
         )
 
@@ -407,7 +416,7 @@ class BitcoinSwap {
 
         val originalLockScript = createSwapScript(
             details.counterpartyKey ?: error("could not find counterparty key"),
-            details.keyUsed,
+            details.keyUsed!!,
             secretHash
         )
 

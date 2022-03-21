@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
+import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.params.RegTestParams
@@ -132,8 +133,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     val (transaction, _) = WalletHolder.bitcoinSwap.startSwapTx(
                         accept.offerId.toLong(),
                         WalletHolder.bitcoinWallet,
-                        accept.publicKey.hexToBytes(),
-                        "1"
+                        accept.publicKey.hexToBytes()
                     )
                     // add a confidence listener
                     WalletHolder.swapTransactionConfidenceListener.addTransactionInitiator(
@@ -148,6 +148,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     // log
                     Log.d("Transaction M Swap", "Alice created a transaction claimable by Bob")
                     Log.d("Transaction M Swap", transaction.toString())
+
                 }
                 alertDialogBuilder.setCancelable(true)
                 alertDialogBuilder.show()
@@ -162,11 +163,11 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     WalletHolder.bitcoinSwap.swapStorage.getValue(it.offerId.toLong()) as SwapData.CreatorSwapData
 
                 // extract the original transaction
-                if (data.initiateTxId != null) {
+                if (data.initiateTx != null) {
                     val d = OnAcceptReturn(
-                        data.secretHash.toHex(),
-                        data.initiateTxId.toHex(),
-                        data.keyUsed.toHex()
+                        data.secretHash!!.toHex(),
+                        data.initiateTx.toHex(),
+                        data.keyUsed!!.toHex()
                     )
 
 
@@ -276,7 +277,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 alertDialogBuilder.setPositiveButton("Claim money") { _, _ ->
                     val data: SwapData.CreatorSwapData =
                         WalletHolder.bitcoinSwap.swapStorage.getValue(completeMessage.offerId.toLong()) as SwapData.CreatorSwapData
-                    if (data.initiateTxId != null) {
+                    if (data.initiateTx != null) {
                         val tx =
                             Transaction(RegTestParams(), completeMessage.publicKey.hexToBytes())
                         WalletHolder.bitcoinWallet.commitTx(tx)
@@ -326,8 +327,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     val data: SwapData.RecipientSwapData =
                         WalletHolder.bitcoinSwap.swapStorage.getValue(offerId.toLong()) as SwapData.RecipientSwapData
 
-                    if (data.initiateTxId != null) {
-                        val originalTransaction = Transaction(RegTestParams(), data.initiateTxId)
+                    if (data.initiateTx != null) {
+                        val originalTransaction = Transaction(RegTestParams(), data.initiateTx)
                         print(originalTransaction)
 
                         val claimTransaction = WalletHolder.bitcoinSwap.createClaimTxTest(
@@ -471,6 +472,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
         // TODO Implement making swap offer
         val input = "$fromCurrencyAmount $fromCurrency -> $toCurrencyAmount $toCurrency"
+        val x = fromCurrencyAmount.toDouble() * 100000000
+        WalletHolder.bitcoinSwap.addSwapData(1, Coin.valueOf(x.toLong()))
         atomicSwapCommunity.broadcastTradeOffer(1, fromCurrency.toString(), toCurrency.toString(), fromCurrencyAmount.toString(), toCurrencyAmount.toString())
         Toast.makeText(requireContext(), input, Toast.LENGTH_SHORT).show()
     }

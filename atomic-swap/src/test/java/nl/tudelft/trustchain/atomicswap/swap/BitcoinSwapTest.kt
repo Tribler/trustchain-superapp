@@ -65,7 +65,7 @@ class BitcoinSwapTest {
 
         claimBitcoinSwap.addInitialRecipientSwapdata(0,claimPublicKey,"1")
 
-        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTxId!!)
+        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTx!!)
 
         val claimTx = claimBitcoinSwap.createClaimTx(tx.txId.bytes, swapData.secretUsed, 0, claimWallet)
 
@@ -105,7 +105,7 @@ class BitcoinSwapTest {
 
         claimBitcoinSwap.addInitialRecipientSwapdata(0,claimPublicKey,"1")
 
-        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTxId!!)
+        claimBitcoinSwap.updateRecipientSwapData(0,swapData.secretHash,swapData.keyUsed,swapData.initiateTx!!)
 
         val swapForInitiatorTx = claimBitcoinSwap.createSwapTxForInitiator(0,swapData.keyUsed,claimWallet)
 
