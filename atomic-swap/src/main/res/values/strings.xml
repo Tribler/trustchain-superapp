@@ -13,6 +13,7 @@
 
     <string name="balance">Balance:</string>
     <string name="notification_copied_key">Copied wallet public key to clipboard</string>
+    <string name="accept">Accept</string>
 
     <string-array name="currency_codes">
         <item>BTC</item>

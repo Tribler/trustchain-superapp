@@ -50,11 +50,12 @@
             />
 
         <Button
+            android:id="@+id/acceptButton"
             android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:background="@color/blue"
-            android:text="Accept"
+            android:text="@string/accept"
             android:textColor="@android:color/white"/>
 
     </LinearLayout>
