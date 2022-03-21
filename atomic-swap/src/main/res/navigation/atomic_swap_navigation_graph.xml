@@ -14,6 +14,11 @@
         android:id="@+id/navigation_swap"
         android:name="nl.tudelft.trustchain.atomicswap.ui.swap.SwapFragment"
         android:label="@string/title_swap"
-        tools:layout="@layout/fragment_atomic_swap"/>
+        tools:layout="@layout/fragment_atomic_swap" />
+    <fragment
+        android:id="@+id/navigation_trade_offers"
+        android:name="nl.tudelft.trustchain.atomicswap.ui.tradeoffers.TradeOffersFragment"
+        android:label="@string/title_trade_offers"
+        tools:layout="@layout/fragment_atomic_trade_offers" />
 
 </navigation>

@@ -1,10 +1,18 @@
 package nl.tudelft.trustchain.atomicswap.ui.swap
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.ViewModelProvider
+import nl.tudelft.trustchain.atomicswap.R
+import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicSwapBinding
+import nl.tudelft.trustchain.common.ui.BaseFragment
+import java.math.BigDecimal
+import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +24,6 @@ import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentPeersBinding
 import nl.tudelft.trustchain.atomicswap.ui.peers.AddressItem
 import nl.tudelft.trustchain.atomicswap.ui.peers.PeerItem
-import nl.tudelft.trustchain.common.ui.BaseFragment
 import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,9 +36,19 @@ import org.bitcoinj.params.RegTestParams
 import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
 
 
-class SwapFragment : BaseFragment(R.layout.fragment_peers) {
+class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
+
     private val adapter = ItemAdapter()
     val atomicSwapCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
+
+    private var _binding: FragmentAtomicSwapBinding? = null
+
+    private var _model: SwapViewModel? = null
+
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
+    private val model get() = _model!!
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,22 +69,21 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
 //        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayout.VERTICAL))
 //
 
-        loadNetworkInfo()
+        //loadNetworkInfo()
         configureAtomicSwapCallbacks()
         //receiveGossips()
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding =  FragmentPeersBinding.inflate(inflater, container, false)
-        binding.button.setOnClickListener {
-            lifecycleScope.launchWhenStarted {
-                atomicSwapCommunity.broadcastTradeOffer(1,1.0)
-            }
-        }
+        _binding = FragmentAtomicSwapBinding.inflate(inflater, container, false)
+        _model = ViewModelProvider(this).get(SwapViewModel::class.java)
+
+        initializeUi(binding, model)
         return binding.root
     }
 
@@ -398,5 +414,64 @@ class SwapFragment : BaseFragment(R.layout.fragment_peers) {
                 delay(3000)
             }
         }
+    }
+
+
+    private fun initializeUi(binding: FragmentAtomicSwapBinding, model: SwapViewModel) {
+        val fromCurrencySpinner = binding.fromCurrencySpinner
+        val toCurrencySpinner = binding.toCurrencySpinner
+
+        val fromCurrencyInput = binding.fromCurrencyInput
+        val toCurrencyInput = binding.toCurrencyInput
+
+        val createSwapOfferButton = binding.createSwapOfferButton
+
+        model.createSwapOfferEnabled.observe(viewLifecycleOwner) {
+            createSwapOfferButton.isEnabled = it
+        }
+
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.currency_codes,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            fromCurrencySpinner.adapter = adapter
+            toCurrencySpinner.adapter = adapter
+        }
+
+        fromCurrencyInput.addTextChangedListener { validateInput() }
+        toCurrencyInput.addTextChangedListener { validateInput() }
+
+        createSwapOfferButton.setOnClickListener { createSwapOffer() }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        _model = null
+    }
+
+    private fun validateInput() {
+        val fromCurrencyAmount = binding.fromCurrencyInput.text.toString().toBigDecimalOrNull()
+        val toCurrencyAmount = binding.toCurrencyInput.text.toString().toBigDecimalOrNull()
+
+        model.setSwapOfferEnabled(
+            fromCurrencyAmount != null && fromCurrencyAmount > BigDecimal.ZERO
+                && toCurrencyAmount != null && toCurrencyAmount > BigDecimal.ZERO
+        )
+    }
+
+    private fun createSwapOffer() {
+        val fromCurrency = binding.fromCurrencySpinner.selectedItem
+        val toCurrency = binding.toCurrencySpinner.selectedItem
+
+        // Already validated before
+        val fromCurrencyAmount = binding.fromCurrencyInput.text.toString().toBigDecimal()
+        val toCurrencyAmount = binding.toCurrencyInput.text.toString().toBigDecimal()
+
+        // TODO Implement making swap offer
+        val input = "$fromCurrencyAmount $fromCurrency -> $toCurrencyAmount $toCurrency"
+        Toast.makeText(requireContext(), input, Toast.LENGTH_SHORT).show()
     }
 }
