@@ -14,15 +14,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicWalletBinding
-import nl.tudelft.trustchain.common.bitcoin.WalletService
 import nl.tudelft.trustchain.common.ethereum.EthereumWalletService
 import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.listeners.WalletChangeEventListener
 import org.web3j.utils.Convert
-import java.net.InetAddress
 
 class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChangeEventListener {
 
@@ -48,9 +45,9 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         ) as ClipboardManager
 
 
-//        lifecycleScope.launchWhenStarted {
-//            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
-//        }
+        lifecycleScope.launchWhenStarted {
+            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
+        }
     }
 
     override fun onCreateView(
@@ -93,13 +90,13 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         }
 
         WalletHolder.bitcoinWallet.addChangeEventListener(this)
-//        lifecycleScope.launchWhenStarted {
-//            while (isActive) {
-//                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
-//                model.setEthereumBalance("$ether ETH")
-//                delay(1000)
-//            }
-//        }
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
+                model.setEthereumBalance("$ether ETH")
+                delay(1000)
+            }
+        }
     }
 
     override fun onDestroyView() {
