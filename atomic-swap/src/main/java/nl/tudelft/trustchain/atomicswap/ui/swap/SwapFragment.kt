@@ -472,6 +472,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
         // TODO Implement making swap offer
         val input = "$fromCurrencyAmount $fromCurrency -> $toCurrencyAmount $toCurrency"
+        atomicSwapCommunity.broadcastTradeOffer(1,fromCurrencyAmount.toDouble())
         Toast.makeText(requireContext(), input, Toast.LENGTH_SHORT).show()
     }
 }
