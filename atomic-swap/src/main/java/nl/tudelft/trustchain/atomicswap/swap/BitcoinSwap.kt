@@ -385,4 +385,61 @@ class BitcoinSwap {
 
         return contract
     }
+
+
+    fun createClaimTxTest(tx: Transaction,secret:ByteArray,offerId: Long,wallet: Wallet): Transaction {
+        val details = swapStorage[offerId] ?: error("could not fine swap data. ")
+
+        val key = wallet.findKeyFromPubKey(details.keyUsed)
+
+        val contract = Transaction(networkParams)
+        contract.setVersion(2)
+        // find the output by checking if it is P2SH
+        val prevTxOut =tx.outputs.find {
+            it.scriptPubKey.scriptType == Script.ScriptType.P2SH
+        } ?: error("could not find transaction output")
+        contract.addOutput(prevTxOut.value.div(10).multiply(9), wallet.currentReceiveAddress())
+
+        val secretHash = when(details){
+            is SwapData.RecipientSwapData -> details.hashUsed
+            is SwapData.CreatorSwapData -> details.secretHash
+        } ?: error("could not get the secret hash")
+
+        val originalLockScript = createSwapScript(
+            details.counterpartyKey ?: error("could not find counterparty key"),
+            details.keyUsed,
+            secretHash
+        )
+
+        Log.d("swapscript","claim script: $originalLockScript")
+
+
+        val input = contract.addInput(prevTxOut)
+        // we don't need to do this since we are claiming and not reclaiming
+        //contract.inputs[0].sequenceNumber = (0xFFFF0000L + details.relativeLock) xor  (1 shl 31) xor (1 shl 22)
+
+
+        val sig = contract.calculateSignature(0,key,originalLockScript,Transaction.SigHash.ALL,false)
+        val sigscript = ScriptBuilder()
+            .op(ScriptOpCodes.OP_1)
+            .data(sig.encodeToBitcoin())
+            .data(secret)
+            .smallNum(0)
+            .data(originalLockScript.program)
+            .build()
+
+
+        input.scriptSig = sigscript
+
+        val check = runBlocking {
+            contract.inputs.first().verify(prevTxOut)
+        }
+        println(check)
+
+        //Log.d("bitcoinswap","created claim tx for offer : $offerId and tx: $txId")
+
+
+        return contract
+    }
+
 }

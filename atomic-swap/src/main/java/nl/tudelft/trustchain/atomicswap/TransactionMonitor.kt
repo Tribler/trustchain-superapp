@@ -80,4 +80,4 @@ class TransactionMonitor(val depth: Int): TransactionConfidenceEventListener {
     }
 }
 
-class TransactionMonitorEntry(val transactionId: String, val offerId: String, val peer: nl.tudelft.ipv8.Peer)
+class TransactionMonitorEntry(val transactionId: String, val offerId: String, val peer: nl.tudelft.ipv8.Peer?)
