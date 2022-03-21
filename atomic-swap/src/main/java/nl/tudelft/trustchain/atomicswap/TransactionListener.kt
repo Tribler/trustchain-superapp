@@ -41,6 +41,7 @@ class TransactionListener(): OnTransactionBroadcastListener{
                         if (secretData != null) {
                             Log.d("Transaction Observer", t.toString())
                             secretRevealed(secretData, entry.offerId)
+                            watchedAddresses.remove(entry)
                             break
                         }
                     }
