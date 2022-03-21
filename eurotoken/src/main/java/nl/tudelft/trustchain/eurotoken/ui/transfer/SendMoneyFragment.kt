@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.navigation.fragment.findNavController
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -32,6 +33,18 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         )
     }
 
+    private fun findPeer(pubKey : String) : Peer? {
+        val itr = transactionRepository.trustChainCommunity.getPeers().listIterator()
+        while (itr.hasNext()) {
+            val cur : Peer = itr.next()
+            if (cur.key.toString().equals(pubKey)) {
+                return cur
+            }
+        }
+
+        return null
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -41,6 +54,8 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(key)
+
+        val peer = findPeer(publicKey)
 
         binding.txtContactName.text = contact?.name ?: name
 
