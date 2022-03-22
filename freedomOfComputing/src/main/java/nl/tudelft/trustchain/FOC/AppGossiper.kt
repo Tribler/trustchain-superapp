@@ -1,23 +1,14 @@
 package nl.tudelft.trustchain.FOC
 
 import android.content.Context
-import android.os.Environment
 import android.util.Log
-import android.widget.Toast
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import java.io.File
 import java.util.*
-import java.util.concurrent.CountDownLatch
-import kotlin.collections.ArrayList
 
 /**
  * This gossips data about 5 random apps with peers on demoCommunity every 10 seconds and fetches new apps from peers every 20 seconds
@@ -26,7 +17,7 @@ import kotlin.collections.ArrayList
 lateinit var appGossiperInstance: AppGossiper
 
 @Suppress("deprecation")
-class AppGossiper(private val saveDir: File, private val sessionManager: SessionManager, private val context: Context) {
+class AppGossiper(private val sessionManager: SessionManager, private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val maxTorrentThreads = 5
     private val torrentHandles = ArrayList<TorrentHandle>()
@@ -39,9 +30,9 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
      */
 
     companion object {
-        fun getInstance(saveDir: File, sessionManager: SessionManager, context: Context): AppGossiper {
+        fun getInstance(sessionManager: SessionManager, context: Context): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(saveDir, sessionManager, context)
+                appGossiperInstance = AppGossiper(sessionManager, context)
             }
             return appGossiperInstance
         }
@@ -77,12 +68,12 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
     private suspend fun iterativelyDownloadApps() {
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
         while (scope.isActive) {
-            var torrentListMessages = demoCommunity?.getTorrentMessages()
+            val torrentListMessages = demoCommunity?.getTorrentMessages()
             if (torrentListMessages != null) {
                 for (packet in torrentListMessages) {
                     val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
                     Log.i("personal", peer.mid + ": " + payload.message)
-                    var magnetLink = payload.message.substringAfter("FOC:")
+                    val magnetLink = payload.message.substringAfter("FOC:")
                     val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
                         .substringBefore("&dn=")
                     if (torrentInfos.none { it.infoHash().toString() == torrentHash })
@@ -94,14 +85,15 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
     }
 
     private fun randomlyShareFiles(demoCommunity: DemoCommunity) {
-        saveDir.listFiles()?.forEachIndexed { _, file ->
+        // Todo make sure we do not interfere with musicDAO's torrents
+        context.cacheDir.listFiles()?.forEachIndexed { _, file ->
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
                     // We only seed torrents that have previously already been fully downloaded
-                    if (isTorrentOkay(torrentInfo, saveDir)) {
+                    if (isTorrentOkay(torrentInfo, context.cacheDir)) {
                         if (!torrentInfos.any { it.infoHash() == torrentInfo.infoHash() }) {
                             torrentInfos.add(torrentInfo)
                         }
@@ -129,8 +121,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
 
     private fun downloadAndSeed(torrentInfo: TorrentInfo, demoCommunity: DemoCommunity) {
         if (torrentInfo.isValid) {
-
-            sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, context.cacheDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
@@ -158,7 +149,6 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
         if (sessionActive) {
             return
         }
-
 
         if (!magnetLink.startsWith("magnet:")) {
             return
@@ -197,7 +187,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
 
 
         Log.i("personal", "Fetching the magnet uri, please wait...")
-        var data: ByteArray
+        val data: ByteArray
         try {
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
@@ -205,19 +195,12 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
             return
         }
 
-        if (data != null) {
-            val torrentInfo = Entry.bdecode(data).toString()
-            Log.i("personal", torrentInfo)
+        val torrentInfo = Entry.bdecode(data).toString()
+        Log.i("personal", torrentInfo)
 
-            val ti = TorrentInfo.bdecode(data)
-            sessionActive = true
-            // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            sessionManager.download(ti, saveDir)
-            sessionActive = false
-        } else {
-            Log.i("personal", "Failed to retrieve the magnet")
-        }
+        val ti = TorrentInfo.bdecode(data)
+        sessionActive = true
+        sessionManager.download(ti, context.cacheDir)
+        sessionActive = false
     }
-
 }
