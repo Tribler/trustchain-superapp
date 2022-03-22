@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.bitcoin;
+package bitcoin;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import com.google.common.base.Preconditions;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import static org.bitcoin.NativeSecp256k1Util.*;
+import static bitcoin.NativeSecp256k1Util.*;
 
 /**
  * <p>This class holds native methods to handle ECDSA verification.</p>
@@ -44,6 +44,10 @@ public class NativeSecp256k1 {
     private static final Lock r = rwl.readLock();
     private static final Lock w = rwl.writeLock();
     private static ThreadLocal<ByteBuffer> nativeECDSABuffer = new ThreadLocal<>();
+
+    public static String hello(){
+        return "hi from NativeSecp261k";
+    }
 
     /**
      * Verifies the given secp256k1 signature in native code. Calling when enabled == false is undefined (probably

@@ -4,3 +4,5 @@
 0	8	0	clean	f753499a7fe8ca29
 3	392	669149016	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	aa7a677da7bf6459
 393	566	669149016	C:/Users/s/Documents/GitHub/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	c137a7a13e9c1fae
+1	697	669683127	CMakeFiles/hello_cmake.dir/native-lib.cpp.o	aa7a677da7bf6459
+697	810	669683127	C:/Users/s/Documents/GitHub/trustchain-superapp/frost/build/intermediates/cmake/debug/obj/x86/libhello_cmake.so	c137a7a13e9c1fae

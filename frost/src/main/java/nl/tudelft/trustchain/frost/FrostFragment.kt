@@ -9,7 +9,10 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
 
-import org.bitcoin.NativeSecp256k1
+import bitcoin.NativeSecp256k1
+import java.util.Arrays
+
+
 
 
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
@@ -20,9 +23,9 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
 //        initClickListeners()
         sample_text.text = "potato"
 
-        val new_text = NativeSecp256k1.hello()
 
-//        val keys: Array<ByteArray> = NativeSecp256k1.generateKeyPair()
+        val keys: Array<ByteArray> = NativeSecp256k1.generateKeyPair()
+        val new_text = keys[0][0].toString()
 //        val new_text = keys[2].toString()
 //        FrostCpp.stringFromJNI()
 
