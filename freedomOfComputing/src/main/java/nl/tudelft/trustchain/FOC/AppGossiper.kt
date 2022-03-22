@@ -26,7 +26,7 @@ import kotlin.collections.ArrayList
 lateinit var appGossiperInstance: AppGossiper
 
 @Suppress("deprecation")
-class AppGossiper(private val saveDir: File, private val sessionManager: SessionManager, private val context: Context) {
+class AppGossiper(private val sessionManager: SessionManager, private val context: Context) {
     private val scope = CoroutineScope(Dispatchers.IO)
     private val maxTorrentThreads = 5
     private val torrentHandles = ArrayList<TorrentHandle>()
@@ -39,9 +39,9 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
      */
 
     companion object {
-        fun getInstance(saveDir: File, sessionManager: SessionManager, context: Context): AppGossiper {
+        fun getInstance(sessionManager: SessionManager, context: Context): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(saveDir, sessionManager, context)
+                appGossiperInstance = AppGossiper(sessionManager, context)
             }
             return appGossiperInstance
         }
@@ -94,14 +94,15 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
     }
 
     private fun randomlyShareFiles(demoCommunity: DemoCommunity) {
-        saveDir.listFiles()?.forEachIndexed { _, file ->
+        // Todo make sure we do not interfere with musicDAO's torrents
+        context.cacheDir.listFiles()?.forEachIndexed { _, file ->
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
                     // We only seed torrents that have previously already been fully downloaded
-                    if (isTorrentOkay(torrentInfo, saveDir)) {
+                    if (isTorrentOkay(torrentInfo, context.cacheDir)) {
                         if (!torrentInfos.any { it.infoHash() == torrentInfo.infoHash() }) {
                             torrentInfos.add(torrentInfo)
                         }
@@ -129,8 +130,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
 
     private fun downloadAndSeed(torrentInfo: TorrentInfo, demoCommunity: DemoCommunity) {
         if (torrentInfo.isValid) {
-
-            sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, context.cacheDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
@@ -211,9 +211,7 @@ class AppGossiper(private val saveDir: File, private val sessionManager: Session
 
             val ti = TorrentInfo.bdecode(data)
             sessionActive = true
-            // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            sessionManager.download(ti, saveDir)
+            sessionManager.download(ti, context.cacheDir)
             sessionActive = false
         } else {
             Log.i("personal", "Failed to retrieve the magnet")

@@ -45,7 +45,7 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGossiper = AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext)
+        appGossiper = AppGossiper.getInstance(s, applicationContext)
         appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
@@ -62,7 +62,7 @@ class MainActivityFOC : AppCompatActivity() {
         // whenever an available torrent is seeded, clicking on it
         // inserts it into the input for torrent names/magnet links
         listView.setOnItemClickListener { parent, _, position, _ ->
-            var item = parent.getItemAtPosition(position)
+            val item = parent.getItemAtPosition(position)
             enterTorrent.setText(item.toString().substringAfter(" - "))
         }
 
@@ -260,8 +260,7 @@ class MainActivityFOC : AppCompatActivity() {
             downloadMagnetButton.setText("STOP")
             // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
             // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            val savePath = Environment.getExternalStorageDirectory().absolutePath
-            s.download(ti, File(savePath))
+            s.download(ti, applicationContext.cacheDir)
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
             printToast("Something went wrong, check logs")
@@ -303,13 +302,9 @@ class MainActivityFOC : AppCompatActivity() {
             torrentName = "sintel.torrent"
         } else torrentName = inputText
 
-        // uncomment if you want to read from the actual phone storage (needs "write" permission)
-        var torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-        // if (uploadHappening) {
-        // val torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-        // torrent =
-        //    applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName
-        // }
+        // todo minor issue: ensure that users can not inject arbitrary paths using '..'
+        val torrent = "${applicationContext.cacheDir}/${torrentName}"
+
         try {
             if (!readTorrentSuccesfully(torrent)) {
                 printToast("Something went wrong, check logs")
@@ -337,7 +332,7 @@ class MainActivityFOC : AppCompatActivity() {
         sessionActive = true
         appGossiper.sessionActive = true
         if (!uploadHappening)
-            downloadTorrentButton.setText("STOP")
+            downloadTorrentButton.text = "STOP"
         // uncomment if you want to write to the actual phone storage (needs "write" permission)
         s.download(ti, torrentFile.parentFile)
         // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
@@ -404,7 +399,7 @@ class MainActivityFOC : AppCompatActivity() {
             // uncomment if you want to read from the actual phone storage (needs "write" permission)
             intent.putExtra(
                 "fileName",
-                Environment.getExternalStorageDirectory().absolutePath + "/" + apkName
+                "${applicationContext.cacheDir}/${apkName}"
             )
             // intent.putExtra("fileName", apkName);
             startActivity(intent)
@@ -426,8 +421,7 @@ class MainActivityFOC : AppCompatActivity() {
             fileName = "image.png"
         } else fileName = inputText
 
-        val file =
-            File(Environment.getExternalStorageDirectory().absolutePath + "/" + fileName)
+        val file = File(applicationContext.cacheDir, fileName)
         if (!file.exists()) {
             printToast("Something went wrong, check logs")
             Log.i("personal", "File doesn't exist!")
@@ -455,12 +449,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         var os: OutputStream? = null
         try {
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            os =
-                FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
-
-            // os = FileOutputStream(File(applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName))
-
+            os = FileOutputStream(File(applicationContext.cacheDir, torrentName))
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
             e.printStackTrace()
