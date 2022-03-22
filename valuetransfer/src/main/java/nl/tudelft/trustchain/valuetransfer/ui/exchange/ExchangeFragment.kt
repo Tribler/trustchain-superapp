@@ -123,6 +123,7 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
                         null,
                         false
                     ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
+                    ).show(parentFragmentManager, ExchangeTransferMoneyDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }
