@@ -1,17 +1,46 @@
 package nl.tudelft.trustchain.literaturedao
+import android.os.Bundle
+import nl.tudelft.trustchain.common.BaseActivity
+
 import android.util.Log
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import nl.tudelft.trustchain.common.BaseActivity
+import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
-import java.io.BufferedReader
+import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import java.io.InputStream
-import java.io.InputStreamReader
+import java.util.*
+import kotlin.math.roundToInt
 
 open class LiteratureDaoActivity : BaseActivity() {
-    override val navigationGraph: Int = R.navigation.nav_literaturedao
-    override val bottomNavigationMenu: Int
-        get() = super.bottomNavigationMenu
+    override val navigationGraph = R.navigation.nav_literaturedao
+    override val bottomNavigationMenu = R.menu.literature_navigation_menu
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
+        printPeersInfo(literatureCommunity)
+    }
+
+    private fun printPeersInfo(overlay: Overlay) {
+        val peers = overlay.getPeers()
+        Log.i("litdao",overlay::class.simpleName + ": ${peers.size} peers")
+        for (peer in peers) {
+            val avgPing = peer.getAveragePing()
+            val lastRequest = peer.lastRequest
+            val lastResponse = peer.lastResponse
+
+            val lastRequestStr = if (lastRequest != null)
+                "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val lastResponseStr = if (lastResponse != null)
+                "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+            Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
+        }
+    }
 
     override fun onStart() {
         super.onStart()
@@ -53,6 +82,4 @@ open class LiteratureDaoActivity : BaseActivity() {
 */
         //Toast.makeText(LiteratureDaoActivity(), result, Toast.LENGTH_SHORT).show();
     }
-
-
 }
