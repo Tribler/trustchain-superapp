@@ -11,4 +11,10 @@ public class FrostCpp {
 //        System.loadLibrary("superappbitcoinjfrost");
 //    }
 //    public native static byte[][] generateKeyPair();
+
+    static {
+        System.loadLibrary("hello_cmake");
+    }
+    public native static String stringFromJNI();
+
 }

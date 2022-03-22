@@ -11,6 +11,7 @@ import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
 
 import org.bitcoin.NativeSecp256k1
 
+
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     private val binding by viewBinding(FragmentFrostBinding::bind)
 
@@ -24,6 +25,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
 //        val keys: Array<ByteArray> = NativeSecp256k1.generateKeyPair()
 //        val new_text = keys[2].toString()
 //        FrostCpp.stringFromJNI()
+
         sample_text.text = new_text
     }
 

@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
+
 //apply plugin: 'java-library'
 apply plugin: 'com.google.protobuf'
 //apply plugin: 'maven-publish'
@@ -24,6 +25,11 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
+        externalNativeBuild {
+            cmake {
+                cppFlags '-std=c++17'
+            }
+        }
     }
 
     buildTypes {
@@ -39,6 +45,12 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         allWarningsAsErrors = true
+    }
+    externalNativeBuild {
+        cmake {
+            path file('src/main/cpp/CMakeLists.txt')
+            version '3.18.1'
+        }
     }
 
     buildFeatures {
