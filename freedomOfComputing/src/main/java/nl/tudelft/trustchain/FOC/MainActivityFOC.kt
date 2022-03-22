@@ -1,11 +1,8 @@
 package nl.tudelft.trustchain.FOC
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -13,8 +10,6 @@ import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
@@ -55,9 +50,9 @@ class MainActivityFOC : AppCompatActivity() {
         // create a list view for any incoming torrents
         // that are seeded
         val listView = myListView as ListView
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
+        listView.choiceMode = ListView.CHOICE_MODE_SINGLE
         adapterLV = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, torrentList)
-        listView.setAdapter(adapterLV)
+        listView.adapter = adapterLV
 
         // whenever an available torrent is seeded, clicking on it
         // inserts it into the input for torrent names/magnet links
@@ -93,37 +88,16 @@ class MainActivityFOC : AppCompatActivity() {
         retrieveListButton.setOnClickListener { _ ->
             retrieveListOfAvailableTorrents()
         }
-
-        // upon launching our activity, we ask for the "Storage" permission
-        requestStoragePermission()
-    }
-
-    val MY_PERMISSIONS_REQUEST = 0
-
-    // change if you want to write to the actual phone storage (needs "write" permission)
-    fun requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) // READ_EXTERNAL_STORAGE
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
-                MY_PERMISSIONS_REQUEST
-            )
-        }
     }
 
     /**
      * Display a short message on the screen
      */
-    fun printToast(s: String) {
+    private fun printToast(s: String) {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun initializeTorrentSession() {
+    private fun initializeTorrentSession() {
         s.addListener(object : AlertListener {
             override fun types(): IntArray? {
                 return null
@@ -140,7 +114,9 @@ class MainActivityFOC : AppCompatActivity() {
                     AlertType.BLOCK_FINISHED -> {
                         val a = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
-                        progressBar.setProgress(p, true)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            progressBar.setProgress(p, true)
+                        }
                         Log.i(
                             "personal",
                             "Progress: " + p + " for torrent name: " + a.torrentName()
@@ -148,9 +124,11 @@ class MainActivityFOC : AppCompatActivity() {
                         Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
-                        progressBar.setProgress(100, true)
-                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
-                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            progressBar.setProgress(100, true)
+                        }
+                        downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
+                        downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                     }
@@ -169,7 +147,7 @@ class MainActivityFOC : AppCompatActivity() {
         // Handling of the case where the user is already downloading the
         // same or another torrent
 
-        if(appGossiper.sessionActive && !sessionActive) {
+        if (appGossiper.sessionActive && !sessionActive) {
             printToast("The torrent session is busy fetching files, please try again later")
             return
         }
@@ -178,9 +156,9 @@ class MainActivityFOC : AppCompatActivity() {
             s.stop()
             sessionActive = false
             appGossiper.sessionActive = false
-            downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+            downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
             if (downloadMagnetButton.text.equals("STOP")) {
-                downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
                 return
             } else {
                 torrentView.text = ""
@@ -240,7 +218,7 @@ class MainActivityFOC : AppCompatActivity() {
         printToast("Starting download, please wait...")
 
         Log.i("personal", "Fetching the magnet uri, please wait...")
-        var data: ByteArray
+        val data: ByteArray
         try {
             data = s.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
@@ -249,22 +227,15 @@ class MainActivityFOC : AppCompatActivity() {
             return
         }
 
-        if (data != null) {
-            val torrentInfo = Entry.bdecode(data).toString()
-            Log.i("personal", torrentInfo)
-            torrentView.text = torrentInfo
+        val torrentInfo = Entry.bdecode(data).toString()
+        Log.i("personal", torrentInfo)
+        torrentView.text = torrentInfo
 
-            val ti = TorrentInfo.bdecode(data)
-            sessionActive = true
-            appGossiper.sessionActive = true
-            downloadMagnetButton.setText("STOP")
-            // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            s.download(ti, applicationContext.cacheDir)
-        } else {
-            Log.i("personal", "Failed to retrieve the magnet")
-            printToast("Something went wrong, check logs")
-        }
+        val ti = TorrentInfo.bdecode(data)
+        sessionActive = true
+        appGossiper.sessionActive = true
+        downloadMagnetButton.text = "STOP"
+        s.download(ti, applicationContext.cacheDir)
     }
 
     /**
@@ -274,7 +245,7 @@ class MainActivityFOC : AppCompatActivity() {
     fun getTorrent(uploadHappening: Boolean) {
 
 
-        if(appGossiper.sessionActive && !sessionActive) {
+        if (appGossiper.sessionActive && !sessionActive) {
             printToast("The torrent session is busy fetching files, please try again later")
             return
         }
@@ -285,13 +256,15 @@ class MainActivityFOC : AppCompatActivity() {
             s.stop()
             sessionActive = false
             appGossiper.sessionActive = false
-            downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+            downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
             if (downloadTorrentButton.text.equals("STOP")) {
-                downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
                 return
             } else {
                 torrentView.text = ""
-                progressBar.setProgress(0, true)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    progressBar.setProgress(0, true)
+                }
             }
         }
 
@@ -333,10 +306,7 @@ class MainActivityFOC : AppCompatActivity() {
         appGossiper.sessionActive = true
         if (!uploadHappening)
             downloadTorrentButton.text = "STOP"
-        // uncomment if you want to write to the actual phone storage (needs "write" permission)
         s.download(ti, torrentFile.parentFile)
-        // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-        // s.download(ti, File(savePath))
     }
 
     /**
@@ -396,21 +366,19 @@ class MainActivityFOC : AppCompatActivity() {
         } else apkName = inputText
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
-            // uncomment if you want to read from the actual phone storage (needs "write" permission)
             intent.putExtra(
                 "fileName",
                 "${applicationContext.cacheDir}/${apkName}"
             )
-            // intent.putExtra("fileName", apkName);
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    /*
-    Creates a torrent from a file given as input
-    The extension of the file must be included (for example, .png)
+    /**
+     * Creates a torrent from a file given as input
+     * The extension of the file must be included (for example, .png)
      */
     @Suppress("deprecation")
     fun createTorrent() {
@@ -445,7 +413,7 @@ class MainActivityFOC : AppCompatActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
-        var torrentName = fileName.substringBeforeLast('.') + ".torrent"
+        val torrentName = fileName.substringBeforeLast('.') + ".torrent"
 
         var os: OutputStream? = null
         try {
@@ -462,62 +430,62 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
-        val magnet_link = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
-        uploadingTorrent = magnet_link
-        Log.i("personal", magnet_link)
+        val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+        uploadingTorrent = magnetLink
+        Log.i("personal", magnetLink)
 
         enterTorrent.setText(torrentName)
         getTorrent(true)
     }
 
-    /*
-    Displays the list of all the torrents being seeded at the moment,
-    based on the messages received from those peers that seed
+    /**
+     * Displays the list of all the torrents being seeded at the moment,
+     * based on the messages received from those peers that seed
      */
     fun retrieveListOfAvailableTorrents() {
         val ipv8 = IPv8Android.getInstance()
         val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-        var torrentListMessages = demoCommunity.getTorrentMessages()
+        val torrentListMessages = demoCommunity.getTorrentMessages()
         for (packet in torrentListMessages) {
             val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
             Log.i("personal", peer.mid + ": " + payload.message)
-            var magnetLink = payload.message.substringAfter("FOC:")
-            var torrentName = payload.message.substringAfter("&dn=")
+            val magnetLink = payload.message.substringAfter("FOC:")
+            val torrentName = payload.message.substringAfter("&dn=")
                 .substringBefore('&')
             var containsItem = false
-            for (i in 0..adapterLV.count - 1) {
+            for (i in 0 until adapterLV.count) {
                 if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!
-                    .startsWith(torrentName)
+                        .startsWith(torrentName)
                 ) {
                     containsItem = true
                     break
                 }
             }
             if (!containsItem) {
-                adapterLV.add(torrentName + " - " + magnetLink)
+                adapterLV.add("$torrentName - $magnetLink")
                 setListViewHeightBasedOnChildren(myListView)
             }
         }
     }
 
-    /*
-    Handles correct viewing of our list of torrents, since it is within a ScrollView
+    /**
+     * Handles correct viewing of our list of torrents, since it is within a ScrollView
      */
     fun setListViewHeightBasedOnChildren(listView: ListView) {
-        var listAdapter: ListAdapter = listView.getAdapter()
+        val listAdapter: ListAdapter = listView.adapter
 
         var totalHeight = 0
-        var desiredWidth =
-            View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST)
-        for (i in 0..listAdapter.getCount() - 1) {
-            var listItem = listAdapter.getView(i, null, listView)
+        val desiredWidth =
+            View.MeasureSpec.makeMeasureSpec(listView.width, View.MeasureSpec.AT_MOST)
+        for (i in 0 until listAdapter.count) {
+            val listItem = listAdapter.getView(i, null, listView)
             listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED)
-            totalHeight += listItem.getMeasuredHeight()
+            totalHeight += listItem.measuredHeight
         }
 
-        var params = listView.getLayoutParams()
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1))
-        listView.setLayoutParams(params)
+        val params = listView.layoutParams
+        params.height = totalHeight + (listView.dividerHeight * (listAdapter.count - 1))
+        listView.layoutParams = params
         listView.requestLayout()
     }
 }
