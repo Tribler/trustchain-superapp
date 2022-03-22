@@ -1,6 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.content.Intent
+import android.content.*
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -9,12 +9,17 @@ import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.common.contacts.ContactStore
+import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.util.addDecimalLimiter
 import nl.tudelft.trustchain.valuetransfer.util.formatAmount
 import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
+
 
 class ExchangeTransferMoneyLinkDialog(
     private val amount: String?,
@@ -23,10 +28,19 @@ class ExchangeTransferMoneyLinkDialog(
 ) : VTDialogFragment() {
 
     private var transactionAmount = 0L
-    private var transactionMessage = message ?: ""
+    private var transactionAmountText = ""
+    private var transactionMessage = message ?: " "
+    private var isEuroTransfer = false
+    private var IBAN = ""
     private lateinit var messageView: EditText
-
     private lateinit var typeAdapter: ArrayAdapter<CharSequence>
+    private val gatewayStoreLink by lazy {
+        GatewayStore.getInstance(requireContext())
+    }
+    protected val transactionRepositoryLink by lazy {
+        TransactionRepository(IPv8Android.getInstance().getOverlay()!!, gatewayStoreLink)
+    }
+
 
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
@@ -69,6 +83,7 @@ class ExchangeTransferMoneyLinkDialog(
                 object : AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View?, pos: Int, id: Long) {
                         ibanView.visibility = if (pos == 0) View.GONE else View.VISIBLE
+                        isEuroTransfer=pos!=0
                     }
 
                     override fun onNothingSelected(p0: AdapterView<*>?) {}
@@ -87,27 +102,59 @@ class ExchangeTransferMoneyLinkDialog(
 
             transactionAmountView.doAfterTextChanged {
                 transactionAmount = formatAmount(transactionAmountView.text.toString())
+                transactionAmountText=transactionAmountView.text.toString()
             }
 
             messageView.doAfterTextChanged {
                 transactionMessage = messageView.text.toString()
             }
 
+            ibanView.doAfterTextChanged {
+                IBAN=ibanView.text.toString()
+            }
+
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             bottomSheetDialog.clShareLink.setOnClickListener {
+                val link=getLink()
                 val sendIntent: Intent = Intent().apply {
                     action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, "Would you please pay me €1 for 'MarktPlaats' via\nhttps://trustchain-superapp.nl")
+                    putExtra(Intent.EXTRA_TEXT,
+                        "Would you please pay me €$transactionAmountText  via\n$link"
+                    )
                     type = "text/plain"
                 }
                 val shareIntent = Intent.createChooser(sendIntent, null)
                 startActivity(shareIntent)
             }
 
+//            bottomSheetDialog.clCopyLink.setOnClickListener{
+//                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+//                val clip: ClipData = ClipData.newPlainText("link",getLink())
+//                clipboard.setPrimaryClip(clip)
+//                Toast.makeText(this.context, "Text copied to clipboard", Toast.LENGTH_LONG).show()
+//            }
+
+
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
+    }
+
+    private fun  getLink():String
+    {
+        val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
+        val name =
+            ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
+        var url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
+        url.append("amount=").append(transactionAmountText)
+        url.append("&message=").append(transactionMessage)
+        if(name!=null)
+            url.append("&name=").append(name)
+        if(isEuroTransfer)
+            url.append("&IBAN=").append(IBAN)
+        url.append("&public=").append(ownKey)
+        return url.toString()
     }
 
     companion object {
