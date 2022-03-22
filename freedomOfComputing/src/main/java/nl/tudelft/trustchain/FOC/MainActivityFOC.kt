@@ -1,8 +1,11 @@
 package nl.tudelft.trustchain.FOC
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
@@ -10,6 +13,8 @@ import android.widget.ListAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
 import com.frostwire.jlibtorrent.alerts.Alert
@@ -18,19 +23,29 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class MainActivityFOC : AppCompatActivity() {
 
+
+    private val scope = CoroutineScope(Dispatchers.IO)
     val s = SessionManager()
     var sessionActive = false
 
     private var torrentList = ArrayList<String>() // Creating an empty arraylist
+
+    var signal = CountDownLatch(0)
 
     private lateinit var adapterLV: ArrayAdapter<String>
     private lateinit var appGossiper: AppGossiper
@@ -40,7 +55,8 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGossiper = AppGossiper.getInstance(s, applicationContext)
+        appGossiper =
+            AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext, this)
         appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
@@ -65,12 +81,16 @@ class MainActivityFOC : AppCompatActivity() {
 
         // option 1: download a torrent through a magnet link
         downloadMagnetButton.setOnClickListener { _ ->
-            getMagnetLink()
+            scope.launch {
+                getMagnetLink()
+            }
         }
 
         // option 2: download a torrent through a .torrent file on your phone
         downloadTorrentButton.setOnClickListener { _ ->
-            getTorrent(false)
+            scope.launch {
+                getTorrent(false)
+            }
         }
 
         // option 3: Send a message to every other peer using the superapp
@@ -87,6 +107,27 @@ class MainActivityFOC : AppCompatActivity() {
 
         retrieveListButton.setOnClickListener { _ ->
             retrieveListOfAvailableTorrents()
+        }
+
+        // upon launching our activity, we ask for the "Storage" permission
+        requestStoragePermission()
+    }
+
+    val MY_PERMISSIONS_REQUEST = 0
+
+    // change if you want to write to the actual phone storage (needs "write" permission)
+    fun requestStoragePermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) // READ_EXTERNAL_STORAGE
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
+                MY_PERMISSIONS_REQUEST
+            )
         }
     }
 
@@ -124,11 +165,10 @@ class MainActivityFOC : AppCompatActivity() {
                         Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            progressBar.setProgress(100, true)
-                        }
-                        downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
-                        downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
+                        progressBar.setProgress(100, true)
+                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                        signal.countDown()
                         Log.i("personal", "Torrent finished")
                         printToast("Torrent downloaded!!")
                     }
@@ -148,7 +188,7 @@ class MainActivityFOC : AppCompatActivity() {
         // same or another torrent
 
         if (appGossiper.sessionActive && !sessionActive) {
-            printToast("The torrent session is busy fetching files, please try again later")
+            runOnUiThread { printToast("The torrent session is busy fetching files, please try again later") }
             return
         }
 
@@ -173,7 +213,7 @@ class MainActivityFOC : AppCompatActivity() {
         if (magnetLink == "") return
 
         if (!magnetLink.startsWith("magnet:")) {
-            printToast("This is not a magnet link")
+            runOnUiThread { printToast("This is not a magnet link") }
             return
         } else {
             val startindexname = magnetLink.indexOf("&dn=")
@@ -209,7 +249,7 @@ class MainActivityFOC : AppCompatActivity() {
             0, 1000
         )
 
-        printToast("Starting download, please wait...")
+        runOnUiThread { printToast("Starting download, please wait...") }
 
         Log.i("personal", "Fetching the magnet uri, please wait...")
         val data: ByteArray
@@ -217,14 +257,25 @@ class MainActivityFOC : AppCompatActivity() {
             data = s.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             Log.i("personal", "Failed to retrieve the magnet")
-            printToast("Something went wrong, check logs")
+            runOnUiThread { printToast("Something went wrong, check logs") }
             return
         }
 
-        val torrentInfo = Entry.bdecode(data).toString()
-        Log.i("personal", torrentInfo)
-        torrentView.text = torrentInfo
+        if (data != null) {
+            val torrentInfo = Entry.bdecode(data).toString()
+            runOnUiThread { Log.i("personal", torrentInfo) }
+            torrentView.text = torrentInfo
 
+            val ti = TorrentInfo.bdecode(data)
+            sessionActive = true
+            appGossiper.sessionActive = true
+            downloadMagnetButton.setText("STOP")
+            val savePath = Environment.getExternalStorageDirectory().absolutePath
+            s.download(ti, File(savePath))
+        } else {
+            Log.i("personal", "Failed to retrieve the magnet")
+            runOnUiThread { printToast("Something went wrong, check logs") }
+        }
         val ti = TorrentInfo.bdecode(data)
         sessionActive = true
         appGossiper.sessionActive = true
@@ -240,7 +291,7 @@ class MainActivityFOC : AppCompatActivity() {
 
 
         if (appGossiper.sessionActive && !sessionActive) {
-            printToast("The torrent session is busy fetching files, please try again later")
+            runOnUiThread { printToast("The torrent session is busy fetching files, please try again later") }
             return
         }
 
@@ -265,7 +316,7 @@ class MainActivityFOC : AppCompatActivity() {
         val torrentName: String?
         val inputText = enterTorrent.text.toString()
         if (inputText == "") {
-            printToast("No torrent name given, using default")
+            runOnUiThread { printToast("No torrent name given, using default") }
             torrentName = "sintel.torrent"
         } else torrentName = inputText
 
@@ -273,7 +324,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         try {
             if (!readTorrentSuccesfully(torrent)) {
-                printToast("Something went wrong, check logs")
+                runOnUiThread { printToast("Something went wrong, check logs") }
                 return
             }
         } catch (e: IOException) {
@@ -287,8 +338,8 @@ class MainActivityFOC : AppCompatActivity() {
         s.start(params)
 
         if (uploadHappening)
-            printToast("Starting upload, please wait...")
-        else printToast("Starting download, please wait...")
+            runOnUiThread { printToast("Starting upload, please wait...") }
+        else runOnUiThread { printToast("Starting download, please wait...") }
 
         val torrentFile = File(torrent)
         val ti = TorrentInfo(torrentFile)
