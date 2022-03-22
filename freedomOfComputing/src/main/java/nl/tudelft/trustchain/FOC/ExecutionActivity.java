@@ -58,7 +58,7 @@ public class ExecutionActivity extends AppCompatActivity {
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Fragment.SavedState getState() {
-        // TODO: Do not store in root of phone
+        // states are stored in the same directories as apks themselves (in the app specific files)
         String fileName = this.apkName + ".dat";
         try {
             Path path = Paths.get(fileName);
