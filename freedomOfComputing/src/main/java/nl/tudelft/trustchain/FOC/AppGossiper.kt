@@ -1,23 +1,14 @@
 package nl.tudelft.trustchain.FOC
 
 import android.content.Context
-import android.os.Environment
 import android.util.Log
-import android.widget.Toast
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
-import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import java.io.File
 import java.util.*
-import java.util.concurrent.CountDownLatch
-import kotlin.collections.ArrayList
 
 /**
  * This gossips data about 5 random apps with peers on demoCommunity every 10 seconds and fetches new apps from peers every 20 seconds
@@ -77,12 +68,12 @@ class AppGossiper(private val sessionManager: SessionManager, private val contex
     private suspend fun iterativelyDownloadApps() {
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
         while (scope.isActive) {
-            var torrentListMessages = demoCommunity?.getTorrentMessages()
+            val torrentListMessages = demoCommunity?.getTorrentMessages()
             if (torrentListMessages != null) {
                 for (packet in torrentListMessages) {
                     val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
                     Log.i("personal", peer.mid + ": " + payload.message)
-                    var magnetLink = payload.message.substringAfter("FOC:")
+                    val magnetLink = payload.message.substringAfter("FOC:")
                     val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
                         .substringBefore("&dn=")
                     if (torrentInfos.none { it.infoHash().toString() == torrentHash })
@@ -159,7 +150,6 @@ class AppGossiper(private val sessionManager: SessionManager, private val contex
             return
         }
 
-
         if (!magnetLink.startsWith("magnet:")) {
             return
         } else {
@@ -197,7 +187,7 @@ class AppGossiper(private val sessionManager: SessionManager, private val contex
 
 
         Log.i("personal", "Fetching the magnet uri, please wait...")
-        var data: ByteArray
+        val data: ByteArray
         try {
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
@@ -205,17 +195,12 @@ class AppGossiper(private val sessionManager: SessionManager, private val contex
             return
         }
 
-        if (data != null) {
-            val torrentInfo = Entry.bdecode(data).toString()
-            Log.i("personal", torrentInfo)
+        val torrentInfo = Entry.bdecode(data).toString()
+        Log.i("personal", torrentInfo)
 
-            val ti = TorrentInfo.bdecode(data)
-            sessionActive = true
-            sessionManager.download(ti, context.cacheDir)
-            sessionActive = false
-        } else {
-            Log.i("personal", "Failed to retrieve the magnet")
-        }
+        val ti = TorrentInfo.bdecode(data)
+        sessionActive = true
+        sessionManager.download(ti, context.cacheDir)
+        sessionActive = false
     }
-
 }
