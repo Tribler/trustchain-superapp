@@ -269,8 +269,7 @@ class MainActivityFOC : AppCompatActivity() {
             torrentName = "sintel.torrent"
         } else torrentName = inputText
 
-        // todo minor issue: ensure that users can not inject arbitrary paths using '..'
-        val torrent = "${applicationContext.cacheDir}/${torrentName}"
+        val torrent = "${applicationContext.cacheDir}/${torrentName.split("/").last()}"
 
         try {
             if (!readTorrentSuccesfully(torrent)) {
@@ -362,7 +361,7 @@ class MainActivityFOC : AppCompatActivity() {
             val intent = Intent(this, ExecutionActivity::class.java)
             intent.putExtra(
                 "fileName",
-                "${applicationContext.cacheDir}/${apkName}"
+                "${applicationContext.cacheDir}/${apkName.split("/").last()}"
             )
             startActivity(intent)
         } catch (e: Exception) {
@@ -383,7 +382,7 @@ class MainActivityFOC : AppCompatActivity() {
             fileName = "image.png"
         } else fileName = inputText
 
-        val file = File(applicationContext.cacheDir, fileName)
+        val file = File(applicationContext.cacheDir, fileName.split("/").last())
         if (!file.exists()) {
             printToast("Something went wrong, check logs")
             Log.i("personal", "File doesn't exist!")
@@ -411,7 +410,7 @@ class MainActivityFOC : AppCompatActivity() {
 
         var os: OutputStream? = null
         try {
-            os = FileOutputStream(File(applicationContext.cacheDir, torrentName))
+            os = FileOutputStream(File(applicationContext.cacheDir, torrentName.split("/").last()))
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
             e.printStackTrace()
