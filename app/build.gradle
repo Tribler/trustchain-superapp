@@ -27,7 +27,8 @@ ktlint {
 
 // Generate a version code from git commit count
 static def generateVersionCode() {
-    int versionCode = 1
+    int versionCode = "git rev-list HEAD --count".execute().text.trim().toInteger()
+    print("Version code: $versionCode")
     return versionCode
 }
 

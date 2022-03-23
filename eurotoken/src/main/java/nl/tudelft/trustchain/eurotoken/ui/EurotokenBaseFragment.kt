@@ -25,8 +25,13 @@ import nl.tudelft.trustchain.eurotoken.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import mu.KotlinLogging
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
+
+    private val logger = KotlinLogging.logger {}
+
+    private var trustScores: Map<String, *>? = null
 
     protected val transactionRepository by lazy {
         TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
@@ -54,8 +59,17 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
         setHasOptionsMenu(true)
 
-        val map = loadTrustScores()
-        Toast.makeText(requireContext(), "Loaded map!" + map.getValue("fe75ca18bcbbc74d734a8df180de709afb3121c738c0cc27bbc42cef4c23435bef692195773c286207c2a3ffe855c34a988ea106be5d30f9f560ef9a3bf20af771fafdb6a4683e69b7e6"), Toast.LENGTH_LONG).show()
+        try {
+            trustScores = loadTrustScores()
+            Toast.makeText(
+                requireContext(),
+                "Loaded trust scores! " + trustScores!!.getValue("fe75ca18bcbbc74d734a8df180de709afb3121c738c0cc27bbc42cef4c23435bef692195773c286207c2a3ffe855c34a988ea106be5d30f9f560ef9a3bf20af771fafdb6a4683e69b7e6"),
+                Toast.LENGTH_LONG
+            ).show()
+        } catch (e: IOException) {
+            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
+            logger.error(e) { "Error reading trust_scores.json asset" }
+        }
 
         lifecycleScope.launchWhenResumed {
         }
@@ -73,14 +87,10 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         player.start();
     }
 
+    @Throws(IOException::class)
     private fun loadTrustScores(): Map<String, *> {
-        lateinit var jsonString: String
-        try {
-            val fd = activity?.assets?.open("trust_scores.json")?:throw IOException()
-            jsonString = fd.bufferedReader().use{it.readText()}
-        } catch (ioException: IOException) {
-            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
-        }
+        val fd = activity?.assets?.open("trust_scores.json")?: throw IOException()
+        val jsonString = fd.bufferedReader().use{it.readText()}
 
         val jsonObj = JSONObject(jsonString)
         return jsonObj.toMap()
