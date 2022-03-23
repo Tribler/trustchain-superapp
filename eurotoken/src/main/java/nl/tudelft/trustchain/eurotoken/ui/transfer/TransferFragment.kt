@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import mu.KotlinLogging
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -27,6 +28,8 @@ import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
 import org.json.JSONObject
+
+private val logger = KotlinLogging.logger {}
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
@@ -137,9 +140,18 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
 
-                val peer = getTrustChainCommunity().network.getVerifiedByPublicKeyBin(connectionData.public_key.toByteArray())!!
-                val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()!!
-                euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+                try {
+                    val peer = getTrustChainCommunity().network.getVerifiedByPublicKeyBin(connectionData.public_key.toByteArray())!!
+                    val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()!!
+                    euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+                } catch (e: Exception) {
+                    logger.debug { "Could not send addresses of last transactions" }
+                    Toast.makeText(
+                        requireContext(),
+                        "Could not send addresses of last transactions",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
                 if (connectionData.type == "transfer") {
                     findNavController().navigate(
