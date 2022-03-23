@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
@@ -20,6 +21,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.*
+import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
+import com.frostwire.jlibtorrent.alerts.Alert
+import com.frostwire.jlibtorrent.alerts.AlertType
+import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.content_main_activity_foc.*
@@ -49,6 +54,7 @@ class MainActivityFOC : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
+            initializeTorrentSession()
             setContentView(R.layout.activity_main_foc)
             setSupportActionBar(toolbar)
             fab.setOnClickListener { _ ->
@@ -82,6 +88,44 @@ class MainActivityFOC : AppCompatActivity() {
             progress.visibility = View.VISIBLE
         }
         progressVisible = !progressVisible
+    }
+
+    private fun initializeTorrentSession() {
+        s.addListener(object : AlertListener {
+            override fun types(): IntArray? {
+                return null
+            }
+
+            override fun alert(alert: Alert<*>) {
+                val type = alert.type()
+
+                when (type) {
+                    AlertType.ADD_TORRENT -> {
+                        Log.i("personal", "Torrent added")
+                        (alert as AddTorrentAlert).handle().resume()
+                    }
+                    AlertType.BLOCK_FINISHED -> {
+                        val a = alert as BlockFinishedAlert
+                        val p = (a.handle().status().progress() * 100).toInt()
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            progressBar.setProgress(p, true)
+                        }
+                        Log.i(
+                            "personal",
+                            "Progress: " + p + " for torrent name: " + a.torrentName()
+                        )
+                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
+                    }
+                    AlertType.TORRENT_FINISHED -> {
+                        signal.countDown()
+                        Log.i("personal", "Torrent finished")
+                        printToast("Torrent downloaded!!")
+                    }
+                    else -> {
+                    }
+                }
+            }
+        })
     }
 
     @Suppress("deprecation")
