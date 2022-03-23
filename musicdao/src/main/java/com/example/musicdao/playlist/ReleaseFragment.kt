@@ -280,6 +280,7 @@ class ReleaseFragment(
     /**
      * Select a track from the Release and start downloading and seeding it
      */
+    @OptIn(DelicateCoroutinesApi::class, ExperimentalUnsignedTypes::class)
     fun selectTrackAndPlay(index: Int) {
         currentFileIndex = index
 

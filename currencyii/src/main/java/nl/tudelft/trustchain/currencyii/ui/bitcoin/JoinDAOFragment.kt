@@ -32,8 +32,8 @@ class JoinDAOFragment : BaseFragment(R.layout.fragment_join_network) {
     private var fetchedWallets: ArrayList<TrustChainBlock> = ArrayList()
     private var isFetching: Boolean = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         initListeners()
         this.refresh()
     }

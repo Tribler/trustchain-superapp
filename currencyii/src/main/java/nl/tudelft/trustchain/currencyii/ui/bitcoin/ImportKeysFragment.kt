@@ -21,8 +21,8 @@ import nl.tudelft.trustchain.currencyii.coin.WalletManagerConfiguration
  */
 class ImportKeysFragment : Fragment() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         import_btc_address_btn.setOnClickListener {
 

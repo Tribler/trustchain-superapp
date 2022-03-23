@@ -242,6 +242,7 @@ class ChatLocationDialog(
 
     @Suppress("MissingPermission")
     private fun enableMyLocation() {
+        @Suppress("DEPRECATION")
         if (isPermissionGranted()) {
             try {
                 map.isMyLocationEnabled = true

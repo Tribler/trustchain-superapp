@@ -1,12 +1,11 @@
 package nl.tudelft.trustchain.peerchat.ui.conversation
 
-import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -159,23 +158,14 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         }
 
         btnAddImage.setOnClickListener {
-            val intent = Intent()
             fab.collapse()
-            intent.type = "image/*"
-            intent.action = Intent.ACTION_GET_CONTENT
-            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE)
+            pickImage.launch("image/*")
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            PICK_IMAGE -> if (resultCode == Activity.RESULT_OK && data != null) {
-                val uri = data.data
-                if (uri != null) {
-                    sendImageFromUri(uri)
-                }
-            }
-            else -> super.onActivityResult(requestCode, resultCode, data)
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            sendImageFromUri(uri)
         }
     }
 
@@ -211,6 +201,5 @@ class ConversationFragment : BaseFragment(R.layout.fragment_conversation) {
         const val ARG_NAME = "name"
 
         private const val GROUP_TIME_LIMIT = 60 * 1000
-        private const val PICK_IMAGE = 10
     }
 }

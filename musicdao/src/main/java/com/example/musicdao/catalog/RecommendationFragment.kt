@@ -17,8 +17,9 @@ import java.lang.Double.NEGATIVE_INFINITY
 
 class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendation) {
     private var isActive = true
-    private val test = false
+    // private val test = false
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.w("Recommend", "RecommendationFragment view created")
@@ -27,7 +28,7 @@ class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendatio
         lifecycleScope.launchWhenCreated {
             while (isActive) {
                 getRecommenderCommunity().initiateWalkingModel()
-                delay(60 * 1000)
+                delay(60 * 1000L)
             }
         }
         refreshRecommend.setOnRefreshListener {
@@ -71,6 +72,7 @@ class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendatio
      * @param data pair of features and corresponding song block
      * @return array of predicted scores
      */
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun getBaggedPredictions(data: Pair<Array<Array<Double>>, List<TrustChainBlock>>): Array<Double> {
         var jointRelease = Array(data.second.size) { _ -> 0.0 }
         val modelNames = arrayOf("Pegasos")
@@ -78,7 +80,7 @@ class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendatio
             Log.w("Recommend", "Getting model $name")
             val colab = getRecommenderCommunity().recommendStore.getLocalModel(name)
             var bestRelease = (colab as Pegasos).predict(data.first)
-            val sum = bestRelease.sumByDouble { it }
+            val sum = bestRelease.sumOf { it }
             bestRelease = bestRelease.indices.map { bestRelease[it] / sum }.toTypedArray()
             jointRelease = jointRelease.indices.map { jointRelease[it] + bestRelease[it] }.toTypedArray()
         }
@@ -89,6 +91,7 @@ class RecommendationFragment : MusicBaseFragment(R.layout.fragment_recommendatio
      * List all the releases that are currently loaded in the local trustchain database. If keyword
      * search is enabled (searchQuery variable is set) then it also filters the database
      */
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun refreshRecommendations() {
         val recStore = getRecommenderCommunity().recommendStore
         val data = recStore.getNewSongs()

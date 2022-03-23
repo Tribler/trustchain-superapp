@@ -23,7 +23,7 @@ open class RequestModelMessage @ExperimentalUnsignedTypes constructor(
     }
 
     companion object Deserializer : Deserializable<RequestModelMessage> {
-        @ExperimentalUnsignedTypes
+        @OptIn(ExperimentalUnsignedTypes::class)
         @JvmStatic
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<RequestModelMessage, Int> {
             var localOffset = 0

@@ -29,7 +29,6 @@ class TransferFragment : BaseFragment() {
         return inflater.inflate(R.layout.fragment_transfer, container, false)
     }
 
-    @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         Log.d("PKPK", trustchain.getMyPublicKey().toHex())
 //        txtBalance.text = "Current balance: ${getTrustChainCommunity().getBalance().toString()}"
@@ -123,8 +122,6 @@ class TransferFragment : BaseFragment() {
             } else {
                 Log.d("QR Scan", "Scan failed")
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }

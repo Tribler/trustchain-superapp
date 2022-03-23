@@ -26,9 +26,8 @@ import kotlin.concurrent.thread
  */
 class BlockchainDownloadFragment : BaseFragment(R.layout.fragment_blockchain_download) {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         // TODO: The routing is cleaner to do via the previously displayed fragment.
         bitcoin_progress_continue.setOnClickListener {
             val navController = findNavController()

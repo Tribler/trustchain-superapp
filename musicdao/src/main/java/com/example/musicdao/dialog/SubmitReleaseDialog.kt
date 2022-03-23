@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import com.example.musicdao.MusicService
 import com.example.musicdao.R
@@ -54,24 +55,6 @@ class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOvervi
                 }
             )
         return builder.create()
-    }
-
-    /**
-     * This is called when the chooseFile is completed
-     */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (data == null) return
-        val uriList = ReleaseFactory.uriListFromLocalFiles(data)
-        if (uriList.isEmpty()) return
-        val localContext = context
-        if (localContext != null) {
-            val torrentFile = (activity as MusicService).generateTorrent(localContext, uriList)
-            val torrentInfo = TorrentInfo(torrentFile)
-            localTorrentInfo = torrentInfo
-            dialogView?.findViewById<EditText>(R.id.release_magnet)
-                ?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
-        }
     }
 
     /**
@@ -130,6 +113,24 @@ class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOvervi
         }
     }
 
+
+    private val chooseFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (data != null) {
+            val uriList = ReleaseFactory.uriListFromLocalFiles(data)
+            if (uriList.isNotEmpty()) {
+                val localContext = context
+                if (localContext != null) {
+                    val torrentFile = (activity as MusicService).generateTorrent(localContext, uriList)
+                    val torrentInfo = TorrentInfo(torrentFile)
+                    localTorrentInfo = torrentInfo
+                    dialogView?.findViewById<EditText>(R.id.release_magnet)
+                        ?.setText(torrentInfo.makeMagnetUri(), TextView.BufferType.EDITABLE)
+                }
+            }
+        }
+    }
+
     /**
      * Select an audio file from local disk
      */
@@ -137,7 +138,7 @@ class SubmitReleaseDialog(private val playlistsOverviewFragment: PlaylistsOvervi
         val selectFilesIntent = Intent(Intent.ACTION_GET_CONTENT)
         selectFilesIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         selectFilesIntent.type = "audio/*"
-        val chooseFileActivity = Intent.createChooser(selectFilesIntent, "Choose a file")
-        startActivityForResult(chooseFileActivity, 1)
+        val chooseFileIntent = Intent.createChooser(selectFilesIntent, "Choose a file")
+        chooseFile.launch(chooseFileIntent)
     }
 }

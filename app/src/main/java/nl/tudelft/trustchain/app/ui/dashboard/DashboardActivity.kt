@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -25,12 +26,12 @@ class DashboardActivity : AppCompatActivity() {
     private val adapter = ItemAdapter()
 
     private val BLUETOOTH_PERMISSIONS_REQUEST_CODE = 200
-    private val SETTINGS_INTENT_CODE = 1000
 
     private val BLUETOOTH_PERMISSIONS_SCAN = "android.permission.BLUETOOTH_SCAN"
     private val BLUETOOTH_PERMISSIONS_CONNECT = "android.permission.BLUETOOTH_CONNECT"
     private val BLUETOOTH_PERMISSIONS_ADVERTISE = "android.permission.BLUETOOTH_ADVERTISE"
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -90,6 +91,7 @@ class DashboardActivity : AppCompatActivity() {
         )
     }
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -107,18 +109,13 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            SETTINGS_INTENT_CODE -> {
-                if (hasBluetoothPermissions()) {
-                    (application as TrustChainApplication).initIPv8()
-                } else {
-                    onPermissionsDenied()
-                }
-            }
-            else -> super.onActivityResult(requestCode, resultCode, data)
+    @OptIn(ExperimentalUnsignedTypes::class)
+    private val applicationDetailsSettings = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
+        if (hasBluetoothPermissions()) {
+            (application as TrustChainApplication).initIPv8()
+        } else {
+            onPermissionsDenied()
         }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun onPermissionsDenied() {
@@ -131,7 +128,7 @@ class DashboardActivity : AppCompatActivity() {
                             Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         val uri: Uri = Uri.fromParts("package", packageName, null)
                         intent.data = uri
-                        startActivityForResult(intent, SETTINGS_INTENT_CODE)
+                        applicationDetailsSettings.launch(intent)
                     }
                 }.create()
             }

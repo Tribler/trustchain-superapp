@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,7 +17,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
@@ -27,7 +24,6 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.fragment_contacts_chat.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -62,9 +58,10 @@ import androidx.recyclerview.widget.RecyclerView
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doAfterTextChanged
 import androidx.documentfile.provider.DocumentFile
-import com.google.android.gms.location.*
+import androidx.fragment.app.setFragmentResultListener
 import nl.tudelft.ipv8.messaging.eva.TransferState
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -423,6 +420,54 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                 }
             )
         )
+
+        setFragmentResultListener("renameContact") { _, _ ->
+            searchFilterLimit.value = searchFilterLimit.value
+        }
+    }
+
+    private val takePicture = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            cameraUri?.let {
+                sendFromUri(it, TYPE_IMAGE)
+            }
+        }
+    }
+
+    private val pickImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (data != null) {
+            if (data.clipData != null) {
+                data.clipData?.let {
+                    for (i in 0 until it.itemCount) {
+                        val uri = it.getItemAt(i).uri
+                        sendFromUri(uri, TYPE_IMAGE)
+                    }
+                }
+            } else {
+                data.data?.let {
+                    sendFromUri(it, TYPE_IMAGE)
+                }
+            }
+        }
+    }
+
+    private val pickFile = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (data != null) {
+            if (data.clipData != null) {
+                data.clipData?.let {
+                    for (i in 0 until it.itemCount) {
+                        val uri = it.getItemAt(i).uri
+                        sendFromUri(uri, TYPE_FILE)
+                    }
+                }
+            } else {
+                data.data?.let {
+                    sendFromUri(it, TYPE_FILE)
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -521,21 +566,12 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
                 when (item.itemId) {
                     R.id.actionSendCamera -> {
-                        if (!checkCameraPermissions()) {
-                            parentActivity.displayToast(
-                                requireContext(),
-                                resources.getString(R.string.snackbar_camera_retrieve_error)
-                            )
-                        } else {
-                            cameraUri = activity?.contentResolver?.insert(
-                                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                ContentValues()
-                            )
+                        cameraUri = activity?.contentResolver?.insert(
+                            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                            ContentValues()
+                        )
 
-                            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                            intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraUri)
-                            startActivityForResult(intent, PICK_CAMERA)
-                        }
+                        takePicture.launch(cameraUri)
                     }
                     R.id.actionSendPhotoFromLibrary -> {
                         val mimeTypes = arrayOf("image/*")
@@ -543,13 +579,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         intent.type = "*/*"
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        startActivityForResult(
-                            Intent.createChooser(
-                                intent,
-                                resources.getString(R.string.text_send_photo_video)
-                            ),
-                            PICK_IMAGE
-                        )
+                        pickImage.launch(intent)
                     }
                     R.id.actionSendFile -> {
                         val mimeTypes = arrayOf(
@@ -561,13 +591,7 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
                         intent.type = "*/*"
                         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
                         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        startActivityForResult(
-                            Intent.createChooser(
-                                intent,
-                                resources.getString(R.string.text_send_file)
-                            ),
-                            PICK_FILE
-                        )
+                        pickFile.launch(intent)
                     }
                     R.id.actionSendLocation -> ChatLocationDialog(publicKey).show(parentFragmentManager, tag)
                     R.id.actionSendContact -> ContactShareDialog(
@@ -1016,7 +1040,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
 
     private fun addRenameContact(contact: Contact) {
         val dialogContactRename = ContactRenameDialog(contact).newInstance(123)
-        dialogContactRename.setTargetFragment(this, 1)
 
         @Suppress("DEPRECATION")
         dialogContactRename.show(requireFragmentManager().beginTransaction(), "dialog")
@@ -1142,47 +1165,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         (previousFragment[0] as VTFragment).initView()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                PICK_IMAGE -> if (data != null) {
-                    if (data.clipData != null) {
-                        data.clipData?.let {
-                            for (i in 0 until it.itemCount) {
-                                val uri = it.getItemAt(i).uri
-                                sendFromUri(uri, TYPE_IMAGE)
-                            }
-                        }
-                    } else {
-                        data.data?.let {
-                            sendFromUri(it, TYPE_IMAGE)
-                        }
-                    }
-                }
-                PICK_FILE -> if (data != null) {
-                    if (data.clipData != null) {
-                        data.clipData?.let {
-                            for (i in 0 until it.itemCount) {
-                                val uri = it.getItemAt(i).uri
-                                sendFromUri(uri, TYPE_FILE)
-                            }
-                        }
-                    } else {
-                        data.data?.let {
-                            sendFromUri(it, TYPE_FILE)
-                        }
-                    }
-                }
-                PICK_CAMERA -> cameraUri?.let {
-                    sendFromUri(it, TYPE_IMAGE)
-                }
-                RENAME_CONTACT -> if (data != null) {
-                    searchFilterLimit.value = searchFilterLimit.value
-                }
-            }
-        } else super.onActivityResult(requestCode, resultCode, data)
-    }
-
     private fun sendFromUri(uri: Uri, type: String) {
         val file = saveFile(requireContext(), uri)
 
@@ -1234,16 +1216,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
         }
     }
 
-    private fun checkCameraPermissions(): Boolean {
-        return if ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            requestPermissions(
-                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                PERMISSION_CAMERA
-            )
-            false
-        } else true
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -1265,11 +1237,6 @@ class ContactChatFragment : VTFragment(R.layout.fragment_contacts_chat) {
     }
 
     companion object {
-        const val PICK_IMAGE = 11
-        const val PICK_FILE = 12
-        const val PICK_CAMERA = 13
-        const val RENAME_CONTACT = 33
-
         const val MENU_ITEM_OPTIONS = 1
         const val MENU_ITEM_SEARCH_FILTER = 2
 

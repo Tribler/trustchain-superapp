@@ -33,7 +33,7 @@ class PresentAttestationDialog(
             builder.setView(mView)
 
             val dialog: Dialog
-            val title = "Attestation for <font color='#EE0000'>${attributeName.capitalize()}</font>"
+            val title = "Attestation for <font color='#EE0000'>${attributeName.replaceFirstChar { c -> c.uppercase() }}</font>"
             val message = "<b>$attributeName:</b> $attributeValue"
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 builder.setTitle(Html.fromHtml(title, Html.FROM_HTML_MODE_LEGACY))

@@ -20,8 +20,8 @@ import java.io.File
  */
 class MyDAOsFragment : BaseFragment(R.layout.fragment_my_daos) {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         handleDownloadNavigation()
         handleWalletNavigation()
         initMyDAOsView()

@@ -33,7 +33,7 @@ open class ModelExchangeMessage @ExperimentalUnsignedTypes constructor(
     }
 
     companion object Deserializer : Deserializable<ModelExchangeMessage> {
-        @ExperimentalUnsignedTypes
+        @OptIn(ExperimentalUnsignedTypes::class)
         @JvmStatic
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<ModelExchangeMessage, Int> {
             var localOffset = 0

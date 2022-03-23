@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
@@ -98,6 +99,7 @@ class TrustChainApplication : Application() {
         initTrustChain()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun initWallet() {
         GlobalScope.launch {
             // Generate keys in a coroutine as this significantly impacts first launch.
@@ -308,6 +310,7 @@ class TrustChainApplication : Application() {
         )
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")

@@ -9,6 +9,7 @@ import com.google.zxing.integration.android.IntentIntegrator
  */
 class FragmentIntentIntegrator(private val fragment: Fragment) :
     IntentIntegrator(fragment.activity) {
+    @Suppress("DEPRECATION")
     override fun startActivityForResult(intent: Intent, code: Int) {
         fragment.startActivityForResult(intent, code)
     }

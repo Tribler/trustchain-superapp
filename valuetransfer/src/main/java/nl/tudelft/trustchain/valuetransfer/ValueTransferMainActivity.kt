@@ -497,6 +497,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Define bottom navigation view listeners
      */
     private fun bottomNavigationViewListeners() {
+        @Suppress("DEPRECATION")
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             val activeTag = getActiveFragment()?.tag
 

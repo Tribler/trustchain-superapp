@@ -32,8 +32,8 @@ import java.lang.NumberFormatException
 class SharedWalletTransaction : BaseFragment(R.layout.fragment_shared_wallet_transaction) {
     private var blockHash: ByteArray? = null
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         button.setOnClickListener {
             lifecycleScope.launch {

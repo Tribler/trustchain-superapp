@@ -8,7 +8,7 @@ import nl.tudelft.trustchain.trader.util.getAmount
 import nl.tudelft.trustchain.trader.util.getBalance
 
 class DDValidator : TransactionValidator {
-    @ExperimentalUnsignedTypes
+    @OptIn(ExperimentalUnsignedTypes::class)
     override fun validate(
         block: TrustChainBlock,
         database: TrustChainStore

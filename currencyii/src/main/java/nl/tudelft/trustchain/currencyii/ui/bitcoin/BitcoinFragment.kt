@@ -11,6 +11,7 @@ import android.view.*
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.bitcoin_networks.*
 import kotlinx.android.synthetic.main.fragment_bitcoin.*
@@ -32,19 +33,25 @@ const val BALANCE_THRESHOLD = "5"
  * create an instance of this fragment.
  */
 class BitcoinFragment :
-    BaseFragment(R.layout.fragment_bitcoin),
-    ImportKeyDialog.ImportKeyDialogListener {
+    BaseFragment(R.layout.fragment_bitcoin) {
+    //ImportKeyDialog.ImportKeyDialogListener {
 
     private var getBitcoinPressed = false
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        initClickListeners()
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initClickListeners()
         setHasOptionsMenu(true)
+
+        setFragmentResultListener("import") { _, bundle ->
+            val address = bundle.getString("address")!!
+            val privateKey = bundle.getString("privateKey")!!
+            onImport(address, privateKey)
+        }
+
+        setFragmentResultListener("importDone") { _, _ ->
+            onImportDone()
+        }
     }
 
     override fun onResume() {
@@ -273,7 +280,7 @@ class BitcoinFragment :
         fun newInstance() = BitcoinFragment()
     }
 
-    override fun onImport(address: String, privateKey: String) {
+    fun onImport(address: String, privateKey: String) {
         if (!WalletManagerAndroid.isRunning) {
             val config = WalletManagerConfiguration(
                 when (bitcoin_network_radio_group.checkedRadioButtonId) {
@@ -309,7 +316,7 @@ class BitcoinFragment :
         }
     }
 
-    override fun onImportDone() {
+    fun onImportDone() {
         this.refresh(true)
 
         @Suppress("DEPRECATION")

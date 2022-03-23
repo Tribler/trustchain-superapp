@@ -251,7 +251,7 @@ fun ByteArray.md5(): String {
 fun String.getInitials(): String {
     val initials = StringBuilder()
     this.split(" ").forEach {
-        if (it.isNotEmpty()) initials.append("${it[0].toUpperCase()}.")
+        if (it.isNotEmpty()) initials.append("${it[0].uppercase()}.")
     }
     return initials.toString()
 }

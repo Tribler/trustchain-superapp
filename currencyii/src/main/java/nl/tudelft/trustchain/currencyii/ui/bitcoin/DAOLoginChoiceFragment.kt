@@ -20,8 +20,8 @@ import java.io.File
  */
 class DAOLoginChoiceFragment : BaseFragment(R.layout.fragment_dao_login_choice) {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         load_production_wallet.setOnClickListener {
             loadWallet(BitcoinNetworkOptions.PRODUCTION)

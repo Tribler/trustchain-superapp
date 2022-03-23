@@ -101,13 +101,13 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             val amount = getAmount(binding.edtAmount.text.toString())
             if (amount > 0) {
                 val myPeer = transactionRepository.trustChainCommunity.myPeer
-                val ownContact =
+                val requestOwnContact =
                     ContactStore.getInstance(view.context).getContactFromPublicKey(ownKey)
 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
                 connectionData.put("amount", amount)
-                connectionData.put("name", ownContact?.name ?: "")
+                connectionData.put("name", requestOwnContact?.name ?: "")
                 connectionData.put("type", "transfer")
 
                 val args = Bundle()

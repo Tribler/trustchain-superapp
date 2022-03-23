@@ -15,10 +15,10 @@
         <action
             android:id="@+id/action_databaseFragment_to_verificationFragment"
             app:destination="@id/verificationFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit" />
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/verificationFragment"
@@ -27,11 +27,11 @@
         <action
             android:id="@+id/action_verificationFragment_to_databaseFragment"
             app:destination="@id/databaseFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
             app:launchSingleTop="false"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/nav_graph_ssi"
             app:popUpToInclusive="true" />
         <argument
@@ -46,10 +46,10 @@
         <action
             android:id="@+id/action_verificationFragment_to_peersFragment2"
             app:destination="@id/peersFragment2"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit"
-            app:popEnterAnim="@anim/fragment_fade_enter"
-            app:popExitAnim="@anim/fragment_fade_exit"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out"
             app:popUpTo="@id/databaseFragment"
             app:popUpToInclusive="false" />
     </fragment>

@@ -465,7 +465,6 @@ class IdentityOnboardingDialog : VTDialogFragment(), View.OnClickListener {
      * Passport capture result is received
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && data != null) {
             (data.getSerializableExtra(PassportHandler.MRZ_RESULT) as MRZInfo).run {

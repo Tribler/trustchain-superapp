@@ -166,7 +166,7 @@ open class RecommenderCommunity(
         val (_, payload) = packet.getAuthPayload(ModelExchangeMessage)
 
         // packet contains model type and weights from peer
-        val modelType = payload.modelType.toLowerCase(Locale.ROOT)
+        val modelType = payload.modelType.lowercase(Locale.ROOT)
         var peerModel = payload.model
         Log.i("Recommend", "Walking model is de-packaged")
 
@@ -224,7 +224,7 @@ open class RecommenderCommunity(
         val (_, payload) = packet.getAuthPayload(FeaturesExchangeMessage)
 
         // packet contains model type and weights from peer
-        val songIdentifier = payload.songIdentifier.toLowerCase(Locale.ROOT)
+        val songIdentifier = payload.songIdentifier.lowercase(Locale.ROOT)
         val features = payload.features
         Log.i("Recommend", "Song features are de-packaged")
 
@@ -240,7 +240,7 @@ open class RecommenderCommunity(
     private fun onModelRequest(packet: Packet) {
         Log.i("Recommend", "Model request received")
         val (_, payload) = packet.getAuthPayload(ModelExchangeMessage)
-        val modelType = payload.modelType.toLowerCase(Locale.ROOT)
+        val modelType = payload.modelType.lowercase(Locale.ROOT)
         val model = recommendStore.getLocalModel(modelType)
         send(
             packet.source,

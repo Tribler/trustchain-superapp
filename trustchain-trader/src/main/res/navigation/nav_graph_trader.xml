@@ -13,8 +13,8 @@
         <action
             android:id="@+id/action_traderFragment_to_AI_HistoryFragment"
             app:destination="@id/AI_HistoryFragment"
-            app:enterAnim="@anim/fragment_fade_enter"
-            app:exitAnim="@anim/fragment_fade_exit" />
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
         <action
             android:id="@+id/action_traderFragment_to_blocksFragment"
             app:destination="@id/blocksFragment" />
@@ -76,8 +76,8 @@
         <action
             android:id="@+id/action_AI_HistoryFragment_to_traderFragment"
             app:destination="@id/traderFragment"
-            app:enterAnim="@anim/fragment_close_enter"
-            app:exitAnim="@anim/fragment_close_exit" />
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/blocksFragment"

@@ -42,8 +42,8 @@ class MySharedWalletFragment : BaseFragment(R.layout.fragment_my_shared_wallets)
         }
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         initListView()
     }
 

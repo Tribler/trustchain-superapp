@@ -23,7 +23,6 @@ class PayloadCreateFragment : BaseFragment() {
     }
 
     @SuppressLint("SetTextI18n")
-    @ExperimentalUnsignedTypes
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         askBidSwitch.setOnClickListener {

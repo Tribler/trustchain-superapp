@@ -11,15 +11,15 @@ class Messages {
             var ssBuf: ByteArray = byteArrayOf()
 
             if (l < 253) {
-                ssBuf += l.toChar().toByte()
+                ssBuf += l.toChar().code.toByte()
             } else if (l < 0x10000) {
-                ssBuf += 253.toChar().toByte()
+                ssBuf += 253.toChar().code.toByte()
                 ssBuf += l.toShort().toByte()
             } else if (l < 0x100000000) {
-                ssBuf += 254.toChar().toByte()
+                ssBuf += 254.toChar().code.toByte()
                 ssBuf += l.toByte()
             } else {
-                ssBuf += 255.toChar().toByte()
+                ssBuf += 255.toChar().code.toByte()
                 ssBuf += l.toLong().toByte()
             }
 

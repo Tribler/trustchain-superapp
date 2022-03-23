@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.app.Activity
 import android.app.Dialog
-import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.WindowManager
@@ -11,14 +9,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.NestedScrollView
+import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
-import kotlinx.android.synthetic.main.dialog_contact.*
-import kotlinx.android.synthetic.main.fragment_exchange_vt.*
-import kotlinx.android.synthetic.main.item_contacts_chat.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
@@ -35,7 +31,6 @@ import nl.tudelft.trustchain.peerchat.entity.ContactState
 import nl.tudelft.trustchain.peerchat.ui.conversation.MessageAttachment
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
-import nl.tudelft.trustchain.valuetransfer.ui.contacts.ContactChatFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItemRenderer
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItem
 import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityAttributeItemRenderer
@@ -94,6 +89,14 @@ class ContactInfoDialog(
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setFragmentResultListener("renameContact") { _, _ ->
+            bottomSheetDialog.show()
+        }
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         adapterTransactions.registerRenderer(
             ExchangeTransactionItemRenderer(false, parentActivity) {
@@ -132,7 +135,7 @@ class ContactInfoDialog(
             nickNameEdit.setOnClickListener {
                 contact.value.let {
                     val dialogContactRename = ContactRenameDialog(it ?: Contact("", publicKey)).newInstance(123)
-                    dialogContactRename.setTargetFragment(this, 1)
+
 
                     bottomSheetDialog.hide()
 
@@ -305,16 +308,6 @@ class ContactInfoDialog(
         buttonMoreTransactions.isVisible = transactionsItems.size >= transactionShowCount
 
         noTransactionsView.isVisible = items.isEmpty()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                ContactChatFragment.RENAME_CONTACT -> if (data != null) {
-                    bottomSheetDialog.show()
-                }
-            }
-        } else super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun createAttributeItems(attachments: List<MessageAttachment>): List<Item> {

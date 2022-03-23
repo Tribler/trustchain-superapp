@@ -22,8 +22,8 @@ import nl.tudelft.trustchain.currencyii.ui.BaseFragment
  * create an instance of this fragment.
  */
 class CreateSWFragment : BaseFragment(R.layout.fragment_create_sw) {
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         create_sw_wallet_button.setOnClickListener {
             lifecycleScope.launch {

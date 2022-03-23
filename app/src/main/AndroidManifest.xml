@@ -43,7 +43,8 @@
         <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:label="Trustchain Superapp"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -126,7 +127,8 @@
             android:name="com.example.musicdao.MusicService"
             android:label="Music app"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
