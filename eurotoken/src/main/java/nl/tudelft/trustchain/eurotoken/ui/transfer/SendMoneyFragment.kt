@@ -3,7 +3,9 @@ package nl.tudelft.trustchain.eurotoken.ui.transfer
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_send_money.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
@@ -15,6 +17,7 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
+import kotlin.math.roundToInt
 
 class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
@@ -89,6 +92,28 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         binding.txtOwnPublicKey.text = ownPublicKey.toString()
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
+
+        val trustScore = trustScores?.get(publicKey)
+        logger.info { "Trustscore: $trustScore" }
+
+        if (trustScore != null && trustScore is Double) {
+            val trustScorePercentage = (trustScore * 100).roundToInt()
+            if (0.3 < trustScore && trustScore < 0.7) {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScorePercentage)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+                trustScoreWarning.visibility = View.VISIBLE
+            } else if (trustScore < 0.3) {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScorePercentage)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+                trustScoreWarning.visibility = View.VISIBLE
+            } else {
+                trustScoreWarning.visibility = View.GONE
+            }
+        } else {
+            trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
+            trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+            trustScoreWarning.visibility = View.VISIBLE
+        }
 
         binding.btnSend.setOnClickListener {
             val newName = binding.newContactName.text.toString()
