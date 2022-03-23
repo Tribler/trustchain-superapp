@@ -55,8 +55,7 @@ class MainActivityFOC : AppCompatActivity() {
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        appGossiper =
-            AppGossiper.getInstance(File(Environment.getExternalStorageDirectory().absolutePath), s, applicationContext, this)
+        appGossiper = AppGossiper.getInstance(s, applicationContext, this)
         appGossiper.start()
         setContentView(R.layout.activity_main_foc)
         setSupportActionBar(toolbar)
@@ -258,6 +257,7 @@ class MainActivityFOC : AppCompatActivity() {
         } catch (e: Exception) {
             Log.i("personal", "Failed to retrieve the magnet")
             runOnUiThread { printToast("Something went wrong, check logs") }
+            runOnUiThread { printToast(e.toString()) }
             return
         }
 

@@ -22,7 +22,6 @@ lateinit var appGossiperInstance: AppGossiper
 
 @Suppress("deprecation")
 class AppGossiper(
-    private val saveDir: File,
     private val sessionManager: SessionManager,
     private val context: Context,
     private val activity: MainActivityFOC
@@ -41,13 +40,12 @@ class AppGossiper(
 
     companion object {
         fun getInstance(
-            saveDir: File,
             sessionManager: SessionManager,
             context: Context,
             activity: MainActivityFOC
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(saveDir, sessionManager, context, activity)
+                appGossiperInstance = AppGossiper(sessionManager, context, activity)
             }
             return appGossiperInstance
         }
@@ -108,16 +106,17 @@ class AppGossiper(
     }
 
     private fun randomlyShareFiles(demoCommunity: DemoCommunity) {
-        saveDir.listFiles()?.forEachIndexed { _, file ->
+        context.cacheDir.listFiles()?.forEachIndexed { _, file ->
             if (file.name.endsWith(".torrent")) {
                 val torrentInfo = TorrentInfo(file)
                 if (torrentInfo.isValid) {
                     // 'Downloading' the torrent file also starts seeding it after download has
                     // already been completed
                     // We only seed torrents that have previously already been fully downloaded
-                    if (isTorrentOkay(torrentInfo, saveDir)) {
+                    if (isTorrentOkay(torrentInfo, context.cacheDir)) {
                         if (!torrentInfos.any { it.infoHash() == torrentInfo.infoHash() }) {
                             torrentInfos.add(torrentInfo)
+                            activity.runOnUiThread { printToast(file.name) }
                         }
                     }
                 }
@@ -144,7 +143,7 @@ class AppGossiper(
     private fun downloadAndSeed(torrentInfo: TorrentInfo, demoCommunity: DemoCommunity) {
         if (torrentInfo.isValid) {
 
-            sessionManager.download(torrentInfo, saveDir)
+            sessionManager.download(torrentInfo, context.cacheDir)
             val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
             torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
             torrentHandle.pause()
@@ -216,6 +215,7 @@ class AppGossiper(
         } catch (e: Exception) {
             Log.i("personal", "Failed to retrieve the magnet")
             activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName!") }
+            activity.runOnUiThread { printToast(e.toString()) }
             failedTorrents[torrentName] = System.currentTimeMillis()
             return
         }
@@ -227,7 +227,7 @@ class AppGossiper(
             val ti = TorrentInfo.bdecode(data)
             sessionActive = true
             activity.signal = CountDownLatch(1)
-            sessionManager.download(ti, saveDir)
+            sessionManager.download(ti, context.cacheDir)
             activity.signal.await(45, TimeUnit.SECONDS)
             if (activity.signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
