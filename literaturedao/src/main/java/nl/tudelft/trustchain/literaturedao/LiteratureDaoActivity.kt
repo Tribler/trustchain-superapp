@@ -1,14 +1,22 @@
 package nl.tudelft.trustchain.literaturedao
 import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
-
+import com.frostwire.jlibtorrent.TorrentInfo
 import android.util.Log
+import androidx.lifecycle.lifecycleScope
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.util.*
 import kotlin.math.roundToInt
@@ -21,8 +29,26 @@ open class LiteratureDaoActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
-        Log.i("litdao","I am "+literatureCommunity.myPeer.mid+ "and Im broadcasting: hello")
+        val myName = literatureCommunity.myPeer.mid
+        Log.i("litdao","I am $myName and Im broadcasting: hello")
         literatureCommunity.broadcastDebugMessage("hello")
+
+        val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
+        Log.i("personal","I am $myName and Im broadcasting a message")
+        demoCommunity.broadcastGreeting()
+
+        //test seeding
+//        val folderToShare = "assets"
+////        val tor = SharedTorrent.create(albumFile, list, 65535, listOf(), "TrustChain-Superapp")
+//        var torrentFile = "$folderToShare.torrent"
+//        if (!File(torrentFile).isFile) {
+//            torrentFile = "$folderToShare.torrent.added"
+//        }
+////        tor.save(FileOutputStream(torrentFile))
+//        val torrentInfo = TorrentInfo(File(torrentFile))
+//        val magnet = torrentInfo.makeMagnetUri()
+//        val torrentInfoName = torrentInfo.name()
+
     }
 
     private fun printPeersInfo(overlay: Overlay) {
