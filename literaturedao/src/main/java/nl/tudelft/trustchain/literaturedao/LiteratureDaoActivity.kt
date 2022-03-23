@@ -3,6 +3,7 @@ import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
 import com.frostwire.jlibtorrent.TorrentInfo
 import android.util.Log
+import android.view.WindowManager
 import androidx.lifecycle.lifecycleScope
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.delay
@@ -37,6 +38,10 @@ open class LiteratureDaoActivity : BaseActivity() {
         val demoCommunityName = demoCommunity.myPeer.mid
         Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
         demoCommunity.broadcastGreeting()
+
+        this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        supportActionBar?.hide();
+
 
         //test seeding
 //        val folderToShare = "assets"
