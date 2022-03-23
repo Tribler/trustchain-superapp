@@ -27,7 +27,6 @@ import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,7 +60,6 @@ class MainActivityFOC : AppCompatActivity() {
                 selectNewFileToUpload()
             }
 
-            //        initializeTorrentSession()
             popUp.visibility = View.GONE
             download_progress.setOnClickListener {
                 toggleProgressBar(popUp)
@@ -170,48 +168,6 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-//    private fun initializeTorrentSession() {
-//        s.addListener(object : AlertListener {
-//            override fun types(): IntArray? {
-//                return null
-//            }
-//
-//            override fun alert(alert: Alert<*>) {
-//                val type = alert.type()
-//
-//                when (type) {
-//                    AlertType.ADD_TORRENT -> {
-//                        Log.i("personal", "Torrent added")
-//                        (alert as AddTorrentAlert).handle().resume()
-//                    }
-//                    AlertType.BLOCK_FINISHED -> {
-//                        val a = alert as BlockFinishedAlert
-//                        val p = (a.handle().status().progress() * 100).toInt()
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                            progressBar.setProgress(p, true)
-//                        }
-//                        Log.i(
-//                            "personal",
-//                            "Progress: " + p + " for torrent name: " + a.torrentName()
-//                        )
-//                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
-//                    }
-//                    AlertType.TORRENT_FINISHED -> {
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//                            progressBar.setProgress(100, true)
-//                        }
-//                        downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
-//                        downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
-//                        Log.i("personal", "Torrent finished")
-//                        printToast("Torrent downloaded!!")
-//                    }
-//                    else -> {
-//                    }
-//                }
-//            }
-//        })
-//    }
-
     fun createTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
         val button = Button(this)
@@ -229,17 +185,6 @@ class MainActivityFOC : AppCompatActivity() {
         }
         torrentListView.addView(button)
     }
-
-//    @Suppress("DEPRECATION")
-//    fun getPath(uri: Uri?): String? {
-//        val projection = arrayOf(MediaStore.Images.Media.DATA)
-//        val cursor = contentResolver.query(uri!!, projection, null, null, null) ?: return null
-//        val column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-//        cursor.moveToFirst()
-//        val s = cursor.getString(column_index)
-//        cursor.close()
-//        return s
-//    }
 
     @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -263,32 +208,6 @@ class MainActivityFOC : AppCompatActivity() {
             createTorrentButton(data.data!!)
         }
     }
-//
-//    /**
-//     * Reads a .torrent file and displays information about it on the screen
-//     * Part of the getTorrent() function
-//     */
-//    @Throws(IOException::class)
-//    fun readTorrentSuccesfully(torrent: String?): Boolean {
-//        val torrentFile = File(torrent!!)
-//
-//        if (!torrentFile.exists()) {
-//            Log.i("personal", "File doesn't exist!")
-//            return false
-//        }
-//
-//        val ti = TorrentInfo(torrentFile)
-//
-//        val fc = RandomAccessFile(torrent, "r").channel
-//        val buffer =
-//            fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
-//        val ti2 = TorrentInfo(buffer)
-//        val toPrint = ti.toEntry().toString() + ti2.toEntry().toString()
-//        Log.i("personal", ti.toEntry().toString())
-//        Log.i("personal", ti2.toEntry().toString())
-//        torrentView.text = toPrint
-//        return true
-//    }
 
     @Suppress("deprecation")
     fun loadDynamicCode(fileName: String) {
