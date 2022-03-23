@@ -1,13 +1,18 @@
 package nl.tudelft.trustchain.valuetransfer.ui.exchangelink
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
 import androidx.lifecycle.*
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentExchangeTransferMoneyLinkBinding
 import nl.tudelft.trustchain.valuetransfer.dialogs.*
+import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 
 class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_transfer_money_link) {
@@ -62,6 +67,59 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         binding.tvPaymentReceiver.text = this.ReceiverName
         binding.tvPaymentAmount.text = this.Amount
         binding.tvPaymentMessage.text = this.Message?:""
+
+        binding.clPayEurotoken.setOnClickListener {
+            @Suppress("DEPRECATION")
+            Handler().postDelayed(
+                {
+                    try {
+                        // Create proposal block to the recipient
+                        val publicKey = defaultCryptoProvider.keyFromPublicBin(this.ReceiverPublic.hexToBytes())
+                        val block = getTransactionRepository().sendTransferProposalSync(
+                           publicKey.keyToBin(),
+                            this.Amount.replace(".", "").toLong()
+                        )
+                        if (block == null) {
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_insufficient_balance)
+                            )
+                        } else {
+//                            getPeerChatCommunity().sendMessageWithTransaction(
+//                                this.Message,
+//                                block.calculateHash(),
+//                                publicKey,
+//                                getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
+//                            )
+
+                            parentActivity.displayToast(
+                                requireContext(),
+                                resources.getString(R.string.snackbar_transfer_of, this.Amount, this.ReceiverName),
+                                isShort = false
+                            )
+
+                            val previousFragment = parentFragmentManager.fragments.filter {
+                                it.tag == ValueTransferMainActivity.walletOverviewFragmentTag
+                            }
+
+                            parentFragmentManager.beginTransaction().apply {
+                                hide(this@ExchangeTransferMoneyLinkFragment)
+                                show(previousFragment[0])
+                            }.commit()
+
+                            (previousFragment[0] as VTFragment).initView()
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        parentActivity.displayToast(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_unexpected_error_occurred)
+                        )
+                    }
+                },
+                500
+            )
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
