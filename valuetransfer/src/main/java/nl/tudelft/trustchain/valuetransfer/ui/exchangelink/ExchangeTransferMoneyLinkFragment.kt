@@ -74,7 +74,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                 {
                     try {
                         // Create proposal block to the recipient
-                        val publicKey = defaultCryptoProvider.keyFromPublicBin("4c69624e61434c504b3a89c18e4c5e848f9afa64c521599ccb5359e69cbf6e188c2b09c74d8a12d78b719d325ea640e04f5acac907c240b51417aba6c8e43617dd9b58fa10baa0434a26".hexToBytes())
+                        val publicKey = defaultCryptoProvider.keyFromPublicBin(this.ReceiverPublic.hexToBytes())
                         val block = getTransactionRepository().sendTransferProposalSync(
                            publicKey.keyToBin(),
                             this.Amount.replace(".", "").toLong()
@@ -86,7 +86,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
                             )
                         } else {
 //                            getPeerChatCommunity().sendMessageWithTransaction(
-//                                "waw",
+//                                this.Message,
 //                                block.calculateHash(),
 //                                publicKey,
 //                                getIdentityCommunity().getIdentityInfo(appPreferences.getIdentityFaceHash())
@@ -94,7 +94,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
 
                             parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_transfer_of, this.Amount, this.Receiver),
+                                resources.getString(R.string.snackbar_transfer_of, this.Amount, this.ReceiverName),
                                 isShort = false
                             )
 
