@@ -7,6 +7,7 @@ import com.frostwire.jlibtorrent.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import java.io.File
@@ -93,8 +94,9 @@ class AppGossiper(
     private suspend fun iterativelyDownloadApps() {
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
         while (scope.isActive) {
-            var torrentListMessages = demoCommunity?.getTorrentMessages()
-            if (torrentListMessages != null) {
+            val tempPackets = demoCommunity?.getTorrentMessages()
+            if (tempPackets != null) {
+            val torrentListMessages: ArrayList<Packet> = ArrayList(tempPackets)
                 for (packet in torrentListMessages) {
                     val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
                     Log.i("personal", peer.mid + ": " + payload.message)
