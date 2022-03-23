@@ -29,6 +29,14 @@ class LiteratureCommunity(
         }
     }
 
+    @OptIn(ExperimentalUnsignedTypes::class)
+    fun broadcastDebugMessage(message: String) {
+        for (peer in getPeers()) {
+            val packet = serializePacket(MessageID.DEBUG_MESSAGE, DebugMessage(message))
+            send(peer.address, packet)
+        }
+    }
+
 
     private fun onDebugMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(DebugMessage.Deserializer)
