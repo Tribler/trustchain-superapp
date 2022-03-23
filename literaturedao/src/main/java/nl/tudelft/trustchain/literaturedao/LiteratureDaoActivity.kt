@@ -34,7 +34,8 @@ open class LiteratureDaoActivity : BaseActivity() {
         literatureCommunity.broadcastDebugMessage("hello")
 
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
-        Log.i("personal","I am $myName and Im broadcasting a message")
+        val demoCommunityName = demoCommunity.myPeer.mid
+        Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
         demoCommunity.broadcastGreeting()
 
         //test seeding
