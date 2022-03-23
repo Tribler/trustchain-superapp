@@ -52,6 +52,7 @@ android {
     lintOptions {
         abortOnError false
     }
+    ndkVersion '24.0.8215888'
 }
 
 repositories {

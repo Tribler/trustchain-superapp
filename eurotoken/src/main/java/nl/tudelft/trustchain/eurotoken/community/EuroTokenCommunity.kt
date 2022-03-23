@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
@@ -27,6 +28,7 @@ class EuroTokenCommunity(
 
     init {
         messageHandlers[MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
+        messageHandlers[MessageId.ATTACHMENT] = ::onLastAddressPacket
         if (store.getPreferred().isEmpty()) {
             DefaultGateway.addGateway(store)
         }
@@ -40,6 +42,13 @@ class EuroTokenCommunity(
     private fun onRollbackRequestPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(RollbackRequestPayload.Deserializer)
         onRollbackRequest(peer, payload)
+    }
+
+    private fun onLastAddressPacket(packet: Packet) {
+        val (peer, payload) = packet.getDecryptedAuthPayload(
+            MessagePayload.Deserializer, myPeer.key as PrivateKey
+        )
+        logger.debug { "RECEIVED EVA MESSAGE" + payload }
     }
 
     private fun onRollbackRequest(peer: Peer, payload: RollbackRequestPayload) {
