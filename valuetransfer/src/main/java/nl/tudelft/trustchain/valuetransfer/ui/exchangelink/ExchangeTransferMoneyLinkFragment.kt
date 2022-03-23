@@ -13,7 +13,8 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_transfer_money_link) {
     private val binding by viewBinding(FragmentExchangeTransferMoneyLinkBinding::bind)
 
-    private var Receiver=""
+    private var ReceiverName=""
+    private var ReceiverPublic=""
     private var Amount=""
     private var Message: String? = null
 
@@ -42,9 +43,12 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         }
     }
 
-    fun setData(receiver: String,amount: String,message: String?)
+    fun setData(receiver: String?,amount: String,message: String?,public: String)
     {
-        this.Receiver=receiver
+        if (receiver != null) {
+            this.ReceiverName= receiver
+        }
+        this.ReceiverPublic=public
         this.Amount=amount
         this.Message=message
     }
@@ -55,7 +59,7 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         initView()
         onResume()
 
-        binding.tvPaymentReceiver.text = this.Receiver
+        binding.tvPaymentReceiver.text = this.ReceiverName
         binding.tvPaymentAmount.text = this.Amount
         binding.tvPaymentMessage.text = this.Message?:""
     }
