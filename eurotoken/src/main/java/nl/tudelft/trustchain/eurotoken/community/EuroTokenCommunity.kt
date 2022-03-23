@@ -116,11 +116,13 @@ class EuroTokenCommunity(
         // Send the list of addresses to the peer using EVA
         if (evaProtocolEnabled) evaSendBinary(
             peer,
-            "List of last addresses",
             EVAId.EVA_LAST_ADDRESSES,
+            payload.id,
             packet
         ) else send(peer, packet)
     }
+
+
 
     /**
      * Every community initializes a different version of the EVA protocol (if enabled).
