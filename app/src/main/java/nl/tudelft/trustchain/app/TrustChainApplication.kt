@@ -228,9 +228,8 @@ class TrustChainApplication : Application() {
 
     private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
         val randomWalk = RandomWalk.Factory()
-        val store = GatewayStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(store),
+            EuroTokenCommunity.Factory(),
             listOf(randomWalk)
         )
     }

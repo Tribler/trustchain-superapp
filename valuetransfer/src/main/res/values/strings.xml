@@ -72,6 +72,7 @@
     <string name="dialog_title_contact_add">Add Contact</string>
     <string name="dialog_title_contact_chat_send_location">Send Location</string>
     <string name="dialog_title_exchange_gateway_connect">Connect to Gateway</string>
+    <string name="dialog_title_exchange_gateway_add">Add Gateway</string>
     <string name="dialog_title_exchange_gateway_sell">Sell to Gateway</string>
     <string name="dialog_title_attestation">Attestation</string>
     <string name="dialog_title_attestation_authorities">Trusted Authorities</string>
@@ -94,6 +95,7 @@
     <string name="dialog_contact_options">Contact Options</string>
     <string name="dialog_exchange_options">Exchange Options</string>
     <string name="dialog_contacts_chats_view">View Chats</string>
+    <string name="dialog_no_gateway_warning">Missing Gateway</string>
 
     // Button text
     <string name="btn_transfer">Transfer</string>
@@ -107,6 +109,7 @@
     <string name="btn_add">Add</string>
     <string name="btn_gateway_connect">Connect to Gateway</string>
     <string name="btn_slide_to_gateway_connect">Slide to Connect</string>
+    <string name="btn_slide_to_gateway_add">Slide to Add</string>
     <string name="btn_sell">Sell</string>
     <string name="btn_slide_to_sell">Slide to Sell</string>
     <string name="btn_authority_add">Add Authority</string>
@@ -385,6 +388,9 @@
     <string name="text_transaction_details_signature">Signature</string>
     <string name="text_string_view_chat">View Chat</string>
     <string name="text_string_view_contact">View Contact</string>
+    <string name="text_gateway_warning_first">No gateway has been defined, please make sure to add a gateway by scanning its identifying QR code. </string>
+    <string name="text_gateway_warning_second">A gateway is used to exchange between Euros and Euro tokens, and to verify balances. If no gateway is defined, no balances and transactions can be verified.</string>
+    <string name="text_gateway_warning_third">A gateway can be added now by pressing the add button, or later by scanning the QR code of a gateway via the scanner.</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

@@ -84,6 +84,7 @@ import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.widget.Toast
+import nl.tudelft.trustchain.valuetransfer.dialogs.GatewayWarningDialog
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -257,6 +258,8 @@ class ValueTransferMainActivity : BaseActivity() {
             onNewIntent(intent)
         }
 
+        checkGateway()
+
         checkCameraPermissions()
     }
 
@@ -324,6 +327,22 @@ class ValueTransferMainActivity : BaseActivity() {
                     1000
                 )
             }
+        }
+    }
+
+    /**
+     * Checks if a gateway is defined or not.
+     * If no gateway is defined, and the user is logged in (identified),
+     * than a warning will be shown that a saved gateway is needed.
+     */
+    private fun checkGateway() {
+        val gatewayStore = getStore<GatewayStore>()
+        val identityStore = getStore<IdentityStore>()
+        // Check if logged in and if a gateway is defined
+        if (gatewayStore?.getGateways()?.isEmpty() == true && identityStore?.hasIdentity() == true) {
+            val activeTag = getActiveFragment()?.tag ?: ""
+            // Open the dialog
+            GatewayWarningDialog().show(fragmentManager, activeTag)
         }
     }
 

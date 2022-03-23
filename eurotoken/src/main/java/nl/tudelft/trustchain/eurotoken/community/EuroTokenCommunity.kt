@@ -9,22 +9,15 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
-class EuroTokenCommunity(
-    store: GatewayStore
-) : Community() {
+class EuroTokenCommunity : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
     private lateinit var transactionRepository: TransactionRepository
 
     init {
         messageHandlers[MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
-        if (store.getPreferred().isEmpty()) {
-            DefaultGateway.addGateway(store)
-        }
     }
 
     @JvmName("setTransactionRepository1")
@@ -73,11 +66,9 @@ class EuroTokenCommunity(
         const val ROLLBACK_REQUEST = 1
     }
 
-    class Factory(
-        private val store: GatewayStore
-    ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
+    class Factory : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
-            return EuroTokenCommunity(store)
+            return EuroTokenCommunity()
         }
     }
 }
