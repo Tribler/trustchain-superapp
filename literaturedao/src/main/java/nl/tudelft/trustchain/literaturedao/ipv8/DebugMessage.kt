@@ -4,7 +4,7 @@ import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.Deserializable
 
 
-class DebugMessage(val message: String) : Serializable {
+data class DebugMessage(val message: String) : Serializable {
     override fun serialize(): ByteArray {
         return message.toByteArray()
     }
