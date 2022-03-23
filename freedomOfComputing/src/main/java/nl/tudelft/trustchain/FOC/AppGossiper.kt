@@ -249,7 +249,7 @@ class AppGossiper(
             downloadsInProgress -= 1
 
             activity.runOnUiThread { activity.showAllFiles() }
-            activity.signal.await(45, TimeUnit.SECONDS)
+            activity.signal.await(3, TimeUnit.MINUTES)
             if (activity.signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
                 activity.signal = CountDownLatch(0)
