@@ -75,12 +75,16 @@ class ExchangeGatewayDialog(
 
             gateWayPublicKey.text = publicKey.keyToBin().toHex()
 
-            gateWaySaveSwitch.setOnCheckedChangeListener { _, isChecked ->
-                gateWayPreferredConstraintLayout.isVisible = isChecked
+            if (getGatewayStore().getGateways().isEmpty()) {
+                gateWayPreferredConstraintLayout.isVisible = false
+                gateWaySaveConstraintLayout.isVisible = false
+                gateWaySaveSwitch.isChecked = true
+                gateWayPreferredSwitch.isChecked = true
+            } else {
+                gateWaySaveSwitch.setOnCheckedChangeListener { _, isChecked ->
+                    gateWayPreferredConstraintLayout.isVisible = isChecked
+                }
             }
-
-            val saveGateway = gateWaySaveSwitch.isChecked
-            val preferredGateway = gateWayPreferredSwitch.isChecked
 
             connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
@@ -88,13 +92,13 @@ class ExchangeGatewayDialog(
                     @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         Runnable {
-                            if (saveGateway) {
+                            if (gateWaySaveSwitch.isChecked) {
                                 getGatewayStore().addGateway(
                                     publicKey,
                                     name,
                                     ip,
                                     port.toLong(),
-                                    preferredGateway
+                                    gateWayPreferredSwitch.isChecked
                                 )
                             }
 
@@ -122,8 +126,8 @@ class ExchangeGatewayDialog(
                     @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         Runnable {
-                            if (saveGateway) {
-                                getGatewayStore().addGateway(publicKey, name, ip, port.toLong(), preferredGateway)
+                            if (gateWaySaveSwitch.isChecked) {
+                                getGatewayStore().addGateway(publicKey, name, ip, port.toLong(), gateWayPreferredSwitch.isChecked)
                             }
 
                             getTransactionRepository().sendDestroyProposalWithPaymentID(publicKey.keyToBin(), ip, port, paymentID, amount!!).let { block ->

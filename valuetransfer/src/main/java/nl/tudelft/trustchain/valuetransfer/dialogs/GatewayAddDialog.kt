@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.widget.*
 import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.ncorti.slidetoact.SlideToActView
@@ -38,6 +40,7 @@ class GatewayAddDialog(
             // Get the UI views.
             val gateWayName = view.findViewById<TextView>(R.id.tvGatewayName)
             val gateWayPublicKey = view.findViewById<TextView>(R.id.tvGatewayPublicKey)
+            val gateWayPreferredLayout = view.findViewById<ConstraintLayout>(R.id.clPreferredGateway)
             val gateWayPreferredSwitch = view.findViewById<Switch>(R.id.switchPreferredGateway)
             val connectGatewaySlider = view.findViewById<SlideToActView>(R.id.slideConnectGateway)
 
@@ -49,11 +52,10 @@ class GatewayAddDialog(
 
             // Check if this is the first gateway
             if (getGatewayStore().getGateways().isEmpty()) {
-                // If so set preferred to true and disable the switch
-                gateWayPreferredSwitch.isEnabled = false
+                // If so set preferred to true and hide the switch
+                gateWayPreferredLayout.isVisible = false
                 gateWayPreferredSwitch.isChecked = true
             }
-            val preferredGateway = gateWayPreferredSwitch.isChecked
 
             connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
@@ -67,7 +69,7 @@ class GatewayAddDialog(
                                 name,
                                 ip,
                                 port.toLong(),
-                                preferredGateway
+                                gateWayPreferredSwitch.isChecked
                             )
                             bottomSheetDialog.dismiss()
                         },
