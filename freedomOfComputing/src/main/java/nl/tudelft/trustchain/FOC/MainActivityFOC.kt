@@ -270,8 +270,7 @@ class MainActivityFOC : AppCompatActivity() {
             sessionActive = true
             appGossiper.sessionActive = true
             downloadMagnetButton.setText("STOP")
-            val savePath = Environment.getExternalStorageDirectory().absolutePath
-            s.download(ti, File(savePath))
+            s.download(ti, applicationContext.cacheDir)
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
             runOnUiThread { printToast("Something went wrong, check logs") }
