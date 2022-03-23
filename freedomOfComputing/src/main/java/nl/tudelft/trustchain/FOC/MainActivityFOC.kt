@@ -9,18 +9,26 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.size
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import com.frostwire.jlibtorrent.*
+import androidx.core.net.toUri
+import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.Vectors
+import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import java.util.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 
 class MainActivityFOC : AppCompatActivity() {
 
@@ -29,26 +37,41 @@ class MainActivityFOC : AppCompatActivity() {
     private var requestCode = 1
     val MY_PERMISSIONS_REQUEST = 0
     var downloadsInProgress = 0
+    val s = SessionManager()
 
+    private lateinit var appGossiper: AppGossiper
+
+    private var uploadingTorrent = ""
+
+    @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_foc)
-        setSupportActionBar(toolbar)
-        fab.setOnClickListener { _ ->
-            selectNewFileToUpload()
+        try {
+            appGossiper = AppGossiper.getInstance(s, applicationContext, this)
+            appGossiper.start()
+            setContentView(R.layout.activity_main_foc)
+            setSupportActionBar(toolbar)
+            fab.setOnClickListener { _ ->
+                selectNewFileToUpload()
+            }
+
+            //        initializeTorrentSession()
+            popUp.visibility = View.GONE
+            download_progress.setOnClickListener {
+                toggleProgressBar(popUp)
+            }
+
+            download_count.text = getString(R.string.downloadsInProgress, downloadsInProgress)
+            torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+
+            // upon launching our activity, we ask for the "Storage" permission
+            requestStoragePermission()
+
+            printToast("STARTED")
+            showAllFiles()
+        } catch (e: Exception) {
+            printToast(e.toString())
         }
-
-        popUp.visibility = View.GONE
-        download_progress.setOnClickListener{
-            toggleProgressBar(popUp)
-        }
-
-        download_count.text = getString(R.string.downloadsInProgress, downloadsInProgress)
-        torrentCount.text = getString(R.string.torrentCount, torrentList.size)
-
-        // upon launching our activity, we ask for the "Storage" permission
-        requestStoragePermission()
-        printToast("STARTED")
     }
 
     private fun toggleProgressBar(progress: RelativeLayout) {
@@ -60,30 +83,147 @@ class MainActivityFOC : AppCompatActivity() {
         progressVisible = !progressVisible
     }
 
-    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    @Suppress("deprecation")
+    fun showAllFiles() {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            // todo improve this such that the whole list is not loaded again every time
+            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            torrentListView.removeAllViews()
+            torrentList.clear()
+            for (file in files) {
+                if (getFileName(file.toUri()).endsWith(".apk")) {
+                    createTorrentButton(file.toUri())
+                }
+            }
+        }
+    }
 
+    /**
+     * Display a short message on the screen
+     */
+    private fun printToast(s: String) {
+        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
+    }
+
+//    private fun initializeTorrentSession() {
+//        s.addListener(object : AlertListener {
+//            override fun types(): IntArray? {
+//                return null
+//            }
+//
+//            override fun alert(alert: Alert<*>) {
+//                val type = alert.type()
+//
+//                when (type) {
+//                    AlertType.ADD_TORRENT -> {
+//                        Log.i("personal", "Torrent added")
+//                        (alert as AddTorrentAlert).handle().resume()
+//                    }
+//                    AlertType.BLOCK_FINISHED -> {
+//                        val a = alert as BlockFinishedAlert
+//                        val p = (a.handle().status().progress() * 100).toInt()
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                            progressBar.setProgress(p, true)
+//                        }
+//                        Log.i(
+//                            "personal",
+//                            "Progress: " + p + " for torrent name: " + a.torrentName()
+//                        )
+//                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
+//                    }
+//                    AlertType.TORRENT_FINISHED -> {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+//                            progressBar.setProgress(100, true)
+//                        }
+//                        downloadTorrentButton.text = "DOWNLOAD (TORRENT)"
+//                        downloadMagnetButton.text = "DOWNLOAD (MAGNET LINK)"
+//                        Log.i("personal", "Torrent finished")
+//                        printToast("Torrent downloaded!!")
+//                    }
+//                    else -> {
+//                    }
+//                }
+//            }
+//        })
+//    }
+
+    fun createTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val button = Button(this)
+        val fileName = getFileName(uri)
+        button.text = fileName
+        button.isAllCaps = false
+        torrentList.add(button)
+        torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+        button.setOnClickListener {
+            loadDynamicCode(fileName)
+        }
+        button.setOnLongClickListener {
+            createTorrent(fileName)
+            true
+        }
+        torrentListView.addView(button)
+    }
+
+//    @Suppress("DEPRECATION")
+//    fun getPath(uri: Uri?): String? {
+//        val projection = arrayOf(MediaStore.Images.Media.DATA)
+//        val cursor = contentResolver.query(uri!!, projection, null, null, null) ?: return null
+//        val column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+//        cursor.moveToFirst()
+//        val s = cursor.getString(column_index)
+//        cursor.close()
+//        return s
+//    }
+
+
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK) {
             if (data == null) {
                 return
             }
-            // Create a new button
-            val button = Button(this)
             val fileName = getFileName(data.data!!)
-            button.text = fileName
-            button.isAllCaps = false
-            torrentListView.addView(button)
-            torrentList.add(button)
-            torrentCount.text = getString(R.string.torrentCount, torrentList.size)
-            button.setOnClickListener {
-                loadDynamicCode(fileName)
+            try {
+                printToast(data.data!!.path!!.split(":").last())
+                File(Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
+            } catch (e: Exception) {
+                printToast(e.toString())
+                printToast("$fileName already exists!")
+                return
             }
-
-            printToast("File uploaded!")
+            createTorrentButton(data.data!!)
         }
     }
+//
+//    /**
+//     * Reads a .torrent file and displays information about it on the screen
+//     * Part of the getTorrent() function
+//     */
+//    @Throws(IOException::class)
+//    fun readTorrentSuccesfully(torrent: String?): Boolean {
+//        val torrentFile = File(torrent!!)
+//
+//        if (!torrentFile.exists()) {
+//            Log.i("personal", "File doesn't exist!")
+//            return false
+//        }
+//
+//        val ti = TorrentInfo(torrentFile)
+//
+//        val fc = RandomAccessFile(torrent, "r").channel
+//        val buffer =
+//            fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
+//        val ti2 = TorrentInfo(buffer)
+//        val toPrint = ti.toEntry().toString() + ti2.toEntry().toString()
+//        Log.i("personal", ti.toEntry().toString())
+//        Log.i("personal", ti2.toEntry().toString())
+//        torrentView.text = toPrint
+//        return true
+//    }
 
     @Suppress("deprecation")
     fun loadDynamicCode(fileName: String) {
@@ -91,7 +231,7 @@ class MainActivityFOC : AppCompatActivity() {
             val intent = Intent(this, ExecutionActivity::class.java)
             intent.putExtra(
                 "fileName",
-                Environment.getExternalStorageDirectory().absolutePath + "/Download/" + fileName
+                "${applicationContext.cacheDir}/${fileName.split("/").last()}"
             )
             startActivity(intent)
         } catch (e: Exception) {
@@ -120,6 +260,60 @@ class MainActivityFOC : AppCompatActivity() {
         return result
     }
 
+
+    /**
+     * Creates a torrent from a file given as input
+     * The extension of the file must be included (for example, .png)
+     */
+    @Suppress("deprecation")
+    fun createTorrent(fileName: String) {
+        val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
+        if (!file.exists()) {
+            printToast("Something went wrong, check logs")
+            Log.i("personal", "File doesn't exist!")
+            return
+        }
+
+        val fs = file_storage()
+        val l1: add_files_listener = object : add_files_listener() {
+            override fun pred(p: String): Boolean {
+                return true
+            }
+        }
+        libtorrent.add_files_ex(fs, file.absolutePath, l1, create_flags_t())
+        val ct = create_torrent(fs)
+        val l2: set_piece_hashes_listener = object : set_piece_hashes_listener() {
+            override fun progress(i: Int) {}
+        }
+
+        val ec = error_code()
+        libtorrent.set_piece_hashes_ex(ct, file.parent, l2, ec)
+        val torrent = ct.generate()
+        val buffer = torrent.bencode()
+
+        val torrentName = fileName.substringBeforeLast('.') + ".torrent"
+
+        var os: OutputStream? = null
+        try {
+            os = FileOutputStream(File(applicationContext.cacheDir, torrentName.split("/").last()))
+            os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } finally {
+            try {
+                os!!.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
+        val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+        uploadingTorrent = magnetLink
+        Log.i("personal", magnetLink)
+        printToast(fileName)
+    }
+
     @Suppress("deprecation")
     fun selectNewFileToUpload() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
@@ -141,13 +335,13 @@ class MainActivityFOC : AppCompatActivity() {
                 arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
                 MY_PERMISSIONS_REQUEST
             )
+//            val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
+//            val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+//            uploadingTorrent = magnetLink
+//            Log.i("personal", magnetLink)
+//
+//            enterTorrent.setText(torrentName)
+//            getTorrent(true)
         }
-    }
-
-    /**
-     * Display a short message on the screen
-     */
-    fun printToast(s: String) {
-        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 }
