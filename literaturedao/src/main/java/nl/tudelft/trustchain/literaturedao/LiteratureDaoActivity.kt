@@ -21,6 +21,8 @@ open class LiteratureDaoActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
+        Log.i("litdao","I am "+literatureCommunity.myPeer.mid+ "and Im broadcasting: hello")
+        literatureCommunity.broadcastDebugMessage("hello")
     }
 
     private fun printPeersInfo(overlay: Overlay) {
