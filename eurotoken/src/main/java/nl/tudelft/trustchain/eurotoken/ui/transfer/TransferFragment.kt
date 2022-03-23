@@ -22,6 +22,7 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.QRCodeUtils
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
@@ -135,6 +136,11 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
+
+                val peer = getTrustChainCommunity().network.getVerifiedByPublicKeyBin(connectionData.public_key.toByteArray())!!
+                val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()!!
+                euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+
                 if (connectionData.type == "transfer") {
                     findNavController().navigate(
                         R.id.action_transferFragment_to_sendMoneyFragment,
