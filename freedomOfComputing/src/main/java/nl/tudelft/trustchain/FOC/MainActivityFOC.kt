@@ -19,16 +19,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import com.frostwire.jlibtorrent.SessionManager
-import com.frostwire.jlibtorrent.TorrentInfo
-import com.frostwire.jlibtorrent.Vectors
+import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.content_main_activity_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import java.io.*
+import java.util.*
+import java.util.concurrent.CountDownLatch
 
 class MainActivityFOC : AppCompatActivity() {
 
@@ -36,8 +36,10 @@ class MainActivityFOC : AppCompatActivity() {
     private var progressVisible = false
     private var requestCode = 1
     val MY_PERMISSIONS_REQUEST = 0
-    var downloadsInProgress = 0
+    private val scope = CoroutineScope(Dispatchers.IO)
     val s = SessionManager()
+
+    var signal = CountDownLatch(0)
 
     private lateinit var appGossiper: AppGossiper
 
@@ -47,8 +49,6 @@ class MainActivityFOC : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            appGossiper = AppGossiper.getInstance(s, applicationContext, this)
-            appGossiper.start()
             setContentView(R.layout.activity_main_foc)
             setSupportActionBar(toolbar)
             fab.setOnClickListener { _ ->
@@ -61,7 +61,6 @@ class MainActivityFOC : AppCompatActivity() {
                 toggleProgressBar(popUp)
             }
 
-            download_count.text = getString(R.string.downloadsInProgress, downloadsInProgress)
             torrentCount.text = getString(R.string.torrentCount, torrentList.size)
 
             // upon launching our activity, we ask for the "Storage" permission
@@ -69,6 +68,8 @@ class MainActivityFOC : AppCompatActivity() {
 
             printToast("STARTED")
             showAllFiles()
+            appGossiper = AppGossiper.getInstance(s, applicationContext, this)
+            appGossiper.start()
         } catch (e: Exception) {
             printToast(e.toString())
         }
@@ -96,6 +97,25 @@ class MainActivityFOC : AppCompatActivity() {
                     createTorrentButton(file.toUri())
                 }
             }
+        }
+
+        // upon launching our activity, we ask for the "Storage" permission
+        requestStoragePermission()
+    }
+
+    // change if you want to write to the actual phone storage (needs "write" permission)
+    fun requestStoragePermission() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) // READ_EXTERNAL_STORAGE
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
+                MY_PERMISSIONS_REQUEST
+            )
         }
     }
 
@@ -177,7 +197,6 @@ class MainActivityFOC : AppCompatActivity() {
 //        return s
 //    }
 
-
     @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -189,7 +208,9 @@ class MainActivityFOC : AppCompatActivity() {
             val fileName = getFileName(data.data!!)
             try {
                 printToast(data.data!!.path!!.split(":").last())
-                File(Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
+                File(
+                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+                ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
             } catch (e: Exception) {
                 printToast(e.toString())
                 printToast("$fileName already exists!")
@@ -320,28 +341,5 @@ class MainActivityFOC : AppCompatActivity() {
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
         startActivityForResult(intent, requestCode)
-    }
-
-    // change if you want to write to the actual phone storage (needs "write" permission)
-    fun requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) // READ_EXTERNAL_STORAGE
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
-                MY_PERMISSIONS_REQUEST
-            )
-//            val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
-//            val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
-//            uploadingTorrent = magnetLink
-//            Log.i("personal", magnetLink)
-//
-//            enterTorrent.setText(torrentName)
-//            getTorrent(true)
-        }
     }
 }
