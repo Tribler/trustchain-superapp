@@ -160,8 +160,11 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
     override fun onResume() {
         super.onResume()
 
-        binding.clNoIdentity.isVisible = !getIdentityStore().hasIdentity()
-        binding.svHasIdentity.isVisible = getIdentityStore().hasIdentity()
+        //bypass IDENTITY
+//        binding.clNoIdentity.isVisible = !getIdentityStore().hasIdentity()
+//        binding.svHasIdentity.isVisible = getIdentityStore().hasIdentity()
+        binding.clNoIdentity.isVisible = getIdentityStore().hasIdentity()
+        binding.svHasIdentity.isVisible = !getIdentityStore().hasIdentity()
 
         observeContactsItems(viewLifecycleOwner, adapterContacts, itemsContacts)
     }

@@ -13,6 +13,11 @@ import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
 class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_transfer_money_link) {
     private val binding by viewBinding(FragmentExchangeTransferMoneyLinkBinding::bind)
 
+    private var ReceiverName=""
+    private var ReceiverPublic=""
+    private var Amount=""
+    private var Message: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -38,15 +43,25 @@ class ExchangeTransferMoneyLinkFragment : VTFragment(R.layout.fragment_exchange_
         }
     }
 
+    fun setData(receiver: String?,amount: String,message: String?,public: String)
+    {
+        if (receiver != null) {
+            this.ReceiverName= receiver
+        }
+        this.ReceiverPublic=public
+        this.Amount=amount
+        this.Message=message
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initView()
         onResume()
 
-        binding.tvPaymentReceiver.text = "John Doe"
-        binding.tvPaymentAmount.text = "10.50"
-        binding.tvPaymentMessage.text = "Pizza party"
+        binding.tvPaymentReceiver.text = this.ReceiverName
+        binding.tvPaymentAmount.text = this.Amount
+        binding.tvPaymentMessage.text = this.Message?:""
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
