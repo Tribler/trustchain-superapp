@@ -2,16 +2,21 @@ package nl.tudelft.trustchain.eurotoken.community
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
+import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
+
+private val logger = KotlinLogging.logger {}
 
 class EuroTokenCommunity(
     store: GatewayStore
@@ -71,6 +76,7 @@ class EuroTokenCommunity(
     object MessageId {
         const val GATEWAY_CONNECT = 1
         const val ROLLBACK_REQUEST = 1
+        const val ATTACHMENT = 4
     }
 
     class Factory(
@@ -79,5 +85,40 @@ class EuroTokenCommunity(
         override fun create(): EuroTokenCommunity {
             return EuroTokenCommunity(store)
         }
+    }
+
+    fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
+        // Get all addresses of the last [num] incoming transactions
+        val addresses : List<PublicKey> = transactionRepository.getTransactions(50).map{
+            transaction: Transaction ->
+            transaction.sender
+        }
+
+        val payload = MessagePayload(addresses.joinToString(separator = ","))
+        logger.debug { "-> $payload" }
+
+        val packet = serializePacket(
+            MessageId.ATTACHMENT,
+            payload,
+            encrypt = true,
+            recipient = peer
+        )
+
+        // Send the list of addresses to the peer using EVA
+        if (evaProtocolEnabled) evaSendBinary(
+            peer,
+            "List of last addresses",
+            EVAId.EVA_LAST_ADDRESSES,
+            packet
+        ) else send(peer, packet)
+    }
+
+    /**
+     * Every community initializes a different version of the EVA protocol (if enabled).
+     * To distinguish the incoming packets/requests an ID must be used to hold/let through the
+     * EVA related packets.
+     */
+    object EVAId {
+        const val EVA_LAST_ADDRESSES = "eva_last_addresses"
     }
 }
