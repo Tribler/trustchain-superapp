@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -249,18 +250,14 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         }
     }
 
-    private fun addTestFile() {
-        if (ContextCompat.checkSelfPermission(requireContext(),
-                android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                Log.e(logTag, "Requesting permission to pick media")
-                // Request permissions
-                requestPermissions(arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), PERMISSION_REQUEST_CODE)
-        } else {
-            Log.e(logTag, "Permission to pick media")
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, PICK_PHOTO)
+    private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            addImageToVault(uri)
         }
+    }
+
+    private fun addTestFile() {
+        pickImage.launch("image/*")
     }
 
     private fun createFolder() {
@@ -344,16 +341,6 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
             ?: throw java.lang.IllegalStateException("DataVaultCommunity is not configured")
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == PICK_PHOTO){
-            val uri = data?.data
-            if (uri != null) {
-                addImageToVault(uri)
-            }
-        }
-    }
-
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
@@ -388,7 +375,6 @@ class VaultBrowserFragment : BaseFragment(R.layout.vault_browser_fragment) {
         const val VAULT_DIR = "data_vault"
         const val FILENAME = "fileName"
 
-        const val PICK_PHOTO = 100
         const val PERMISSION_REQUEST_CODE = 101
     }
 }
