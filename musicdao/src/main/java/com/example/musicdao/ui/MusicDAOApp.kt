@@ -24,8 +24,6 @@ import com.example.musicdao.ui.navigation.AppNavigation
 import com.example.musicdao.ui.screens.release.CreateReleaseDialog
 import com.example.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -91,21 +89,5 @@ fun MusicDAOApp() {
                 }
             },
         )
-    }
-}
-
-object SnackbarHandler {
-    var snackbarHostState: SnackbarHostState? = null
-    var coroutineScope: CoroutineScope? = null
-
-    fun displaySnackbar(text: String) {
-        val snackbarHostState = snackbarHostState
-        val coroutineScope = coroutineScope
-
-        if (snackbarHostState != null && coroutineScope != null) {
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar(message = text)
-            }
-        }
     }
 }

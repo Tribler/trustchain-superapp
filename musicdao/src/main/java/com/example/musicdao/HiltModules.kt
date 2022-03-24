@@ -5,9 +5,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.example.musicdao.core.database.CacheDatabase
-import com.example.musicdao.core.database.GsonParser
-import com.example.musicdao.core.database.parser.Converters
+import com.example.musicdao.core.cache.CacheDatabase
+import com.example.musicdao.core.cache.GsonParser
+import com.example.musicdao.core.cache.parser.Converters
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.usecases.DownloadFinishUseCase
 import com.example.musicdao.core.wallet.WalletConfig

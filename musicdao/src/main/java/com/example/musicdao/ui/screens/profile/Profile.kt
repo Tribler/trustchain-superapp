@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.model.Artist
+import com.example.musicdao.core.repositories.model.Album
+import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.ui.components.releases.NonLazyReleaseList
 import com.example.musicdao.ui.navigation.Screen
 

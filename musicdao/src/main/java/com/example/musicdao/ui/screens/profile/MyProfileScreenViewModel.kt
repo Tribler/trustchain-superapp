@@ -5,7 +5,7 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.core.ipv8.repositories.ArtistAnnounceBlockRepository
-import com.example.musicdao.core.model.Artist
+import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.core.repositories.ArtistRepository
 import com.example.musicdao.core.usecases.GetOwnPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,4 +1,4 @@
-package com.example.musicdao.core.model
+package com.example.musicdao.core.repositories.model
 
 data class Artist(
     val publicKey: String,

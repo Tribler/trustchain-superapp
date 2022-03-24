@@ -1,6 +1,5 @@
 package com.example.musicdao.core.ipv8.blocks.release_publish
 
-import android.util.Log
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
 import nl.tudelft.ipv8.android.IPv8Android

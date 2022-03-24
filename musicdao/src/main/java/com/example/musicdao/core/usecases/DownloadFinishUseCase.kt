@@ -4,9 +4,9 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
-import com.example.musicdao.core.database.CacheDatabase
-import com.example.musicdao.core.database.entities.SongEntity
-import com.example.musicdao.core.torrent.ReleaseProcessor
+import com.example.musicdao.core.cache.CacheDatabase
+import com.example.musicdao.core.cache.entities.SongEntity
+import com.example.musicdao.core.torrent.FileProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,7 +34,7 @@ class DownloadFinishUseCase constructor(
 
                 val root = Paths.get("${cachePath.getPath()}/torrents/$infoHash")
 
-                val mp3Files = ReleaseProcessor.getMP3Files(root)
+                val mp3Files = FileProcessor.getMP3Files(root)
                 Log.d("MusicDao", "DownloadFinishUseCase: mp3 files in $root: $mp3Files")
 
                 val songs = mp3Files?.map {

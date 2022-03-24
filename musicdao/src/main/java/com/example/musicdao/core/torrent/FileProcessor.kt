@@ -1,11 +1,10 @@
-package com.example.musicdao.core.usecases
+package com.example.musicdao.core.torrent
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.example.musicdao.core.torrent.ReleaseProcessor
 import com.example.musicdao.core.util.Util
 import com.mpatric.mp3agic.Mp3File
 import java.io.File
@@ -18,6 +17,40 @@ import java.nio.file.Paths
 class FileProcessor {
 
     companion object {
+        private fun getFiles(path: Path): List<File>? {
+            val folder = path.toFile()
+            if (!folder.exists()) {
+                return null
+            }
+            return getFiles(folder)
+        }
+
+        private fun getFiles(folder: File): List<File>? {
+            if (!folder.exists()) {
+                return null
+            }
+            return folder.walkTopDown().map { it }.toList()
+        }
+
+        fun getMP3Files(path: Path): List<Mp3File>? {
+            val files = getFiles(path) ?: return null
+            val mp3Files = files.toList().filter {
+                it.extension == "mp3"
+            }
+
+            return mp3Files.mapNotNull {
+                try {
+                    Mp3File(it)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        fun folderExistsAndHasFiles(folder: File): Boolean {
+            return folder.exists() && getFiles(folder)?.isEmpty() == false
+        }
+
         fun getTitle(mp3: Mp3File): String {
             val title = Util.getTitle(mp3)
             if (title != null) {
@@ -46,8 +79,8 @@ class FileProcessor {
                 return null
             }
 
-            val files = ReleaseProcessor.getFiles(folder) ?: return null
-            val mp3Files = ReleaseProcessor.getMP3Files(folder.toPath()) ?: return null
+            val files = getFiles(folder) ?: return null
+            val mp3Files = getMP3Files(folder.toPath()) ?: return null
 
             // 1. cover.jpg
             val first = files.find { file ->

@@ -4,8 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.usecases.releases.SearchAlbums
+import com.example.musicdao.core.repositories.model.Album
+import com.example.musicdao.core.repositories.AlbumRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchScreenViewModel @Inject constructor(
-    private val searchAlbums: SearchAlbums
+    private val albumRepository: AlbumRepository
 ) : ViewModel() {
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
@@ -43,7 +43,7 @@ class SearchScreenViewModel @Inject constructor(
         if (searchText.isEmpty()) {
             _searchResult.value = listOf()
         } else {
-            val result = searchAlbums.invoke(searchText)
+            val result = albumRepository.searchAlbums(searchText)
             _searchResult.value = result
         }
     }

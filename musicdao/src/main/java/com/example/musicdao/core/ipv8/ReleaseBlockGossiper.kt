@@ -1,6 +1,5 @@
 package com.example.musicdao.core.ipv8
 
-import android.util.Log
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockValidator
 import kotlinx.coroutines.CoroutineScope

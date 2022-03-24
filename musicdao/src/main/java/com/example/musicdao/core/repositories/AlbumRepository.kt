@@ -4,14 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import com.example.musicdao.core.database.CacheDatabase
-import com.example.musicdao.core.database.entities.AlbumEntity
+import com.example.musicdao.core.cache.CacheDatabase
+import com.example.musicdao.core.cache.entities.AlbumEntity
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlock
 import com.example.musicdao.core.ipv8.blocks.release_publish.ReleasePublishBlockRepository
-import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.repositories.model.Album
 import com.example.musicdao.core.torrent.TorrentEngine
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**

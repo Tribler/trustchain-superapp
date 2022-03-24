@@ -8,7 +8,6 @@ import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.torrent.TorrentEngine
-import java.nio.file.Paths
 import java.util.*
 import javax.inject.Inject
 
@@ -29,7 +28,7 @@ class CreateReleaseUseCase @Inject constructor(
         val releaseId = UUID.randomUUID().toString()
         Log.d("MusicDao", "CreateReleaseUseCase: $releaseId")
 
-        val root = torrentEngine.simulateDownload(context, uris, releaseId)
+        val root = torrentEngine.simulateDownload(context, uris)
         if (root == null) {
             Log.d("MusicDao", "CreateReleaseUseCase: could not simulate download")
             return false

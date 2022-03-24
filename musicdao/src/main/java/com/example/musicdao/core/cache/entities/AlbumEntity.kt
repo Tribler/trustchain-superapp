@@ -1,10 +1,10 @@
-package com.example.musicdao.core.database.entities
+package com.example.musicdao.core.cache.entities
 
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.repositories.model.Album
 import java.io.File
 import java.time.Instant
 

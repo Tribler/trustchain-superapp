@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.repositories.model.Album
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.navigation.Screen
 

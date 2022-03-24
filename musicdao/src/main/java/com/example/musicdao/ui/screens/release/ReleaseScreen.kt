@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.musicdao.MusicActivity
-import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.model.Song
+import com.example.musicdao.core.repositories.model.Album
+import com.example.musicdao.core.repositories.model.Song
 import com.example.musicdao.core.torrent.api.DownloadingTrack
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
@@ -247,21 +247,25 @@ fun Header(album: Album, navController: NavController) {
                         contentDescription = null,
                     )
                 }
-                IconButton(onClick = {
-                    navController.navigate(
-                        Screen.Profile.createRoute(publicKey = album.publisher)
-                    )
-                }) {
+                IconButton(
+                    onClick = {
+                        navController.navigate(
+                            Screen.Profile.createRoute(publicKey = album.publisher)
+                        )
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Outlined.Person,
                         contentDescription = null,
                     )
                 }
-                IconButton(onClick = {
-                    navController.navigate(
-                        Screen.Donate.route
-                    )
-                }) {
+                IconButton(
+                    onClick = {
+                        navController.navigate(
+                            Screen.Donate.route
+                        )
+                    }
+                ) {
                     Icon(
                         imageVector = Icons.Default.ShoppingCart,
                         contentDescription = null,
@@ -280,18 +284,22 @@ fun Header(album: Album, navController: NavController) {
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
                     ) {
-                        DropdownMenuItem(onClick = {
-                            navController.navigate(
-                                Screen.Profile.createRoute(publicKey = album.publisher)
-                            )
-                        }) {
+                        DropdownMenuItem(
+                            onClick = {
+                                navController.navigate(
+                                    Screen.Profile.createRoute(publicKey = album.publisher)
+                                )
+                            }
+                        ) {
                             Text("View Artist")
                         }
-                        DropdownMenuItem(onClick = {
-                            navController.navigate(
-                                Screen.Donate.route
-                            )
-                        }) {
+                        DropdownMenuItem(
+                            onClick = {
+                                navController.navigate(
+                                    Screen.Donate.route
+                                )
+                            }
+                        ) {
                             Text("Donate")
                         }
                         DropdownMenuItem(onClick = { }) {

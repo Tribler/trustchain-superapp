@@ -1,4 +1,4 @@
-package com.example.musicdao.core.model
+package com.example.musicdao.core.repositories.model
 
 import java.io.File
 import java.time.Instant

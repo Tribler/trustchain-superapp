@@ -1,9 +1,8 @@
-package com.example.musicdao.core.database
+package com.example.musicdao.core.cache
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.example.musicdao.core.database.entities.AlbumEntity
-import kotlinx.coroutines.flow.Flow
+import com.example.musicdao.core.cache.entities.AlbumEntity
 
 @Dao
 interface CacheDao {

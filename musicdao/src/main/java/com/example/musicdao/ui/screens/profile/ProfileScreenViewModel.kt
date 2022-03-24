@@ -5,8 +5,8 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.model.Artist
+import com.example.musicdao.core.repositories.model.Album
+import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.core.repositories.ArtistRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

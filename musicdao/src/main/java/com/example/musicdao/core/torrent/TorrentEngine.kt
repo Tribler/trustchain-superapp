@@ -8,7 +8,7 @@ import android.provider.MediaStore
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
-import com.example.musicdao.core.database.CacheDatabase
+import com.example.musicdao.core.cache.CacheDatabase
 import com.example.musicdao.core.usecases.DownloadFinishUseCase
 import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.*
@@ -17,7 +17,6 @@ import com.turn.ttorrent.client.SharedTorrent
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import org.apache.commons.io.FileUtils
 import java.io.File
 import java.nio.file.Path
@@ -25,9 +24,6 @@ import java.nio.file.Paths
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.exists
-import kotlin.io.path.writeBytes
 
 @DelicateCoroutinesApi
 @Singleton
@@ -69,7 +65,7 @@ class TorrentEngine @Inject constructor(
             "MusicDao",
             "seed(): torrent seed with $magnet, $root, $contentFolder, $initialSeed"
         )
-        if (!ReleaseProcessor.folderExistsAndHasFiles(contentFolder.toFile())) {
+        if (!FileProcessor.folderExistsAndHasFiles(contentFolder.toFile())) {
             Log.d("MusicDao", "seed(): Folder $contentFolder is empty or does not exist")
             return null
         }
@@ -110,7 +106,7 @@ class TorrentEngine @Inject constructor(
             "download(2): ${_activeTorrents.value.map { it }} $this"
         )
 
-        if(_activeTorrents.value.contains(infoHash)) {
+        if (_activeTorrents.value.contains(infoHash)) {
             Log.d(
                 "MusicDao",
                 "download(): torrent already started as a job"
@@ -221,10 +217,14 @@ class TorrentEngine @Inject constructor(
      * Simulates a download and puts content in cache/torrents/releaseId
      * @return root folder of release in cache
      */
-    fun simulateDownload(context: Context, uris: List<Uri>, releaseId: String): Pair<Path, TorrentInfo>? {
+    fun simulateDownload(
+        context: Context,
+        uris: List<Uri>,
+    ): Pair<Path, TorrentInfo>? {
         copyReleaseToTempFolder(context, uris)
 
-        val torrentInfo = createTorrentInfo(Paths.get("${cachePath.getPath()}/temp/$DEFAULT_DIR_NAME"))
+        val torrentInfo =
+            createTorrentInfo(Paths.get("${cachePath.getPath()}/temp/$DEFAULT_DIR_NAME"))
         val infoHash = torrentInfo.infoHash().toString()
         val torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent")
         val torrentFile = torrentPath.toFile()
@@ -245,7 +245,10 @@ class TorrentEngine @Inject constructor(
             "copyIntoCache: attempting to copy files $folder into torrent cache $torrentCacheFolder"
         )
         try {
-            folder.toFile().copyRecursively(Paths.get("$torrentCacheFolder/${torrentInfo.infoHash()}").toFile(), overwrite = true)
+            folder.toFile().copyRecursively(
+                Paths.get("$torrentCacheFolder/${torrentInfo.infoHash()}").toFile(),
+                overwrite = true
+            )
         } catch (exception: Exception) {
             Log.d("MusicDao", "copyIntoCache: could not copy files")
             return null
@@ -395,7 +398,7 @@ class TorrentEngine @Inject constructor(
     companion object {
         fun generateInfoHash(path: Path): String? {
             val folder = path.toFile()
-            if (!ReleaseProcessor.folderExistsAndHasFiles(folder)) {
+            if (!FileProcessor.folderExistsAndHasFiles(folder)) {
                 Log.d("MusicDao", "generateInfoHash: could not calculate info-hash for $folder")
                 return null
             }

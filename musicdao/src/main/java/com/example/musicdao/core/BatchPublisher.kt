@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
 import com.example.musicdao.core.repositories.AlbumRepository
-import com.example.musicdao.core.util.TorrentUtil
+import com.example.musicdao.core.torrent.TorrentEngine
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import java.nio.file.Paths
@@ -46,7 +46,7 @@ class BatchPublisher @Inject constructor(
             val title = record.get(0)
             val artist = record.get(1)
             val magnet = record.get(2)
-            val infoHash = TorrentUtil.magnetToInfoHash(magnet)
+            val infoHash = TorrentEngine.magnetToInfoHash(magnet)
             Log.d("MusicDao", "Batchpublisher: $title, $artist, $infoHash")
             val id = UUID.randomUUID().toString()
 

@@ -4,8 +4,8 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
 import com.example.musicdao.core.ipv8.repositories.ArtistAnnounceBlockRepository
-import com.example.musicdao.core.model.Album
-import com.example.musicdao.core.model.Artist
+import com.example.musicdao.core.repositories.model.Album
+import com.example.musicdao.core.repositories.model.Artist
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)

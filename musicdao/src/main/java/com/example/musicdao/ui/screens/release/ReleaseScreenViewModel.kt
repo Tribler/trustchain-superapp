@@ -1,16 +1,14 @@
 package com.example.musicdao.ui.screens.release
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
 import com.example.musicdao.CachePath
-import com.example.musicdao.core.database.CacheDatabase
-import com.example.musicdao.core.database.entities.AlbumEntity
-import com.example.musicdao.core.model.Album
+import com.example.musicdao.core.cache.CacheDatabase
+import com.example.musicdao.core.cache.entities.AlbumEntity
+import com.example.musicdao.core.repositories.model.Album
 import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.torrent.api.TorrentHandleStatus
-import com.example.musicdao.core.usecases.releases.GetRelease
 import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
 import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
 import dagger.assisted.Assisted
@@ -27,9 +25,7 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 class ReleaseScreenViewModel @AssistedInject constructor(
     @Assisted private val releaseId: String,
-    private val getReleaseUseCase: GetRelease,
     private val downloadIntentUseCase: DownloadIntentUseCase,
-    private val getTorrentStatusFlowUseCase: GetTorrentStatusFlowUseCase,
     private val database: CacheDatabase,
     private val torrentEngine: TorrentEngine,
     private val cachePath: CachePath

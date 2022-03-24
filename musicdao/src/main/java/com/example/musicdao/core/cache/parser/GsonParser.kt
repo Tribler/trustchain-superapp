@@ -1,4 +1,4 @@
-package com.example.musicdao.core.database
+package com.example.musicdao.core.cache
 
 import com.google.gson.Gson
 import java.lang.reflect.Type
