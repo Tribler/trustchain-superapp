@@ -16,10 +16,98 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            >
+
+            <FrameLayout
+                android:id="@+id/frameLayout"
+                style="?attr/actionButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:clipToPadding="false"
+
+                android:focusable="true">
+
+                <ImageButton
+                    android:id="@+id/download_progress"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitCenter"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_baseline_arrow_circle_down_24"
+                    >
+
+                </ImageButton>
+
+                <TextView
+                    android:id="@+id/download_count"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="end|top"
+                    android:layout_marginEnd="-5dp"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/rounded_corner"
+                    android:gravity="center"
+                    android:padding="3dp"
+                    android:textColor="@android:color/white"
+                    android:text="@string/downloadsInProgress"
+                    android:textSize="10sp"/>
+
+            </FrameLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/light_gray"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="#8f8c83"
+                app:srcCompat="@drawable/ic_baseline_search_24" />
+
+            <EditText
+                android:id="@+id/editTextTextPersonName"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:backgroundTint="#8f8c83"
+                android:hint="@string/SearchHint"
+                android:inputType="textPersonName"
+                android:textColor="#8f8c83"
+                android:textColorHint="#8f8c83" />
+
+            <TextView
+                android:id="@+id/torrentCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@string/torrentCount"
+                android:paddingEnd="10dp"
+                android:textColor="#8f8c83" />
+        </androidx.appcompat.widget.Toolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main_activity_foc" />
+
+    <include layout="@layout/fragment_download" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_add_24"
+        android:contentDescription="@string/addButtonDescription"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        app:backgroundTint="@color/blue"
+        />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
