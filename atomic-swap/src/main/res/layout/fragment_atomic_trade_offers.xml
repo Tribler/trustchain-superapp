@@ -10,8 +10,8 @@
         android:id="@+id/tradeOffersRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
-<!--        app:layoutManager="LinearLayoutManager"-->
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layoutManager="LinearLayoutManager" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/refreshTradeOffersButton"

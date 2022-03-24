@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.atomicswap.ui.tradeoffers.list
 
+import android.content.Context
 import android.view.View
+import android.widget.Toast
 import com.mattskala.itemadapter.BindingItemRenderer
 import nl.tudelft.trustchain.atomicswap.databinding.ItemTradeOfferBinding
 import nl.tudelft.trustchain.atomicswap.ui.enums.TradeOfferStatus
 
-class TradeOfferItemRenderer : BindingItemRenderer<TradeOfferItem, ItemTradeOfferBinding>(
-    TradeOfferItem::class.java,
-    ItemTradeOfferBinding::inflate
-) {
+class TradeOfferItemRenderer(val context: Context) :
+    BindingItemRenderer<TradeOfferItem, ItemTradeOfferBinding>(
+        TradeOfferItem::class.java,
+        ItemTradeOfferBinding::inflate
+    ) {
 
     override fun bindView(item: TradeOfferItem, binding: ItemTradeOfferBinding) {
         binding.fromCurrencyAmount.text = item.fromCurrencyAmount.toPlainString()
@@ -22,6 +25,8 @@ class TradeOfferItemRenderer : BindingItemRenderer<TradeOfferItem, ItemTradeOffe
         if (item.status == TradeOfferStatus.OPEN) {
             binding.acceptButton.setOnClickListener {
                 // TODO: Accept trade offer
+                Toast.makeText(context, "Accepting trade offer", Toast.LENGTH_SHORT)
+                    .show()
             }
         } else {
             binding.acceptButton.visibility = View.GONE
