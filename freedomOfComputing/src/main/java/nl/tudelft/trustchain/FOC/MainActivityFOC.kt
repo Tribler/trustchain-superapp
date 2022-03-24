@@ -28,8 +28,6 @@ import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import java.io.*
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -40,10 +38,7 @@ class MainActivityFOC : AppCompatActivity() {
     private var progressVisible = false
     private var requestCode = 1
     val MY_PERMISSIONS_REQUEST = 0
-    private val scope = CoroutineScope(Dispatchers.IO)
     val s = SessionManager()
-
-    var signal = CountDownLatch(0)
 
     private lateinit var appGossiper: AppGossiper
 
@@ -51,7 +46,6 @@ class MainActivityFOC : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            initializeTorrentSession()
             setContentView(R.layout.activity_main_foc)
             setSupportActionBar(toolbar)
             fab.setOnClickListener { _ ->
@@ -86,43 +80,6 @@ class MainActivityFOC : AppCompatActivity() {
         progressVisible = !progressVisible
     }
 
-    private fun initializeTorrentSession() {
-        s.addListener(object : AlertListener {
-            override fun types(): IntArray? {
-                return null
-            }
-
-            override fun alert(alert: Alert<*>) {
-                val type = alert.type()
-
-                when (type) {
-                    AlertType.ADD_TORRENT -> {
-                        Log.i("personal", "Torrent added")
-                        (alert as AddTorrentAlert).handle().resume()
-                    }
-                    AlertType.BLOCK_FINISHED -> {
-                        val a = alert as BlockFinishedAlert
-                        val p = (a.handle().status().progress() * 100).toInt()
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            progressBar.setProgress(p, true)
-                        }
-                        Log.i(
-                            "personal",
-                            "Progress: " + p + " for torrent name: " + a.torrentName()
-                        )
-                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
-                    }
-                    AlertType.TORRENT_FINISHED -> {
-                        signal.countDown()
-                        Log.i("personal", "Torrent finished")
-                        printToast("Torrent downloaded!!")
-                    }
-                    else -> {
-                    }
-                }
-            }
-        })
-    }
 
     @Suppress("deprecation")
     fun showAllFiles() {
@@ -251,7 +208,7 @@ class MainActivityFOC : AppCompatActivity() {
     fun createTorrent(fileName: String) {
         val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
-            printToast("Something went wrong, check logs")
+            runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("personal", "File doesn't exist!")
             return
         }
@@ -292,7 +249,7 @@ class MainActivityFOC : AppCompatActivity() {
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
         val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
         Log.i("personal", magnetLink)
-        printToast(fileName)
+        runOnUiThread { printToast(fileName) }
     }
 
     @Suppress("deprecation")

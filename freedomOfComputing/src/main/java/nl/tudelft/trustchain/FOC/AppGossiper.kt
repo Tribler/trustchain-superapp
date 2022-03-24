@@ -3,6 +3,10 @@ package nl.tudelft.trustchain.FOC
 import android.util.Log
 import android.widget.Toast
 import com.frostwire.jlibtorrent.*
+import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
+import com.frostwire.jlibtorrent.alerts.Alert
+import com.frostwire.jlibtorrent.alerts.AlertType
+import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
@@ -19,6 +23,8 @@ import kotlin.collections.HashMap
  */
 
 lateinit var appGossiperInstance: AppGossiper
+const val GOSSIP_DELAY: Long = 10000
+const val DOWNLOAD_DELAY: Long = 20000
 
 @Suppress("deprecation")
 class AppGossiper(
@@ -30,6 +36,7 @@ class AppGossiper(
     private val torrentHandles = ArrayList<TorrentHandle>()
     private val torrentInfos = ArrayList<TorrentInfo>()
     private val failedTorrents = HashMap<String, Long>()
+    private var signal = CountDownLatch(0)
     var sessionActive = false
     var downloadsInProgress = 0
 
@@ -48,6 +55,7 @@ class AppGossiper(
     fun start() {
         printToast("Start gossiper")
         populateKnownTorrents()
+        initializeTorrentSession()
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
         val params =
@@ -70,6 +78,42 @@ class AppGossiper(
         }
     }
 
+    private fun initializeTorrentSession() {
+        sessionManager.addListener(object : AlertListener {
+            override fun types(): IntArray? {
+                return null
+            }
+
+            override fun alert(alert: Alert<*>) {
+                val type = alert.type()
+
+                when (type) {
+                    AlertType.ADD_TORRENT -> {
+                        Log.i("personal", "Torrent added")
+                        (alert as AddTorrentAlert).handle().resume()
+                    }
+                    AlertType.BLOCK_FINISHED -> {
+                        val a = alert as BlockFinishedAlert
+                        val p = (a.handle().status().progress() * 100).toInt()
+                        Log.i(
+                            "personal",
+                            "Progress: " + p + " for torrent name: " + a.torrentName()
+                        )
+                        Log.i("personal", java.lang.Long.toString(sessionManager.stats().totalDownload()))
+                    }
+                    AlertType.TORRENT_FINISHED -> {
+                        signal.countDown()
+                        Log.i("personal", "Torrent finished")
+                        printToast("Torrent downloaded!!")
+                    }
+                    else -> {
+                    }
+                }
+            }
+        })
+    }
+
+
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
      */
@@ -79,7 +123,7 @@ class AppGossiper(
             if (demoCommunity != null) {
                 randomlyShareFiles(demoCommunity)
             }
-            delay(10000)
+            delay(GOSSIP_DELAY)
         }
     }
 
@@ -104,7 +148,7 @@ class AppGossiper(
                     }
                 }
             }
-            delay(20000)
+            delay(DOWNLOAD_DELAY)
         }
     }
 
@@ -228,17 +272,17 @@ class AppGossiper(
 
             val torrentInfo = TorrentInfo.bdecode(data)
             sessionActive = true
-            activity.signal = CountDownLatch(1)
+            signal = CountDownLatch(1)
 
             downloadsInProgress += 1
             sessionManager.download(torrentInfo, activity.applicationContext.cacheDir)
             downloadsInProgress -= 1
 
             activity.runOnUiThread { activity.showAllFiles() }
-            activity.signal.await(3, TimeUnit.MINUTES)
-            if (activity.signal.count.toInt() == 1) {
+            signal.await(3, TimeUnit.MINUTES)
+            if (signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
-                activity.signal = CountDownLatch(0)
+                signal = CountDownLatch(0)
                 failedTorrents[torrentName] = System.currentTimeMillis()
             }
             sessionActive = false
