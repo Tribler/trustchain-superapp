@@ -8,6 +8,7 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
@@ -62,6 +63,7 @@ class AppGossiper(
             SessionParams(sp)
         sessionManager.start(params)
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         scope.launch {
             try {
                 iterativelyShareApps()
@@ -130,6 +132,9 @@ class AppGossiper(
     private suspend fun iterativelyDownloadApps() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
             while (scope.isActive) {
+                downloadsInProgress = demoCommunity.getTorrentMessages().size
+                activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+                activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
                 for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                     val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
                     Log.i("personal", peer.mid + ": " + payload.message)
@@ -216,7 +221,10 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
-        activity.runOnUiThread { printToast("Found new torrent and start download") }
+        activity.runOnUiThread {
+            printToast("Found new torrent and start download")
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+        }
 
         if (sessionActive || !magnetLink.startsWith("magnet:"))
             return
@@ -260,8 +268,13 @@ class AppGossiper(
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             Log.i("personal", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName!") }
-            activity.runOnUiThread { printToast(e.toString()) }
+            activity.runOnUiThread {
+                printToast("Failed to fetch magnet info for $torrentName!")
+                printToast(e.toString())
+                activity.createUnsuccessfulTorrentButton(torrentName)
+                activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+                activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            }
             failedTorrents[torrentName] = System.currentTimeMillis()
             return
         }
@@ -274,10 +287,9 @@ class AppGossiper(
             sessionActive = true
             signal = CountDownLatch(1)
 
-            downloadsInProgress += 1
             sessionManager.download(torrentInfo, activity.applicationContext.cacheDir)
-            downloadsInProgress -= 1
 
+            // TODO: When calling showAllFiles() the buttons that are created for unsuccessful downloads will disappear
             activity.runOnUiThread { activity.showAllFiles() }
             signal.await(3, TimeUnit.MINUTES)
             if (signal.count.toInt() == 1) {
@@ -290,8 +302,16 @@ class AppGossiper(
             torrentInfos.add(torrentInfo)
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
+            activity.runOnUiThread {
+                printToast("Failed to retrieve magnet for $torrentName!")
+                activity.createUnsuccessfulTorrentButton(torrentName)
+            }
             failedTorrents[torrentName] = System.currentTimeMillis()
+        }
+        activity.runOnUiThread {
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress...")
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         }
     }
 

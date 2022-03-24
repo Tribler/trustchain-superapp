@@ -4,9 +4,9 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
@@ -21,16 +21,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import java.io.*
 import java.util.*
-import java.util.concurrent.CountDownLatch
 
 class MainActivityFOC : AppCompatActivity() {
 
@@ -91,7 +86,7 @@ class MainActivityFOC : AppCompatActivity() {
             torrentList.clear()
             for (file in files) {
                 if (getFileName(file.toUri()).endsWith(".apk")) {
-                    createTorrentButton(file.toUri())
+                    createSuccessfulTorrentButton(file.toUri())
                 }
             }
         }
@@ -123,12 +118,13 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun createTorrentButton(uri: Uri) {
+    fun createSuccessfulTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
         val button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
         button.isAllCaps = false
+        button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.android_green))
         torrentList.add(button)
         torrentCount.text = getString(R.string.torrentCount, torrentList.size)
         button.setOnClickListener {
@@ -138,6 +134,15 @@ class MainActivityFOC : AppCompatActivity() {
             createTorrent(fileName)
             true
         }
+        torrentListView.addView(button)
+    }
+
+    fun createUnsuccessfulTorrentButton(torrentName: String) {
+        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val button = Button(this)
+        button.text = torrentName
+        button.isAllCaps = false
+        button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.red))
         torrentListView.addView(button)
     }
 
@@ -160,7 +165,7 @@ class MainActivityFOC : AppCompatActivity() {
                 printToast("$fileName already exists!")
                 return
             }
-            createTorrentButton(data.data!!)
+            createSuccessfulTorrentButton(data.data!!)
         }
     }
 

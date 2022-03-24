@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Downloading: Another torrent"
+        android:text="@string/currentTorrentDownload"
         />
 
     <ProgressBar
@@ -48,7 +48,7 @@
         android:gravity="bottom|end"
         android:layout_alignEnd="@+id/progressBar"
         android:layout_below="@+id/progressBar"
-        android:text="In queue: 1"
+        android:text="@string/downloadsInQueue"
         />
 
 </RelativeLayout>
