@@ -15,6 +15,8 @@
     <string name="notification_copied_key">Copied wallet public key to clipboard</string>
     <string name="accept">Accept</string>
 
+    <string name="toast_refreshing_trade_offers">Refreshing trade offers…</string>
+
     <string-array name="currency_codes">
         <item>BTC</item>
         <item>ETH</item>
