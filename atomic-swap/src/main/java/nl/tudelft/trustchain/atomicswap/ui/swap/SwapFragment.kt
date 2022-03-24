@@ -21,8 +21,6 @@ import kotlinx.android.synthetic.main.fragment_peers.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.atomicswap.ui.peers.AddressItem
-import nl.tudelft.trustchain.atomicswap.ui.peers.PeerItem
 import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,25 +51,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//
-//        setContentView(R.layout.fragment_peers)
-//
-//        adapter.registerRenderer(PeerItemRenderer {
-//            // NOOP
-//        })
-//
-//        adapter.registerRenderer(AddressItemRenderer {
-//            // NOOP
-//        })
-//
-//        recyclerView.adapter = adapter
-//        recyclerView.layoutManager = LinearLayoutManager(this)
-//        recyclerView.addItemDecoration(DividerItemDecoration(this, LinearLayout.VERTICAL))
-//
-
-        //loadNetworkInfo()
         configureAtomicSwapCallbacks()
-        //receiveGossips()
     }
 
 
@@ -353,69 +333,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 }
             }
         }
-
-
-
-
-
-
-
-
-    private fun loadNetworkInfo() {
-        lifecycleScope.launchWhenStarted {
-            while (isActive) {
-                val peers = atomicSwapCommunity.getPeers()
-
-                val discoveredAddresses = atomicSwapCommunity.network
-                    .getWalkableAddresses(atomicSwapCommunity.serviceId)
-
-                val discoveredBluetoothAddresses = atomicSwapCommunity.network
-                    .getNewBluetoothPeerCandidates()
-                    .map { it.address }
-
-                val peerItems = peers.map {
-                    PeerItem(
-                        it
-                    )
-                }
-
-                val addressItems = discoveredAddresses.map { address ->
-                    val contacted = atomicSwapCommunity.discoveredAddressesContacted[address]
-                    AddressItem(
-                        address,
-                        null,
-                        contacted
-                    )
-                }
-
-                val bluetoothAddressItems = discoveredBluetoothAddresses.map { address ->
-                    AddressItem(
-                        address,
-                        null,
-                        null
-                    )
-                }
-
-                val items = peerItems + bluetoothAddressItems + addressItems
-
-                for (peer in peers) {
-                    Log.d("AtomicSwapCommunity", "FOUND PEER with id " + peer.mid)
-                }
-
-
-                adapter.updateItems(items)
-                txtCommunityName.text = atomicSwapCommunity.javaClass.simpleName
-                txtPeerCount.text = "${peers.size} peers"
-                val textColorResId = if (peers.isNotEmpty()) R.color.green else R.color.red
-                val textColor = ResourcesCompat.getColor(resources, textColorResId, null)
-                txtPeerCount.setTextColor(textColor)
-                imgEmpty.isVisible = items.isEmpty()
-
-                delay(3000)
-            }
-        }
-    }
-
 
     private fun initializeUi(binding: FragmentAtomicSwapBinding, model: SwapViewModel) {
         val fromCurrencySpinner = binding.fromCurrencySpinner
