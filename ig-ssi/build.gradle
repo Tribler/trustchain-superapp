@@ -13,14 +13,11 @@ ktlint {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
@@ -37,16 +34,16 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         allWarningsAsErrors = true
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 }
 
@@ -92,7 +89,7 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-Werror" // Set Kotlin compiler warnings as errors
+        "-Werror", // Set Kotlin compiler warnings as errors
+        "-opt-in=kotlin.RequiresOptIn"
     ]
 }

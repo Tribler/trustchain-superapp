@@ -59,11 +59,11 @@ class PlaylistCoverFragment(
      */
     fun filter(name: String): Boolean {
         if (name.isEmpty()) return true
-        val query = name.toLowerCase(Locale.ROOT)
+        val query = name.lowercase(Locale.ROOT)
         val transaction = trustChainBlock.transaction
-        val title = transaction["title"].toString().toLowerCase(Locale.ROOT)
-        val artists = transaction["artists"].toString().toLowerCase(Locale.ROOT)
-        val date = transaction["date"].toString().toLowerCase(Locale.ROOT)
+        val title = transaction["title"].toString().lowercase(Locale.ROOT)
+        val artists = transaction["artists"].toString().lowercase(Locale.ROOT)
+        val date = transaction["date"].toString().lowercase(Locale.ROOT)
         if (title.contains(query)) {
             return true
         }

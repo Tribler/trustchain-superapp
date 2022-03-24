@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.valuetransfer.ui.identity
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.graphics.Typeface
 import android.os.Build
@@ -10,11 +11,14 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.view.*
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.delay
@@ -40,6 +44,8 @@ import nl.tudelft.trustchain.common.valuetransfer.extensions.encodeImage
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.common.valuetransfer.extensions.exitEnterView
+import nl.tudelft.trustchain.valuetransfer.util.DividerItemDecorator
+import nl.tudelft.trustchain.valuetransfer.util.getInitials
 import org.json.JSONObject
 import java.util.*
 
@@ -107,7 +113,9 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
                 { identity ->
                     val map = mapOf(
                         QRScanController.KEY_PUBLIC_KEY to identity.publicKey.keyToBin().toHex(),
-                        QRScanController.KEY_NAME to identity.content.givenNames
+                        QRScanController.KEY_NAME to identity.content.let {
+                            "${it.givenNames.getInitials()} ${it.surname}"
+                        },
                     )
 
                     QRCodeDialog(resources.getString(R.string.text_my_public_key), resources.getString(R.string.text_public_key_share_desc), mapToJSON(map).toString())
@@ -244,11 +252,15 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         binding.rvAttributes.apply {
             adapter = adapterAttributes
             layoutManager = LinearLayoutManager(context)
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_identity_attribute, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         binding.rvAttestations.apply {
             adapter = adapterAttestations
             layoutManager = LinearLayoutManager(context)
+            val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_attestation, requireContext().theme)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         itemsIdentity.observe(
@@ -277,7 +289,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         binding.ivAddAttributeAttestation.setOnClickListener {
             OptionsDialog(
                 R.menu.identity_add_options,
-                "Choose Option",
+                resources.getString(R.string.dialog_choose_option),
                 menuMods = { menu ->
                     menu.apply {
                         findItem(R.id.actionAddIdentityAttribute).isVisible = getIdentityCommunity().getUnusedAttributeNames().isNotEmpty()
@@ -335,7 +347,7 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         OptionsDialog(
             R.menu.identity_options,
-            "Choose Option"
+            resources.getString(R.string.dialog_choose_option),
         ) { _, selectedItem ->
             when (selectedItem.itemId) {
                 R.id.actionViewAuthorities -> IdentityAttestationAuthoritiesDialog(
@@ -444,18 +456,26 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
         )
     }
 
+    private val pickIdentityImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val bundle = result.data
+        if (bundle != null) {
+            bundle.data?.let { uri ->
+                val bitmapIs = parentActivity.contentResolver.openInputStream(uri)
+                val bitmap = BitmapFactory.decodeStream(bitmapIs)
+                appPreferences.setIdentityFace(encodeImage(bitmap))
+            }
+        }
+    }
+
     private fun identityImageIntent() {
         val mimeTypes = arrayOf("image/*")
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        startActivityForResult(
-            Intent.createChooser(
-                intent,
-                resources.getString(R.string.text_send_photo_video)
-            ),
-            PICK_IDENTITY_IMAGE
-        )
+        pickIdentityImage.launch(Intent.createChooser(
+            intent,
+            resources.getString(R.string.text_send_photo_video)
+        ))
     }
 
     private fun createAttributeItems(attributes: List<IdentityAttribute>): List<Item> {
@@ -491,71 +511,55 @@ class IdentityFragment : VTFragment(R.layout.fragment_identity) {
     @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == PICK_IDENTITY_IMAGE) {
-                if (data != null) {
-                    data.data?.let { uri ->
-                        val bitmap = if (Build.VERSION.SDK_INT >= 29) {
-                            val source = ImageDecoder.createSource(parentActivity.contentResolver, uri)
-                            ImageDecoder.decodeBitmap(source)
-                        } else {
-                            MediaStore.Images.Media.getBitmap(parentActivity.contentResolver, uri)
-                        }
+            QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
+                ?.let { result ->
+                    try {
+                        val obj = JSONObject(result)
 
-                        appPreferences.setIdentityFace(encodeImage(bitmap))
-                    }
-                }
-            } else {
-                QRCodeUtils(requireContext()).parseActivityResult(requestCode, resultCode, data)
-                    ?.let { result ->
-                        try {
-                            val obj = JSONObject(result)
+                        if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
+                            try {
+                                defaultCryptoProvider.keyFromPublicBin(
+                                    obj.optString(
+                                        QRScanController.KEY_PUBLIC_KEY
+                                    ).hexToBytes()
+                                )
+                                val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
 
-                            if (obj.has(QRScanController.KEY_PUBLIC_KEY)) {
-                                try {
-                                    defaultCryptoProvider.keyFromPublicBin(
-                                        obj.optString(
-                                            QRScanController.KEY_PUBLIC_KEY
-                                        ).hexToBytes()
+                                when (scanIntent) {
+                                    ADD_ATTESTATION_INTENT -> getQRScanController().addAttestation(
+                                        publicKey
                                     )
-                                    val publicKey = obj.optString(QRScanController.KEY_PUBLIC_KEY)
-
-                                    when (scanIntent) {
-                                        ADD_ATTESTATION_INTENT -> getQRScanController().addAttestation(
-                                            publicKey
-                                        )
-                                        ADD_AUTHORITY_INTENT -> getQRScanController().addAuthority(
-                                            publicKey
-                                        )
-                                    }
-                                } catch (e: Exception) {
-                                    e.printStackTrace()
-                                    parentActivity.displayToast(
-                                        requireContext(),
-                                        resources.getString(R.string.snackbar_invalid_public_key)
+                                    ADD_AUTHORITY_INTENT -> getQRScanController().addAuthority(
+                                        publicKey
                                     )
                                 }
-                            } else {
+                            } catch (e: Exception) {
+                                e.printStackTrace()
                                 parentActivity.displayToast(
                                     requireContext(),
-                                    resources.getString(R.string.snackbar_no_public_key_found)
+                                    resources.getString(R.string.snackbar_invalid_public_key)
                                 )
                             }
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+                        } else {
                             parentActivity.displayToast(
                                 requireContext(),
-                                resources.getString(R.string.snackbar_qr_code_not_json_format)
+                                resources.getString(R.string.snackbar_no_public_key_found)
                             )
                         }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        parentActivity.displayToast(
+                            requireContext(),
+                            resources.getString(R.string.snackbar_qr_code_not_json_format)
+                        )
                     }
-            }
-        } else super.onActivityResult(requestCode, resultCode, data)
+                }
+        }
     }
 
     companion object {
         private const val ADD_ATTESTATION_INTENT = 0
         private const val ADD_AUTHORITY_INTENT = 1
         private const val MENU_ITEM_OPTIONS = 1234
-        private const val PICK_IDENTITY_IMAGE = 2
     }
 }

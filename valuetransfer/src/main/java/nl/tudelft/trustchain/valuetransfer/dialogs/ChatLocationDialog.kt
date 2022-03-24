@@ -56,6 +56,8 @@ class ChatLocationDialog(
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             bottomSheetDialog = Dialog(requireContext(), R.style.FullscreenDialog)
+
+            @Suppress("DEPRECATION")
             bottomSheetDialog.window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN)
             val view = layoutInflater.inflate(R.layout.dialog_contact_chat_location, null)
             dialogView = view
@@ -166,7 +168,6 @@ class ChatLocationDialog(
             googleMap.setOnMapClickListener(this)
             removeMarker(map)
 
-            locationSendView.isVisible = map.isMyLocationEnabled
             openDirectionsView.isVisible = false
 
             map.setOnMyLocationChangeListener {
@@ -175,10 +176,12 @@ class ChatLocationDialog(
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
 
                     locationTypeSend.text = resources.getString(R.string.text_send_current_location)
-                    locationNameSend.text = getAddress(it.latitude, it.longitude)
+                    locationNameSend.text = getAddress(it.latitude, it.longitude) ?: resources.getString(R.string.text_address_not_found)
 
                     mapInitialized = true
                 }
+
+                locationSendView.isVisible = map.isMyLocationEnabled && mapInitialized
             }
         }
     }
@@ -200,7 +203,7 @@ class ChatLocationDialog(
 
             locationSendView.isVisible = location == null
             locationTypeSend.text = resources.getString(R.string.text_send_this_location)
-            locationNameSend.text = getAddress(latitude, longitude)
+            locationNameSend.text = getAddress(latitude, longitude) ?: resources.getString(R.string.text_address_not_found)
         }
     }
 
@@ -214,7 +217,7 @@ class ChatLocationDialog(
 
             if (map.isMyLocationEnabled) {
                 locationTypeSend.text = resources.getString(R.string.text_send_current_location)
-                locationNameSend.text = getAddress(map.myLocation.latitude, map.myLocation.longitude)
+                locationNameSend.text = getAddress(map.myLocation.latitude, map.myLocation.longitude) ?: resources.getString(R.string.text_address_not_found)
             }
 
             return@setOnMarkerClickListener true
@@ -222,15 +225,15 @@ class ChatLocationDialog(
     }
 
     private fun getAddress(latitude: Double, longitude: Double): String? {
-        val geocoder = Geocoder(requireContext(), Locale.getDefault())
-        val address = geocoder.getFromLocation(
-            latitude,
-            longitude,
-            1
-        )
-
         return try {
-            address[0].getAddressLine(0)
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            geocoder.getFromLocation(
+                latitude,
+                longitude,
+                1
+            ).let { address ->
+                address[0].getAddressLine(0)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -239,6 +242,7 @@ class ChatLocationDialog(
 
     @Suppress("MissingPermission")
     private fun enableMyLocation() {
+        @Suppress("DEPRECATION")
         if (isPermissionGranted()) {
             try {
                 map.isMyLocationEnabled = true

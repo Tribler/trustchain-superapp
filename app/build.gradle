@@ -14,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.1'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
     }
 }
 
@@ -33,13 +33,13 @@ static def generateVersionCode() {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 31
+    buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "nl.tudelft.trustchain"
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode generateVersionCode()
         versionName "0.3"
 
@@ -66,17 +66,17 @@ android {
     // To inline the bytecode built with JVM target 1.8 into
     // bytecode that is being built with JVM target 1.6. (e.g. navArgs)
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         allWarningsAsErrors = true
     }
 
     buildFeatures {
-        viewBinding = true
+        viewBinding true
     }
 
     packagingOptions {
@@ -182,7 +182,6 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += [
-        "-Xuse-experimental=kotlin.Experimental,kotlin.ExperimentalUnsignedTypes",
-        "-Xopt-in=kotlin.RequiresOptIn"
+        "-opt-in=kotlin.RequiresOptIn"
     ]
 }

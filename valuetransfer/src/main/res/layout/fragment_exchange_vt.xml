@@ -1,136 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="12dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/clBalance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/square_rounded">
+
+        <TextView
+            android:id="@+id/tvExchangeTitle"
+            style="@style/FragmentTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:text="@string/menu_navigation_exchange_balance"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBalanceReload"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/dialogColor"
+            app:layout_constraintDimensionRatio="H1,1"
+            app:layout_constraintEnd_toStartOf="@+id/clExchangeOptions"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.utils.widget.ImageFilterView
+                android:id="@+id/ivReloadBalance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:src="@drawable/ic_baseline_refresh_24"
+                app:tint="?attr/mutedColor"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/pbBalanceUpdating"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:padding="8dp"
+                android:visibility="invisible"
+                android:indeterminateTint="?attr/onWidgetSecondaryColor"
+                android:indeterminateTintMode="src_atop"
+                app:layout_constraintDimensionRatio="H,1:1" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clExchangeOptions"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/dialogColor"
+            app:layout_constraintDimensionRatio="H1,1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_exchange"
+                android:padding="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <FrameLayout
+            android:id="@+id/flExchangeBalance"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tvExchangeTitle">
+
+            <LinearLayout
+                android:id="@+id/llExchangeBalanceHidden"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp"
+                tools:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_baseline_asterisk"
+                    app:tint="?attr/onWidgetColor" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_baseline_asterisk"
+                    app:tint="?attr/onWidgetColor" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_baseline_asterisk"
+                    app:tint="?attr/onWidgetColor" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/ic_baseline_asterisk"
+                    app:tint="?attr/onWidgetColor" />
+
+                <FrameLayout
+                    android:id="@+id/clExchangeBalanceToggle"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="@drawable/pill_rounded"
+                    android:padding="8dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvExchangeTitle"
+                    app:layout_constraintDimensionRatio="H1,1"
+                    app:layout_constraintStart_toEndOf="@+id/tvExchangeTitle"
+                    app:layout_constraintTop_toTopOf="@+id/tvExchangeTitle">
+
+                    <ImageView
+                        android:id="@+id/ivExchangeBalanceButtonShow"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_eye_show" />
+
+                    <ImageView
+                        android:id="@+id/ivExchangeBalanceButtonHidden"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_eye_hidden"
+                        android:visibility="gone" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llExchangeBalance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/ivBalanceIcon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_baseline_euro_symbol_24"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="?attr/onWidgetColor" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/clBalances"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvBalanceAmountTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/text_including_unverified_transactions"
+                        android:textColor="?attr/onWidgetSecondaryColor"
+                        android:textSize="10sp"
+                        android:textStyle="italic"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="@+id/clBalanceAmount"
+                        app:layout_constraintBottom_toTopOf="@+id/clBalanceAmount"/>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/clBalanceAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <TextView
+                            android:id="@+id/tvBalanceAmount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0.00"
+                            android:gravity="center_vertical"
+                            android:textColor="?attr/onWidgetColor"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"/>
+
+                        <TextView
+                            android:id="@+id/tvBalanceVerifiedAmount"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="0.00"
+                            android:textColor="?attr/onWidgetColor"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <ImageView
+                        android:id="@+id/ivBalanceErrorIcon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginStart="8dp"
+                        android:padding="4dp"
+                        android:src="@drawable/ic_baseline_info_24"
+                        android:tooltipText="@string/text_tooltip_unverified_balance"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
+                        app:layout_constraintStart_toEndOf="@+id/clBalanceAmount"
+                        app:layout_constraintTop_toTopOf="@+id/clBalanceAmount"
+                        app:tint="?attr/colorError"
+                        tools:visibility="visible" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            </LinearLayout>
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingBottom="12dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/clBalance"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/square_rounded"
-            android:paddingStart="16dp"
-            android:paddingEnd="8dp">
-
-            <ImageView
-                android:id="@+id/ivBalanceIcon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_baseline_euro_symbol_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:tint="?attr/onWidgetColor" />
-
-            <TextView
-                android:id="@+id/tvBalanceAmountTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/text_including_unverified_transactions"
-                android:textColor="?attr/onWidgetSecondaryColor"
-                android:textSize="10sp"
-                android:textStyle="italic"
-                android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@+id/clBalanceAmount"
-                app:layout_constraintStart_toStartOf="@+id/clBalanceAmount" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clBalanceAmount"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/ivBalanceIcon"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <TextView
-                    android:id="@+id/tvBalanceAmount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="0.00"
-                    android:textColor="?attr/onWidgetColor"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvBalanceVerifiedAmount"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="0.00"
-                    android:textColor="?attr/onWidgetColor"
-                    android:textSize="24sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <ImageView
-                android:id="@+id/ivBalanceErrorIcon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="8dp"
-                android:padding="4dp"
-                android:src="@drawable/ic_baseline_info_24"
-                android:tooltipText="@string/text_tooltip_unverified_balance"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
-                app:layout_constraintStart_toEndOf="@+id/clBalanceAmount"
-                app:layout_constraintTop_toTopOf="@+id/clBalanceAmount"
-                app:tint="?attr/colorError"
-                tools:visibility="visible" />
-
-            <ProgressBar
-                android:id="@+id/pbBalanceUpdating"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="8dp"
-                android:indeterminateTint="?attr/onWidgetSecondaryColor"
-                android:indeterminateTintMode="src_atop"
-                app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
-                app:layout_constraintDimensionRatio="H,1:1"
-                app:layout_constraintStart_toEndOf="@+id/ivBalanceErrorIcon"
-                app:layout_constraintTop_toTopOf="@+id/clBalanceAmount" />
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/clExchangeOptions"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_baseline_more_vert_24"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="?attr/mutedColor" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/square_rounded">
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -142,33 +277,39 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
+                android:layout_marginStart="12dp"
                 android:layout_marginTop="12dp"
                 android:layout_toLeftOf="@+id/flReloadButtons"
                 android:text="@string/text_title_transactions" />
 
             <FrameLayout
                 android:id="@+id/flReloadButtons"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/tvTransactionsTitle"
-                android:layout_alignBottom="@+id/tvTransactionsTitle"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                app:layout_constraintDimensionRatio="H1,1"
+                android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginEnd="12dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="?attr/dialogColor">
 
                 <androidx.constraintlayout.utils.widget.ImageFilterView
                     android:id="@+id/ivReloadTransactions"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center"
+                    android:padding="8dp"
                     android:src="@drawable/ic_baseline_refresh_24"
                     android:visibility="invisible"
                     app:tint="?attr/mutedColor"
                     tools:visibility="visible" />
 
                 <ProgressBar
-                    android:id="@+id/pbLoadingSpinner"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:id="@+id/pbTransactionsUpdating"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="8dp"
                     android:layout_gravity="center"
                     android:indeterminateTint="?attr/mutedColor"
                     android:indeterminateTintMode="src_atop"
@@ -180,8 +321,8 @@
             android:id="@+id/tvNoTransactions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/pill_rounded"
             android:paddingVertical="4dp"
             android:text="@string/text_no_transactions"
@@ -193,32 +334,30 @@
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
+            android:paddingTop="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@drawable/square_rounded">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvTransactions"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:itemCount="1"
+                    tools:itemCount="3"
                     tools:listitem="@layout/item_exchange_transaction" />
 
                 <ImageView
                     android:id="@+id/btnShowMoreTransactions"
                     android:layout_width="match_parent"
                     android:layout_height="28dp"
-                    android:layout_marginHorizontal="12dp"
-                    android:background="@drawable/square_rounded"
                     android:paddingVertical="8dp"
                     android:src="@drawable/ic_arrow_down"
                     android:visibility="gone"
                     tools:visibility="visible" />
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
-
     </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

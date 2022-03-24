@@ -63,7 +63,7 @@ class MusicCommunity(
      */
     private fun onKeywordSearch(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(KeywordSearchMessage)
-        val keyword = payload.keyword.toLowerCase(Locale.ROOT)
+        val keyword = payload.keyword.lowercase(Locale.ROOT)
         val block = localKeywordSearch(keyword)
         if (block != null) sendBlock(block, peer)
         if (block == null) {
@@ -99,8 +99,8 @@ class MusicCommunity(
     fun localKeywordSearch(keyword: String): TrustChainBlock? {
         database.getBlocksWithType("publish_release").forEach {
             val transaction = it.transaction
-            val title = transaction["title"]?.toString()?.toLowerCase(Locale.ROOT)
-            val artists = transaction["artists"]?.toString()?.toLowerCase(Locale.ROOT)
+            val title = transaction["title"]?.toString()?.lowercase(Locale.ROOT)
+            val artists = transaction["artists"]?.toString()?.lowercase(Locale.ROOT)
             if (title != null && title.contains(keyword)) {
                 return it
             } else if (artists != null && artists.contains(keyword)) {

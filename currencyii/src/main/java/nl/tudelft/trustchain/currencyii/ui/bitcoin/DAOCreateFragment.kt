@@ -26,12 +26,10 @@ import java.io.File
  */
 class DAOCreateFragment : BaseFragment() {
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         handleFirstTimeUsage()
         initListeners()
-
-        super.onActivityCreated(savedInstanceState)
     }
 
     private fun handleFirstTimeUsage() {

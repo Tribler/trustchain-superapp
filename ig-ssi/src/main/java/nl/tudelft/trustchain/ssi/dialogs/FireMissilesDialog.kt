@@ -76,7 +76,7 @@ class FireMissilesDialog(private val peer: Peer) : DialogFragment() {
                         } else {
                             attestationCommunity.requestAttestation(
                                 peer,
-                                attrInput.text.toString().toUpperCase(Locale.getDefault()),
+                                attrInput.text.toString().uppercase(Locale.getDefault()),
                                 key,
                                 hashMapOf("id_format" to idFormat),
                                 true

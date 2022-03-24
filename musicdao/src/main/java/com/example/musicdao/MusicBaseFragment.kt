@@ -14,6 +14,7 @@ abstract class MusicBaseFragment(@LayoutRes contentLayoutId: Int = 0) :
         return getIpv8().getOverlay()
             ?: throw IllegalStateException("MusicCommunity is not configured")
     }
+    @OptIn(ExperimentalUnsignedTypes::class)
     protected fun getRecommenderCommunity(): RecommenderCommunity {
         return getIpv8().getOverlay()
             ?: throw IllegalStateException("RecommenderCommunity is not configured")

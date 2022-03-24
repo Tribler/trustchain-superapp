@@ -14,7 +14,6 @@
     <TextView
         android:id="@+id/tvTitle"
         android:layout_marginTop="8dp"
-        android:paddingBottom="12dp"
         style="@style/DialogTitle"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/dialogHandle"
@@ -24,26 +23,34 @@
         tools:visibility="visible" />
 
     <LinearLayout
-        android:id="@+id/llOptionsBig"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="12dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle">
 
-    <ListView
-        android:id="@+id/listOptions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginBottom="12dp"
-        android:background="@drawable/pill_rounded"
-        android:backgroundTint="?attr/widgetColor"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llOptionsBig"
-        tools:listitem="@layout/item_option" />
+        <LinearLayout
+            android:id="@+id/llOptionsBig"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ListView
+            android:id="@+id/listOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/pill_rounded"
+            android:backgroundTint="?attr/widgetColor"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/llOptionsBig"
+            tools:listitem="@layout/item_option" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

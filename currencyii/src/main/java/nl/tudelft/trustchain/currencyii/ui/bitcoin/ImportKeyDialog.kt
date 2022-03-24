@@ -6,20 +6,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.setFragmentResultListener
 import nl.tudelft.trustchain.currencyii.R
 
 class ImportKeyDialog : DialogFragment() {
-    private lateinit var listener: ImportKeyDialogListener
-
-    interface ImportKeyDialogListener {
-        fun onImport(address: String, privateKey: String)
-        fun onImportDone()
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         try {
-            listener = targetFragment as ImportKeyDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException("Calling Fragment must implement Listener")
         }
@@ -47,11 +43,17 @@ class ImportKeyDialog : DialogFragment() {
                     val privateKeyValid = isPrivateKeyValid(privateKey)
 
                     if (addressValid && privateKeyValid) {
-                        listener.onImport(address, privateKey)
+                        val importResultBundle = Bundle().apply {
+                            putString("address", address)
+                            putString("privateKey", privateKey)
+                        }
+                        setFragmentResult("import", importResultBundle)
+
                         ad.text = ""
                         sk.text = ""
 
-                        listener.onImportDone()
+                        setFragmentResult("importDone", Bundle())
+
                         Toast.makeText(
                             this.requireContext(),
                             "Key imported successfully.",

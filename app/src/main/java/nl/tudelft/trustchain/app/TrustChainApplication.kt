@@ -9,6 +9,7 @@ import androidx.preference.PreferenceManager
 import com.example.musicdao.ipv8.MusicCommunity
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.IPv8Configuration
@@ -55,7 +56,6 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -65,10 +65,15 @@ class TrustChainApplication : Application() {
         super.onCreate()
 
         defaultCryptoProvider = AndroidCryptoProvider
-        initIPv8()
+
+        // Only start IPv8 here if we are on Android 11 or below.
+        val BUILD_VERSION_CODE_S = 31
+        if (Build.VERSION.SDK_INT < BUILD_VERSION_CODE_S) {
+            initIPv8()
+        }
     }
 
-    private fun initIPv8() {
+    fun initIPv8() {
         val config = IPv8Configuration(
             overlays = listOf(
                 createDiscoveryCommunity(),
@@ -100,6 +105,7 @@ class TrustChainApplication : Application() {
         initEBSI()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun initWallet() {
         GlobalScope.launch {
             // Generate keys in a coroutine as this significantly impacts first launch.
@@ -315,6 +321,7 @@ class TrustChainApplication : Application() {
         )
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun createRecommenderCommunity(): OverlayConfiguration<RecommenderCommunity> {
         val settings = TrustChainSettings()
         val musicDriver = AndroidSqliteDriver(Database.Schema, this, "music.db")

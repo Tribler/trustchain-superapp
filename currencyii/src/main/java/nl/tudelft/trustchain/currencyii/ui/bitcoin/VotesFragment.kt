@@ -129,6 +129,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
     /**
      * The method for setting the data for join requests
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun signatureAskBlockVotes(blockId: String) {
         val walletManager = WalletManagerAndroid.getInstance()
         val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex
@@ -224,6 +225,7 @@ class VotesFragment : BaseFragment(R.layout.fragment_votes) {
      * The method for setting the data for transfer funds requests
      * @param blockId
      */
+    @OptIn(DelicateCoroutinesApi::class)
     private fun transferFundsAskBlockVotes(blockId: String) {
         val walletManager = WalletManagerAndroid.getInstance()
         val myPublicBitcoinKey = walletManager.protocolECKey().publicKeyAsHex

@@ -25,6 +25,7 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
     private val firstMessageTimestamps = mutableMapOf<String, Date>()
     private var firstSentMessageTimestamp: Date? = null
 
+    @OptIn(ObsoleteCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -35,6 +36,7 @@ class PunctureFragment : BaseFragment(R.layout.fragment_puncture) {
             }
         }
         lifecycleScope.launchWhenCreated {
+            @Suppress("DEPRECATION")
             getDemoCommunity().punctureChannel.asFlow().collect { (peer, payload) ->
                 Log.i(
                     "PunctureFragment",

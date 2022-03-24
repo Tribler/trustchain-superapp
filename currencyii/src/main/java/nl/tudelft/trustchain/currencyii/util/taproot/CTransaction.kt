@@ -67,7 +67,7 @@ class CTransaction(
         vin = deserializeVectorCTxIn(bytes)
         var flags: Char = 0.toChar()
         if (vin.isEmpty()) {
-            flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).get().toChar()
+            flags = ByteBuffer.wrap(read(bytes, 1)).order(ByteOrder.LITTLE_ENDIAN).get().toInt().toChar()
             if (flags != 0.toChar()) {
                 vin = deserializeVectorCTxIn(bytes)
                 vout = deserializeVectorCTxOut(bytes)
@@ -461,7 +461,7 @@ fun littleEndian(long: Long): ByteArray {
 fun littleEndian(char: Char): ByteArray {
     val bb: ByteBuffer = ByteBuffer.allocate(1)
     bb.order(ByteOrder.LITTLE_ENDIAN)
-    bb.put(char.toByte())
+    bb.put(char.code.toByte())
     return bb.array()
 }
 

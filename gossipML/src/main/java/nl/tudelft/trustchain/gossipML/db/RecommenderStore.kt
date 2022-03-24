@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.example.musicdao_datafeeder.AudioFileFilter
 import com.mpatric.mp3agic.Mp3File
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -310,6 +311,7 @@ open class RecommenderStore(
      *
      * @return training data (pair of features and labels) from local songs
      */
+    @OptIn(DelicateCoroutinesApi::class)
     fun getLocalSongData(): Pair<Array<Array<Double>>, IntArray> {
         if (!essentiaJob.isActive)
             essentiaJob = GlobalScope.launch { addAllLocalFeatures() } // analyze local music files

@@ -53,7 +53,6 @@ class PayloadFragment : BaseFragment(R.layout.fragment_payload) {
         )
     }
 
-    @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

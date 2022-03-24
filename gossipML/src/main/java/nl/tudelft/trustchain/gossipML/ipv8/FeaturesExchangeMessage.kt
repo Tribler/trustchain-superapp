@@ -27,7 +27,7 @@ open class FeaturesExchangeMessage @ExperimentalUnsignedTypes constructor(
     }
 
     companion object Deserializer : Deserializable<FeaturesExchangeMessage> {
-        @ExperimentalUnsignedTypes
+        @OptIn(ExperimentalUnsignedTypes::class)
         @JvmStatic
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<FeaturesExchangeMessage, Int> {
             var localOffset = 0

@@ -317,6 +317,8 @@ class ValueTransferMainActivity : BaseActivity() {
         when {
             intent.action == NfcAdapter.ACTION_TECH_DISCOVERED -> nfcIntentController(intent)
             getCommunity<IdentityCommunity>()!!.hasIdentity() -> {
+
+                @Suppress("DEPRECATION")
                 Handler().postDelayed(
                     {
                         notificationIntentController(intent)
@@ -421,11 +423,14 @@ class ValueTransferMainActivity : BaseActivity() {
             try {
                 val publicKey = defaultCryptoProvider.keyFromPublicBin(publicKeyString.hexToBytes())
                 val contact = getStore<ContactStore>()!!.getContactFromPublicKey(publicKey)
+                val identityName = getStore<PeerChatStore>()!!.getContactState(publicKey)?.identityInfo?.let {
+                    "${it.initials} ${it.surname}"
+                }
 
                 ContactChatFragment().apply {
                     arguments = bundleOf(
                         ARG_PUBLIC_KEY to publicKeyString,
-                        ARG_NAME to (contact?.name ?: resources.getString(R.string.text_unknown_contact)),
+                        ARG_NAME to (contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact))),
                         ARG_PARENT to (activeFragment?.tag ?: walletOverviewFragmentTag)
                     )
                 }
@@ -494,6 +499,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Define bottom navigation view listeners
      */
     private fun bottomNavigationViewListeners() {
+        @Suppress("DEPRECATION")
         bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
             val activeTag = getActiveFragment()?.tag
 
@@ -1084,7 +1090,6 @@ class ValueTransferMainActivity : BaseActivity() {
     /**
      * On receipt of an attestation request (initiated by the other party) execute the following
      */
-    @Suppress("UNUSED_PARAMETER")
     private fun attestationRequestCallback(peer: Peer, attributeName: String, metadata: String): ByteArray {
 
         val parsedMetadata = JSONObject(metadata)

@@ -42,7 +42,6 @@ class TraderFragment : BaseFragment(R.layout.fragment_trader) {
     }
 
     @SuppressLint("SetTextI18n")
-    @InternalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
