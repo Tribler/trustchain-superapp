@@ -2,9 +2,6 @@ package nl.tudelft.trustchain.atomicswap.swap.eth
 
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
-import nl.tudelft.trustchain.atomicswap.BitcoinSwap
-import nl.tudelft.trustchain.atomicswap.SwapData
-import org.bitcoinj.core.Coin
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.methods.response.TransactionReceipt
@@ -21,7 +18,7 @@ sealed class EthSwapInfo {
      * The creator is the person who locks the funds in the contract.
      */
     data class CreatorInfo(
-        val ricipientAddress: String,
+        val recipientAddress: String,
         val secret: ByteArray,
         val secretHash: ByteArray,
         val txHash: ByteArray,
@@ -81,7 +78,7 @@ class EthereumSwap(
 
 
         val swapData = EthSwapInfo.CreatorInfo(
-            ricipientAddress = claimAddress,
+            recipientAddress = claimAddress,
             secret = secret,
             secretHash = secretHash,
             amount = amount,
