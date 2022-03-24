@@ -17,9 +17,16 @@ typealias onInitiate = (InitiateMessage, Peer) -> Unit
 typealias onTrade = (TradeMessage, Peer) -> Unit
 typealias onComplete = (CompleteSwapMessage, Peer) -> Unit
 
+object AtomicSwapTrustchainConstants {
+    const val ATOMIC_SWAP_COMPLETED_BLOCK = "atomic_swap_completed_block"
+    const val TRANSACTION_FROM_COIN = "from_coin"
+    const val TRANSACTION_TO_COIN = "to_coin"
+    const val TRANSACTION_FROM_AMOUNT = "from_amount"
+    const val TRANSACTION_TO_AMOUNT = "to_amount"
+    const val TRANSACTION_OFFER_ID = "offer_id"
+}
+
 class AtomicSwapCommunity : Community() {
-
-
     override val serviceId = "abcdefabcdefabcdefabcdefabcdef0123456789"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
