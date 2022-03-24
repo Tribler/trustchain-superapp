@@ -1,10 +1,19 @@
 package nl.tudelft.trustchain.literaturedao
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import java.util.*
+import kotlin.math.roundToInt
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -20,6 +29,39 @@ class LiteratureFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+
+    val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
+
+//    init {
+//        lifecycleScope.launchWhenStarted {
+//            while (isActive) {
+//                printPeersInfo(literatureCommunity)
+//                val myName = literatureCommunity.myPeer.mid
+//                Log.i("litdao","I am $myName and Im broadcasting: hello")
+//                literatureCommunity.broadcastDebugMessage("hello")
+//                delay(2000)
+//            }
+//        }
+//    }
+
+    private fun printPeersInfo(overlay: Overlay) {
+        val peers = overlay.getPeers()
+        Log.i("litdao",overlay::class.simpleName + ": ${peers.size} peers")
+        for (peer in peers) {
+            val avgPing = peer.getAveragePing()
+            val lastRequest = peer.lastRequest
+            val lastResponse = peer.lastResponse
+
+            val lastRequestStr = if (lastRequest != null)
+                "" + ((Date().time - lastRequest.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val lastResponseStr = if (lastResponse != null)
+                "" + ((Date().time - lastResponse.time) / 1000.0).roundToInt() + " s" else "?"
+
+            val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
+            Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
