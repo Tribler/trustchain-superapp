@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.atomicswap
+package nl.tudelft.trustchain.atomicswap.messages
 
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable

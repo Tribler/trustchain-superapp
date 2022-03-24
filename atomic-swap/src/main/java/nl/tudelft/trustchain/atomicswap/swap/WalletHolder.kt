@@ -1,10 +1,9 @@
-package nl.tudelft.trustchain.atomicswap.ui.wallet
+package nl.tudelft.trustchain.atomicswap.swap
 
 import nl.tudelft.trustchain.atomicswap.BitcoinSwap
 import nl.tudelft.trustchain.atomicswap.SwapTransactionBroadcastListener
 import nl.tudelft.trustchain.atomicswap.SwapTransactionConfidenceListener
 import nl.tudelft.trustchain.common.bitcoin.WalletService
-import java.net.InetAddress
 
 object WalletHolder {
     val walletAppKit = WalletService.getGlobalWallet()

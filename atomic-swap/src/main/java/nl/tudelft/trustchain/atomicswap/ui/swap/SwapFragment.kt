@@ -31,7 +31,7 @@ import org.bitcoinj.core.Coin
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.params.RegTestParams
-import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder as WalletHolder
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder as WalletHolder
 
 
 class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {

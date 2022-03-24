@@ -14,15 +14,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicWalletBinding
-import nl.tudelft.trustchain.common.bitcoin.WalletService
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
 import nl.tudelft.trustchain.common.ethereum.EthereumWalletService
 import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.listeners.WalletChangeEventListener
 import org.web3j.utils.Convert
-import java.net.InetAddress
 
 class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChangeEventListener {
 

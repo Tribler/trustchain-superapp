@@ -6,12 +6,15 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import org.bitcoinj.core.PeerAddress
+import nl.tudelft.trustchain.atomicswap.messages.AcceptMessage
+import nl.tudelft.trustchain.atomicswap.messages.CompleteSwapMessage
+import nl.tudelft.trustchain.atomicswap.messages.InitiateMessage
+import nl.tudelft.trustchain.atomicswap.messages.TradeMessage
 import java.util.*
 
 typealias onAccept = (AcceptMessage, Peer) -> Unit
 typealias onInitiate = (InitiateMessage, Peer) -> Unit
-typealias onTrade = (TradeMessage,Peer) -> Unit
+typealias onTrade = (TradeMessage, Peer) -> Unit
 typealias onComplete = (CompleteSwapMessage, Peer) -> Unit
 
 class AtomicSwapCommunity : Community() {
@@ -104,7 +107,8 @@ class AtomicSwapCommunity : Community() {
                     fromCoin,
                     toCoin,
                     fromAmount,
-                    toAmount))
+                    toAmount)
+            )
             send(peer.address, packet)
         }
     }
