@@ -48,9 +48,9 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         ) as ClipboardManager
 
 
-//        lifecycleScope.launchWhenStarted {
-//            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
-//        }
+        lifecycleScope.launchWhenStarted {
+            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
+        }
     }
 
     override fun onCreateView(
@@ -93,13 +93,13 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         }
 
         WalletHolder.bitcoinWallet.addChangeEventListener(this)
-//        lifecycleScope.launchWhenStarted {
-//            while (isActive) {
-//                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
-//                model.setEthereumBalance("$ether ETH")
-//                delay(1000)
-//            }
-//        }
+        lifecycleScope.launchWhenStarted {
+            while (isActive) {
+                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
+                model.setEthereumBalance("$ether ETH")
+                delay(1000)
+            }
+        }
     }
 
     override fun onDestroyView() {
