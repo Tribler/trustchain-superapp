@@ -21,6 +21,7 @@ data class AlbumEntity(
     val root: String?,
     val isDownloaded: Boolean,
     val infoHash: String?,
+    val torrentPath: String?
 ) {
     @RequiresApi(Build.VERSION_CODES.O)
     fun toAlbum(): Album {

@@ -47,7 +47,7 @@ fun FullPlayerScreen(playerViewModel: PlayerViewModel) {
             )
             Column(modifier = Modifier.padding(top = 10.dp)) {
                 Text(
-                    track?.name ?: "",
+                    track?.title ?: "",
                     style = MaterialTheme.typography.h6.merge(SpanStyle(fontWeight = FontWeight.ExtraBold)),
                     modifier = Modifier.padding(bottom = 5.dp)
                 )

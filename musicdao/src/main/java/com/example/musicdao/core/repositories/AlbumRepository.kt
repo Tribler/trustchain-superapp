@@ -79,7 +79,8 @@ class AlbumRepository @Inject constructor(
                     cover = null,
                     root = null,
                     isDownloaded = false,
-                    infoHash = TorrentEngine.magnetToInfoHash(transaction.magnet)
+                    infoHash = TorrentEngine.magnetToInfoHash(transaction.magnet),
+                    torrentPath = null
                 )
             )
         }
@@ -103,7 +104,8 @@ class AlbumRepository @Inject constructor(
                     cover = null,
                     root = null,
                     isDownloaded = false,
-                    infoHash = TorrentEngine.magnetToInfoHash(it.magnet)
+                    infoHash = TorrentEngine.magnetToInfoHash(it.magnet),
+                    torrentPath = null
                 )
             )
         }

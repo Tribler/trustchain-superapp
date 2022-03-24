@@ -81,7 +81,6 @@ fun ReleaseScreen(
         playerViewModel.play(
             Song(
                 file = track.file,
-                name = track.title,
                 artist = track.artist,
                 title = track.title,
             ),

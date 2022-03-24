@@ -41,7 +41,6 @@ class DownloadFinishUseCase constructor(
                     SongEntity(
                         file = it.filename,
                         title = FileProcessor.getTitle(it),
-                        name = FileProcessor.getTitle(it),
                         artist = albumEntity.artist
                     )
                 } ?: listOf()
@@ -51,7 +50,8 @@ class DownloadFinishUseCase constructor(
                     songs = songs,
                     cover = cover?.absolutePath,
                     root = root.toString(),
-                    isDownloaded = true
+                    isDownloaded = true,
+                    torrentPath = Paths.get("${cachePath.getPath()}/torrents/$infoHash.torrent").toString()
                 )
 
                 Log.d("MusicDao", "DownloadFinishUseCase: updated album with $updatedAlbumEntity")
