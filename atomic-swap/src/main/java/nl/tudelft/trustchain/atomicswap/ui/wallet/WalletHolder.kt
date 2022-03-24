@@ -17,7 +17,7 @@ object WalletHolder {
         // phone
 //         walletAppKit.peerGroup().addAddress(InetAddress.getByName("192.168.178.200"))
         // emulator
-        walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
+//        walletAppKit.peerGroup().addAddress(InetAddress.getByName("10.0.2.2"))
 
         bitcoinWallet.addTransactionConfidenceEventListener(swapTransactionConfidenceListener)
         walletAppKit.peerGroup().addOnTransactionBroadcastListener(swapTransactionBroadcastListener)
