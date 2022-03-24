@@ -11,8 +11,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -23,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -96,7 +101,8 @@ fun ReleaseScreen(
                         viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
                     val isPlaying = playerViewModel.exoPlayer.isPlaying
                     val targetTrack =
-                        downloadingTracks.find { it.file.name == current.file?.name } ?: return@collect
+                        downloadingTracks.find { it.file.name == current.file?.name }
+                            ?: return@collect
 
                     if (!isPlaying && targetTrack.progress > 20 && targetTrack.progress < 99) {
                         play(targetTrack, album.cover)
@@ -150,11 +156,11 @@ fun ReleaseScreen(
                         } ?: MaterialTheme.colors.onBackground
 
                         ListItem(
-                            text = { Text(it.title, color = isPlayingModifier) },
+                            text = { Text(it.title, color = isPlayingModifier, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             secondaryText = { Text(it.artist, color = isPlayingModifier) },
                             trailing = {
                                 Icon(
-                                    imageVector = Icons.Filled.Menu,
+                                    imageVector = Icons.Default.MoreVert,
                                     contentDescription = null
                                 )
                             },
@@ -175,12 +181,11 @@ fun ReleaseScreen(
                                 },
                                 trailing = {
                                     Icon(
-                                        imageVector = Icons.Filled.Menu,
+                                        imageVector = Icons.Default.MoreVert,
                                         contentDescription = null
                                     )
                                 },
                                 modifier = Modifier.clickable {
-//                                viewModel.setFilePriority(it)
                                     play(it, album.cover)
                                 }
                             )
@@ -212,7 +217,7 @@ fun ReleaseScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(album: Album, navController: NavController) {
-    Column(modifier = Modifier.padding(20.dp)) {
+    Column(modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp)) {
         Text(
             album.title,
             style = MaterialTheme.typography.h6.merge(SpanStyle(fontWeight = FontWeight.ExtraBold)),
@@ -236,27 +241,77 @@ fun Header(album: Album, navController: NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Row {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .then(Modifier.padding(0.dp))
-                        .align(Alignment.CenterVertically)
-                )
-                OutlinedButton(
-                    onClick = {
-                        navController.navigate(
-                            Screen.Profile.createRoute(publicKey = album.publisher)
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Favorite,
+                        contentDescription = null,
+                    )
+                }
+                IconButton(onClick = {
+                    navController.navigate(
+                        Screen.Profile.createRoute(publicKey = album.publisher)
+                    )
+                }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Person,
+                        contentDescription = null,
+                    )
+                }
+                IconButton(onClick = {
+                    navController.navigate(
+                        Screen.Donate.route
+                    )
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = null,
+                    )
+                }
+
+                var expanded by remember { mutableStateOf(false) }
+                Box(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.TopStart)) {
+                    IconButton(onClick = { expanded = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.MoreVert,
+                            contentDescription = null,
                         )
-                    },
-                    modifier = Modifier.padding(start = 10.dp)
-                ) {
-                    Text("View Artist", color = Color.White)
+                    }
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            navController.navigate(
+                                Screen.Profile.createRoute(publicKey = album.publisher)
+                            )
+                        }) {
+                            Text("View Artist")
+                        }
+                        DropdownMenuItem(onClick = {
+                            navController.navigate(
+                                Screen.Donate.route
+                            )
+                        }) {
+                            Text("Donate")
+                        }
+                        DropdownMenuItem(onClick = { }) {
+                            Text("View Meta-data")
+                        }
+                    }
                 }
             }
-            OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
-                Text("Donate", color = Color.White)
+            IconButton(onClick = { /*TODO*/ }) {
+                Icon(
+                    imageVector = Icons.Outlined.PlayArrow,
+                    contentDescription = null,
+
+                )
             }
+//            OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
+//                Row {
+//                    Icon(imageVector = Icons.Default.Send, contentDescription = null)
+//                }
+//            }
         }
     }
 }

@@ -3,17 +3,13 @@ package com.example.musicdao.ui.screens.home
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.components.releases.ReleaseList
@@ -30,22 +26,16 @@ fun HomeScreen(navController: NavHostController, homeScreenViewModel: HomeScreen
     val isRefreshing by homeScreenViewModel.isRefreshing.observeAsState(false)
     val refreshState = rememberSwipeRefreshState(isRefreshing)
 
-    SwipeRefresh(state = refreshState, onRefresh = { homeScreenViewModel.refresh() }) {
+    SwipeRefresh(
+        state = refreshState,
+        onRefresh = { homeScreenViewModel.refresh() }
+    ) {
         val modifier = if (releasesState.isEmpty()) Modifier else Modifier.fillMaxSize()
+
         Column(modifier = Modifier.fillMaxSize()) {
             ReleaseList(
-                releasesState = releasesState, navController = navController,
-                header = {
-                    Text(
-                        text = "All Releases",
-                        style = MaterialTheme.typography.h6,
-                        modifier = Modifier
-                            .background(MaterialTheme.colors.background)
-                            .fillMaxWidth()
-                            .padding(20.dp)
-                    )
-                    Divider()
-                },
+                releasesState = releasesState,
+                navController = navController,
                 modifier = modifier
             )
             if (releasesState.isEmpty()) {

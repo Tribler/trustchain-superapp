@@ -10,15 +10,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.musicdao.core.model.Album
 import com.example.musicdao.ui.components.ReleaseCover
-import com.example.musicdao.ui.dateToShortString
 import com.example.musicdao.ui.navigation.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -28,15 +28,9 @@ import com.example.musicdao.ui.navigation.Screen
 fun ReleaseList(
     releasesState: List<Album>,
     navController: NavController,
-    header: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
-        if (header != null) {
-            stickyHeader {
-                header()
-            }
-        }
         items(releasesState) {
             ReleaseListItem(album = it, navController = navController)
             Divider()
@@ -71,10 +65,14 @@ fun NonLazyReleaseList(
 @Composable
 fun ReleaseListItem(album: Album, navController: NavController) {
     ListItem(
-        text = { Text(album.title) },
+        text = { Text(text = album.title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         secondaryText = {
             Row {
-                Text("Album - ${album.artist}")
+                Text(
+                    text = "Album - ${album.artist}",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
                 if (album.songs != null && album.songs.isNotEmpty()) {
                     Icon(
                         imageVector = Icons.Default.CheckCircle,
@@ -89,15 +87,8 @@ fun ReleaseListItem(album: Album, navController: NavController) {
             }
         },
         trailing = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    dateToShortString(album.releaseDate.toString()),
-                    modifier = Modifier.padding(end = 10.dp)
-                )
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = null
-                )
+            IconButton(onClick = { }) {
+                Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
             }
         },
         modifier = Modifier.clickable {
