@@ -47,8 +47,6 @@ class MainActivityFOC : AppCompatActivity() {
 
     private lateinit var appGossiper: AppGossiper
 
-    private var uploadingTorrent = ""
-
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +70,7 @@ class MainActivityFOC : AppCompatActivity() {
 
             printToast("STARTED")
             showAllFiles()
-            appGossiper = AppGossiper.getInstance(s, applicationContext, this)
+            appGossiper = AppGossiper.getInstance(s, this)
             appGossiper.start()
         } catch (e: Exception) {
             printToast(e.toString())
@@ -293,7 +291,6 @@ class MainActivityFOC : AppCompatActivity() {
 
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
         val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
-        uploadingTorrent = magnetLink
         Log.i("personal", magnetLink)
         printToast(fileName)
     }

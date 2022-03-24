@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.FOC
 
-import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.frostwire.jlibtorrent.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
 import java.io.File
@@ -25,7 +23,6 @@ lateinit var appGossiperInstance: AppGossiper
 @Suppress("deprecation")
 class AppGossiper(
     private val sessionManager: SessionManager,
-    private val context: Context,
     private val activity: MainActivityFOC
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -36,19 +33,13 @@ class AppGossiper(
     var sessionActive = false
     var downloadsInProgress = 0
 
-    /**
-     * Class used for the client Binder.  Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-
     companion object {
         fun getInstance(
             sessionManager: SessionManager,
-            context: Context,
             activity: MainActivityFOC
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(sessionManager, context, activity)
+                appGossiperInstance = AppGossiper(sessionManager, activity)
             }
             return appGossiperInstance
         }
@@ -56,6 +47,7 @@ class AppGossiper(
 
     fun start() {
         printToast("Start gossiper")
+        populateKnownTorrents()
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
         val params =
@@ -64,14 +56,14 @@ class AppGossiper(
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         scope.launch {
             try {
-            iterativelyShareApps()
+                iterativelyShareApps()
             } catch (e: Exception) {
                 activity.runOnUiThread { printToast(e.toString()) }
             }
         }
         scope.launch {
             try {
-            iterativelyDownloadApps()
+                iterativelyDownloadApps()
             } catch (e: Exception) {
                 activity.runOnUiThread { printToast(e.toString()) }
             }
@@ -92,17 +84,14 @@ class AppGossiper(
     }
 
     private suspend fun iterativelyDownloadApps() {
-        val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
-        while (scope.isActive) {
-            val tempPackets = demoCommunity?.getTorrentMessages()
-            if (tempPackets != null) {
-            val torrentListMessages: ArrayList<Packet> = ArrayList(tempPackets)
-                for (packet in torrentListMessages) {
+        IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
+            while (scope.isActive) {
+                for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                     val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
                     Log.i("personal", peer.mid + ": " + payload.message)
-                    var torrentName = payload.message.substringAfter("&dn=")
+                    val torrentName = payload.message.substringAfter("&dn=")
                         .substringBefore('&')
-                    var magnetLink = payload.message.substringAfter("FOC:")
+                    val magnetLink = payload.message.substringAfter("FOC:")
                     val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
                         .substringBefore("&dn=")
                     if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
@@ -120,22 +109,7 @@ class AppGossiper(
     }
 
     private fun randomlyShareFiles(demoCommunity: DemoCommunity) {
-        context.cacheDir.listFiles()?.forEachIndexed { _, file ->
-            if (file.name.endsWith(".torrent")) {
-                val torrentInfo = TorrentInfo(file)
-                if (torrentInfo.isValid) {
-                    // 'Downloading' the torrent file also starts seeding it after download has
-                    // already been completed
-                    // We only seed torrents that have previously already been fully downloaded
-                    if (isTorrentOkay(torrentInfo, context.cacheDir)) {
-                        if (!torrentInfos.any { it.infoHash() == torrentInfo.infoHash() }) {
-                            torrentInfos.add(torrentInfo)
-                            activity.runOnUiThread { printToast(file.name) }
-                        }
-                    }
-                }
-            }
-        }
+        populateKnownTorrents()
         torrentInfos.shuffle()
         val toSeed: ArrayList<TorrentInfo> = ArrayList(torrentInfos.take(maxTorrentThreads))
         torrentHandles.forEach { torrentHandle ->
@@ -154,26 +128,43 @@ class AppGossiper(
         }
     }
 
+    private fun populateKnownTorrents() {
+        activity.applicationContext.cacheDir.listFiles()?.forEachIndexed { _, file ->
+            if (file.name.endsWith(".torrent")) {
+                TorrentInfo(file).let { torrentInfo ->
+                    if (torrentInfo.isValid) {
+                        if (isTorrentOkay(torrentInfo, activity.applicationContext.cacheDir)) {
+                            if (!torrentInfos.any { it.infoHash() == torrentInfo.infoHash() })
+                                torrentInfos.add(torrentInfo)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun downloadAndSeed(torrentInfo: TorrentInfo, demoCommunity: DemoCommunity) {
         if (torrentInfo.isValid) {
-
-            sessionManager.download(torrentInfo, context.cacheDir)
-            val torrentHandle = sessionManager.find(torrentInfo.infoHash()) ?: return
-            torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
-            torrentHandle.pause()
-            torrentHandle.resume() // This is a fix/hack that forces SEED_MODE to be available, for
-            // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
-            // state
-            val magnet_link = "magnet:?xt=urn:btih:" + torrentInfo.infoHash() + "&dn=" + torrentInfo.name()
-            demoCommunity.informAboutTorrent(magnet_link)
-            torrentHandles.add(torrentHandle)
+            sessionManager.download(torrentInfo, activity.applicationContext.cacheDir)
+            sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
+                torrentHandle.setFlags(torrentHandle.flags().and_(TorrentFlags.SEED_MODE))
+                torrentHandle.pause()
+                torrentHandle.resume()
+                // This is a fix/hack that forces SEED_MODE to be available, for
+                // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
+                // state
+                val magnet_link = "magnet:?xt=urn:btih:" + torrentInfo.infoHash() + "&dn=" + torrentInfo.name()
+                demoCommunity.informAboutTorrent(magnet_link)
+                torrentHandles.add(torrentHandle)
+            }
         }
     }
 
     fun isTorrentOkay(torrentInfo: TorrentInfo, saveDirectory: File): Boolean {
-        val file = File(saveDirectory.path + "/" + torrentInfo.name())
-        if (!(file.extension == "apk" || file.extension == "jar")) return false
-        if (file.length() >= torrentInfo.totalSize()) return true
+        File(saveDirectory.path + "/" + torrentInfo.name()).run {
+            if (!(extension == "apk" || extension == "jar")) return false
+            if (length() >= torrentInfo.totalSize()) return true
+        }
         return false
     }
 
@@ -183,23 +174,18 @@ class AppGossiper(
         // same or another torrent
         activity.runOnUiThread { printToast("Found new torrent and start download") }
 
-        if (sessionActive) {
+        if (sessionActive || !magnetLink.startsWith("magnet:"))
             return
-        }
 
-        if (!magnetLink.startsWith("magnet:")) {
-            return
-        } else {
-            val startindexname = magnetLink.indexOf("&dn=")
-            val stopindexname =
-                if (magnetLink.contains("&tr=")) magnetLink.indexOf("&tr") else magnetLink.length
+        val startIndexName = magnetLink.indexOf("&dn=")
+        val stopIndexName =
+            if (magnetLink.contains("&tr=")) magnetLink.indexOf("&tr") else magnetLink.length
 
-            val magnetnameraw = magnetLink.substring(startindexname + 4, stopindexname)
-            Log.i("personal", magnetnameraw)
-            val magnetname = magnetnameraw.replace('+', ' ', false)
-            Log.i("personal", magnetname)
-            activity.runOnUiThread { printToast(magnetname) }
-        }
+        val magnetNameRaw = magnetLink.substring(startIndexName + 4, stopIndexName)
+        Log.i("personal", magnetNameRaw)
+        val magnetName = magnetNameRaw.replace('+', ' ', false)
+        Log.i("personal", magnetName)
+        activity.runOnUiThread { printToast(magnetName) }
 
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
@@ -237,15 +223,15 @@ class AppGossiper(
         }
 
         if (data != null) {
-            val torrentInfo = Entry.bdecode(data).toString()
-            Log.i("personal", torrentInfo)
+            val torrentInfoAsString = Entry.bdecode(data).toString()
+            Log.i("personal", torrentInfoAsString)
 
-            val ti = TorrentInfo.bdecode(data)
+            val torrentInfo = TorrentInfo.bdecode(data)
             sessionActive = true
             activity.signal = CountDownLatch(1)
 
             downloadsInProgress += 1
-            sessionManager.download(ti, context.cacheDir)
+            sessionManager.download(torrentInfo, activity.applicationContext.cacheDir)
             downloadsInProgress -= 1
 
             activity.runOnUiThread { activity.showAllFiles() }
@@ -256,6 +242,8 @@ class AppGossiper(
                 failedTorrents[torrentName] = System.currentTimeMillis()
             }
             sessionActive = false
+            activity.createTorrent(magnetName)
+            torrentInfos.add(torrentInfo)
         } else {
             Log.i("personal", "Failed to retrieve the magnet")
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
@@ -264,7 +252,7 @@ class AppGossiper(
     }
 
     fun printToast(s: String) {
-        Toast.makeText(context, s, Toast.LENGTH_LONG).show()
+        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
 }
