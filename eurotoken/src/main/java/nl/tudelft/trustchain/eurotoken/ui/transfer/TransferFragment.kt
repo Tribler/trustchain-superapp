@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.fragment_transactions.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
+import mu.KotlinLogging
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -30,6 +31,8 @@ import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Exception
+
+private val logger = KotlinLogging.logger {}
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
@@ -171,7 +174,11 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                         euroTokenCommunity.sendAddressesOfLastTransactions(peer)
                     }
                 } catch (e : Exception) {
-                    Toast.makeText(requireContext(), "Failed to send transactions", Toast.LENGTH_LONG)
+                    Toast.makeText(
+                        requireContext(),
+                        "Failed to send transactions",
+                        Toast.LENGTH_LONG
+                    )
                         .show()
                 }
 
