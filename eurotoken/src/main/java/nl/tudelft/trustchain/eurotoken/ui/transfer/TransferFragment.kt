@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -16,6 +17,7 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_transactions.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -27,6 +29,7 @@ import nl.tudelft.trustchain.eurotoken.databinding.FragmentTransferEuroBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 import org.json.JSONException
 import org.json.JSONObject
+import java.lang.Exception
 
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
@@ -108,6 +111,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
                 connectionData.put("amount", amount)
+                connectionData.put("mid", myPeer.mid.toString())
                 connectionData.put("name", ownContact?.name ?: "")
                 connectionData.put("type", "transfer")
 
@@ -127,6 +131,20 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
     }
 
+
+    private fun findPeer(pubKey : String) : Peer? {
+        val itr = transactionRepository.trustChainCommunity.getPeers().listIterator()
+        while (itr.hasNext()) {
+            val cur : Peer = itr.next()
+            Log.d("EUROTOKEN", cur.key.pub().toString())
+            if (cur.key.pub().toString() == pubKey) {
+                return cur
+            }
+        }
+
+        return null
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         qrCodeUtils.parseActivityResult(requestCode, resultCode, data)?.let {
             try {
@@ -136,10 +154,26 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
+                args.putString(SendMoneyFragment.ARG_MID, connectionData.mid)
 
-                val peer = getTrustChainCommunity().network.getVerifiedByPublicKeyBin(connectionData.public_key.toByteArray())!!
-                val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()!!
-                euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+                try {
+                    val peer = findPeer(connectionData.mid);
+                    if (peer == null) {
+                        Toast.makeText(requireContext(), connectionData.public_key, Toast.LENGTH_LONG)
+                            .show()
+                    }
+                    val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()
+                    if (euroTokenCommunity == null) {
+                        Toast.makeText(requireContext(), "Could not find community", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                    if (peer != null && euroTokenCommunity != null) {
+                        euroTokenCommunity.sendAddressesOfLastTransactions(peer)
+                    }
+                } catch (e : Exception) {
+                    Toast.makeText(requireContext(), "Failed to send transactions", Toast.LENGTH_LONG)
+                        .show()
+                }
 
                 if (connectionData.type == "transfer") {
                     findNavController().navigate(
@@ -180,6 +214,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             var amount = this.optLong("amount", -1L)
             var name = this.optString("name")
             var type = this.optString("type")
+            var mid = this.optString("mid")
         }
 
         fun getAmount(amount: String): Long {

@@ -33,30 +33,16 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         )
     }
 
-    private fun findPeer(pubKey : String) : Peer? {
-        val itr = transactionRepository.trustChainCommunity.getPeers().listIterator()
-        while (itr.hasNext()) {
-            val cur : Peer = itr.next()
-            if (cur.key.toString().equals(pubKey)) {
-                return cur
-            }
-        }
-
-        return null
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val publicKey = requireArguments().getString(ARG_PUBLIC_KEY)!!
         val amount = requireArguments().getLong(ARG_AMOUNT)
         val name = requireArguments().getString(ARG_NAME)!!
+        val mid = requireArguments().getString(ARG_MID)!!
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(key)
-
-        val peer = findPeer(publicKey)
-
         binding.txtContactName.text = contact?.name ?: name
 
         binding.newContactName.visibility = View.GONE
@@ -114,5 +100,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         const val ARG_AMOUNT = "amount"
         const val ARG_PUBLIC_KEY = "pubkey"
         const val ARG_NAME = "name"
+        const val ARG_MID = "mid"
     }
 }
