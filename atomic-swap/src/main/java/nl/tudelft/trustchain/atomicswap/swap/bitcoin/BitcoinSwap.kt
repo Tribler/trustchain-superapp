@@ -174,7 +174,6 @@ class BitcoinSwap {
 
         val sendRequest = SendRequest.forTx(contractTx)
 
-
         wallet.completeTx(sendRequest)
 
         swapStorage[offerId] = (swapStorage[offerId] as SwapData.CreatorSwapData).copy(
