@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.content.*
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -10,6 +11,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -110,7 +112,15 @@ class ExchangeTransferMoneyLinkDialog(
             }
 
             ibanView.doAfterTextChanged {
-                IBAN=ibanView.text.toString()
+                when {
+                    !isValidIban(ibanView.text.toString()) -> {
+                        ibanView.background.setTint(Color.parseColor("#FFBABA"))
+                    }
+                    else -> {
+                        ibanView.background.setTint(Color.parseColor("#C8FFC4"))
+                        IBAN=ibanView.text.toString()
+                    }
+                }
             }
 
             bottomSheetDialog.setContentView(view)
@@ -125,6 +135,12 @@ class ExchangeTransferMoneyLinkDialog(
                     )
                     type = "text/plain"
                 }
+                if (!isValidIban(ibanView.text.toString()))
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.transer_money_link_valid_iban)
+
+                    )
                 val shareIntent = Intent.createChooser(sendIntent, null)
                 startActivity(shareIntent)
             }
@@ -155,6 +171,27 @@ class ExchangeTransferMoneyLinkDialog(
             url.append("&IBAN=").append(IBAN)
         url.append("&public=").append(ownKey)
         return url.toString()
+    }
+
+
+    private fun isValidIban(iban: String): Boolean {
+        if (!"^[0-9A-Z]*\$".toRegex().matches(iban)) {
+            return false
+        }
+
+        val symbols = iban.trim { it <= ' ' }
+        if (symbols.length < 15 || symbols.length > 34) {
+            return false
+        }
+
+        val swapped = symbols.substring(4) + symbols.substring(0, 4)
+        return swapped.toCharArray()
+            .map { it.toInt() }
+            .fold(0) { previousMod: Int, _char: Int ->
+                val value = Integer.parseInt(Character.toString(_char.toChar()), 36)
+                val factor = if (value < 10) 10 else 100
+                (factor * previousMod + value) % 97
+            } == 1
     }
 
     companion object {
