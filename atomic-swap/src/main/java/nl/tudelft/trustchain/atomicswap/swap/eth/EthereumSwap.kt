@@ -1,9 +1,12 @@
 package nl.tudelft.trustchain.atomicswap.swap.eth
 
+import android.util.Log
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
@@ -43,6 +46,19 @@ class EthereumSwap(
     contractAddress : String,
     val relativeLock: Int = 6
 ) {
+
+
+
+    init {
+        val filter = EthFilter(
+            DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST,
+            contractAddress
+        )
+        web3j.ethLogFlowable(filter).subscribe{ log ->
+            Log.d("ETHLOG",log.data)
+        }
+    }
+
 
     val swapContract = AtomicSwapContract.load(contractAddress,web3j,credentials,DefaultGasProvider())
 
