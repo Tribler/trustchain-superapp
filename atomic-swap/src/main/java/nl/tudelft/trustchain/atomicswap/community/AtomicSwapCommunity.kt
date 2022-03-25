@@ -99,9 +99,13 @@ class AtomicSwapCommunity : Community() {
     }
 
     private fun onCompleteTrade(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
-        onCompleteCallback(payload, peer)
-        Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
+        try {
+            val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
+            onCompleteCallback(payload, peer)
+            Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
+        } catch (e:Exception){
+            print(e)
+        }
     }
 
 
