@@ -231,10 +231,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
             }
         }
 
-        WalletHolder.swapTransactionConfidenceListener.setOnClaimedConfirmed {
-            Log.d(LOG, "The claim transaction is confirmed")
-        }
-
 
         // BOB GETS NOTIFIED THAT ALICE CLAIMED THE MONEY AND REVEALED THE SECRET -> HE CLAIMS THE MONEY
         WalletHolder.swapTransactionBroadcastListener.setOnSecretRevealed { secret, offerId ->
@@ -261,6 +257,20 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 )
                 WalletHolder.walletAppKit.peerGroup().broadcastTransaction(claimTransaction)
                 Log.d(LOG, "Bob observed the secret")
+            }
+        }
+
+
+        // END OF SWAP
+        WalletHolder.swapTransactionConfidenceListener.setOnClaimedConfirmed {
+            Log.d(LOG, "The claim transaction is confirmed")
+            lifecycleScope.launch(Dispatchers.Main) {
+
+                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+                alertDialogBuilder.setTitle("The Swap is complete")
+                alertDialogBuilder.setMessage(it.offerId.toString())
+                alertDialogBuilder.setCancelable(true)
+                alertDialogBuilder.show()
             }
         }
     }
