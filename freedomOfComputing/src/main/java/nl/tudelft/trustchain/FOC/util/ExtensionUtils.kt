@@ -2,6 +2,10 @@ package nl.tudelft.trustchain.FOC.util
 
 class ExtensionUtils {
     companion object {
-        val supportedAppExtensions = arrayListOf("apk", "jar")
+        const val apkExtenstion = "apk"
+        const val jarExtenstion = "jar"
+        const val torrentExtension = "torrent"
+
+        val supportedAppExtensions = arrayListOf(apkExtenstion, jarExtenstion)
     }
 }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.supportedAppExtensions
+import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTracker
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTrackerAppender
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.constructMagnetLink
@@ -100,6 +101,7 @@ class AppGossiper(
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
             activity.runOnUiThread { printToast("Failed to fetch torrent through EVA protocol because $exception!") }
+            resetFailures()
             evaRequestActive = false
         }
     }
@@ -201,8 +203,8 @@ class AppGossiper(
                     val dup = toSeed.find { it.infoHash() == torrentHandle.infoHash() }
                     toSeed.remove(dup)
                     if (dup != null) {
-                        val magnet_link = "magnet:?xt=urn:btih:" + dup.infoHash() + "&dn=" + dup.name()
-                        informAboutTorrent(magnet_link)
+                        val magnetLink = constructMagnetLink(dup.infoHash(), dup.name())
+                        informAboutTorrent(magnetLink)
                     }
                 } else
                     torrentHandle.pause()
@@ -215,7 +217,7 @@ class AppGossiper(
 
     private fun populateKnownTorrents() {
         appDirectory.listFiles()?.forEachIndexed { _, file ->
-            if (file.name.endsWith(".torrent")) {
+            if (file.name.endsWith(torrentExtension)) {
                 TorrentInfo(file).let { torrentInfo ->
                     if (torrentInfo.isValid) {
                         if (isTorrentOkay(torrentInfo, appDirectory)) {
@@ -342,7 +344,7 @@ class AppGossiper(
         magnetInfoHash: String,
         peer: Peer
     ) {
-        if (!evaRequestActive) {
+        if (!evaRequestActive && demoCommunity?.evaProtocolEnabled == true) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
             else
@@ -355,6 +357,14 @@ class AppGossiper(
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
+        }
+    }
+
+    private fun resetFailures() {
+        failedTorrents.keys.let { keys ->
+            for (key in keys) {
+                failedTorrents[key] = 0
+            }
         }
     }
 
