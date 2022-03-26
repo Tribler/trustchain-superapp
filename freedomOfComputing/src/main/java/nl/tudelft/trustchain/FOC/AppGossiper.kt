@@ -350,7 +350,7 @@ class AppGossiper(
             else
                 failedTorrents[torrentName] = 1
             if (failedTorrents[torrentName] == TORRENT_ATTEMPTS_THRESHOLD)
-                demoCommunity?.let {
+                demoCommunity.let {
                     activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
                     demoCommunity.sendAppRequest(magnetInfoHash, peer)
                     evaRequestActive = true

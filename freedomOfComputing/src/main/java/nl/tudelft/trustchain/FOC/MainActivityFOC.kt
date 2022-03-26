@@ -76,8 +76,8 @@ class MainActivityFOC : AppCompatActivity() {
         appGossiper.resume()
     }
 
-    override fun onStop() {
-        super.onStop()
+    override fun onPause() {
+        super.onPause()
         appGossiper.pause()
     }
 
