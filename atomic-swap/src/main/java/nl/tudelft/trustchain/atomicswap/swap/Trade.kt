@@ -1,8 +1,5 @@
 package nl.tudelft.trustchain.atomicswap.swap
 
-import arrow.core.Either
-import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
-import org.bitcoinj.core.Coin
 
 
 
