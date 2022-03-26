@@ -18,6 +18,7 @@ import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import java.io.File
 import java.io.FileOutputStream
+import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import java.io.InputStream
 import java.util.*
 import kotlin.math.roundToInt
@@ -76,44 +77,43 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
+    var tempStorage: MutableList<Pair<String, MutableList<Pair<String, Double>>>> = mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>()
+
     override fun onStart() {
         super.onStart()
         Log.e("litdao", "starting ...")
         PDFBoxResourceLoader.init(getApplicationContext());
-        var pdfController = PdfController()
         var i = 1
         while (i < 2){
-            val stream: InputStream = getAssets().open(i.toString() + ".pdf")
-            //val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-            //val result: String
-            val result = KeywordExtractor()
-                .quikFix(pdfController
-                    .stripText(stream))
-                .toString()
-            /*
-            if (csv != null){
-                val reader = BufferedReader(InputStreamReader(csv))
-                val result = KeywordExtractor()
-                    .actualImplementation(pdfController
-                        .stripText(stream), reader)
-                    .toString()
-            } else {
-                val result = KeywordExtractor()
-                    .quikFix(pdfController
-                        .stripText(stream))
-                    .toString()
-            }*/
-
-            Log.e("litdao", "litdao: " + result)
+            val path = i.toString() + ".pdf"
+            val stream: InputStream = getAssets().open(path)
+            val kws = getKWs(stream)
+            save(path, kws)
+            Log.e("litdao", "litdao: " + kws.toString())
             i += 1
         }
-        //Log.d("litdao", pdfController.stripText(stream))
+        // query test
+        var handler = QueryHandler()
+        Log.d("litdao", handler.scoreList("Clustering all the algorighems man", loadAll()).toString())
+        Log.d("litdao", handler.scoreList("The pythagorean algorithms machine learning", loadAll()).toString())
 
-/*
-        Snackbar sb = Snackbar.make(findViewById(R.id.linearLayout), R.string.offline_message, Snackbar.LENGTH);
-        snackbar.show
-        ()
-*/
-        //Toast.makeText(LiteratureDaoActivity(), result, Toast.LENGTH_SHORT).show();
+    }
+
+    fun getKWs(pdfIS: java.io.InputStream): MutableList<Pair<String, Double>>{
+        var pdfController = PdfController()
+        val keywordExtractorInput = pdfController.stripText(pdfIS)
+        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+        val result = KeywordExtractor()
+            .extract(keywordExtractorInput, csv)
+        return result
+    }
+
+
+    fun save(path: String, KWList: MutableList<Pair<String, Double>>){
+        tempStorage.add(Pair(path, KWList))
+    }
+
+    fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
+        return tempStorage
     }
 }
