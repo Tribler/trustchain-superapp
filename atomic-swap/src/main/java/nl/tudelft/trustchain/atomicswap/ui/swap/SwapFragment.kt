@@ -200,6 +200,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     tx.bitcoinSerialize().toHex()
                 )
                 Log.d(LOG, "Bob's transaction is confirmed")
+                Log.d(LOG, "Bob's started observing the address $addressToWatch")
             }
         }
 
@@ -241,7 +242,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val originalTransaction = Transaction(RegTestParams(), data.initiateTx)
                 print(originalTransaction)
 
-                val claimTransaction = WalletHolder.bitcoinSwap.createClaimTxTest(
+                val claimTransaction = WalletHolder.bitcoinSwap.createClaimTx(
                     originalTransaction,
                     secret,
                     offerId.toLong(),
