@@ -210,7 +210,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 WalletHolder.bitcoinSwap.swapStorage.getValue(completeMessage.offerId.toLong()) as SwapData.CreatorSwapData
             if (data.initiateTx != null) {
                 val tx =
-                    Transaction(RegTestParams(), completeMessage.publicKey.hexToBytes())
+                    Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
                 WalletHolder.bitcoinWallet.commitTx(tx)
                 val transaction = WalletHolder.bitcoinSwap.createClaimTxForInitiator(
                     completeMessage.offerId.toLong(),

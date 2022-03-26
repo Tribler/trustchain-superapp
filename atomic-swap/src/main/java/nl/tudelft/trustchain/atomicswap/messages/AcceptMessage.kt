@@ -13,7 +13,7 @@ data class AcceptMessage(val offerId: String, val publicKey: String) : Serializa
 
     companion object Deserializer : Deserializable<AcceptMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<AcceptMessage, Int> {
-            val (offerId, publicKey) = buffer.drop(8).toByteArray().decodeToString().split(";")
+            val (offerId, publicKey) = buffer.drop(offset).toByteArray().decodeToString().split(";")
             return Pair(AcceptMessage(offerId, publicKey), buffer.size)
         }
     }

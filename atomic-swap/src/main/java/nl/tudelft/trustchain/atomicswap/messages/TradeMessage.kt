@@ -18,7 +18,7 @@ data class TradeMessage(val offerId: String, val fromCoin: String, val toCoin: S
 
     companion object Deserializer : Deserializable<TradeMessage> {
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<TradeMessage, Int> {
-            val (offerId, fromCoin, toCoin, fromAmount, toAmount) = buffer.drop(8).toByteArray().decodeToString().split(";")
+            val (offerId, fromCoin, toCoin, fromAmount, toAmount) = buffer.drop(offset).toByteArray().decodeToString().split(";")
             return Pair(TradeMessage(offerId, fromCoin, toCoin, fromAmount, toAmount), buffer.size)
         }
     }
