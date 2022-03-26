@@ -9,7 +9,7 @@ import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
 
-import bitcoin.NativeSecp256k1
+import bitcoinj-frost.core.src.main.java.org.bitcoin.NativeSecp256k1
 import java.util.Arrays
 
 
@@ -23,6 +23,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
 //        initClickListeners()
         sample_text.text = "potato"
 
+        val path = System.getProperty("java.library.path")
+        System.setProperty("java.library.path", "bitcoinj-frost/.libs")
 
         val keys = NativeSecp256k1.a()
         val new_text = keys.toString()
