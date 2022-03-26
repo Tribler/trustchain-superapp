@@ -480,6 +480,10 @@ public class NativeSecp256k1 {
         return generate_key_pair(Secp256k1Context.getContext());
     }
 
+    public static long a(){
+        return Secp256k1Context.getContext();
+    }
+
     public static byte[][] getAggregatedPublicKey(byte[][] publicKeys , int totalNumberOfPublicKeys){
         return get_combined_public_keys(publicKeys, totalNumberOfPublicKeys, Secp256k1Context.getContext());
     }

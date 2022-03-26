@@ -34,13 +34,13 @@ public class Secp256k1Context {
     static { // static initializer
         boolean isEnabled = true;
         long contextRef = -1;
-        try {
+//        try {
             System.loadLibrary("secp256k1");
             contextRef = secp256k1_init_context();
-        } catch (UnsatisfiedLinkError | SecurityException e) {
-            log.debug(e.toString());
-            isEnabled = false;
-        }
+//        } catch (UnsatisfiedLinkError | SecurityException e) {
+//            log.debug(e.toString());
+//            isEnabled = false;
+//        }
         enabled = isEnabled;
         context = contextRef;
     }

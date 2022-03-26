@@ -24,8 +24,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         sample_text.text = "potato"
 
 
-        val keys: Array<ByteArray> = NativeSecp256k1.generateKeyPair()
-        val new_text = keys[0][0].toString()
+        val keys = NativeSecp256k1.a()
+        val new_text = keys.toString()
 //        val new_text = keys[2].toString()
 //        FrostCpp.stringFromJNI()
 
