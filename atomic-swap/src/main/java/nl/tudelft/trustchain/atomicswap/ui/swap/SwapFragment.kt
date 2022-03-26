@@ -76,18 +76,20 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 alertDialogBuilder.setMessage(trade.toString())
                 alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
 
-                    // Generate a new receive key
-                    val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
-                    val freshKeyString = freshKey.pubKey.toHex()
-                    // Add it in the swap data together with offer id and amount
-                    WalletHolder.bitcoinSwap.addInitialRecipientSwapdata(
-                        trade.offerId.toLong(),
-                        freshKey.pubKey,
-                        trade.toAmount
-                    )
-                    // Send an accept message back
-                    atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, freshKeyString)
-                    Log.d(LOG, "Bob accepted a trade offer from Alice")
+                    if (trade.toCoin == "BTC"){
+                        // Generate a new receive key
+                        val freshKey = WalletHolder.bitcoinWallet.freshReceiveKey()
+                        val freshKeyString = freshKey.pubKey.toHex()
+                        // Add it in the swap data together with offer id and amount
+                        WalletHolder.bitcoinSwap.addInitialRecipientSwapdata(
+                            trade.offerId.toLong(),
+                            freshKey.pubKey,
+                            trade.toAmount
+                        )
+                        // Send an accept message back
+                        atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, freshKeyString)
+                        Log.d(LOG, "Bob accepted a trade offer from Alice")
+                    }
                 }
 
                 alertDialogBuilder.setCancelable(true)
