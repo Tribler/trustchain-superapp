@@ -271,11 +271,17 @@ class DemoCommunity(
             AppPayload.Deserializer, myPeer.key as PrivateKey
         )
         logger.debug { "<- Received app from ${peer.mid}" }
-        try {
-            val os = FileOutputStream(appDirectory.toString() + "/" + payload.appName)
-            os.write(payload.data)
-        } catch (e: Exception) {
-            logger.debug { "Could not write file from $peer with hash ${payload.appTorrentInfoHash}" }
+        val file = appDirectory.toString() + "/" + payload.appName
+        val existingFile = File(file)
+        if(!existingFile.exists()) {
+            try {
+                val os = FileOutputStream(file)
+                os.write(payload.data)
+            } catch (e: Exception) {
+                logger.debug { "Could not write file from $peer with hash ${payload.appTorrentInfoHash}" }
+            }
+        } else {
+            logger.error { "File $file already exists, will not overwrite after EVA download" }
         }
     }
 
@@ -316,8 +322,6 @@ class DemoCommunity(
 
     private fun onEVAErrorCallback(peer: Peer, exception: TransferException) {
         Log.d("DemoCommunity", "ON EVA error callback for '${exception.info} from ${peer.mid}'")
-
-        if (exception.info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
 
         if (this::evaErrorCallback.isInitialized) {
             this.evaErrorCallback(peer, exception)
