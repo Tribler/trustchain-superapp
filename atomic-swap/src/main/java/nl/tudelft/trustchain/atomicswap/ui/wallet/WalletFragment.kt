@@ -1,8 +1,10 @@
 package nl.tudelft.trustchain.atomicswap.ui.wallet
 
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,17 +12,29 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.util.sha256
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicWalletBinding
 import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder.bitcoinWallet
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder.ethSwap
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder.ethereumWallet
+import nl.tudelft.trustchain.atomicswap.swap.eth.AtomicSwapContract
+import nl.tudelft.trustchain.atomicswap.swap.eth.EthereumSwap
 import nl.tudelft.trustchain.common.ethereum.EthereumWalletService
 import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import org.bitcoinj.wallet.Wallet
 import org.bitcoinj.wallet.listeners.WalletChangeEventListener
+import org.web3j.tx.RawTransactionManager
+import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
+import kotlin.random.Random
 
 class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChangeEventListener {
 
@@ -35,7 +49,6 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
 
     private lateinit var clipboard: ClipboardManager
 
-    private lateinit var ethereumWallet: EthereumWeb3jWallet
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,8 +59,26 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         ) as ClipboardManager
 
 
+
+
         lifecycleScope.launchWhenStarted {
-            ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
+            launch(Dispatchers.Default) {
+                WalletHolder.ethereumWallet = EthereumWalletService.getGlobalWeb3jWallet(requireContext())
+                while (true) {
+                    delay(4000)
+                    try {
+                        val contract = AtomicSwapContract.deploy(
+                            ethereumWallet.web3j,
+                            RawTransactionManager(ethereumWallet.web3j,ethereumWallet.credentials,1337 ),
+                            DefaultGasProvider()
+                        ).send()
+                        WalletHolder.ethSwap = EthereumSwap(ethereumWallet.web3j, ethereumWallet.credentials,contract.contractAddress)
+                        break
+                    }catch (e: Exception){
+                        Log.d("ETHLOG", e.toString())
+                    }
+                }
+            }
         }
     }
 
