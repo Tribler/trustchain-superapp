@@ -66,6 +66,16 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        appGossiper.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        appGossiper.pause()
+    }
+
     private fun toggleProgressBar(progress: RelativeLayout) {
         if (progressVisible) {
             progress.visibility = View.GONE
