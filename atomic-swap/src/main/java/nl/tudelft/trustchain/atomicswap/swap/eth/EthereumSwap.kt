@@ -1,69 +1,52 @@
 package nl.tudelft.trustchain.atomicswap.swap.eth
 
+import android.annotation.SuppressLint
 import android.util.Log
-import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.sha256
+import nl.tudelft.ipv8.util.toHex
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
-import org.web3j.protocol.core.methods.request.EthFilter
 import org.web3j.protocol.core.methods.response.TransactionReceipt
+import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
 import org.web3j.utils.Convert
 import java.math.BigInteger
-import kotlin.random.Random
 
-sealed class EthSwapInfo {
-    abstract val amount : String
-    abstract val relativeLock : Int
 
-    /**
-     * The creator is the person who locks the funds in the contract.
-     */
-    data class CreatorInfo(
-        val recipientAddress: String,
-        val secret: ByteArray,
-        val secretHash: ByteArray,
-        val txHash: ByteArray,
-        override val relativeLock: Int,
-        override val amount: String
-    ) : EthSwapInfo()
-
-    /**
-     * The recipient is the person who can claim the locked funds.
-     */
-    data class RecipientInfo(
-        val counterpartyAddress: String? = null,
-        val hashUsed: ByteArray? = null,
-        override val amount: String,
-        override val relativeLock: Int
-    ) : EthSwapInfo()
-}
-
+@SuppressLint("CheckResult")
 class EthereumSwap(
     web3j: Web3j,
     val credentials: Credentials,
-    contractAddress : String,
-    val relativeLock: Int = 6
+    contractAddress : String
 ) {
 
 
 
+    val txManager = RawTransactionManager(web3j,credentials,1337 )
+    val swapContract = AtomicSwapContract.load(contractAddress,web3j,txManager,DefaultGasProvider())
+    /**
+     * Map of callbacks that are called when a swap with a hash equal to the key is claimed.
+     *
+     */
+    val claimCallbacks = mutableMapOf<String,ClaimCallback>()
     init {
-        val filter = EthFilter(
-            DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST,
-            contractAddress
-        )
-        web3j.ethLogFlowable(filter).subscribe{ log ->
-            Log.d("ETHLOG",log.data)
-        }
+
+        swapContract.swapClaimedEventFlowable(DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST)
+            .subscribe { event->
+                claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret) ?: run{Log.d("ETHLOG","cb is null")}
+                Log.d("ETHLOG","Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}")
+            }
+
     }
 
-
-    val swapContract = AtomicSwapContract.load(contractAddress,web3j,credentials,DefaultGasProvider())
-
-
-    val swapStorage = mutableMapOf<Long, EthSwapInfo>()
+    /**
+     * Called when the swap with this hash is claimed.
+     */
+    fun setOnClaimed(hash: ByteArray,cb : ClaimCallback){
+        // bytearrays cannot be used as keys in a map
+        claimCallbacks[hash.toHex()]  = cb
+    }
 
     /**
      * Note that the contract requires that the secret size be 32 bytes
@@ -71,40 +54,19 @@ class EthereumSwap(
      * @param amount: Amount of eth to lock in the swap.
      * @return: tx hash. web3j can actually get a tx from its hash
      */
-    fun createSwapForRecipient(
-        offerId: Long,
+    fun createSwap(
         claimAddress: String,
-        amount: String
-    ): EthSwapInfo.CreatorInfo {
-
-        val secret = Random.nextBytes(32)
-        val secretHash = sha256(secret)
+        amount: String,
+        secretHash: ByteArray,
+        relativeLock : Int
+    ): String {
 
         val tx = swapContract.addSwap(
-            credentials.address, secretHash, BigInteger.valueOf(10),
+            claimAddress, secretHash, relativeLock.toBigInteger(),
             Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
         ).send()
 
-
-        println("""
-            ETHSWAP
-
-            ${tx.transactionHash}
-        """.trimIndent())
-
-
-        val swapData = EthSwapInfo.CreatorInfo(
-            recipientAddress = claimAddress,
-            secret = secret,
-            secretHash = secretHash,
-            amount = amount,
-            relativeLock = relativeLock,
-            // hash prob starts with "0x" or not (?)
-            txHash = tx.transactionHash.removePrefix("0x").hexToBytes()
-        )
-        swapStorage[offerId] = swapData
-
-        return swapData
+        return tx.transactionHash
     }
 
 
@@ -118,56 +80,28 @@ class EthereumSwap(
 
     /**
      * Claim the swap represented by the hash.
-     * @param hash: The hash of the secret value. While this is not necessary it helps in checking
      * that the hash and secret value correspond to each other.
      * @param secret: The secret needed to claim the swap.
      */
-    fun claimSwap(offerId: Long,secret:ByteArray): TransactionReceipt {
-        val swapInfo = when(val info = swapStorage[offerId]){
-            is EthSwapInfo.RecipientInfo -> info
-            null -> error("this trade is not known to us.")
-            is EthSwapInfo.CreatorInfo -> error("only the recipient can claim.")
-        }
-        require(sha256(secret).contentEquals(swapInfo.hashUsed)) { "hash should match the secret" }
-
-        return swapContract.claim(secret, swapInfo.hashUsed).send()
+    fun claimSwap(secret: ByteArray): TransactionReceipt {
+        return swapContract.claim(secret, sha256(secret)).send()
     }
 
-    /**
-     * Used when we are accepting an offer.
-     */
-    fun addInitialRecipientSwapdata(offerId: Long,amount: String) {
-        swapStorage[offerId] = EthSwapInfo.RecipientInfo(
-            amount = amount,
-            relativeLock = relativeLock
-        )
-    }
-
-    /**
-     * Add the secret hash to info of the swap.
-     */
-    fun updateRecipientSwapdata(offerId: Long,secretHash:ByteArray){
-        swapStorage[offerId] = when(val info = swapStorage[offerId]){
-            is EthSwapInfo.RecipientInfo -> info.copy(hashUsed = secretHash)
-            null -> error("This offer is not known to us.")
-            else -> error("We are not the recipient in this trade.")
-        }
-    }
 
     /**
      * Reclaim the swap represented by [hash].
      *
      * Todo: check that we are at the reclaim height (?)
      */
-    fun reclaimSwap(offerId: Long): TransactionReceipt {
-//        val getSwap = getSwap(hash)
-        val swapInfo = when(val info = swapStorage[offerId]){
-            is EthSwapInfo.CreatorInfo -> info
-            null -> error("This offer is not known to us.")
-            else -> error("The recipient cannot reclaim")
-        }
-        return swapContract.reclaim(swapInfo.secretHash).send()
+    fun reclaimSwap(hash:ByteArray): TransactionReceipt {
+        return swapContract.reclaim(hash).send()
     }
 
 
 }
+
+/**
+ * Type of callback called when a swap is claimed.
+ * The parameter for the callback is the secret that was used to claim the swap.
+ */
+typealias ClaimCallback = (ByteArray) -> Unit
