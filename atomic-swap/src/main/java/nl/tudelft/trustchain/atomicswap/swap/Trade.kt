@@ -68,6 +68,10 @@ data class Trade(
         secretHash = Sha256Hash.hash(randomSecret)
         this.counterpartyPubKey = counterpartyPubKey
     }
+
+    fun setOnComplete(counterpartyBitcoinTransaction: ByteArray){
+        this.counterpartyBitcoinTransaction = counterpartyBitcoinTransaction
+    }
 }
 
 enum class Currency{

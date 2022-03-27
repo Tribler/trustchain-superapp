@@ -12,65 +12,6 @@ import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptOpCodes
 import org.bitcoinj.wallet.SendRequest
-import org.bitcoinj.wallet.Wallet
-
-//
-//sealed class SwapData {
-//    abstract val keyUsed: ByteArray?
-//    abstract val amount: Coin
-//    abstract val relativeLock: Int
-//    abstract val counterpartyKey: ByteArray?
-//    abstract val offerId: Long
-//
-//    /**
-//     * The transaction that initiated the swap
-//     */
-//    abstract val initiateTx: ByteArray?
-//
-//    /**
-//     * The transaction Id of the transaction that is meant to be claimed by the initiator of the swap.
-//     */
-//    abstract val claimByInitiatorTxId: ByteArray?
-//
-//    /**
-//     * Used for storing meta-data about a swap where we are the one who can reclaim.
-//     * @param keyUsed: the public key of the private key that was used by us.
-//     * @param secretUsed: the secret of the hash which was used to create the swap.
-//     * @param relativeLock: the number of blocks before the contract can be reclaimed.
-//     * @param amount: the amount our counterparty receives.
-//     */
-//    data class CreatorSwapData(
-//        override val keyUsed: ByteArray?,
-//        val secretUsed: ByteArray?,
-//        override val amount: Coin,
-//        override val offerId: Long,
-//        override val relativeLock: Int = 6,
-//        override val counterpartyKey: ByteArray? = null,
-//        override val initiateTx: ByteArray? = null,
-//        override val claimByInitiatorTxId: ByteArray? = null,
-//        val secretHash: ByteArray?
-//    ) : SwapData() {
-//
-//    }
-//
-//    /**
-//     * Used for storing meta-data about a swap where we are the one who can redeem.
-//     * @param keyUsed: the Bitcoin public key that identifies us in the swap.
-//     * @param hashUsed: the hash used to create the swap.
-//     * @param relativeLock: the number of blocks before the contract can be reclaimed.
-//     * @param amount: the amount our counterparty receives.
-//     */
-//    data class RecipientSwapData(
-//        override val keyUsed: ByteArray,
-//        override val amount: Coin,
-//        override val offerId: Long,
-//        override val relativeLock: Int = 6,
-//        override val counterpartyKey: ByteArray? = null,
-//        val hashUsed: ByteArray? = null,
-//        override val initiateTx: ByteArray? = null,
-//        override val claimByInitiatorTxId: ByteArray? = null
-//    ) : SwapData()
-//}
 
 class BitcoinSwap {
     var relativeLock: Int = 6

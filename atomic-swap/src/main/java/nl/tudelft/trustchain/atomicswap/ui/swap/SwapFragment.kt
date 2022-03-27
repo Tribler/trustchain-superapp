@@ -237,6 +237,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
                 val tx = Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
                 WalletHolder.bitcoinWallet.commitTx(tx)
+                trade.setOnComplete(completeMessage.txId.hexToBytes())
                 val transaction = WalletHolder.bitcoinSwap.createClaimTx(trade)
 
                 WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
