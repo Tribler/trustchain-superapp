@@ -47,6 +47,7 @@ data class Trade(
     // Called by the recipient
     fun setOnTrade(){
         myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
+        myAddress= WalletHolder.ethereumWallet.address()
     }
 
     fun setOnInitiate(counterpartyPubKey: ByteArray, secretHash: ByteArray, counterpartyBitcoinTransaction: ByteArray) {
@@ -61,12 +62,13 @@ data class Trade(
 
 
     // Called by the initiator
-    fun setOnAccept(counterpartyPubKey: ByteArray) {
+    fun setOnAccept(counterpartyPubKey: ByteArray, ethAddress: String) {
         myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
         val randomSecret = Random.nextBytes(20)
         secret = randomSecret
         secretHash = Sha256Hash.hash(randomSecret)
         this.counterpartyPubKey = counterpartyPubKey
+        counterpartyAddress = ethAddress
     }
 
     fun setOnComplete(counterpartyBitcoinTransaction: ByteArray){

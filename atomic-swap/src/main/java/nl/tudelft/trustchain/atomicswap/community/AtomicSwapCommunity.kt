@@ -124,10 +124,10 @@ class AtomicSwapCommunity : Community() {
         }
     }
 
-    fun sendAcceptMessage(peer: Peer, offerId:String, pubKey: String){
+    fun sendAcceptMessage(peer: Peer, offerId:String, btcPubKey: String, ethAddress: String ){
         send(
             peer.address,
-            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, pubKey ))
+            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, btcPubKey, ethAddress))
         )
     }
 
@@ -137,7 +137,7 @@ class AtomicSwapCommunity : Community() {
             peer.address,
             serializePacket(
                 Companion.INITIATE_MESSAGE_ID,
-                InitiateMessage(offerId, data.secretHash, data.txId, data.publicKey)
+                InitiateMessage(offerId, data.secretHash, data.txId, data.btcPubKey,data.ethAddress)
             )
         )
     }
@@ -170,5 +170,6 @@ class AtomicSwapCommunity : Community() {
 data class OnAcceptReturn(
     val secretHash: String,
     val txId: String,
-    val publicKey: String
+    val btcPubKey: String,
+    val ethAddress: String
 )
