@@ -91,6 +91,9 @@ class BitcoinSwap(
         val sendRequest = SendRequest.forTx(transaction)
         WalletHolder.bitcoinWallet.completeTx(sendRequest)
 
+        // update Trade object
+        trade.setOnTransactionCreated(sendRequest.tx.bitcoinSerialize())
+
         return sendRequest.tx to swapScript
     }
 

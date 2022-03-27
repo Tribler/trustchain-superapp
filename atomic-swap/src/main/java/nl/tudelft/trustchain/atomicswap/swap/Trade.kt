@@ -16,34 +16,29 @@ import kotlin.random.Random
  * that "0.01" Bitcoin.
  */
 data class Trade(
-
-    // initator: on trade broadcast
-    // recipient: on trade accept
     val id: Long,
     val myCoin : Currency,
     val myAmount : String,
     val counterpartyCoin : Currency,
     val counterpartyAmount: String,
-
-    // Bob sends his pub key to Alice with the Accept message
-    var myPubKey: ByteArray? = null,
-    var myAddress: String? = null,
-
-    var counterpartyPubKey: ByteArray? = null, //empty
-    var counterpartyAddress: String? = null,
-
-    var secret: ByteArray? = null, // only the creator
-    var secretHash: ByteArray? = null,
-
-    var myBitcoinTransaction: ByteArray? = null,
-    var counterpartyBitcoinTransaction: ByteArray? = null,
-
-    // Alice sends everything except the secret to Bob
-
-    //1. btc to btc
-    //2. eth to btc
-    //3. btc to eth
 ) {
+
+    var myPubKey: ByteArray? = null
+        private set
+    var myAddress: String? = null
+        private set
+    var counterpartyPubKey: ByteArray? = null
+        private set
+    var counterpartyAddress: String? = null
+        private set
+    var secret: ByteArray? = null
+        private set
+    var secretHash: ByteArray? = null
+        private set
+    var myBitcoinTransaction: ByteArray? = null
+        private set
+    var counterpartyBitcoinTransaction: ByteArray? = null
+        private set
 
     // Called by the recipient
     fun setOnTrade(){
@@ -77,6 +72,13 @@ data class Trade(
     fun setOnComplete(counterpartyBitcoinTransaction: ByteArray){
         this.counterpartyBitcoinTransaction = counterpartyBitcoinTransaction
     }
+
+
+    // Called by both
+    fun setOnTransactionCreated(myBitcoinTransaction: ByteArray?){
+        this.myBitcoinTransaction = myBitcoinTransaction
+    }
+
 }
 
 enum class Currency{

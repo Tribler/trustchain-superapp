@@ -105,7 +105,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 trade.setOnAccept(accept.btcPubKey.hexToBytes(), accept.ethAddress)
 
                 val (transaction,_) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
-                trade.myBitcoinTransaction = transaction.bitcoinSerialize()
 
                 // add a confidence listener
                 WalletHolder.swapTransactionConfidenceListener.addTransactionInitiator(
@@ -167,7 +166,6 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
                 // create a swap transaction
                 val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
-                trade.myBitcoinTransaction = transaction.bitcoinSerialize()
 
                 // add a listener on transaction
                 WalletHolder.swapTransactionConfidenceListener.addTransactionRecipient(
