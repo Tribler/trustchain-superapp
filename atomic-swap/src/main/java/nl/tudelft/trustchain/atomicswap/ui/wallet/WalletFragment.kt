@@ -124,9 +124,14 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
         WalletHolder.bitcoinWallet.addChangeEventListener(this)
         lifecycleScope.launchWhenStarted {
             while (isActive) {
-                val ether = Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
-                model.setEthereumBalance("$ether ETH")
-                delay(1000)
+                try {
+                    val ether =
+                        Convert.fromWei(ethereumWallet.balance().toString(), Convert.Unit.ETHER)
+                    model.setEthereumBalance("$ether ETH")
+                    delay(1000)
+                } catch (_: Exception) {
+                    delay(2900)
+                }
             }
         }
     }
