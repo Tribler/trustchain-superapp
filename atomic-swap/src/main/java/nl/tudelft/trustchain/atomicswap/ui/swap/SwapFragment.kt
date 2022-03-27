@@ -352,12 +352,13 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
         val trade = Trade(Random.nextLong(), Currency.fromString(fromCurrency.toString()), fromCurrencyAmount, Currency.fromString(toCurrency.toString()), toCurrencyAmount)
         trades.add(trade)
         atomicSwapCommunity.broadcastTradeOffer(
-            trade.id.toInt(),
+            trade.id.toString(),
             fromCurrency.toString(),
             toCurrency.toString(),
             fromCurrencyAmount,
             toCurrencyAmount
         )
+        Log.d(LOG,"Alice broadcasted a trade offer with id ${trade.id.toString()}")
 
         val input = "$fromCurrencyAmount $fromCurrency -> $toCurrencyAmount $toCurrency"
         Toast.makeText(requireContext(), input, Toast.LENGTH_SHORT).show()
