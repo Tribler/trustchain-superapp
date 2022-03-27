@@ -86,7 +86,8 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     if (newTrade.myCoin == Currency.BTC){
                         newTrade.setOnTrade()
                         val myPubKey = newTrade.myPubKey ?: error("Some fields are not initialized")
-                        atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, myPubKey.toHex(), WalletHolder.ethereumWallet.address() )
+                        val myAddress = newTrade.myAddress ?: error("Some fields are not initialized")
+                        atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, myPubKey.toHex(), myAddress )
                         Log.d(LOG, "Bob accepted a trade offer from Alice")
                     }
                 }
@@ -102,7 +103,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
             try {
                 val trade  = trades.first { it.id == accept.offerId.toLong() }
-                trade.setOnAccept(accept.btcPubKey.hexToBytes(), WalletHolder.ethereumWallet.address())
+                trade.setOnAccept(accept.btcPubKey.hexToBytes(), accept.ethAddress)
 
                 val (transaction,_) = WalletHolder.bitcoinSwap.startSwapTx(trade)
                 trade.myBitcoinTransaction = transaction.bitcoinSerialize()
@@ -134,8 +135,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val secretHash = trade.secretHash
                 val myTransaction = trade.myBitcoinTransaction
                 val myPubKey = trade.myPubKey
+                val myAddress = trade.myAddress
 
-                if(secretHash == null || myTransaction == null || myPubKey == null){
+                if(secretHash == null || myTransaction == null || myPubKey == null || myAddress == null){
                     error("Some fields are not initialised")
                 }
 
@@ -143,7 +145,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     secretHash.toHex(),
                     myTransaction.toHex(),
                     myPubKey.toHex(),
-                    WalletHolder.ethereumWallet.address()
+                    myAddress
                 )
 
                 atomicSwapCommunity.sendInitiateMessage(entry.peer!!, entry.offerId, dataToSend)
@@ -162,7 +164,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
                 // update the trade
                 val trade  = trades.first { it.id == initiateMessage.offerId.toLong() }
-                trade.setOnInitiate(initiateMessage.btcPublickey.hexToBytes(), initiateMessage.hash.hexToBytes(), initiateMessage.txId.hexToBytes())
+                trade.setOnInitiate(initiateMessage.btcPublickey.hexToBytes(), initiateMessage.hash.hexToBytes(), initiateMessage.txId.hexToBytes(), initiateMessage.ethAddress)
 
                 // create a swap transaction
                 val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.startSwapTx(trade)

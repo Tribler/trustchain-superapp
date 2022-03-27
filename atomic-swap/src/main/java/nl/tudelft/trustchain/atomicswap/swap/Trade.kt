@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.atomicswap.swap
 
 import nl.tudelft.ipv8.util.sha256
+import org.bitcoinj.core.Address
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.wallet.KeyChain
 import kotlin.random.Random
@@ -50,10 +51,11 @@ data class Trade(
         myAddress= WalletHolder.ethereumWallet.address()
     }
 
-    fun setOnInitiate(counterpartyPubKey: ByteArray, secretHash: ByteArray, counterpartyBitcoinTransaction: ByteArray) {
+    fun setOnInitiate(counterpartyPubKey: ByteArray, secretHash: ByteArray, counterpartyBitcoinTransaction: ByteArray?, counterpartyAddress: String?) {
         this.secretHash = secretHash
         this.counterpartyPubKey = counterpartyPubKey
         this.counterpartyBitcoinTransaction = counterpartyBitcoinTransaction
+        this.counterpartyAddress = counterpartyAddress
     }
 
     fun setOnSecretObserved(secret: ByteArray){
@@ -64,6 +66,7 @@ data class Trade(
     // Called by the initiator
     fun setOnAccept(counterpartyPubKey: ByteArray, ethAddress: String) {
         myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
+        myAddress= WalletHolder.ethereumWallet.address()
         val randomSecret = Random.nextBytes(20)
         secret = randomSecret
         secretHash = Sha256Hash.hash(randomSecret)
