@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.atomicswap.swap.Trade
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
 import org.web3j.protocol.core.DefaultBlockParameterName
@@ -46,6 +47,14 @@ class EthereumSwap(
     fun setOnClaimed(hash: ByteArray,cb : ClaimCallback){
         // bytearrays cannot be used as keys in a map
         claimCallbacks[hash.toHex()]  = cb
+    }
+
+    fun createSwap(
+        trade: Trade
+    ): String{
+        val counterpartyAddress = trade.counterpartyAddress ?: error("Counterparty ethereum address not set, we don't know who we are trading with")
+        val secretHash = trade.secretHash ?: error("secret hash not set")
+        return createSwap(counterpartyAddress,trade.counterpartyAmount,secretHash,10) //todo relative lock
     }
 
     /**

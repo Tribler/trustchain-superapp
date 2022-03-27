@@ -67,12 +67,13 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
                 while (true) {
                     delay(4000)
                     try {
-                        val contract = AtomicSwapContract.deploy(
-                            ethereumWallet.web3j,
-                            RawTransactionManager(ethereumWallet.web3j,ethereumWallet.credentials,1337 ),
-                            DefaultGasProvider()
-                        ).send()
-                        WalletHolder.ethSwap = EthereumSwap(ethereumWallet.web3j, ethereumWallet.credentials,contract.contractAddress)
+//                        val contract = AtomicSwapContract.deploy(
+//                            ethereumWallet.web3j,
+//                            RawTransactionManager(ethereumWallet.web3j,ethereumWallet.credentials,1337 ),
+//                            DefaultGasProvider()
+//                        ).send()
+//                        Log.d("ETHLOG","contract address : ${contract.contractAddress}")
+                        WalletHolder.ethSwap = EthereumSwap(ethereumWallet.web3j, ethereumWallet.credentials,"0x5a657c6bf3ffc92199d6f87f6ccd2d3a35059395") //todo add address to some env
                         break
                     }catch (e: Exception){
                         Log.d("ETHLOG", e.toString())
