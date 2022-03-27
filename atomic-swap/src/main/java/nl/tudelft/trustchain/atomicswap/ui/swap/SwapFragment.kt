@@ -34,7 +34,6 @@ const val LOG = "I Atomic Swap"
 
 class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
-    private val adapter = ItemAdapter()
     val atomicSwapCommunity = IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
 
     private var _binding: FragmentAtomicSwapBinding? = null
