@@ -62,7 +62,7 @@ data class Trade(
     fun setOnAccept(counterpartyPubKey: ByteArray, ethAddress: String) {
         myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
         myAddress= WalletHolder.ethereumWallet.address()
-        val randomSecret = Random.nextBytes(20)
+        val randomSecret = Random.nextBytes(32)
         secret = randomSecret
         secretHash = Sha256Hash.hash(randomSecret)
         this.counterpartyPubKey = counterpartyPubKey

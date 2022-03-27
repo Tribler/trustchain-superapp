@@ -82,13 +82,16 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     val newTrade = Trade(trade.offerId.toLong(), Currency.fromString(trade.toCoin), trade.toAmount, Currency.fromString(trade.fromCoin), trade.fromAmount)
                     trades.add(newTrade)
 
-                    if (newTrade.myCoin == Currency.BTC){
-                        newTrade.setOnTrade()
-                        val myPubKey = newTrade.myPubKey ?: error("Some fields are not initialized")
-                        val myAddress = newTrade.myAddress ?: error("Some fields are not initialized")
-                        atomicSwapCommunity.sendAcceptMessage(peer, trade.offerId, myPubKey.toHex(), myAddress )
-                        Log.d(LOG, "Bob accepted a trade offer from Alice")
-                    }
+                    newTrade.setOnTrade()
+                    val myPubKey = newTrade.myPubKey ?: error("Some fields are not initialized")
+                    val myAddress = newTrade.myAddress ?: error("Some fields are not initialized")
+                    atomicSwapCommunity.sendAcceptMessage(
+                        peer,
+                        trade.offerId,
+                        myPubKey.toHex(),
+                        myAddress
+                    )
+                    Log.d(LOG, "Bob accepted a trade offer from Alice")
                 }
 
                 alertDialogBuilder.setCancelable(true)
@@ -99,27 +102,44 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
         // ALICE RECEIVES AN ACCEPT AND CREATES A TRANSACTION THAT CAN BE CLAIMED BY BOB
         atomicSwapCommunity.setOnAccept { accept, peer ->
-
             try {
                 val trade  = trades.first { it.id == accept.offerId.toLong() }
                 trade.setOnAccept(accept.btcPubKey.hexToBytes(), accept.ethAddress)
 
-                val (transaction,_) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
+                if(trade.myCoin == Currency.ETH){
+                    val txid = WalletHolder.ethSwap.createSwap(trade)
+                    val secretHash = trade.secretHash
+                    val myPubKey = trade.myPubKey
 
-                // add a confidence listener
-                WalletHolder.swapTransactionConfidenceListener.addTransactionInitiator(
-                    TransactionConfidenceEntry(
-                        transaction.txId.toString(),
-                        accept.offerId,
-                        peer
+                    if(secretHash == null || myPubKey == null){
+                        error("Some fields are not initialised")
+                    }
+                    val dataToSend = OnAcceptReturn(
+                        secretHash = secretHash.toHex(),
+                        txid,
+                        myPubKey.toHex(),
+                        WalletHolder.ethereumWallet.address()
                     )
-                )
-                // broadcast the transaction
-                WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
-                // log
-                Log.d(LOG, "Alice created a transaction claimable by Bob")
-                Log.d(LOG, transaction.toString())
+                    atomicSwapCommunity.sendInitiateMessage(peer, trade.id.toString() , dataToSend)
 
+                    Log.d(LOG,"Alice created an ethereum transaction claimable by bob with id : $txid")
+
+                }else if (trade.myCoin == Currency.BTC){
+                    val (transaction,_) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
+
+                    // add a confidence listener
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionInitiator(
+                        TransactionConfidenceEntry(
+                            transaction.txId.toString(),
+                            accept.offerId,
+                            peer
+                        )
+                    )
+                    // broadcast the transaction
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
+                    // log
+                    Log.d(LOG, "Alice created a bitcoin transaction claimable by Bob with id: ${transaction.txId}")
+                }
             } catch (e:Exception){
                 e.printStackTrace()
             }
@@ -157,6 +177,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
         // BOB GETS NOTIFIED WHEN ALICE FINISHES HER TRANSACTION AND CREATES HIS OWN TRANSACTION
         atomicSwapCommunity.setOnInitiate { initiateMessage, peer ->
+            Log.d(LOG,"Bob received initiat message from alice.")
 
             try {
 
@@ -164,36 +185,66 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val trade  = trades.first { it.id == initiateMessage.offerId.toLong() }
                 trade.setOnInitiate(initiateMessage.btcPublickey.hexToBytes(), initiateMessage.hash.hexToBytes(), initiateMessage.txId.hexToBytes(), initiateMessage.ethAddress)
 
-                // create a swap transaction
-                val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
 
-                // add a listener on transaction
-                WalletHolder.swapTransactionConfidenceListener.addTransactionRecipient(
-                    TransactionConfidenceEntry(
-                        transaction.txId.toString(),
-                        initiateMessage.offerId,
-                        peer
+                if(trade.myCoin == Currency.ETH){
+                    val txid = WalletHolder.ethSwap.createSwap(trade)
+
+                    WalletHolder.ethSwap.setOnClaimed(trade.secretHash ?: error("we don't know the secret hash")){ secret ->
+                        trade.setOnSecretObserved(secret)
+                        if(trade.counterpartyCoin == Currency.BTC){
+                            val tx = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
+                            WalletHolder.walletAppKit.peerGroup().broadcastTransaction(tx)
+
+                            WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
+                                TransactionConfidenceEntry(
+                                    tx.txId.toString(),
+                                    trade.id.toString(),
+                                    null
+                                )
+                            )
+                            Log.d(LOG,"Bobs ether was claimed by Alice and the secret was revealed. Bob is now claiming Alice's bitcoin")
+                        }
+                    }
+                    atomicSwapCommunity.sendCompleteMessage(
+                        peer,
+                        trade.id.toString(),
+                        txid
                     )
-                )
 
-                // observe Alice spending the transaction
-                val watchedAddress = ScriptBuilder.createP2SHOutputScript(scriptToWatch).getToAddress(RegTestParams.get())
-                WalletHolder.swapTransactionBroadcastListener.addWatchedAddress(
-                    TransactionListenerEntry(
-                        watchedAddress,
-                        initiateMessage.offerId,
-                        scriptToWatch
+                    Log.d(LOG,"Bob receive initiate from ALice and locked ether for alice to claim")
+
+                }else if(trade.myCoin == Currency.BTC){
+
+                    // create a swap transaction
+                    val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
+
+                    // add a listener on transaction
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionRecipient(
+                        TransactionConfidenceEntry(
+                            transaction.txId.toString(),
+                            initiateMessage.offerId,
+                            peer
+                        )
                     )
-                )
 
-                // broadcast transaction
-                WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
+                    // observe Alice spending the transaction
+                    val watchedAddress = ScriptBuilder.createP2SHOutputScript(scriptToWatch).getToAddress(RegTestParams.get())
+                    WalletHolder.swapTransactionBroadcastListener.addWatchedAddress(
+                        TransactionListenerEntry(
+                            watchedAddress,
+                            initiateMessage.offerId,
+                            scriptToWatch
+                        )
+                    )
 
-                // log
-                Log.d(LOG, "Bob created a transaction claimable by Alice")
-                Log.d(LOG, transaction.toString())
-                Log.d(LOG, "Bob's started observing the address $watchedAddress")
+                    // broadcast transaction
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
 
+                    // log
+                    Log.d(LOG, "Bob created a transaction claimable by Alice")
+                    Log.d(LOG, transaction.toString())
+                    Log.d(LOG, "Bob's started observing the address $watchedAddress")
+                }
 
             } catch (e:Exception){
                 e.printStackTrace()
@@ -204,11 +255,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
             try {
                 val trade  = trades.first { it.id == entry.offerId.toLong() }
-                val myTransaction = trade.myBitcoinTransaction
-
-                if (myTransaction == null){
-                    error("Some fields are not initialized")
-                }
+                val myTransaction = trade.myBitcoinTransaction ?: error("Some fields are not initialized")
 
 
                 // send complete message
@@ -233,21 +280,26 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
             try {
                 val trade  = trades.first { it.id == completeMessage.offerId.toLong() }
 
-                val tx = Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
-                WalletHolder.bitcoinWallet.commitTx(tx)
-                trade.setOnComplete(completeMessage.txId.hexToBytes())
-                val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
+                if (trade.counterpartyCoin == Currency.ETH){
+                    WalletHolder.ethSwap.claimSwap(trade.secret?: error("cannot claim swap, we don't know the secret"))
+                    Log.d(LOG,"Alice received a complete message from Bob and is now claiming Bob's ether.")
+                }else if(trade.counterpartyCoin == Currency.BTC){
+                    val tx = Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
+                    WalletHolder.bitcoinWallet.commitTx(tx)
+                    trade.setOnComplete(completeMessage.txId.hexToBytes())
+                    val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
 
-                WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
-                    TransactionConfidenceEntry(
-                        transaction.txId.toString(),
-                        completeMessage.offerId,
-                        peer
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
+                        TransactionConfidenceEntry(
+                            transaction.txId.toString(),
+                            completeMessage.offerId,
+                            peer
+                        )
                     )
-                )
-                WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
-                Log.d(LOG, "Alice created a claim transaction")
-                Log.d(LOG, transaction.toString())
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
+                    Log.d(LOG, "Alice created a claim transaction")
+                    Log.d(LOG, transaction.toString())
+                }
 
             } catch (e:Exception){
                 e.printStackTrace()
@@ -262,18 +314,25 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val trade  = trades.first { it.id == offerId.toLong() }
                 trade.setOnSecretObserved(secret)
 
-                val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
+                if(trade.counterpartyCoin == Currency.BTC){
+                    val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
 
-                WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
-                    TransactionConfidenceEntry(
-                        transaction.txId.toString(),
-                        offerId,
-                        null
+                    WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
+                        TransactionConfidenceEntry(
+                            transaction.txId.toString(),
+                            offerId,
+                            null
+                        )
                     )
-                )
-                WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
-                Log.d(LOG, "Bob created a claim transaction")
-                Log.d(LOG, transaction.toString())
+                    WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
+                    Log.d(LOG, "Bob created a claim transaction")
+                    Log.d(LOG, transaction.toString())
+                }else if (trade.counterpartyCoin == Currency.ETH){
+                    WalletHolder.ethSwap.claimSwap(secret)
+                    Log.d(LOG,"Bob claimed Ethereum. From a secret from bitcoin.")
+                }
+
+
 
 
             } catch (e:Exception){

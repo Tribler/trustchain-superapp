@@ -38,7 +38,6 @@ class EthereumSwap(
                 claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret) ?: run{Log.d("ETHLOG","cb is null")}
                 Log.d("ETHLOG","Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}")
             }
-
     }
 
     /**
@@ -54,7 +53,7 @@ class EthereumSwap(
     ): String{
         val counterpartyAddress = trade.counterpartyAddress ?: error("Counterparty ethereum address not set, we don't know who we are trading with")
         val secretHash = trade.secretHash ?: error("secret hash not set")
-        return createSwap(counterpartyAddress,trade.counterpartyAmount,secretHash,10) //todo relative lock
+        return createSwap(counterpartyAddress,trade.myAmount,secretHash,10) //todo relative lock
     }
 
     /**
