@@ -1,7 +1,9 @@
 package nl.tudelft.trustchain.atomicswap.swap
 
-
-
+import nl.tudelft.ipv8.util.sha256
+import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.wallet.KeyChain
+import kotlin.random.Random
 
 
 /**
@@ -40,7 +42,33 @@ data class Trade(
     //1. btc to btc
     //2. eth to btc
     //3. btc to eth
-)
+) {
+
+    // Called by the recipient
+    fun setOnTrade(){
+        myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
+    }
+
+    fun setOnInitiate(counterpartyPubKey: ByteArray, secretHash: ByteArray, counterpartyBitcoinTransaction: ByteArray) {
+        this.secretHash = secretHash
+        this.counterpartyPubKey = counterpartyPubKey
+        this.counterpartyBitcoinTransaction = counterpartyBitcoinTransaction
+    }
+
+    fun setOnSecretObserved(secret: ByteArray){
+        this.secret = secret
+    }
+
+
+    // Called by the initiator
+    fun setOnAccept(counterpartyPubKey: ByteArray) {
+        myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
+        val randomSecret = Random.nextBytes(20)
+        secret = randomSecret
+        secretHash = Sha256Hash.hash(randomSecret)
+        this.counterpartyPubKey = counterpartyPubKey
+    }
+}
 
 enum class Currency{
     BTC(),
