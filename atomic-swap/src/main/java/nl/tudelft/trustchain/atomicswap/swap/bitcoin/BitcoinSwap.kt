@@ -1,8 +1,6 @@
 package nl.tudelft.trustchain.atomicswap
 
-import android.util.Log
 import kotlinx.coroutines.runBlocking
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.swap.Trade
 import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
 import org.bitcoinj.core.*
@@ -13,35 +11,20 @@ import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptOpCodes
 import org.bitcoinj.wallet.SendRequest
 
-class BitcoinSwap {
-    var relativeLock: Int = 6
-        private set
-    var networkParams: NetworkParameters = RegTestParams()
-        private set
-
-
-    constructor(relativeLock: Int = 6, networkParams: NetworkParameters = RegTestParams()) {
-        this.relativeLock = relativeLock
-        this.networkParams = networkParams
-    }
+class BitcoinSwap(
+    private var relativeLock: Int = 6,
+    private var networkParams: NetworkParameters = RegTestParams()
+) {
 
 
     /**
-     * Create a new swap contract.
-     *
-     * Useful for initially creating the contract, or for recreating the contract when we are
-     * ready to spend it.
-     *
-     * @param reclaimPubKey: the key used by the user creating the contract. The key that can
-     * reclaim the contract
-     * @param claimPubKey: the key that can claim the contract with the hash.
+     * Creates a new Atomic Swap script
+     * @param reclaimPubKey: the key used by the user creating the contract. The key that can reclaim the contract
+     * @param claimPubKey: the key that can claim the contract with the secret.
+     * @param secretHash: the hash of the secret
+     * @param relativeLock:
      */
-    private fun createSwapScript(
-        reclaimPubKey: ByteArray,
-        claimPubKey: ByteArray,
-        secretHash: ByteArray,
-        relativeLock: Int = this.relativeLock
-    ): Script = ScriptBuilder()
+    private fun createSwapScript(reclaimPubKey: ByteArray, claimPubKey: ByteArray, secretHash: ByteArray, relativeLock: Int = this.relativeLock): Script = ScriptBuilder()
         .op(ScriptOpCodes.OP_IF)
         .number(relativeLock.toLong())
         .op(ScriptOpCodes.OP_CHECKSEQUENCEVERIFY)
@@ -57,6 +40,12 @@ class BitcoinSwap {
         .op(ScriptOpCodes.OP_ENDIF)
         .build()
 
+    /**
+     * Creates a script which unlocks the Atomic Swap script
+     * @param sig: the signature of the Atomic Swap script
+     * @param originalLockScript: the original script
+     * @param secret: The secret whose hash is contained in the original lock script
+    * */
     private fun createClaimScript(sig: TransactionSignature, originalLockScript: Script, secret: ByteArray): Script =
         ScriptBuilder()
             .op(ScriptOpCodes.OP_1)
@@ -70,84 +59,88 @@ class BitcoinSwap {
 
     /**
      * Creates the transaction for initiating the swap process.
-     * Called by Alice -> at this point she has all the information about the trade except for the transactions
-     *
-     * @return A pair of the transaction to be broadcast and some details of the swap.
+     * @return A pair of the transaction to be broadcast and the pubKey script
      */
+    fun createSwapTransaction(trade: Trade): Pair<Transaction,Script> {
 
-    fun startSwapTx(trade: Trade): Pair<Transaction,Script> {
-
+        // extract the needed fields from the Trade object which should have been initialized at this point
         val myPubKey = trade.myPubKey
         val counterpartyPubKey = trade.counterpartyPubKey
         val secretHash = trade.secretHash
-
         if (myPubKey == null || counterpartyPubKey == null || secretHash == null) {
             error("Not all fields are initialized")
         }
 
+        // create the locking script
         val swapScript = createSwapScript(
             reclaimPubKey = myPubKey,
             claimPubKey = counterpartyPubKey,
             secretHash = secretHash
         )
 
-        val contractTx = Transaction(networkParams)
+        // create the transaction
+        val transaction = Transaction(networkParams)
 
-        contractTx.addOutput(
+        // set money to the output and lock the money with the script
+        transaction.addOutput(
             Coin.parseCoin(trade.myAmount),
             ScriptBuilder.createP2SHOutputScript(swapScript)
         )
 
-        val sendRequest = SendRequest.forTx(contractTx)
+        // complete the transaction
+        val sendRequest = SendRequest.forTx(transaction)
         WalletHolder.bitcoinWallet.completeTx(sendRequest)
+
         return sendRequest.tx to swapScript
     }
 
+    /**
+     * Creates the transaction that claims the money from the Atomic Swap transaction
+     * @return the transaction
+     */
+    fun createClaimTransaction(trade: Trade): Transaction {
 
-    fun createClaimTx(trade: Trade): Transaction {
-
+        // extract the needed fields from the Trade object which should have been initialized at this point
         val myPubKey = trade.myPubKey
         val counterpartyPubKey = trade.counterpartyPubKey
         val counterpartyBitcoinTransaction = trade.counterpartyBitcoinTransaction
         val secretHash = trade.secretHash
         val secret = trade.secret
-
         if(myPubKey == null || counterpartyBitcoinTransaction == null || secretHash == null || counterpartyPubKey == null || secret == null){
             error("Some fields are not initialized")
         }
 
-        val transaction = Transaction(RegTestParams.get(), counterpartyBitcoinTransaction)
-        val key = WalletHolder.bitcoinWallet.findKeyFromPubKey(myPubKey)
-        val prevTxOut = transaction.outputs.find {
+        // extract the needed data from the Atomic Swap transaction
+        val swapTransaction = Transaction(RegTestParams.get(), counterpartyBitcoinTransaction)
+        val swapTransactionOutput = swapTransaction.outputs.find {
             it.scriptPubKey.scriptType == Script.ScriptType.P2SH
         } ?: error("could not find transaction output")
+        val swapTransactionAmount = swapTransactionOutput.value.div(10).multiply(9)
 
+        val key = WalletHolder.bitcoinWallet.findKeyFromPubKey(myPubKey)
 
-        val contract = Transaction(networkParams)
-        contract.setVersion(2)
-        contract.addOutput(prevTxOut.value.div(10).multiply(9), WalletHolder.bitcoinWallet.currentReceiveAddress())
+        // create a transaction
+        val transaction = Transaction(networkParams)
+        transaction.setVersion(2)
 
-        val originalLockScript = createSwapScript(
-            counterpartyPubKey,
-            myPubKey,
-            secretHash
-        )
+        // add an output
+        transaction.addOutput(swapTransactionAmount, WalletHolder.bitcoinWallet.currentReceiveAddress())
 
-        Log.d("swapscript", "claim script: $originalLockScript")
+        // add an input
+        val input = transaction.addInput(swapTransactionOutput)
 
-        val input = contract.addInput(prevTxOut)
-
-        val sig =
-            contract.calculateSignature(0, key, originalLockScript, Transaction.SigHash.ALL, false)
+        // unlock the locking script
+        val originalLockScript = createSwapScript(counterpartyPubKey, myPubKey, secretHash)
+        val sig = transaction.calculateSignature(0, key, originalLockScript, Transaction.SigHash.ALL, false)
         val sigscript = createClaimScript(sig, originalLockScript, secret)
-
         input.scriptSig = sigscript
 
+        // verify that the input can spend the given output
         runBlocking {
-            contract.inputs.first().verify(prevTxOut)
+            transaction.inputs.first().verify(swapTransactionOutput)
         }
 
-        return contract
+        return transaction
     }
 
     /**

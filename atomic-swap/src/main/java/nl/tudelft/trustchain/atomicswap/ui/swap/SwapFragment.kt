@@ -23,8 +23,6 @@ import nl.tudelft.trustchain.atomicswap.swap.Currency
 import nl.tudelft.trustchain.atomicswap.swap.Trade
 import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.ScriptBuilder
@@ -106,7 +104,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val trade  = trades.first { it.id == accept.offerId.toLong() }
                 trade.setOnAccept(accept.publicKey.hexToBytes())
 
-                val (transaction,_) = WalletHolder.bitcoinSwap.startSwapTx(trade)
+                val (transaction,_) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
                 trade.myBitcoinTransaction = transaction.bitcoinSerialize()
 
                 // add a confidence listener
@@ -166,7 +164,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 trade.setOnInitiate(initiateMessage.publicKey.hexToBytes(), initiateMessage.hash.hexToBytes(), initiateMessage.txId.hexToBytes())
 
                 // create a swap transaction
-                val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.startSwapTx(trade)
+                val (transaction,scriptToWatch) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
                 trade.myBitcoinTransaction = transaction.bitcoinSerialize()
 
                 // add a listener on transaction
@@ -238,7 +236,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val tx = Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
                 WalletHolder.bitcoinWallet.commitTx(tx)
                 trade.setOnComplete(completeMessage.txId.hexToBytes())
-                val transaction = WalletHolder.bitcoinSwap.createClaimTx(trade)
+                val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
 
                 WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
                     TransactionConfidenceEntry(
@@ -264,7 +262,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val trade  = trades.first { it.id == offerId.toLong() }
                 trade.setOnSecretObserved(secret)
 
-                val transaction = WalletHolder.bitcoinSwap.createClaimTx(trade)
+                val transaction = WalletHolder.bitcoinSwap.createClaimTransaction(trade)
 
                 WalletHolder.swapTransactionConfidenceListener.addTransactionClaimed(
                     TransactionConfidenceEntry(
