@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.musicdao.ui.components.EmptyState
 
@@ -18,10 +17,9 @@ import com.example.musicdao.ui.components.EmptyState
 @ExperimentalMaterialApi
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun MyProfileScreen(navController: NavController) {
+fun MyProfileScreen(navController: NavController, profileScreenViewModel: MyProfileScreenViewModel) {
 
-    val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
-    val profile = ownProfileViewScreenModel.profile.collectAsState()
+    val profile = profileScreenViewModel.profile.collectAsState()
 
     profile.value?.let {
         Profile(it, navController = navController)

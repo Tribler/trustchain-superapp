@@ -31,11 +31,6 @@ class PlayerViewModel(context: Context) : ViewModel() {
         ExoPlayerFactory.newSimpleInstance(context)
     }
 
-    fun pauseOrResume() {
-        _isPlaying.value = !_isPlaying.value
-        exoPlayer.playWhenReady = !exoPlayer.playWhenReady
-    }
-
     private fun buildMediaSource(uri: Uri, context: Context): MediaSource? {
         val dataSourceFactory: DataSource.Factory =
             DefaultDataSourceFactory(context, "musicdao-audioplayer")

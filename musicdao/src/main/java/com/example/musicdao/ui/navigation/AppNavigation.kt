@@ -24,10 +24,7 @@ import com.example.musicdao.ui.screens.debug.Debug
 import com.example.musicdao.ui.screens.donate.DonateScreen
 import com.example.musicdao.ui.screens.home.HomeScreen
 import com.example.musicdao.ui.screens.home.HomeScreenViewModel
-import com.example.musicdao.ui.screens.profile.EditProfileScreen
-import com.example.musicdao.ui.screens.profile.MyProfileScreen
-import com.example.musicdao.ui.screens.profile.ProfileMenuScreen
-import com.example.musicdao.ui.screens.profile.ProfileScreen
+import com.example.musicdao.ui.screens.profile.*
 import com.example.musicdao.ui.screens.release.ReleaseScreen
 import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 import com.example.musicdao.ui.screens.search.SearchScreen
@@ -44,11 +41,8 @@ import com.google.accompanist.navigation.animation.composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
     playerViewModel: PlayerViewModel,
+    ownProfileViewScreenModel: MyProfileScreenViewModel
 ) {
-    val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
-    val searchScreenScreenViewModel: SearchScreenViewModel = hiltViewModel()
-    val debugScreenViewModel: DebugScreenViewModel = hiltViewModel()
-
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
         enterTransition = { _, _ -> EnterTransition.None },
@@ -57,19 +51,23 @@ fun AppNavigation(
         startDestination = Screen.Home.route,
         builder = {
             composable(Screen.Home.route) {
+                val homeScreenViewModel: HomeScreenViewModel = hiltViewModel()
                 HomeScreen(
                     navController = navController,
                     homeScreenViewModel = homeScreenViewModel
                 )
             }
             composable(Screen.Search.route) {
+                val searchScreenScreenViewModel: SearchScreenViewModel = hiltViewModel()
                 SearchScreen(navController, searchScreenScreenViewModel)
             }
             composable(Screen.Debug.route) {
+                val debugScreenViewModel: DebugScreenViewModel = hiltViewModel()
+
                 Debug(debugScreenViewModel)
             }
             composable(Screen.MyProfile.route) {
-                MyProfileScreen(navController = navController)
+                MyProfileScreen(navController = navController, ownProfileViewScreenModel)
             }
             composable(Screen.EditProfile.route) {
                 EditProfileScreen(navController = navController)

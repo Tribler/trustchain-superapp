@@ -29,7 +29,6 @@ fun MinimizedPlayer(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    val isPlaying by playerViewModel.isPlaying.collectAsState(false)
     val coverFile by playerViewModel.coverFile.collectAsState(null)
     val track by playerViewModel.playingTrack.collectAsState(null)
 
@@ -71,26 +70,6 @@ fun MinimizedPlayer(
                         )
                     }
                 }
-//            Row {
-//                IconButton(onClick = { playerViewModel.pauseOrResume() }) {
-//                    if (track != null) {
-//                        if (isPlaying) {
-//                            Icon(
-//                                imageVector = Icons.Filled.PlayArrow,
-//                                contentDescription = null,
-//                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
-//                            )
-//                        } else {
-//                            Icon(
-//                                imageVector = Icons.Filled.Close,
-//                                contentDescription = null,
-//                                modifier = Modifier.clickable { playerViewModel.pauseOrResume() }
-//                            )
-//                        }
-//
-//                    }
-//                }
-//            }
             }
         },
         effect = {

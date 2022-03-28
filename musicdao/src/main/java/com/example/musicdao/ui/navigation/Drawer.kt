@@ -1,29 +1,38 @@
-package com.example.musicdao.ui
+package com.example.musicdao.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.musicdao.ui.screens.profile.MyProfileScreenViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @ExperimentalMaterialApi
 @Composable
-fun Drawer() {
-    var checked by remember { mutableStateOf(false) }
+fun Drawer(navController: NavController, profileScreenViewModel: MyProfileScreenViewModel) {
+    val profile = profileScreenViewModel.profile.collectAsState()
 
     Column {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Column {
+        Column(
+            modifier = Modifier.padding(
+                start = 15.dp,
+                end = 15.dp,
+                top = 20.dp,
+                bottom = 20.dp
+            )
+        ) {
+            Column(modifier = Modifier.padding(bottom = 20.dp)) {
                 Box(
                     modifier = Modifier
                         .size(50.dp)
@@ -31,38 +40,28 @@ fun Drawer() {
                         .background(Color.Black)
                 )
             }
-            Column(modifier = Modifier.padding(top = 20.dp)) {
-                Row {
-                    Column {
-                        Text("Name Here", style = MaterialTheme.typography.h6)
-                        Text("Public Key", style = MaterialTheme.typography.subtitle1)
-                    }
-                    Spacer(Modifier.weight(1f))
-                    IconButton(onClick = {}) {
-                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
-                    }
+            Row {
+                Column {
+                    Text(profile.value?.name ?: "", style = MaterialTheme.typography.h6)
+                    Text(
+                        profileScreenViewModel.publicKey(),
+                        style = MaterialTheme.typography.subtitle1
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                IconButton(onClick = {}) {
+                    Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                 }
             }
         }
         Divider()
         Column {
-            ListItem(
-                text = { Text("Profile") },
-                icon = { Icon(imageVector = Icons.Default.Person, contentDescription = null) },
-                modifier = Modifier.clickable {}
-            )
-            ListItem(
-                text = { Text("Wallet") },
-                icon = { Icon(imageVector = Icons.Default.Send, contentDescription = null) },
-                modifier = Modifier.clickable {}
-
-            )
-            ListItem(
-                text = { Text("Settings") },
-                icon = { Icon(imageVector = Icons.Default.Settings, contentDescription = null) },
-                modifier = Modifier.clickable {}
-
-            )
+            DropdownMenuItem(onClick = { navController.navigate(Screen.Debug.route) }) {
+                Text("Active Torrents")
+            }
+            DropdownMenuItem(onClick = { /* Handle settings! */ }) {
+                Text("Settings")
+            }
         }
     }
 }

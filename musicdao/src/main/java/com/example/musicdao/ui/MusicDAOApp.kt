@@ -18,9 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.navigation.AppNavigation
+import com.example.musicdao.ui.navigation.Drawer
+import com.example.musicdao.ui.screens.profile.MyProfileScreenViewModel
 import com.example.musicdao.ui.screens.release.CreateReleaseDialog
 import com.example.musicdao.ui.styling.MusicDAOTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -44,6 +47,7 @@ fun MusicDAOApp() {
 
         val playerViewModel: PlayerViewModel =
             viewModel(factory = PlayerViewModel.provideFactory(context = context))
+        val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
 
         val scaffoldState = rememberScaffoldState()
         SnackbarHandler.coroutineScope = rememberCoroutineScope()
@@ -60,11 +64,11 @@ fun MusicDAOApp() {
                     )
                 }
             },
-            drawerContent = { Drawer() },
+            drawerContent = { Drawer(navController, ownProfileViewScreenModel) },
             content = { paddingValues ->
                 Column(modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())) {
                     Column(modifier = Modifier.weight(2f)) {
-                        AppNavigation(navController, playerViewModel)
+                        AppNavigation(navController, playerViewModel, ownProfileViewScreenModel)
                     }
                     MinimizedPlayer(
                         playerViewModel = playerViewModel,
