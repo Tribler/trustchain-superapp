@@ -168,7 +168,8 @@ class MainActivityFOC : AppCompatActivity() {
             try {
                 printToast(data.data!!.path!!.split(":").last())
                 File(
-                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+//                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+                    Environment.getExternalStorageDirectory().absolutePath + "/" + fileName
                 ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
             } catch (e: Exception) {
                 printToast(e.toString())

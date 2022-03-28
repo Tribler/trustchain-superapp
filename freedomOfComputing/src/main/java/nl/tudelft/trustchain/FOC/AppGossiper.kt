@@ -8,6 +8,7 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -80,6 +81,8 @@ class AppGossiper(
             SessionParams(sp)
         sessionManager.start(params)
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+        activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
         scope.launch {
             iterativelyShareApps()
         }
@@ -115,6 +118,9 @@ class AppGossiper(
     fun resume() {
         gossipingPaused = false
         downloadingPaused = false
+        activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+        activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
     }
 
     private fun initializeTorrentSession() {
@@ -270,7 +276,12 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
-        activity.runOnUiThread { printToast("Found new torrent and start download") }
+        activity.runOnUiThread {
+            printToast("Found new torrent and start download")
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+        }
 
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString))
             return
@@ -315,8 +326,13 @@ class AppGossiper(
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             Log.i("appGossiper", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName!") }
-            activity.runOnUiThread { printToast(e.toString()) }
+            activity.runOnUiThread {
+                printToast("Failed to fetch magnet info for $torrentName!")
+                printToast(e.toString())
+                activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+                activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+                activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             return
         }
@@ -329,9 +345,7 @@ class AppGossiper(
             sessionActive = true
             signal = CountDownLatch(1)
 
-            downloadsInProgress += 1
             sessionManager.download(torrentInfo, appDirectory)
-            downloadsInProgress -= 1
 
             signal.await(3, TimeUnit.MINUTES)
             if (signal.count.toInt() == 1) {
@@ -346,6 +360,9 @@ class AppGossiper(
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
         }
+        activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+        activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
     }
 
     private fun onDownloadSuccess(torrentName: String) {

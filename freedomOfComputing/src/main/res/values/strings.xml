@@ -11,7 +11,6 @@
     <string name="progress">75</string>
     <string name="torrentCount">%1$d torrent(s)</string>
     <string name="downloadsInProgress">%1$d</string>
-    <string name="currentDownloadInProgress">%1$s</string>
     <string name="downloadsInQueue">In queue: %1$d</string>
-
+    <string name="currentTorrentDownload">%1$s</string>
 </resources>
