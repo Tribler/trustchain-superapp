@@ -174,7 +174,7 @@ fun ReleaseScreen(
                                 text = { Text(it.title) },
                                 secondaryText = {
                                     Column {
-                                        Text(it.artist, modifier = Modifier.padding(bottom = 5.dp))
+                                        Text(album.artist, modifier = Modifier.padding(bottom = 5.dp))
                                         LinearProgressIndicator(progress = it.progress.toFloat() / 100)
                                     }
                                 },
@@ -216,7 +216,7 @@ fun ReleaseScreen(
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Header(album: Album, navController: NavController) {
-    Column(modifier = Modifier.padding(top = 10.dp, start = 10.dp, end = 10.dp)) {
+    Column(modifier = Modifier.padding(top = 10.dp, start = 20.dp, end = 20.dp)) {
         Text(
             album.title,
             style = MaterialTheme.typography.h6.merge(SpanStyle(fontWeight = FontWeight.ExtraBold)),

@@ -166,7 +166,10 @@ class TorrentEngine @Inject constructor(
 
             // Opt-out of the auto-managed queue system of lib-torrent
             handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
+
+            // Set torrent priorities.
             Util.setTorrentPriorities(handle)
+
             handle.resume()
             Log.d(
                 "MusicDao",
@@ -197,13 +200,21 @@ class TorrentEngine @Inject constructor(
         )
     }
 
-    fun getTorrentHandle(infoHash: String): TorrentHandle? {
+    private fun getTorrentHandle(infoHash: String): TorrentHandle? {
         val handle = sessionManager.find(Sha1Hash(infoHash))
         return if (handle != null) {
             handle
         } else {
             null
         }
+    }
+
+    fun setFilePriority(handle: TorrentHandle, fileName: String) {
+        val files = TorrentStatus.torrentHandleFiles(handle, cachePath.getPath()!!.toFile()!!) ?: return
+        val file = files.find { it.file.name == fileName } ?: return
+        val index = file.index
+        Log.d("MusicDao", "setFilePriority: for ${file.file.name}")
+        Util.setTorrentPriorities(handle, false, 0, index)
     }
 
     suspend fun seedStrategy(): List<TorrentHandle> {

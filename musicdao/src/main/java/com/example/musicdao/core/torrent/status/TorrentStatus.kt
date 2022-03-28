@@ -50,7 +50,7 @@ data class TorrentStatus(
             val files = handle.torrentFile()?.files() ?: return null
             val fileProgress = handle.fileProgress()
 
-            val downloadingTracks = (0..(files.numFiles() - 1)).mapNotNull {
+            val downloadingTracks = (0 until files.numFiles()).mapNotNull {
                 val file = File("$directory/torrents/${handle.infoHash()}/${files.filePath(it)}")
                 if (file.exists()) {
                     DownloadingTrack(
@@ -72,5 +72,25 @@ data class TorrentStatus(
             }
             return downloadingTracks
         }
+
+        fun torrentHandleFiles(handle: TorrentHandle, cacheDir: File): List<FileWithIndex>? {
+            val memoryFiles = handle.torrentFile()?.files() ?: return null
+
+            return (0 until memoryFiles.numFiles()).mapNotNull {
+                val file =
+                    File("$cacheDir/torrents/${handle.infoHash()}/${memoryFiles.filePath(it)}")
+
+                if (file.exists()) {
+                    FileWithIndex(file, it)
+                } else {
+                    null
+                }
+            }
+        }
+
+        data class FileWithIndex(
+            val file: File,
+            val index: Int
+        )
     }
 }
