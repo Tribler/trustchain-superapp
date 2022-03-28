@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.util.toHex
 import java.util.*
 
 @Suppress("DEPRECATION")
@@ -114,6 +115,10 @@ class MusicCommunity(
         val peers = getPeers()
         if (peers.isEmpty()) return null
         return peers.random()
+    }
+
+    fun publicKeyHex(): String {
+        return this.myPeer.publicKey.keyToBin().toHex()
     }
 
     object MessageId {

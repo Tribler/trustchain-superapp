@@ -1,4 +1,4 @@
-package com.example.musicdao.core.usecases
+package com.example.musicdao.core.torrent.file_processing
 
 import android.os.Build
 import android.util.Log
@@ -6,7 +6,6 @@ import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
 import com.example.musicdao.core.cache.CacheDatabase
 import com.example.musicdao.core.cache.entities.SongEntity
-import com.example.musicdao.core.torrent.FileProcessor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -18,7 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
+import com.example.musicdao.core.torrent.status.TorrentStatus
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.screens.search.DebugScreenViewModel
 
@@ -39,34 +39,30 @@ fun Debug(debugScreenViewModel: DebugScreenViewModel) {
         Divider()
         LazyColumn {
             items(torrentHandleStatus) {
-                val item = it.collectAsState(null)
-                val itemValue = item.value
-                if (itemValue != null) {
-                    TorrentStatusListItem(itemValue)
-                    Divider()
-                }
+                TorrentStatusListItem(it)
+                Divider()
             }
         }
-        if (torrentHandleStatus.isEmpty()) {
-            EmptyState(
-                firstLine = "No torrents active",
-                secondLine = "Currently there are no torrents seeding or downloading",
-            )
-        }
-        Column(modifier = Modifier.height(height = 200.dp)) {}
     }
+    if (torrentHandleStatus.isEmpty()) {
+        EmptyState(
+            firstLine = "No torrents active",
+            secondLine = "Currently there are no torrents seeding or downloading",
+        )
+    }
+    Column(modifier = Modifier.height(height = 200.dp)) {}
 }
 
 @ExperimentalMaterialApi
 @Composable
-fun TorrentStatusListItem(torrentHandleStatus: TorrentHandleStatus) {
+fun TorrentStatusListItem(torrentStatus: TorrentStatus) {
     ListItem(
-        text = { Text(torrentHandleStatus.infoHash) },
+        text = { Text(torrentStatus.infoHash) },
         secondaryText = {
             Column {
-                Text(torrentHandleStatus.magnet)
+                Text(torrentStatus.magnet)
                 Column(modifier = Modifier.padding(vertical = 10.dp)) {
-                    if (torrentHandleStatus.seeding == "true") {
+                    if (torrentStatus.seeding == "true") {
                         LinearProgressIndicator(1.0f)
                     } else {
                         LinearProgressIndicator()
@@ -74,23 +70,23 @@ fun TorrentStatusListItem(torrentHandleStatus: TorrentHandleStatus) {
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.Person, contentDescription = null)
-                    Text(torrentHandleStatus.peers)
+                    Text(torrentStatus.peers)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
-                    Text(torrentHandleStatus.uploadedBytes)
+                    Text(torrentStatus.uploadedBytes)
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null
                     )
-                    Text(torrentHandleStatus.downloadedBytes)
+                    Text(torrentStatus.downloadedBytes)
                 }
             }
         },
         overlineText = {
-            if (torrentHandleStatus.seeding == "true") {
+            if (torrentStatus.seeding == "true") {
                 Text("Seeding")
             } else {
                 Text("Downloading")
@@ -98,7 +94,7 @@ fun TorrentStatusListItem(torrentHandleStatus: TorrentHandleStatus) {
         },
         icon = {
             // TODO: turn this into boolean
-            if (torrentHandleStatus.seeding == "true") {
+            if (torrentStatus.seeding == "true") {
                 Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
             } else {
                 Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)

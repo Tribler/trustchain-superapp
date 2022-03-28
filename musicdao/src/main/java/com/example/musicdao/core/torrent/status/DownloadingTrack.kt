@@ -1,4 +1,4 @@
-package com.example.musicdao.core.torrent.api
+package com.example.musicdao.core.torrent.status
 
 import java.io.File
 

@@ -14,8 +14,8 @@ data class WalletConfig(
     companion object {
         val DEFAULT_NETWORK_PARAMS = RegTestParams.get()
         val DEFAULT_FILE_PREFIX = "regtest-musicdao"
-        val DEFAULT_REGTEST_BOOTSTRAP_IP = "95.179.182.243"
+        val DEFAULT_REGTEST_BOOTSTRAP_IP = "131.180.27.224"
         val DEFAULT_REGTEST_BOOTSTRAP_PORT = "3000"
-        val DEFAULT_FAUCET_ENDPOINT = "http://95.179.182.243:3000/faucet"
+        val DEFAULT_FAUCET_ENDPOINT = "http://taproot.tribler.org/faucet"
     }
 }

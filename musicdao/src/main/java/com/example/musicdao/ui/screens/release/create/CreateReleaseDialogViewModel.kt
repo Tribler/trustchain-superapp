@@ -5,7 +5,7 @@ import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
-import com.example.musicdao.core.usecases.CreateReleaseUseCase
+import com.example.musicdao.core.repositories.album.CreateReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

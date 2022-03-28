@@ -23,16 +23,16 @@ class AlbumRepository @Inject constructor(
     private val releasePublishBlockRepository: ReleasePublishBlockRepository
 ) {
 
-    suspend fun get(id: String): Album {
+    suspend fun getAlbum(id: String): Album {
         return database.dao.get(id).toAlbum()
-    }
-
-    fun getFlow(id: String): LiveData<Album> {
-        return Transformations.map(database.dao.getLiveData(id)) { it.toAlbum() }
     }
 
     suspend fun getAlbums(): List<Album> {
         return database.dao.getAll().map { it.toAlbum() }
+    }
+
+    fun getAlbumFlow(id: String): LiveData<Album> {
+        return Transformations.map(database.dao.getLiveData(id)) { it.toAlbum() }
     }
 
     fun getAlbumsFlow(): LiveData<List<Album>> {
@@ -47,7 +47,7 @@ class AlbumRepository @Inject constructor(
         return database.dao.localSearch(keyword).map { it.toAlbum() }
     }
 
-    suspend fun create(
+    suspend fun createAlbum(
         releaseId: String,
         magnet: String,
         title: String,

@@ -1,4 +1,4 @@
-package com.example.musicdao.core
+package com.example.musicdao.core.repositories.album
 
 import android.os.Build
 import android.util.Log
@@ -20,6 +20,8 @@ class BatchPublisher @Inject constructor(
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun run() {
+        val currentAlbums = albumRepository.getAlbums()
+
         val file = Paths.get("${cachePath.getPath()}/output.csv").toFile()
         if (!file.exists()) {
             Log.d("MusicDao", "BatchPublisher: file not found $file")
@@ -46,19 +48,24 @@ class BatchPublisher @Inject constructor(
             val title = record.get(0)
             val artist = record.get(1)
             val magnet = record.get(2)
+
             val infoHash = TorrentEngine.magnetToInfoHash(magnet)
-            Log.d("MusicDao", "Batchpublisher: $title, $artist, $infoHash")
-            val id = UUID.randomUUID().toString()
 
-            val result = albumRepository.create(
-                releaseId = id,
-                magnet = magnet,
-                title = title,
-                artist = artist,
-                releaseDate = Instant.now().toString()
-            )
+            // Only publish albums not published before.
+            if (currentAlbums.find { TorrentEngine.magnetToInfoHash(it.magnet) == infoHash } == null) {
+                Log.d("MusicDao", "Batchpublisher: $title, $artist, $infoHash")
+                val id = UUID.randomUUID().toString()
 
-            Log.d("MusicDao", "Batchpublisher: $infoHash $result")
+                val result = albumRepository.createAlbum(
+                    releaseId = id,
+                    magnet = magnet,
+                    title = title,
+                    artist = artist,
+                    releaseDate = Instant.now().toString()
+                )
+
+                Log.d("MusicDao", "Batchpublisher: $infoHash $result")
+            }
         }
     }
 }

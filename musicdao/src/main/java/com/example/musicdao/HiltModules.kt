@@ -9,7 +9,7 @@ import com.example.musicdao.core.cache.CacheDatabase
 import com.example.musicdao.core.cache.GsonParser
 import com.example.musicdao.core.cache.parser.Converters
 import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.usecases.DownloadFinishUseCase
+import com.example.musicdao.core.torrent.file_processing.DownloadFinishUseCase
 import com.example.musicdao.core.wallet.WalletConfig
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FAUCET_ENDPOINT
 import com.example.musicdao.core.wallet.WalletConfig.Companion.DEFAULT_FILE_PREFIX
@@ -54,7 +54,7 @@ class HiltModules {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                .getString("musicdao_port", "10006")
+                .getString("musicdao_port", "10252")
                 ?.toIntOrNull()
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"

@@ -29,7 +29,7 @@ class DiscoverArtistsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _artists.value = artistRepository.getAllArtists()
+            _artists.value = artistRepository.getArtists()
         }
     }
 
@@ -37,7 +37,7 @@ class DiscoverArtistsViewModel @Inject constructor(
         viewModelScope.launch {
             _isRefreshing.value = true
             delay(500)
-            _artists.value = artistRepository.getAllArtists()
+            _artists.value = artistRepository.getArtists()
             _isRefreshing.value = false
         }
     }

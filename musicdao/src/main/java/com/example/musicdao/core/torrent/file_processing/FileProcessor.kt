@@ -1,4 +1,4 @@
-package com.example.musicdao.core.torrent
+package com.example.musicdao.core.torrent.file_processing
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

@@ -1,6 +1,6 @@
 package com.example.musicdao.ui.screens.torrent
 
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
+import com.example.musicdao.core.torrent.status.TorrentStatus
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -15,49 +15,49 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TorrentStatusScreen(torrentHandle: TorrentHandleStatus) {
+fun TorrentStatusScreen(torrent: TorrentStatus) {
 
     Column {
-        ListItem(text = { Text("Info Hash") }, secondaryText = { Text(torrentHandle.infoHash) })
+        ListItem(text = { Text("Info Hash") }, secondaryText = { Text(torrent.infoHash) })
         ListItem(
             text = { Text("Magnet Link") },
-            secondaryText = { SelectionContainer { Text(torrentHandle.magnet) } },
+            secondaryText = { SelectionContainer { Text(torrent.magnet) } },
             modifier = Modifier.padding(bottom = 10.dp)
         )
         Divider()
         ListItem(
             text = { Text("Finished Downloading") },
-            secondaryText = { Text(torrentHandle.finishedDownloading) }
+            secondaryText = { Text(torrent.finishedDownloading) }
         )
-        ListItem(text = { Text("Pieces") }, secondaryText = { Text(torrentHandle.pieces) })
-        ListItem(text = { Text("Files") }, secondaryText = { Text("${torrentHandle.files}") })
+        ListItem(text = { Text("Pieces") }, secondaryText = { Text(torrent.pieces) })
+        ListItem(text = { Text("Files") }, secondaryText = { Text("${torrent.files}") })
         Divider()
         ListItem(
             text = { Text("Seeding") },
-            secondaryText = { Text(torrentHandle.seeding) }
+            secondaryText = { Text(torrent.seeding) }
         )
 
         Row {
             ListItem(
                 text = { Text("Peers") },
-                secondaryText = { Text(torrentHandle.peers) },
+                secondaryText = { Text(torrent.peers) },
                 modifier = Modifier.weight(1f)
             )
             ListItem(
                 text = { Text("Seeders") },
-                secondaryText = { Text(torrentHandle.seeders) },
+                secondaryText = { Text(torrent.seeders) },
                 modifier = Modifier.weight(1f)
             )
         }
         Row {
             ListItem(
                 text = { Text("Uploaded Bytes") },
-                secondaryText = { Text(torrentHandle.uploadedBytes) },
+                secondaryText = { Text(torrent.uploadedBytes) },
                 modifier = Modifier.weight(1f)
             )
             ListItem(
                 text = { Text("Downloaded Bytes") },
-                secondaryText = { Text(torrentHandle.downloadedBytes) },
+                secondaryText = { Text(torrent.downloadedBytes) },
                 modifier = Modifier.weight(1f)
             )
         }

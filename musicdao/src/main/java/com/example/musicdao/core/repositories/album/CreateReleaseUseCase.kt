@@ -1,4 +1,4 @@
-package com.example.musicdao.core.usecases
+package com.example.musicdao.core.repositories.album
 
 import android.content.Context
 import android.net.Uri
@@ -44,7 +44,7 @@ class CreateReleaseUseCase @Inject constructor(
 //        }
 
         val magnet = root.second.makeMagnetUri()
-        val publishResult = albumRepository.create(
+        val publishResult = albumRepository.createAlbum(
             releaseId = releaseId,
             magnet = magnet,
             title = title,

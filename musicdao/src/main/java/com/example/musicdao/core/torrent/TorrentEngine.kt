@@ -9,7 +9,10 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.CachePath
 import com.example.musicdao.core.cache.CacheDatabase
-import com.example.musicdao.core.usecases.DownloadFinishUseCase
+import com.example.musicdao.core.torrent.file_processing.DownloadFinishUseCase
+import com.example.musicdao.core.torrent.file_processing.FileProcessor
+import com.example.musicdao.core.torrent.status.SessionManagerStatus
+import com.example.musicdao.core.torrent.status.TorrentStatus
 import com.example.musicdao.core.util.Util
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.*
@@ -174,11 +177,26 @@ class TorrentEngine @Inject constructor(
         return null
     }
 
-    fun getAllTorrents(): StateFlow<List<String>> {
-        return activeTorrents
+    fun getTorrentStatus(infoHash: String): TorrentStatus? {
+        val handle = getTorrentHandle(infoHash) ?: return null
+        return TorrentStatus.mapTorrentHandle(handle, cachePath.getPath()!!.toFile()!!)
     }
 
-    fun get(infoHash: String): TorrentHandle? {
+    fun getAllTorrentStatus(): List<TorrentStatus> {
+        val activeTorrents = activeTorrents.value
+        return activeTorrents.mapNotNull { getTorrentStatus(it) }
+    }
+
+    fun getSessionManagerStatus(): SessionManagerStatus {
+        return SessionManagerStatus(
+            interfaces = sessionManager.listenInterfaces(),
+            dhtNodes = sessionManager.dhtNodes(),
+            uploadRate = sessionManager.uploadRate(),
+            downloadRate = sessionManager.downloadRate()
+        )
+    }
+
+    fun getTorrentHandle(infoHash: String): TorrentHandle? {
         val handle = sessionManager.find(Sha1Hash(infoHash))
         return if (handle != null) {
             handle

@@ -3,14 +3,11 @@ package com.example.musicdao.ui.screens.release
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.*
-import com.example.musicdao.CachePath
 import com.example.musicdao.core.cache.CacheDatabase
 import com.example.musicdao.core.cache.entities.AlbumEntity
 import com.example.musicdao.core.repositories.model.Album
 import com.example.musicdao.core.torrent.TorrentEngine
-import com.example.musicdao.core.torrent.api.TorrentHandleStatus
-import com.example.musicdao.core.usecases.torrents.DownloadIntentUseCase
-import com.example.musicdao.core.usecases.torrents.GetTorrentStatusFlowUseCase
+import com.example.musicdao.core.torrent.status.TorrentStatus
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -25,10 +22,8 @@ import kotlinx.coroutines.launch
 @RequiresApi(Build.VERSION_CODES.O)
 class ReleaseScreenViewModel @AssistedInject constructor(
     @Assisted private val releaseId: String,
-    private val downloadIntentUseCase: DownloadIntentUseCase,
     private val database: CacheDatabase,
     private val torrentEngine: TorrentEngine,
-    private val cachePath: CachePath
 ) : ViewModel() {
 
     @AssistedFactory
@@ -50,31 +45,24 @@ class ReleaseScreenViewModel @AssistedInject constructor(
     private var releaseLiveData: LiveData<AlbumEntity> = MutableLiveData(null)
     var saturatedReleaseState: LiveData<Album?> = MutableLiveData()
 
-    val _torrentHandleState: MutableStateFlow<TorrentHandleStatus?> = MutableStateFlow(null)
-    val torrentHandleState: StateFlow<TorrentHandleStatus?> = _torrentHandleState
+    private val _torrentState: MutableStateFlow<TorrentStatus?> = MutableStateFlow(null)
+    val torrentState: StateFlow<TorrentStatus?> = _torrentState
 
     init {
         viewModelScope.launch {
             releaseLiveData = database.dao.getLiveData(releaseId)
-            saturatedReleaseState = Transformations.map(releaseLiveData, { it.toAlbum() })
+            saturatedReleaseState = Transformations.map(releaseLiveData) { it.toAlbum() }
 
             val release = database.dao.get(releaseId)
 
-            release.let { release ->
-                if (!release.isDownloaded) {
-                    downloadIntentUseCase.invoke(release.magnet)
+            release.let { _release ->
+                if (!_release.isDownloaded) {
+                    torrentEngine.download(_release.magnet)
                 }
 
                 while (isActive) {
-                    val infoHash = TorrentEngine.magnetToInfoHash(release.magnet)
-                    if (infoHash != null) {
-                        torrentEngine.get(infoHash)?.let {
-                            _torrentHandleState.value =
-                                GetTorrentStatusFlowUseCase.mapTorrentHandle(
-                                    it,
-                                    cachePath.getPath()!!.toFile()
-                                )
-                        }
+                    if (_release.infoHash != null) {
+                        _torrentState.value = torrentEngine.getTorrentStatus(_release.infoHash)
                     }
                     delay(1000L)
                 }

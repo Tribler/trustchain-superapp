@@ -4,10 +4,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.repositories.ArtistAnnounceBlockRepository
 import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.core.repositories.ArtistRepository
-import com.example.musicdao.core.usecases.GetOwnPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +18,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MyProfileScreenViewModel @Inject constructor(
     private val artistRepository: ArtistRepository,
-    private val getOwnPublicKey: GetOwnPublicKey,
+    private val musicCommunity: MusicCommunity,
     private val artistAnnounceBlockRepository: ArtistAnnounceBlockRepository
 ) : ViewModel() {
 
@@ -26,7 +26,7 @@ class MyProfileScreenViewModel @Inject constructor(
     val profile: StateFlow<Artist?> = _profile
 
     fun publicKey(): String {
-        return getOwnPublicKey.invoke()
+        return musicCommunity.publicKeyHex()
     }
 
     fun publishEdit(
@@ -47,8 +47,7 @@ class MyProfileScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val publicKey = getOwnPublicKey.invoke()
-            _profile.value = artistRepository.getArtist(publicKey = publicKey)
+            _profile.value = artistRepository.getArtist(musicCommunity.publicKeyHex())
         }
     }
 }

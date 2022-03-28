@@ -18,7 +18,7 @@ class ArtistRepository @Inject constructor(
         return artistAnnounceBlockRepository.getOrCrawl(publicKey)?.let { toArtist(it) }
     }
 
-    fun getAllArtists(): List<Artist> {
+    fun getArtists(): List<Artist> {
         return artistAnnounceBlockRepository.getAllLocal().map { toArtist(it) }
     }
 

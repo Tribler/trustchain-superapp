@@ -34,7 +34,7 @@ import androidx.navigation.NavController
 import com.example.musicdao.MusicActivity
 import com.example.musicdao.core.repositories.model.Album
 import com.example.musicdao.core.repositories.model.Song
-import com.example.musicdao.core.torrent.api.DownloadingTrack
+import com.example.musicdao.core.torrent.status.DownloadingTrack
 import com.example.musicdao.ui.components.ReleaseCover
 import com.example.musicdao.ui.components.player.PlayerViewModel
 import com.example.musicdao.ui.dateToShortString
@@ -65,7 +65,7 @@ fun ReleaseScreen(
         factory = ReleaseScreenViewModel.provideFactory(viewModelFactory, releaseId = releaseId)
     )
 
-    val torrentStatus by viewModel.torrentHandleState.collectAsState()
+    val torrentStatus by viewModel.torrentState.collectAsState()
     val album by viewModel.saturatedReleaseState.observeAsState()
 
     val playingTrack = playerViewModel.playingTrack.collectAsState()
@@ -94,10 +94,10 @@ fun ReleaseScreen(
         LaunchedEffect(
             key1 = playerViewModel,
             block = {
-                viewModel.torrentHandleState.collect {
+                viewModel.torrentState.collect {
                     val current = playerViewModel.playingTrack.value ?: return@collect
                     val downloadingTracks =
-                        viewModel.torrentHandleState.value?.downloadingTracks ?: return@collect
+                        viewModel.torrentState.value?.downloadingTracks ?: return@collect
                     val isPlaying = playerViewModel.exoPlayer.isPlaying
                     val targetTrack =
                         downloadingTracks.find { it.file.name == current.file?.name }

@@ -17,7 +17,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.lifecycle.lifecycleScope
-import com.example.musicdao.core.BatchPublisher
+import com.example.musicdao.core.repositories.album.BatchPublisher
 import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
@@ -40,9 +40,6 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MusicActivity : AppCompatActivity() {
 
-    lateinit var mService: MusicGossipingService
-    var mBound: Boolean = false
-
     @Inject
     lateinit var albumRepository: AlbumRepository
 
@@ -61,6 +58,9 @@ class MusicActivity : AppCompatActivity() {
     @Inject
     lateinit var setupMusicCommunity: SetupMusicCommunity
 
+    lateinit var mService: MusicGossipingService
+    var mBound: Boolean = false
+
     @DelicateCoroutinesApi
     @ExperimentalAnimationApi
     @ExperimentalFoundationApi
@@ -70,6 +70,7 @@ class MusicActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         AppContainer.provide(this)
+
         lifecycleScope.launchWhenStarted {
             setupMusicCommunity.registerListeners()
             albumRepository.refreshCache()
@@ -79,7 +80,7 @@ class MusicActivity : AppCompatActivity() {
             }
             Log.d(
                 "MusicDao",
-                "Release: ${albumRepository.getAlbums()}"
+                "Releases: ${albumRepository.getAlbums()}"
             )
 //            batchPublisher.run()
         }
