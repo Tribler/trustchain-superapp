@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.keyvault.PrivateKey
+import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTracker
@@ -21,6 +23,7 @@ import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.magnetHeaderString
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.preHashString
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MyMessage
+import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
@@ -78,25 +81,25 @@ class AppGossiper(
         sessionManager.start(params)
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         scope.launch {
-            try {
-                iterativelyShareApps()
-            } catch (e: Exception) {
-                activity.runOnUiThread { printToast(e.toString()) }
-            }
+            iterativelyShareApps()
         }
         scope.launch {
-            try {
-                iterativelyDownloadApps()
-            } catch (e: Exception) {
-                activity.runOnUiThread { printToast(e.toString()) }
-            }
+            iterativelyDownloadApps()
         }
     }
 
     private fun initializeEvaCallbacks() {
-        demoCommunity?.setEVAOnReceiveCompleteCallback { _, _, _, _ ->
-            activity.runOnUiThread { printToast("Torrent fetched through EVA protocol!") }
-            activity.runOnUiThread { activity.showAllFiles() }
+        demoCommunity?.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
+            data?.let {
+                val packet = Packet(peer.address, data)
+                val (_, payload) = packet.getDecryptedAuthPayload(
+                    AppPayload.Deserializer, demoCommunity.myPeer.key as PrivateKey
+                )
+                activity.runOnUiThread {
+                    printToast("Torrent ${payload.appName} fetched through EVA protocol!")
+                    onDownloadSuccess(payload.appName)
+                }
+            }
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
             activity.runOnUiThread { printToast("Failed to fetch torrent through EVA protocol because $exception!") }
@@ -155,16 +158,26 @@ class AppGossiper(
      */
     private suspend fun iterativelyShareApps() {
         while (scope.isActive) {
-            if (!gossipingPaused)
-                randomlyShareFiles()
+            if (!gossipingPaused) {
+                try {
+                    randomlyShareFiles()
+                } catch (e: Exception) {
+                    activity.runOnUiThread { printToast(e.toString()) }
+                }
+            }
             delay(GOSSIP_DELAY)
         }
     }
 
     private suspend fun iterativelyDownloadApps() {
         while (scope.isActive) {
-            if (!downloadingPaused)
-                downloadPendingFiles()
+            if (!downloadingPaused) {
+                try {
+                    downloadPendingFiles()
+                } catch (e: Exception) {
+                    activity.runOnUiThread { printToast(e.toString()) }
+                }
+            }
             delay(DOWNLOAD_DELAY)
         }
     }
@@ -320,7 +333,6 @@ class AppGossiper(
             sessionManager.download(torrentInfo, appDirectory)
             downloadsInProgress -= 1
 
-            activity.runOnUiThread { activity.showAllFiles() }
             signal.await(3, TimeUnit.MINUTES)
             if (signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
@@ -328,12 +340,20 @@ class AppGossiper(
                 onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             }
             sessionActive = false
-            activity.createTorrent(magnetName)
-            torrentInfos.add(torrentInfo)
+            onDownloadSuccess(magnetName)
         } else {
             Log.i("appGossiper", "Failed to retrieve the magnet")
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+        }
+    }
+
+    private fun onDownloadSuccess(torrentName: String) {
+        activity.runOnUiThread {
+            activity.createTorrent(torrentName)?.let {
+                torrentInfos.add(it)
+            }
+            activity.showAllFiles()
         }
     }
 

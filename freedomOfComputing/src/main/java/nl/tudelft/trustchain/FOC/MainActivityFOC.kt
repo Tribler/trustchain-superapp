@@ -220,12 +220,12 @@ class MainActivityFOC : AppCompatActivity() {
      * The extension of the file must be included (for example, .png)
      */
     @Suppress("deprecation")
-    fun createTorrent(fileName: String) {
+    fun createTorrent(fileName: String): TorrentInfo? {
         val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
             runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("personal", "File doesn't exist!")
-            return
+            return null
         }
 
         val fs = file_storage()
@@ -265,6 +265,7 @@ class MainActivityFOC : AppCompatActivity() {
         val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
         Log.i("personal", magnetLink)
         runOnUiThread { printToast(fileName) }
+        return ti
     }
 
     @Suppress("deprecation")
