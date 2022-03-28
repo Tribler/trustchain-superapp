@@ -74,11 +74,11 @@ fun ReleaseScreen(
     val context = LocalContext.current
 
     fun play(track: Song, cover: File?) {
-        playerViewModel.play(track, context, cover)
+        playerViewModel.playDownloadedTrack(track, context, cover)
     }
 
     fun play(track: DownloadingTrack, cover: File?) {
-        playerViewModel.play(
+        playerViewModel.playDownloadingTrack(
             Song(
                 file = track.file,
                 artist = track.artist,

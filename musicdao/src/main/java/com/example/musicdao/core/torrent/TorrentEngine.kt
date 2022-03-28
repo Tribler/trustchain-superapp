@@ -166,6 +166,7 @@ class TorrentEngine @Inject constructor(
 
             // Opt-out of the auto-managed queue system of lib-torrent
             handle.unsetFlags(TorrentFlags.AUTO_MANAGED)
+            Util.setTorrentPriorities(handle)
             handle.resume()
             Log.d(
                 "MusicDao",

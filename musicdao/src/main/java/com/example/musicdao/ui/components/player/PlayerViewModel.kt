@@ -6,8 +6,8 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.musicdao.core.repositories.model.Song
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
@@ -27,18 +27,31 @@ class PlayerViewModel(context: Context) : ViewModel() {
     private val _coverFile: MutableStateFlow<File?> = MutableStateFlow(null)
     val coverFile: StateFlow<File?> = _coverFile
 
-    val exoPlayer: SimpleExoPlayer by lazy {
-        ExoPlayerFactory.newSimpleInstance(context)
+    val exoPlayer by lazy {
+        ExoPlayer.Builder(context).build()
     }
 
     private fun buildMediaSource(uri: Uri, context: Context): MediaSource? {
         val dataSourceFactory: DataSource.Factory =
             DefaultDataSourceFactory(context, "musicdao-audioplayer")
+        val mediaItem = MediaItem.fromUri(uri)
         return ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(uri)
+            .createMediaSource(mediaItem)
     }
 
-    fun play(track: Song, context: Context, cover: File? = null) {
+    fun playDownloadedTrack(track: Song, context: Context, cover: File? = null) {
+        _playingTrack.value = track
+        _coverFile.value = cover
+        val mediaItem = MediaItem.fromUri(Uri.fromFile(track.file))
+        Log.d("MusicDAOTorrent", "Trying to play ${track.file}")
+        exoPlayer.playWhenReady = true
+        exoPlayer.seekTo(0, 0)
+        exoPlayer.setMediaItem(mediaItem)
+        exoPlayer.prepare();
+        exoPlayer.play()
+    }
+
+    fun playDownloadingTrack(track: Song, context: Context, cover: File? = null) {
         _playingTrack.value = track
         _coverFile.value = cover
         val mediaSource = buildMediaSource(Uri.fromFile(track.file), context)
@@ -46,7 +59,9 @@ class PlayerViewModel(context: Context) : ViewModel() {
         Log.d("MusicDAOTorrent", "Trying to play ${track.file}")
         exoPlayer.playWhenReady = true
         exoPlayer.seekTo(0, 0)
-        exoPlayer.prepare(mediaSource, false, false)
+        exoPlayer.setMediaSource(mediaSource)
+        exoPlayer.prepare();
+        exoPlayer.play()
     }
 
     fun release() {
