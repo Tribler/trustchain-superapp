@@ -8,21 +8,21 @@ import com.example.musicdao.core.repositories.AlbumRepository
 import com.example.musicdao.core.torrent.TorrentEngine
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import java.io.File
 import java.nio.file.Paths
 import java.time.Instant
 import java.util.*
 import javax.inject.Inject
 
+@RequiresApi(Build.VERSION_CODES.O)
 class BatchPublisher @Inject constructor(
     val cachePath: CachePath,
     val albumRepository: AlbumRepository
 ) {
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    suspend fun run() {
+    suspend fun publish(file: File) {
         val currentAlbums = albumRepository.getAlbums()
 
-        val file = Paths.get("${cachePath.getPath()}/output.csv").toFile()
         if (!file.exists()) {
             Log.d("MusicDao", "BatchPublisher: file not found $file")
             return
@@ -67,5 +67,9 @@ class BatchPublisher @Inject constructor(
                 Log.d("MusicDao", "Batchpublisher: $infoHash $result")
             }
         }
+    }
+
+    suspend fun publish() {
+        publish(Paths.get("${cachePath.getPath()}/output.csv").toFile())
     }
 }

@@ -42,7 +42,7 @@ fun Drawer(navController: NavController, profileScreenViewModel: MyProfileScreen
             }
             Row {
                 Column {
-                    Text(profile.value?.name ?: "", style = MaterialTheme.typography.h6)
+                    Text(profile.value?.name ?: "[name]", style = MaterialTheme.typography.h6)
                     Text(
                         profileScreenViewModel.publicKey(),
                         style = MaterialTheme.typography.subtitle1
@@ -59,7 +59,7 @@ fun Drawer(navController: NavController, profileScreenViewModel: MyProfileScreen
             DropdownMenuItem(onClick = { navController.navigate(Screen.Debug.route) }) {
                 Text("Active Torrents")
             }
-            DropdownMenuItem(onClick = { /* Handle settings! */ }) {
+            DropdownMenuItem(onClick = { navController.navigate(Screen.Settings.route) }) {
                 Text("Settings")
             }
         }

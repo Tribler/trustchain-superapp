@@ -31,6 +31,9 @@ fun ReleaseList(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
+        item(0) {
+            Divider()
+        }
         items(releasesState) {
             ReleaseListItem(album = it, navController = navController)
             Divider()

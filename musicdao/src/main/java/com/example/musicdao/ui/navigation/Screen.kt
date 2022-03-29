@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
 
     object Search : Screen("search")
     object Settings : Screen("settings")
+    object Settings2 : Screen("settings2")
     object Debug : Screen("debug")
     object FullPlayerScreen : Screen("fullPlayerScreen")
 

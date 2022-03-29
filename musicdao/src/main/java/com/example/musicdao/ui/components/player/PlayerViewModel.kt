@@ -47,7 +47,7 @@ class PlayerViewModel(context: Context) : ViewModel() {
         exoPlayer.playWhenReady = true
         exoPlayer.seekTo(0, 0)
         exoPlayer.setMediaItem(mediaItem)
-        exoPlayer.prepare();
+        exoPlayer.prepare()
         exoPlayer.play()
     }
 
@@ -60,7 +60,7 @@ class PlayerViewModel(context: Context) : ViewModel() {
         exoPlayer.playWhenReady = true
         exoPlayer.seekTo(0, 0)
         exoPlayer.setMediaSource(mediaSource)
-        exoPlayer.prepare();
+        exoPlayer.prepare()
         exoPlayer.play()
     }
 

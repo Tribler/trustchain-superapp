@@ -82,7 +82,6 @@ class MusicActivity : AppCompatActivity() {
                 "MusicDao",
                 "Releases: ${albumRepository.getAlbums()}"
             )
-//            batchPublisher.run()
         }
         iterativelyFetchReleases()
         Intent(this, MusicGossipingService::class.java).also { intent ->
