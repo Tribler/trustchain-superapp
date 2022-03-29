@@ -13,6 +13,8 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.messaging.eva.PeerBusyException
+import nl.tudelft.ipv8.messaging.eva.TimeoutException
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTracker
@@ -108,9 +110,14 @@ class AppGossiper(
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
             if (evaDownloadInfo != null) {
-                activity.runOnUiThread { printToast("Failed to fetch torrent through EVA protocol because $exception! Retrying") }
-                demoCommunity.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
-                lastEvaRequest = System.currentTimeMillis()
+                if(exception is TimeoutException || exception is PeerBusyException) {
+                    activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
+                    demoCommunity.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
+                    lastEvaRequest = System.currentTimeMillis()
+                } else {
+                    activity.runOnUiThread { printToast("Can't fetch through EVA because of $exception will continue to retry via torrent") }
+                    evaDownloadInfo = null
+                }
             }
         }
     }
