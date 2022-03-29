@@ -23,7 +23,7 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        minSdkVersion 22
+        minSdkVersion 28
         targetSdkVersion 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -66,9 +66,10 @@ android {
 }
 
 repositories {
-    maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
     mavenCentral()
+    maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
     maven { url 'https://jitpack.io' }
+    // maven { url 'https://repo.danubetech.com/repository/maven-public/' }
 }
 
 dependencies {
@@ -111,6 +112,23 @@ dependencies {
 
     // JWT
     implementation 'org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:9.18.0.wso2v1'
+
+    // JSON_LD
+//    implementation 'info.weboftrust:ld-signatures-java:1.0.0'
+//    implementation 'decentralized-identity:jsonld-common-java:1.0.0'
+//    implementation files('libs/jsonld-common-java-1.0.0.jar',
+//        'libs/ld-signatures-java-1.0.0.jar',
+//        'libs/key-formats-java-1.3.0.jar')
+    // implementation 'com.apicatalog:titanium-json-ld:1.2.0'
+    implementation "com.squareup.okhttp3:okhttp:4.9.3"
+    implementation 'org.glassfish:jakarta.json:2.0.1'
+    implementation 'io.setl:rdf-urdna:1.1'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.13.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.2'
+    // caffeine 2.* lower sdk requirement
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.6'
+    implementation 'net.jcip:jcip-annotations:1.0'
 
     // Multibase encoding
     implementation 'com.github.multiformats:java-multibase:1.1.0'

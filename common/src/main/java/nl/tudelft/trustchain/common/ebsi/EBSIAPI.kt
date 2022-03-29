@@ -6,6 +6,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
+import java.net.URLEncoder
 
 object EBSIAPI {
 
@@ -22,23 +23,27 @@ object EBSIAPI {
     }
 
     // =====ONBOARDING=====
-    fun getAuthenticationRequest(sessionToken: String, api: String, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener?) {
-        EBSIRequest.setAuthorization(sessionToken)
-        val body = JSONObject().put("scope", "ebsi users onboarding")
+    fun getAuthenticationRequest(api: String, scope: String, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener?) {
+        val body = JSONObject().put("scope", scope)
         val request = EBSIRequest.post(api, body, listener, errorListener)
         requestQueue.add(request)
     }
 
-    fun getVerifiableAuthorisation(clientId: String, idToken: String,
+    fun getVerifiableAuthorisation(sessionToken: String, clientId: String, idToken: String,
                                    listener: Response.Listener<JSONObject>,
                                    errorListener: Response.ErrorListener?) {
+        EBSIRequest.setAuthorization(sessionToken)
         val body = JSONObject().put("id_token", idToken)
         val request = EBSIRequest.post(null, body, listener, errorListener).redirect(clientId)
         requestQueue.add(request)
     }
 
-    fun getAuthorisationAccessToken() {
-
+    fun getAuthorisationAccessToken(clientId: String, idToken: String,
+                                    listener: Response.Listener<JSONObject>,
+                                    errorListener: Response.ErrorListener?) {
+        val body = JSONObject().put("id_token", idToken)
+        val request = EBSIRequest.post(null, body, listener, errorListener).redirect(clientId)
+        requestQueue.add(request)
     }
 
     // ===============
@@ -63,6 +68,16 @@ object EBSIAPI {
             put("redirect_uri", "")
         }
         val request = EBSIRequest.post(api, body, listener, errorListener)
+        requestQueue.add(request)
+    }
+    // ===============
+
+    // =====DID Document=====
+    fun getDidDocument(did: String,
+                       listener: Response.Listener<JSONObject>,
+                       errorListener: Response.ErrorListener?) {
+        val api = "did-registry/v2/identifiers/${URLEncoder.encode(did, "UTF-8")}"
+        val request = EBSIRequest.get(api, null, listener, errorListener)
         requestQueue.add(request)
     }
     // ===============

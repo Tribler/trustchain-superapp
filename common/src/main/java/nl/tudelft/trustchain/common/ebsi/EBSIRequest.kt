@@ -11,7 +11,7 @@ import java.util.*
 
 
 object EBSIRequest {
-    private var server = "https://api.conformance.intebsi.xyz" //Change to prod server
+    private var server = "https://api.preprod.ebsi.eu" //Change to prod server
 
     private var isTest = false
     private val EBSIHeaders = mutableMapOf<String, String>()
@@ -55,7 +55,8 @@ object EBSIRequest {
     fun test(uuid: UUID) {
         isTest = true
 
-        server = "https://api.conformance.intebsi.xyz"
+        // TODO conformance server seems to have some problems
+        // server = "https://api.conformance.intebsi.xyz"
         EBSIHeaders["Conformance"] = uuid.toString()
     }
 

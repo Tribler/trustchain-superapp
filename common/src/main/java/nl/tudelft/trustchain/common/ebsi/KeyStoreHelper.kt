@@ -8,16 +8,12 @@ import nl.tudelft.ipv8.android.util.AndroidEncodingUtils
 import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
 import org.spongycastle.asn1.ASN1InputStream
-import org.spongycastle.asn1.ASN1String
-import org.spongycastle.asn1.DEROctetString
 import org.spongycastle.asn1.DLSequence
 import org.spongycastle.jcajce.provider.asymmetric.util.EC5Util
 import org.spongycastle.jce.ECNamedCurveTable
 import org.spongycastle.jce.ECPointUtil
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import org.spongycastle.jce.spec.ECNamedCurveParameterSpec
-import org.spongycastle.math.ec.ECCurve
-import org.spongycastle.util.io.pem.PemObject
 import org.spongycastle.util.io.pem.PemReader
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -136,8 +132,11 @@ class KeyStoreHelper(
             //Log.e(TAG, "DER string: ${derObject.string}")
         }
 
-        fun decodePemPublicKey(s: String): ECPublicKey {
-            val pemString = AndroidEncodingUtils.decodeBase64FromString(s).toString(Charset.defaultCharset())
+        fun decodePemPublicKey(s: String, isBase64: Boolean = true): ECPublicKey {
+            val pemString = if (isBase64) {
+                AndroidEncodingUtils.decodeBase64FromString(s).toString(Charset.defaultCharset())
+            } else { s }
+
             val pemReader = PemReader(StringReader(pemString))
             val pem = pemReader.readPemObject()
             val publicKeySpec = X509EncodedKeySpec(pem.content)
@@ -150,21 +149,12 @@ class KeyStoreHelper(
         }
 
         fun loadPublicKey(data: ByteArray): PublicKey? {
-            //val factory = KeyFactory.getInstance("ECDSA", "SC")
-
             val curve = "secp256k1"
             val kf = KeyFactory.getInstance("EC")
 
-            // ECNamedCurveTable.getByName(curve)
             val spec: ECNamedCurveParameterSpec = ECNamedCurveTable.getParameterSpec(curve)
-            val eccCurve: ECCurve = spec.curve
-            Log.e(TAG, "Curve: $eccCurve")
-            val ellipticCurve: EllipticCurve = EC5Util.convertCurve(eccCurve, spec.seed)
-            Log.e(TAG, "ECCurve: $ellipticCurve, seed: ${spec.seed}")
+            val ellipticCurve: EllipticCurve = EC5Util.convertCurve(spec.curve, spec.seed)
 
-            // decoding point fails,
-            // line no 66.
-            Log.e(TAG, "Field: ${ellipticCurve.field}")
             val point: ECPoint = ECPointUtil.decodePoint(ellipticCurve, data)
             val params: ECParameterSpec = EC5Util.convertSpec(ellipticCurve, spec)
             val keySpec = ECPublicKeySpec(point, params)
