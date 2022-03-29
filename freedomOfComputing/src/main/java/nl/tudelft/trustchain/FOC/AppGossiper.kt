@@ -28,6 +28,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 import kotlin.collections.HashMap
 
 /**
@@ -37,7 +38,8 @@ import kotlin.collections.HashMap
 lateinit var appGossiperInstance: AppGossiper
 const val GOSSIP_DELAY: Long = 10000
 const val DOWNLOAD_DELAY: Long = 20000
-const val TORRENT_ATTEMPTS_THRESHOLD = 2
+
+const val TORRENT_ATTEMPTS_THRESHOLD = 1
 
 @Suppress("deprecation")
 class AppGossiper(
@@ -54,6 +56,8 @@ class AppGossiper(
     private val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
     private var gossipingPaused = false
     private var downloadingPaused = false
+    private var evaDownloadInfo: Pair<String, Peer>? = null
+    private var lastEvaRequest: Long? = null
     var sessionActive = false
     var downloadsInProgress = 0
 
@@ -95,6 +99,7 @@ class AppGossiper(
                 val (_, payload) = packet.getDecryptedAuthPayload(
                     AppPayload.Deserializer, demoCommunity.myPeer.key as PrivateKey
                 )
+                evaDownloadInfo = null
                 activity.runOnUiThread {
                     printToast("Torrent ${payload.appName} fetched through EVA protocol!")
                     onDownloadSuccess(payload.appName)
@@ -102,8 +107,11 @@ class AppGossiper(
             }
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
-            activity.runOnUiThread { printToast("Failed to fetch torrent through EVA protocol because $exception!") }
-            resetFailures()
+            if (evaDownloadInfo != null) {
+                activity.runOnUiThread { printToast("Failed to fetch torrent through EVA protocol because $exception! Retrying") }
+                demoCommunity.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
+                lastEvaRequest = System.currentTimeMillis()
+            }
         }
     }
 
@@ -174,6 +182,11 @@ class AppGossiper(
             if (!downloadingPaused) {
                 try {
                     downloadPendingFiles()
+                    if (evaDownloadInfo != null && lastEvaRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
+                        activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
+                        demoCommunity?.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
+                        lastEvaRequest = System.currentTimeMillis()
+                    }
                 } catch (e: Exception) {
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
@@ -270,7 +283,7 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
-        activity.runOnUiThread { printToast("Found new torrent and start download") }
+        activity.runOnUiThread { printToast("Found new torrent $torrentName, attempting to download!") }
 
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString))
             return
@@ -284,7 +297,6 @@ class AppGossiper(
         val magnetName = magnetNameRaw.replace('+', ' ', false)
         val magnetInfoHash = magnetLink.substring(preHashString.length, startIndexName)
         Log.i("appGossiper", magnetName)
-        activity.runOnUiThread { printToast(magnetName) }
 
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
@@ -315,8 +327,7 @@ class AppGossiper(
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             Log.i("appGossiper", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName!") }
-            activity.runOnUiThread { printToast(e.toString()) }
+            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:${e}") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             return
         }
@@ -332,15 +343,19 @@ class AppGossiper(
             downloadsInProgress += 1
             sessionManager.download(torrentInfo, appDirectory)
             downloadsInProgress -= 1
-
-            signal.await(3, TimeUnit.MINUTES)
+            activity.runOnUiThread { printToast("Managed to fetch torrent info for $torrentName, trying to download it via torrent!") }
+            signal.await(1, TimeUnit.MINUTES)
             if (signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
                 signal = CountDownLatch(0)
+                sessionManager.find(torrentInfo.infoHash())?.let { torrentHandle ->
+                    sessionManager.remove(torrentHandle)
+                }
                 onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
+            } else {
+                onDownloadSuccess(magnetName)
             }
             sessionActive = false
-            onDownloadSuccess(magnetName)
         } else {
             Log.i("appGossiper", "Failed to retrieve the magnet")
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
@@ -362,7 +377,7 @@ class AppGossiper(
         magnetInfoHash: String,
         peer: Peer
     ) {
-        if (demoCommunity?.evaProtocolEnabled == true) {
+        if (demoCommunity?.evaProtocolEnabled == true && evaDownloadInfo == null) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
             else
@@ -371,17 +386,11 @@ class AppGossiper(
                 demoCommunity.let {
                     activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
                     demoCommunity.sendAppRequest(magnetInfoHash, peer)
+                    evaDownloadInfo = Pair(magnetInfoHash, peer)
+                    lastEvaRequest = System.currentTimeMillis()
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
-        }
-    }
-
-    private fun resetFailures() {
-        failedTorrents.keys.let { keys ->
-            for (key in keys) {
-                failedTorrents[key] = 0
-            }
         }
     }
 
