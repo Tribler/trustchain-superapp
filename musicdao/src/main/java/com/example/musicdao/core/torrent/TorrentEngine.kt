@@ -218,11 +218,17 @@ class TorrentEngine @Inject constructor(
     }
 
     suspend fun seedStrategy(): List<TorrentHandle> {
-        val downloadedReleases = database.dao.getAll().filter { it.isDownloaded }
+        // simple seed strategy of 20 random torrent
+        val downloadedReleases = database.dao.getAll()
+            .filter { it.isDownloaded }
+            .shuffled()
+            .take(20)
+
         Log.d(
             "MusicDao",
             "SeedStrategy: attempting to seed (${downloadedReleases.size}): ${downloadedReleases.map { "[${it.magnet} - $it]" }}"
         )
+
 
         val result = downloadedReleases.mapNotNull {
             it.root?.let { root ->
