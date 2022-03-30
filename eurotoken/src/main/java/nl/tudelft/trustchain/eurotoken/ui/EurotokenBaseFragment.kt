@@ -72,6 +72,8 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 //            logger.error(e) { "Error reading trust_scores.json asset" }
 //        }
 
+        store.createContactStateTable()
+
         store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey)
         val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey)
         Toast.makeText(requireContext(), "Loaded score with " + score.toString(), Toast.LENGTH_LONG).show()

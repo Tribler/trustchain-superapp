@@ -16,7 +16,7 @@ getScore:
 SELECT score FROM trust_scores WHERE public_key=?;
 
 incrementScore:
-INSERT OR REPLACE INTO trust_scores(public_key, score) VALUES (?, ?);
+UPDATE trust_scores SET score = score + 1 WHERE public_key=?;
 
 -- deleteTable:
 -- DROP TABLE IF EXISTS trust_scores;

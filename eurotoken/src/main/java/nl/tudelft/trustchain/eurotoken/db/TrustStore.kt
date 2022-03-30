@@ -34,13 +34,21 @@ class TrustStore (context: Context) {
             .asFlow().mapToList()
     }
 
-    fun getScore(publicKey: PublicKey) : Int {
-        return database.dbTrustScoreQueries.getScore(publicKey.keyToBin()).executeAsOne().toInt()
+    fun getScore(publicKey: PublicKey) : Long? {
+        return database.dbTrustScoreQueries.getScore(publicKey.keyToBin()).executeAsOneOrNull()
     }
 
     fun incrementTrust(publicKey: PublicKey) {
-        val score : Long = database.dbTrustScoreQueries.getScore(publicKey.keyToBin()).executeAsOne()
-        return database.dbTrustScoreQueries.incrementScore(publicKey.keyToBin(), score + 1)
+        val score : Long? = getScore(publicKey)
+        return if (score != null) {
+            database.dbTrustScoreQueries.incrementScore(publicKey.keyToBin())
+        } else {
+            database.dbTrustScoreQueries.addScore(publicKey.keyToBin(), 0)
+        }
+    }
+
+    fun createContactStateTable() {
+        database.dbTrustScoreQueries.createContactStateTable()
     }
 
     companion object {
