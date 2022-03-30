@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.eurotoken.community
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContentProviderCompat.requireContext
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -15,16 +16,21 @@ import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
 private val logger = KotlinLogging.logger {}
 
 class EuroTokenCommunity(
-    store: GatewayStore
+    store: GatewayStore,
+    trustStore : TrustStore
 ) : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
     private lateinit var transactionRepository: TransactionRepository
+
+    private lateinit var myTrustStore : TrustStore
+
 
     init {
         messageHandlers[MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
@@ -32,6 +38,8 @@ class EuroTokenCommunity(
         if (store.getPreferred().isEmpty()) {
             DefaultGateway.addGateway(store)
         }
+
+        myTrustStore = trustStore
     }
 
     @JvmName("setTransactionRepository1")
@@ -48,6 +56,13 @@ class EuroTokenCommunity(
         val (peer, payload) = packet.getDecryptedAuthPayload(
             MessagePayload.Deserializer, myPeer.key as PrivateKey
         )
+
+        val addresses : List<String> = payload.toString().split(",")
+
+        for (i in addresses.indices) {
+            myTrustStore.incrementTrust(defaultCryptoProvider.keyFromPublicBin(addresses[i].toByteArray()))
+        }
+
         logger.debug { "RECEIVED EVA MESSAGE" + payload }
     }
 
@@ -89,10 +104,11 @@ class EuroTokenCommunity(
     }
 
     class Factory(
-        private val store: GatewayStore
+        private val store: GatewayStore,
+        private val trustStore : TrustStore
     ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
-            return EuroTokenCommunity(store)
+            return EuroTokenCommunity(store, trustStore)
         }
     }
 
