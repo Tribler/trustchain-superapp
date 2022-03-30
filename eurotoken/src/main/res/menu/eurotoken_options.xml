@@ -15,4 +15,7 @@
     <item
         android:id="@+id/toggleDemoMode"
         android:title="@string/toggle_demo_mode" />
+    <item
+        android:id="@+id/trustScoresMenuItem"
+        android:title="@string/trust_scores_menu_item" />
 </menu>

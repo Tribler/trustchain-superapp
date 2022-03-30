@@ -130,7 +130,6 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         val pref = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
         val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
         return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
-//        return "SDFSDF"
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -170,6 +169,10 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 edit.commit()
 
                 item.setTitle(getDemoModeMenuItemText())
+                true
+            }
+            R.id.trustScoresMenuItem -> {
+                findNavController().navigate(R.id.trustScoresFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)

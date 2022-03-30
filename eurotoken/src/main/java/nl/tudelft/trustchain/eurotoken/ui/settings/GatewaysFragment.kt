@@ -22,7 +22,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentGatewaysBinding
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-import org.json.JSONObject
 
 
 class GatewaysFragment : EurotokenBaseFragment(R.layout.fragment_gateways) {
