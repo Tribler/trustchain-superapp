@@ -9,6 +9,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.bitcoinj.core.Transaction
+import org.bitcoinj.wallet.Wallet
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,6 +21,7 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
     val estimatedBalance: MutableStateFlow<String?> = MutableStateFlow(null)
     val status: MutableStateFlow<String?> = MutableStateFlow(null)
     val syncProgress: MutableStateFlow<Int?> = MutableStateFlow(null)
+    val walletTransactions: MutableStateFlow<List<Transaction>> = MutableStateFlow(listOf())
 
     val faucetInProgress: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
@@ -31,6 +34,7 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
                 confirmedBalance.value = walletService.confirmedBalance()
                 status.value = walletService.walletStatus()
                 syncProgress.value = walletService.percentageSynced()
+                walletTransactions.value = walletService.walletTransactions()
                 delay(REFRESH_DELAY)
             }
         }
@@ -47,6 +51,10 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
             }
             faucetInProgress.value = false
         }
+    }
+
+    fun wallet(): Wallet {
+        return walletService.wallet()
     }
 
     companion object {

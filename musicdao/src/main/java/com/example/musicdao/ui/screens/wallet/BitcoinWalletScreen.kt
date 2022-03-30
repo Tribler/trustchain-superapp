@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.ListItem
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -13,7 +14,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicdao.ui.components.EmptyStateNotScrollable
 import com.example.musicdao.ui.screens.profile.CustomMenuItem
+import org.bitcoinj.core.Transaction
+import org.bitcoinj.wallet.Wallet
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BitcoinWalletScreen() {
 
@@ -23,6 +27,7 @@ fun BitcoinWalletScreen() {
     val syncProgress = bitcoinWalletViewModel.syncProgress.collectAsState()
     val status = bitcoinWalletViewModel.status.collectAsState()
     val faucetInProgress = bitcoinWalletViewModel.faucetInProgress.collectAsState()
+    val walletTransactions = bitcoinWalletViewModel.walletTransactions.collectAsState()
 
     var state by remember { mutableStateOf(0) }
     val titles = listOf("ACTIONS", "TRANSACTIONS")
@@ -133,15 +138,50 @@ fun BitcoinWalletScreen() {
             }
             1 -> {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    EmptyStateNotScrollable(
-                        firstLine = "No Transactions",
-                        secondLine = "No transactions have been made.",
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(vertical = 50.dp)
-                    )
+                    if (walletTransactions.value.isEmpty()) {
+                        EmptyStateNotScrollable(
+                            firstLine = "No Transactions",
+                            secondLine = "No transactions have been made.",
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(vertical = 50.dp)
+                        )
+                    } else {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            walletTransactions.value.map {
+                                TransactionItem(
+                                    transaction = it,
+                                    wallet = bitcoinWalletViewModel.wallet()
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun TransactionItem(transaction: Transaction, wallet: Wallet) {
+    val value = transaction.getValue(wallet)
+
+    ListItem(
+        overlineText = {
+            if (value.isPositive) {
+                Text("INCOMING")
+            } else {
+                Text("OUTGOING")
+            }
+        },
+        text = { Text(value.toFriendlyString()) },
+        secondaryText = {
+            Text(
+                "${
+                transaction.txId
+                }\n${transaction.updateTime.toGMTString()}"
+            )
+        },
+    )
 }

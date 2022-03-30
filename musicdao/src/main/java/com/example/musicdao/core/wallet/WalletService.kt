@@ -4,10 +4,7 @@ import android.util.Log
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.bitcoinj.core.Address
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.ECKey
-import org.bitcoinj.core.PeerAddress
+import org.bitcoinj.core.*
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
 import org.bitcoinj.params.RegTestParams
@@ -90,6 +87,10 @@ class WalletService(val config: WalletConfig) {
 
         app.startAsync()
         started = true
+    }
+
+    fun wallet(): Wallet {
+        return app.wallet()
     }
 
     /**
@@ -186,6 +187,10 @@ class WalletService(val config: WalletConfig) {
         } catch (e: java.lang.Exception) {
             null
         }
+    }
+
+    fun walletTransactions(): List<Transaction> {
+        return app.wallet().walletTransactions.map { it.transaction }
     }
 
     fun estimatedBalance(): String? {
