@@ -42,6 +42,7 @@ const val GOSSIP_DELAY: Long = 10000
 const val DOWNLOAD_DELAY: Long = 20000
 
 const val TORRENT_ATTEMPTS_THRESHOLD = 1
+const val EVA_RETRIES = 10
 
 @Suppress("deprecation")
 class AppGossiper(
@@ -58,8 +59,7 @@ class AppGossiper(
     private val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
     private var gossipingPaused = false
     private var downloadingPaused = false
-    private var evaDownloadInfo: Pair<String, Peer>? = null
-    private var lastEvaRequest: Long? = null
+    private var evaDownload: EvaDownload = EvaDownload()
     var sessionActive = false
     var downloadsInProgress = 0
 
@@ -101,7 +101,7 @@ class AppGossiper(
                 val (_, payload) = packet.getDecryptedAuthPayload(
                     AppPayload.Deserializer, demoCommunity.myPeer.key as PrivateKey
                 )
-                evaDownloadInfo = null
+                evaDownload.activeDownload = false
                 activity.runOnUiThread {
                     printToast("Torrent ${payload.appName} fetched through EVA protocol!")
                     onDownloadSuccess(payload.appName)
@@ -109,18 +109,30 @@ class AppGossiper(
             }
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
-            if (evaDownloadInfo != null) {
-                if(exception is TimeoutException || exception is PeerBusyException) {
+            if (evaDownload.activeDownload) {
+                if (exception is TimeoutException || exception is PeerBusyException) {
                     activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
-                    demoCommunity.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
-                    lastEvaRequest = System.currentTimeMillis()
+                    retryActiveEvaDownload()
                 } else {
                     activity.runOnUiThread { printToast("Can't fetch through EVA because of $exception will continue to retry via torrent") }
-                    evaDownloadInfo = null
+                    evaDownload.activeDownload = false
                 }
             }
         }
     }
+
+    private fun retryActiveEvaDownload() {
+        if (evaDownload.retryAttempts < EVA_RETRIES) {
+            evaDownload.peer?.let { demoCommunity?.sendAppRequest(evaDownload.magnetInfoHash, it) }
+            evaDownload.lastRequest = System.currentTimeMillis()
+            evaDownload.retryAttempts++
+            if (evaDownload.retryAttempts == EVA_RETRIES) {
+                activity.runOnUiThread { printToast("Giving up on trying to download via EVA") }
+                evaDownload.activeDownload = false
+            }
+        }
+    }
+
 
     fun pause() {
         gossipingPaused = true
@@ -158,7 +170,7 @@ class AppGossiper(
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
                         Log.i("appGossiper", "Torrent finished")
-                        printToast("Torrent downloaded!!")
+                        activity.runOnUiThread { printToast("Torrent downloaded!!") }
                     }
                     else -> {
                     }
@@ -189,10 +201,9 @@ class AppGossiper(
             if (!downloadingPaused) {
                 try {
                     downloadPendingFiles()
-                    if (evaDownloadInfo != null && lastEvaRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
+                    if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
                         activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
-                        demoCommunity?.sendAppRequest(evaDownloadInfo!!.first, evaDownloadInfo!!.second)
-                        lastEvaRequest = System.currentTimeMillis()
+                        retryActiveEvaDownload()
                     }
                 } catch (e: Exception) {
                     activity.runOnUiThread { printToast(e.toString()) }
@@ -290,10 +301,10 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
-        activity.runOnUiThread { printToast("Found new torrent $torrentName, attempting to download!") }
-
-        if (sessionActive || !magnetLink.startsWith(magnetHeaderString))
+        if (sessionActive || !magnetLink.startsWith(magnetHeaderString) || evaDownload.activeDownload)
             return
+
+        activity.runOnUiThread { printToast("Found new torrent $torrentName, attempting to download!") }
 
         val startIndexName = magnetLink.indexOf(displayNameAppender)
         val stopIndexName =
@@ -384,7 +395,7 @@ class AppGossiper(
         magnetInfoHash: String,
         peer: Peer
     ) {
-        if (demoCommunity?.evaProtocolEnabled == true && evaDownloadInfo == null) {
+        if (demoCommunity?.evaProtocolEnabled == true && !evaDownload.activeDownload) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
             else
@@ -393,8 +404,7 @@ class AppGossiper(
                 demoCommunity.let {
                     activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
                     demoCommunity.sendAppRequest(magnetInfoHash, peer)
-                    evaDownloadInfo = Pair(magnetInfoHash, peer)
-                    lastEvaRequest = System.currentTimeMillis()
+                    evaDownload = EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0)
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
