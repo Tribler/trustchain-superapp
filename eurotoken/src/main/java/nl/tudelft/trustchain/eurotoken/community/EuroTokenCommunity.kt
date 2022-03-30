@@ -23,6 +23,9 @@ import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
 private val logger = KotlinLogging.logger {}
 
+const val EUROTOKEN_PREFERENCES = "eurotoken"
+const val DEMO_MODE_ENABLED_PREF = "demo_mode_enabled"
+
 class EuroTokenCommunity(
     store: GatewayStore,
     trustStore : TrustStore
@@ -115,15 +118,41 @@ class EuroTokenCommunity(
         }
     }
 
+    fun generatePublicKey(seed: Long, size: Int = 148) : String {
+        val key = defaultCryptoProvider.generateKey()
+        return key.pub().toString()
+    }
+
+    fun generatePublicKeys(length: Int, seed: Long, size: Int = 148) : List<String> {
+        val keys = mutableListOf<String>()
+        for (i in 0 until length) {
+            keys.add(generatePublicKey(seed + i, size))
+        }
+        return keys
+    }
+
+
     fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
-        // Get all addresses of the last [num] incoming transactions
-        // COMMENT THIS OUT FOR NOW
-//        val addresses : List<PublicKey> = transactionRepository.getTransactions(50).map{
-//            transaction: Transaction ->
-//            transaction.sender
-//        }§
-        val addresses : List<String> = listOf(myPeer.publicKey.keyToBin().toHex())
+        // TODO: load demoModeEnabled from preferences
+//        val pref = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
+//        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
+        val demoModeEnabled = true
+
         logger.debug{"ADDRESS CHECK " + myPeer.publicKey.keyToBin().toHex()}
+
+        var addresses : ArrayList<String> = ArrayList()
+        // Add own public key to list of addresses.
+        addresses.add(myPeer.publicKey.keyToBin().toHex())
+        if (demoModeEnabled) {
+            // Generate [num] addresses if in demo mode
+            addresses.addAll(generatePublicKeys(num, 1337))
+        } else {
+            // Get all addresses of the last [num] incoming transactions
+            addresses.addAll(transactionRepository.getTransactions(num).map { transaction: Transaction ->
+                transaction.sender.toString()
+            })
+        }
+
         val payload = TransactionsPayload("1", addresses.joinToString(separator = ",").toByteArray())
         logger.debug { "-> $payload" }
 
