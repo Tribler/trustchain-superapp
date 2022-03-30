@@ -8,6 +8,7 @@ import android.text.InputType
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -32,6 +33,13 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
     protected val logger = KotlinLogging.logger {}
 
     protected var trustScores: Map<String, *>? = null
+
+    /**
+     * When enabled, the trustscore is always shown when sending money, not only when it is a low or average score.
+     * Also, when enabled, if no 50 transactions are availalbe, 50 public keys will be generated to 'simulate' sending
+     * the last 50 public keys.
+     */
+    private var demoModeEnabled = false
 
     protected val transactionRepository by lazy {
         TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
@@ -107,7 +115,10 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.eurotoken_options, menu)
+        menu.findItem(R.id.toggleDemoMode).setTitle(getDemoModeMenuItemText())
     }
+
+    private fun getDemoModeMenuItemText() = getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
@@ -137,6 +148,11 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
             }
             R.id.gateways -> {
                 findNavController().navigate(R.id.gatewaysFragment)
+                true
+            }
+            R.id.toggleDemoMode -> {
+                demoModeEnabled = !demoModeEnabled
+                item.setTitle(getDemoModeMenuItemText())
                 true
             }
             else -> super.onOptionsItemSelected(item)
