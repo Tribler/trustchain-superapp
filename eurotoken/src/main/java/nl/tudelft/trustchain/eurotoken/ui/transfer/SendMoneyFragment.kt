@@ -6,7 +6,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import kotlinx.android.synthetic.main.fragment_send_money.*
-import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
@@ -35,6 +34,9 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
                 .hexToBytes()
         )
     }
+
+    private val TRUSTSCORE_AVERAGE_BOUNDARY = 0.7
+    private val TRUSTSCORE_LOW_BOUNDARY = 0.3
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -84,16 +86,15 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
         if (trustScore != null && trustScore is Double) {
             val trustScorePercentage = (trustScore * 100).roundToInt()
-            if (0.3 < trustScore && trustScore < 0.7) {
+            if (trustScore >= TRUSTSCORE_AVERAGE_BOUNDARY) {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScorePercentage)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
+            } else if (trustScore > TRUSTSCORE_LOW_BOUNDARY) {
                 trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScorePercentage)
                 trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
-                trustScoreWarning.visibility = View.VISIBLE
-            } else if (trustScore < 0.3) {
+            } else {
                 trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScorePercentage)
                 trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
-                trustScoreWarning.visibility = View.VISIBLE
-            } else {
-                trustScoreWarning.visibility = View.GONE
             }
         } else {
             trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
