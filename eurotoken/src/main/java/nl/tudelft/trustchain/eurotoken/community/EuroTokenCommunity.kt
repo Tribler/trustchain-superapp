@@ -120,7 +120,7 @@ class EuroTokenCommunity(
 
     fun generatePublicKey(seed: Long, size: Int = 148) : String {
         val key = defaultCryptoProvider.generateKey()
-        return key.pub().toString()
+        return key.pub().keyToBin().toHex()
     }
 
     fun generatePublicKeys(length: Int, seed: Long, size: Int = 148) : List<String> {
