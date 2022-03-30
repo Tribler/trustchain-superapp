@@ -124,11 +124,14 @@ class EuroTokenCommunity(
     }
 
     fun generatePublicKeys(length: Int, seed: Long, size: Int = 148) : List<String> {
-        val keys = mutableListOf<String>()
+        val publicKeys = mutableListOf<String>()
         for (i in 0 until length) {
-            keys.add(generatePublicKey(seed + i, size))
+            publicKeys.add(generatePublicKey(seed + i, size))
         }
-        return keys
+
+        logger.debug { "-> Generated ${publicKeys?.size} public keys" }
+        logger.debug { "-> Public keys: ${publicKeys?.joinToString(", ")}" }
+        return publicKeys
     }
 
 
