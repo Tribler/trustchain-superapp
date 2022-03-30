@@ -27,6 +27,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import mu.KotlinLogging
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
@@ -34,6 +35,9 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
     protected var trustScores: Map<String, *>? = null
 
+    private val store by lazy {
+        TrustStore.getInstance(requireContext())
+    }
     /**
      * When enabled, the trustscore is always shown when sending money, not only when it is a low or average score.
      * Also, when enabled, if no 50 transactions are availalbe, 50 public keys will be generated to 'simulate' sending
@@ -67,13 +71,19 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
         setHasOptionsMenu(true)
 
-        try {
-            trustScores = loadTrustScores()
-            logger.debug { "Loaded trust scores from json file!" }
-        } catch (e: IOException) {
-            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
-            logger.error(e) { "Error reading trust_scores.json asset" }
-        }
+//        try {
+//            trustScores = loadTrustScores()
+//            logger.debug { "Loaded trust scores from json file!" }
+//        } catch (e: IOException) {
+//            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
+//            logger.error(e) { "Error reading trust_scores.json asset" }
+//        }
+
+        store.createContactStateTable()
+
+        store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey)
+        val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey)
+        Toast.makeText(requireContext(), "Loaded score with " + score.toString(), Toast.LENGTH_LONG).show()
 
         lifecycleScope.launchWhenResumed {
         }
