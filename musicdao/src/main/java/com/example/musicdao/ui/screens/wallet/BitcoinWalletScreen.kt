@@ -18,6 +18,11 @@ import com.example.musicdao.ui.screens.profile.CustomMenuItem
 fun BitcoinWalletScreen() {
 
     val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
+    val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.collectAsState()
+    val estimatedBalance = bitcoinWalletViewModel.estimatedBalance.collectAsState()
+    val syncProgress = bitcoinWalletViewModel.syncProgress.collectAsState()
+    val status = bitcoinWalletViewModel.status.collectAsState()
+    val faucetInProgress = bitcoinWalletViewModel.faucetInProgress.collectAsState()
 
     var state by remember { mutableStateOf(0) }
     val titles = listOf("ACTIONS", "TRANSACTIONS")
@@ -42,11 +47,11 @@ fun BitcoinWalletScreen() {
                     )
             ) {
                 Text(
-                    text = bitcoinWalletViewModel.confirmedBalance.value ?: "0.00 BTC",
+                    text = confirmedBalance.value ?: "0.00 BTC",
                     style = MaterialTheme.typography.h6
                 )
                 Text(
-                    text = "${bitcoinWalletViewModel.confirmedBalance.value ?: "0.00 BTC"} (Estimated)",
+                    text = "${estimatedBalance.value ?: "0.00 BTC"} (Estimated)",
                     style = MaterialTheme.typography.subtitle1
                 )
             }
@@ -59,13 +64,13 @@ fun BitcoinWalletScreen() {
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    "Syncing",
+                    "Sync Progress",
                     modifier = Modifier
-                        .padding(end = 1.dp)
+                        .padding(end = 15.dp)
                         .align(Alignment.CenterVertically)
                 )
                 LinearProgressIndicator(
-                    bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
+                    syncProgress.value?.let { (it / 100).toFloat() }
                         ?: 0f,
                     color = MaterialTheme.colors.onPrimary,
                     modifier = Modifier
@@ -90,7 +95,10 @@ fun BitcoinWalletScreen() {
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
                     CustomMenuItem(
                         text = "Request from faucet",
-                        onClick = { bitcoinWalletViewModel.requestFaucet() }
+                        onClick = {
+                            bitcoinWalletViewModel.requestFaucet()
+                        },
+                        disabled = faucetInProgress.value
                     )
                     CustomMenuItem(
                         text = "Send",
@@ -110,7 +118,7 @@ fun BitcoinWalletScreen() {
 
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(text = "Wallet Status", fontWeight = FontWeight.Bold)
-                        Text(text = bitcoinWalletViewModel.status.value ?: "No Status")
+                        Text(text = status.value ?: "No Status")
                     }
 
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {

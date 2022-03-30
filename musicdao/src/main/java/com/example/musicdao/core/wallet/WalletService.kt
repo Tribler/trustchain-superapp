@@ -1,9 +1,9 @@
 package com.example.musicdao.core.wallet
 
+import android.util.Log
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Coin
 import org.bitcoinj.core.ECKey
@@ -35,9 +35,6 @@ class WalletService(val config: WalletConfig) {
                 if (wallet().keyChainGroupSize < 1) {
                     val key = ECKey()
                     wallet().importKey(key)
-                }
-                if (wallet().balance.isZero) {
-                    defaultFaucetRequest(amount = "1")
                 }
                 wallet().addCoinsReceivedEventListener { w, tx, _, _ ->
                     val value: Coin = tx.getValueSentToMe(w)
@@ -95,42 +92,6 @@ class WalletService(val config: WalletConfig) {
         started = true
     }
 
-    private fun isRegTest(): Boolean {
-        return config.networkParams == RegTestParams.get()
-    }
-
-    fun walletStatus(): String {
-        return app.state().name
-    }
-
-    fun percentageSynced(): Int {
-        return percentageSynced
-    }
-
-    fun confirmedBalance(): String? {
-        return try {
-            app.wallet().balance.toFriendlyString()
-        } catch (e: java.lang.Exception) {
-            null
-        }
-    }
-
-    fun estimatedBalance(): String? {
-        return try {
-            app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
-        } catch (e: java.lang.Exception) {
-            null
-        }
-    }
-
-    fun publicKey(): String? {
-        return try {
-            app.wallet().currentReceiveAddress().toString()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     /**
      * Convert an amount of coins represented by a user input string, and then send it
      * @param coinsAmount the amount of coins to send, as a string, such as "5", "0.5"
@@ -169,24 +130,70 @@ class WalletService(val config: WalletConfig) {
     }
 
     /**
-     * Query the bitcoin faucet for some starter bitcoins
+     * Query the faucet to the default protocol address
+     * @return whether request was successfully or not
      */
-    @DelicateCoroutinesApi
-    fun requestFaucet(address: String, amount: String) {
-        GlobalScope.launch(Dispatchers.IO) {
-            val obj = URL("${config.regtestFaucetEndPoint}/$address/$amount")
+    suspend fun defaultFaucetRequest(): Boolean {
+        return requestFaucet(protocolAddress().toString())
+    }
+
+    /**
+     * Query the bitcoin faucet for some starter bitcoins
+     * @param address the address to send the coins to
+     * @return whether request was successfully or not
+     */
+    private suspend fun requestFaucet(address: String): Boolean {
+        Log.d("MusicDao", "requestFaucet (1): $address")
+        val obj = URL("${config.regtestFaucetEndPoint}/addBTC?address=$address")
+
+        return withContext(Dispatchers.IO) {
             try {
                 val con: InputStream? = obj.openStream()
                 con?.close()
+                Log.d("MusicDao", "requestFaucet (2): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address")
+                true
             } catch (exception: IOException) {
                 exception.printStackTrace()
+                Log.d("MusicDao", "requestFaucet failed (3): $address using ${config.regtestFaucetEndPoint}/addBTC?address=$address")
+                Log.d("MusicDao", "requestFaucet failed (4): $exception")
+                false
             }
         }
     }
 
-    fun defaultFaucetRequest(amount: String = "1") {
-        val address = app.wallet().issuedReceiveAddresses[0].toString()
-        requestFaucet(address, amount)
+    private fun isRegTest(): Boolean {
+        return config.networkParams == RegTestParams.get()
+    }
+
+    fun walletStatus(): String {
+        return app.state().name
+    }
+
+    fun percentageSynced(): Int {
+        return percentageSynced
+    }
+
+    /**
+     * @return default address used for all interactions on chain
+     */
+    fun protocolAddress(): Address {
+        return app.wallet().issuedReceiveAddresses[0]
+    }
+
+    fun confirmedBalance(): String? {
+        return try {
+            app.wallet().balance.toFriendlyString()
+        } catch (e: java.lang.Exception) {
+            null
+        }
+    }
+
+    fun estimatedBalance(): String? {
+        return try {
+            app.wallet().getBalance(Wallet.BalanceType.ESTIMATED).toFriendlyString()
+        } catch (e: java.lang.Exception) {
+            null
+        }
     }
 
     companion object {

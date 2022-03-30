@@ -19,15 +19,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.musicdao.ui.navigation.Screen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileMenuScreen(navController: NavController) {
-
-    val ownProfileViewScreenModel: MyProfileScreenViewModel = hiltViewModel()
 
     Column {
         Box(
@@ -71,9 +68,9 @@ fun ProfileMenuScreen(navController: NavController) {
 }
 
 @Composable
-fun CustomMenuItem(text: String, onClick: () -> Unit, enabled: Boolean = true) {
+fun CustomMenuItem(text: String, onClick: () -> Unit, enabled: Boolean = true, disabled: Boolean = false) {
 
-    val modifier = if (enabled) {
+    val modifier = if (enabled && !disabled) {
         Modifier.clickable(
             onClick = { onClick() },
         )

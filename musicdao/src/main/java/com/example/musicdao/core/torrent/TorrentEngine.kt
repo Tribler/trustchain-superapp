@@ -229,7 +229,6 @@ class TorrentEngine @Inject constructor(
             "SeedStrategy: attempting to seed (${downloadedReleases.size}): ${downloadedReleases.map { "[${it.magnet} - $it]" }}"
         )
 
-
         val result = downloadedReleases.mapNotNull {
             it.root?.let { root ->
                 download(magnet = it.magnet, Paths.get(root))
