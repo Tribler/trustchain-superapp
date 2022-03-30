@@ -1,9 +1,9 @@
 package nl.tudelft.trustchain.eurotoken
 
-import android.media.MediaPlayer
-import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
-import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+
+const val EUROTOKEN_PREFERENCES = "eurotoken"
+const val DEMO_MODE_ENABLED_PREF = "demo_mode_enabled"
 
 class EuroTokenMainActivity : BaseActivity() {
 

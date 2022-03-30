@@ -1,13 +1,8 @@
 package nl.tudelft.trustchain.eurotoken.db
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
-import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import nl.tudelft.eurotoken.sqldelight.Database
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.trustchain.eurotoken.entity.TrustScore
@@ -29,9 +24,8 @@ class TrustStore (context: Context) {
         )
     }
 
-    fun getAllScores() : Flow<List<TrustScore>> {
-        return database.dbTrustScoreQueries.getAll(messageMapper)
-            .asFlow().mapToList()
+    fun getAllScores() : List<TrustScore> {
+        return database.dbTrustScoreQueries.getAll(messageMapper).executeAsList()
     }
 
     fun getScore(publicKey: String) : Long? {

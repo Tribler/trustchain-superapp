@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.eurotoken.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.Context
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.text.InputType
@@ -27,6 +29,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import mu.KotlinLogging
+import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
+import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
@@ -38,12 +42,6 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
     private val store by lazy {
         TrustStore.getInstance(requireContext())
     }
-    /**
-     * When enabled, the trustscore is always shown when sending money, not only when it is a low or average score.
-     * Also, when enabled, if no 50 transactions are availalbe, 50 public keys will be generated to 'simulate' sending
-     * the last 50 public keys.
-     */
-    private var demoModeEnabled = false
 
     protected val transactionRepository by lazy {
         TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
@@ -128,7 +126,11 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         menu.findItem(R.id.toggleDemoMode).setTitle(getDemoModeMenuItemText())
     }
 
-    private fun getDemoModeMenuItemText() = getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
+    private fun getDemoModeMenuItemText(): String {
+        val pref = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
+        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
+        return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val myPublicKey = getIpv8().myPeer.publicKey.keyToBin().toHex()
@@ -161,8 +163,16 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 true
             }
             R.id.toggleDemoMode -> {
-                demoModeEnabled = !demoModeEnabled
+                val sharedPreferences = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
+                val edit = sharedPreferences.edit()
+                edit.putBoolean(DEMO_MODE_ENABLED_PREF, !sharedPreferences.getBoolean(DEMO_MODE_ENABLED_PREF, false))
+                edit.commit()
+
                 item.setTitle(getDemoModeMenuItemText())
+                true
+            }
+            R.id.trustScoresMenuItem -> {
+                findNavController().navigate(R.id.trustScoresFragment)
                 true
             }
             else -> super.onOptionsItemSelected(item)
