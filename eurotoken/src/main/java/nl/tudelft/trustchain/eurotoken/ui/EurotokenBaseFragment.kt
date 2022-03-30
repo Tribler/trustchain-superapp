@@ -26,12 +26,17 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import mu.KotlinLogging
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
     protected val logger = KotlinLogging.logger {}
 
     protected var trustScores: Map<String, *>? = null
+
+    private val store by lazy {
+        TrustStore.getInstance(requireContext())
+    }
 
     protected val transactionRepository by lazy {
         TransactionRepository(getIpv8().getOverlay()!!, gatewayStore)
@@ -59,13 +64,17 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
         setHasOptionsMenu(true)
 
-        try {
-            trustScores = loadTrustScores()
-            logger.debug { "Loaded trust scores from json file!" }
-        } catch (e: IOException) {
-            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
-            logger.error(e) { "Error reading trust_scores.json asset" }
-        }
+//        try {
+//            trustScores = loadTrustScores()
+//            logger.debug { "Loaded trust scores from json file!" }
+//        } catch (e: IOException) {
+//            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
+//            logger.error(e) { "Error reading trust_scores.json asset" }
+//        }
+
+        store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey)
+        val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey)
+        Toast.makeText(requireContext(), "Loaded score with " + score.toString(), Toast.LENGTH_LONG).show()
 
         lifecycleScope.launchWhenResumed {
         }

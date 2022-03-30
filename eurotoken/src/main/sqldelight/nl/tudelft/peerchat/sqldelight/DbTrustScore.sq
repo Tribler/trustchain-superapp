@@ -8,5 +8,15 @@ CREATE TABLE IF NOT EXISTS trust_scores (
 getAll:
 SELECT public_key, score FROM trust_scores;
 
+addScore:
+INSERT INTO trust_scores (public_key, score)
+VALUES(?, ?);
+
+getScore:
+SELECT score FROM trust_scores WHERE public_key=?;
+
+incrementScore:
+INSERT OR REPLACE INTO trust_scores(public_key, score) VALUES (?, ?);
+
 -- deleteTable:
 -- DROP TABLE IF EXISTS trust_scores;
