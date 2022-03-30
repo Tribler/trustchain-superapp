@@ -1,0 +1,12 @@
+createContactStateTable:
+CREATE TABLE IF NOT EXISTS trust_scores (
+    public_key BLOB NOT NULL,
+    score INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (public_key)
+);
+
+getAll:
+SELECT public_key, score FROM trust_scores;
+
+-- deleteTable:
+-- DROP TABLE IF EXISTS trust_scores;
