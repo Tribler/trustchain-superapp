@@ -79,8 +79,8 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
         store.createContactStateTable()
 
-        store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey)
-        val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey)
+        store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex())
+        val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex())
         Toast.makeText(requireContext(), "Loaded score with " + score.toString(), Toast.LENGTH_LONG).show()
 
         lifecycleScope.launchWhenResumed {

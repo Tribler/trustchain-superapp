@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.eurotoken.community
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContentProviderCompat.requireContext
+import kotlinx.coroutines.flow.collect
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -12,19 +14,25 @@ import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
 private val logger = KotlinLogging.logger {}
 
 class EuroTokenCommunity(
-    store: GatewayStore
+    store: GatewayStore,
+    trustStore : TrustStore
 ) : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
     private lateinit var transactionRepository: TransactionRepository
+
+    private lateinit var myTrustStore : TrustStore
+
 
     init {
         messageHandlers[MessageId.ROLLBACK_REQUEST] = ::onRollbackRequestPacket
@@ -32,6 +40,8 @@ class EuroTokenCommunity(
         if (store.getPreferred().isEmpty()) {
             DefaultGateway.addGateway(store)
         }
+
+        myTrustStore = trustStore
     }
 
     @JvmName("setTransactionRepository1")
@@ -45,11 +55,19 @@ class EuroTokenCommunity(
     }
 
     private fun onLastAddressPacket(packet: Packet) {
+        logger.debug { "RECEIVED EVA MESSAGE PT 0" }
         val (peer, payload) = packet.getDecryptedAuthPayload(
-            MessagePayload.Deserializer, myPeer.key as PrivateKey
+            TransactionsPayload.Deserializer, myPeer.key as PrivateKey
         )
-        logger.debug { "RECEIVED EVA MESSAGE" + payload }
+
+        val addresses : List<String> = String(payload.data).split(",")
+        for (i in addresses.indices) {
+            myTrustStore.incrementTrust(addresses[i])
+        }
+
+        logger.debug { "DONE ADDING" }
     }
+
 
     private fun onRollbackRequest(peer: Peer, payload: RollbackRequestPayload) {
         transactionRepository.attemptRollback(peer, payload.transactionHash)
@@ -89,21 +107,24 @@ class EuroTokenCommunity(
     }
 
     class Factory(
-        private val store: GatewayStore
+        private val store: GatewayStore,
+        private val trustStore : TrustStore
     ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
-            return EuroTokenCommunity(store)
+            return EuroTokenCommunity(store, trustStore)
         }
     }
 
     fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
         // Get all addresses of the last [num] incoming transactions
-        val addresses : List<PublicKey> = transactionRepository.getTransactions(50).map{
-            transaction: Transaction ->
-            transaction.sender
-        }
-
-        val payload = MessagePayload(addresses.joinToString(separator = ","))
+        // COMMENT THIS OUT FOR NOW
+//        val addresses : List<PublicKey> = transactionRepository.getTransactions(50).map{
+//            transaction: Transaction ->
+//            transaction.sender
+//        }§
+        val addresses : List<String> = listOf(myPeer.publicKey.keyToBin().toHex())
+        logger.debug{"ADDRESS CHECK " + myPeer.publicKey.keyToBin().toHex()}
+        val payload = TransactionsPayload("1", addresses.joinToString(separator = ",").toByteArray())
         logger.debug { "-> $payload" }
 
         val packet = serializePacket(

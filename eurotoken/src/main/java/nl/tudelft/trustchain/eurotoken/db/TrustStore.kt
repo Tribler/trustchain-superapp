@@ -28,16 +28,16 @@ class TrustStore (context: Context) {
         return database.dbTrustScoreQueries.getAll(messageMapper).executeAsList()
     }
 
-    fun getScore(publicKey: PublicKey) : Long? {
-        return database.dbTrustScoreQueries.getScore(publicKey.keyToBin()).executeAsOneOrNull()
+    fun getScore(publicKey: String) : Long? {
+        return database.dbTrustScoreQueries.getScore(publicKey.toByteArray()).executeAsOneOrNull()
     }
 
-    fun incrementTrust(publicKey: PublicKey) {
+    fun incrementTrust(publicKey: String) {
         val score : Long? = getScore(publicKey)
         return if (score != null) {
-            database.dbTrustScoreQueries.incrementScore(publicKey.keyToBin())
+            database.dbTrustScoreQueries.incrementScore(publicKey.toByteArray())
         } else {
-            database.dbTrustScoreQueries.addScore(publicKey.keyToBin(), 0)
+            database.dbTrustScoreQueries.addScore(publicKey.toByteArray(), 0)
         }
     }
 
@@ -46,14 +46,6 @@ class TrustStore (context: Context) {
     }
 
     companion object {
-        const val STATUS_ARCHIVE = "status_archive"
-        const val STATUS_MUTE = "status_mute"
-        const val STATUS_BLOCK = "status_block"
-        const val STATUS_VERIFICATION = "status_verification"
-        const val STATUS_IMAGE_HASH = "status_image_hash"
-        const val STATUS_INITIALS = "status_initials"
-        const val STATUS_SURNAME = "status_surname"
-
         private lateinit var instance: TrustStore
         fun getInstance(context: Context): TrustStore {
             if (!::instance.isInitialized) {
