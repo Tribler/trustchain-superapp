@@ -15,6 +15,7 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.PeerBusyException
 import nl.tudelft.ipv8.messaging.eva.TimeoutException
+import nl.tudelft.ipv8.messaging.eva.TransferType
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTracker
@@ -109,7 +110,7 @@ class AppGossiper(
             }
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
-            if (evaDownload.activeDownload) {
+            if (evaDownload.activeDownload && exception.transfer?.type == TransferType.INCOMING) {
                 if (exception is TimeoutException || exception is PeerBusyException) {
                     activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
                     retryActiveEvaDownload()
