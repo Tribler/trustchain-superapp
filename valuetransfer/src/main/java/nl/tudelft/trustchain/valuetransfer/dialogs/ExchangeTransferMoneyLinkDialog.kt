@@ -145,14 +145,6 @@ class ExchangeTransferMoneyLinkDialog(
                 startActivity(shareIntent)
             }
 
-//            bottomSheetDialog.clCopyLink.setOnClickListener{
-//                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                val clip: ClipData = ClipData.newPlainText("link",getLink())
-//                clipboard.setPrimaryClip(clip)
-//                Toast.makeText(this.context, "Text copied to clipboard", Toast.LENGTH_LONG).show()
-//            }
-
-
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
@@ -162,14 +154,14 @@ class ExchangeTransferMoneyLinkDialog(
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
             ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
-        var url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
+        val url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
         url.append("amount=").append(transactionAmountText)
         url.append("&message=").append(transactionMessage)
         if(name!=null)
             url.append("&name=").append(name)
         if(isEuroTransfer)
             url.append("&IBAN=").append(IBAN)
-        url.append("&public=").append(ownKey)
+        url.append("&public=").append(ownKey.keyToBin().toHex())
         return url.toString()
     }
 
