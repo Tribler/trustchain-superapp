@@ -147,7 +147,7 @@ class EuroTokenCommunity(
         addresses.add(myPeer.publicKey.keyToBin().toHex())
         if (demoModeEnabled) {
             // Generate [num] addresses if in demo mode
-            addresses.addAll(generatePublicKeys(num, 1337))
+            addresses.addAll(generatePublicKeys(num))
         } else {
             // Get all addresses of the last [num] incoming transactions
             addresses.addAll(transactionRepository.getTransactions(num).map { transaction: Transaction ->
