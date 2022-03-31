@@ -118,15 +118,14 @@ class EuroTokenCommunity(
         }
     }
 
-    fun generatePublicKey(seed: Long, size: Int = 148) : String {
-        val key = defaultCryptoProvider.generateKey()
-        return key.pub().keyToBin().toHex()
+    fun generatePublicKey() : String {
+        return defaultCryptoProvider.generateKey().pub().keyToBin().toHex()
     }
 
-    fun generatePublicKeys(length: Int, seed: Long, size: Int = 148) : List<String> {
+    fun generatePublicKeys(length: Int) : List<String> {
         val publicKeys = mutableListOf<String>()
         for (i in 0 until length) {
-            publicKeys.add(generatePublicKey(seed + i, size))
+            publicKeys.add(generatePublicKey())
         }
 
         logger.debug { "-> Generated ${publicKeys?.size} public keys" }
