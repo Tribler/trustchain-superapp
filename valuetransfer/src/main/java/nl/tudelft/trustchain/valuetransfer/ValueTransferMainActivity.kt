@@ -166,14 +166,14 @@ class ValueTransferMainActivity : BaseActivity() {
         var requestMoney=false
         if(action!=null && data!=null)
         {
-
             val receiver_name=data.getQueryParameter("name")
             val receiver_public=data.getQueryParameter("public")
             val amount=data.getQueryParameter("amount")
             val message=data.getQueryParameter("message")
+            val iban=data.getQueryParameter("IBAN")
             if(receiver_public!=null && amount!=null) {
                 requestMoney = true
-                exchangeTransferMoneyLinkFragment.setData(receiver_name, amount, message,receiver_public)
+                exchangeTransferMoneyLinkFragment.setData(receiver_name, amount, message, receiver_public, iban)
             }
         }
 
