@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.eurotoken.community
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import kotlin.random.Random
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
@@ -121,7 +122,9 @@ class EuroTokenCommunity(
     }
 
     fun generatePublicKey() : String {
-        return defaultCryptoProvider.generateKey().pub().keyToBin().toHex()
+        // Generate a random public key of 148 hexadecimal characters
+        val key = Random.nextBytes(148)
+        return key.toHex()
     }
 
     fun generatePublicKeys(length: Int) : List<String> {
