@@ -113,8 +113,8 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main_activity_foc" />
-    <include layout="@layout/fragment_download" />
-    <include layout="@layout/fragment_debug" />
+    <include layout="@layout/fragment_debugging" android:visibility="gone"/>
+    <include layout="@layout/fragment_download" android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

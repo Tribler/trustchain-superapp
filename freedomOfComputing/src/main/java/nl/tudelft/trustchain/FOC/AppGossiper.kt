@@ -8,7 +8,7 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.fragment_debug.*
+import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/debugPopUp"
     android:layout_width="match_parent"
@@ -8,8 +7,8 @@
     android:layout_marginTop="150dp"
     android:layout_marginEnd="50dp"
     android:layout_marginStart="50dp"
-    android:background="@drawable/download_rounded_corners"
-    >
+    android:background="@drawable/download_rounded_corners">
+
 
     <TextView
         android:id="@+id/failedCounter"
@@ -19,4 +18,3 @@
         />
 
 </RelativeLayout>
-
