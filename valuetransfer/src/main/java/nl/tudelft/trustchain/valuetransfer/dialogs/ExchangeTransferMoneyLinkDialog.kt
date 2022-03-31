@@ -157,7 +157,7 @@ class ExchangeTransferMoneyLinkDialog(
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    private fun  getLink():String
+    private fun getLink():String
     {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
@@ -174,7 +174,7 @@ class ExchangeTransferMoneyLinkDialog(
     }
 
 
-    private fun isValidIban(iban: String): Boolean {
+    internal fun isValidIban(iban: String): Boolean {
         if (!"^[0-9A-Z]*\$".toRegex().matches(iban)) {
             return false
         }
