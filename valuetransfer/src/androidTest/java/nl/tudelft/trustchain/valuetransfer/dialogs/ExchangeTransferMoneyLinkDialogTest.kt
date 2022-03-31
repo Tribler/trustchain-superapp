@@ -6,7 +6,6 @@ import org.junit.Test
 
 
 class ExchangeTransferMoneyLinkDialogTest{
-//    TO BE CONTINUED
     val exchange = ExchangeTransferMoneyLinkDialog("10",true,"Hi")
     @Test
     @Suppress("IllegalIdentifier")

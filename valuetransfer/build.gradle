@@ -28,7 +28,6 @@ repositories {
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
-
     defaultConfig {
         minSdkVersion 22
         targetSdkVersion 29
@@ -38,7 +37,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-
+    packagingOptions {
+        exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -56,6 +57,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    ndkVersion '21.1.6352462'
 }
 
 dependencies {
