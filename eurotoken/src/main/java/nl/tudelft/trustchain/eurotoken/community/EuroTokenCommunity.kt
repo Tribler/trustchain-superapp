@@ -1,16 +1,14 @@
 package nl.tudelft.trustchain.eurotoken.community
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContentProviderCompat.requireContext
-import kotlinx.coroutines.flow.collect
 import mu.KotlinLogging
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.PrivateKey
-import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.util.hexToBytes
@@ -18,23 +16,25 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
+import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
 private val logger = KotlinLogging.logger {}
 
-const val EUROTOKEN_PREFERENCES = "eurotoken"
-const val DEMO_MODE_ENABLED_PREF = "demo_mode_enabled"
-
 class EuroTokenCommunity(
     store: GatewayStore,
-    trustStore : TrustStore
+    trustStore : TrustStore,
+    context: Context,
 ) : Community() {
     override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
     private lateinit var transactionRepository: TransactionRepository
 
-    private lateinit var myTrustStore : TrustStore
+    private var myTrustStore : TrustStore
+
+    private var myContext : Context
 
 
     init {
@@ -45,6 +45,7 @@ class EuroTokenCommunity(
         }
 
         myTrustStore = trustStore
+        myContext = context
     }
 
     @JvmName("setTransactionRepository1")
@@ -59,11 +60,11 @@ class EuroTokenCommunity(
 
     private fun onLastAddressPacket(packet: Packet) {
         logger.debug { "RECEIVED EVA MESSAGE PT 0" }
-        val (peer, payload) = packet.getDecryptedAuthPayload(
+        val (_, payload) = packet.getDecryptedAuthPayload(
             TransactionsPayload.Deserializer, myPeer.key as PrivateKey
         )
 
-        val addresses : List<String> = String(payload.data).split(",")
+        val addresses : List<ByteArray> = String(payload.data).split(",").map { it.toByteArray() }
         for (i in addresses.indices) {
             myTrustStore.incrementTrust(addresses[i])
         }
@@ -111,10 +112,11 @@ class EuroTokenCommunity(
 
     class Factory(
         private val store: GatewayStore,
-        private val trustStore : TrustStore
+        private val trustStore : TrustStore,
+        private val context : Context,
     ) : Overlay.Factory<EuroTokenCommunity>(EuroTokenCommunity::class.java) {
         override fun create(): EuroTokenCommunity {
-            return EuroTokenCommunity(store, trustStore)
+            return EuroTokenCommunity(store, trustStore, context)
         }
     }
 
@@ -136,10 +138,8 @@ class EuroTokenCommunity(
 
 
     fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
-        // TODO: load demoModeEnabled from preferences
-//        val pref = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
-//        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
-        val demoModeEnabled = true
+        val pref = myContext.getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
+        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
 
         logger.debug{"ADDRESS CHECK " + myPeer.publicKey.keyToBin().toHex()}
 

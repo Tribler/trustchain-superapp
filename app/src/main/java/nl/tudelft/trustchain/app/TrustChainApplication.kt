@@ -232,7 +232,7 @@ class TrustChainApplication : Application() {
         val store = GatewayStore.getInstance(this)
         val trustStore = TrustStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(store, trustStore),
+            EuroTokenCommunity.Factory(store, trustStore, this),
             listOf(randomWalk)
         )
     }

@@ -3,20 +3,19 @@ package nl.tudelft.trustchain.eurotoken.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.text.InputType
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import mu.KotlinLogging
 import nl.tudelft.ipv8.attestation.trustchain.BlockListener
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
 import nl.tudelft.ipv8.util.toHex
@@ -24,14 +23,13 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
+import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
+import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
 import nl.tudelft.trustchain.eurotoken.R
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
-import mu.KotlinLogging
-import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
-import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
-import nl.tudelft.trustchain.eurotoken.db.TrustStore
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
@@ -68,20 +66,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
-
-//        try {
-//            trustScores = loadTrustScores()
-//            logger.debug { "Loaded trust scores from json file!" }
-//        } catch (e: IOException) {
-//            Toast.makeText(requireContext(), "Error reading trust scores", Toast.LENGTH_SHORT).show()
-//            logger.error(e) { "Error reading trust_scores.json asset" }
-//        }
-
         store.createContactStateTable()
-
-        store.incrementTrust(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex())
-        val score = store.getScore(transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex())
-        Toast.makeText(requireContext(), "Loaded score with " + score.toString(), Toast.LENGTH_LONG).show()
 
         lifecycleScope.launchWhenResumed {
         }
