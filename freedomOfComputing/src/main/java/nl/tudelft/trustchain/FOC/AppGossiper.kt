@@ -231,8 +231,24 @@ class AppGossiper(
         }
     }
 
+    fun addButtonsInAdvance(packets: ArrayList<Packet>) {
+        for (packet in packets) {
+            val (peer, payload) = packet.getAuthPayload(MyMessage)
+            Log.i("appGossiper", peer.mid + ": " + payload.message)
+            val torrentName = payload.message.substringAfter("&dn=")
+                .substringBefore('&')
+            activity.runOnUiThread {
+                activity.createUnsuccessfulTorrentButton(torrentName)
+            }
+        }
+    }
+
     private suspend fun downloadPendingFiles() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
+
+            addDownloadToQueue(demoCommunity.getTorrentMessages().size)
+            addButtonsInAdvance(demoCommunity.getTorrentMessages())
+
             for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                 val (peer, payload) = packet.getAuthPayload(MyMessage)
                 Log.i("appGossiper", peer.mid + ": " + payload.message)
@@ -247,10 +263,11 @@ class AppGossiper(
                         if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
                             continue
                     }
-                    addDownloadToQueue()
                     getMagnetLink(magnetLink, torrentName, peer)
                 }
             }
+            // If the torrents are already downloaded, set this to 0
+            addDownloadToQueue(0)
         }
     }
 
@@ -323,11 +340,10 @@ class AppGossiper(
         activity.runOnUiThread {
             printToast("Found new torrent $torrentName attempting to download!")
         }
-        downloadHasStarted(torrentName)
 
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString) || evaDownload.activeDownload)
             return
-
+        downloadHasStarted(torrentName)
 
         val startIndexName = magnetLink.indexOf(displayNameAppender)
         val stopIndexName =
@@ -444,9 +460,10 @@ class AppGossiper(
         Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun addDownloadToQueue() {
+    fun addDownloadToQueue(downloadsInProgressCount: Int) {
         activity.runOnUiThread {
-            activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
+            downloadsInProgress = downloadsInProgressCount
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
             activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         }
     }
@@ -462,7 +479,6 @@ class AppGossiper(
         activity.runOnUiThread {
             activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
             activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
-            activity.createUnsuccessfulTorrentButton(torrentName)
         }
     }
 
