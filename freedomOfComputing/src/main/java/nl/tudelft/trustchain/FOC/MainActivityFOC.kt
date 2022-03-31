@@ -20,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
@@ -28,7 +27,6 @@ import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import java.io.*
 import java.util.*
 import java.io.File
 import java.io.FileOutputStream
@@ -80,17 +78,26 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    fun toggleDebugPopUp(layout: RelativeLayout) {
-        if (debugVisible) {
-            layout.visibility = View.GONE
-        } else {
-            layout.visibility = View.VISIBLE
-        }
+    fun toggleDebugPopUp(layout: LinearLayout) {
+        if (debugVisible) layout.visibility = View.GONE
+        else layout.visibility = View.VISIBLE
+
         if (progressVisible) {
             progressVisible = false
             popUp.visibility = View.GONE
         }
         debugVisible = !debugVisible
+    }
+
+    private fun toggleProgressBar(progress: RelativeLayout) {
+        if (progressVisible) progress.visibility = View.GONE
+        else progress.visibility = View.VISIBLE
+
+        if (debugVisible) {
+            debugVisible = false
+            debugPopUp.visibility = View.GONE
+        }
+        progressVisible = !progressVisible
     }
 
     override fun onResume() {
@@ -101,19 +108,6 @@ class MainActivityFOC : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         appGossiper.pause()
-    }
-
-    private fun toggleProgressBar(progress: RelativeLayout) {
-        if (progressVisible) {
-            progress.visibility = View.GONE
-        } else {
-            progress.visibility = View.VISIBLE
-        }
-        if (debugVisible) {
-            debugVisible = false
-            debugPopUp.visibility = View.GONE
-        }
-        progressVisible = !progressVisible
     }
 
 

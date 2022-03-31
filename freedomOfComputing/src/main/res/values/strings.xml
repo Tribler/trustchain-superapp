@@ -14,5 +14,6 @@
     <string name="downloadsInQueue">In queue: %1$d</string>
     <string name="currentTorrentDownload">%1$s</string>
     <string name="downloadProgressPercentage">%1$s</string>
-    <string name="failedCounter">Failed counter map: \n %1$s</string>
+    <string name="failedCounter">Failed torrent counter map: %1$s</string>
+    <string name="evaRetries">Eva retries: %1$d</string>
 </resources>
