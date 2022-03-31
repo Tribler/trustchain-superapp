@@ -120,15 +120,14 @@ class EuroTokenCommunity(
         }
     }
 
-    fun generatePublicKey(seed: Long, size: Int = 148) : String {
-        val key = defaultCryptoProvider.generateKey()
-        return key.pub().keyToBin().toHex()
+    fun generatePublicKey() : String {
+        return defaultCryptoProvider.generateKey().pub().keyToBin().toHex()
     }
 
-    fun generatePublicKeys(length: Int, seed: Long, size: Int = 148) : List<String> {
+    fun generatePublicKeys(length: Int) : List<String> {
         val publicKeys = mutableListOf<String>()
         for (i in 0 until length) {
-            publicKeys.add(generatePublicKey(seed + i, size))
+            publicKeys.add(generatePublicKey())
         }
 
         logger.debug { "-> Generated ${publicKeys?.size} public keys" }
@@ -148,7 +147,7 @@ class EuroTokenCommunity(
         addresses.add(myPeer.publicKey.keyToBin().toHex())
         if (demoModeEnabled) {
             // Generate [num] addresses if in demo mode
-            addresses.addAll(generatePublicKeys(num, 1337))
+            addresses.addAll(generatePublicKeys(num))
         } else {
             // Get all addresses of the last [num] incoming transactions
             addresses.addAll(transactionRepository.getTransactions(num).map { transaction: Transaction ->
