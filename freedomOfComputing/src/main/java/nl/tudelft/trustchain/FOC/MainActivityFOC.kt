@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
@@ -20,17 +19,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
-import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import java.io.*
-import java.util.*
-import java.util.concurrent.CountDownLatch
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 
 class MainActivityFOC : AppCompatActivity() {
 
@@ -61,6 +59,8 @@ class MainActivityFOC : AppCompatActivity() {
 
             // upon launching our activity, we ask for the "Storage" permission
             requestStoragePermission()
+
+            copyDefaultApp()
 
             printToast("STARTED")
             showAllFiles()
@@ -108,6 +108,24 @@ class MainActivityFOC : AppCompatActivity() {
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
+    }
+
+    /**
+     * Ensures that there will always be one apk runnable from within FoC.
+     */
+    private fun copyDefaultApp() {
+        try {
+            val file = File(this.applicationContext.cacheDir.absolutePath + "/search.apk")
+            if (!file.exists()) {
+                val outputStream = FileOutputStream(file)
+                val ins = resources.openRawResource(resources.getIdentifier("search", "raw", packageName))
+                outputStream.write(ins.readBytes())
+                ins.close()
+                outputStream.close()
+            }
+        } catch (e: Exception) {
+            this.printToast(e.toString())
+        }
     }
 
     // change if you want to write to the actual phone storage (needs "write" permission)
