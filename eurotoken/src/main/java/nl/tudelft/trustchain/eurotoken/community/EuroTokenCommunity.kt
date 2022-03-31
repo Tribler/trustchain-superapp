@@ -121,16 +121,19 @@ class EuroTokenCommunity(
         }
     }
 
-    fun generatePublicKey() : String {
+    fun generatePublicKey(seed : Long) : String {
+        // Initialize Random with seed
+        val random = Random(seed)
+
         // Generate a random public key of 148 hexadecimal characters
-        val key = Random.nextBytes(148)
+        val key = random.nextBytes(148)
         return key.toHex()
     }
 
-    fun generatePublicKeys(length: Int) : List<String> {
+    fun generatePublicKeys(length: Int, seed : Long = 1337) : List<String> {
         val publicKeys = mutableListOf<String>()
         for (i in 0 until length) {
-            publicKeys.add(generatePublicKey())
+            publicKeys.add(generatePublicKey(seed + i))
         }
 
         logger.debug { "-> Generated ${publicKeys?.size} public keys" }
