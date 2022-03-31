@@ -235,7 +235,7 @@ class DemoCommunity(
             serializePacket(MessageId.APP, appPayload, encrypt = true, recipient = peer)
         if (evaProtocolEnabled) evaSendBinary(
             peer,
-            EVAId.EVA_PEERCHAT_ATTACHMENT,
+            EVAId.EVA_DEMOCOMMUNITY_ATTACHMENT,
             appTorrentInfoHash,
             packet
         ) else send(peer, packet)
@@ -288,7 +288,7 @@ class DemoCommunity(
     private fun onEVASendCompleteCallback(peer: Peer, info: String, nonce: ULong) {
         Log.d("DemoCommunity", "ON EVA send complete callback for '$info'")
 
-        if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
+        if (info != EVAId.EVA_DEMOCOMMUNITY_ATTACHMENT) return
 
         if (this::evaSendCompleteCallback.isInitialized) {
             this.evaSendCompleteCallback(peer, info, nonce)
@@ -298,7 +298,7 @@ class DemoCommunity(
     private fun onEVAReceiveProgressCallback(peer: Peer, info: String, progress: TransferProgress) {
         Log.d("DemoCommunity", "ON EVA receive progress callback for '$info'")
 
-        if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
+        if (info != EVAId.EVA_DEMOCOMMUNITY_ATTACHMENT) return
 
         if (this::evaReceiveProgressCallback.isInitialized) {
             this.evaReceiveProgressCallback(peer, info, progress)
@@ -308,7 +308,7 @@ class DemoCommunity(
     private fun onEVAReceiveCompleteCallback(peer: Peer, info: String, id: String, data: ByteArray?) {
         Log.d("DemoCommunity", "ON EVA receive complete callback for '$info'")
 
-        if (info != EVAId.EVA_PEERCHAT_ATTACHMENT) return
+        if (info != EVAId.EVA_DEMOCOMMUNITY_ATTACHMENT) return
 
         data?.let {
             val packet = Packet(peer.address, it)
