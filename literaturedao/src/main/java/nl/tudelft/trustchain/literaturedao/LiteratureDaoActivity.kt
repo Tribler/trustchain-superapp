@@ -82,6 +82,9 @@ open class LiteratureDaoActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         Log.e("litdao", "starting ...")
+    }
+
+    fun importPDF(){
         PDFBoxResourceLoader.init(getApplicationContext());
         var i = 1
         while (i < 2){
@@ -92,19 +95,19 @@ open class LiteratureDaoActivity : BaseActivity() {
             Log.e("litdao", "litdao: " + kws.toString())
             i += 1
         }
-        // query test
-        var handler = QueryHandler()
-        Log.d("litdao", handler.scoreList("Clustering all the algorighems man", loadAll()).toString())
-        Log.d("litdao", handler.scoreList("The pythagorean algorithms machine learning", loadAll()).toString())
+    }
 
+    fun localSearch(inp: String): MutableList<Pair<String, Double>>{
+        var handler = QueryHandler()
+        return handler.scoreList(inp, loadAll())
     }
 
     fun getKWs(pdfIS: java.io.InputStream): MutableList<Pair<String, Double>>{
         var pdfController = PdfController()
-        val keywordExtractorInput = pdfController.stripText(pdfIS)
+        val strippedString = pdfController.stripText(pdfIS)
         val csv: InputStream = getAssets().open("stemmed_freqs.csv")
         val result = KeywordExtractor()
-            .extract(keywordExtractorInput, csv)
+            .extract(strippedString, csv)
         return result
     }
 
