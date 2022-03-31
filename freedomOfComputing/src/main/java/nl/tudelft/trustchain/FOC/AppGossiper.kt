@@ -110,6 +110,11 @@ class AppGossiper(
                 }
             }
         }
+
+        demoCommunity?.setEVAOnReceiveProgressCallback { _, _, progress ->
+            updateProgress(progress = progress.progress.toInt())
+        }
+
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
             downloadHasFailed()
             if (evaDownload.activeDownload && exception.transfer?.type == TransferType.INCOMING) {
@@ -225,8 +230,6 @@ class AppGossiper(
 
     private suspend fun downloadPendingFiles() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
-            downloadsInProgress = demoCommunity.getTorrentMessages().size
-            activity.runOnUiThread { activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress) }
             for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                 val (peer, payload) = packet.getAuthPayload(MyMessage)
                 Log.i("appGossiper", peer.mid + ": " + payload.message)
@@ -241,6 +244,7 @@ class AppGossiper(
                         if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
                             continue
                     }
+                    activity.runOnUiThread { activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress) }
                     getMagnetLink(magnetLink, torrentName, peer)
                 }
             }
@@ -397,13 +401,13 @@ class AppGossiper(
     }
 
     private fun onDownloadSuccess(torrentName: String) {
-        downloadHasPassed()
         activity.runOnUiThread {
             activity.createTorrent(torrentName)?.let {
                 torrentInfos.add(it)
             }
             activity.showAllFiles()
         }
+        downloadHasPassed()
     }
 
     private fun onTorrentDownloadFailure(
@@ -456,6 +460,7 @@ class AppGossiper(
             activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
             activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
             activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
+            updateProgress(0)
         }
     }
 
@@ -465,6 +470,7 @@ class AppGossiper(
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
             activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
             activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            updateProgress(0)
         }
     }
 
