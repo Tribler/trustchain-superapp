@@ -110,6 +110,7 @@ class AppGossiper(
             }
         }
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
+            downloadHasFailed()
             if (evaDownload.activeDownload) {
                 if (exception is TimeoutException || exception is PeerBusyException) {
                     activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
@@ -396,13 +397,13 @@ class AppGossiper(
     }
 
     private fun onDownloadSuccess(torrentName: String) {
+        downloadHasPassed()
         activity.runOnUiThread {
             activity.createTorrent(torrentName)?.let {
                 torrentInfos.add(it)
             }
             activity.showAllFiles()
         }
-        downloadHasPassed()
     }
 
     private fun onTorrentDownloadFailure(
@@ -410,6 +411,7 @@ class AppGossiper(
         magnetInfoHash: String,
         peer: Peer
     ) {
+        downloadHasFailed()
         if (demoCommunity?.evaProtocolEnabled == true && !evaDownload.activeDownload) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
@@ -425,7 +427,6 @@ class AppGossiper(
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
 
-            downloadHasFailed()
         }
     }
 
