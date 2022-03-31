@@ -116,8 +116,6 @@ class AppGossiper(
     }
 
     fun resume() {
-        gossipingPaused = false
-        downloadingPaused = false
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
@@ -144,12 +142,17 @@ class AppGossiper(
                             "appGossiper",
                             "Progress: " + p + " for torrent name: " + a.torrentName()
                         )
+                        activity.progressBar.progress = p
+                        activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "$p%")
                         Log.i("appGossiper", java.lang.Long.toString(sessionManager.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
                         Log.i("appGossiper", "Torrent finished")
                         printToast("Torrent downloaded!!")
+                        activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
+                        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+                        activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
                     }
                     else -> {
                     }
@@ -190,6 +193,8 @@ class AppGossiper(
 
     private suspend fun downloadPendingFiles() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
+            downloadsInProgress = demoCommunity.getTorrentMessages().size
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
             for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                 val (peer, payload) = packet.getAuthPayload(MyMessage)
                 Log.i("appGossiper", peer.mid + ": " + payload.message)
@@ -278,9 +283,9 @@ class AppGossiper(
         // same or another torrent
         activity.runOnUiThread {
             printToast("Found new torrent and start download")
-            activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
             activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
             activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+            activity.createUnsuccessfulTorrentButton(torrentName)
         }
 
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString))
@@ -329,9 +334,6 @@ class AppGossiper(
             activity.runOnUiThread {
                 printToast("Failed to fetch magnet info for $torrentName!")
                 printToast(e.toString())
-                activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
-                activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-                activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
             }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             return
@@ -360,9 +362,6 @@ class AppGossiper(
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
         }
-        activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
-        activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-        activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
     }
 
     private fun onDownloadSuccess(torrentName: String) {

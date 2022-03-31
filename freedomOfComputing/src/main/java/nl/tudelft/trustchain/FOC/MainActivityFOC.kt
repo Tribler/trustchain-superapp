@@ -130,12 +130,21 @@ class MainActivityFOC : AppCompatActivity() {
 
     fun createSuccessfulTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
-        val button = Button(this)
+        var button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
+        // Replace the failed torrent with the downloaded torrent
+        val existingButton = torrentList.find { btn -> btn.text == fileName }
+        if (existingButton != null) {
+            button = existingButton;
+            printToast("Replacing button with filename: $fileName")
+        } else {
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
+
         button.isAllCaps = false
         button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.android_green))
-        torrentList.add(button)
         torrentCount.text = getString(R.string.torrentCount, torrentList.size)
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -144,16 +153,19 @@ class MainActivityFOC : AppCompatActivity() {
             createTorrent(fileName)
             true
         }
-        torrentListView.addView(button)
     }
 
     fun createUnsuccessfulTorrentButton(torrentName: String) {
-        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
-        val button = Button(this)
-        button.text = torrentName
-        button.isAllCaps = false
-        button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.red))
-        torrentListView.addView(button)
+        // No need to create duplicate failed torrent buttons
+        val existingButton = torrentList.find { btn -> btn.text == torrentName }
+        if (existingButton == null) {
+            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            val button = Button(this)
+            button.text = torrentName
+            button.isAllCaps = false
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
     }
 
     @Suppress("DEPRECATION")

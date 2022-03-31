@@ -26,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:clipToPadding="false"
-
                 android:focusable="true">
 
                 <ImageButton
@@ -96,7 +95,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main_activity_foc" />
-
     <include layout="@layout/fragment_download" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
