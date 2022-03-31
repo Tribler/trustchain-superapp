@@ -1,7 +1,0 @@
-Executable : C:\Users\s\AppData\Local\Android\Sdk\cmake\3.18.1\bin\ninja.exe
-arguments : 
--C
-C:\Users\s\Documents\GitHub\trustchain-superapp\frost\.cxx\cmake\debug\armeabi-v7a
-hello_cmake
-jvmArgs : 
-

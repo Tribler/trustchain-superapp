@@ -1,3 +1,0 @@
-C:/Users/s/Documents/GitHub/trustchain-superapp/frost/.cxx/cmake/debug/arm64-v8a/CMakeFiles/hello_cmake.dir
-C:/Users/s/Documents/GitHub/trustchain-superapp/frost/.cxx/cmake/debug/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/s/Documents/GitHub/trustchain-superapp/frost/.cxx/cmake/debug/arm64-v8a/CMakeFiles/rebuild_cache.dir
