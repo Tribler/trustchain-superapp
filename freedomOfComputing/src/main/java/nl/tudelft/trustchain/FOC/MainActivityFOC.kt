@@ -115,7 +115,6 @@ class MainActivityFOC : AppCompatActivity() {
     fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
-            // todo improve this such that the whole list is not loaded again every time
             val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
             torrentListView.removeAllViews()
             torrentList.clear()
@@ -128,6 +127,18 @@ class MainActivityFOC : AppCompatActivity() {
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
+    }
+
+    fun showAddedFile(torrentName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == torrentName
+            }
+            if (file != null) {
+                createSuccessfulTorrentButton(file.toUri())
+            }
+        }
     }
 
     /**
@@ -180,7 +191,6 @@ class MainActivityFOC : AppCompatActivity() {
         val existingButton = torrentList.find { btn -> btn.text == fileName }
         if (existingButton != null) {
             button = existingButton;
-            printToast("Replacing button with filename: $fileName")
         } else {
             torrentList.add(button)
             torrentListView.addView(button)
