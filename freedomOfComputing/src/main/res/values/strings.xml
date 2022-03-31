@@ -13,4 +13,6 @@
     <string name="downloadsInProgress">%1$d</string>
     <string name="downloadsInQueue">In queue: %1$d</string>
     <string name="currentTorrentDownload">%1$s</string>
+    <string name="downloadProgressPercentage">%1$s</string>
+    <string name="failedCounter">Failed counter map: \n %1$s</string>
 </resources>

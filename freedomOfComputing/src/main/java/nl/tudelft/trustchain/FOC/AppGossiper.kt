@@ -8,6 +8,7 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_debug.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
@@ -83,6 +84,7 @@ class AppGossiper(
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+        activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%%")
         scope.launch {
             iterativelyShareApps()
         }
@@ -119,6 +121,9 @@ class AppGossiper(
         activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+        activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
+        gossipingPaused = false
+        downloadingPaused = false
     }
 
     private fun initializeTorrentSession() {
@@ -379,10 +384,14 @@ class AppGossiper(
         peer: Peer
     ) {
         if (demoCommunity?.evaProtocolEnabled == true) {
-            if (failedTorrents.containsKey(torrentName))
+            if (failedTorrents.containsKey(torrentName)) {
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
-            else
+                activity.runOnUiThread { activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString()) }
+            }
+            else {
                 failedTorrents[torrentName] = 1
+                activity.runOnUiThread { activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString()) }
+            }
             if (failedTorrents[torrentName] == TORRENT_ATTEMPTS_THRESHOLD)
                 demoCommunity.let {
                     activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
@@ -397,6 +406,7 @@ class AppGossiper(
         failedTorrents.keys.let { keys ->
             for (key in keys) {
                 failedTorrents[key] = 0
+                activity.runOnUiThread { activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString()) }
             }
         }
     }

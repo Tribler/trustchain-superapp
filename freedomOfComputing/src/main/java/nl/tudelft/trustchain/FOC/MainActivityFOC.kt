@@ -23,6 +23,7 @@ import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_debug.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import java.io.*
 import java.util.*
@@ -31,6 +32,7 @@ class MainActivityFOC : AppCompatActivity() {
 
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
+    private var debugVisible = false
     private var requestCode = 1
     val MY_PERMISSIONS_REQUEST = 0
     val s = SessionManager()
@@ -52,6 +54,11 @@ class MainActivityFOC : AppCompatActivity() {
                 toggleProgressBar(popUp)
             }
 
+            debugPopUp.visibility = View.GONE
+            debugPopUpButton.setOnClickListener {
+                toggleDebugPopUp(debugPopUp)
+            }
+
             torrentCount.text = getString(R.string.torrentCount, torrentList.size)
 
             // upon launching our activity, we ask for the "Storage" permission
@@ -64,6 +71,19 @@ class MainActivityFOC : AppCompatActivity() {
         } catch (e: Exception) {
             printToast(e.toString())
         }
+    }
+
+    fun toggleDebugPopUp(layout: RelativeLayout) {
+        if (debugVisible) {
+            layout.visibility = View.GONE
+        } else {
+            layout.visibility = View.VISIBLE
+        }
+        if (progressVisible) {
+            progressVisible = false
+            popUp.visibility = View.GONE
+        }
+        debugVisible = !debugVisible
     }
 
     override fun onResume() {
@@ -81,6 +101,10 @@ class MainActivityFOC : AppCompatActivity() {
             progress.visibility = View.GONE
         } else {
             progress.visibility = View.VISIBLE
+        }
+        if (debugVisible) {
+            debugVisible = false
+            debugPopUp.visibility = View.GONE
         }
         progressVisible = !progressVisible
     }
