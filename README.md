@@ -1,10 +1,13 @@
 ## EuroToken Multi-Currency Payment Request Feature For the SuperApp
 
-The payment request system (Dutch: Betaalverzoek) has been increasingly popular among the population due to its simplicity in payment request and management. Implementing payment requests would potentially enhance the usability of the EuroToken among the consumers. This feature is widely implemented nowadays, however, it has not been developed into the SuperApp yet. Furthermore, our developed feature also enhances adoptability by enabling future users to request and pay in multiple currencies, by automatically connecting to a trusted exchange and carry out the "swap" on behave of the user. At the moment, the implementation only supports EUR and EuroToken. This implementation also tests the usability of the REST API of the exchange by putting it in use in the different features. At the same time we would like to identify potential weakness of the Value Transfer app and provide suggestion for the future.
+The payment request system (Dutch: Betaalverzoek) has been increasingly popular among the population due to its simplicity in payment request and management. Implementing payment requests would potentially enhance the usability of the EuroToken among the consumers. This feature is widely implemented nowadays, however, it has not been developed into the SuperApp yet. Furthermore, our developed feature also enhances adoptability by enabling future users to request and pay in multiple currencies, by automatically connecting to a trusted exchange and carry out the "swap" on behave of the user. 
+
+At the moment, the implementation only supports EUR and EuroToken. This implementation also tests the usability of the REST API of the exchange by putting it in use in the different features. At the same time we would like to identify potential weakness of the Value Transfer app and provide suggestion for the future.
 
 
 ## Prerequisite
 [EuroToken: An offline-capable Central Bank Digital Currency](https://repository.tudelft.nl/islandora/object/uuid%3A132faae8-6883-454f-a8ce-94735340dce9?collection=education)
+
 [EuroToken implementation in the Superapp](https://github.com/Tribler/trustchain-superapp/tree/master/eurotoken/src/main/java/nl/tudelft/trustchain/eurotoken)
 
 ## Design & Implementation
