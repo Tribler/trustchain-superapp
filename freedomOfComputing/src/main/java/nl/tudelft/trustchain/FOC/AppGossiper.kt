@@ -32,7 +32,6 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.Pair
 import kotlin.collections.HashMap
 
 /**
@@ -429,13 +428,12 @@ class AppGossiper(
             if (failedTorrents[torrentName] == TORRENT_ATTEMPTS_THRESHOLD)
                 demoCommunity.let {
                     activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
-                    demoCommunity.sendAppRequest(magnetInfoHash, peer)
+                    demoCommunity?.sendAppRequest(magnetInfoHash, peer)
                     evaDownload = EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0)
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
         }
-    }
 
     fun printToast(s: String) {
         Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
