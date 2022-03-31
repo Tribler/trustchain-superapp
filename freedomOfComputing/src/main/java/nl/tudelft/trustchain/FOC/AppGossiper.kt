@@ -461,7 +461,7 @@ class AppGossiper(
     }
 
     fun printToast(s: String) {
-        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
     fun addDownloadToQueue(downloadsInProgressCount: Int) {

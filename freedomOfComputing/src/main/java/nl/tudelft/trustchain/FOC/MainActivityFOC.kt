@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.FOC
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -204,8 +206,37 @@ class MainActivityFOC : AppCompatActivity() {
             loadDynamicCode(fileName)
         }
         button.setOnLongClickListener {
-            createTorrent(fileName)
+            createAlertDialog(fileName)
             true
+        }
+    }
+
+
+    fun createAlertDialog(fileName: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Create or Delete")
+        builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
+        builder.setPositiveButton("Cancel", null)
+        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
+        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.show()
+    }
+
+    fun deleteApkFile(fileName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == fileName
+            }
+            val deleted = file?.delete()
+            if (deleted != null && deleted) {
+                val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
+                if (buttonToBeDeleted != null) {
+                    val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+                    torrentListView.removeView(buttonToBeDeleted)
+                    torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+                }
+            }
         }
     }
 
