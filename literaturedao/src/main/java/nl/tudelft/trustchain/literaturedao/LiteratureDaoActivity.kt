@@ -4,6 +4,8 @@ import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
 import android.util.Log
 import android.view.WindowManager
+import android.widget.SearchView
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
@@ -92,15 +94,49 @@ open class LiteratureDaoActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         Log.e("litdao", "starting ...")
-        KeyWordModelView(this.baseContext).calcKWs("1.pdf")
+        importPDF()
 
+        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (!newText.isNullOrEmpty())
+                    Log.d("litdao", localSearch(newText).toString())
+                return false
+            }
+        })
+        Log.d("litdao", localSearch("dpca").toString())
+    }
+
+    fun importPDF(){
+        PDFBoxResourceLoader.init(getApplicationContext());
+        var i = 1
+        while (i < 4){
+            val path = i.toString() + ".pdf"
+            val pdf: InputStream = getAssets().open(path)
+            PDFBoxResourceLoader.init(this)
+            val strippedString = PdfController().stripText(pdf)
+            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+            val kws = KeywordExtractor().extract(strippedString,csv)
+            store(path, kws)
+            Log.e("litdao", "litdao: " + kws.toString())
+            i += 1
+        }
+    }
+        //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
+/*
         try{
             Log.e("litdao", "litDao read: " + read("1.pdf").content.toString())
         } catch (e: Exception){
             Log.e("litdao", "litDao exception: " + e.toString())
-       }
-    }
+       }*/
 }
+
 
 fun localSearch(inp: String): MutableList<Pair<String, Double>>{
     var handler = QueryHandler()
@@ -112,7 +148,6 @@ fun store(path: String, KWList: MutableList<Pair<String, Double>>){
 }
 
 fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
-
     return tempStorage
 }
 
