@@ -42,6 +42,4 @@ class KeyWordModelView(context: Context) : ViewModel() {
             output.write(Json.encodeToString(Data(kws)).toByteArray())
         }
     }
-
-
 }

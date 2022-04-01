@@ -118,9 +118,12 @@ open class LiteratureDaoActivity : BaseActivity() {
         var i = 1
         while (i < 4){
             val path = i.toString() + ".pdf"
-            val stream: InputStream = getAssets().open(path)
-            val kws = getKWs(stream)
-            save(path, kws)
+            val pdf: InputStream = getAssets().open(path)
+            PDFBoxResourceLoader.init(this)
+            val strippedString = PdfController().stripText(pdf)
+            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+            val kws = KeywordExtractor().extract(strippedString,csv)
+            store(path, kws)
             Log.e("litdao", "litdao: " + kws.toString())
             i += 1
         }
@@ -132,8 +135,8 @@ open class LiteratureDaoActivity : BaseActivity() {
         } catch (e: Exception){
             Log.e("litdao", "litDao exception: " + e.toString())
        }*/
-    }
 }
+
 
 fun localSearch(inp: String): MutableList<Pair<String, Double>>{
     var handler = QueryHandler()
@@ -145,7 +148,6 @@ fun store(path: String, KWList: MutableList<Pair<String, Double>>){
 }
 
 fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
-
     return tempStorage
 }
 
