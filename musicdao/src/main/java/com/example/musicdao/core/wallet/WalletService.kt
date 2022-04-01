@@ -107,34 +107,29 @@ class WalletService(val config: WalletConfig) {
      * @param publicKey the public key address of the cryptocurrency wallet to send the funds to
      */
     fun sendCoins(publicKey: String, coinsAmount: String) {
-        val coins = try {
+        Log.d("MusicDao", "Wallet (1): sending $coinsAmount to $publicKey")
+
+        val coins: BigDecimal = try {
             BigDecimal(coinsAmount.toDouble())
         } catch (e: NumberFormatException) {
-//            musicService.showToast("Incorrect coins amount given", Toast.LENGTH_SHORT)
-            return
-        }
+            null
+        } ?: return
+
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
-        val targetAddress: Address?
-        try {
-            targetAddress = Address.fromString(config.networkParams, publicKey)
+
+        val targetAddress: Address = try {
+            Address.fromString(config.networkParams, publicKey)
         } catch (e: Exception) {
-//            musicService.showToast("Could not resolve wallet address of peer", Toast.LENGTH_LONG)
-            return
-        }
+            null
+        } ?: return
+
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
+
         try {
             app.wallet().sendCoins(sendRequest)
-//            musicService.showToast(
-//                "Sending funds: ${
-//                Coin.valueOf(satoshiAmount).toFriendlyString()
-//                }",
-//                Toast.LENGTH_SHORT
-//            )
+            Log.d("MusicDao", "Wallet (2): successfully sent $coinsAmount to $publicKey")
         } catch (e: Exception) {
-//            musicService.showToast(
-//                "Error creating transaction (do you have sufficient funds?)",
-//                Toast.LENGTH_SHORT
-//            )
+            Log.d("MusicDao", "Wallet (3): failed sending $coinsAmount to $publicKey")
         }
     }
 

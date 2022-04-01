@@ -261,7 +261,7 @@ fun Header(album: Album, navController: NavController) {
                 IconButton(
                     onClick = {
                         navController.navigate(
-                            Screen.Donate.route
+                            Screen.Donate.createRoute(publicKey = album.publisher)
                         )
                     }
                 ) {
@@ -295,7 +295,7 @@ fun Header(album: Album, navController: NavController) {
                         DropdownMenuItem(
                             onClick = {
                                 navController.navigate(
-                                    Screen.Donate.route
+                                    Screen.Donate.createRoute(publicKey = album.publisher)
                                 )
                             }
                         ) {

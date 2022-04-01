@@ -11,15 +11,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicdao.ui.SnackbarHandler
 import com.example.musicdao.ui.screens.profile.CustomMenuItem
 import com.example.musicdao.ui.screens.wallet.BitcoinWalletViewModel
 
 @Composable
-fun DonateScreen() {
-
-    val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
+fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String) {
 
     val amount = rememberSaveable { mutableStateOf("1") }
 

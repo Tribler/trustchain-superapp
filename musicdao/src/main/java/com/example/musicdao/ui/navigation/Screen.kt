@@ -17,10 +17,12 @@ sealed class Screen(val route: String) {
     object EditProfile : Screen("me/edit")
     object BitcoinWallet : Screen("me/wallet")
 
-    object Donate : Screen("donate")
     object DiscoverArtists : Screen("artists")
 
     object Profile : Screen("profile/{publicKey}") {
         fun createRoute(publicKey: String) = "profile/$publicKey"
+    }
+    object Donate : Screen("profile/{publicKey}/donate") {
+        fun createRoute(publicKey: String) = "profile/$publicKey/donate"
     }
 }

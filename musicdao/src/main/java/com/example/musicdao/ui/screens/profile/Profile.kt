@@ -56,7 +56,7 @@ fun Profile(artist: Artist, releases: List<Album> = listOf(), navController: Nav
                 OutlinedButton(onClick = { }, modifier = Modifier.padding(end = 10.dp)) {
                     Text(text = "Follow")
                 }
-                OutlinedButton(onClick = { navController.navigate(Screen.Donate.route) }) {
+                OutlinedButton(onClick = { navController.navigate(Screen.Donate.createRoute(publicKey = artist.publicKey)) }) {
                     Text(text = "Donate")
                 }
             }

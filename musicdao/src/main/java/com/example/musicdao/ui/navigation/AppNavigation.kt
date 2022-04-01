@@ -32,6 +32,7 @@ import com.example.musicdao.ui.screens.search.SearchScreenViewModel
 import com.example.musicdao.ui.screens.settings.SettingsScreen
 import com.example.musicdao.ui.screens.settings.SettingsScreenViewModel
 import com.example.musicdao.ui.screens.wallet.BitcoinWalletScreen
+import com.example.musicdao.ui.screens.wallet.BitcoinWalletViewModel
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 
@@ -45,6 +46,8 @@ fun AppNavigation(
     playerViewModel: PlayerViewModel,
     ownProfileViewScreenModel: MyProfileScreenViewModel
 ) {
+    val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
+
     AnimatedNavHost(
         modifier = Modifier.fillMaxSize(),
         enterTransition = { _, _ -> EnterTransition.None },
@@ -78,10 +81,22 @@ fun AppNavigation(
                 ProfileMenuScreen(navController = navController)
             }
             composable(Screen.BitcoinWallet.route) {
-                BitcoinWalletScreen()
+                BitcoinWalletScreen(bitcoinWalletViewModel = bitcoinWalletViewModel)
             }
-            composable(Screen.Donate.route) {
-                DonateScreen()
+            composable(
+                Screen.Donate.route,
+                arguments = listOf(
+                    navArgument("publicKey") {
+                        type = NavType.StringType
+                    }
+                )
+            ) { navBackStackEntry ->
+                DonateScreen(
+                    bitcoinWalletViewModel = bitcoinWalletViewModel,
+                    navBackStackEntry.arguments?.getString(
+                        "publicKey"
+                    )!!
+                )
             }
             composable(Screen.DiscoverArtists.route) {
                 DiscoverArtistsScreen(navController = navController)

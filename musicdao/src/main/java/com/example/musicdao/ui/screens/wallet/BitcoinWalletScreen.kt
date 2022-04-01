@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.musicdao.core.wallet.UserWalletTransaction
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.components.EmptyStateNotScrollable
@@ -25,9 +24,8 @@ import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BitcoinWalletScreen() {
+fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
 
-    val bitcoinWalletViewModel: BitcoinWalletViewModel = hiltViewModel()
     val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.collectAsState()
     val estimatedBalance = bitcoinWalletViewModel.estimatedBalance.collectAsState()
     val syncProgress = bitcoinWalletViewModel.syncProgress.collectAsState()
@@ -224,6 +222,6 @@ fun TransactionItem(userWalletTransaction: UserWalletTransaction) {
 }
 
 fun dateToString(date: Date): String {
-    val formatter = SimpleDateFormat("dd MMMM, yyyy, HH:mm")
+    val formatter = SimpleDateFormat("dd MMMM, yyyy, HH:mm", Locale.US)
     return formatter.format(date)
 }
