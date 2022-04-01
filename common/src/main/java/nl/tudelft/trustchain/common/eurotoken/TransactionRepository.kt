@@ -669,21 +669,23 @@ class TransactionRepository(
             EuroTokenTransferValidator(this)
         )
 
-        trustChainCommunity.registerBlockSigner(
-            BLOCK_TYPE_TRANSFER,
-            object : BlockSigner {
-                override fun onSignatureRequest(block: TrustChainBlock) {
-                    Log.w("EuroTokenBlockTransfer", "sig request ${block.transaction}")
-                    // agree if validated
-                    trustChainCommunity.sendBlock(
-                        trustChainCommunity.createAgreementBlock(
-                            block,
-                            block.transaction
-                        )
-                    )
-                }
-            }
-        )
+//        trustChainCommunity.registerBlockSigner(
+//            BLOCK_TYPE_TRANSFER,
+//            object : BlockSigner {
+//                override fun onSignatureRequest(block: TrustChainBlock) {
+//                    Log.w("EuroTokenBlockTransfer", "sig request ${block.transaction}")
+//                    // HERE ADD DIALOG
+//
+//                    // agree if validated
+//                    trustChainCommunity.sendBlock(
+//                        trustChainCommunity.createAgreementBlock(
+//                            block,
+//                            block.transaction
+//                        )
+//                    )
+//                }
+//            }
+//        )
 
         trustChainCommunity.addListener(
             BLOCK_TYPE_TRANSFER,

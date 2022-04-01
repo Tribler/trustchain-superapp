@@ -13,6 +13,7 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.passport.PassportHandler
 
@@ -75,6 +76,11 @@ abstract class VTDialogFragment : DialogFragment() {
     fun getTrustChainHelper(): TrustChainHelper {
         return parentActivity.getStore()
             ?: throw java.lang.IllegalStateException("TrustChainHelper is not configured")
+    }
+
+    fun getTrustStore(): TrustStore {
+        return parentActivity.getStore()
+            ?: throw java.lang.IllegalStateException("TrustStore is not configured")
     }
 
     fun getQRScanController(): QRScanController {

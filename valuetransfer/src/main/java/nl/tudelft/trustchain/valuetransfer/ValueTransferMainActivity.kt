@@ -84,6 +84,7 @@ import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.widget.Toast
+import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.GatewayWarningDialog
 
 class ValueTransferMainActivity : BaseActivity() {
@@ -121,7 +122,7 @@ class ValueTransferMainActivity : BaseActivity() {
         EuroTokenCommunity::class.java to IPv8Android.getInstance().getOverlay<EuroTokenCommunity>()!!,
         AttestationCommunity::class.java to IPv8Android.getInstance().getOverlay<AttestationCommunity>()!!
     )
-    val stores: Map<Any, Any> = mapOf(
+    val stores: MutableMap<Any, Any> = mutableMapOf(
         IdentityStore::class.java to IdentityStore.getInstance(this),
         PeerChatStore::class.java to PeerChatStore.getInstance(this),
         GatewayStore::class.java to GatewayStore.getInstance(this),
@@ -237,6 +238,8 @@ class ValueTransferMainActivity : BaseActivity() {
         attestationCommunity.setAttestationRequestCompleteCallback(::attestationRequestCompleteCallbackWrapper)
         attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
+
+        stores[TrustStore::class.java] = TrustStore.getInstance(this)
 
         /**
          * Create a (centered) custom action bar with a title and subtitle

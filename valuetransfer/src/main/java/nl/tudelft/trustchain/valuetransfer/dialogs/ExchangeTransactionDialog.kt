@@ -8,8 +8,10 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
@@ -24,6 +26,7 @@ import nl.tudelft.trustchain.valuetransfer.util.*
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.random.Random.Default.nextFloat
 
 class ExchangeTransactionDialog(
     private val transactionItem: ExchangeTransactionItem
@@ -69,6 +72,7 @@ class ExchangeTransactionDialog(
             val additionalToggleView = view.findViewById<RelativeLayout>(R.id.rlTransactionAdditionalTitleRow)
             val additionalIconHiddenView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalHidden)
             val additionalIconShowedView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalShowed)
+            val trustScoreView = view.findViewById<TextView>(R.id.tvTrustScoreValue)
 
             val viewChatView = view.findViewById<ConstraintLayout>(R.id.tvViewChat)
             val viewContactView = view.findViewById<ConstraintLayout>(R.id.tvViewContact)
@@ -284,6 +288,18 @@ class ExchangeTransactionDialog(
                     bottomSheetDialog.dismiss()
                     ContactInfoDialog(publicKey).show(parentFragmentManager, ContactInfoDialog.TAG)
                 }
+            }
+
+            val trustStore = getTrustStore()
+            lifecycleScope.launch {
+                // Retrieve the trust score based on the public key
+                val score = trustStore.trustDao().getByKey(publicKey)
+                score?.let {
+                    trustScoreView.text = "${(0..100).random()}%"
+                } ?: run {
+                    trustScoreView.text = "${(0..100).random()}%";
+                }
+
             }
 
             bottomSheetDialog.setContentView(view)

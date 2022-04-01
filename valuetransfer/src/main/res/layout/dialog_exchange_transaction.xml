@@ -256,6 +256,71 @@
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="8dp"
+        android:paddingVertical="8dp"
+        android:paddingHorizontal="12dp"
+        android:orientation="vertical"
+        android:background="@drawable/square_rounded">
+
+        <TextView
+            android:id="@+id/tvTrustScoreTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:textColor="?attr/onDialogColor"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="@string/text_trust_score_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/tvTrustDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="1dp"
+            tools:text="From"
+            android:textSize="12sp"
+            android:text="@string/text_trust_score_details"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTrustScoreTitle"
+            android:textColor="?attr/mutedColor"/>
+
+        <View
+            android:id="@+id/vTrustDivider"
+            style="@style/Divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTrustDetails"
+            android:layout_marginVertical="4dp" />
+
+        <TextView
+            android:id="@+id/tvTrustScoreLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="1dp"
+            android:textSize="12sp"
+            android:text="@string/text_trust_score"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vTrustDivider"
+            android:textColor="?attr/mutedColor"/>
+
+        <TextView
+            android:id="@+id/tvTrustScoreValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="1dp"
+            android:textColor="?attr/onDialogColor"
+            android:textSize="14sp"
+            android:text="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vTrustDivider"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/clTransactionResendButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -142,6 +142,7 @@
     <string name="text_transaction_amount">Enter the transaction amount</string>
     <string name="text_optional_message">(Optional) message to receiver…</string>
     <string name="text_add_to_address_book">Add contact to address book</string>
+    <string name="text_allow_unverified_transfer">Allow users to pay with unverified balance</string>
     <string name="text_select_contact_share">Select the contact to share</string>
     <string name="text_provide_name_for_contact">Provide a name for this contact</string>
     <string name="text_send_publickey_or_qr">Provide QRcode to your friend</string>
@@ -391,6 +392,9 @@
     <string name="text_gateway_warning_first">No gateway has been defined, please make sure to add a gateway by scanning its identifying QR code. </string>
     <string name="text_gateway_warning_second">A gateway is used to exchange between Euros and Euro tokens, and to verify balances. If no gateway is defined, no balances and transactions can be verified.</string>
     <string name="text_gateway_warning_third">A gateway can be added now by pressing the add button, or later by scanning the QR code of a gateway via the scanner.</string>
+    <string name="text_trust_score_title">Trust score</string>
+    <string name="text_trust_score">Score</string>
+    <string name="text_trust_score_details">A score indicating the trustworthiness of a user</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>
