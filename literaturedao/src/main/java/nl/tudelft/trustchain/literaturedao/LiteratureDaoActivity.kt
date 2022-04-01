@@ -1,28 +1,31 @@
 package nl.tudelft.trustchain.literaturedao
+import android.content.Context
 import android.os.Bundle
 import nl.tudelft.trustchain.common.BaseActivity
-import com.frostwire.jlibtorrent.TorrentInfo
 import android.util.Log
 import android.view.WindowManager
-import android.widget.SearchView
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-import java.io.File
-import java.io.FileOutputStream
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
+import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import java.io.InputStream
+import java.lang.Exception
 import java.util.*
 import kotlin.math.roundToInt
+
+var tempStorage: MutableList<Pair<String, MutableList<Pair<String, Double>>>> = mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>()
 
 open class LiteratureDaoActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_literaturedao
@@ -78,63 +81,38 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
-    var tempStorage: MutableList<Pair<String, MutableList<Pair<String, Double>>>> = mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>()
+    @Serializable
+    data class Data(val content: MutableList<Pair<String, Double>>)
+    fun read(path: String): Data{
+        this.openFileInput(path).use { input ->
+            return Json.decodeFromString<Data>(input.toString())
+        }
+    }
 
     override fun onStart() {
         super.onStart()
         Log.e("litdao", "starting ...")
-        importPDF()
+        KeyWordModelView(this.baseContext).calcKWs("1.pdf")
 
-        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (!newText.isNullOrEmpty())
-                    Log.d("litdao", localSearch(newText).toString())
-                return false
-            }
-        })
-        Log.d("litdao", localSearch("dpca").toString())
-    }
-
-    fun importPDF(){
-        PDFBoxResourceLoader.init(getApplicationContext());
-        var i = 1
-        while (i < 4){
-            val path = i.toString() + ".pdf"
-            val stream: InputStream = getAssets().open(path)
-            val kws = getKWs(stream)
-            save(path, kws)
-            Log.e("litdao", "litdao: " + kws.toString())
-            i += 1
-        }
-    }
-
-    fun localSearch(inp: String): MutableList<Pair<String, Double>>{
-        var handler = QueryHandler()
-        return handler.scoreList(inp, loadAll())
-    }
-
-    fun getKWs(pdfIS: java.io.InputStream): MutableList<Pair<String, Double>>{
-        var pdfController = PdfController()
-        val strippedString = pdfController.stripText(pdfIS)
-        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-        val result = KeywordExtractor()
-            .extract(strippedString, csv)
-        return result
-    }
-
-
-    fun save(path: String, KWList: MutableList<Pair<String, Double>>){
-        tempStorage.add(Pair(path, KWList))
-    }
-
-    fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
-        return tempStorage
+        try{
+            Log.e("litdao", "litDao read: " + read("1.pdf").content.toString())
+        } catch (e: Exception){
+            Log.e("litdao", "litDao exception: " + e.toString())
+       }
     }
 }
+
+fun localSearch(inp: String): MutableList<Pair<String, Double>>{
+    var handler = QueryHandler()
+    return handler.scoreList(inp, loadAll())
+}
+
+fun store(path: String, KWList: MutableList<Pair<String, Double>>){
+    tempStorage.add(Pair(path, KWList))
+}
+
+fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
+
+    return tempStorage
+}
+
