@@ -4,6 +4,7 @@ import nl.tudelft.trustchain.common.BaseActivity
 import com.frostwire.jlibtorrent.TorrentInfo
 import android.util.Log
 import android.view.WindowManager
+import android.widget.SearchView
 import androidx.lifecycle.lifecycleScope
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.delay
@@ -82,6 +83,22 @@ open class LiteratureDaoActivity : BaseActivity() {
     override fun onStart() {
         super.onStart()
         Log.e("litdao", "starting ...")
+        importPDF()
+        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                Log.d("litdao", "onQueryTextSubmit: $newText")
+                if (!newText.isNullOrEmpty())
+                    Log.d("litdao", localSearch(newText).toString())
+                return false
+            }
+        })
     }
 
     fun importPDF(){
