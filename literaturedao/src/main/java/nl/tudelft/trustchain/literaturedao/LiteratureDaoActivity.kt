@@ -84,6 +84,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         super.onStart()
         Log.e("litdao", "starting ...")
         importPDF()
+
         val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -93,18 +94,18 @@ open class LiteratureDaoActivity : BaseActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                Log.d("litdao", "onQueryTextSubmit: $newText")
                 if (!newText.isNullOrEmpty())
                     Log.d("litdao", localSearch(newText).toString())
                 return false
             }
         })
+        Log.d("litdao", localSearch("dpca").toString())
     }
 
     fun importPDF(){
         PDFBoxResourceLoader.init(getApplicationContext());
         var i = 1
-        while (i < 2){
+        while (i < 4){
             val path = i.toString() + ".pdf"
             val stream: InputStream = getAssets().open(path)
             val kws = getKWs(stream)
