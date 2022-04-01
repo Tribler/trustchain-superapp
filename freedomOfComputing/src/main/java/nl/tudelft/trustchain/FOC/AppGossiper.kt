@@ -8,6 +8,8 @@ import com.frostwire.jlibtorrent.alerts.Alert
 import com.frostwire.jlibtorrent.alerts.AlertType
 import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_debugging.*
+import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -31,7 +33,6 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.Pair
 import kotlin.collections.HashMap
 
 /**
@@ -63,6 +64,8 @@ class AppGossiper(
     private var evaDownload: EvaDownload = EvaDownload()
     var sessionActive = false
     var downloadsInProgress = 0
+    var downloadsFinished = 0
+    var batchDone = true
 
     companion object {
         fun getInstance(
@@ -81,12 +84,12 @@ class AppGossiper(
         populateKnownTorrents()
         initializeTorrentSession()
         initializeEvaCallbacks()
+        initialUISettings()
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
         val params =
             SessionParams(sp)
         sessionManager.start(params)
-        activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
         scope.launch {
             iterativelyShareApps()
         }
@@ -109,6 +112,11 @@ class AppGossiper(
                 }
             }
         }
+
+        demoCommunity?.setEVAOnReceiveProgressCallback { _, _, progress ->
+            updateProgress(progress = progress.progress.toInt())
+        }
+
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
             if (evaDownload.activeDownload && exception.transfer?.type == TransferType.INCOMING) {
                 if (exception is TimeoutException || exception is PeerBusyException) {
@@ -117,6 +125,7 @@ class AppGossiper(
                 } else {
                     activity.runOnUiThread { printToast("Can't fetch through EVA because of $exception will continue to retry via torrent") }
                     evaDownload.activeDownload = false
+                    downloadHasFailed()
                 }
             }
         }
@@ -130,7 +139,11 @@ class AppGossiper(
             if (evaDownload.retryAttempts == EVA_RETRIES) {
                 activity.runOnUiThread { printToast("Giving up on trying to download via EVA") }
                 evaDownload.activeDownload = false
+                downloadHasFailed()
+            } else {
+                downloadHasStarted(evaDownload.fileName)
             }
+            activity.runOnUiThread { activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaDownload.retryAttempts) }
         }
     }
 
@@ -141,6 +154,7 @@ class AppGossiper(
     }
 
     fun resume() {
+        initialUISettings()
         gossipingPaused = false
         downloadingPaused = false
     }
@@ -166,12 +180,17 @@ class AppGossiper(
                             "appGossiper",
                             "Progress: " + p + " for torrent name: " + a.torrentName()
                         )
+                        printToast("Download in progress!")
+                        updateProgress(p)
                         Log.i("appGossiper", java.lang.Long.toString(sessionManager.stats().totalDownload()))
                     }
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
                         Log.i("appGossiper", "Torrent finished")
-                        activity.runOnUiThread { printToast("Torrent downloaded!!") }
+
+                        activity.runOnUiThread {
+                            printToast("Torrent downloaded!!")
+                        }
                     }
                     else -> {
                     }
@@ -201,7 +220,9 @@ class AppGossiper(
         while (scope.isActive) {
             if (!downloadingPaused) {
                 try {
-                    downloadPendingFiles()
+                    if (batchDone) {
+                        downloadPendingFiles()
+                    }
                     if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
                         activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
                         retryActiveEvaDownload()
@@ -214,8 +235,25 @@ class AppGossiper(
         }
     }
 
+    fun addButtonsInAdvance(packets: ArrayList<Packet>) {
+        for (packet in packets) {
+            val (peer, payload) = packet.getAuthPayload(MyMessage)
+            Log.i("appGossiper", peer.mid + ": " + payload.message)
+            val torrentName = payload.message.substringAfter("&dn=")
+                .substringBefore('&')
+            activity.runOnUiThread {
+                activity.createUnsuccessfulTorrentButton(torrentName)
+            }
+        }
+    }
+
     private suspend fun downloadPendingFiles() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
+
+            delay(1000)
+            addDownloadToQueue(demoCommunity.getTorrentMessages().size - downloadsFinished)
+            addButtonsInAdvance(demoCommunity.getTorrentMessages())
+            batchDone = false
             for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                 val (peer, payload) = packet.getAuthPayload(MyMessage)
                 Log.i("appGossiper", peer.mid + ": " + payload.message)
@@ -233,6 +271,7 @@ class AppGossiper(
                     getMagnetLink(magnetLink, torrentName, peer)
                 }
             }
+            batchDone = true
         }
     }
 
@@ -302,10 +341,13 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
+        activity.runOnUiThread {
+            printToast("Found new torrent $torrentName attempting to download!")
+        }
+
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString) || evaDownload.activeDownload)
             return
-
-        activity.runOnUiThread { printToast("Found new torrent $torrentName, attempting to download!") }
+        downloadHasStarted(torrentName)
 
         val startIndexName = magnetLink.indexOf(displayNameAppender)
         val stopIndexName =
@@ -359,11 +401,10 @@ class AppGossiper(
             sessionActive = true
             signal = CountDownLatch(1)
 
-            downloadsInProgress += 1
             sessionManager.download(torrentInfo, appDirectory)
-            downloadsInProgress -= 1
             activity.runOnUiThread { printToast("Managed to fetch torrent info for $torrentName, trying to download it via torrent!") }
             signal.await(1, TimeUnit.MINUTES)
+
             if (signal.count.toInt() == 1) {
                 activity.runOnUiThread { printToast("Attempt to download timed out for $torrentName!") }
                 signal = CountDownLatch(0)
@@ -387,8 +428,9 @@ class AppGossiper(
             activity.createTorrent(torrentName)?.let {
                 torrentInfos.add(it)
             }
-            activity.showAllFiles()
+            activity.showAddedFile(torrentName)
         }
+        downloadHasPassed()
     }
 
     private fun onTorrentDownloadFailure(
@@ -396,6 +438,7 @@ class AppGossiper(
         magnetInfoHash: String,
         peer: Peer
     ) {
+        downloadHasFailed()
         if (demoCommunity?.evaProtocolEnabled == true && !evaDownload.activeDownload) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
@@ -403,16 +446,76 @@ class AppGossiper(
                 failedTorrents[torrentName] = 1
             if (failedTorrents[torrentName] == TORRENT_ATTEMPTS_THRESHOLD)
                 demoCommunity.let {
-                    activity.runOnUiThread { printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!") }
+                    activity.runOnUiThread {
+                        downloadHasStarted(torrentName)
+                        printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!")
+                    }
                     demoCommunity.sendAppRequest(magnetInfoHash, peer)
-                    evaDownload = EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0)
+                    evaDownload =
+                        EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName)
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
+
         }
     }
 
     fun printToast(s: String) {
         Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
+    }
+
+    fun addDownloadToQueue(downloadsInProgressCount: Int) {
+        downloadsInProgress = downloadsInProgressCount
+        activity.runOnUiThread {
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+        }
+    }
+
+    fun updateProgress(progress: Int) {
+        activity.runOnUiThread {
+            activity.progressBar.progress = progress
+            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "$progress%")
+        }
+    }
+
+    fun downloadHasStarted(torrentName: String) {
+        activity.runOnUiThread {
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+        }
+    }
+
+    fun downloadHasFailed() {
+        downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
+        activity.runOnUiThread {
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
+        }
+        updateProgress(0)
+    }
+
+    fun downloadHasPassed() {
+        downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
+        activity.runOnUiThread {
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            downloadsFinished++
+        }
+        updateProgress(0)
+    }
+
+    fun initialUISettings() {
+        activity.runOnUiThread {
+            activity.download_count.text = activity.getString(R.string.downloadsInProgress, 0)
+            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
+            activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, 0)
+            activity.failedCounter.text = activity.getString(R.string.failedCounter, "{}")
+        }
     }
 }

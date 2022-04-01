@@ -26,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:clipToPadding="false"
-
                 android:focusable="true">
 
                 <ImageButton
@@ -37,9 +36,7 @@
                     android:layout_gravity="center"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_baseline_arrow_circle_down_24"
-                    >
-
-                </ImageButton>
+                    />
 
                 <TextView
                     android:id="@+id/download_count"
@@ -55,6 +52,26 @@
                     android:text="@string/downloadsInProgress"
                     android:textSize="10sp"/>
 
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/debugButtonLayout"
+                style="?attr/actionButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:clipToPadding="false"
+                android:focusable="true">
+
+                <ImageButton
+                    android:id="@+id/debugPopUpButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:scaleType="fitCenter"
+                    android:layout_gravity="center"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_baseline_info_24"
+                    />
             </FrameLayout>
         </androidx.appcompat.widget.Toolbar>
 
@@ -96,8 +113,8 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main_activity_foc" />
-
-    <include layout="@layout/fragment_download" />
+    <include layout="@layout/fragment_debugging" android:visibility="gone"/>
+    <include layout="@layout/fragment_download" android:visibility="gone"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

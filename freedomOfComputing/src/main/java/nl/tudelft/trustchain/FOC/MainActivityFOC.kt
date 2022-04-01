@@ -2,8 +2,11 @@ package nl.tudelft.trustchain.FOC
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
@@ -24,7 +27,9 @@ import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
+import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
+import java.util.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -34,6 +39,7 @@ class MainActivityFOC : AppCompatActivity() {
 
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
+    private var debugVisible = false
     private var requestCode = 1
     val MY_PERMISSIONS_REQUEST = 0
     val s = SessionManager()
@@ -50,9 +56,12 @@ class MainActivityFOC : AppCompatActivity() {
                 selectNewFileToUpload()
             }
 
-            popUp.visibility = View.GONE
             download_progress.setOnClickListener {
                 toggleProgressBar(popUp)
+            }
+
+            debugPopUpButton.setOnClickListener {
+                toggleDebugPopUp(debugPopUp)
             }
 
             torrentCount.text = getString(R.string.torrentCount, torrentList.size)
@@ -71,6 +80,28 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    fun toggleDebugPopUp(layout: LinearLayout) {
+        if (debugVisible) layout.visibility = View.GONE
+        else layout.visibility = View.VISIBLE
+
+        if (progressVisible) {
+            progressVisible = false
+            popUp.visibility = View.GONE
+        }
+        debugVisible = !debugVisible
+    }
+
+    private fun toggleProgressBar(progress: RelativeLayout) {
+        if (progressVisible) progress.visibility = View.GONE
+        else progress.visibility = View.VISIBLE
+
+        if (debugVisible) {
+            debugVisible = false
+            debugPopUp.visibility = View.GONE
+        }
+        progressVisible = !progressVisible
+    }
+
     override fun onResume() {
         super.onResume()
         appGossiper.resume()
@@ -81,33 +112,35 @@ class MainActivityFOC : AppCompatActivity() {
         appGossiper.pause()
     }
 
-    private fun toggleProgressBar(progress: RelativeLayout) {
-        if (progressVisible) {
-            progress.visibility = View.GONE
-        } else {
-            progress.visibility = View.VISIBLE
-        }
-        progressVisible = !progressVisible
-    }
-
 
     @Suppress("deprecation")
     fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
-            // todo improve this such that the whole list is not loaded again every time
             val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
             torrentListView.removeAllViews()
             torrentList.clear()
             for (file in files) {
                 if (getFileName(file.toUri()).endsWith(".apk")) {
-                    createTorrentButton(file.toUri())
+                    createSuccessfulTorrentButton(file.toUri())
                 }
             }
         }
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
+    }
+
+    fun showAddedFile(torrentName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == torrentName
+            }
+            if (file != null) {
+                createSuccessfulTorrentButton(file.toUri())
+            }
+        }
     }
 
     /**
@@ -151,22 +184,73 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun createTorrentButton(uri: Uri) {
+    fun createSuccessfulTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
-        val button = Button(this)
+        var button = Button(this)
         val fileName = getFileName(uri)
         button.text = fileName
+        // Replace the failed torrent with the downloaded torrent
+        val existingButton = torrentList.find { btn -> btn.text == fileName }
+        if (existingButton != null) {
+            button = existingButton;
+        } else {
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
+
         button.isAllCaps = false
-        torrentList.add(button)
+        button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
+        button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         torrentCount.text = getString(R.string.torrentCount, torrentList.size)
         button.setOnClickListener {
             loadDynamicCode(fileName)
         }
         button.setOnLongClickListener {
-            createTorrent(fileName)
+            createAlertDialog(fileName)
             true
         }
-        torrentListView.addView(button)
+    }
+
+
+    fun createAlertDialog(fileName: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Create or Delete")
+        builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
+        builder.setPositiveButton("Cancel", null)
+        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
+        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.show()
+    }
+
+    fun deleteApkFile(fileName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == fileName
+            }
+            val deleted = file?.delete()
+            if (deleted != null && deleted) {
+                val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
+                if (buttonToBeDeleted != null) {
+                    val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+                    torrentListView.removeView(buttonToBeDeleted)
+                    torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+                }
+            }
+        }
+    }
+
+    fun createUnsuccessfulTorrentButton(torrentName: String) {
+        // No need to create duplicate failed torrent buttons
+        val existingButton = torrentList.find { btn -> btn.text == torrentName }
+        if (existingButton == null) {
+            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            val button = Button(this)
+            button.text = torrentName
+            button.isAllCaps = false
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
     }
 
     @Suppress("DEPRECATION")
@@ -181,14 +265,15 @@ class MainActivityFOC : AppCompatActivity() {
             try {
                 printToast(data.data!!.path!!.split(":").last())
                 File(
-                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+//                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+                    Environment.getExternalStorageDirectory().absolutePath + "/" + fileName
                 ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
             } catch (e: Exception) {
                 printToast(e.toString())
                 printToast("$fileName already exists!")
                 return
             }
-            createTorrentButton(data.data!!)
+            createSuccessfulTorrentButton(data.data!!)
         }
     }
 

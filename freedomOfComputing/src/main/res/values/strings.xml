@@ -11,5 +11,9 @@
     <string name="progress">75</string>
     <string name="torrentCount">%1$d torrent(s)</string>
     <string name="downloadsInProgress">%1$d</string>
-
+    <string name="downloadsInQueue">In queue: %1$d</string>
+    <string name="currentTorrentDownload">%1$s</string>
+    <string name="downloadProgressPercentage">%1$s</string>
+    <string name="failedCounter">Failed torrent counter map: %1$s</string>
+    <string name="evaRetries">Eva retries: %1$d</string>
 </resources>
