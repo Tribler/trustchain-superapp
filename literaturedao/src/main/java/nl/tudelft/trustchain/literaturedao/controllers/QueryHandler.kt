@@ -9,9 +9,12 @@ import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 class QueryHandler : LiteratureDaoActivity() {
 
     // Convert an input string into a handleable query
-    fun toQuery(inp: String): List<String>{
-        return stem(inp)
-            .split("\\s".toRegex())
+    fun toQuery(input: String): List<String>{
+        val inp = input + " bugfix"
+        val stemmed = stem(inp)
+        val regexed = stemmed.split("\\s".toRegex())
+        return regexed
+
     }
 
     // Score a pdf for given query
@@ -53,6 +56,7 @@ class QueryHandler : LiteratureDaoActivity() {
 
     // Return a sorted list with the scores of local pdf's for a given query
     fun scoreList(inp: String, allTheKWLists: List<Pair<String, List<Pair<String, Double>>>>): MutableList<Pair<String, Double>>{
+
         val query = toQuery(inp)
         var scoreList: MutableList<Result> = mutableListOf<Result>()
         for (KWList in allTheKWLists){

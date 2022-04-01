@@ -9,8 +9,8 @@ import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 class KeywordExtractor : LiteratureDaoActivity() {
 
-    val hardCodedMagickNumber = 80
-    val maxKWs = 300
+    val hardCodedMagickNumber = 1
+    val maxKWs = 99999
 
     // Function that loads the average stemmed word occurance
     fun instantiateAvgFreqMap(csv: InputStream): Map<String, Long>{
@@ -90,7 +90,7 @@ class KeywordExtractor : LiteratureDaoActivity() {
         relativeFreqList.reverse()
         // cutoff for top 100 results
         if (relativeFreqList.size > maxKWs) {
-            relativeFreqList = relativeFreqList.slice(0..99).toMutableList()
+            relativeFreqList = relativeFreqList.slice(0..(maxKWs - 1)).toMutableList()
         }
         Log.d("litdao", relativeFreqList.toString())
         var result: MutableList<Pair<String, Double>> = mutableListOf<Pair<String, Double>>()
