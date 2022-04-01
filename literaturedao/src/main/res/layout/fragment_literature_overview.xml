@@ -124,7 +124,7 @@
 
                 <androidx.gridlayout.widget.GridLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:padding="10dp"
                     app:columnCount="2"
                     app:useDefaultMargins="true">
@@ -134,6 +134,13 @@
                         android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        app:layout_column="1"
+                        app:layout_columnSpan="1"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill"
+                        app:layout_row="1"
+                        app:layout_rowSpan="1"
+                        app:layout_rowWeight="1"
                         tools:layout="@layout/fragment_literature" />
 
                     <androidx.fragment.app.FragmentContainerView
@@ -142,6 +149,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         app:layout_column="1"
+                        app:layout_columnSpan="1"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill"
+                        app:layout_rowSpan="1"
+                        app:layout_rowWeight="1"
                         tools:layout="@layout/fragment_literature" />
 
                 </androidx.gridlayout.widget.GridLayout>
