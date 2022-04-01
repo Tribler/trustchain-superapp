@@ -3,6 +3,7 @@ package com.example.musicdao.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -16,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modifier) {
+fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modifier, loadingIcon: Boolean = false) {
 
     Column(
         verticalArrangement = Arrangement.Center,
@@ -44,6 +45,9 @@ fun EmptyState(firstLine: String, secondLine: String, modifier: Modifier = Modif
             textAlign = TextAlign.Center,
             modifier = Modifier.width(300.dp)
         )
+        if (loadingIcon) {
+            CircularProgressIndicator(modifier = Modifier.padding(top = 20.dp))
+        }
     }
 }
 

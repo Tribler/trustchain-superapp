@@ -3,6 +3,7 @@ package com.example.musicdao.core.wallet
 import android.util.Log
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.bitcoinj.core.*
 import org.bitcoinj.core.listeners.DownloadProgressTracker
@@ -24,6 +25,8 @@ class WalletService(val config: WalletConfig) {
     private var percentageSynced = 0
     private val app: WalletAppKit
 
+    val userTransactions: MutableStateFlow<List<UserWalletTransaction>> = MutableStateFlow(listOf())
+
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
 
@@ -42,6 +45,7 @@ class WalletService(val config: WalletConfig) {
 //                        )
                     }
                 }
+                setWalletReceiveListener()
             }
         }
     }
@@ -91,6 +95,10 @@ class WalletService(val config: WalletConfig) {
 
     fun wallet(): Wallet {
         return app.wallet()
+    }
+
+    fun isStarted(): Boolean {
+        return started && app.wallet() != null
     }
 
     /**
@@ -189,8 +197,21 @@ class WalletService(val config: WalletConfig) {
         }
     }
 
-    fun walletTransactions(): List<Transaction> {
-        return app.wallet().walletTransactions.map { it.transaction }
+    fun walletTransactions(): List<UserWalletTransaction> {
+        return app.wallet().walletTransactions.map {
+            UserWalletTransaction(
+                transaction = it.transaction,
+                value = it.transaction.getValue(app.wallet()),
+                date = it.transaction.updateTime
+            )
+        }.sortedBy { it.date }
+    }
+
+    fun setWalletReceiveListener() {
+        userTransactions.value = walletTransactions()
+        app.wallet().addCoinsReceivedEventListener { _, _, _, _ ->
+            userTransactions.value = walletTransactions()
+        }
     }
 
     fun estimatedBalance(): String? {
@@ -205,3 +226,9 @@ class WalletService(val config: WalletConfig) {
         val SATS_PER_BITCOIN = BigDecimal(100_000_000)
     }
 }
+
+data class UserWalletTransaction(
+    val transaction: Transaction,
+    val value: Coin,
+    val date: Date
+)

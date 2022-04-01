@@ -5,17 +5,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.material.ListItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.musicdao.core.wallet.UserWalletTransaction
+import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.components.EmptyStateNotScrollable
 import com.example.musicdao.ui.screens.profile.CustomMenuItem
-import org.bitcoinj.core.Transaction
-import org.bitcoinj.wallet.Wallet
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -28,9 +34,19 @@ fun BitcoinWalletScreen() {
     val status = bitcoinWalletViewModel.status.collectAsState()
     val faucetInProgress = bitcoinWalletViewModel.faucetInProgress.collectAsState()
     val walletTransactions = bitcoinWalletViewModel.walletTransactions.collectAsState()
+    val isStarted = bitcoinWalletViewModel.isStarted.collectAsState()
 
     var state by remember { mutableStateOf(0) }
     val titles = listOf("ACTIONS", "TRANSACTIONS")
+
+    if (!isStarted.value) {
+        EmptyState(
+            firstLine = "Your wallet is not started yet.",
+            secondLine = "Please, wait for the wallet to be started.",
+            loadingIcon = true
+        )
+        return
+    }
 
     Column(
         modifier = Modifier
@@ -150,8 +166,7 @@ fun BitcoinWalletScreen() {
                         Column(modifier = Modifier.fillMaxSize()) {
                             walletTransactions.value.map {
                                 TransactionItem(
-                                    transaction = it,
-                                    wallet = bitcoinWalletViewModel.wallet()
+                                    userWalletTransaction = it,
                                 )
                             }
                         }
@@ -164,24 +179,51 @@ fun BitcoinWalletScreen() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun TransactionItem(transaction: Transaction, wallet: Wallet) {
-    val value = transaction.getValue(wallet)
-
+fun TransactionItem(userWalletTransaction: UserWalletTransaction) {
     ListItem(
-        overlineText = {
-            if (value.isPositive) {
-                Text("INCOMING")
-            } else {
-                Text("OUTGOING")
-            }
-        },
-        text = { Text(value.toFriendlyString()) },
-        secondaryText = {
-            Text(
-                "${
-                transaction.txId
-                }\n${transaction.updateTime.toGMTString()}"
+        icon = {
+            Icon(
+                imageVector = if (userWalletTransaction.value.isPositive) {
+                    Icons.Outlined.ArrowForward
+                } else {
+                    Icons.Outlined.ArrowBack
+                },
+                contentDescription = null
             )
         },
+        overlineText = {
+            Text(
+                text = dateToString(userWalletTransaction.date),
+                style = MaterialTheme.typography.caption
+            )
+        },
+        text = {
+            val text = if (userWalletTransaction.value.isPositive) {
+                "Received"
+            } else {
+                "Sent"
+            }
+            Text(text = text)
+        },
+        secondaryText = {
+            Text(text = userWalletTransaction.transaction.txId.toString())
+        },
+        trailing = {
+            Text(
+                text = userWalletTransaction.value.toFriendlyString(),
+                style = TextStyle(
+                    color = if (userWalletTransaction.value.isPositive) {
+                        Color.Green
+                    } else {
+                        Color.Red
+                    }
+                )
+            )
+        }
     )
+}
+
+fun dateToString(date: Date): String {
+    val formatter = SimpleDateFormat("dd MMMM, yyyy, HH:mm")
+    return formatter.format(date)
 }
