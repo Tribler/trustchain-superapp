@@ -1,8 +1,10 @@
 package nl.tudelft.trustchain.FOC
 
 import android.Manifest
+import android.app.DownloadManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
@@ -28,6 +30,7 @@ import nl.tudelft.trustchain.common.MyMessage
 import java.io.*
 import java.nio.channels.FileChannel
 import java.util.*
+
 
 class MainActivityFOC : AppCompatActivity() {
 
@@ -79,6 +82,11 @@ class MainActivityFOC : AppCompatActivity() {
         // option 4: dynamically load and execute code from a jar/apk file
         executeCodeButton.setOnClickListener { _ ->
             loadDynamicCode()
+        }
+
+        // option 5: download a torrent trough a url
+        downloadUrlButton.setOnClickListener { _ ->
+            getUrl()
         }
 
         uploadTorrentButton.setOnClickListener { _ ->
@@ -170,11 +178,13 @@ class MainActivityFOC : AppCompatActivity() {
             downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
             if (downloadMagnetButton.text.equals("STOP")) {
                 downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                return }
+            if (downloadUrlButton.text.equals("STOP")) {
+                downloadUrlButton.setText("DOWNLOAD (URL)")
                 return
-            } else {
-                torrentView.text = ""
-                progressBar.setProgress(0, true)
             }
+            torrentView.text = ""
+            progressBar.setProgress(0, true)
         }
 
         val magnetLink: String?
@@ -270,11 +280,13 @@ class MainActivityFOC : AppCompatActivity() {
             downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
             if (downloadTorrentButton.text.equals("STOP")) {
                 downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                return }
+            if (downloadUrlButton.text.equals("STOP")) {
+                downloadUrlButton.setText("DOWNLOAD (URL)")
                 return
-            } else {
-                torrentView.text = ""
-                progressBar.setProgress(0, true)
             }
+            torrentView.text = ""
+            progressBar.setProgress(0, true)
         }
 
         val torrentName: String?
@@ -323,6 +335,66 @@ class MainActivityFOC : AppCompatActivity() {
         // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
         // s.download(ti, File(savePath))
     }
+
+    /**
+     *  Download a torrent through a url
+     */
+    @Suppress("deprecation")
+    fun getUrl() {
+
+        // Handling of the case where the user is already downloading the
+        // same or another torrent
+        if (sessionActive) {
+            s.stop()
+            sessionActive = false
+            downloadUrlButton.setText("DOWNLOAD (URL)")
+            if (downloadTorrentButton.text.equals("STOP")) {
+                downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
+                return }
+            if (downloadMagnetButton.text.equals("STOP")) {
+                downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
+                return
+            }
+            torrentView.text = ""
+            progressBar.setProgress(0, true)
+        }
+
+        val urlName: String?
+        val urlTitle: String?
+        val inputText = enterTorrent.text.toString()
+        if (inputText == "") {
+            printToast("No url name given, using default")
+            urlName = "https://commons.wikimedia.org/wiki/File:TUDelft_Logo.png"
+            urlTitle = "Default - TU Delft logo"
+        } else {
+            urlName = inputText
+            urlTitle = inputText.substringAfterLast('/')
+        }
+        Log.i("personal", urlTitle)
+        enterJar.setText(urlTitle)
+
+        val sp = SettingsPack()
+        sp.seedingOutgoingConnections(true)
+        val params =
+            SessionParams(sp)
+        s.start(params)
+
+        try {
+            val request = DownloadManager.Request(Uri.parse(urlName))
+            val savePath = Environment.getExternalStorageDirectory().absolutePath
+            request.setTitle(urlTitle).setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, savePath)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            printToast("Starting download, please wait...")
+            val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+            dm.enqueue(request)
+        }
+        catch (e: IOException) {
+            printToast("Download failed, check logs")
+            e.printStackTrace()
+        }
+    }
+
+
 
     /**
      * Reads a .torrent file and displays information about it on the screen

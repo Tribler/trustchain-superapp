@@ -77,7 +77,7 @@
 
             <Button
                 android:id="@+id/downloadMagnetButton"
-                android:layout_width="168dp"
+                android:layout_width="100dp"
                 android:layout_height="105dp"
                 android:layout_alignLeft="@id/enterTorrent"
                 android:layout_centerVertical="false"
@@ -87,6 +87,15 @@
                 android:textColor="#FFFFFF" />
 
 
+            <Button
+                    android:id="@+id/downloadUrlButton"
+                    android:layout_width="100dp"
+                    android:layout_height="105dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="100dp"
+                    android:background="#036BFC"
+                    android:text="DOWNLOAD (URL)"
+                    android:textColor="#FFFFFF"/>
             <Button
                 android:id="@+id/informPeersButton"
                 android:layout_width="168dp"
@@ -121,7 +130,7 @@
 
             <Button
                 android:id="@+id/downloadTorrentButton"
-                android:layout_width="168dp"
+                android:layout_width="100dp"
                 android:layout_height="105dp"
                 android:layout_alignRight="@id/enterTorrent"
                 android:layout_marginTop="100dp"
