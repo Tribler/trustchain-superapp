@@ -341,14 +341,15 @@ class AppGossiper(
     fun getMagnetLink(magnetLink: String, torrentName: String, peer: Peer) {
         // Handling of the case where the user is already downloading the
         // same or another torrent
-        activity.runOnUiThread {
-            printToast("Found new torrent $torrentName attempting to download!")
-        }
 
         if (sessionActive || !magnetLink.startsWith(magnetHeaderString) || evaDownload.activeDownload)
             return
+
         downloadHasStarted(torrentName)
 
+        activity.runOnUiThread {
+            printToast("Found new torrent $torrentName attempting to download!")
+        }
         val startIndexName = magnetLink.indexOf(displayNameAppender)
         val stopIndexName =
             if (magnetLink.contains(addressTrackerAppender)) magnetLink.indexOf(addressTracker) else magnetLink.length
