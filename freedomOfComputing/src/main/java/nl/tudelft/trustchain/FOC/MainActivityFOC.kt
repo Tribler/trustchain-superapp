@@ -155,6 +155,7 @@ class MainActivityFOC : AppCompatActivity() {
                 outputStream.write(ins.readBytes())
                 ins.close()
                 outputStream.close()
+                this.createTorrent("search.apk")
             }
         } catch (e: Exception) {
             this.printToast(e.toString())
@@ -229,6 +230,12 @@ class MainActivityFOC : AppCompatActivity() {
                 getFileName(file.toUri()) == fileName
             }
             val deleted = file?.delete()
+
+            // delete torrent file if it exists
+            files.find { torrentFile ->
+                getFileName(torrentFile.toUri()) == fileName.replace(".apk", ".torrent")
+            }?.delete()
+
             if (deleted != null && deleted) {
                 val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
                 if (buttonToBeDeleted != null) {

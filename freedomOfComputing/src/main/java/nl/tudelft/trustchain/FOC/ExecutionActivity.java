@@ -16,7 +16,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import dalvik.system.DexClassLoader;
 import dalvik.system.DexFile;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,7 +35,7 @@ public class ExecutionActivity extends AppCompatActivity {
      * Stores the current state of the dynamically loaded code.
      */
     private void storeState() {
-        // TODO: Do not store in root of phone
+        // Store state next to apk
         String fileName = this.apkName + ".dat";
         try {
             FileOutputStream stream = new FileOutputStream(fileName);
@@ -74,13 +73,12 @@ public class ExecutionActivity extends AppCompatActivity {
     }
 
     /**
-     * This method is called by Android indicating that the state should be saved
-     *
-     * @param savedInstanceState Default Android savedInstanceState
+     * This method is called by Android indicating that the user no longer interacts with the app and
+     * that the state should be saved.
      */
     @Override
-    public void onSaveInstanceState(@NotNull Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
+    public void onPause() {
+        super.onPause();
         this.storeState();
     }
 
