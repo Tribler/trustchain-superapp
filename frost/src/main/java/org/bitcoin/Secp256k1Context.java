@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package bitcoin;
+package org.bitcoin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.SecurityException;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * This class holds the context reference used in native methods to handle ECDSA operations.
@@ -29,18 +27,19 @@ public class Secp256k1Context {
     private static final boolean enabled; // true if the library is loaded
     private static final long context; // ref to pointer to context obj
 
-    private static final Logger log = LoggerFactory.getLogger(Secp256k1Context.class);
+//    private static final Logger log = LoggerFactory.getLogger(Secp256k1Context.class);
 
     static { // static initializer
         boolean isEnabled = true;
         long contextRef = -1;
-//        try {
+        try {
             System.loadLibrary("secp256k1");
             contextRef = secp256k1_init_context();
-//        } catch (UnsatisfiedLinkError | SecurityException e) {
+        } catch (UnsatisfiedLinkError | SecurityException e) {
 //            log.debug(e.toString());
-//            isEnabled = false;
-//        }
+		    System.out.println(e.toString());
+            isEnabled = false;
+        }
         enabled = isEnabled;
         context = contextRef;
     }

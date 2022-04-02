@@ -77,8 +77,6 @@ android {
 
 dependencies {
 
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-
     implementation project(':common')
 
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'

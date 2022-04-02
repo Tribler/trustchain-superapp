@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package bitcoin;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.bitcoin;
+//
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * Assertion utilities for {@link NativeSecp256k1}
  */
 public class NativeSecp256k1Util {
 
-    private static final Logger log = LoggerFactory.getLogger(NativeSecp256k1Util.class);
+//    private static final Logger log = LoggerFactory.getLogger(NativeSecp256k1Util.class);
 
     /**
      * Compare two integers and throw {@link AssertFailException} if not equal
@@ -50,8 +50,8 @@ public class NativeSecp256k1Util {
     public static void assertEquals(boolean val, boolean val2, String message) throws AssertFailException {
         if (val != val2)
             throw new AssertFailException("FAIL: " + message);
-        else
-            log.debug("PASS: " + message);
+//        else
+//            log.debug("PASS: " + message);
     }
 
     /**
@@ -65,8 +65,8 @@ public class NativeSecp256k1Util {
     public static void assertEquals(String val, String val2, String message) throws AssertFailException {
         if (!val.equals(val2))
             throw new AssertFailException("FAIL: " + message);
-        else
-            log.debug("PASS: " + message);
+//        else
+//            log.debug("PASS: " + message);
     }
 
     /**
