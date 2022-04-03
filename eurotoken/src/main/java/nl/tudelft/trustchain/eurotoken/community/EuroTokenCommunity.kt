@@ -59,8 +59,15 @@ class EuroTokenCommunity(
         onRollbackRequest(peer, payload)
     }
 
+    /**
+     * Called upon receiving MessageId.ATTACHMENT packet.
+     * Payload consists out of latest 50 public keys the sender transacted with.
+     * This function parses the packet and increments the trust by 1 for every
+     * key received.
+     * Format is: '<key>, <key>, ..., <key>' where key is the hex-encoded public key.
+     * @param packet : the corresponding packet that contains the right payload.
+     */
     private fun onLastAddressPacket(packet: Packet) {
-        logger.debug { "RECEIVED EVA MESSAGE PT 0" }
         val (_, payload) = packet.getDecryptedAuthPayload(
             TransactionsPayload.Deserializer, myPeer.key as PrivateKey
         )
@@ -69,8 +76,6 @@ class EuroTokenCommunity(
         for (i in addresses.indices) {
             myTrustStore.incrementTrust(addresses[i])
         }
-
-        logger.debug { "DONE ADDING" }
     }
 
 
@@ -135,18 +140,18 @@ class EuroTokenCommunity(
         for (i in 0 until length) {
             publicKeys.add(generatePublicKey(seed + i))
         }
-
-        logger.debug { "-> Generated ${publicKeys?.size} public keys" }
-        logger.debug { "-> Public keys: ${publicKeys?.joinToString(", ")}" }
         return publicKeys
     }
 
 
+    /**
+     * Called after the user has finished a transaction with the other party.
+     * Sends the 50 public keys of latest transaction counterparties to the receiver.
+     * When DEMO mode is enabled, it generates 50 random keys instead.
+     */
     fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
         val pref = myContext.getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
         val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
-
-        logger.debug{"ADDRESS CHECK " + myPeer.publicKey.keyToBin().toHex()}
 
         var addresses : ArrayList<String> = ArrayList()
         // Add own public key to list of addresses.
@@ -162,7 +167,6 @@ class EuroTokenCommunity(
         }
 
         val payload = TransactionsPayload("1", addresses.joinToString(separator = ",").toByteArray())
-        logger.debug { "-> $payload" }
 
         val packet = serializePacket(
             MessageId.ATTACHMENT,

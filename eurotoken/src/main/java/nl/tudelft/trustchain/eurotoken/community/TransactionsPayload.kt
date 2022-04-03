@@ -5,6 +5,12 @@ import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
 
+/**
+ * This class is used to serialize and deserialize
+ * the transactions payload message. In essence, this payload
+ * encodes public keys such that trust scores can be updated.
+ * Used by EuroTokenCommunity
+ */
 class TransactionsPayload (    val id: String,
                                val data: ByteArray
 ) : Serializable {

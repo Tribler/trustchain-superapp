@@ -4,6 +4,12 @@ import com.squareup.sqldelight.android.AndroidSqliteDriver
 import nl.tudelft.eurotoken.sqldelight.Database
 import nl.tudelft.trustchain.eurotoken.entity.TrustScore
 
+/**
+ * TrustStore stores the trust scores of other wallets.
+ * When we receive EuroTokens, the sender also sends its latest
+ * 50 public keys of transactions he/she made. For every public key,
+ * a trust score is maintained in order to build the web of trust.
+ */
 class TrustStore (context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "eurotoken.db")
     private val database = Database(driver)
