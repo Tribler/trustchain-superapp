@@ -1,10 +1,8 @@
 package com.example.musicdao.core.wallet
 
 import android.util.Log
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.withContext
 import org.bitcoinj.core.*
 import org.bitcoinj.core.listeners.DownloadProgressTracker
 import org.bitcoinj.kits.WalletAppKit
@@ -26,6 +24,11 @@ class WalletService(val config: WalletConfig) {
     private val app: WalletAppKit
 
     val userTransactions: MutableStateFlow<List<UserWalletTransaction>> = MutableStateFlow(listOf())
+    val onSetupCompletedListeners = mutableListOf<() -> Unit>()
+
+    fun addOnSetupCompletedListener(listener: () -> Unit) {
+        onSetupCompletedListeners.add(listener)
+    }
 
     init {
         BriefLogFormatter.initWithSilentBitcoinJ()
@@ -44,6 +47,9 @@ class WalletService(val config: WalletConfig) {
 //                            Toast.LENGTH_SHORT
 //                        )
                     }
+                }
+                onSetupCompletedListeners.forEach {
+                    it()
                 }
                 setWalletReceiveListener()
             }
@@ -106,30 +112,34 @@ class WalletService(val config: WalletConfig) {
      * @param coinsAmount the amount of coins to send, as a string, such as "5", "0.5"
      * @param publicKey the public key address of the cryptocurrency wallet to send the funds to
      */
-    fun sendCoins(publicKey: String, coinsAmount: String) {
+    fun sendCoins(publicKey: String, coinsAmount: String): Boolean {
         Log.d("MusicDao", "Wallet (1): sending $coinsAmount to $publicKey")
 
         val coins: BigDecimal = try {
             BigDecimal(coinsAmount.toDouble())
         } catch (e: NumberFormatException) {
+            Log.d("MusicDao", "Wallet (2): failed to parse $coinsAmount")
             null
-        } ?: return
+        } ?: return false
 
         val satoshiAmount = (coins * SATS_PER_BITCOIN).toLong()
 
         val targetAddress: Address = try {
             Address.fromString(config.networkParams, publicKey)
         } catch (e: Exception) {
+            Log.d("MusicDao", "Wallet (3): failed to parse $publicKey")
             null
-        } ?: return
+        } ?: return false
 
         val sendRequest = SendRequest.to(targetAddress, Coin.valueOf(satoshiAmount))
 
         try {
             app.wallet().sendCoins(sendRequest)
             Log.d("MusicDao", "Wallet (2): successfully sent $coinsAmount to $publicKey")
+            return true
         } catch (e: Exception) {
             Log.d("MusicDao", "Wallet (3): failed sending $coinsAmount to $publicKey")
+            return false
         }
     }
 
@@ -199,7 +209,7 @@ class WalletService(val config: WalletConfig) {
                 value = it.transaction.getValue(app.wallet()),
                 date = it.transaction.updateTime
             )
-        }.sortedBy { it.date }
+        }.sortedByDescending { it.date }
     }
 
     fun setWalletReceiveListener() {

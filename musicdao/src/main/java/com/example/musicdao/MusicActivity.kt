@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.musicdao.core.repositories.album.BatchPublisher
 import com.example.musicdao.core.ipv8.SetupMusicCommunity
 import com.example.musicdao.core.repositories.AlbumRepository
+import com.example.musicdao.core.repositories.ArtistRepository
 import com.example.musicdao.core.repositories.MusicGossipingService
 import com.example.musicdao.core.torrent.TorrentEngine
 import com.example.musicdao.core.wallet.WalletService
@@ -42,6 +43,9 @@ class MusicActivity : AppCompatActivity() {
 
     @Inject
     lateinit var albumRepository: AlbumRepository
+
+    @Inject
+    lateinit var artistRepository: ArtistRepository
 
     @Inject
     lateinit var torrentEngine: TorrentEngine
@@ -87,6 +91,26 @@ class MusicActivity : AppCompatActivity() {
         Intent(this, MusicGossipingService::class.java).also { intent ->
             startService(intent)
             bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+        }
+
+        walletService.addOnSetupCompletedListener {
+            val scope = CoroutineScope(Dispatchers.IO)
+            val address = walletService.protocolAddress().toString()
+            Log.d("MusicDao", "onSetupCompletedListener (1)")
+
+            scope.launch {
+                val me = artistRepository.getMyself()
+                Log.d("MusicDao", "onSetupCompletedListener (2)")
+                if (me != null) {
+                    if (me.bitcoinAddress != address) {
+                        Log.d("MusicDao", "onSetupCompletedListener (3)")
+                        artistRepository.edit(me.name, address, me.socials, me.biography)
+                    }
+                } else {
+                    Log.d("MusicDao", "onSetupCompletedListener (4)")
+                    artistRepository.edit("Name", address, "Socials", "Biography")
+                }
+            }
         }
 
         setContent {

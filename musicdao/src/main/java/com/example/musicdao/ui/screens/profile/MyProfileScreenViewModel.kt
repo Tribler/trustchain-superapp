@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.musicdao.core.ipv8.MusicCommunity
-import com.example.musicdao.core.ipv8.repositories.ArtistAnnounceBlockRepository
 import com.example.musicdao.core.repositories.model.Artist
 import com.example.musicdao.core.repositories.ArtistRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +18,6 @@ import javax.inject.Inject
 class MyProfileScreenViewModel @Inject constructor(
     private val artistRepository: ArtistRepository,
     private val musicCommunity: MusicCommunity,
-    private val artistAnnounceBlockRepository: ArtistAnnounceBlockRepository
 ) : ViewModel() {
 
     private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
@@ -35,14 +33,7 @@ class MyProfileScreenViewModel @Inject constructor(
         socials: String,
         biography: String
     ): Boolean {
-        return artistAnnounceBlockRepository.create(
-            ArtistAnnounceBlockRepository.Companion.Create(
-                bitcoinAddress = bitcoinAddress,
-                name = name,
-                socials = socials,
-                biography = biography
-            )
-        ) != null
+        return artistRepository.edit(name, bitcoinAddress, socials, biography)
     }
 
     init {

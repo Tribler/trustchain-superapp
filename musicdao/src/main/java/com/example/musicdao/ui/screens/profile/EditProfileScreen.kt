@@ -76,7 +76,8 @@ fun EditProfileScreen(navController: NavController) {
             Text(text = "Bitcoin Public Key", fontWeight = FontWeight.Bold)
             TextField(
                 value = bitcoinPublicKey.value ?: "",
-                onValueChange = { bitcoinPublicKey.value = it }
+                onValueChange = { bitcoinPublicKey.value = it },
+                enabled = false
             )
         }
 

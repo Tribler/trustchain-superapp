@@ -1,7 +1,10 @@
 package com.example.musicdao.ui.screens.wallet
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.musicdao.core.repositories.ArtistRepository
 import com.example.musicdao.core.wallet.UserWalletTransaction
 import com.example.musicdao.core.wallet.WalletService
 import com.example.musicdao.ui.SnackbarHandler
@@ -14,7 +17,7 @@ import org.bitcoinj.wallet.Wallet
 import javax.inject.Inject
 
 @HiltViewModel
-class BitcoinWalletViewModel @Inject constructor(val walletService: WalletService) : ViewModel() {
+class BitcoinWalletViewModel @Inject constructor(val walletService: WalletService, val artistRepository: ArtistRepository) : ViewModel() {
 
     val publicKey: MutableStateFlow<String?> = MutableStateFlow(null)
     val confirmedBalance: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -59,6 +62,12 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
 
     fun wallet(): Wallet {
         return walletService.wallet()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun donate(publicKey: String, amount: String): Boolean {
+        val bitcoinPublicKey = artistRepository.getArtist(publicKey)?.bitcoinAddress ?: return false
+        return walletService.sendCoins(bitcoinPublicKey, amount)
     }
 
     companion object {
