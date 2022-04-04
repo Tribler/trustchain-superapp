@@ -54,7 +54,7 @@ class HiltModules {
 
         val port =
             PreferenceManager.getDefaultSharedPreferences(applicationContext)
-                .getString("musicdao_port", "10252")
+                .getString("musicdao_port", "10129")
                 ?.toIntOrNull()
         if (port != null) {
             val interfaceFormat = "0.0.0.0:%1\$d,[::]:%1\$d"

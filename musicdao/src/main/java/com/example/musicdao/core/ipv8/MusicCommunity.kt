@@ -10,7 +10,10 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.ipv8.keyvault.PublicKey
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
+import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import java.util.*
 
@@ -119,6 +122,14 @@ class MusicCommunity(
 
     fun publicKeyHex(): String {
         return this.myPeer.publicKey.keyToBin().toHex()
+    }
+
+    fun publicKeyStringToPublicKey(publicKey: String) : PublicKey {
+        return defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
+    }
+
+    fun publicKeyStringToByteArray(publicKey: String) : ByteArray {
+        return publicKeyStringToPublicKey(publicKey).keyToBin()
     }
 
     object MessageId {

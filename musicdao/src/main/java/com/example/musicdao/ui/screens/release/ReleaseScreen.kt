@@ -228,6 +228,27 @@ fun Header(album: Album, navController: NavController) {
             modifier = Modifier.padding(bottom = 5.dp)
         )
         Text(
+            "UUID",
+            style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
+            modifier = Modifier.padding(bottom = 5.dp)
+        )
+        Text(
+            album.id,
+            style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
+            modifier = Modifier.padding(bottom = 5.dp)
+        )
+        Text(
+            "Artist Public Key",
+            style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
+            modifier = Modifier.padding(bottom = 5.dp)
+        )
+        Text(
+            album.publisher,
+            style = MaterialTheme.typography.body2.merge(SpanStyle(fontWeight = FontWeight.SemiBold)),
+            modifier = Modifier.padding(bottom = 5.dp)
+        )
+
+        Text(
             "Album - ${dateToShortString(album.releaseDate.toString())}",
             style = MaterialTheme.typography.body2.merge(
                 SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.Gray)

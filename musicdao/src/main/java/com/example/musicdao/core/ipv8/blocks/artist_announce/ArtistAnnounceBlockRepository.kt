@@ -1,5 +1,6 @@
 package com.example.musicdao.core.ipv8.repositories
 
+import android.util.Log
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.Constants
 import com.example.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
@@ -21,6 +22,7 @@ class ArtistAnnounceBlockRepository @Inject constructor(
      */
     suspend fun getOrCrawl(publicKey: String): ArtistAnnounceBlock? {
         val block = get(publicKey)
+        Log.d("MusicDao", "getOrCrawl 1: $block $publicKey")
         return if (block != null) {
             block
         } else {
@@ -59,13 +61,20 @@ class ArtistAnnounceBlockRepository @Inject constructor(
     }
 
     private suspend fun crawl(publicKey: String) {
-        val key = publicKey.toByteArray()
+        val key = musicCommunity.publicKeyStringToByteArray(publicKey)
         val peer = musicCommunity.network.getVerifiedByPublicKeyBin(key)
+        Log.d("MusicDao", "crawl: peer is? $peer")
+        Log.d("MusicDao", "all peers")
+        musicCommunity.network.verifiedPeers.forEach {
+            Log.d("MusicDao", "peer: ${it.publicKey.keyToBin().toHex()}")
+        }
 
         if (peer != null) {
+            Log.d("MusicDao", "crawl: peer found $peer, crawling")
             musicCommunity.crawlChain(peer = peer)
         } else {
             val randomPeers = musicCommunity.network.getRandomPeers(10) - musicCommunity.myPeer
+            Log.d("MusicDao", "crawl: crawling random peers ${randomPeers.size}")
             try {
                 randomPeers.forEach {
                     musicCommunity.sendCrawlRequest(it, key, LongRange(-1, -1))
