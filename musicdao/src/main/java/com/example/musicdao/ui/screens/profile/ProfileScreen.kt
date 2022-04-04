@@ -39,7 +39,7 @@ fun ProfileScreen(publicKey: String, navController: NavController) {
     profile.value?.let {
         Profile(artist = it, releases = releases.value, navController = navController)
     } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        EmptyState(firstLine = "404", secondLine = "This artist has notpublished  any information yet.")
+        EmptyState(firstLine = "404", secondLine = "This artist has not published  any information yet.")
         return
     }
 }

@@ -9,10 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -20,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.musicdao.ui.SnackbarHandler
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -34,19 +32,22 @@ fun EditProfileScreen(navController: NavController) {
     val socials = remember { mutableStateOf(profile.value?.socials) }
 
     val context = LocalContext.current
+    val coroutine = rememberCoroutineScope()
 
     fun save() {
-        val result = ownProfileViewScreenModel.publishEdit(
-            name = name.value ?: "",
-            bitcoinAddress = bitcoinPublicKey.value ?: "",
-            socials = socials.value ?: "",
-            biography = biography.value ?: ""
-        )
-        if (result) {
-            navController.popBackStack()
-            SnackbarHandler.displaySnackbar(text = "Successfully published your profile")
-        } else {
-            SnackbarHandler.displaySnackbar(text = "Could not publish, please fill in all fields")
+        coroutine.launch {
+            val result = ownProfileViewScreenModel.publishEdit(
+                name = name.value ?: "",
+                bitcoinAddress = bitcoinPublicKey.value ?: "",
+                socials = socials.value ?: "",
+                biography = biography.value ?: ""
+            )
+            if (result) {
+                navController.popBackStack()
+                SnackbarHandler.displaySnackbar(text = "Successfully published your profile")
+            } else {
+                SnackbarHandler.displaySnackbar(text = "Could not publish, please fill in all fields")
+            }
         }
     }
 

@@ -22,14 +22,14 @@ class ProfileScreenViewModel @AssistedInject constructor(
 ) : ViewModel() {
 
     private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
-    val profile: StateFlow<Artist?> = _profile
+    var profile: StateFlow<Artist?> = _profile
 
     private val _releases: MutableStateFlow<List<Album>> = MutableStateFlow(listOf())
     val releases: StateFlow<List<Album>> = _releases
 
     init {
         viewModelScope.launch {
-            _profile.value = artistRepository.getArtist(publicKey = publicKey)
+            profile = artistRepository.getArtistStateFlow(publicKey = publicKey)
             _releases.value = artistRepository.getArtistReleases(publicKey = publicKey)
         }
     }

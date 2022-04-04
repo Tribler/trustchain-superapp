@@ -7,16 +7,17 @@ import com.example.musicdao.core.repositories.ArtistRepository
 import com.example.musicdao.core.repositories.model.Artist
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @RequiresApi(Build.VERSION_CODES.O)
 @HiltViewModel
 class DonateScreenViewModel @Inject constructor(val artistRepository: ArtistRepository) : ViewModel() {
 
-    val artist: MutableStateFlow<Artist?> = MutableStateFlow(null)
+    var artist: StateFlow<Artist?> = MutableStateFlow(null)
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun setArtist(publicKey: String) {
-        artist.value = artistRepository.getArtist(publicKey)
+        artist = artistRepository.getArtistStateFlow(publicKey)
     }
 }

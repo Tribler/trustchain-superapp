@@ -21,13 +21,13 @@ class MyProfileScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _profile: MutableStateFlow<Artist?> = MutableStateFlow(null)
-    val profile: StateFlow<Artist?> = _profile
+    var profile: StateFlow<Artist?> = _profile
 
     fun publicKey(): String {
         return musicCommunity.publicKeyHex()
     }
 
-    fun publishEdit(
+    suspend fun publishEdit(
         name: String,
         bitcoinAddress: String,
         socials: String,
@@ -38,7 +38,7 @@ class MyProfileScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            _profile.value = artistRepository.getArtist(musicCommunity.publicKeyHex())
+            profile = artistRepository.getArtistStateFlow(publicKey())
         }
     }
 }
