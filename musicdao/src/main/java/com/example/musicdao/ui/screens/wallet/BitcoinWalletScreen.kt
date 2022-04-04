@@ -89,7 +89,7 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                         .align(Alignment.CenterVertically)
                 )
                 LinearProgressIndicator(
-                    syncProgress.value?.let { (it / 100).toFloat() }
+                    syncProgress.value?.let { (it.toFloat() / 100).toFloat() }
                         ?: 0f,
                     color = MaterialTheme.colors.onPrimary,
                     modifier = Modifier
@@ -138,15 +138,6 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                     Column(modifier = Modifier.padding(bottom = 20.dp)) {
                         Text(text = "Wallet Status", fontWeight = FontWeight.Bold)
                         Text(text = status.value ?: "No Status")
-                    }
-
-                    Column(modifier = Modifier.padding(bottom = 20.dp)) {
-                        Text(text = "Syncing Progress", fontWeight = FontWeight.Bold)
-                        LinearProgressIndicator(
-                            bitcoinWalletViewModel.syncProgress.value?.let { (it / 100).toFloat() }
-                                ?: 0f,
-                            modifier = Modifier.padding(top = 10.dp)
-                        )
                     }
                 }
             }
