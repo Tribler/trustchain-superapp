@@ -95,7 +95,8 @@ fun AppNavigation(
                     bitcoinWalletViewModel = bitcoinWalletViewModel,
                     navBackStackEntry.arguments?.getString(
                         "publicKey"
-                    )!!
+                    )!!,
+                    navController = navController
                 )
             }
             composable(Screen.DiscoverArtists.route) {

@@ -3,8 +3,10 @@ package com.example.musicdao.ui.screens.donate
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.musicdao.ui.SnackbarHandler
 import com.example.musicdao.ui.components.EmptyState
 import com.example.musicdao.ui.screens.profile.CustomMenuItem
@@ -21,11 +24,11 @@ import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String) {
+fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: String, navController: NavController) {
 
     val donateScreenViewModel: DonateScreenViewModel = hiltViewModel()
     val artist = donateScreenViewModel.artist.collectAsState()
-    val amount = rememberSaveable { mutableStateOf("1") }
+    val amount = rememberSaveable { mutableStateOf("0.1") }
     val coroutine = rememberCoroutineScope()
 
     LaunchedEffect(publicKey) {
@@ -48,6 +51,7 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
             val result = bitcoinWalletViewModel.donate(publicKey, amount.value)
             if (result) {
                 SnackbarHandler.displaySnackbar("Donation sent")
+                navController.popBackStack()
             } else {
                 SnackbarHandler.displaySnackbar("Donation failed")
             }
@@ -62,16 +66,33 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
     Column(modifier = Modifier.padding(20.dp)) {
 
         Text(
-            text = "Current Balance is ${bitcoinWalletViewModel.confirmedBalance.value ?: "0.00 BTC"}",
+            text = "Your balance is ${bitcoinWalletViewModel.confirmedBalance.value?.toFriendlyString() ?: "0.00 BTC"}",
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 5.dp)
+            modifier = Modifier.padding(bottom = 10.dp)
         )
         Text(
             text = "Amount",
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 5.dp)
         )
-        OutlinedTextField(value = amount.value, onValueChange = { amount.value = it })
+        OutlinedTextField(value = amount.value, onValueChange = { amount.value = it }, modifier = Modifier.padding(bottom = 10.dp))
+        Row() {
+            Button(onClick = {
+                amount.value = "0.001"
+            }, modifier = Modifier.padding(end = 10.dp)) {
+                Text("0.001")
+            }
+            Button(onClick = {
+                amount.value = "0.01"
+            }, modifier = Modifier.padding(end = 10.dp)) {
+                Text("0.01")
+            }
+            Button(onClick = {
+                amount.value = "0.1"
+            }, modifier = Modifier.padding(end = 10.dp)) {
+                Text("0.1")
+            }
+        }
 
         Spacer(modifier = Modifier.weight(1f))
         CustomMenuItem(text = "Confirm Send", onClick = { send() })
