@@ -1,6 +1,7 @@
 package com.example.musicdao.core.repositories
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.musicdao.core.ipv8.MusicCommunity
 import com.example.musicdao.core.ipv8.blocks.artist_announce.ArtistAnnounceBlock
@@ -10,15 +11,17 @@ import com.example.musicdao.core.repositories.model.Artist
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @RequiresApi(Build.VERSION_CODES.O)
+@Singleton
 class ArtistRepository @Inject constructor(
     private val artistAnnounceBlockRepository: ArtistAnnounceBlockRepository,
     private val albumRepository: AlbumRepository,
     private val musicCommunity: MusicCommunity
 ) {
 
-    val stateFlows: MutableList<MutableStateFlow<Artist?>> = mutableListOf()
+    val stateFlows: MutableMap<String, MutableStateFlow<Artist?>> = mutableMapOf()
 
     val optimisticUpdateListeners = mutableListOf<() -> Unit>()
     fun addOptimisticUpdateListener(listener: () -> Unit) {
@@ -38,23 +41,25 @@ class ArtistRepository @Inject constructor(
     }
 
     suspend fun getArtistStateFlow(publicKey: String): StateFlow<Artist?> {
-        val current = stateFlows.find { it.value?.publicKey == publicKey }
+        val current = stateFlows.get(publicKey)
         if (current == null) {
             val stateFlow = MutableStateFlow<Artist?>(null)
             stateFlow.value = getArtist(publicKey)
-            stateFlows.add(stateFlow)
+            stateFlows.set(publicKey, stateFlow)
             return stateFlow
         }
         return current
     }
 
     suspend fun refreshArtistStateFlow(publicKey: String) {
-        val current = stateFlows.find { it.value?.publicKey == publicKey }
+        val current = stateFlows.get(publicKey)
+
         if (current != null) {
             current.value = getArtist(publicKey)
+        } else {
+            stateFlows.set(publicKey, MutableStateFlow(getArtist(publicKey)))
         }
     }
-
 
     suspend fun getMyself(): Artist? {
         val publicKey = musicCommunity.publicKeyHex()
@@ -80,7 +85,6 @@ class ArtistRepository @Inject constructor(
             refreshArtistStateFlow(musicCommunity.publicKeyHex())
         }
         return result
-
     }
 
     private fun toArtist(block: ArtistAnnounceBlock): Artist {

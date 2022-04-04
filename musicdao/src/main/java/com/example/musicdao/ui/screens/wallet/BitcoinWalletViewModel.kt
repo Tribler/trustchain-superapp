@@ -34,13 +34,14 @@ class BitcoinWalletViewModel @Inject constructor(val walletService: WalletServic
         viewModelScope.launch {
 
             while (isActive) {
+                syncProgress.value = walletService.percentageSynced()
+                status.value = walletService.walletStatus()
+
                 if (walletService.isStarted()) {
                     isStarted.value = true
                     publicKey.value = walletService.protocolAddress().toString()
                     estimatedBalance.value = walletService.estimatedBalance()
                     confirmedBalance.value = walletService.confirmedBalance()
-                    status.value = walletService.walletStatus()
-                    syncProgress.value = walletService.percentageSynced()
                     walletTransactions.value = walletService.walletTransactions()
                 }
                 delay(REFRESH_DELAY)
