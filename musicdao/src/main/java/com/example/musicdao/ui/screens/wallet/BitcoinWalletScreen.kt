@@ -66,7 +66,7 @@ fun BitcoinWalletScreen(bitcoinWalletViewModel: BitcoinWalletViewModel) {
                     )
             ) {
                 Text(
-                    text = confirmedBalance.value ?: "0.00 BTC",
+                    text = confirmedBalance.value?.toFriendlyString() ?: "0.00 BTC",
                     style = MaterialTheme.typography.h6
                 )
                 Text(

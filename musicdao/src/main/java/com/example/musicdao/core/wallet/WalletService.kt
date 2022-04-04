@@ -194,9 +194,9 @@ class WalletService(val config: WalletConfig) {
         return app.wallet().issuedReceiveAddresses[0]
     }
 
-    fun confirmedBalance(): String? {
+    fun confirmedBalance(): Coin? {
         return try {
-            app.wallet().balance.toFriendlyString()
+            app.wallet().balance
         } catch (e: java.lang.Exception) {
             null
         }

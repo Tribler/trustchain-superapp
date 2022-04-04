@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import org.bitcoinj.core.Coin
 import org.bitcoinj.wallet.Wallet
 import javax.inject.Inject
 
@@ -20,7 +21,7 @@ import javax.inject.Inject
 class BitcoinWalletViewModel @Inject constructor(val walletService: WalletService, val artistRepository: ArtistRepository) : ViewModel() {
 
     val publicKey: MutableStateFlow<String?> = MutableStateFlow(null)
-    val confirmedBalance: MutableStateFlow<String?> = MutableStateFlow(null)
+    val confirmedBalance: MutableStateFlow<Coin?> = MutableStateFlow(null)
     val estimatedBalance: MutableStateFlow<String?> = MutableStateFlow(null)
     val status: MutableStateFlow<String?> = MutableStateFlow(null)
     val syncProgress: MutableStateFlow<Int?> = MutableStateFlow(null)

@@ -36,6 +36,14 @@ fun DonateScreen(bitcoinWalletViewModel: BitcoinWalletViewModel, publicKey: Stri
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun send() {
+
+        // Check if enough balance available
+        val confirmedBalance = bitcoinWalletViewModel.confirmedBalance.value
+        if (confirmedBalance == null || confirmedBalance.isZero || confirmedBalance.isNegative) {
+            SnackbarHandler.displaySnackbar("You don't have enough funds to make a donation")
+            return
+        }
+
         coroutine.launch {
             val result = bitcoinWalletViewModel.donate(publicKey, amount.value)
             if (result) {
