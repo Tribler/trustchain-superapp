@@ -58,10 +58,12 @@ class FileProcessor {
                 return title
             }
 
-            return mp3.filename
-                .replace("_", " ")
+            val fileNameTitle = mp3.filename
                 .substringAfterLast("/")
-                .substringAfterLast("-")
+                .substringBefore(".mp3")
+            Log.d("MusicDao", "2 Get Title: $fileNameTitle vs ${mp3.filename}")
+
+            return fileNameTitle
         }
 
         /**
