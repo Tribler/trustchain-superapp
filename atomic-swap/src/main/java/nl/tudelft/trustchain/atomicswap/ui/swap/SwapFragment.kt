@@ -125,6 +125,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     Log.d(LOG,"Alice created an ethereum transaction claimable by bob with id : $txid")
 
                 }else if (trade.myCoin == Currency.BTC){
+                    Log.d(LOG,"generated secret : ${trade.secret?.toHex()}")
                     val (transaction,_) = WalletHolder.bitcoinSwap.createSwapTransaction(trade)
 
                     // add a confidence listener
@@ -170,7 +171,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 Log.d(LOG, "Alice's transaction is confirmed")
 
             } catch (e:Exception){
-                e.printStackTrace()
+                Log.d(LOG,e.stackTraceToString())
             }
         }
 
@@ -187,8 +188,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
 
                 if(trade.myCoin == Currency.ETH){
+                    Log.d(LOG,"secret hash ${trade.secretHash?.toHex()}")
                     val txid = WalletHolder.ethSwap.createSwap(trade)
-
+                    Log.d(LOG,"get swap : ${WalletHolder.ethSwap.getSwap(trade.secretHash?: error("")).amount}")
                     WalletHolder.ethSwap.setOnClaimed(trade.secretHash ?: error("we don't know the secret hash")){ secret ->
                         trade.setOnSecretObserved(secret)
                         if(trade.counterpartyCoin == Currency.BTC){
@@ -247,7 +249,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 }
 
             } catch (e:Exception){
-                e.printStackTrace()
+                Log.d(LOG,e.stackTraceToString())
             }
         }
 
@@ -268,7 +270,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
 
             } catch (e:Exception){
-                e.printStackTrace()
+                Log.d(LOG,e.stackTraceToString())
             }
 
         }
@@ -281,8 +283,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 val trade  = trades.first { it.id == completeMessage.offerId.toLong() }
 
                 if (trade.counterpartyCoin == Currency.ETH){
-                    WalletHolder.ethSwap.claimSwap(trade.secret?: error("cannot claim swap, we don't know the secret"))
+                    val receipt = WalletHolder.ethSwap.claimSwap(trade.secret?: error("cannot claim swap, we don't know the secret"))
                     Log.d(LOG,"Alice received a complete message from Bob and is now claiming Bob's ether.")
+                    Log.d(LOG,"tx receipt : $receipt")
                 }else if(trade.counterpartyCoin == Currency.BTC){
                     val tx = Transaction(RegTestParams(), completeMessage.txId.hexToBytes())
                     WalletHolder.bitcoinWallet.commitTx(tx)
@@ -302,7 +305,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 }
 
             } catch (e:Exception){
-                e.printStackTrace()
+                Log.d(LOG,e.stackTraceToString())
             }
         }
 
@@ -336,7 +339,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
 
             } catch (e:Exception){
-                e.printStackTrace()
+                Log.d(LOG,e.stackTraceToString())
             }
         }
 

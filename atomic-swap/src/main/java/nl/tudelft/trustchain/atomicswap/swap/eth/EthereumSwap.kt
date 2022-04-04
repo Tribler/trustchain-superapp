@@ -2,12 +2,16 @@ package nl.tudelft.trustchain.atomicswap.swap.eth
 
 import android.annotation.SuppressLint
 import android.util.Log
+import io.reactivex.plugins.RxJavaPlugins
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.swap.Trade
+import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
 import org.web3j.crypto.Credentials
 import org.web3j.protocol.Web3j
+import org.web3j.protocol.core.DefaultBlockParameter
 import org.web3j.protocol.core.DefaultBlockParameterName
+import org.web3j.protocol.core.DefaultBlockParameterNumber
 import org.web3j.protocol.core.methods.response.TransactionReceipt
 import org.web3j.tx.RawTransactionManager
 import org.web3j.tx.gas.DefaultGasProvider
@@ -32,12 +36,15 @@ class EthereumSwap(
      */
     val claimCallbacks = mutableMapOf<String,ClaimCallback>()
     init {
-
-        swapContract.swapClaimedEventFlowable(DefaultBlockParameterName.EARLIEST,DefaultBlockParameterName.LATEST)
-            .subscribe { event->
-                claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret) ?: run{Log.d("ETHLOG","cb is null")}
-                Log.d("ETHLOG","Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}")
-            }
+        try {
+            swapContract.swapClaimedEventFlowable(DefaultBlockParameterName.LATEST,DefaultBlockParameterName.LATEST)
+                .subscribe { event->
+                    claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret) ?: run{Log.d("ETHLOG","cb is null")}
+                    Log.d("ETHLOG","Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}")
+                }
+        } catch (e: Exception) {
+            Log.d(LOG,e.stackTraceToString())
+        }
     }
 
     /**
@@ -74,6 +81,8 @@ class EthereumSwap(
             Convert.toWei(amount, Convert.Unit.ETHER).toBigInteger()
         ).send()
 
+        Log.d(LOG,"receipt : $tx")
+
         return tx.transactionHash
     }
 
@@ -92,6 +101,10 @@ class EthereumSwap(
      * @param secret: The secret needed to claim the swap.
      */
     fun claimSwap(secret: ByteArray): TransactionReceipt {
+        Log.d(LOG,"CLaiming eht with secret : ${secret.toHex()}")
+        require(getSwap(sha256(secret)).recipient == credentials.address){
+            Log.d(LOG,"Cannot claim swap.")
+        }
         return swapContract.claim(secret, sha256(secret)).send()
     }
 
