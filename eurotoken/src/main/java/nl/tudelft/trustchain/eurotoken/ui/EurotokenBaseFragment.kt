@@ -23,19 +23,18 @@ import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.ui.BaseFragment
-import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
-import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
-import org.json.JSONArray
-import org.json.JSONObject
-import java.io.IOException
 
 open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(contentLayoutId) {
 
     protected val logger = KotlinLogging.logger {}
 
-    private val store by lazy {
+    /**
+     * The [TrustStore] to retrieve trust scores from.
+     */
+    protected val trustStore by lazy {
         TrustStore.getInstance(requireContext())
     }
 
@@ -64,7 +63,7 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         super.onCreate(savedInstanceState)
 
         setHasOptionsMenu(true)
-        store.createContactStateTable()
+        trustStore.createContactStateTable()
 
         lifecycleScope.launchWhenResumed {
         }
@@ -100,9 +99,15 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         menu.findItem(R.id.toggleDemoMode).setTitle(getDemoModeMenuItemText())
     }
 
+    /**
+     * Get the text for the demo mode menu item.
+     */
     private fun getDemoModeMenuItemText(): String {
-        val pref = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
-        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
+        val pref = requireContext().getSharedPreferences(
+            EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+            Context.MODE_PRIVATE
+        )
+        val demoModeEnabled = pref.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
         return getString(R.string.toggle_demo_mode, if (demoModeEnabled) "OFF" else "ON")
     }
 
@@ -137,9 +142,15 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
                 true
             }
             R.id.toggleDemoMode -> {
-                val sharedPreferences = requireContext().getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
+                val sharedPreferences = requireContext().getSharedPreferences(
+                    EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME,
+                    Context.MODE_PRIVATE
+                )
                 val edit = sharedPreferences.edit()
-                edit.putBoolean(DEMO_MODE_ENABLED_PREF, !sharedPreferences.getBoolean(DEMO_MODE_ENABLED_PREF, false))
+                edit.putBoolean(
+                    EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED,
+                    !sharedPreferences.getBoolean(EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED, false)
+                )
                 edit.commit()
 
                 item.setTitle(getDemoModeMenuItemText())
@@ -184,21 +195,5 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         ) { dialog, _ -> dialog.cancel() }
 
         builder.show()
-    }
-
-
-}
-
-private fun JSONObject.toMap(): Map<String, *> = keys().asSequence().associateWith {
-    when (val value = this[it])
-    {
-        is JSONArray ->
-        {
-            val map = (0 until value.length()).associate { Pair(it.toString(), value[it]) }
-            JSONObject(map).toMap().values.toList()
-        }
-        is JSONObject -> value.toMap()
-        JSONObject.NULL -> null
-        else            -> value
     }
 }

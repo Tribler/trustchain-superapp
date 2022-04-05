@@ -1,5 +1,8 @@
 package nl.tudelft.trustchain.eurotoken.entity
 
+/**
+ * The [TrustScore] of a peer by public key.
+ */
 data class TrustScore (
     val pubKey : ByteArray,
     val trust : Int

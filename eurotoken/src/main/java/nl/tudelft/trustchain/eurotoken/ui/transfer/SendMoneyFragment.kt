@@ -23,19 +23,12 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
 
-    private val trustStore by lazy {
-        TrustStore.getInstance(requireContext())
-    }
-
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
             transactionRepository.trustChainCommunity.myPeer.publicKey.keyToBin().toHex()
                 .hexToBytes()
         )
     }
-
-    private val TRUSTSCORE_AVERAGE_BOUNDARY = 70
-    private val TRUSTSCORE_LOW_BOUNDARY = 30
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -123,5 +116,7 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         const val ARG_AMOUNT = "amount"
         const val ARG_PUBLIC_KEY = "pubkey"
         const val ARG_NAME = "name"
+        const val TRUSTSCORE_AVERAGE_BOUNDARY = 70
+        const val TRUSTSCORE_LOW_BOUNDARY = 30
     }
 }

@@ -17,12 +17,11 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.Transaction
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
-import nl.tudelft.trustchain.eurotoken.DEMO_MODE_ENABLED_PREF
-import nl.tudelft.trustchain.eurotoken.EUROTOKEN_PREFERENCES
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity.EurotokenPreferences.DEMO_MODE_ENABLED
+import nl.tudelft.trustchain.eurotoken.EuroTokenMainActivity.EurotokenPreferences.EUROTOKEN_SHARED_PREF_NAME
 import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 
-private val logger = KotlinLogging.logger {}
 
 class EuroTokenCommunity(
     store: GatewayStore,
@@ -33,8 +32,14 @@ class EuroTokenCommunity(
 
     private lateinit var transactionRepository: TransactionRepository
 
+    /**
+     * The [TrustStore] used to fetch and update trust scores from peers.
+     */
     private var myTrustStore : TrustStore
 
+    /**
+     * The context used to access the shared preferences.
+     */
     private var myContext : Context
 
 
@@ -126,7 +131,11 @@ class EuroTokenCommunity(
         }
     }
 
-    fun generatePublicKey(seed : Long) : String {
+    /**
+     * Generate a public key based on the [seed].
+     * @param seed : the seed used to generate the public key.
+     */
+    private fun generatePublicKey(seed : Long) : String {
         // Initialize Random with seed
         val random = Random(seed)
 
@@ -135,9 +144,14 @@ class EuroTokenCommunity(
         return key.toHex()
     }
 
-    fun generatePublicKeys(length: Int, seed : Long = 1337) : List<String> {
+    /**
+     * Generate [numberOfKeys] public keys based on the [seed].
+     * @param numberOfKeys : the number of keys to generate.
+     * @param seed : the seed used to generate the public keys.
+     */
+    private fun generatePublicKeys(numberOfKeys: Int, seed : Long = 1337) : List<String> {
         val publicKeys = mutableListOf<String>()
-        for (i in 0 until length) {
+        for (i in 0 until numberOfKeys) {
             publicKeys.add(generatePublicKey(seed + i))
         }
         return publicKeys
@@ -146,14 +160,16 @@ class EuroTokenCommunity(
 
     /**
      * Called after the user has finished a transaction with the other party.
-     * Sends the 50 public keys of latest transaction counterparties to the receiver.
+     * Sends the [num] public keys of latest transaction counterparties to the receiver.
      * When DEMO mode is enabled, it generates 50 random keys instead.
+     * @param peer : the peer to send the keys to.
+     * @param num : the number of keys to send.
      */
     fun sendAddressesOfLastTransactions(peer: Peer, num: Int = 50) {
-        val pref = myContext.getSharedPreferences(EUROTOKEN_PREFERENCES, Context.MODE_PRIVATE)
-        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED_PREF, false)
+        val pref = myContext.getSharedPreferences(EUROTOKEN_SHARED_PREF_NAME, Context.MODE_PRIVATE)
+        val demoModeEnabled = pref.getBoolean(DEMO_MODE_ENABLED, false)
 
-        var addresses : ArrayList<String> = ArrayList()
+        val addresses : ArrayList<String> = ArrayList()
         // Add own public key to list of addresses.
         addresses.add(myPeer.publicKey.keyToBin().toHex())
         if (demoModeEnabled) {

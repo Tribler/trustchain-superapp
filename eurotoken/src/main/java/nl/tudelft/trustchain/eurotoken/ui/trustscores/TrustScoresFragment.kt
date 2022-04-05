@@ -29,10 +29,6 @@ class TrustScoresFragment : EurotokenBaseFragment(R.layout.fragment_trust_scores
 
     private val adapter = ItemAdapter()
 
-    private val store by lazy {
-        TrustStore.getInstance(requireContext())
-    }
-
     private val items: LiveData<List<Item>> by lazy {
         liveData { emit(listOf<Item>()) }
     }
@@ -40,10 +36,10 @@ class TrustScoresFragment : EurotokenBaseFragment(R.layout.fragment_trust_scores
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter.registerRenderer(TrustScoreItemRenderer { showOptions(it) })
+        adapter.registerRenderer(TrustScoreItemRenderer())
 
         lifecycleScope.launchWhenResumed {
-            val items = store.getAllScores().map { trustScore: TrustScore -> TrustScoreItem(trustScore) }
+            val items = trustStore.getAllScores().map { trustScore: TrustScore -> TrustScoreItem(trustScore) }
             adapter.updateItems(items)
             adapter.notifyDataSetChanged()
             delay(1000L)
@@ -65,9 +61,5 @@ class TrustScoresFragment : EurotokenBaseFragment(R.layout.fragment_trust_scores
         items.observe(viewLifecycleOwner) {
             adapter.updateItems(it)
         }
-    }
-
-    private fun showOptions(trustScore: TrustScore) {
-        logger.info("Show options for ${trustScore.pubKey}")
     }
 }

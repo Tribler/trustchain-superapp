@@ -14,6 +14,9 @@ class TrustStore (context: Context) {
     private val driver = AndroidSqliteDriver(Database.Schema, context, "eurotoken.db")
     private val database = Database(driver)
 
+    /**
+     * Maps the keys and accompanying trust scores out of the database into a kotlin [TrustScore] object.
+     */
     private val messageMapper = {
             public_key : ByteArray,
             score : Long
@@ -24,14 +27,24 @@ class TrustStore (context: Context) {
         )
     }
 
+    /**
+     * Retrieve all [TrustScore]s from the database.
+     */
     fun getAllScores() : List<TrustScore> {
         return database.dbTrustScoreQueries.getAll(messageMapper).executeAsList()
     }
 
+    /**
+     * Retrieve the [TrustScore]s of a specific public key.
+     */
     fun getScore(publicKey: ByteArray) : Long? {
         return database.dbTrustScoreQueries.getScore(publicKey).executeAsOneOrNull()
     }
 
+    /**
+     * Insert a new [TrustScore] into the database.
+     * If the score already exists, it will be incremented by 1.
+     */
     fun incrementTrust(publicKey: ByteArray) {
         val score : Long? = getScore(publicKey)
 
@@ -46,6 +59,9 @@ class TrustStore (context: Context) {
         }
     }
 
+    /**
+     * Initialize the database.
+     */
     fun createContactStateTable() {
         database.dbTrustScoreQueries.createContactStateTable()
     }

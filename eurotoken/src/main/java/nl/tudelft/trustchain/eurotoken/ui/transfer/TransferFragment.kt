@@ -33,8 +33,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.lang.Exception
 
-private val logger = KotlinLogging.logger {}
-
 class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) {
     private val binding by viewBinding(FragmentTransferEuroBinding::bind)
 
@@ -134,7 +132,10 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
         }
     }
 
-
+    /**
+     * Find a [Peer] in the network by its public key.
+     * @param pubKey : The public key of the peer to find.
+     */
     private fun findPeer(pubKey : String) : Peer? {
         val itr = transactionRepository.trustChainCommunity.getPeers().listIterator()
         while (itr.hasNext()) {
@@ -158,6 +159,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
 
+                // Try to send the addresses of the last X transactions to the peer we have just scanned.
                 try {
                     val peer = findPeer(defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.toByteArray()).toString());
                     if (peer == null) {
@@ -194,10 +196,6 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             }
         } ?: Toast.makeText(requireContext(), "Scan failed", Toast.LENGTH_LONG).show()
         return
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
     }
 
     companion object {
