@@ -36,10 +36,10 @@ class TrustStore (context: Context) {
         val score : Long? = getScore(publicKey)
 
         // Limit score to 100
-        if(score == 100) {
+        if(score != null && score.toInt() == 100) {
             return
         }
-        
+
         return if (score != null) {
             database.dbTrustScoreQueries.incrementScore(publicKey)
         } else {
