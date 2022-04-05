@@ -18,10 +18,6 @@ buildscript {
     }
 }
 
-ext {
-    ndkVersion = '24.0.8215888'
-}
-
 ktlint {
     version = "$ktlint_version"
     android = true
@@ -31,7 +27,7 @@ ktlint {
 
 // Generate a version code from git commit count
 static def generateVersionCode() {
-    int versionCode =  1 //"git rev-list HEAD --count".execute().text.trim().toInteger()
+    int versionCode =  "git rev-list HEAD --count".execute().text.trim().toInteger()
     print("Version code: $versionCode")
     return versionCode
 }
@@ -87,7 +83,6 @@ android {
         exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
         exclude 'META-INF/DEPENDENCIES'
     }
-    ndkVersion ndkVersion
 }
 
 repositories {
