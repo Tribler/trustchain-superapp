@@ -19,6 +19,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import mu.KotlinLogging
+import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -114,7 +115,6 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 val connectionData = JSONObject()
                 connectionData.put("public_key", myPeer.publicKey.keyToBin().toHex())
                 connectionData.put("amount", amount)
-                connectionData.put("mid", myPeer.mid.toString())
                 connectionData.put("name", ownContact?.name ?: "")
                 connectionData.put("type", "transfer")
 
@@ -157,12 +157,11 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                 args.putString(SendMoneyFragment.ARG_PUBLIC_KEY, connectionData.public_key)
                 args.putLong(SendMoneyFragment.ARG_AMOUNT, connectionData.amount)
                 args.putString(SendMoneyFragment.ARG_NAME, connectionData.name)
-                args.putString(SendMoneyFragment.ARG_MID, connectionData.mid)
 
                 try {
-                    val peer = findPeer(connectionData.mid);
+                    val peer = findPeer(defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.toByteArray()).toString());
                     if (peer == null) {
-                        Toast.makeText(requireContext(), connectionData.public_key, Toast.LENGTH_LONG)
+                        Toast.makeText(requireContext(), "Could not find peer from QR code", Toast.LENGTH_LONG)
                             .show()
                     }
                     val euroTokenCommunity = getIpv8().getOverlay<EuroTokenCommunity>()
@@ -221,7 +220,6 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
             var amount = this.optLong("amount", -1L)
             var name = this.optString("name")
             var type = this.optString("type")
-            var mid = this.optString("mid")
         }
 
         fun getAmount(amount: String): Long {

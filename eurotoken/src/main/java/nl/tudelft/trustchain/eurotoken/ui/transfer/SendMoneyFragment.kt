@@ -44,7 +44,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         val publicKey = requireArguments().getString(ARG_PUBLIC_KEY)!!
         val amount = requireArguments().getLong(ARG_AMOUNT)
         val name = requireArguments().getString(ARG_NAME)!!
-        val mid = requireArguments().getString(ARG_MID)!!
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(key)
@@ -126,6 +125,5 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         const val ARG_AMOUNT = "amount"
         const val ARG_PUBLIC_KEY = "pubkey"
         const val ARG_NAME = "name"
-        const val ARG_MID = "mid"
     }
 }
