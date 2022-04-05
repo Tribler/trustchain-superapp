@@ -34,6 +34,12 @@ class TrustStore (context: Context) {
 
     fun incrementTrust(publicKey: ByteArray) {
         val score : Long? = getScore(publicKey)
+
+        // Limit score to 100
+        if(score == 100) {
+            return
+        }
+        
         return if (score != null) {
             database.dbTrustScoreQueries.incrementScore(publicKey)
         } else {
