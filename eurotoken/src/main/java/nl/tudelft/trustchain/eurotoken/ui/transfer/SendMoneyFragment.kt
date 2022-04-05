@@ -10,13 +10,12 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
-import kotlin.math.roundToInt
 
 class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
@@ -24,8 +23,8 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
 
-    private val gatewayStore by lazy {
-        GatewayStore.getInstance(requireContext())
+    private val trustStore by lazy {
+        TrustStore.getInstance(requireContext())
     }
 
     private val ownPublicKey by lazy {
@@ -35,8 +34,8 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         )
     }
 
-    private val TRUSTSCORE_AVERAGE_BOUNDARY = 0.7
-    private val TRUSTSCORE_LOW_BOUNDARY = 0.3
+    private val TRUSTSCORE_AVERAGE_BOUNDARY = 70
+    private val TRUSTSCORE_LOW_BOUNDARY = 30
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,19 +79,18 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
 
-        val trustScore = trustScores?.get(publicKey)
+        val trustScore = trustStore.getScore(publicKey.toByteArray())
         logger.info { "Trustscore: $trustScore" }
 
-        if (trustScore != null && trustScore is Double) {
-            val trustScorePercentage = (trustScore * 100).roundToInt()
+        if (trustScore != null) {
             if (trustScore >= TRUSTSCORE_AVERAGE_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScorePercentage)
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScore)
                 trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
             } else if (trustScore > TRUSTSCORE_LOW_BOUNDARY) {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScorePercentage)
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScore)
                 trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
             } else {
-                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScorePercentage)
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScore)
                 trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
             }
         } else {

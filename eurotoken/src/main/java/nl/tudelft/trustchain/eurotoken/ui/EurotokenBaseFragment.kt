@@ -35,8 +35,6 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
 
     protected val logger = KotlinLogging.logger {}
 
-    protected var trustScores: Map<String, *>? = null
-
     private val store by lazy {
         TrustStore.getInstance(requireContext())
     }
@@ -82,15 +80,6 @@ open class EurotokenBaseFragment(contentLayoutId: Int = 0) : BaseFragment(conten
         player.setDataSource(afd.fileDescriptor, afd.startOffset, afd.length);
         player.prepare();
         player.start();
-    }
-
-    @Throws(IOException::class)
-    private fun loadTrustScores(): Map<String, *> {
-        val fd = activity?.assets?.open("trust_scores.json")?: throw IOException()
-        val jsonString = fd.bufferedReader().use{it.readText()}
-
-        val jsonObj = JSONObject(jsonString)
-        return jsonObj.toMap()
     }
 
 
