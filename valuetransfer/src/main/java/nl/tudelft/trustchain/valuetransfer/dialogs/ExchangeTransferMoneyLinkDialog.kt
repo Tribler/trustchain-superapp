@@ -270,5 +270,7 @@ class ExchangeTransferMoneyLinkDialog(
 
     companion object {
         const val TAG = "exchange_transfer_money_link_dialog"
+        const val HIGHTRANSACTIONWARNINGVALUE = 1000.00
+        const val TOOHIGHTRANSACTIONVALUE = 1000000000000.00
     }
 }
