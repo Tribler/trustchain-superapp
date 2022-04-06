@@ -83,6 +83,8 @@ import android.net.Uri
 import android.os.*
 import android.widget.Toast
 import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
+import nl.tudelft.trustchain.valuetransfer.util.SecurityUtil
+import java.net.URLDecoder
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -166,15 +168,7 @@ class ValueTransferMainActivity : BaseActivity() {
         var requestMoney=false
         if(action!=null && data!=null)
         {
-
-            val receiver_name=data.getQueryParameter("name")
-            val receiver_public=data.getQueryParameter("public")
-            val amount=data.getQueryParameter("amount")
-            val message=data.getQueryParameter("message")
-            if(receiver_public!=null && amount!=null) {
-                requestMoney = true
-                exchangeTransferMoneyLinkFragment.setData(receiver_name, amount, message,receiver_public)
-            }
+            requestMoney=handleLinkRequest(data)
         }
 
 
@@ -1195,6 +1189,30 @@ class ValueTransferMainActivity : BaseActivity() {
                 )
                 finish()
             }
+        }
+    }
+
+    fun handleLinkRequest(data: Uri):Boolean
+    {
+        try{
+            val receiver_name=data.getQueryParameter("name")
+            val receiver_public=data.getQueryParameter("public")
+            val amount=data.getQueryParameter("amount")
+            val message=data.getQueryParameter("message")
+            val pkstring=data.getQueryParameter("key")
+            val signature=data.getQueryParameter("signature")
+            val pk= SecurityUtil.deserializePK(pkstring)
+            var url=SecurityUtil.urldecode(data.toString())
+            url=url.removeRange(0,url.indexOf("?")+1)
+            url=url.removeRange(url.indexOf("&signature"),url.length)
+            if(amount!=null && receiver_public!=null && pk!=null && SecurityUtil.validate(url,signature,pk)) {
+                exchangeTransferMoneyLinkFragment.setData(receiver_name, amount, message,receiver_public)
+                return true
+            }
+            return false
+        }catch (ex: java.lang.Exception)
+        {
+            return false
         }
     }
 

@@ -1,9 +1,11 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
 import android.content.*
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -15,10 +17,11 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
-import nl.tudelft.trustchain.valuetransfer.util.addDecimalLimiter
-import nl.tudelft.trustchain.valuetransfer.util.formatAmount
-import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
-import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
+import nl.tudelft.trustchain.valuetransfer.util.*
+import java.net.URI
+import java.net.URLEncoder
+import java.security.interfaces.RSAPublicKey
+import kotlin.math.sign
 
 
 class ExchangeTransferMoneyLinkDialog(
@@ -42,6 +45,7 @@ class ExchangeTransferMoneyLinkDialog(
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
@@ -141,19 +145,40 @@ class ExchangeTransferMoneyLinkDialog(
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun  getLink():String
     {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
             ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
         var url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
-        url.append("amount=").append(transactionAmountText)
-        url.append("&message=").append(transactionMessage)
-        if(name!=null)
-            url.append("&name=").append(name)
-        if(isEuroTransfer)
-            url.append("&IBAN=").append(IBAN)
-        url.append("&public=").append(ownKey)
+        //TODO: "simpleParams" is just a temporary fix to get the signature based on unencoded params (the same the recipient gets).
+        // This could probably be cleaner with utilizing the URI class instead of a StringBuilder.
+        var simpleParams=java.lang.StringBuilder()
+        var parameters=java.lang.StringBuilder()
+        simpleParams.append("amount=").append(transactionAmountText)
+        simpleParams.append("&message=").append(transactionMessage)
+        parameters.append("amount=").append(SecurityUtil.urlencode(transactionAmountText))
+        parameters.append("&message=").append(SecurityUtil.urlencode(transactionMessage))
+        if(name!=null) {
+            simpleParams.append("&name=").append(name)
+            parameters.append("&name=").append(SecurityUtil.urlencode(name))
+        }
+        if(isEuroTransfer) {
+            simpleParams.append("&IBAN=").append(IBAN)
+            parameters.append("&IBAN=").append(SecurityUtil.urlencode(IBAN))
+        }
+        simpleParams.append("&public=").append(ownKey.toString())
+        parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.toString()))
+        val keyPair=SecurityUtil.generateKey()
+        val publicKey=keyPair.public
+        val privateKey=keyPair.private
+        //url.append(parameters)
+        val pkstring=SecurityUtil.serializePK(publicKey as RSAPublicKey)
+        val signature=SecurityUtil.sign(simpleParams.toString(), privateKey)
+        parameters.append(("&signature=")).append(SecurityUtil.urlencode(signature))
+        parameters.append("&key=").append(SecurityUtil.urlencode(pkstring))
+        url.append(parameters)
         return url.toString()
     }
 

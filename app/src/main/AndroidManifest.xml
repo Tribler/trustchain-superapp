@@ -116,28 +116,16 @@
             android:screenOrientation="portrait"
             android:launchMode="singleTop">
             <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
-
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:scheme="http"
-                    android:host="trustchain.tudelft.nl"
-                    android:pathPrefix="/requestMoney" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:scheme="https"
-                    android:host="trustchain.tudelft.nl"
-                    android:pathPrefix="/requestMoney" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="trustchain.tudelft.nl"/>
+                <data android:pathPrefix="/requestMoney" />
             </intent-filter>
         </activity>
 
