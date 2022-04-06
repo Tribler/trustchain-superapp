@@ -78,13 +78,13 @@ class WalletService {
                 }
             }
 
-//            app.setPeerNodes(
-//                PeerAddress(
-//                    params,
-//                    InetAddress.getByName(BuildConfig.BITCOIN_DEFAULT_PEER),
-//                    params.port
-//                )
-//            )
+            app.setPeerNodes(
+                PeerAddress(
+                    params,
+                    InetAddress.getByName(BuildConfig.BITCOIN_DEFAULT_PEER),
+                    params.port
+                )
+            )
 
 //            app.setPeerNodes(
 //                PeerAddress(

@@ -6,17 +6,27 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import org.bitcoinj.core.PeerAddress
+import nl.tudelft.trustchain.atomicswap.messages.AcceptMessage
+import nl.tudelft.trustchain.atomicswap.messages.CompleteSwapMessage
+import nl.tudelft.trustchain.atomicswap.messages.InitiateMessage
+import nl.tudelft.trustchain.atomicswap.messages.TradeMessage
 import java.util.*
 
 typealias onAccept = (AcceptMessage, Peer) -> Unit
 typealias onInitiate = (InitiateMessage, Peer) -> Unit
-typealias onTrade = (TradeMessage,Peer) -> Unit
+typealias onTrade = (TradeMessage, Peer) -> Unit
 typealias onComplete = (CompleteSwapMessage, Peer) -> Unit
 
+object AtomicSwapTrustchainConstants {
+    const val ATOMIC_SWAP_COMPLETED_BLOCK = "atomic_swap_completed_block"
+    const val TRANSACTION_FROM_COIN = "from_coin"
+    const val TRANSACTION_TO_COIN = "to_coin"
+    const val TRANSACTION_FROM_AMOUNT = "from_amount"
+    const val TRANSACTION_TO_AMOUNT = "to_amount"
+    const val TRANSACTION_OFFER_ID = "offer_id"
+}
+
 class AtomicSwapCommunity : Community() {
-
-
     override val serviceId = "abcdefabcdefabcdefabcdefabcdef0123456789"
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
     val lastTrackerResponses = mutableMapOf<IPv4Address, Date>()
@@ -89,30 +99,35 @@ class AtomicSwapCommunity : Community() {
     }
 
     private fun onCompleteTrade(packet: Packet) {
-        val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
-        onCompleteCallback(payload, peer)
-        Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
+        try {
+            val (peer, payload) = packet.getAuthPayload(CompleteSwapMessage.Deserializer)
+            onCompleteCallback(payload, peer)
+            Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
+        } catch (e:Exception){
+            print(e)
+        }
     }
 
 
 
     // Function for sending messages
-    fun broadcastTradeOffer(offerId: Int, fromCoin: String, toCoin: String, fromAmount: String, toAmount: String) {
+    fun broadcastTradeOffer(offerId: String, fromCoin: String, toCoin: String, fromAmount: String, toAmount: String) {
         for (peer in getPeers()) {
             val packet = serializePacket(
-                Companion.BROADCAST_TRADE_MESSAGE_ID, TradeMessage(offerId.toString(),
+                Companion.BROADCAST_TRADE_MESSAGE_ID, TradeMessage(offerId,
                     fromCoin,
                     toCoin,
                     fromAmount,
-                    toAmount))
+                    toAmount)
+            )
             send(peer.address, packet)
         }
     }
 
-    fun sendAcceptMessage(peer: Peer, offerId:String, pubKey: String){
+    fun sendAcceptMessage(peer: Peer, offerId:String, btcPubKey: String, ethAddress: String ){
         send(
             peer.address,
-            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, pubKey ))
+            serializePacket(Companion.ACCEPT_MESSAGE_ID, AcceptMessage(offerId, btcPubKey, ethAddress))
         )
     }
 
@@ -122,7 +137,7 @@ class AtomicSwapCommunity : Community() {
             peer.address,
             serializePacket(
                 Companion.INITIATE_MESSAGE_ID,
-                InitiateMessage(offerId, data.secretHash, data.txId, data.publicKey)
+                InitiateMessage(offerId, data.secretHash, data.txId, data.btcPubKey,data.ethAddress)
             )
         )
     }
@@ -155,5 +170,6 @@ class AtomicSwapCommunity : Community() {
 data class OnAcceptReturn(
     val secretHash: String,
     val txId: String,
-    val publicKey: String
+    val btcPubKey: String,
+    val ethAddress: String
 )

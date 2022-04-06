@@ -1,13 +1,9 @@
 package nl.tudelft.trustchain.atomicswap
 
-import android.util.Log
-import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.util.toHex
-import nl.tudelft.trustchain.atomicswap.ui.wallet.WalletHolder
+import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
 import org.bitcoinj.core.Address
 import org.bitcoinj.core.Transaction
 import org.bitcoinj.core.listeners.OnTransactionBroadcastListener
-import org.bitcoinj.params.RegTestParams
 import org.bitcoinj.script.Script
 
 class SwapTransactionBroadcastListener(): OnTransactionBroadcastListener{
