@@ -191,6 +191,7 @@ class ExchangeTransferMoneyLinkDialog(
         queue.add(request);
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun showLink(host: String, paymentId: String)
     {
         val link=getLink(host, paymentId)
@@ -207,6 +208,7 @@ class ExchangeTransferMoneyLinkDialog(
 
 
     @RequiresApi(Build.VERSION_CODES.M)
+    fun getLink(host: String, paymentId: String):String
     {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
@@ -218,22 +220,25 @@ class ExchangeTransferMoneyLinkDialog(
         var parameters=java.lang.StringBuilder()
         simpleParams.append("amount=").append(transactionAmountText)
         simpleParams.append("&message=").append(transactionMessage)
+        simpleParams.append("&host=").append(host)
+        simpleParams.append("&paymentId=").append(paymentId)
         parameters.append("amount=").append(SecurityUtil.urlencode(transactionAmountText))
         parameters.append("&message=").append(SecurityUtil.urlencode(transactionMessage))
+        parameters.append("&host=").append(host)
+        parameters.append("&paymentId=").append(paymentId)
         if(name!=null) {
-        url.append("&public=").append(ownKey.keyToBin().toHex())
+            simpleParams.append("&name=").append(name)
             parameters.append("&name=").append(SecurityUtil.urlencode(name))
         }
         if(isEuroTransfer) {
             simpleParams.append("&IBAN=").append(IBAN)
             parameters.append("&IBAN=").append(SecurityUtil.urlencode(IBAN))
         }
-        simpleParams.append("&public=").append(ownKey.toString())
-        parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.toString()))
+        simpleParams.append("&public=").append(ownKey.keyToBin().toHex())
+        parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.keyToBin().toHex()))
         val keyPair=SecurityUtil.generateKey()
         val publicKey=keyPair.public
         val privateKey=keyPair.private
-        //url.append(parameters)
         val pkstring=SecurityUtil.serializePK(publicKey as RSAPublicKey)
         val signature=SecurityUtil.sign(simpleParams.toString(), privateKey)
         parameters.append(("&signature=")).append(SecurityUtil.urlencode(signature))
