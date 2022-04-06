@@ -114,6 +114,22 @@ class ExchangeTransferMoneyLinkDialog(
             transactionAmountView.doAfterTextChanged {
                 transactionAmount = formatAmount(transactionAmountView.text.toString())
                 transactionAmountText=transactionAmountView.text.toString()
+                //                  Large number warning
+                if (isValidTransactionAmount(transactionAmountText) == "Valid but large"){
+                    transactionAmountView.background.setTint(Color.parseColor("#FFF9BA"))
+                }
+//                  Invalid:
+                else if (isValidTransactionAmount(transactionAmountText) == "Invalid"){
+                    transactionAmountView.background.setTint(Color.parseColor("#FFBABA"))
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.transer_money_link_valid_transaction_value)
+                    )
+                }
+//                  Is valid:
+                else{
+                    transactionAmountView.background.setTint(Color.parseColor("#C8FFC4"))
+                }
             }
 
             messageView.doAfterTextChanged {
@@ -136,7 +152,7 @@ class ExchangeTransferMoneyLinkDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog.clShareLink.setOnClickListener {
-                if (!isValidIban(ibanView.text.toString())) {
+                if (!isValidIban(ibanView.text.toString()) && ibanView.visibility == View.VISIBLE) {
                     parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.transer_money_link_valid_iban)
@@ -266,6 +282,27 @@ class ExchangeTransferMoneyLinkDialog(
                 val factor = if (value < 10) 10 else 100
                 (factor * previousMod + value) % 97
             } == 1
+    }
+
+    internal fun isValidTransactionAmount(transactionAmountText: String): String {
+        val transactionAmountDouble = transactionAmountText.replace(",",".").toDoubleOrNull();
+        if (transactionAmountDouble != null) {
+//          Large number warning
+            return if (transactionAmountDouble >= HIGHTRANSACTIONWARNINGVALUE && transactionAmountDouble < TOOHIGHTRANSACTIONVALUE){
+                "Valid but large"
+            }
+//          Too large:
+            else if (transactionAmountDouble >= TOOHIGHTRANSACTIONVALUE){
+                "Invalid"
+            }
+//          Is valid:
+            else{
+                "Valid"
+            }
+//      Not valid:
+        } else {
+            return "Invalid"
+        }
     }
 
     companion object {
