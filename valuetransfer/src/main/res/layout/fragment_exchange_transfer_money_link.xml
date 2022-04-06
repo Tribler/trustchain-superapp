@@ -10,8 +10,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="?attr/backgroundColor">
+        android:background="?attr/backgroundColor"
+        android:orientation="vertical">
 
         <TextView
             style="@style/FragmentTitle"
@@ -24,12 +24,12 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
             android:layout_marginTop="8dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:orientation="horizontal"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="?attr/widgetColor"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -47,9 +47,9 @@
                 android:id="@+id/tvPaymentReceiver"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                tools:text="x.x.x"
+                android:gravity="center_vertical"
                 android:textColor="?attr/onWidgetSecondaryColor"
-                android:gravity="center_vertical"/>
+                tools:text="x.x.x" />
 
         </LinearLayout>
 
@@ -58,12 +58,12 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
             android:layout_marginTop="8dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:orientation="horizontal"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="?attr/widgetColor"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -81,9 +81,9 @@
                 android:id="@+id/tvPaymentAmount"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
-                tools:text="x.x.x"
+                android:gravity="center_vertical"
                 android:textColor="?attr/onWidgetSecondaryColor"
-                android:gravity="center_vertical"/>
+                tools:text="x.x.x" />
 
         </LinearLayout>
 
@@ -93,13 +93,13 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="12dp"
             android:layout_marginTop="8dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:orientation="vertical"
-            android:visibility="gone"
             android:background="@drawable/pill_rounded"
             android:backgroundTint="?attr/widgetColor"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="8dp"
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -113,9 +113,9 @@
                 android:id="@+id/tvPaymentMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="x.x.x"
+                android:gravity="center_vertical"
                 android:textColor="?attr/onWidgetSecondaryColor"
-                android:gravity="center_vertical"/>
+                tools:text="x.x.x" />
 
         </LinearLayout>
 
@@ -128,9 +128,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginHorizontal="12dp"
             android:layout_marginTop="8dp"
-            android:layout_marginHorizontal="12dp">
+            android:orientation="horizontal">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/clPayEuro"
@@ -142,11 +142,22 @@
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="8dp"
                 android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/clPayEurotoken"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/clPayEurotoken">
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ProgressBar
+                    android:id="@+id/pbPayingEuro"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="25dp"
+                    android:layout_height="24dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:gravity="center_vertical"
@@ -169,9 +180,10 @@
                 android:backgroundTint="?attr/widgetColor"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/clPayEuro">
+                app:layout_constraintStart_toEndOf="@+id/clPayEuro"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:layout_width="wrap_content"

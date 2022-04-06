@@ -1,17 +1,24 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.content.*
+import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.BuildConfig
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -21,6 +28,7 @@ import nl.tudelft.trustchain.valuetransfer.util.addDecimalLimiter
 import nl.tudelft.trustchain.valuetransfer.util.formatAmount
 import nl.tudelft.trustchain.valuetransfer.util.onFocusChange
 import nl.tudelft.trustchain.valuetransfer.util.setNavigationBarColor
+import org.json.JSONObject
 
 
 class ExchangeTransferMoneyLinkDialog(
@@ -44,6 +52,7 @@ class ExchangeTransferMoneyLinkDialog(
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
@@ -127,29 +136,77 @@ class ExchangeTransferMoneyLinkDialog(
             bottomSheetDialog.show()
 
             bottomSheetDialog.clShareLink.setOnClickListener {
-                val link=getLink()
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT,
-                        "Would you please pay me €$transactionAmountText  via\n$link"
-                    )
-                    type = "text/plain"
-                }
-                if (!isValidIban(ibanView.text.toString()))
+                if (!isValidIban(ibanView.text.toString())) {
                     parentActivity.displayToast(
                         requireContext(),
                         resources.getString(R.string.transer_money_link_valid_iban)
-
                     )
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                startActivity(shareIntent)
+                }
+                if (transactionAmount <= 0) {
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.transer_money_link_valid_amount)
+                    )
+                }
+                else {
+                    createPaymentId(
+                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt()
+                    )
+                }
             }
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
-    private fun getLink():String
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createPaymentId(amount: Int)
+    {
+        val host = BuildConfig.DEFAULT_GATEWAY_HOST
+        val url = "$host/api/exchange/e2t/initiate"
+        val queue = Volley.newRequestQueue(requireContext())
+        // Post parameters
+        val params = HashMap<String,Int>()
+        params["collatoral_cent"] = amount
+        val jsonObject = JSONObject(params as Map<*, *>)
+        // Volley post request with parameters
+        val request = JsonObjectRequest(
+            Request.Method.POST,url,jsonObject,
+            { response ->
+                val paymentId = response.getString("payment_id")
+                val gatewaydata = response.getJSONObject("gateway_connection_data")
+                getEuroTokenCommunity().connectToGateway(gatewaydata.getString("public_key"),
+                    gatewaydata.getString("ip"),
+                    gatewaydata.getString("port").toInt(),
+                    paymentId)
+                showLink(host, paymentId)
+            }, { error ->
+                Log.d("server_err", error.message?: error.toString())
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_unexpected_error_occurred)
+                )
+            })
+        // Add the volley post request to the request queue
+        queue.add(request);
+    }
+
+    private fun showLink(host: String, paymentId: String)
+    {
+        val link=getLink(host, paymentId)
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT,
+                "Would you please pay me €$transactionAmountText  via\n$link"
+            )
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
+    }
+
+
+    private fun getLink(host: String, paymentId: String):String
     {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
@@ -157,6 +214,9 @@ class ExchangeTransferMoneyLinkDialog(
         val url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
         url.append("amount=").append(transactionAmountText)
         url.append("&message=").append(transactionMessage)
+        url.append("&message=").append(transactionMessage)
+        url.append("&host=").append(host)
+        url.append("&paymentId=").append(paymentId)
         if(name!=null)
             url.append("&name=").append(name)
         if(isEuroTransfer)
