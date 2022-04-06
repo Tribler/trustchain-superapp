@@ -40,6 +40,8 @@ import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
 import nl.tudelft.trustchain.atomicswap.AtomicSwapTrustchainConstants
+import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
+import nl.tudelft.trustchain.atomicswap.ui.swap.SwapFragment
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
@@ -204,14 +206,8 @@ class TrustChainApplication : Application() {
             AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK,
             object : BlockSigner {
                 override fun onSignatureRequest(block: TrustChainBlock) {
-                    val atomicSwapCommunity =
-                        IPv8Android.getInstance().getOverlay<AtomicSwapCommunity>()!!
-                    val peer = atomicSwapCommunity.getPeers()
-                        .find { it.publicKey.keyToBin().contentEquals(block.publicKey) }
-                    if (peer != null) {
-                        trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
-                        println("BLOCK AGREE SENT")
-                    }
+                    trustchain.createAgreementBlock(block, mapOf<Any?, Any?>())
+                    Log.d(LOG, "Bob created a trustchain agreement block")
                 }
             }
         )

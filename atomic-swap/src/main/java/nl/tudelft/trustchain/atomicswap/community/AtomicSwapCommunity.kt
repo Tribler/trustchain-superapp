@@ -6,16 +6,14 @@ import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
-import nl.tudelft.trustchain.atomicswap.messages.AcceptMessage
-import nl.tudelft.trustchain.atomicswap.messages.CompleteSwapMessage
-import nl.tudelft.trustchain.atomicswap.messages.InitiateMessage
-import nl.tudelft.trustchain.atomicswap.messages.TradeMessage
+import nl.tudelft.trustchain.atomicswap.messages.*
 import java.util.*
 
 typealias onAccept = (AcceptMessage, Peer) -> Unit
 typealias onInitiate = (InitiateMessage, Peer) -> Unit
 typealias onTrade = (TradeMessage, Peer) -> Unit
 typealias onComplete = (CompleteSwapMessage, Peer) -> Unit
+typealias onRemove = (RemoveTradeMessage, Peer) -> Unit
 
 object AtomicSwapTrustchainConstants {
     const val ATOMIC_SWAP_COMPLETED_BLOCK = "atomic_swap_completed_block"
@@ -54,6 +52,7 @@ class AtomicSwapCommunity : Community() {
         messageHandlers[Companion.ACCEPT_MESSAGE_ID] = ::onAcceptMessage
         messageHandlers[Companion.INITIATE_MESSAGE_ID] = ::onInitiateMessage
         messageHandlers[Companion.COMPLETE_MESSAGE_ID] = ::onCompleteTrade
+        messageHandlers[Companion.REMOVE_MESSAGE_ID] = ::onRemoveMessage
     }
 
 
@@ -61,6 +60,7 @@ class AtomicSwapCommunity : Community() {
     private lateinit var onInitiateCallback: onInitiate
     private lateinit var onTradeCallback: onTrade
     private lateinit var onCompleteCallback: onComplete
+    private lateinit var onRemoveCallback: onRemove
 
     fun setOnAccept(callback: onAccept) = callback.also {
         onAcceptCallback = it
@@ -74,6 +74,9 @@ class AtomicSwapCommunity : Community() {
     }
     fun setOnComplete(callback: onComplete) = callback.also {
         onCompleteCallback = it
+    }
+    fun setOnRemove(callback: onRemove) = callback.also {
+        onRemoveCallback = it
     }
 
 
@@ -108,7 +111,11 @@ class AtomicSwapCommunity : Community() {
         }
     }
 
-
+    private fun onRemoveMessage(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(RemoveTradeMessage.Deserializer)
+        Log.d("AtomicSwapCommunity", "Received remove tade message")
+        onRemoveCallback(payload, peer)
+    }
 
     // Function for sending messages
     fun broadcastTradeOffer(offerId: String, fromCoin: String, toCoin: String, fromAmount: String, toAmount: String) {
@@ -153,7 +160,18 @@ class AtomicSwapCommunity : Community() {
         )
     }
 
-
+    fun sendRemoveTradeMessage(offerId: String) {
+        Log.d("AtomicSwapCommunity", "SENDING REMOVE TRADE MESS")
+        for (peer in getPeers()) {
+            send(
+                peer.address,
+                serializePacket(
+                    Companion.REMOVE_MESSAGE_ID,
+                    RemoveTradeMessage(offerId)
+                )
+            )
+        }
+    }
 
 
     companion object {
@@ -161,6 +179,7 @@ class AtomicSwapCommunity : Community() {
         private const val ACCEPT_MESSAGE_ID = 2
         private const val INITIATE_MESSAGE_ID = 3
         private const val COMPLETE_MESSAGE_ID = 4
+        private const val REMOVE_MESSAGE_ID = 5
     }
 }
 
