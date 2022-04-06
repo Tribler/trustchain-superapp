@@ -1,17 +1,24 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.content.*
+import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.Observer
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.dialog_exchange_transfer_link.*
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.common.BuildConfig
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -21,7 +28,7 @@ import nl.tudelft.trustchain.valuetransfer.util.*
 import java.net.URI
 import java.net.URLEncoder
 import java.security.interfaces.RSAPublicKey
-import kotlin.math.sign
+import org.json.JSONObject
 
 
 class ExchangeTransferMoneyLinkDialog(
@@ -45,7 +52,7 @@ class ExchangeTransferMoneyLinkDialog(
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)
@@ -114,44 +121,97 @@ class ExchangeTransferMoneyLinkDialog(
             }
 
             ibanView.doAfterTextChanged {
-                IBAN=ibanView.text.toString()
+                when {
+                    !isValidIban(ibanView.text.toString()) -> {
+                        ibanView.background.setTint(Color.parseColor("#FFBABA"))
+                    }
+                    else -> {
+                        ibanView.background.setTint(Color.parseColor("#C8FFC4"))
+                        IBAN=ibanView.text.toString()
+                    }
+                }
             }
 
             bottomSheetDialog.setContentView(view)
             bottomSheetDialog.show()
 
             bottomSheetDialog.clShareLink.setOnClickListener {
-                val link=getLink()
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT,
-                        "Would you please pay me €$transactionAmountText  via\n$link"
+                if (!isValidIban(ibanView.text.toString())) {
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.transer_money_link_valid_iban)
                     )
-                    type = "text/plain"
                 }
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                startActivity(shareIntent)
+                if (transactionAmount <= 0) {
+                    parentActivity.displayToast(
+                        requireContext(),
+                        resources.getString(R.string.transer_money_link_valid_amount)
+                    )
+                }
+                else {
+                    createPaymentId(
+                        (transactionAmountText.replace(",", ".").toDouble() * 100).toInt()
+                    )
+                }
             }
-
-//            bottomSheetDialog.clCopyLink.setOnClickListener{
-//                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-//                val clip: ClipData = ClipData.newPlainText("link",getLink())
-//                clipboard.setPrimaryClip(clip)
-//                Toast.makeText(this.context, "Text copied to clipboard", Toast.LENGTH_LONG).show()
-//            }
-
 
             bottomSheetDialog
         } ?: throw IllegalStateException(resources.getString(R.string.text_activity_not_null_requirement))
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createPaymentId(amount: Int)
+    {
+        val host = BuildConfig.DEFAULT_GATEWAY_HOST
+        val url = "$host/api/exchange/e2t/initiate"
+        val queue = Volley.newRequestQueue(requireContext())
+        // Post parameters
+        val params = HashMap<String,Int>()
+        params["collatoral_cent"] = amount
+        val jsonObject = JSONObject(params as Map<*, *>)
+        // Volley post request with parameters
+        val request = JsonObjectRequest(
+            Request.Method.POST,url,jsonObject,
+            { response ->
+                val paymentId = response.getString("payment_id")
+                val gatewaydata = response.getJSONObject("gateway_connection_data")
+                getEuroTokenCommunity().connectToGateway(gatewaydata.getString("public_key"),
+                    gatewaydata.getString("ip"),
+                    gatewaydata.getString("port").toInt(),
+                    paymentId)
+                showLink(host, paymentId)
+            }, { error ->
+                Log.d("server_err", error.message?: error.toString())
+                parentActivity.displayToast(
+                    requireContext(),
+                    resources.getString(R.string.snackbar_unexpected_error_occurred)
+                )
+            })
+        // Add the volley post request to the request queue
+        queue.add(request);
+    }
+
+    private fun showLink(host: String, paymentId: String)
+    {
+        val link=getLink(host, paymentId)
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT,
+                "Would you please pay me €$transactionAmountText  via\n$link"
+            )
+            type = "text/plain"
+        }
+        val shareIntent = Intent.createChooser(sendIntent, null)
+        startActivity(shareIntent)
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun  getLink():String
     {
         val ownKey = transactionRepositoryLink.trustChainCommunity.myPeer.publicKey
         val name =
             ContactStore.getInstance(requireContext()).getContactFromPublicKey(ownKey)?.name
-        var url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
+        val url=StringBuilder("http://trustchain.tudelft.nl/requestMoney?")
         //TODO: "simpleParams" is just a temporary fix to get the signature based on unencoded params (the same the recipient gets).
         // This could probably be cleaner with utilizing the URI class instead of a StringBuilder.
         var simpleParams=java.lang.StringBuilder()
@@ -161,7 +221,7 @@ class ExchangeTransferMoneyLinkDialog(
         parameters.append("amount=").append(SecurityUtil.urlencode(transactionAmountText))
         parameters.append("&message=").append(SecurityUtil.urlencode(transactionMessage))
         if(name!=null) {
-            simpleParams.append("&name=").append(name)
+        url.append("&public=").append(ownKey.keyToBin().toHex())
             parameters.append("&name=").append(SecurityUtil.urlencode(name))
         }
         if(isEuroTransfer) {
@@ -180,6 +240,27 @@ class ExchangeTransferMoneyLinkDialog(
         parameters.append("&key=").append(SecurityUtil.urlencode(pkstring))
         url.append(parameters)
         return url.toString()
+    }
+
+
+    internal fun isValidIban(iban: String): Boolean {
+        if (!"^[0-9A-Z]*\$".toRegex().matches(iban)) {
+            return false
+        }
+
+        val symbols = iban.trim { it <= ' ' }
+        if (symbols.length < 15 || symbols.length > 34) {
+            return false
+        }
+
+        val swapped = symbols.substring(4) + symbols.substring(0, 4)
+        return swapped.toCharArray()
+            .map { it.toInt() }
+            .fold(0) { previousMod: Int, _char: Int ->
+                val value = Integer.parseInt(Character.toString(_char.toChar()), 36)
+                val factor = if (value < 10) 10 else 100
+                (factor * previousMod + value) % 97
+            } == 1
     }
 
     companion object {

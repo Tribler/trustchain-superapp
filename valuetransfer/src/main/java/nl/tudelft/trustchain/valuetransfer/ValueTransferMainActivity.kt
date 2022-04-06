@@ -93,7 +93,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * All fragments within this application, contact chat fragment excluded because it depends on arguments
      */
     private val fragmentManager = supportFragmentManager
-    private val walletOverviewFragment = WalletOverviewFragment()
+    private val walletOverviewFragment = ExchangeFragment()
     private val identityFragment = IdentityFragment()
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
@@ -169,6 +169,11 @@ class ValueTransferMainActivity : BaseActivity() {
         if(action!=null && data!=null)
         {
             requestMoney=handleLinkRequest(data)
+            val host=data.getQueryParameter("host")
+            val paymentId=data.getQueryParameter("paymentId")
+            if(receiver_public!=null && amount!=null && host!=null && paymentId!=null) {
+                exchangeTransferMoneyLinkFragment.setData(receiver_name, amount, message,
+                    receiver_public, iban, host, paymentId)
         }
 
 

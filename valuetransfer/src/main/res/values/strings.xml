@@ -435,6 +435,8 @@
     <string name="snackbar_peer_unlocated">Peer could not be located in the network, please try again</string>
     <string name="snackbar_missing_variable">Missing variable %s</string>
     <string name="snackbar_provide_valid_public_key">Please provide a valid public key</string>
+    <string name="transer_money_link_valid_iban">Please provide a valid IBAN</string>
+    <string name="transer_money_link_valid_amount">Please provide a valid amount</string>
     <string name="snackbar_contact_shared_to">Contact %s shared to %s</string>
     <string name="snackbar_unexpected_error_occurred">Unexpected error occurred, please try again</string>
     <string name="snackbar_gateway_trying_connect">Trying to connect to gateway, continue on exchange portal</string>
