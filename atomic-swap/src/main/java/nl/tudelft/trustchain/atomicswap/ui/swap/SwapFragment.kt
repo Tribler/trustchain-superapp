@@ -14,11 +14,14 @@ import androidx.lifecycle.lifecycleScope
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.atomicswap.*
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicSwapBinding
+import nl.tudelft.trustchain.atomicswap.messages.TradeMessage
 import nl.tudelft.trustchain.atomicswap.swap.Currency
 import nl.tudelft.trustchain.atomicswap.swap.Trade
 import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
@@ -41,6 +44,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
     private var _model: SwapViewModel? = null
 
     private var trades = mutableListOf<Trade>()
+    private var tradeOffers = mutableListOf<Pair<Trade, Peer>>()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -71,34 +75,13 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
         // BOB RECEIVES A TRADE OFFER AND ACCEPTS IT
         atomicSwapCommunity.setOnTrade { trade, peer ->
-
-            lifecycleScope.launch(Dispatchers.Main) {
-
-                val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
-                alertDialogBuilder.setTitle("Received Trade Offer")
-                alertDialogBuilder.setMessage(trade.toString())
-                alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
-
-                    val newTrade = Trade(trade.offerId.toLong(), Currency.fromString(trade.toCoin), trade.toAmount, Currency.fromString(trade.fromCoin), trade.fromAmount)
-                    trades.add(newTrade)
-
-                    newTrade.setOnTrade()
-                    val myPubKey = newTrade.myPubKey ?: error("Some fields are not initialized")
-                    val myAddress = newTrade.myAddress ?: error("Some fields are not initialized")
-                    atomicSwapCommunity.sendAcceptMessage(
-                        peer,
-                        trade.offerId,
-                        myPubKey.toHex(),
-                        myAddress
-                    )
-                    Log.d(LOG, "Bob accepted a trade offer from Alice")
-                }
-
-                alertDialogBuilder.setCancelable(true)
-                alertDialogBuilder.show()
+            try {
+                val newTrade = Trade(trade.offerId.toLong(), Currency.fromString(trade.toCoin), trade.toAmount, Currency.fromString(trade.fromCoin), trade.fromAmount)
+                tradeOffers.add(Pair(newTrade, peer))
+            } catch (e:Exception){
+                Log.d(LOG,e.stackTraceToString())
             }
         }
-
 
         // ALICE RECEIVES AN ACCEPT AND CREATES A TRANSACTION THAT CAN BE CLAIMED BY BOB
         atomicSwapCommunity.setOnAccept { accept, peer ->
@@ -281,6 +264,7 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
 
             try {
                 val trade  = trades.first { it.id == completeMessage.offerId.toLong() }
+                val trustChainCommunity = IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!
 
                 if (trade.counterpartyCoin == Currency.ETH){
                     val receipt = WalletHolder.ethSwap.claimSwap(trade.secret?: error("cannot claim swap, we don't know the secret"))
@@ -302,6 +286,14 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     WalletHolder.walletAppKit.peerGroup().broadcastTransaction(transaction)
                     Log.d(LOG, "Alice created a claim transaction")
                     Log.d(LOG, transaction.toString())
+                    val tchain_trans = mapOf(AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN to trade.myCoin,
+                        AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN to trade.counterpartyCoin,
+                        AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT to trade.myAmount,
+                        AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT to trade.counterpartyAmount,
+                        AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID to trade.id)
+                    val publicKey = peer.publicKey.keyToBin()
+                    trustChainCommunity.createProposalBlock(AtomicSwapTrustchainConstants.ATOMIC_SWAP_COMPLETED_BLOCK, tchain_trans, publicKey)
+                    Log.d(LOG, "Alice created a trustchain proposal block")
                 }
 
             } catch (e:Exception){
@@ -334,8 +326,9 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                     WalletHolder.ethSwap.claimSwap(secret)
                     Log.d(LOG,"Bob claimed Ethereum. From a secret from bitcoin.")
                 }
-
-
+                /* add this trade to the UI list of completed trades and remove from available trades */
+                tradeOffers.remove(tradeOffers.first { it.first.id == offerId.toLong() })
+                atomicSwapCommunity.sendRemoveTradeMessage(trade.id.toString())
 
 
             } catch (e:Exception){
@@ -356,8 +349,44 @@ class SwapFragment : BaseFragment(R.layout.fragment_atomic_swap) {
                 alertDialogBuilder.show()
             }
         }
+
+        atomicSwapCommunity.setOnRemove { removeMessage, _ ->
+            try {
+                val trade = tradeOffers.first { it.first.id == removeMessage.offerId.toLong() }
+                tradeOffers.remove(trade)
+            } catch (e: Exception) {
+                Log.d(LOG, e.stackTraceToString())
+            }
+        }
     }
 
+    /* call this when user accepts trade offer from Trade Offers screen */
+    private fun acceptTrade(trade: Trade, peer: Peer) {
+        lifecycleScope.launch(Dispatchers.Main) {
+            val alertDialogBuilder = AlertDialog.Builder(this@SwapFragment.requireContext())
+            alertDialogBuilder.setTitle("Received Trade Offer")
+            alertDialogBuilder.setMessage(trade.toString())
+            alertDialogBuilder.setPositiveButton("Accept") { _, _ ->
+
+                val newTrade = trade.copy()
+                trades.add(newTrade)
+
+                newTrade.setOnTrade()
+                val myPubKey = newTrade.myPubKey ?: error("Some fields are not initialized")
+                val myAddress = newTrade.myAddress ?: error("Some fields are not initialized")
+                atomicSwapCommunity.sendAcceptMessage(
+                    peer,
+                    trade.id.toString(),
+                    myPubKey.toHex(),
+                    myAddress
+                )
+                Log.d(LOG, "Bob accepted a trade offer from Alice")
+            }
+
+            alertDialogBuilder.setCancelable(true)
+            alertDialogBuilder.show()
+        }
+    }
     private fun initializeUi(binding: FragmentAtomicSwapBinding, model: SwapViewModel) {
         val fromCurrencySpinner = binding.fromCurrencySpinner
         val toCurrencySpinner = binding.toCurrencySpinner
