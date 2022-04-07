@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-//import bitcoin.NativeSecp256k1
+import bitcoin.NativeSecp256k1
 import kotlinx.android.synthetic.main.fragment_frost.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -20,9 +20,9 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         sample_text.text = "potato"
 
 //        val path = System.getProperty("java.library.path")
-        System.setProperty("java.library.path", "bitcoinj-frost/.libs")
+//        System.setProperty("java.library.path", "bitcoinj-frost/.libs")
 
-        FrostCpp.a()
+        NativeSecp256k1.a()
 //        val new_text = keys.toString()
 //        val new_text = keys[2].toString()
 //        FrostCpp.stringFromJNI()

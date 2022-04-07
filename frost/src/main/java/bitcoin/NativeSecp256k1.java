@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.bitcoin;
+package bitcoin;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;

@@ -1,4 +1,4 @@
-package org.bitcoin;
+package bitcoin;
 
 public class FrostSigner {
   public byte[] pubkey;

@@ -1,4 +1,4 @@
-package org.bitcoin;
+package bitcoin;
 
 public class FrostCache {
 
