@@ -24,15 +24,20 @@ The figure above is the modified tokenization flow (red elements). The original 
 ### Steps:
 
 
-## Challenges
-Since the SuperApp is still a prototype developed by students from prior years, documentation, guide, and testing of the SuperApp are minimal. There were several challenges that we overcame in order to develop this feature:
-- Setting the gateway up and running during week 2: Our implementation requires the payment request to involve the exchange, we had trouble with setting up the exchange, particularly the exchange front end. 
-- We had trouble working with the Exchange's rest API during week 3: We had to set up our own exchange on the local host which by default uses HTTP. Since Android does not allow connecting through HTTP, we could not implement the feature with the REST API and had to hardcode some elements. (Mostafa)
-- As mentioned previously, there were no tests for the Value Transfer app, hence we have developed some tests, mostly focused on our implementation to make sure that no issues will occur with future implementation 
-- Signing the sharing link enhances security for the feature, however, there was an issue with the code being open-sourced. Hence everyone can have see how the private and public key pair being generated (Theodoros)
-
 ##Suggestions:
+Even though our implementation of link sharing is very straight forward, during this progress there is no guarantee that the person behind the public key is the intended benficiary. We have enable link signature to make sure that the message cannot be valid if tampered with, i.e. the information in the link being switched. However, there is a chance that even if the signature is valid, but the adversary managed to swap the original valid signed link with another signed link but with the keys from him/her self. In order to (partially) counteract this, we replaced the information in the link (receiver public key, amount, etc) with a transaction ID. The suggestion for the future is that, a validation mechanism should be implemented either in the server (with a trusted authority) or user to make sure the link is shared by a receiver linked to the strong identity (for example passport-enrolled identity in the app)
 
+
+##Testings:
+Tests were not written for Valuetransfer app previously, we managed to add several tests as well, bringing the test coverage slightly higher.
+The following components were tested (check our code):
+Validation of correct IBAN input
+Validation of correct Amount input
+Validation of correct link signing and verification
+Test if eurotoken is received at scenario 1
+Test if eurotoken is received at scenario 2
+Test if euros is received at scenario 3
+Test link creation at scenario 1/2 and 3
 
 
 ## Support:
