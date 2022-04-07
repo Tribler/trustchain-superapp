@@ -26,7 +26,7 @@ The figure above is the modified tokenization flow (red elements). The original 
 
 ## Challenges
 Since the SuperApp is still a prototype developed by students from prior years, documentation, guide, and testing of the SuperApp are minimal. There were several challenges that we overcame in order to develop this feature:
-- Setting the gateway up and running during week 2: Our implementation requires the payment request to involve the exchange, we had trouble with setting up the exchange, particularly the exchange front end. (Erwin)
+- Setting the gateway up and running during week 2: Our implementation requires the payment request to involve the exchange, we had trouble with setting up the exchange, particularly the exchange front end. 
 - We had trouble working with the Exchange's rest API during week 3: We had to set up our own exchange on the local host which by default uses HTTP. Since Android does not allow connecting through HTTP, we could not implement the feature with the REST API and had to hardcode some elements. (Mostafa)
 - As mentioned previously, there were no tests for the Value Transfer app, hence we have developed some tests, mostly focused on our implementation to make sure that no issues will occur with future implementation 
 - Signing the sharing link enhances security for the feature, however, there was an issue with the code being open-sourced. Hence everyone can have see how the private and public key pair being generated (Theodoros)
