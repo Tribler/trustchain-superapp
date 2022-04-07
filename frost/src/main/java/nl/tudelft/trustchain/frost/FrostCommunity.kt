@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
+import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import kotlin.random.Random
 
@@ -51,9 +52,9 @@ class FrostCommunity(private val context: Context): Community(){
     }
 
 
-    private fun saveKeyShare(keyShare: String){
+    private fun saveKeyShare(keyShare: ByteArray){
         this.context.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
-            it?.write(keyShare.toByteArray())
+            it?.write(keyShare)
             Log.i("FROST", "File written ${myPeer.address}")
         }
     }
@@ -70,16 +71,20 @@ class FrostCommunity(private val context: Context): Community(){
 
     @ExperimentalUnsignedTypes
     fun distributeKey(
-        keyShare: String,
+        keyShare: ByteArray,
         ttl: UInt = 2u,
-        originPublicKey: ByteArray = myPeer.publicKey.keyToBin()
+        originPublicKey: ByteArray = myPeer.publicKey.keyToBin(),
+        peers: List<Peer>? = null
     ): Int {
         var count = 0
-        for (peer in getPeers()) {
+        var peerList = peers
+        if(peerList == null){
+            peerList = getPeers()
+        }
+
+        for (peer in peerList) {
             if(peer == myPeer){
-                Log.i("FROST", "Key fragment saved $keyShare")
                 saveKeyShare(keyShare)
-                getKeyShare()
             }
             else{
                 val packet = serializePacket(

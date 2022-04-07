@@ -6,13 +6,13 @@ import nl.tudelft.ipv8.messaging.*
 class KeyPacketMessage @ExperimentalUnsignedTypes constructor(
     val originPublicKey: ByteArray,
     var ttl: UInt,
-    val keyShare: String
+    val keyShare: ByteArray
 ) : Serializable {
 
     override fun serialize(): ByteArray {
         return originPublicKey +
             serializeUInt(ttl) +
-            serializeVarLen(keyShare.toByteArray(Charsets.UTF_8))
+            serializeVarLen(keyShare)
     }
 
     @kotlin.ExperimentalUnsignedTypes
@@ -37,14 +37,13 @@ class KeyPacketMessage @ExperimentalUnsignedTypes constructor(
             localOffset += SERIALIZED_UINT_SIZE
 
             val (keyBytes, keySize) = deserializeVarLen(buffer, offset + localOffset)
-            val keyShare = keyBytes.toString(Charsets.UTF_8)
             localOffset += keySize
 
             return Pair(
                 first = KeyPacketMessage(
                     originPublicKey = originPublicKey,
                     ttl = ttl,
-                    keyShare = keyShare
+                    keyShare = keyBytes
                 ),
                 second = localOffset
             )

@@ -94,8 +94,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
                 }
                 Log.i("FROST", "LOADED: $text")
             }
-
-            getFrostCommunity().distributeKey("hello")
+            val message = "hello"
+            getFrostCommunity().distributeKey(message.toByteArray())
         }
     }
 }
