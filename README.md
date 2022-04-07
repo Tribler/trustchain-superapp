@@ -29,14 +29,22 @@ Even though our implementation of link sharing is very straight forward, during 
 
 
 ##Testings:
+
 Tests were not written for Valuetransfer app previously, we managed to add several tests as well, bringing the test coverage slightly higher.
 The following components were tested (check our code):
+
 Validation of correct IBAN input
+
 Validation of correct Amount input
+
 Validation of correct link signing and verification
+
 Test if eurotoken is received at scenario 1
+
 Test if eurotoken is received at scenario 2
+
 Test if euros is received at scenario 3
+
 Test link creation at scenario 1/2 and 3
 
 
