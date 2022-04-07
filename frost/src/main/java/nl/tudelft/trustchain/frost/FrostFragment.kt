@@ -12,7 +12,6 @@ import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.frost.databinding.FragmentFrostBinding
 
 
-@ExperimentalUnsignedTypes
 class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     private val binding by viewBinding(FragmentFrostBinding::bind)
 
@@ -79,22 +78,12 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         button.setOnClickListener {
             // TODO: add FROST JNI
             Log.i("FROST", "Key distribution started")
-//            var file = File("key_share.txt")
-//            file.writeText("keyFile")
 
-            this.context?.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
-                val message = "hello"
-                it?.write(message.toByteArray())
-                Log.i("FROST", "File written")
-            }
-
-            this.context?.openFileInput("key_share.txt").use { stream ->
-                val text = stream?.bufferedReader().use {
-                    it?.readText()
-                }
-                Log.i("FROST", "LOADED: $text")
-            }
             val message = "hello"
+
+            writeToFile("key_share.txt", message)
+            readFile("key_share.txt")
+
             getFrostCommunity().distributeKey(message.toByteArray())
         }
     }

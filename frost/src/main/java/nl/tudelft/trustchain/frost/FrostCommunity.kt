@@ -9,13 +9,12 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import kotlin.random.Random
 
-@ExperimentalUnsignedTypes
 class FrostCommunity(private val context: Context): Community(){
     override val serviceId = "98c1f6342f30528ada9647197f0503d48db9c2fb"
 
     init {
-        messageHandlers[MessageId.ID] = ::onDistributeKey
-        messageHandlers[MessageId.ACK] = ::onAckKey
+        messageHandlers[MessageId.SEND_KEY] = ::onDistributeKey
+        messageHandlers[MessageId.ACK_KEY] = ::onAckKey
     }
     override fun load() {
         super.load()
@@ -34,38 +33,35 @@ class FrostCommunity(private val context: Context): Community(){
         }
     }
 
-
-    @ExperimentalUnsignedTypes
-    fun onDistributeKey(packet: Packet) {
-        Log.i("FROST", "Key packet received")
-        val (peer, payload) = packet.getDecryptedAuthPayload(KeyPacketMessage, myPeer.key as PrivateKey)
+    private fun onDistributeKey(packet: Packet) {
+        Log.i("FROST", "Key packet received $packet")
+        val (peer, payload) = packet.getDecryptedAuthPayload(KeyPacketMessage.Deserializer, myPeer.key as PrivateKey)
         val keyShare = payload.keyShare
-        Log.i("FROST", "Walking model is de-packaged")
-
         saveKeyShare(keyShare)
 
         ackKey(peer, keyShare)
 
         Log.i("FROST", "Key fragment acked $keyShare")
 
-        getKeyShare()
+//        getKeyShare()
 
     }
 
     private fun ackKey(peer: Peer, keyShare: ByteArray){
         val ack = serializePacket(
-            MessageId.ACK,
+            MessageId.ACK_KEY,
             Ack(keyShare),
             encrypt = true,
+            sign = true,
             recipient = peer
         )
-        Log.i("FROST", "Sending key ack ${myPeer.address}")
+        Log.i("FROST", " ${myPeer.address} sending key ack to ${peer.address}")
         send(peer, ack)
     }
 
     private fun onAckKey(packet: Packet){
-        val (peer, payload) = packet.getDecryptedAuthPayload(Ack, myPeer.key as PrivateKey)
-        Log.i("FROST", "${peer.address} acked key  ${payload.keyShare}")
+        val (peer, payload) = packet.getDecryptedAuthPayload(Ack.Deserializer, myPeer.key as PrivateKey)
+        Log.i("FROST", "${myPeer.address} acked key ${payload.keyShare} from ${peer.address}")
     }
 
     private fun saveKeyShare(keyShare: ByteArray){
@@ -85,7 +81,6 @@ class FrostCommunity(private val context: Context): Community(){
     }
 
 
-    @ExperimentalUnsignedTypes
     fun distributeKey(
         keyShare: ByteArray,
         peers: List<Peer>? = null
@@ -102,12 +97,13 @@ class FrostCommunity(private val context: Context): Community(){
             }
             else{
                 val packet = serializePacket(
-                    MessageId.ID,
+                    MessageId.SEND_KEY,
                     KeyPacketMessage(keyShare),
                     encrypt = true,
+                    sign = true,
                     recipient = peer
                 )
-                Log.i("FROST", "Sending key fragment to ${peer.address}")
+                Log.i("FROST", "${myPeer.address} sending key fragment to ${peer.address}")
                 send(peer, packet)
                 count += 1
             }
@@ -117,10 +113,8 @@ class FrostCommunity(private val context: Context): Community(){
 
 
     object MessageId {
-        val ID: Int
-            get() { return 0 }
-        val ACK: Int
-            get() { return 1 }
+        const val SEND_KEY = 0
+        const val ACK_KEY = 1
     }
 
     class Factory(
