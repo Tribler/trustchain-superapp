@@ -1,5 +1,7 @@
 package nl.tudelft.trustchain.eurotoken.community
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.IPv4Address
 import nl.tudelft.ipv8.Overlay
@@ -14,7 +16,7 @@ import nl.tudelft.trustchain.eurotoken.ui.settings.DefaultGateway
 class EuroTokenCommunity(
     store: GatewayStore
 ) : Community() {
-    override val serviceId = "f0eb36102436bd55c7b3cdca93dcaefb08df0742"
+    override val serviceId = "f0eb36102436bd55c7a3cdca93dcaefb08df0750"
 
     private lateinit var transactionRepository: TransactionRepository
 
