@@ -2,50 +2,26 @@ package nl.tudelft.trustchain.frost
 
 import nl.tudelft.ipv8.messaging.*
 
+import nl.tudelft.ipv8.messaging.Deserializable
+import nl.tudelft.ipv8.messaging.Serializable
+import nl.tudelft.ipv8.messaging.deserializeVarLen
+import nl.tudelft.ipv8.messaging.serializeVarLen
 
-class KeyPacketMessage @ExperimentalUnsignedTypes constructor(
-    val originPublicKey: ByteArray,
-    var ttl: UInt,
+class KeyPacketMessage constructor(
     val keyShare: ByteArray
 ) : Serializable {
-
     override fun serialize(): ByteArray {
-        return originPublicKey +
-            serializeUInt(ttl) +
-            serializeVarLen(keyShare)
-    }
-
-    @kotlin.ExperimentalUnsignedTypes
-    fun checkTTL(): Boolean {
-        ttl -= 1u
-        if (ttl < 1u) return false
-        return true
+        return serializeVarLen(keyShare)
     }
 
     companion object Deserializer : Deserializable<KeyPacketMessage> {
-        @ExperimentalUnsignedTypes
-        @JvmStatic
         override fun deserialize(buffer: ByteArray, offset: Int): Pair<KeyPacketMessage, Int> {
-            var localOffset = 0
-            val originPublicKey = buffer.copyOfRange(
-                offset + localOffset,
-                offset + localOffset + SERIALIZED_PUBLIC_KEY_SIZE
-            )
-
-            localOffset += SERIALIZED_PUBLIC_KEY_SIZE
-            val ttl = deserializeUInt(buffer, offset + localOffset)
-            localOffset += SERIALIZED_UINT_SIZE
-
-            val (keyBytes, keySize) = deserializeVarLen(buffer, offset + localOffset)
-            localOffset += keySize
-
+            var localOffset = offset
+            val (keyShare, size) = deserializeVarLen(buffer, localOffset)
+            localOffset += size
             return Pair(
-                first = KeyPacketMessage(
-                    originPublicKey = originPublicKey,
-                    ttl = ttl,
-                    keyShare = keyBytes
-                ),
-                second = localOffset
+                KeyPacketMessage(keyShare),
+                localOffset - offset
             )
         }
     }

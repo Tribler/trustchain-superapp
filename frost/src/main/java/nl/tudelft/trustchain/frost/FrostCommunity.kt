@@ -5,6 +5,7 @@ import android.util.Log
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
+import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import kotlin.random.Random
 
@@ -37,12 +38,9 @@ class FrostCommunity(private val context: Context): Community(){
     @ExperimentalUnsignedTypes
     fun onDistributeKey(packet: Packet) {
         Log.i("FROST", "Key packet received")
-        val (peer, payload) = packet.getAuthPayload(KeyPacketMessage)
-
+        val (peer, payload) = packet.getDecryptedAuthPayload(KeyPacketMessage, myPeer.key as PrivateKey)
         val keyShare = payload.keyShare
         Log.i("FROST", "Walking model is de-packaged")
-
-        // TODO handle encryption
 
         saveKeyShare(keyShare)
 
@@ -56,15 +54,17 @@ class FrostCommunity(private val context: Context): Community(){
 
     private fun ackKey(peer: Peer, keyShare: ByteArray){
         val ack = serializePacket(
-            MessageId.ID,
-            Ack(myPeer.publicKey.keyToBin(), keyShare)
+            MessageId.ACK,
+            Ack(keyShare),
+            encrypt = true,
+            recipient = peer
         )
         Log.i("FROST", "Sending key ack ${myPeer.address}")
         send(peer, ack)
     }
 
     private fun onAckKey(packet: Packet){
-        val (peer, payload) = packet.getAuthPayload(Ack)
+        val (peer, payload) = packet.getDecryptedAuthPayload(Ack, myPeer.key as PrivateKey)
         Log.i("FROST", "${peer.address} acked key  ${payload.keyShare}")
     }
 
@@ -88,8 +88,6 @@ class FrostCommunity(private val context: Context): Community(){
     @ExperimentalUnsignedTypes
     fun distributeKey(
         keyShare: ByteArray,
-        ttl: UInt = 2u,
-        originPublicKey: ByteArray = myPeer.publicKey.keyToBin(),
         peers: List<Peer>? = null
     ): Int {
         var count = 0
@@ -105,7 +103,9 @@ class FrostCommunity(private val context: Context): Community(){
             else{
                 val packet = serializePacket(
                     MessageId.ID,
-                    KeyPacketMessage(originPublicKey, ttl, keyShare)
+                    KeyPacketMessage(keyShare),
+                    encrypt = true,
+                    recipient = peer
                 )
                 Log.i("FROST", "Sending key fragment to ${peer.address}")
                 send(peer, packet)
