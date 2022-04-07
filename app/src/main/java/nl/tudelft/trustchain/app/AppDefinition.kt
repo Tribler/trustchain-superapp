@@ -116,7 +116,7 @@ enum class AppDefinition(
     FROST(
     R.drawable.ic_ice,
     "Frost",
-    R.color.blue,
+    R.color.frost,
     FrostActivity::class.java
     )
 }
