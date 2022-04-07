@@ -176,7 +176,7 @@ class ExchangeTransferMoneyLinkDialog(
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun createPaymentId(amount: Int)
+    internal fun createPaymentId(amount: Int)
     {
         val host = BuildConfig.DEFAULT_GATEWAY_HOST
         val url = "$host/api/exchange/e2t/initiate"
