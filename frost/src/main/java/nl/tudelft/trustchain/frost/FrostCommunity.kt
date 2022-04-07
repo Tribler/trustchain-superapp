@@ -14,6 +14,7 @@ class FrostCommunity(private val context: Context): Community(){
 
     init {
         messageHandlers[MessageId.ID] = ::onDistributeKey
+        messageHandlers[MessageId.ACK] = ::onAckKey
     }
     override fun load() {
         super.load()
@@ -36,7 +37,7 @@ class FrostCommunity(private val context: Context): Community(){
     @ExperimentalUnsignedTypes
     fun onDistributeKey(packet: Packet) {
         Log.i("FROST", "Key packet received")
-        val (_, payload) = packet.getAuthPayload(KeyPacketMessage)
+        val (peer, payload) = packet.getAuthPayload(KeyPacketMessage)
 
         val keyShare = payload.keyShare
         Log.i("FROST", "Walking model is de-packaged")
@@ -45,12 +46,27 @@ class FrostCommunity(private val context: Context): Community(){
 
         saveKeyShare(keyShare)
 
-        Log.i("FROST", "Key fragment saved $keyShare")
+        ackKey(peer, keyShare)
+
+        Log.i("FROST", "Key fragment acked $keyShare")
 
         getKeyShare()
 
     }
 
+    private fun ackKey(peer: Peer, keyShare: ByteArray){
+        val ack = serializePacket(
+            MessageId.ID,
+            Ack(myPeer.publicKey.keyToBin(), keyShare)
+        )
+        Log.i("FROST", "Sending key ack ${myPeer.address}")
+        send(peer, ack)
+    }
+
+    private fun onAckKey(packet: Packet){
+        val (peer, payload) = packet.getAuthPayload(Ack)
+        Log.i("FROST", "${peer.address} acked key  ${payload.keyShare}")
+    }
 
     private fun saveKeyShare(keyShare: ByteArray){
         this.context.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
@@ -103,6 +119,8 @@ class FrostCommunity(private val context: Context): Community(){
     object MessageId {
         val ID: Int
             get() { return 0 }
+        val ACK: Int
+            get() { return 1 }
     }
 
     class Factory(
