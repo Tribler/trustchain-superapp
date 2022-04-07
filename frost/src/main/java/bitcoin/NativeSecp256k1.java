@@ -581,7 +581,7 @@ public class NativeSecp256k1 {
         return "hello";
     }
 
-    public static void a(){
+    public static String a(){
         final int numberOfKeys = 5;
         int threshold = 3;
         byte[][] publicKeys = new byte[numberOfKeys][];
@@ -671,6 +671,7 @@ public class NativeSecp256k1 {
         System.out.println("JAVA DONE");
         System.out.println(good);
 
+        return "####### VERIFY: " + good;
     }
 
     static void prnt(byte[] arr) {
