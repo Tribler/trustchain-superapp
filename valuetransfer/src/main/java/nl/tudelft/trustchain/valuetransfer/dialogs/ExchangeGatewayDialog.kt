@@ -84,6 +84,8 @@ class ExchangeGatewayDialog(
 
             connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
+
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         Runnable {
                             if (saveGateway) {
@@ -117,6 +119,7 @@ class ExchangeGatewayDialog(
 
             sellSlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
+                    @Suppress("DEPRECATION")
                     Handler().postDelayed(
                         Runnable {
                             if (saveGateway) {

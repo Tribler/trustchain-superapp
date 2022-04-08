@@ -150,7 +150,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toTopOf="@+id/clTransactionResend">
+                    app:layout_constraintBottom_toBottomOf="parent">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/clTransactionIcon"
@@ -195,8 +195,23 @@
                     android:textColor="@color/white"
                     android:textStyle="bold"
                     app:layout_constraintStart_toEndOf="@+id/clTransactionIcon"
+                    app:layout_constraintEnd_toStartOf="@+id/ivTransactionErrorIcon"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="Outgoing transfer of €50,00" />
+
+                <ImageView
+                    android:id="@+id/ivTransactionErrorIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/ic_baseline_info_24"
+                    app:tint="@color/red"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvTransactionTitle"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/tvTransactionTitle" />
 
                 <TextView
                     android:id="@+id/tvTransactionMessage"
@@ -211,47 +226,6 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     tools:text="Transaction Message"
                     tools:visibility="visible" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/clTransactionResend"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/pill_rounded_bottom_red"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/clTransactionContent">
-
-                    <TextView
-                        android:id="@+id/tvResendTransaction"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="4dp"
-                        android:text="Resend Transaction"
-                        android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:gravity="center_horizontal"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        tools:backgroundTint="@color/colorYellow" />
-
-                    <ImageView
-                        android:id="@+id/ivResendTransactionIcon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="0dp"
-                        android:src="@drawable/ic_baseline_info_24"
-                        app:tint="@color/white"
-                        android:tooltipText="Transaction has not been confirmed, possibly because the recipient is disconnected"
-                        app:layout_constraintBottom_toBottomOf="@+id/tvResendTransaction"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="@+id/tvResendTransaction" />
-
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -348,7 +322,6 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:visibility="gone"
-                tools:visibility="visible"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvChatMessage">
 

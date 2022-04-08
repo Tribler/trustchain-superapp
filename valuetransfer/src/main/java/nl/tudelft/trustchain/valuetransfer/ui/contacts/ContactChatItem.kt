@@ -8,6 +8,7 @@ import nl.tudelft.trustchain.peerchat.entity.ChatMessage
 data class ContactChatItem(
     val chatMessage: ChatMessage,
     val transaction: TrustChainBlock?,
+    val blocks: List<TrustChainBlock>,
     val loadMoreMessages: Boolean,
     val shouldShowDate: Boolean,
     val transactionIsReceived: Boolean,

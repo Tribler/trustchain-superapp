@@ -137,6 +137,11 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="ButtonWidgetRounded" parent="ButtonRounded">
+        <item name="backgroundTint">?attr/dialogColor</item>
+        <item name="android:textColor">?attr/onDialogColor</item>
+    </style>
+
     // Date Picker Dialog
     <style name="DatePickerDialogTheme" parent="Theme.AppCompat.Light.Dialog">
         <item name="colorAccent">@color/colorPrimaryValueTransfer</item>

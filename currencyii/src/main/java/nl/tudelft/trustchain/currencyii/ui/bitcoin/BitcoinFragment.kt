@@ -102,6 +102,8 @@ class BitcoinFragment :
 
         bitcoin_refresh_swiper.setOnRefreshListener {
             this.refresh()
+
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
                     try {
@@ -174,6 +176,8 @@ class BitcoinFragment :
     private fun refresh(animation: Boolean? = false) {
         if (animation!!) {
             bitcoin_refresh_swiper.isRefreshing = true
+
+            @Suppress("DEPRECATION")
             Handler().postDelayed(
                 {
                     try {
@@ -307,6 +311,8 @@ class BitcoinFragment :
 
     override fun onImportDone() {
         this.refresh(true)
+
+        @Suppress("DEPRECATION")
         Handler().postDelayed(
             {
                 findNavController().navigate(BitcoinFragmentDirections.actionBitcoinFragmentToBlockchainDownloadFragment())

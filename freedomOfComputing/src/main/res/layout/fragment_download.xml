@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popUp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginBottom="470dp"
+    android:layout_marginTop="150dp"
+    android:layout_marginEnd="50dp"
+    android:layout_marginStart="50dp"
+    android:background="@drawable/download_rounded_corners"
+    >
+
+    <TextView
+        android:id="@+id/currentDownload"
+        android:layout_centerHorizontal="true"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/currentTorrentDownload"
+        />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:foregroundGravity="center"
+        android:progress="0"
+        android:progressTint="@color/blue"
+        />
+    <TextView
+        android:id="@+id/progressBarPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/progressBar"
+        android:layout_below="@+id/progressBar"
+        android:text="@string/downloadProgressPercentage"
+        />
+
+    <TextView
+        android:id="@+id/inQueue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|end"
+        android:layout_alignEnd="@+id/progressBar"
+        android:layout_below="@+id/progressBar"
+        android:text="@string/downloadsInQueue"
+        />
+
+</RelativeLayout>

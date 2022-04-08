@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/uploadPopUp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_marginBottom="470dp"
+              android:layout_marginTop="150dp"
+              android:layout_marginEnd="50dp"
+              android:layout_marginStart="50dp"
+              android:background="@drawable/download_rounded_corners"
+              android:orientation="vertical">
+
+    <FrameLayout
+            android:id="@+id/uploadFileButtonLayout"
+            style="?attr/actionButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:focusable="true">
+
+        <TextView
+                android:id="@+id/uploadFile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp"
+                android:textSize="15dp"
+                android:text="Click here to upload from file"
+                android:clickable="true"
+
+        />
+
+    </FrameLayout>
+
+    <FrameLayout
+            android:id="@+id/uploadUrlButtonLayout"
+            style="?attr/actionButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:focusable="true">
+
+<!--        <EditText-->
+<!--                android:id="@+id/editTextURL"-->
+<!--                android:layout_width="260dp"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:ems="10"-->
+<!--                android:paddingTop="15dp"-->
+<!--                android:backgroundTint="#8f8c83"-->
+<!--                android:inputType="textURL"-->
+<!--                android:textColor="#8f8c83"-->
+<!--                android:textColorHint="#8f8c83" />-->
+
+<!--        <ImageButton-->
+<!--                android:id="@+id/uploadUrl"-->
+<!--                android:background="@android:color/transparent"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content" />-->
+
+        <TextView
+                android:id="@+id/uploadUrl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="15dp"
+                android:layout_gravity="center"
+                android:textSize="15dp"
+                android:text="Paste URL here to upload from URL"
+                android:clickable="true"
+        />
+
+    </FrameLayout>
+
+
+</LinearLayout>

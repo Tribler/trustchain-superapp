@@ -1,107 +1,207 @@
 package nl.tudelft.trustchain.FOC
 
 import android.Manifest
-import android.app.DownloadManager
+import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.StrictMode
+import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.ListAdapter
-import android.widget.ListView
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.AlertType
-import com.frostwire.jlibtorrent.alerts.BlockFinishedAlert
+import androidx.core.net.toUri
+import com.frostwire.jlibtorrent.SessionManager
+import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
-import kotlinx.android.synthetic.main.content_main_activity_foc.*
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.common.MyMessage
+import kotlinx.android.synthetic.main.fragment_debugging.*
+import kotlinx.android.synthetic.main.fragment_download.*
+import kotlinx.android.synthetic.main.fragment_upload.*
+import kotlinx.coroutines.*
 import java.io.*
-import java.nio.channels.FileChannel
+import java.net.URL
+import java.net.URLConnection
 import java.util.*
 
 
 class MainActivityFOC : AppCompatActivity() {
 
+    private var torrentList = ArrayList<Button>()
+    private var progressVisible = false
+    private var uploadVisible = false
+    private var debugVisible = false
+    private var requestCode = 1
+    val MY_PERMISSIONS_REQUEST = 0
     val s = SessionManager()
-    var sessionActive = false
 
-    private var torrentList = ArrayList<String>() // Creating an empty arraylist
+    private lateinit var appGossiper: AppGossiper
 
-    private lateinit var adapterLV: ArrayAdapter<String>
-
-    private var uploadingTorrent = ""
-
+    @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main_foc)
-        setSupportActionBar(toolbar)
+        try {
+            setContentView(R.layout.activity_main_foc)
+            setSupportActionBar(toolbar)
 
-        initializeTorrentSession()
+            fab.setOnClickListener {
+                toggleUploadPopUp(uploadPopUp)
+            }
+            uploadFile.setOnClickListener {
+                printToast("INIT FILE UPLOAD")
+                selectNewFileToUpload()
+                finish()
+            }
+            uploadUrl.setOnClickListener {
+                printToast("INIT URL UPLOAD")
+                val successfailtoast = selectNewUrlToUpload()
+//                recreate()
+                showAllFiles()
+                printToast(successfailtoast)
+            }
 
-        // create a list view for any incoming torrents
-        // that are seeded
-        val listView = myListView as ListView
-        listView.setChoiceMode(ListView.CHOICE_MODE_SINGLE)
-        adapterLV = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, torrentList)
-        listView.setAdapter(adapterLV)
+            download_progress.setOnClickListener {
+                toggleProgressBar(popUp)
+            }
 
-        // whenever an available torrent is seeded, clicking on it
-        // inserts it into the input for torrent names/magnet links
-        listView.setOnItemClickListener { parent, _, position, _ ->
-            var item = parent.getItemAtPosition(position)
-            enterTorrent.setText(item.toString().substringAfter(" - "))
+            debugPopUpButton.setOnClickListener {
+                toggleDebugPopUp(debugPopUp)
+            }
+
+            torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+
+            // upon launching our activity, we ask for the "Storage" permission
+            requestStoragePermission()
+
+            copyDefaultApp()
+
+            printToast("STARTED")
+            showAllFiles()
+            appGossiper = AppGossiper.getInstance(s, this)
+            appGossiper.start()
+        } catch (e: Exception) {
+            printToast(e.toString())
         }
+    }
 
-        printToast("STARTED")
+    fun toggleDebugPopUp(layout: LinearLayout) {
+        if (debugVisible) layout.visibility = View.GONE
+        else layout.visibility = View.VISIBLE
 
-        // option 1: download a torrent through a magnet link
-        downloadMagnetButton.setOnClickListener { _ ->
-            getMagnetLink()
+        if (progressVisible) {
+            progressVisible = false
+            popUp.visibility = View.GONE
         }
-
-        // option 2: download a torrent through a .torrent file on your phone
-        downloadTorrentButton.setOnClickListener { _ ->
-            getTorrent(false)
+        if (uploadVisible) {
+            uploadVisible = false
+            uploadPopUp.visibility = View.GONE
         }
+        debugVisible = !debugVisible
+    }
 
-        // option 3: Send a message to every other peer using the superapp
-        informPeersButton.setOnClickListener { _ -> informPeersAboutSeeding() }
+    private fun toggleUploadPopUp(layout: LinearLayout) {
+        if (uploadVisible) layout.visibility = View.GONE
+        else layout.visibility = View.VISIBLE
 
-        // option 4: dynamically load and execute code from a jar/apk file
-        executeCodeButton.setOnClickListener { _ ->
-            loadDynamicCode()
+        if (debugVisible) {
+            debugVisible = false
+            debugPopUp.visibility = View.GONE
         }
-
-        // option 5: download a torrent trough a url
-        downloadUrlButton.setOnClickListener { _ ->
-            getUrl()
+        if (progressVisible) {
+            progressVisible = false
+            popUp.visibility = View.GONE
         }
+        uploadVisible = !uploadVisible
+    }
 
-        uploadTorrentButton.setOnClickListener { _ ->
-            createTorrent()
+
+    private fun toggleProgressBar(progress: RelativeLayout) {
+        if (progressVisible) progress.visibility = View.GONE
+        else progress.visibility = View.VISIBLE
+
+        if (debugVisible) {
+            debugVisible = false
+            debugPopUp.visibility = View.GONE
         }
+        if (uploadVisible) {
+            uploadVisible = false
+            uploadPopUp.visibility = View.GONE
+        }
+        progressVisible = !progressVisible
+    }
 
-        retrieveListButton.setOnClickListener { _ ->
-            retrieveListOfAvailableTorrents()
+    override fun onResume() {
+        super.onResume()
+        appGossiper.resume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        appGossiper.pause()
+    }
+
+
+    @Suppress("deprecation")
+    fun showAllFiles() {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            torrentListView.removeAllViews()
+            torrentList.clear()
+            for (file in files) {
+                if (getFileName(file.toUri()).endsWith(".apk")) {
+                    createSuccessfulTorrentButton(file.toUri())
+                }
+            }
         }
 
         // upon launching our activity, we ask for the "Storage" permission
         requestStoragePermission()
     }
 
-    val MY_PERMISSIONS_REQUEST = 0
+    fun showAddedFile(torrentName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == torrentName
+            }
+            if (file != null) {
+                createSuccessfulTorrentButton(file.toUri())
+            }
+        }
+    }
+
+    /**
+     * Ensures that there will always be one apk runnable from within FoC.
+     */
+    private fun copyDefaultApp() {
+        try {
+            val file = File(this.applicationContext.cacheDir.absolutePath + "/search.apk")
+            if (!file.exists()) {
+                val outputStream = FileOutputStream(file)
+                val ins = resources.openRawResource(resources.getIdentifier("search", "raw", packageName))
+                outputStream.write(ins.readBytes())
+                ins.close()
+                outputStream.close()
+                this.createTorrent("search.apk")
+            }
+        } catch (e: Exception) {
+            this.printToast(e.toString())
+        }
+    }
 
     // change if you want to write to the actual phone storage (needs "write" permission)
     fun requestStoragePermission() {
@@ -122,368 +222,155 @@ class MainActivityFOC : AppCompatActivity() {
     /**
      * Display a short message on the screen
      */
-    fun printToast(s: String) {
+    private fun printToast(s: String) {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun initializeTorrentSession() {
-        s.addListener(object : AlertListener {
-            override fun types(): IntArray? {
-                return null
+    fun createSuccessfulTorrentButton(uri: Uri) {
+        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        var button = Button(this)
+        val fileName = getFileName(uri)
+        button.text = fileName
+        // Replace the failed torrent with the downloaded torrent
+        val existingButton = torrentList.find { btn -> btn.text == fileName }
+        if (existingButton != null) {
+            button = existingButton;
+        } else {
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
+
+        button.isAllCaps = false
+        button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
+        button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
+        torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+        button.setOnClickListener {
+            loadDynamicCode(fileName)
+        }
+        button.setOnLongClickListener {
+            createAlertDialog(fileName)
+            true
+        }
+    }
+
+    fun createAlertDialog(fileName: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Create or Delete")
+        builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
+        builder.setPositiveButton("Cancel", null)
+        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
+        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.show()
+    }
+
+    fun deleteApkFile(fileName: String) {
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            val file = files.find { file ->
+                getFileName(file.toUri()) == fileName
             }
+            val deleted = file?.delete()
 
-            override fun alert(alert: Alert<*>) {
-                val type = alert.type()
+            // delete torrent file if it exists
+            files.find { torrentFile ->
+                getFileName(torrentFile.toUri()) == fileName.replace(".apk", ".torrent")
+            }?.delete()
 
-                when (type) {
-                    AlertType.ADD_TORRENT -> {
-                        Log.i("personal", "Torrent added")
-                        (alert as AddTorrentAlert).handle().resume()
-                    }
-                    AlertType.BLOCK_FINISHED -> {
-                        val a = alert as BlockFinishedAlert
-                        val p = (a.handle().status().progress() * 100).toInt()
-                        progressBar.setProgress(p, true)
-                        Log.i(
-                            "personal",
-                            "Progress: " + p + " for torrent name: " + a.torrentName()
-                        )
-                        Log.i("personal", java.lang.Long.toString(s.stats().totalDownload()))
-                    }
-                    AlertType.TORRENT_FINISHED -> {
-                        progressBar.setProgress(100, true)
-                        downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
-                        downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
-                        Log.i("personal", "Torrent finished")
-                        printToast("Torrent downloaded!!")
-                    }
-                    else -> {
-                    }
+            if (deleted != null && deleted) {
+                val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
+                if (buttonToBeDeleted != null) {
+                    val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+                    torrentListView.removeView(buttonToBeDeleted)
+                    torrentCount.text = getString(R.string.torrentCount, torrentList.size)
                 }
             }
-        })
+        }
     }
 
-    /**
-     * Download a torrent through a magnet link
-     */
-    @Suppress("deprecation")
-    fun getMagnetLink() {
-        // Handling of the case where the user is already downloading the
-        // same or another torrent
+    fun createUnsuccessfulTorrentButton(torrentName: String) {
+        // No need to create duplicate failed torrent buttons
+        val existingButton = torrentList.find { btn -> btn.text == torrentName }
+        if (existingButton == null) {
+            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+            val button = Button(this)
+            button.text = torrentName
+            button.isAllCaps = false
+            torrentList.add(button)
+            torrentListView.addView(button)
+        }
+    }
 
-        if (sessionActive) {
-            s.stop()
-            sessionActive = false
-            downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
-            if (downloadMagnetButton.text.equals("STOP")) {
-                downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
-                return }
-            if (downloadUrlButton.text.equals("STOP")) {
-                downloadUrlButton.setText("DOWNLOAD (URL)")
+    @Suppress("DEPRECATION")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
                 return
             }
-            torrentView.text = ""
-            progressBar.setProgress(0, true)
-        }
-
-        val magnetLink: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No magnet link given, using default")
-            // magnetLink = "magnet:?xt=urn:btih:86d0502ead28e495c9e67665340f72aa72fe304e&dn=Frostwire.5.3.6.+%5BWindows%5D&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Ftracker.publicbt.com%3A80&tr=udp%3A%2F%2Ftracker.istole.it%3A6969&tr=udp%3A%2F%2Fopen.demonii.com%3A1337";
-            // magnetLink = "magnet:?xt=urn:btih:737d38ed01da1df727a3e0521a6f2c457cb812de&dn=HOME+-+a+film+by+Yann+Arthus-Bertrand+%282009%29+%5BEnglish%5D+%5BHD+MP4%5D&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.zer0day.to%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969";
-            // magnetLink = "magnet:?xt=urn:btih:a83cc13bf4a07e85b938dcf06aa707955687ca7c";
-            magnetLink =
-                "magnet:?xt=urn:btih:209c8226b299b308beaf2b9cd3fb49212dbd13ec&dn=Tears+of+Steel&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Ftears-of-steel.torrent"
-            // magnetLink = "magnet:?xt=urn:btih:dd8255ecdc7ca55fb0bbf81323d87062db1f6d1c&dn=Big+Buck+Bunny&tr=udp%3A%2F%2Fexplodie.org%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.empire-js.us%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&ws=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2F&xs=https%3A%2F%2Fwebtorrent.io%2Ftorrents%2Fbig-buck-bunny.torrent";
-        } else magnetLink = inputText
-
-        if (!magnetLink.startsWith("magnet:")) {
-            printToast("This is not a magnet link")
-            return
-        } else {
-            val startindexname = magnetLink.indexOf("&dn=")
-            val stopindexname =
-                if (magnetLink.contains("&tr=")) magnetLink.indexOf("&tr") else magnetLink.length
-
-            val magnetnameraw = magnetLink.substring(startindexname + 4, stopindexname)
-            Log.i("personal", magnetnameraw)
-            val magnetname = magnetnameraw.replace('+', ' ', false)
-            Log.i("personal", magnetname)
-            enterJar.setText(magnetname)
-        }
-
-        val sp = SettingsPack()
-        sp.seedingOutgoingConnections(true)
-        val params =
-            SessionParams(sp)
-        s.start(params)
-
-        val timer = Timer()
-        timer.schedule(
-            object : TimerTask() {
-                override fun run() {
-                    val nodes = s.stats().dhtNodes()
-                    // wait for at least 10 nodes in the DHT.
-                    if (nodes >= 10) {
-                        Log.i("personal", "DHT contains $nodes nodes")
-                        // signal.countDown();
-                        timer.cancel()
-                    }
-                }
-            },
-            0, 1000
-        )
-
-        printToast("Starting download, please wait...")
-
-        Log.i("personal", "Fetching the magnet uri, please wait...")
-        var data: ByteArray
-        try {
-            data = s.fetchMagnet(magnetLink, 30)
-        } catch (e: Exception) {
-            Log.i("personal", "Failed to retrieve the magnet")
-            printToast("Something went wrong, check logs")
-            return
-        }
-
-        if (data != null) {
-            val torrentInfo = Entry.bdecode(data).toString()
-            Log.i("personal", torrentInfo)
-            torrentView.text = torrentInfo
-
-            val ti = TorrentInfo.bdecode(data)
-            sessionActive = true
-            downloadMagnetButton.setText("STOP")
-            // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            val savePath = Environment.getExternalStorageDirectory().absolutePath
-            s.download(ti, File(savePath))
-        } else {
-            Log.i("personal", "Failed to retrieve the magnet")
-            printToast("Something went wrong, check logs")
-        }
-    }
-
-    /**
-     *  Download a torrent through a .torrent file on your phone
-     */
-    @Suppress("deprecation")
-    fun getTorrent(uploadHappening: Boolean) {
-
-        // Handling of the case where the user is already downloading the
-        // same or another torrent
-        if (sessionActive) {
-            s.stop()
-            sessionActive = false
-            downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
-            if (downloadTorrentButton.text.equals("STOP")) {
-                downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
-                return }
-            if (downloadUrlButton.text.equals("STOP")) {
-                downloadUrlButton.setText("DOWNLOAD (URL)")
+            val fileName = getFileName(data.data!!)
+            try {
+                printToast(data.data!!.path!!.split(":").last())
+                File(
+//                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
+                    Environment.getExternalStorageDirectory().absolutePath + "/" + fileName
+                ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
+            } catch (e: Exception) {
+                printToast(e.toString())
+                printToast("$fileName already exists!")
                 return
             }
-            torrentView.text = ""
-            progressBar.setProgress(0, true)
+            createSuccessfulTorrentButton(data.data!!)
         }
-
-        val torrentName: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No torrent name given, using default")
-            torrentName = "sintel.torrent"
-        } else torrentName = inputText
-
-        // uncomment if you want to read from the actual phone storage (needs "write" permission)
-        var torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-        // if (uploadHappening) {
-        // val torrent = Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName
-        // torrent =
-        //    applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName
-        // }
-        try {
-            if (!readTorrentSuccesfully(torrent)) {
-                printToast("Something went wrong, check logs")
-                return
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-
-        val sp = SettingsPack()
-        sp.seedingOutgoingConnections(true)
-        val params =
-            SessionParams(sp)
-        s.start(params)
-
-        if (uploadHappening)
-            printToast("Starting upload, please wait...")
-        else printToast("Starting download, please wait...")
-
-        val torrentFile = File(torrent)
-        val ti = TorrentInfo(torrentFile)
-
-        Log.i("personal", "Storage of downloads: " + torrentFile.parentFile!!.toString())
-
-        sessionActive = true
-        if (!uploadHappening)
-            downloadTorrentButton.setText("STOP")
-        // uncomment if you want to write to the actual phone storage (needs "write" permission)
-        s.download(ti, torrentFile.parentFile)
-        // val savePath = applicationContext.getExternalFilesDir(null)!!.getAbsolutePath()
-        // s.download(ti, File(savePath))
     }
 
-    /**
-     *  Download a torrent through a url
-     */
     @Suppress("deprecation")
-    fun getUrl() {
-
-        // Handling of the case where the user is already downloading the
-        // same or another torrent
-        if (sessionActive) {
-            s.stop()
-            sessionActive = false
-            downloadUrlButton.setText("DOWNLOAD (URL)")
-            if (downloadTorrentButton.text.equals("STOP")) {
-                downloadTorrentButton.setText("DOWNLOAD (TORRENT)")
-                return }
-            if (downloadMagnetButton.text.equals("STOP")) {
-                downloadMagnetButton.setText("DOWNLOAD (MAGNET LINK)")
-                return
-            }
-            torrentView.text = ""
-            progressBar.setProgress(0, true)
-        }
-
-        val urlName: String?
-        val urlTitle: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No url name given, using default")
-            urlName = "https://commons.wikimedia.org/wiki/File:TUDelft_Logo.png"
-            urlTitle = "Default - TU Delft logo"
-        } else {
-            urlName = inputText
-            urlTitle = inputText.substringAfterLast('/')
-        }
-        Log.i("personal", urlTitle)
-        enterJar.setText(urlTitle)
-
-        val sp = SettingsPack()
-        sp.seedingOutgoingConnections(true)
-        val params =
-            SessionParams(sp)
-        s.start(params)
-
-        try {
-            val request = DownloadManager.Request(Uri.parse(urlName))
-            val savePath = Environment.getExternalStorageDirectory().absolutePath
-            request.setTitle(urlTitle).setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, savePath)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            printToast("Starting download, please wait...")
-            val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(request)
-        }
-        catch (e: IOException) {
-            printToast("Download failed, check logs")
-            e.printStackTrace()
-        }
-    }
-
-
-
-    /**
-     * Reads a .torrent file and displays information about it on the screen
-     * Part of the getTorrent() function
-     */
-    @Throws(IOException::class)
-    fun readTorrentSuccesfully(torrent: String?): Boolean {
-        val torrentFile = File(torrent!!)
-
-        if (!torrentFile.exists()) {
-            Log.i("personal", "File doesn't exist!")
-            return false
-        }
-
-        val ti = TorrentInfo(torrentFile)
-
-        val fc = RandomAccessFile(torrent, "r").channel
-        val buffer =
-            fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size())
-        val ti2 = TorrentInfo(buffer)
-        val toPrint = ti.toEntry().toString() + ti2.toEntry().toString()
-        Log.i("personal", ti.toEntry().toString())
-        Log.i("personal", ti2.toEntry().toString())
-        torrentView.text = toPrint
-        return true
-    }
-
-    /* Let others peers know of the torrent you are seeding,
-    by sending the magnet link
-     */
-    fun informPeersAboutSeeding() {
-        val ipv8 = IPv8Android.getInstance()
-        val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-        val peers = demoCommunity.getPeers()
-
-        Log.i("personal", "n:" + peers.size.toString())
-        for (peer in peers) {
-            Log.i("personal", peer.mid)
-        }
-
-        demoCommunity.informAboutTorrent(uploadingTorrent)
-    }
-
-    /**
-     * Dynamically load and execute code from a jar/apk file
-     * The name of the class to be loaded, and the name of the
-     * function to execute, have to be known beforehand
-     */
-    @Suppress("deprecation")
-    fun loadDynamicCode() {
-        val apkName: String?
-        val inputText = enterJar.text.toString()
-        if (inputText == "") {
-            printToast("No apk/jar name given, using default")
-            apkName = "demoapp.apk"
-        } else apkName = inputText
+    fun loadDynamicCode(fileName: String) {
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
-            // uncomment if you want to read from the actual phone storage (needs "write" permission)
             intent.putExtra(
                 "fileName",
-                Environment.getExternalStorageDirectory().absolutePath + "/" + apkName
+                "${applicationContext.cacheDir}/${fileName.split("/").last()}"
             )
-            // intent.putExtra("fileName", apkName);
             startActivity(intent)
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    /*
-    Creates a torrent from a file given as input
-    The extension of the file must be included (for example, .png)
+    fun getFileName(uri: Uri): String {
+        var result: String? = null
+        val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+            }
+        } finally {
+            cursor?.close()
+        }
+
+        if (result == null) {
+            result = uri.path
+            val cut = result!!.lastIndexOf('/')
+            if (cut != -1) {
+                result = result.substring(cut + 1)
+            }
+        }
+        return result
+    }
+
+
+    /**
+     * Creates a torrent from a file given as input
+     * The extension of the file must be included (for example, .png)
      */
     @Suppress("deprecation")
-    fun createTorrent() {
-        val fileName: String?
-        val inputText = enterTorrent.text.toString()
-        if (inputText == "") {
-            printToast("No torrent name given, using default")
-            fileName = "image.png"
-        } else fileName = inputText
-
-        val file =
-            File(Environment.getExternalStorageDirectory().absolutePath + "/" + fileName)
+    fun createTorrent(fileName: String): TorrentInfo? {
+        val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
-            printToast("Something went wrong, check logs")
+            runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("personal", "File doesn't exist!")
-            return
+            return null
         }
 
         val fs = file_storage()
@@ -503,16 +390,11 @@ class MainActivityFOC : AppCompatActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
-        var torrentName = fileName.substringBeforeLast('.') + ".torrent"
+        val torrentName = fileName.substringBeforeLast('.') + ".torrent"
 
         var os: OutputStream? = null
         try {
-            // uncomment if you want to write to the actual phone storage (needs "write" permission)
-            os =
-                FileOutputStream(File(Environment.getExternalStorageDirectory().absolutePath + "/" + torrentName))
-
-            // os = FileOutputStream(File(applicationContext.getExternalFilesDir(null)!!.getAbsolutePath() + "/" + torrentName))
-
+            os = FileOutputStream(File(applicationContext.cacheDir, torrentName.split("/").last()))
             os.write(Vectors.byte_vector2bytes(buffer), 0, Vectors.byte_vector2bytes(buffer).size)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -525,62 +407,63 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
-        val magnet_link = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
-        uploadingTorrent = magnet_link
-        Log.i("personal", magnet_link)
-
-        enterTorrent.setText(torrentName)
-        getTorrent(true)
+        val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+        Log.i("personal", magnetLink)
+        runOnUiThread { printToast(fileName) }
+        return ti
     }
 
-    /*
-    Displays the list of all the torrents being seeded at the moment,
-    based on the messages received from those peers that seed
-     */
-    fun retrieveListOfAvailableTorrents() {
-        val ipv8 = IPv8Android.getInstance()
-        val demoCommunity = ipv8.getOverlay<DemoCommunity>()!!
-        var torrentListMessages = demoCommunity.getTorrentMessages()
-        for (packet in torrentListMessages) {
-            val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
-            Log.i("personal", peer.mid + ": " + payload.message)
-            var magnetLink = payload.message.substringAfter("FOC:")
-            var torrentName = payload.message.substringAfter("&dn=")
-                .substringBefore('&')
-            var containsItem = false
-            for (i in 0..adapterLV.count - 1) {
-                if (adapterLV.getItem(i) != null && adapterLV.getItem(i)!!
-                    .startsWith(torrentName)
-                ) {
-                    containsItem = true
-                    break
-                }
-            }
-            if (!containsItem) {
-                adapterLV.add(torrentName + " - " + magnetLink)
-                setListViewHeightBasedOnChildren(myListView)
-            }
-        }
+    @Suppress("deprecation")
+    fun selectNewFileToUpload() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+        startActivityForResult(intent, requestCode)
     }
 
-    /*
-    Handles correct viewing of our list of torrents, since it is within a ScrollView
-     */
-    fun setListViewHeightBasedOnChildren(listView: ListView) {
-        var listAdapter: ListAdapter = listView.getAdapter()
+    @Suppress("deprecation")
+    fun selectNewUrlToUpload(): String {
+        val urlName = "https://test.trackingcontracts.com/assets/voice.apk"     // TODO: replace placeholder
+        val urlTitle = urlName.substringAfterLast('/')
 
-        var totalHeight = 0
-        var desiredWidth =
-            View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST)
-        for (i in 0..listAdapter.getCount() - 1) {
-            var listItem = listAdapter.getView(i, null, listView)
-            listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED)
-            totalHeight += listItem.getMeasuredHeight()
+        val url = URL(urlName)
+        val filePath: String = this.applicationContext.cacheDir.absolutePath + "/" + urlTitle
+        printToast("Testing:" + " " + url.toString() + " " + filePath)
+
+        // TEMPORARY FIX FOR NetworkOnMainThreadException
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
+
+        try {
+            val con: URLConnection = url.openConnection()
+            con.setReadTimeout(5000)
+            con.setConnectTimeout(10000)
+
+            val `is`: InputStream = con.getInputStream()
+            val inStream = BufferedInputStream(`is`, 1024 * 5)
+
+            val file = File(filePath)
+            if (file.exists()) {
+                file.delete()       // TODO: remove
+                printToast("An APK with this name already exists.")
+            }
+            file.createNewFile()
+
+            val outStream = FileOutputStream(file)
+            val buff = ByteArray(5 * 1024)
+
+            var len: Int
+            while (inStream.read(buff).also { len = it } != -1) {
+                outStream.write(buff, 0, len)
+            }
+
+            outStream.flush()
+            outStream.close()
+            inStream.close()
+
+            return "Download complete"
+
+        } catch (e: Exception) {
+             return e.toString()
         }
-
-        var params = listView.getLayoutParams()
-        params.height = totalHeight + (listView.getDividerHeight() * (listAdapter.getCount() - 1))
-        listView.setLayoutParams(params)
-        listView.requestLayout()
     }
 }

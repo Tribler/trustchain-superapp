@@ -33,6 +33,7 @@
         android:layout_marginTop="4dp"
         android:gravity="center_horizontal"
         android:textSize="14sp"
+        android:textColor="?attr/onBackgroundColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ivOptionBig"
