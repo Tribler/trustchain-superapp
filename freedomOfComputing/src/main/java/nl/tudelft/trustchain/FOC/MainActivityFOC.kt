@@ -66,11 +66,18 @@ class MainActivityFOC : AppCompatActivity() {
                 finish()
             }
             uploadUrl.setOnClickListener {
-                printToast("INIT URL UPLOAD")
-                val successfailtoast = selectNewUrlToUpload()
+                val input = uploadUrl.getText().toString()
+                if (input != "") {
+                    printToast("INIT URL UPLOAD")
+                    val successfailtoast = selectNewUrlToUpload(input)
 //                recreate()
-                showAllFiles()
-                printToast(successfailtoast)
+                    toggleUploadPopUp(uploadPopUp)
+                    showAllFiles()
+                    printToast(successfailtoast)
+                } else {
+                    printToast("No URL specified for uploading")
+                    toggleUploadPopUp(uploadPopUp)
+                }
             }
 
             download_progress.setOnClickListener {
@@ -422,8 +429,8 @@ class MainActivityFOC : AppCompatActivity() {
     }
 
     @Suppress("deprecation")
-    fun selectNewUrlToUpload(): String {
-        val urlName = "https://test.trackingcontracts.com/assets/voice.apk"     // TODO: replace placeholder
+    fun selectNewUrlToUpload(urlName: String): String {
+//        val urlName = "https://test.trackingcontracts.com/assets/voice.apk"     // Input placeholder
         val urlTitle = urlName.substringAfterLast('/')
 
         val url = URL(urlName)

@@ -52,23 +52,26 @@
 <!--                android:textColor="#8f8c83"-->
 <!--                android:textColorHint="#8f8c83" />-->
 
-<!--        <ImageButton-->
+<!--        <TextView-->
 <!--                android:id="@+id/uploadUrl"-->
-<!--                android:background="@android:color/transparent"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content" />-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:paddingTop="15dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:textSize="15dp"-->
+<!--                android:text="Paste URL here to upload from URL"-->
+<!--                android:clickable="true"-->
+<!--        />-->
 
-        <TextView
+        <EditText
                 android:id="@+id/uploadUrl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="15dp"
                 android:layout_gravity="center"
                 android:textSize="15dp"
-                android:text="Paste URL here to upload from URL"
-                android:clickable="true"
-        />
-
+                android:singleLine="true"
+                android:hint="Paste URL here to upload from URL" />
     </FrameLayout>
 
 
