@@ -63,7 +63,7 @@ class FrostCommunity(private val context: Context): Community(){
         val (peer, payload) = packet.getDecryptedAuthPayload(Ack.Deserializer, myPeer.key as PrivateKey)
         Log.i("FROST", "${myPeer.address} acked key ${payload.keyShare} from ${peer.address}")
         val ackBuffer = readFile("acks.txt")
-        val newBuffer = "$ackBuffer ${peer.address}"
+        val newBuffer = "$ackBuffer \n ${peer.address}"
 
         writeToFile("acks.txt", newBuffer)
     }
@@ -122,12 +122,13 @@ class FrostCommunity(private val context: Context): Community(){
         }
     }
 
-    private fun readFile(filePath: String){
+    private fun readFile(filePath: String): String? {
         this.context.openFileInput(filePath).use { stream ->
             val text = stream?.bufferedReader().use {
                 it?.readText()
             }
             Log.i("FROST", "Read: $text from $filePath")
+            return text
         }
     }
 

@@ -43,12 +43,13 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     }
 }
 
-    private fun readFile(filePath: String){
+    private fun readFile(filePath: String): String?{
         this.context?.openFileInput(filePath).use { stream ->
             val text = stream?.bufferedReader().use {
                 it?.readText()
             }
             Log.i("FROST", "Read: $text from $filePath")
+            return text
         }
     }
 
@@ -71,8 +72,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     private fun initClickListeners() {
 
         button1.setOnClickListener {
-            changeText(text_button_1, "")
-            changeText(text_button_1, NativeSecp256k1.a())
+            changeText(text_button_1, "Press \"REFRESH\" to check received acks")
+//            changeText(text_button_1, NativeSecp256k1.a())
             sayHelloToCommunity()
         }
         button2.setOnClickListener {
@@ -88,10 +89,10 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
             changeText(text_button_4, NativeSecp256k1.a())
         }
         refresh.setOnClickListener {
-            changeText(refresh, "")
             val acks = readFile("acks.txt")
-            Log.i("FROST", acks.toString())
-            changeText(refresh, acks.toString())
+            var text = "$acks"
+            Log.i("FROST", text)
+            changeText(text_refresh, "Received acks: \n $text")
         }
     }
 }
