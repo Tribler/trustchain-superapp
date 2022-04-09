@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.frost
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -25,7 +24,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
-        writeToFile("acks.txt", "")
+        writeToFile(this.context, "acks.txt", "")
     }
 
     override fun onCreateView(
@@ -34,23 +33,6 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     ): View? {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_frost, container, false)
-    }
-//
-    private fun writeToFile(filePath: String, text: String){
-    this.context?.openFileOutput(filePath, Context.MODE_PRIVATE).use {
-        it?.write(text.toByteArray())
-        Log.i("FROST", "Write: $text to $filePath")
-    }
-}
-
-    private fun readFile(filePath: String): String?{
-        this.context?.openFileInput(filePath).use { stream ->
-            val text = stream?.bufferedReader().use {
-                it?.readText()
-            }
-            Log.i("FROST", "Read: $text from $filePath")
-            return text
-        }
     }
 
 
@@ -63,8 +45,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
 
         val message = "hello"
 
-        writeToFile("key_share.txt", message)
-        readFile("key_share.txt")
+        writeToFile(this.context, "key_share.txt", message)
+        readFile(this.context,"key_share.txt")
 
         getFrostCommunity().distributeKey(message.toByteArray())
     }
@@ -89,7 +71,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
             changeText(text_button_4, NativeSecp256k1.a())
         }
         refresh.setOnClickListener {
-            val acks = readFile("acks.txt")
+            val acks = readFile(this.context, "acks.txt")
             var text = "$acks"
             Log.i("FROST", text)
             changeText(text_refresh, "Received acks: \n $text")

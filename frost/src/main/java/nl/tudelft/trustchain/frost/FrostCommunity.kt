@@ -62,26 +62,20 @@ class FrostCommunity(private val context: Context): Community(){
     private fun onAckKey(packet: Packet){
         val (peer, payload) = packet.getDecryptedAuthPayload(Ack.Deserializer, myPeer.key as PrivateKey)
         Log.i("FROST", "${myPeer.address} acked key ${payload.keyShare} from ${peer.address}")
-        val ackBuffer = readFile("acks.txt")
+        val ackBuffer = readFile(this.context,"acks.txt")
         val newBuffer = "$ackBuffer \n ${peer.address}"
-
-        writeToFile("acks.txt", newBuffer)
+        writeToFile(this.context, "acks.txt", newBuffer)
     }
 
     private fun saveKeyShare(keyShare: ByteArray){
-        this.context.openFileOutput("key_share.txt", Context.MODE_PRIVATE).use {
-            it?.write(keyShare)
-            Log.i("FROST", "File written ${myPeer.address}")
-        }
+        writeToFile(this.context, "key_share.txt", keyShare.toString())
+        Log.i("FROST", "File written ${myPeer.address}")
     }
 
-    private fun getKeyShare(){
-        this.context.openFileInput("key_share.txt").use { stream ->
-            val text = stream?.bufferedReader().use {
-                it?.readText()
-            }
-            Log.i("FROST", "LOADED: $text ${myPeer.address}")
-        }
+    private fun getKeyShare(): ByteArray? {
+        val key = readFile(this.context, "key_share.txt")
+        Log.i("FROST", "LOADED: $key ${myPeer.address}")
+        return key?.toByteArray()
     }
 
 
@@ -114,24 +108,6 @@ class FrostCommunity(private val context: Context): Community(){
         }
         return count
     }
-
-    private fun writeToFile(filePath: String, text: String){
-        this.context.openFileOutput(filePath, Context.MODE_PRIVATE).use {
-            it?.write(text.toByteArray())
-            Log.i("FROST", "Write: $text to $filePath")
-        }
-    }
-
-    private fun readFile(filePath: String): String? {
-        this.context.openFileInput(filePath).use { stream ->
-            val text = stream?.bufferedReader().use {
-                it?.readText()
-            }
-            Log.i("FROST", "Read: $text from $filePath")
-            return text
-        }
-    }
-
 
     object MessageId {
         const val SEND_KEY = 0
