@@ -62,6 +62,10 @@ class FrostCommunity(private val context: Context): Community(){
     private fun onAckKey(packet: Packet){
         val (peer, payload) = packet.getDecryptedAuthPayload(Ack.Deserializer, myPeer.key as PrivateKey)
         Log.i("FROST", "${myPeer.address} acked key ${payload.keyShare} from ${peer.address}")
+        val ackBuffer = readFile("acks.txt")
+        val newBuffer = "$ackBuffer ${peer.address}"
+
+        writeToFile("acks.txt", newBuffer)
     }
 
     private fun saveKeyShare(keyShare: ByteArray){
@@ -109,6 +113,22 @@ class FrostCommunity(private val context: Context): Community(){
             }
         }
         return count
+    }
+
+    private fun writeToFile(filePath: String, text: String){
+        this.context.openFileOutput(filePath, Context.MODE_PRIVATE).use {
+            it?.write(text.toByteArray())
+            Log.i("FROST", "Write: $text to $filePath")
+        }
+    }
+
+    private fun readFile(filePath: String){
+        this.context.openFileInput(filePath).use { stream ->
+            val text = stream?.bufferedReader().use {
+                it?.readText()
+            }
+            Log.i("FROST", "Read: $text from $filePath")
+        }
     }
 
 

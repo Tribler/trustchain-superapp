@@ -25,6 +25,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
+        writeToFile("acks.txt", "")
     }
 
     override fun onCreateView(
@@ -85,8 +86,12 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         button4.setOnClickListener {
             changeText(text_button_4, "")
             changeText(text_button_4, NativeSecp256k1.a())
-
-
+        }
+        refresh.setOnClickListener {
+            changeText(refresh, "")
+            val acks = readFile("acks.txt")
+            Log.i("FROST", acks.toString())
+            changeText(refresh, acks.toString())
         }
     }
 }
