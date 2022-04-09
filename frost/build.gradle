@@ -4,6 +4,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'androidx.navigation.safeargs.kotlin'
 
+
+//apply plugin: 'java-library'
+apply plugin: 'com.google.protobuf'
+//apply plugin: 'maven-publish'
+//apply plugin: 'eclipse'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -105,4 +111,86 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    // Bitcoin
+    api 'org.bouncycastle:bcprov-jdk15to18:1.69'
+    api 'com.google.guava:guava:31.0.1-android'
+    api 'com.google.protobuf:protobuf-javalite:3.18.0'
+    api 'com.squareup.okhttp3:okhttp:3.14.9'
+    implementation 'org.slf4j:slf4j-api:1.7.32'
+    implementation 'net.jcip:jcip-annotations:1.0'
+    compileOnly 'org.fusesource.leveldbjni:leveldbjni-all:1.8'
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'org.easymock:easymock:3.2'
+    testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.5.2'
+    testImplementation 'org.slf4j:slf4j-jdk14:1.7.32'
+    testImplementation 'com.h2database:h2:1.3.167'
+    testImplementation 'org.fusesource.leveldbjni:leveldbjni-all:1.8'
+    testImplementation 'nl.jqno.equalsverifier:equalsverifier:2.5.2'
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
 }
+
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.18.0'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+    generatedFilesBaseDir = new File(projectDir, '/src') // workaround for '$projectDir/src'
+}
+
+//test {
+//    exclude 'org/bitcoinj/core/PeerTest*'
+//    exclude 'org/bitcoinj/core/TransactionBroadcastTest*'
+//    exclude 'org/bitcoinj/net/discovery/DnsDiscoveryTest*'
+//    testLogging {
+//        events "failed"
+//        exceptionFormat "full"
+//    }
+//}
+
+//ext.moduleName = 'org.bitcoinj.core'
+//
+//jar {
+//    inputs.property("moduleName", moduleName)
+//    manifest {
+//        attributes 'Automatic-Module-Name': moduleName
+//    }
+//}
+
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+//
+//task sourcesJar(type: Jar, dependsOn: classes) {
+//    classifier = 'sources'
+//    from sourceSets.main.allSource
+//}
+//
+//artifacts {
+//    archives sourcesJar
+//    archives javadocJar
+//}
+//
+//publishing {
+//    publications {
+//        mavenJava(MavenPublication) {
+//            artifactId = 'bitcoinj-core'
+//            from components.java
+//            artifact sourcesJar
+//            artifact javadocJar
+//
+//            pom {
+//                description = 'A Java Bitcoin library'
+//            }
+//        }
+//    }
+//}

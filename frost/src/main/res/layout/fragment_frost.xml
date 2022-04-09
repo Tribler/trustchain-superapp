@@ -1,26 +1,123 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
              xmlns:app="http://schemas.android.com/apk/res-auto"
              xmlns:tools="http://schemas.android.com/tools"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
+                android:background="@drawable/snowflake"
+                android:backgroundTint="#80000000"
+                android:backgroundTintMode="src_over"
              tools:context="nl.tudelft.trustchain.frost.FrostFragment">
 
+
     <TextView
-        android:id="@+id/sample_text"
+        android:id="@+id/text_top"
+        android:textSize="20dp"
+        android:textColor="@color/white"
+        android:fontFamily="sans-serif-black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
+        android:text="FROST functions"
+        android:layout_marginLeft="14dp"
+        android:layout_marginTop="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:id="@+id/text_button_1"
+        android:textColor="@color/white"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:fontFamily="sans-serif"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_button_2"
+        android:textColor="@color/white"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:fontFamily="sans-serif"
+        android:layout_marginLeft="190dp"
+        android:layout_marginTop="100dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:id="@+id/text_button_3"
+        android:textColor="@color/white"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:fontFamily="sans-serif"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_button_4"
+        android:textColor="@color/white"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:fontFamily="sans-serif"
+        android:layout_marginLeft="190dp"
+        android:layout_marginTop="200dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/button1"
         style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="match_parent"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Button" />
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="10dp"
+        android:backgroundTint="@color/frost"
+        android:text="Button1"
+        android:fontFamily="sans-serif"/>
+    <Button
+        android:id="@+id/button2"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="190dp"
+        android:backgroundTint="@color/frost"
+        android:text="Button2"
+        android:fontFamily="sans-serif"/>
+    <Button
+        android:id="@+id/button3"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:layout_marginLeft="10dp"
+        android:backgroundTint="@color/frost"
+        android:text="Button3"
+        android:fontFamily="sans-serif"/>
 
-</FrameLayout>
+    <Button
+        android:id="@+id/button4"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp"
+        android:layout_marginLeft="190dp"
+        android:backgroundTint="@color/frost"
+        android:text="Button4"
+        android:fontFamily="sans-serif"/>
+
+</RelativeLayout>

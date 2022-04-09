@@ -4,3 +4,7 @@
 [submodule "gossipML/superapp-essentia"]
 	path = gossipML/superapp-essentia
 	url = https://github.com/Tribler/superapp-essentia.git
+[submodule "bitcoinj-frost"]
+	path = bitcoinj-frost
+	url = git@github.com:OrestisKan/bitcoinj-frost.git
+	branch = frost-step3
