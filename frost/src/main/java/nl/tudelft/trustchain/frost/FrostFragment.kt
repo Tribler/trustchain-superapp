@@ -6,6 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import bitcoin.NativeSecp256k1
 import kotlinx.android.synthetic.main.fragment_frost.*
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.common.util.viewBinding
@@ -23,33 +25,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         initClickListeners()
-        sample_text.text = "potato"
-        val new_text = FrostCpp.stringFromJNI()
-        sample_text.text = new_text
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-//        binding = ActivityMainBinding.inflate(layoutInflater)
-//        setContentView(binding.root)
-
-        // Example of a call to a native method
-//
-    }
-
-//    /**
-//     * A native method that is implemented by the 'hello_cmake' native library,
-//     * which is packaged with this application.
-//     */
-//    external fun stringFromJNI(): String
-//
-//    companion object {
-//        // Used to load the 'hello_cmake' library on application startup.
-//        init {
-//            System.loadLibrary("hello_cmake")
-//        }
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,17 +50,43 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
             Log.i("FROST", "Read: $text from $filePath")
         }
     }
+
+
+    private fun changeText(textView: TextView, text: String){
+        textView.text = text
+    }
+
+    private fun sayHelloToCommunity(){
+        Log.i("FROST", "Key distribution started")
+
+        val message = "hello"
+
+        writeToFile("key_share.txt", message)
+        readFile("key_share.txt")
+
+        getFrostCommunity().distributeKey(message.toByteArray())
+    }
+
     private fun initClickListeners() {
-        button.setOnClickListener {
-            // TODO: add FROST JNI
-            Log.i("FROST", "Key distribution started")
 
-            val message = "hello"
+        button1.setOnClickListener {
+            changeText(text_button_1, "")
+            changeText(text_button_1, NativeSecp256k1.a())
+            sayHelloToCommunity()
+        }
+        button2.setOnClickListener {
+            changeText(text_button_2, "")
+            changeText(text_button_2, NativeSecp256k1.a())
+        }
+        button3.setOnClickListener {
+            changeText(text_button_3, "")
+            changeText(text_button_3, NativeSecp256k1.a())
+        }
+        button4.setOnClickListener {
+            changeText(text_button_4, "")
+            changeText(text_button_4, NativeSecp256k1.a())
 
-            writeToFile("key_share.txt", message)
-            readFile("key_share.txt")
 
-            getFrostCommunity().distributeKey(message.toByteArray())
         }
     }
 }
