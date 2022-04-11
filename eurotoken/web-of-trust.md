@@ -1,11 +1,11 @@
-# EuroToken III: Adding Trust
-For the course Blockchain Engineering our 'EuroToken III' group has been working on integrating a trust system in the EuroToken project.
+# EuroToken: Protocol specifics
+Previously, the app had zero indication of whether the counterparty was to be trusted.
+Our pull request attempts to create a 'web of trust' by transceiving public keys that counterparties transacted with in the past.
 
-Double spending is the biggest issue that is currently preventing the EuroToken from becoming the obvious replacement to the current financial system.
-
-Previously, the app had zero indication of whether the counterparty was to be trusted. Our pull request attempts to create a 'web of trust' by transceiving public keys that counterparties transacted with in the past.
-
-An unknown public key currently receives a trust score of 0. Upon receiving a message containing a known public key, the trust score is incremented by 1 (up to 100). The following sequence diagram describes the trust update protocol. To transceive the list of 50 public keys, the EVA protocol is utilized.
+An unknown public key currently receives a trust score of 0.
+Upon receiving a message containing a known public key, the trust score is incremented by 1 (up to 100).
+The following sequence diagram describes the trust update protocol.
+To transceive the list of 50 public keys, the EVA protocol is utilized.
 
 ![Sequence diagram showing public key transmission](images/sequence.png)
 
@@ -27,7 +27,7 @@ An unknown public key currently receives a trust score of 0. Upon receiving a me
 
 ## Changelog
 - Added `TrustStore.db` to store and update public key + trust score pairs.
-- Added demo mode to EuroToken, which can be toggled on in the topright options corner. Deme mode is used to generate random keys for transmitting, in case when a fresh app has no transactions.
+- Added demo mode to EuroToken, which can be toggled on in the topright options corner. Demo mode is used to generate random keys for transmitting, in case when a fresh app has no transactions.
 - Added transceiving of public keys. On receive; update trust score by 1 (default is 0). Send latest 50 transaction public keys after sending EuroTokens to someone.
 - Added a visualization of the trust score of the counterparty you are transacting with. Check out `TrustScoresFragment.kt`
 - Improved string localization; move strings to `eurotoken/src/main/res/values/strings.xml`
