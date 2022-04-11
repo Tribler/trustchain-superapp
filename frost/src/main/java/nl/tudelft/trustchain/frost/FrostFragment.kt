@@ -55,6 +55,8 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
 
         button1.setOnClickListener {
             changeText(text_button_1, "Press \"REFRESH\" to check received acks")
+            changeText(text_refresh, "Received acks:")
+            writeToFile(this.context, "acks.txt", "")
 //            changeText(text_button_1, NativeSecp256k1.a())
             sayHelloToCommunity()
         }
