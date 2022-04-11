@@ -581,6 +581,14 @@ public class NativeSecp256k1 {
         return "hello";
     }
 
+    public static FrostSigner genKey(int threshold){
+        FrostSigner signer = new FrostSigner(threshold);
+        FrostSecret secret = new FrostSecret();
+        NativeSecp256k1.generateKey(secret, signer);
+        // send signer
+        return signer;
+    }
+
     public static String a(){
         final int numberOfKeys = 5;
         int threshold = 3;
