@@ -200,8 +200,7 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         button.isAllCaps = false
-        button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
-        button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
+        button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.android_green))
         torrentCount.text = getString(R.string.torrentCount, torrentList.size)
         button.setOnClickListener {
             loadDynamicCode(fileName)
