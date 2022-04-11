@@ -65,7 +65,6 @@ class AppGossiper(
     var sessionActive = false
     var downloadsInProgress = 0
     var downloadsFinished = 0
-    var batchDone = true
 
     companion object {
         fun getInstance(
@@ -220,9 +219,7 @@ class AppGossiper(
         while (scope.isActive) {
             if (!downloadingPaused) {
                 try {
-                    if (batchDone) {
-                        downloadPendingFiles()
-                    }
+                    downloadPendingFiles()
                     if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
                         activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
                         retryActiveEvaDownload()
@@ -249,11 +246,9 @@ class AppGossiper(
 
     private suspend fun downloadPendingFiles() {
         IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
-
             delay(1000)
             addDownloadToQueue(demoCommunity.getTorrentMessages().size - downloadsFinished)
             addButtonsInAdvance(demoCommunity.getTorrentMessages())
-            batchDone = false
             for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
                 val (peer, payload) = packet.getAuthPayload(MyMessage)
                 Log.i("appGossiper", peer.mid + ": " + payload.message)
@@ -271,7 +266,6 @@ class AppGossiper(
                     getMagnetLink(magnetLink, torrentName, peer)
                 }
             }
-            batchDone = true
         }
     }
 

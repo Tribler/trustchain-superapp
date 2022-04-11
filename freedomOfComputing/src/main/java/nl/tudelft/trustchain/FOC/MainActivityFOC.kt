@@ -240,6 +240,7 @@ class MainActivityFOC : AppCompatActivity() {
                 val buttonToBeDeleted = torrentList.find { button -> button.text == fileName }
                 if (buttonToBeDeleted != null) {
                     val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+                    torrentList.remove(buttonToBeDeleted)
                     torrentListView.removeView(buttonToBeDeleted)
                     torrentCount.text = getString(R.string.torrentCount, torrentList.size)
                 }
