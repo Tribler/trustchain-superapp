@@ -91,34 +91,36 @@ class FrostCommunity(private val context: Context,
     }
 
     fun createSigner(threshold: Int, sendBack: Boolean) {
-        // add self as signer
-        val signer = FrostSigner(threshold)
-        val secret = FrostSecret()
-        NativeSecp256k1.generateKey(secret, signer)
-        signer.ip = myPeer.address.toString()
-        if(!signerInList(myPeer.address.toString())) {
+        if (!signerInList(myPeer.address.toString())) {
+            // add self as signer
+            val signer = FrostSigner(threshold)
+            val secret = FrostSecret()
+            NativeSecp256k1.generateKey(secret, signer)
+            signer.ip = myPeer.address.toString()
             this.signers.add(signer)
-        }
 
-        for (peer in getPeers()) {
-            val packet = serializePacket(
-                MessageId.SEND_SIGNER,
-                FrostSignerPacket(
-                    signer.pubkey,
-                    signer.pubnonce,
-                    signer.partial_sig,
-                    signer.vss_hash,
-                    signer.pubcoeff
-                ),
-                encrypt = true,
-                sign = true,
-                recipient = peer
-            )
-            Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
-            if(sendBack)
-                send(peer, packet)
-            else if(!signerInList(peer.address.toString())) {
-                send(peer, packet)
+            for (peer in getPeers()) {
+                if (peer != myPeer) {
+                    val packet = serializePacket(
+                        MessageId.SEND_SIGNER,
+                        FrostSignerPacket(
+                            signer.pubkey,
+                            signer.pubnonce,
+                            signer.partial_sig,
+                            signer.vss_hash,
+                            signer.pubcoeff
+                        ),
+                        encrypt = true,
+                        sign = true,
+                        recipient = peer
+                    )
+                    Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
+                    if (sendBack)
+                        send(peer, packet)
+                    else if (!signerInList(peer.address.toString())) {
+                        send(peer, packet)
+                    }
+                }
             }
         }
     }
@@ -142,12 +144,16 @@ class FrostCommunity(private val context: Context,
             payload.vss_hash,
             payload.pubcoeff
         )
-        if(!signerInList(peer.address.toString()))
+        signer.ip = peer.address.toString()
+
+        if(!signerInList(peer.address.toString())){
+            this.signers.add(signer)
             createSigner(THRESHOLD, true)
-        else createSigner(THRESHOLD, false)
-        this.signers.add(signer)
+        }
+        else
+            createSigner(THRESHOLD, false)
+
         Log.i("FROST", "${myPeer.address} received signer from ${peer.address}")
-        createSigner(THRESHOLD, true)
     }
 
 

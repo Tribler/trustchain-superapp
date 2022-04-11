@@ -110,7 +110,7 @@
         android:layout_marginTop="50dp"
         android:layout_marginLeft="190dp"
         android:backgroundTint="@color/frost"
-        android:text="Button2"
+        android:text="Signer"
         android:fontFamily="sans-serif"/>
     <Button
         android:id="@+id/button3"
