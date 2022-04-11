@@ -92,6 +92,7 @@ class FrostCommunity(private val context: Context,
 
     fun createSigner(threshold: Int, sendBack: Boolean) {
         if (!signerInList(myPeer.address.toString())) {
+            Log.i("FROST", "${myPeer.address} creating own signer")
             // add self as signer
             val signer = FrostSigner(threshold)
             val secret = FrostSecret()
@@ -114,10 +115,13 @@ class FrostCommunity(private val context: Context,
                         sign = true,
                         recipient = peer
                     )
-                    Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
-                    if (sendBack)
+                    if (sendBack){
+                        Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
                         send(peer, packet)
+                    }
+
                     else if (!signerInList(peer.address.toString())) {
+                        Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
                         send(peer, packet)
                     }
                 }
@@ -146,14 +150,16 @@ class FrostCommunity(private val context: Context,
         )
         signer.ip = peer.address.toString()
 
+        Log.i("FROST", "${myPeer.address} received signer from ${peer.address}")
+
         if(!signerInList(peer.address.toString())){
+            Log.i("FROST", "${myPeer.address} signer was unknown, adding to list")
             this.signers.add(signer)
             createSigner(THRESHOLD, true)
         }
         else
+            Log.i("FROST", "${myPeer.address} signer was known")
             createSigner(THRESHOLD, false)
-
-        Log.i("FROST", "${myPeer.address} received signer from ${peer.address}")
     }
 
 
