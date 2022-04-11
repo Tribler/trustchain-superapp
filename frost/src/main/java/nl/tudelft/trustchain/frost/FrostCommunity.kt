@@ -14,7 +14,7 @@ import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import kotlin.random.Random
 
-val THRESHOLD = 2
+val THRESHOLD = 3
 
 class FrostCommunity(private val context: Context,
                      private val signers: MutableList<FrostSigner>,
@@ -90,7 +90,7 @@ class FrostCommunity(private val context: Context,
         return key?.toByteArray()
     }
 
-    fun createSigner(threshold: Int) {
+    fun createSigner(threshold: Int, sendBack: Boolean) {
         // add self as signer
         val signer = FrostSigner(threshold)
         val secret = FrostSecret()
@@ -114,9 +114,10 @@ class FrostCommunity(private val context: Context,
                 sign = true,
                 recipient = peer
             )
-            Log.i("FROST", "${myPeer.address} sending key fragment to ${peer.address}")
-
-            if(!signerInList(peer.address.toString())) {
+            Log.i("FROST", "${myPeer.address} sending signer to ${peer.address}")
+            if(sendBack)
+                send(peer, packet)
+            else if(!signerInList(peer.address.toString())) {
                 send(peer, packet)
             }
         }
@@ -133,7 +134,7 @@ class FrostCommunity(private val context: Context,
 
 
     fun onCreateSigner(packet: Packet) {
-        val (_, payload) = packet.getDecryptedAuthPayload(FrostSignerPacket.Deserializer, myPeer.key as PrivateKey)
+        val (peer, payload) = packet.getDecryptedAuthPayload(FrostSignerPacket.Deserializer, myPeer.key as PrivateKey)
         val signer = FrostSigner(
             payload.pubkey,
             payload.pubnonce,
@@ -141,11 +142,13 @@ class FrostCommunity(private val context: Context,
             payload.vss_hash,
             payload.pubcoeff
         )
+        if(!signerInList(peer.address.toString()))
+            createSigner(THRESHOLD, true)
+        else createSigner(THRESHOLD, false)
         this.signers.add(signer)
-
-        createSigner(THRESHOLD)
-
-        }
+        Log.i("FROST", "${myPeer.address} received signer from ${peer.address}")
+        createSigner(THRESHOLD, true)
+    }
 
 
     fun distributeKey(

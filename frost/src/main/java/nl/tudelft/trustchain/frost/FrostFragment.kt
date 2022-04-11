@@ -62,7 +62,7 @@ class FrostFragment : BaseFragment(R.layout.fragment_frost) {
         }
         button2.setOnClickListener {
             changeText(text_button_2, "")
-            getFrostCommunity().createSigner(THRESHOLD)
+            getFrostCommunity().createSigner(THRESHOLD, true)
 //            changeText(text_button_2, NativeSecp256k1.a())
         }
         button3.setOnClickListener {
