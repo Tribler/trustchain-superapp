@@ -147,7 +147,6 @@ class AppGossiper(
         }
     }
 
-
     fun pause() {
         gossipingPaused = true
         downloadingPaused = true
@@ -198,7 +197,6 @@ class AppGossiper(
             }
         })
     }
-
 
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
@@ -382,14 +380,13 @@ class AppGossiper(
             0, 1000
         )
 
-
         Log.i("appGossiper", "Fetching the magnet uri, please wait...")
         val data: ByteArray
         try {
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
             Log.i("appGossiper", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:${e}") }
+            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:$e") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             return
         }
@@ -457,7 +454,6 @@ class AppGossiper(
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
-
         }
     }
 

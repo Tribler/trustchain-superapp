@@ -182,7 +182,6 @@ class DemoCommunity(
         setOnEVAErrorCallback(::onEVAErrorCallback)
     }
 
-
     private fun onMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(MyMessage.Deserializer)
         Log.i("personal", peer.mid + ": " + payload.message)
@@ -193,11 +192,10 @@ class DemoCommunity(
         val torrentHash = payload.message.substringAfter("magnet:?xt=urn:btih:")
             .substringBefore("&dn=")
         if (torrentMessagesList.none {
-                val (_, existingPayload) = it.getAuthPayload(MyMessage.Deserializer)
-                val existingHash = existingPayload.message.substringAfter("magnet:?xt=urn:btih:")
-                    .substringBefore("&dn=")
-                torrentHash == existingHash
-            }
+            val (_, existingPayload) = it.getAuthPayload(MyMessage.Deserializer)
+            val existingHash = existingPayload.message.substringAfter("magnet:?xt=urn:btih:").substringBefore("&dn=")
+            torrentHash == existingHash
+        }
         ) {
             torrentMessagesList.add(packet)
             Log.i("personal", peer.mid + ": " + payload.message)
@@ -273,7 +271,7 @@ class DemoCommunity(
         logger.debug { "<- Received app from ${peer.mid}" }
         val file = appDirectory.toString() + "/" + payload.appName
         val existingFile = File(file)
-        if(!existingFile.exists()) {
+        if (!existingFile.exists()) {
             try {
                 val os = FileOutputStream(file)
                 os.write(payload.data)
@@ -337,7 +335,7 @@ class DemoCommunity(
     }
 
     companion object {
-        //Use this until we can commit an id to kotlin ipv8
+        // Use this until we can commit an id to kotlin ipv8
         const val EVA_DEMOCOMMUNITY_ATTACHMENT = "eva_democommunity_attachment"
     }
 }
