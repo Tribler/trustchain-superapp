@@ -29,7 +29,7 @@ To adhere to the standard of EuroToken, the solution for double spending has to 
 * Independent of other authorities, such as banks
 
 ### Double Spending mitigation
-To counter double spending, EuroToken attempts to create a [web-of-trust](https://en.wikipedia.org/wiki/Web-of-trust) to help verify the authenticity of transactions and users.
+To counter double spending, EuroToken attempts to create a [web-of-trust](https://en.wikipedia.org/wiki/Web_of_trust) to help verify the authenticity of transactions and users.
 The basis of the web-of-trust is proof by participation of users in the network.
 If someone participates actively in the network, by making transactions, then they are regarded as more trustworthy than someone who does not participate.
 [Read about the specific implementation of the web-of-trust](web-of-trust.md)
