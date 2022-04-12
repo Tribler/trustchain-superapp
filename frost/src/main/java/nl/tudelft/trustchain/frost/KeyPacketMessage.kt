@@ -8,10 +8,12 @@ import nl.tudelft.ipv8.messaging.deserializeVarLen
 import nl.tudelft.ipv8.messaging.serializeVarLen
 
 class KeyPacketMessage constructor(
-    val keyShare: ByteArray
+    val keyShare: ByteArray,
+//    val index: Int
 ) : Serializable {
     override fun serialize(): ByteArray {
         return serializeVarLen(keyShare)
+//        + serializeUShort(index)
     }
 
     companion object Deserializer : Deserializable<KeyPacketMessage> {
@@ -19,6 +21,8 @@ class KeyPacketMessage constructor(
             var localOffset = offset
             val (keyShare, size) = deserializeVarLen(buffer, localOffset)
             localOffset += size
+//            val index = deserializeUShort(buffer, localOffset)
+//            localOffset += SERIALIZED_USHORT_SIZE
             return Pair(
                 KeyPacketMessage(keyShare),
                 localOffset - offset

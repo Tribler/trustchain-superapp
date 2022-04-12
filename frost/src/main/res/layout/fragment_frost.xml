@@ -97,42 +97,42 @@
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/frost"
-        android:text="Say hello"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:text="Join FROST"/>
     <Button
         android:id="@+id/button2"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:layout_marginLeft="190dp"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/frost"
-        android:text="Signer"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:text="Send Shares"/>
     <Button
         android:id="@+id/button3"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="150dp"
         android:backgroundTint="@color/frost"
-        android:text="Button3"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:text="Refresh Acks"/>
 
     <Button
         android:id="@+id/button4"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="150dp"
         android:layout_marginLeft="190dp"
+        android:layout_marginTop="150dp"
         android:backgroundTint="@color/frost"
-        android:text="Button4"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif"
+        android:text="Referesh Shares"/>
 
     <Button
         android:id="@+id/refresh"
@@ -142,7 +142,7 @@
         android:layout_marginTop="300dp"
         android:layout_marginLeft="100dp"
         android:backgroundTint="@color/frost"
-        android:text="refresh"
+        android:text="Shares received"
         android:fontFamily="sans-serif"/>
 
 </RelativeLayout>

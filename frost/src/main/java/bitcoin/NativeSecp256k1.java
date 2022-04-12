@@ -589,7 +589,7 @@ public class NativeSecp256k1 {
         return signer;
     }
 
-    public static String a(){
+    public static String smokeTest(){
         final int numberOfKeys = 5;
         int threshold = 3;
         byte[][] publicKeys = new byte[numberOfKeys][];

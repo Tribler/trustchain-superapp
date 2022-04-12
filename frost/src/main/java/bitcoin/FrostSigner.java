@@ -1,7 +1,7 @@
 package bitcoin;
 import java.util.Arrays;
 
-public class FrostSigner {
+public class FrostSigner implements Comparable<FrostSigner>{
   public byte[] pubkey;
   public byte[] pubnonce;
   public byte[] partial_sig;
@@ -48,5 +48,10 @@ public class FrostSigner {
         result = 31 * result + Arrays.hashCode(vss_hash);
         result = 31 * result + Arrays.deepHashCode(pubcoeff);
         return result;
+    }
+
+    @Override
+    public int compareTo(FrostSigner o) {
+        return ip.compareTo(o.ip);
     }
 }
