@@ -114,7 +114,7 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.ValueTransfer"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop" />
+            android:launchMode="singleTop">
             <tools:validation testUrl="http://trustchain.tudelft.nl/requestMoney?receiver=Tat&amp;amount=15.23&amp;message=party" />
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />

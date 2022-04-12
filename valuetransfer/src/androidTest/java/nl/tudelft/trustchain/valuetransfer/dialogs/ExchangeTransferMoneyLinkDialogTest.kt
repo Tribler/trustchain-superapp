@@ -43,9 +43,9 @@ class ExchangeTransferMoneyLinkDialogTest{
         assertEquals(expected, "Valid but large")
     }
 
-    @Test
-    fun `Normal_payment_ID_creation`(){
-        val expected = exchange.getLink(10)
-        assertEquals(expected, "Valid but large")
-    }
+//    @Test
+//    fun `Normal_payment_ID_creation`(){
+//        val expected = exchange.getLink(10)
+//        assertEquals(expected, "Valid but large")
+//    }
 }
