@@ -200,7 +200,8 @@ class MainActivityFOC : AppCompatActivity() {
         }
 
         button.isAllCaps = false
-        button.backgroundTintList = ColorStateList.valueOf( ContextCompat.getColor(applicationContext, R.color.android_green))
+        button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
+        button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
         torrentCount.text = getString(R.string.torrentCount, torrentList.size)
         button.setOnClickListener {
             loadDynamicCode(fileName)
@@ -242,6 +243,7 @@ class MainActivityFOC : AppCompatActivity() {
                     torrentList.remove(buttonToBeDeleted)
                     torrentListView.removeView(buttonToBeDeleted)
                     torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+                    appGossiper.removeTorrent(fileName)
                 }
             }
         }

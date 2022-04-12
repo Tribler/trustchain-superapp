@@ -257,6 +257,7 @@ class AppGossiper(
                 val magnetLink = payload.message.substringAfter("FOC:")
                 val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
                     .substringBefore("&dn=")
+                // TODO: Debug why another one is not created even though it has been deleted from torrentInfos
                 if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
                     if (failedTorrents.containsKey(torrentName)) {
                         // Wait at least 1000 seconds if torrent failed before
@@ -452,6 +453,13 @@ class AppGossiper(
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
 
+        }
+    }
+
+    fun removeTorrent(torrentName: String) {
+        val torrentInfo: TorrentInfo? = this.torrentInfos.find { torrentInfo -> torrentInfo.name() == torrentName }
+        if (torrentInfo != null) {
+            this.torrentInfos.remove(torrentInfo)
         }
     }
 
