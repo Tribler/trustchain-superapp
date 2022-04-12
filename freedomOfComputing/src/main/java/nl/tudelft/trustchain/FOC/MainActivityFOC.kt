@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.FOC
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -112,7 +111,6 @@ class MainActivityFOC : AppCompatActivity() {
         appGossiper.pause()
     }
 
-
     @Suppress("deprecation")
     fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
@@ -193,7 +191,7 @@ class MainActivityFOC : AppCompatActivity() {
         // Replace the failed torrent with the downloaded torrent
         val existingButton = torrentList.find { btn -> btn.text == fileName }
         if (existingButton != null) {
-            button = existingButton;
+            button = existingButton
         } else {
             torrentList.add(button)
             torrentListView.addView(button)
@@ -212,14 +210,13 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-
     fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle("Create or Delete")
         builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
         builder.setPositiveButton("Cancel", null)
-        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
-        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName) }
+        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName) }
         builder.show()
     }
 
@@ -303,7 +300,7 @@ class MainActivityFOC : AppCompatActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
             }
         } finally {
             cursor?.close()
@@ -318,7 +315,6 @@ class MainActivityFOC : AppCompatActivity() {
         }
         return result
     }
-
 
     /**
      * Creates a torrent from a file given as input
