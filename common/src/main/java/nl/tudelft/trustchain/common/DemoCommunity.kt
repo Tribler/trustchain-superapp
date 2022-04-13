@@ -155,8 +155,8 @@ class DemoCommunity(
         endpoint.send(address, packet)
     }
 
-    fun sendAppRequest(torrentInfoHash: String, peer: Peer) {
-        AppRequestPayload(torrentInfoHash).let { payload ->
+    fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String) {
+        AppRequestPayload(torrentInfoHash, uuid).let { payload ->
             logger.debug { "-> $payload" }
             send(peer, serializePacket(MessageId.APP_REQUEST, payload))
         }
@@ -213,14 +213,14 @@ class DemoCommunity(
     private fun onAppRequestPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(AppRequestPayload.Deserializer)
         logger.debug { "-> DemoCommunity: Received request $payload from ${peer.mid}" }
-        onAppRequest(peer, payload.appTorrentInfoHash)
+        onAppRequest(peer, payload)
     }
 
-    private fun onAppRequest(peer: Peer, appTorrentInfoHash: String) {
+    private fun onAppRequest(peer: Peer, appRequestPayload: AppRequestPayload) {
         try {
-            locateApp(appTorrentInfoHash)?.let { file ->
+            locateApp(appRequestPayload.appTorrentInfoHash)?.let { file ->
                 logger.debug { "-> sending app ${file.name} to ${peer.mid}" }
-                sendApp(peer, appTorrentInfoHash, file)
+                sendApp(peer, appRequestPayload.appTorrentInfoHash, file, appRequestPayload.uuid)
                 return
             }
             logger.debug { "Received Request for an app that doesn't exist" }
@@ -229,16 +229,24 @@ class DemoCommunity(
         }
     }
 
-    private fun sendApp(peer: Peer, appTorrentInfoHash: String, file: File) {
+    private fun sendApp(peer: Peer, appTorrentInfoHash: String, file: File, uuid: String) {
         val appPayload = AppPayload(appTorrentInfoHash, file.name, file.readBytes())
         val packet =
-            serializePacket(MessageId.APP, appPayload, encrypt = true, recipient = peer)
+            serializePacket(
+                MessageId.APP,
+                appPayload,
+                encrypt = true,
+                recipient = peer,
+                timestamp = System.currentTimeMillis().toULong()
+            )
         if (evaProtocolEnabled) evaSendBinary(
             peer,
             EVA_DEMOCOMMUNITY_ATTACHMENT,
-            appTorrentInfoHash,
-            packet
-        ) else send(peer, packet)
+            uuid,
+            packet,
+            System.currentTimeMillis()
+        )
+        else send(peer, packet)
     }
 
     private fun locateApp(appTorrentInfoHash: String): File? {
@@ -273,7 +281,7 @@ class DemoCommunity(
         logger.debug { "<- Received app from ${peer.mid}" }
         val file = appDirectory.toString() + "/" + payload.appName
         val existingFile = File(file)
-        if(!existingFile.exists()) {
+        if (!existingFile.exists()) {
             try {
                 val os = FileOutputStream(file)
                 os.write(payload.data)
