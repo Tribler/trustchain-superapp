@@ -182,36 +182,6 @@ class DemoCommunity(
         evaProtocolEnabled = true
     }
 
-    override fun onPacket(packet: Packet) {val sourceAddress = packet.source
-        val data = packet.data
-
-        val probablePeer = network.getVerifiedByAddress(sourceAddress)
-        if (probablePeer != null) {
-            probablePeer.lastResponse = Date()
-        }
-
-        val packetPrefix = data.copyOfRange(0, prefix.size)
-        if (!packetPrefix.contentEquals(prefix)) {
-            // logger.debug("prefix not matching")
-            evaAppRequestCallback("prefix not matching")
-            return
-        }
-
-        val msgId = data[prefix.size].toUByte().toInt()
-
-        val handler = messageHandlers[msgId]
-
-        if (handler != null) {
-            try {
-                handler(packet)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        } else {
-            logger.debug("Received unknown message $msgId from $sourceAddress")
-        }
-    }
-
     override fun load() {
         super.load()
 
