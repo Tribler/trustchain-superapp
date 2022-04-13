@@ -55,7 +55,7 @@ class QueryHandler : LiteratureDaoActivity() {
     }
 
     // Return a sorted list with the scores of local pdf's for a given query
-    fun scoreList(inp: String, allTheKWLists: List<Pair<String, List<Pair<String, Double>>>>): MutableList<Pair<String, Double>>{
+    fun scoreList(inp: String, allTheKWLists: MutableList<Pair<String, MutableList<Pair<String, Double>>>>): MutableList<Pair<String, Double>>{
 
         val query = toQuery(inp)
         var scoreList: MutableList<Result> = mutableListOf<Result>()
