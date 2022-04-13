@@ -112,11 +112,18 @@ class AppGossiper(
             }
         }
 
+        demoCommunity?.setEVAOnAppRequestCallback { info ->
+            activity.runOnUiThread { printToast("community: " + info)}
+        }
+
         demoCommunity?.setEVAOnReceiveProgressCallback { _, _, progress ->
             updateProgress(progress = progress.progress.toInt())
         }
 
         demoCommunity?.setEVAOnErrorCallback { _, exception ->
+            activity.runOnUiThread { printToast("hmmm")}
+            activity.runOnUiThread { printToast(exception.transfer?.type.toString())}
+            activity.runOnUiThread { printToast(exception.toString()) }
             if (evaDownload.activeDownload && exception.transfer?.type == TransferType.INCOMING) {
                 if (exception is TimeoutException || exception is PeerBusyException) {
                     activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
@@ -208,6 +215,7 @@ class AppGossiper(
                 try {
                     randomlyShareFiles()
                 } catch (e: Exception) {
+                    activity.runOnUiThread { printToast("1") }
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
             }
@@ -225,6 +233,7 @@ class AppGossiper(
                         retryActiveEvaDownload()
                     }
                 } catch (e: Exception) {
+                    activity.runOnUiThread { printToast("2") }
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
             }
@@ -259,13 +268,17 @@ class AppGossiper(
                     .substringBefore("&dn=")
                 // TODO: Debug why another one is not created even though it has been deleted from torrentInfos
                 if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
+                    activity.runOnUiThread { this.printToast("Nice") }
                     if (failedTorrents.containsKey(torrentName)) {
                         // Wait at least 1000 seconds if torrent failed before
-                        if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
+                        if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD) {
+                            activity.runOnUiThread { this.printToast("continue") }
                             continue
+                        }
                     }
                     getMagnetLink(magnetLink, torrentName, peer)
                 }
+                activity.runOnUiThread { this.printToast("Failed?") }
             }
         }
     }
@@ -278,7 +291,6 @@ class AppGossiper(
             torrentHandles.forEach { torrentHandle ->
                 if (toSeed.any { it.infoHash() == torrentHandle.infoHash() }) {
                     val dup = toSeed.find { it.infoHash() == torrentHandle.infoHash() }
-                    toSeed.remove(dup)
                     if (dup != null) {
                         val magnetLink = constructMagnetLink(dup.infoHash(), dup.name())
                         informAboutTorrent(magnetLink)
@@ -461,10 +473,12 @@ class AppGossiper(
         if (torrentInfo != null) {
             this.torrentInfos.remove(torrentInfo)
         }
+        if (failedTorrents.containsKey(torrentName))
+            failedTorrents.remove(torrentName)
     }
 
     fun printToast(s: String) {
-        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
+        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_SHORT).show()
     }
 
     fun addDownloadToQueue(downloadsInProgressCount: Int) {

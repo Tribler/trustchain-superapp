@@ -76,6 +76,7 @@ class MainActivityFOC : AppCompatActivity() {
             appGossiper = AppGossiper.getInstance(s, this)
             appGossiper.start()
         } catch (e: Exception) {
+            this.printToast("1")
             printToast(e.toString())
         }
     }
@@ -158,6 +159,7 @@ class MainActivityFOC : AppCompatActivity() {
                 this.createTorrent("search.apk")
             }
         } catch (e: Exception) {
+            this.printToast("2")
             this.printToast(e.toString())
         }
     }
@@ -182,7 +184,7 @@ class MainActivityFOC : AppCompatActivity() {
      * Display a short message on the screen
      */
     private fun printToast(s: String) {
-        Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, s, Toast.LENGTH_SHORT).show()
     }
 
     fun createSuccessfulTorrentButton(uri: Uri) {
