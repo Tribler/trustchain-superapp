@@ -182,7 +182,7 @@ class EuroTokenCommunity(
             })
         }
 
-        val payload = TransactionsPayload("1", addresses.joinToString(separator = ",").toByteArray())
+        val payload = TransactionsPayload(EVAId.EVA_LAST_ADDRESSES, addresses.joinToString(separator = ",").toByteArray())
 
         val packet = serializePacket(
             MessageId.ATTACHMENT,
