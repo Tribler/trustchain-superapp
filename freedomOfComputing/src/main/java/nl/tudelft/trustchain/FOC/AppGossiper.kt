@@ -139,7 +139,7 @@ class AppGossiper(
 
     private fun retryActiveEvaDownload() {
         if (evaDownload.retryAttempts < EVA_RETRIES) {
-            evaDownload.peer?.let { demoCommunity?.sendAppRequest(evaDownload.magnetInfoHash, it) }
+            evaDownload.peer?.let { demoCommunity?.sendAppRequest(evaDownload.magnetInfoHash, it, evaDownload.attemptUUID!!) }
             evaDownload.lastRequest = System.currentTimeMillis()
             evaDownload.retryAttempts++
             if (evaDownload.retryAttempts == EVA_RETRIES) {
@@ -458,9 +458,10 @@ class AppGossiper(
                         downloadHasStarted(torrentName)
                         printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!")
                     }
-                    demoCommunity.sendAppRequest(magnetInfoHash, peer)
+                    val attemptUUID = UUID.randomUUID().toString()
+                    demoCommunity.sendAppRequest(magnetInfoHash, peer, attemptUUID)
                     evaDownload =
-                        EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName)
+                        EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName, attemptUUID)
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
