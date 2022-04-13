@@ -112,10 +112,6 @@ class AppGossiper(
             }
         }
 
-        demoCommunity?.setEVAOnAppRequestCallback { info ->
-            activity.runOnUiThread { printToast("community: " + info) }
-        }
-
         demoCommunity?.setEVAOnReceiveProgressCallback { _, _, progress ->
             updateProgress(progress = progress.progress.toInt())
         }
@@ -216,7 +212,6 @@ class AppGossiper(
                 try {
                     randomlyShareFiles()
                 } catch (e: Exception) {
-                    activity.runOnUiThread { printToast("1") }
                     activity.runOnUiThread { printToast(e.toString()) }
                 }
             }
@@ -335,8 +330,6 @@ class AppGossiper(
                     val magnetLink = constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())
                     demoCommunity?.informAboutTorrent(magnetLink)
                     torrentHandles.add(torrentHandle)
-                } else {
-                    activity.runOnUiThread { printToast("torrentHandle invalid part 2") }
                 }
             }
         }

@@ -62,9 +62,6 @@ class DemoCommunity(
         peer: Peer,
         exception: TransferException
     ) -> Unit
-    private lateinit var evaAppRequestCallback: (
-        info: String
-    ) -> Unit
 
     fun setEVAOnSendCompleteCallback(
         f: (peer: Peer, info: String, nonce: ULong) -> Unit
@@ -82,12 +79,6 @@ class DemoCommunity(
         f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit
     ) {
         this.evaReceiveCompleteCallback = f
-    }
-
-    fun setEVAOnAppRequestCallback(
-        f: (info: String) -> Unit
-    ) {
-        this.evaAppRequestCallback = f
     }
 
     fun setEVAOnErrorCallback(
@@ -230,7 +221,6 @@ class DemoCommunity(
             locateApp(appRequestPayload.appTorrentInfoHash)?.let { file ->
                 logger.debug { "-> sending app ${file.name} to ${peer.mid}" }
                 sendApp(peer, appRequestPayload.appTorrentInfoHash, file, appRequestPayload.uuid)
-                evaAppRequestCallback("sent")
                 return
             }
             logger.debug { "Received Request for an app that doesn't exist" }
@@ -285,7 +275,6 @@ class DemoCommunity(
     }
 
     private fun onAppPacket(packet: Packet) {
-        evaAppRequestCallback("RECEIVED")
         val (peer, payload) = packet.getDecryptedAuthPayload(
             AppPayload.Deserializer, myPeer.key as PrivateKey
         )

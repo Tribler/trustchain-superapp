@@ -76,7 +76,6 @@ class MainActivityFOC : AppCompatActivity() {
             appGossiper = AppGossiper.getInstance(s, this)
             appGossiper.start()
         } catch (e: Exception) {
-            this.printToast("1")
             printToast(e.toString())
         }
     }
@@ -159,7 +158,6 @@ class MainActivityFOC : AppCompatActivity() {
                 this.createTorrent("search.apk")
             }
         } catch (e: Exception) {
-            this.printToast("2")
             this.printToast(e.toString())
         }
     }
