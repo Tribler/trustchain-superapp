@@ -7,7 +7,7 @@ import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import java.util.*
 
 @Suppress("deprecation")
-abstract class FOCCommunityBase: Community() {
+abstract class FOCCommunityBase : Community() {
 
     abstract var torrentMessagesList: ArrayList<Pair<Peer, FOCMessage>>
 
