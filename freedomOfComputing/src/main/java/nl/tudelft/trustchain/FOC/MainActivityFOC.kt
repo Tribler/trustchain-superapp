@@ -28,13 +28,15 @@ import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import java.util.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 
-class MainActivityFOC : AppCompatActivity() {
+open class MainActivityFOC : AppCompatActivity() {
 
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
@@ -43,7 +45,7 @@ class MainActivityFOC : AppCompatActivity() {
     val MY_PERMISSIONS_REQUEST = 0
     val s = SessionManager()
 
-    private lateinit var appGossiper: AppGossiper
+    private var appGossiper: AppGossiper? = null
 
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,8 +74,9 @@ class MainActivityFOC : AppCompatActivity() {
 
             printToast("STARTED")
             showAllFiles()
-            appGossiper = AppGossiper.getInstance(s, this)
-            appGossiper.start()
+            appGossiper =
+                IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
+            appGossiper?.start()
         } catch (e: Exception) {
             printToast(e.toString())
         }
@@ -103,12 +106,12 @@ class MainActivityFOC : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        appGossiper.resume()
+        appGossiper?.resume()
     }
 
     override fun onPause() {
         super.onPause()
-        appGossiper.pause()
+        appGossiper?.pause()
     }
 
     @Suppress("deprecation")
