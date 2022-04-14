@@ -19,7 +19,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import nl.tudelft.ipv8.Peer
 import mu.KotlinLogging
+import nl.tudelft.ipv8.keyvault.LibNaClPK
+import nl.tudelft.ipv8.keyvault.LibNaClSK.Companion.BIN_PREFIX
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
+import nl.tudelft.ipv8.util.hexToBytes
+import nl.tudelft.ipv8.util.sha1
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
@@ -161,8 +166,9 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
 
                 // Try to send the addresses of the last X transactions to the peer we have just scanned.
                 try {
-                    val peer = findPeer(defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.toByteArray()).toString());
+                    val peer = findPeer(defaultCryptoProvider.keyFromPublicBin(connectionData.public_key.hexToBytes()).toString())
                     if (peer == null) {
+                        logger.warn { "Could not find peer from QR code by public key " + connectionData.public_key }
                         Toast.makeText(requireContext(), "Could not find peer from QR code", Toast.LENGTH_LONG)
                             .show()
                     }
@@ -175,6 +181,7 @@ class TransferFragment : EurotokenBaseFragment(R.layout.fragment_transfer_euro) 
                         euroTokenCommunity.sendAddressesOfLastTransactions(peer)
                     }
                 } catch (e : Exception) {
+                    logger.error { e }
                     Toast.makeText(
                         requireContext(),
                         "Failed to send transactions",
