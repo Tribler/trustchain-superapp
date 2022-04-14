@@ -80,3 +80,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
         "-Xopt-in=kotlin.RequiresOptIn"
     ]
 }
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", "./src/main/jniLibs"
+}
