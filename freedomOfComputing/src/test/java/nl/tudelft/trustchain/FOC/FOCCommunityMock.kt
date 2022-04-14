@@ -26,16 +26,30 @@ class FOCCommunityMock(
     }
 
     override fun setEVAOnReceiveProgressCallback(
-        f: (peer: Peer, info: String, progress: TransferProgress) -> Unit) {
+        f: (
+            peer: Peer,
+            info: String,
+            progress: TransferProgress
+        ) -> Unit
+    ) {
     }
 
     override fun setEVAOnReceiveCompleteCallback(
-        f: (peer: Peer, info: String, id: String, data: ByteArray?) -> Unit) {
-
+        f: (
+            peer: Peer,
+            info: String,
+            id: String,
+            data: ByteArray?
+        ) -> Unit
+    ) {
     }
 
     override fun setEVAOnErrorCallback(
-        f: (peer: Peer, exception: TransferException) -> Unit) {
+        f: (
+            peer: Peer,
+            exception: TransferException
+        ) -> Unit
+    ) {
     }
 
     override fun informAboutTorrent(torrentName: String) {
