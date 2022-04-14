@@ -7,7 +7,6 @@ import com.frostwire.jlibtorrent.Sha1Hash
 import com.frostwire.jlibtorrent.TorrentInfo
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.slot
 import io.mockk.verify
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.Key
@@ -74,22 +73,22 @@ class AppGossiperTest {
     @Test
     fun triesToDownloadGossipedTorrentFromMagnetLink() {
         every { sessionManager.fetchMagnet(someMagnetLink, 30) } returns (someMagnetLinkByteArray)
-        appGossiper = AppGossiper.getInstance(sessionManager, mainActivity, focCommunityMock, false)
+        appGossiper = AppGossiper(sessionManager, mainActivity, focCommunityMock, false)
         appGossiper.start()
         await().atMost(1, TimeUnit.MINUTES).until { appGossiper.signal.count.toInt() == 1 }
-        val torrentInfoSlot = slot<TorrentInfo>()
+        val torrentInfoSlot = mutableListOf<TorrentInfo>()
         verify(exactly = 1) { sessionManager.fetchMagnet(someMagnetLink, 30) }
-        verify(exactly = 1) { sessionManager.download(capture(torrentInfoSlot), cacheDir) }
+        verify(exactly = 2) { sessionManager.download(capture(torrentInfoSlot), cacheDir) }
         Assert.assertEquals(
-            TorrentInfo.bdecode(someMagnetLinkByteArray).infoHash(),
-            torrentInfoSlot.captured.infoHash()
+            torrentInfoSlot.map { it.infoHash() }.sorted(),
+            listOf(TorrentInfo.bdecode(someMagnetLinkByteArray).infoHash(), TorrentInfo(File(contextDir + "/some.torrent")).infoHash()).sorted()
         )
     }
 
     @Test
     fun usesEvaProtocolAsFallbackWhenTorrentingDoesntWork() {
         every { sessionManager.fetchMagnet(someMagnetLink, 30) } throws RuntimeException("No torrenting for you")
-        appGossiper = AppGossiper.getInstance(sessionManager, mainActivity, focCommunityMock, false)
+        appGossiper = AppGossiper(sessionManager, mainActivity, focCommunityMock, false)
         appGossiper.start()
         await().atMost(1, TimeUnit.MINUTES).until { focCommunityMock.appRequests.size == 1 }
         val appRequest = focCommunityMock.appRequests[0]
@@ -100,7 +99,7 @@ class AppGossiperTest {
     @Test
     fun informsPeersAboutLocalFiles() {
         every { sessionManager.fetchMagnet(someMagnetLink, 30) } throws RuntimeException("No torrenting for you")
-        appGossiper = AppGossiper.getInstance(sessionManager, mainActivity, focCommunityMock, false)
+        appGossiper = AppGossiper(sessionManager, mainActivity, focCommunityMock, false)
         appGossiper.start()
         await().atMost(1, TimeUnit.MINUTES).until { focCommunityMock.torrentsInformedAbout.size == 1 }
         val torrentInformedAbout = focCommunityMock.torrentsInformedAbout[0]
