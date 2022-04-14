@@ -1,5 +1,6 @@
 # EuroToken - A Digital Euro
-_TODO: Write out in more detail about basics of EuroToken_
+EU member states of the Eurozone [are considering creating a blockchain-inspired digital Eurotoken using a P2P architecture](https://haldus.eestipank.ee/sites/default/files/2021-07/Work%20stream%203%20-%20A%20New%20Solution%20-%20Blockchain%20and%20eID_1.pdf).
+The superapp contains a fully functional digital cash implementation, still experimental and tested within 1 retail location for 1 morning in live production usage with real financial transactions.
 
 ## Web-of-Trust
 In standard operation, EuroToken communicates with a gateway controlled by authorities to verify the authenticity of transactions.
