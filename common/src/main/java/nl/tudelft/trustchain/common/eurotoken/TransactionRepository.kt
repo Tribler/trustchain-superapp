@@ -255,6 +255,7 @@ class TransactionRepository(
     }
 
     fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified: Boolean = false): TrustChainBlock? {
+        Log.d("TransactionRepository", "Allow unverified: $allowUnverified")
         if (getMyVerifiedBalance() - amount < 0) {
             return null
         }
