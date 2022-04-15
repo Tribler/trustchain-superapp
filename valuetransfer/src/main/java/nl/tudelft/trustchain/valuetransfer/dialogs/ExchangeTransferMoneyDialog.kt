@@ -32,7 +32,8 @@ class ExchangeTransferMoneyDialog(
     private val recipient: Contact?,
     private val amount: String?,
     private val isTransfer: Boolean,
-    private val message: String? = ""
+    private val message: String? = "",
+    private val allowUnverified: Boolean = false
 ) : VTDialogFragment() {
 
     private var selectedContact: Contact? = recipient
@@ -71,6 +72,13 @@ class ExchangeTransferMoneyDialog(
             val recipientTitleView = view.findViewById<TextView>(R.id.tvRecipientTitle)
             val addNewContactView = view.findViewById<ConstraintLayout>(R.id.clAddNewContact)
             val addNewContactSwitch = view.findViewById<Switch>(R.id.switchAddNewContact)
+            val allowUnverifiedSwitch = view.findViewById<Switch>(R.id.switchAllowUnverified)
+            val clAllowUnverified = view.findViewById<ConstraintLayout>(R.id.clAllowUnverified)
+
+            // Only enable the unverified money switch for requests
+            if (isTransfer) {
+                clAllowUnverified.visibility = View.GONE
+            }
 
             transferSlider = view.findViewById(R.id.slideTransferMoney)
             transferSlider.isLocked = selectedContact != null && transactionAmount != 0L
@@ -295,7 +303,8 @@ class ExchangeTransferMoneyDialog(
                                 // Create proposal block to the recipient
                                 val block = getTransactionRepository().sendTransferProposalSync(
                                     selectedContact!!.publicKey.keyToBin(),
-                                    transactionAmount
+                                    transactionAmount,
+                                    allowUnverified
                                 )
                                 if (block == null) {
                                     parentActivity.displayToast(
@@ -339,7 +348,8 @@ class ExchangeTransferMoneyDialog(
                         transactionMessage,
                         transactionAmount,
                         getTrustChainCommunity().myPeer.publicKey,
-                        selectedContact!!.publicKey
+                        selectedContact!!.publicKey,
+                        allowUnverifiedSwitch.isChecked
                     )
 
                     @Suppress("DEPRECATION")
@@ -384,7 +394,8 @@ class ExchangeTransferMoneyDialog(
                             "${it.givenNames.getInitials()} ${it.surname}"
                         },
                         QRScanController.KEY_TYPE to QRScanController.VALUE_TRANSFER,
-                        QRScanController.KEY_MESSAGE to transactionMessage
+                        QRScanController.KEY_MESSAGE to transactionMessage,
+                        QRScanController.KEY_ALLOW_UNVERIFIED to allowUnverifiedSwitch.isChecked.toString()
                     )
 
                     bottomSheetDialog.dismiss()

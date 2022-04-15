@@ -254,7 +254,7 @@ class TransactionRepository(
         return true
     }
 
-    fun sendTransferProposalSync(recipient: ByteArray, amount: Long): TrustChainBlock? {
+    fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified: Boolean = false): TrustChainBlock? {
         if (getMyVerifiedBalance() - amount < 0) {
             return null
         }
