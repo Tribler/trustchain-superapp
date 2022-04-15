@@ -41,28 +41,6 @@
             android:clipToPadding="false"
             android:focusable="true">
 
-<!--        <EditText-->
-<!--                android:id="@+id/editTextURL"-->
-<!--                android:layout_width="260dp"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:ems="10"-->
-<!--                android:paddingTop="15dp"-->
-<!--                android:backgroundTint="#8f8c83"-->
-<!--                android:inputType="textURL"-->
-<!--                android:textColor="#8f8c83"-->
-<!--                android:textColorHint="#8f8c83" />-->
-
-<!--        <TextView-->
-<!--                android:id="@+id/uploadUrl"-->
-<!--                android:layout_width="0dp"-->
-<!--                android:layout_height="0dp"-->
-<!--                android:paddingTop="15dp"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:textSize="15dp"-->
-<!--                android:text="Paste URL here to upload from URL"-->
-<!--                android:clickable="true"-->
-<!--        />-->
-
         <EditText
                 android:id="@+id/uploadUrl"
                 android:layout_width="match_parent"

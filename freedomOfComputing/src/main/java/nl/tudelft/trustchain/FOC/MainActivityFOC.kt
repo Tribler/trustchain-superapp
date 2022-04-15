@@ -70,7 +70,6 @@ class MainActivityFOC : AppCompatActivity() {
                 if (input != "") {
                     printToast("INIT URL UPLOAD")
                     val successfailtoast = selectNewUrlToUpload(input)
-//                recreate()
                     toggleUploadPopUp(uploadPopUp)
                     showAllFiles()
                     printToast(successfailtoast)
@@ -78,6 +77,11 @@ class MainActivityFOC : AppCompatActivity() {
                     printToast("No URL specified for uploading")
                     toggleUploadPopUp(uploadPopUp)
                 }
+            }
+
+            search_bar_input.setOnClickListener {
+                val search = search_bar_input.getText().toString()
+                searchAllFiles(search)
             }
 
             download_progress.setOnClickListener {
@@ -189,6 +193,22 @@ class MainActivityFOC : AppCompatActivity() {
                 createSuccessfulTorrentButton(file.toUri())
             }
         }
+    }
+
+    fun searchAllFiles(searchVal: String){
+        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        torrentListView.removeAllViews()
+        torrentList.clear()
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            for (file in files){
+                val fileName = getFileName(file.toUri())
+                if (fileName.endsWith(".apk") && fileName.contains(searchVal)){
+                    createSuccessfulTorrentButton(file.toUri())
+                }
+            }
+        }
+        requestStoragePermission()
     }
 
     /**
