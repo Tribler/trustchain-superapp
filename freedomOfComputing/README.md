@@ -2,24 +2,23 @@
 
 ## Overview
 
-Freedom-of-Computing is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "DemoCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, needs to have a specific format for its execution to work, the requirements/constraints are listed below.
+Freedom-of-Computing (FOC) is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "FOCCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, also needs to follow some constraints to be executed; the requirements/constraints are listed below.
 
 ## Describing the main use case of our app
 We present the main use case of our app, step by step, through which our contributions to the whole “superapp” project become visible.
 
-### Creating a torrent out of any file
-The user has a file he wants to distribute to the rest of the peers in the superapp’s network, say “image.png”. Suppose this file resides in the main directory of his Android phone’s storage (the root directory of Internal Storage). The user writes the name of the file in the torrent inputBox, including the extension (i.e. image.png). He presses on the “Upload torrent” button, which causes both a torrent file and a magnet link to be created, both representing the given file. The file then begins to be seeded by the user.
-
-### Informing the other peers about the seeding torrent
-The user presses the “Inform peers about seeding” button, which sends the magnet link to every other peer in the network. Every recipient can now check his incoming magnet links / messages by pressing the “Retrieve list of torrents” button. Upon pressing that button, a list of the available torrents appears at the bottom of the scrollable screen.
+### Creating a torrent out of an apk
+The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “demo.apk”. Suppose this file resides on a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, the user will be shown a set of options from which they can choose to either delete the file or create a torrent out of it. Once the torrent has been created, FOC will automatically share this with other FOC peers within the community.
 
 ### Downloading the seeding torrent, as a recipient
-The recipient can press on any of the list entries, which represent a seeded torrent each. The magnet link of that torrent will then fill up the torrent inputBox. Finally, by pressing the “Download (magnet link)” button, and since the corresponding inputBox is filled up, the seeded torrent will begin downloading for the recipient. The download might take some time to actually start, especially when the only seeder is the creator of the torrent. The downloaded file will also be placed in the main storage directory of the phone.
+FOC continuously scans the network for newly seeded torrents, i.e. torrents it has not yet downloaded. If such a torrent is detected, it is directly downloaded to the app-specific directory of the superapp. Upon successfully downloading a detected torrent, FOC will create a torrent from the retrieved .apk on the receiving device to build a larger P2P network. The recipient will also be shown a new button displaying the name of the download .apk.
 
-### Executing the downloaded apk/jar
-The user can press the “Execute code from jar” button to execute the file specified in the apk inputBox, which should also be stored in the main storage directory of the phone.
+### Executing the downloaded apk
+The user can press the displayed buttons containing the name of the specific .apk to execute it.
 
 ## User Guide
+
+todo
 
 ### Upload
 Enter the apk name in the upper input box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder.
@@ -42,6 +41,14 @@ This should result in the torrent information being displayed and in the apk nam
 Once the button has been pressed the downloaded application should launch.
 
 <img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.40.png" width="180">
+
+## Developer guide
+
+The MainActivityFOC is the main class which boots FOC. From here, all UI is loaded and the AppGossiper, which performs all network communication, is initialized. Furthermore, MainActivityFOC is also responsible for booting the dynamic code execution by initializing ExecutionActivity.
+
+The AppGossiper class is the main hub for all communication for both downloading and uploading .apk's. For both uploading and downloading, threads are created. The uploading thread will, in its current configuration, inform all known peers about 5 of its randomly chosen locally stored torrents every 10 seconds using the EVA protocol. Note: the AppGossiper knows about locally stored torrents by considering all .torrent files in the superapp's app-specific directory. This also includes additional functionality where newly downloaded/added torrents will automatically be shared. The downloading thread is currently ran every 20 seconds and will attempt to download all torrents it knows about, but does not stored locally. Initially, a torrenting mechanism will be used to share the .apk file with the receiver using a magnet link. However, in FOC's current state, this mechanism only works when both the sending and receiving device are connected to the same network and can thus communicate with each other directly. When attempting to share .apk's between devices on different networks, they will be unable to reach each other and will thus result in failure. The AppGossiper will attempt to retry the download until a threshold is reached, which is currently set to 1 failure. As soon as this threshold is reached, the receiving device will adopt a different approach and attempt a download using the EVA protocol. If the latter method fails as well for a specific amount of times (currently set to 10), it will give up on this .apk file.
+
+The ExecutionActivity is responsible for executing dynamic code. It is passed the name of an .apk file, which should be stored in the superapp's app-specific directory. The DexClassLoader is used to load the .apk into memory, after which FOC will search for a class called 'MainFragment', as this is used as the starting point to boot the loaded code. Furthermore, the ExecutionActivity class supports basic functionality for saving states of dynamically loaded code. As such, as soon as the instance of ExecutionActivity is paused, it will store the current (UI) state into a file named the same as the apk followed by a .dat extension. Upon re-initializing the dynamic code, FOC checks for existing saved states, after which such state will be restored.
 
 ## How to develop a module for execution in our app
 
@@ -107,9 +114,3 @@ public class MainFragment extends Fragment {
 <img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
 
 **NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp
-
-## Extra info
-
-At any point, a download can be stopped by pressing at the stop button. Additionally, initializing a different download will cause the last download to stop, but the progress remains until the next time.
-
-The torrent inputBox must include either a magnet link or a torrent file (extension .torrent included), except for the case of uploading, where the actual extension of the file is required (e.g. image.png). If an inputBox is left empty, the default value is assumed by the app.
