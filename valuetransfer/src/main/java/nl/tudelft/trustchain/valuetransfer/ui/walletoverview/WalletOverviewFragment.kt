@@ -294,6 +294,9 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
             R.id.actionSettings -> {
                 parentActivity.detailFragment(ValueTransferMainActivity.settingsFragmentTag, Bundle())
             }
+            R.id.actionTrust -> {
+                parentActivity.detailFragment(ValueTransferMainActivity.trustFragmentTag, Bundle())
+            }
         }
         return super.onOptionsItemSelected(item)
     }

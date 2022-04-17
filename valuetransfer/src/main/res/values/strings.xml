@@ -61,6 +61,9 @@
     <string name="menu_maps_hybrid_map">Hybrid Map</string>
     <string name="menu_maps_satellite_map">Satellite Map</string>
     <string name="menu_maps_terrain_map">Terrain Map</string>
+    <string name="menu_wallet_overview_trust">Trust Scores</string>
+    <string name="menu_trust_insert_random">Add Random Scores</string>
+    <string name="menu_trust_clear_scores">Clear Scores</string>
 
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
@@ -395,6 +398,11 @@
     <string name="text_trust_score_title">Trust score</string>
     <string name="text_trust_score">Score</string>
     <string name="text_trust_score_details">A score indicating the trustworthiness of a user</string>
+    <string name="text_trust_scores">Scores</string>
+    <string name="text_title_trust_scores">Trust Scores</string>
+    <string name="text_trust_score_format">%1$.2f%%</string>
+    <string name="text_trust_peer_unknown">Unknown contact</string>
+    <string name="text_trust_score_unknown">Unknown score</string>
 
     // Snackbar texts
     <string name="snackbar_copied_clipboard">%s copied to clipboard</string>

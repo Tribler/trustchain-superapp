@@ -37,6 +37,6 @@
         <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
         <item name="android:windowBackground">?attr/colorPrimary</item>
         <item name="popupMenuStyle">@style/OptionsMenu</item>
-        <item name="android:itemBackground">@color/colorGray</item>
+        <item name="android:itemBackground">?attr/colorPrimary</item>
     </style>
 </resources>

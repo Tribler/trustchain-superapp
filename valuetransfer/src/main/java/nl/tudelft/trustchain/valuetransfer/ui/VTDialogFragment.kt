@@ -12,6 +12,7 @@ import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.community.TrustCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
 import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
@@ -31,6 +32,11 @@ abstract class VTDialogFragment : DialogFragment() {
     fun getIdentityCommunity(): IdentityCommunity {
         return parentActivity.getCommunity()
             ?: throw java.lang.IllegalStateException("IdentityCommunity is not configured")
+    }
+
+    fun getTrustCommunity(): TrustCommunity {
+        return parentActivity.getCommunity()
+            ?: throw java.lang.IllegalStateException("TrustCommunity is not configured")
     }
 
     fun getPeerChatCommunity(): PeerChatCommunity {

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/actionInsertScores"
+        android:icon="@drawable/ic_add_black_24dp"
+        android:title="@string/menu_trust_insert_random"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/actionClearScores"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/menu_trust_clear_scores"
+        app:showAsAction="never"/>
+</menu>

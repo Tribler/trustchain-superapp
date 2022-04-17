@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import nl.tudelft.trustchain.valuetransfer.entity.TrustScore
 
-@Database(entities = [TrustScore::class], version = 2)
+@Database(entities = [TrustScore::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class TrustStore : RoomDatabase() {
     abstract fun trustDao(): TrustDao
@@ -19,7 +19,7 @@ abstract class TrustStore : RoomDatabase() {
             return instance ?: Room.databaseBuilder(
                 context,
                 TrustStore::class.java,
-                "truststore"
+                "vt-truststore"
             ).build().also { instance = it }
         }
     }

@@ -84,8 +84,12 @@ import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.widget.Toast
+import nl.tudelft.ipv8.attestation.trustchain.BlockListener
+import nl.tudelft.ipv8.attestation.trustchain.TrustChainBlock
+import nl.tudelft.trustchain.valuetransfer.community.TrustCommunity
 import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.valuetransfer.dialogs.GatewayWarningDialog
+import nl.tudelft.trustchain.valuetransfer.ui.trust.TrustFragment
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -99,6 +103,7 @@ class ValueTransferMainActivity : BaseActivity() {
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
     private val settingsFragment = SettingsFragment()
+    private val trustFragment = TrustFragment()
     private val qrScanController = QRScanController()
 
     private lateinit var customActionBar: View
@@ -115,7 +120,7 @@ class ValueTransferMainActivity : BaseActivity() {
      * Initialize all communities and (database) stores and repo's for performance purposes and
      * ease of use in other classes/fragments.
      */
-    val communities: Map<Class<out Community>, Community> = mapOf(
+    val communities: MutableMap<Class<out Community>, Community> = mutableMapOf(
         TrustChainCommunity::class.java to IPv8Android.getInstance().getOverlay<TrustChainCommunity>()!!,
         IdentityCommunity::class.java to IPv8Android.getInstance().getOverlay<IdentityCommunity>()!!,
         PeerChatCommunity::class.java to IPv8Android.getInstance().getOverlay<PeerChatCommunity>()!!,
@@ -200,6 +205,7 @@ class ValueTransferMainActivity : BaseActivity() {
             .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
             .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
             .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+            .add(R.id.container, trustFragment, trustFragmentTag).hide(trustFragment)
             .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
             .commit()
 
@@ -239,7 +245,36 @@ class ValueTransferMainActivity : BaseActivity() {
         attestationCommunity.setAttestationChunkCallback(::attestationChunkCallback)
         attestationCommunity.trustedAuthorityManager.addTrustedAuthority(IPv8Android.getInstance().myPeer.publicKey)
 
+        // Initialize the trust community/store later as these rely on context (Android Room)
         stores[TrustStore::class.java] = TrustStore.getInstance(this)
+        communities[TrustCommunity::class.java] = IPv8Android.getInstance().getOverlay<TrustCommunity>()!!
+        val trustChainCommunity = getCommunity<TrustChainCommunity>()
+        trustChainCommunity?.addListener(TransactionRepository.BLOCK_TYPE_TRANSFER,
+            object : BlockListener {
+            override fun onBlockReceived(block: TrustChainBlock) {
+                // If we received an agreement block from the other party, the transaction is now complete.
+                if (block.isAgreement && !block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                    // First find the peer based on the sender public key (peer that created the agreement block)
+                    val itr = trustChainCommunity.getPeers().listIterator()
+                    var peer: Peer? = null
+                    while (itr.hasNext()) {
+                        val cur : Peer = itr.next()
+                        val key = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+                        if (cur.key.pub() == key) {
+                            peer = cur
+                            break
+                        }
+                    }
+
+                    // If a peer was found, send it the trust scores
+                    if (peer != null) {
+                        lifecycleScope.launch {
+                            getCommunity<TrustCommunity>()?.sendTrustScores(peer)
+                        }
+                    }
+                }
+            }
+        })
 
         /**
          * Create a (centered) custom action bar with a title and subtitle
@@ -405,6 +440,8 @@ class ValueTransferMainActivity : BaseActivity() {
                             previousFragment.onBackPressed()
                         } else if (previousFragment is SettingsFragment) {
                             previousFragment.onBackPressed(false)
+                        } else if (previousFragment is TrustFragment) {
+                            previousFragment.onBackPressed(false)
                         }
                     }
 
@@ -412,6 +449,8 @@ class ValueTransferMainActivity : BaseActivity() {
 
                     if (fragmentTag == settingsFragmentTag) {
                         detailFragment(settingsFragmentTag, Bundle())
+                    } else if (fragmentTag == trustFragmentTag) {
+                        detailFragment(trustFragmentTag, Bundle())
                     } else {
                         selectBottomNavigationItem(fragmentTag)
                         (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
@@ -579,6 +618,15 @@ class ValueTransferMainActivity : BaseActivity() {
 
                 (settingsFragment as VTFragment).initView()
             }
+            trustFragmentTag -> {
+                fragmentManager.beginTransaction().apply {
+                    setCustomAnimations(0, R.anim.exit_to_left)
+                    if (activeFragment != null) hide(activeFragment)
+                    setCustomAnimations(R.anim.enter_from_right, 0)
+                    show(trustFragment)
+                }.commit()
+                (trustFragment as VTFragment).initView()
+            }
         }
     }
 
@@ -592,6 +640,7 @@ class ValueTransferMainActivity : BaseActivity() {
             exchangeFragmentTag -> exchangeFragment
             contactsFragmentTag -> contactsFragment
             settingsFragmentTag -> settingsFragment
+            trustFragmentTag -> trustFragment
             contactChatFragmentTag -> fragmentManager.findFragmentByTag(tag)
             else -> null
         }
@@ -1179,6 +1228,7 @@ class ValueTransferMainActivity : BaseActivity() {
         const val qrScanControllerTag = "qrscancontroller"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
+        const val trustFragmentTag = "trust_fragment"
 
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"

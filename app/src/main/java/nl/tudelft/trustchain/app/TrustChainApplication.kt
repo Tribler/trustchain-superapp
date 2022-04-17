@@ -50,7 +50,9 @@ import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
+import nl.tudelft.trustchain.valuetransfer.community.TrustCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
+import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -83,7 +85,8 @@ class TrustChainApplication : Application() {
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity()
+                createIdentityCommunity(),
+                createTrustCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -248,6 +251,15 @@ class TrustChainApplication : Application() {
         val store = IdentityStore.getInstance(this)
         return OverlayConfiguration(
             IdentityCommunity.Factory(store, this),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createTrustCommunity(): OverlayConfiguration<TrustCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        val store = TrustStore.getInstance(this)
+        return OverlayConfiguration(
+            TrustCommunity.Factory(store, this),
             listOf(randomWalk)
         )
     }

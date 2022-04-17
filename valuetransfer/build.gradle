@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.squareup.sqldelight'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlinx-serialization'
 
 ktlint {
     version = "$ktlint_version"
@@ -128,6 +129,9 @@ dependencies {
 
     // Side to confirm
     implementation "com.ncorti:slidetoact:0.9.0"
+
+    // Serialization
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

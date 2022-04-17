@@ -20,13 +20,14 @@ import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
+import nl.tudelft.trustchain.valuetransfer.entity.TrustScore
 import nl.tudelft.trustchain.valuetransfer.ui.VTDialogFragment
 import nl.tudelft.trustchain.valuetransfer.ui.exchange.ExchangeTransactionItem
 import nl.tudelft.trustchain.valuetransfer.util.*
+import java.lang.Float.min
 import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.random.Random.Default.nextFloat
 
 class ExchangeTransactionDialog(
     private val transactionItem: ExchangeTransactionItem
@@ -239,6 +240,19 @@ class ExchangeTransactionDialog(
             transactionSignButton.setOnClickListener {
                 transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
                 getTrustChainCommunity().createAgreementBlock(transactionItem.transaction.block, transactionItem.transaction.block.transaction)
+                lifecycleScope.launch {
+                    // Check if there is an existing score to increase, otherwise create one
+                    val store = getTrustStore().trustDao()
+                    val key = transactionItem.transaction.sender
+                    val currentScore = store.getByKey(key)
+                    if (currentScore != null) {
+                        // Increase by one
+                        val newScore = min(currentScore.trustScore + 1f, 100f)
+                        store.update((TrustScore(key, newScore, currentScore.values)))
+                    } else {
+                        store.insert(TrustScore(key, 1f, arrayListOf()))
+                    }
+                }
 
                 @Suppress("DEPRECATION")
                 Handler().postDelayed(
@@ -295,9 +309,9 @@ class ExchangeTransactionDialog(
                 // Retrieve the trust score based on the public key
                 val score = trustStore.trustDao().getByKey(publicKey)
                 score?.let {
-                    trustScoreView.text = "${(0..100).random()}%"
+                    trustScoreView.text = getString(R.string.text_trust_score_format, it.trustScore)
                 } ?: run {
-                    trustScoreView.text = "${(0..100).random()}%";
+                    trustScoreView.text = getString(R.string.text_trust_score_unknown)
                 }
 
             }
