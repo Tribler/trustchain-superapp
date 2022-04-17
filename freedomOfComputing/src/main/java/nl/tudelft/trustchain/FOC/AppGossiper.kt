@@ -247,7 +247,7 @@ class AppGossiper(
         }
     }
 
-    fun downloadPendingFiles() {
+    private fun downloadPendingFiles() {
         addButtonsInAdvance(focCommunity.torrentMessagesList)
         for ((peer, payload) in ArrayList(focCommunity.torrentMessagesList)) {
             val torrentName = payload.message.substringAfter(displayNameAppender)
