@@ -60,7 +60,7 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         }
     }
 
-    private fun verifyBalanceAvailable(block: TrustChainBlock, database: TrustChainStore) {
+    private fun verifyVerifiedBalanceAvailable(block: TrustChainBlock, database: TrustChainStore) {
         val balance = getVerifiedBalanceForBlock(block, database) ?: throw PartialPrevious("Missing previous blocks")
         if (balance < 0) {
             // the validated balance is not enough, but it could be the case we're missing some
@@ -71,7 +71,7 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
                 throw MissingBlocks(unConfirmed)
             } else { // last checkpoint is full, spendable balance is invalid
                 throw InsufficientValidatedBalance(
-                    "Insufficient balance ($balance) for amount (${
+                    "Insufficient verified balance ($balance) for amount (${
                     getBalanceChangeForBlock(
                         block
                     )
@@ -82,9 +82,32 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         return // Valid
     }
 
+    private fun verifyUnverifiedBalanceAvailable(block: TrustChainBlock, database: TrustChainStore) {
+        val total = getBalanceForBlock(block, database) ?: throw PartialPrevious("Missing previous blocks")
+        val verified = getVerifiedBalanceForBlock(block, database) ?: throw PartialPrevious("Missing previous blocks")
+        val balance = total - verified
+        Log.d("=====", "$total, $verified")
+
+        if (balance < 0) {
+            throw InsufficientValidatedBalance(
+                "Insufficient unverified balance ($balance) for amount (${
+                    getBalanceChangeForBlock(
+                        block
+                    )
+                })"
+            )
+        }
+        return // Valid
+    }
+
     open fun validateEuroTokenProposal(block: TrustChainBlock, database: TrustChainStore) {
         verifyListedBalance(block, database)
-        verifyBalanceAvailable(block, database)
+
+        if (block.transaction[TransactionRepository.KEY_UNVERIFIED] == true) {
+            verifyUnverifiedBalanceAvailable(block, database)
+        } else {
+            verifyVerifiedBalanceAvailable(block, database)
+        }
     }
 
     open fun validateEuroTokenAcceptance(block: TrustChainBlock, database: TrustChainStore) {
