@@ -38,10 +38,11 @@ import java.io.OutputStream
 
 open class MainActivityFOC : AppCompatActivity() {
 
-    private var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var debugVisible = false
     private var requestCode = 1
+    var torrentList = ArrayList<Button>()
+    var torrentAmount = 0
     val MY_PERMISSIONS_REQUEST = 0
     val s = SessionManager()
 
@@ -65,7 +66,7 @@ open class MainActivityFOC : AppCompatActivity() {
                 toggleDebugPopUp(debugPopUp)
             }
 
-            torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+            torrentCount.text = getString(R.string.torrentCount, torrentAmount)
 
             // upon launching our activity, we ask for the "Storage" permission
             requestStoragePermission()
@@ -106,7 +107,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        initialUISettings()
+        resumeUISettings()
         appGossiper?.resume()
     }
 
@@ -204,7 +205,7 @@ open class MainActivityFOC : AppCompatActivity() {
         button.isAllCaps = false
         button.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(applicationContext, R.color.blue))
         button.setTextColor(ContextCompat.getColor(applicationContext, R.color.white))
-        torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+        torrentCount.text = getString(R.string.torrentCount, ++torrentAmount)
         button.setOnClickListener {
             loadDynamicCode(fileName)
         }
@@ -212,6 +213,15 @@ open class MainActivityFOC : AppCompatActivity() {
             createAlertDialog(fileName)
             true
         }
+    }
+
+    fun createUnsuccessfulTorrentButton(torrentName: String) {
+        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        val button = Button(this)
+        button.text = torrentName
+        torrentList.add(button)
+        torrentListView.addView(button)
+        button.isAllCaps = false
     }
 
     fun createAlertDialog(fileName: String) {
@@ -243,23 +253,10 @@ open class MainActivityFOC : AppCompatActivity() {
                     val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
                     torrentList.remove(buttonToBeDeleted)
                     torrentListView.removeView(buttonToBeDeleted)
-                    torrentCount.text = getString(R.string.torrentCount, torrentList.size)
+                    torrentCount.text = getString(R.string.torrentCount, --torrentAmount)
                     appGossiper?.removeTorrent(fileName)
                 }
             }
-        }
-    }
-
-    fun createUnsuccessfulTorrentButton(torrentName: String) {
-        // No need to create duplicate failed torrent buttons
-        val existingButton = torrentList.find { btn -> btn.text == torrentName }
-        if (existingButton == null) {
-            val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
-            val button = Button(this)
-            button.text = torrentName
-            button.isAllCaps = false
-            torrentList.add(button)
-            torrentListView.addView(button)
         }
     }
 
@@ -383,14 +380,13 @@ open class MainActivityFOC : AppCompatActivity() {
         startActivityForResult(intent, requestCode)
     }
 
-    fun initialUISettings() {
-            download_count.text = getString(R.string.downloadsInProgress, 0)
-            inQueue.text =
-                getString(R.string.downloadsInQueue, 0)
-            currentDownload.text =
-                getString(R.string.currentTorrentDownload, "No download in progress")
-            progressBarPercentage.text = getString(R.string.downloadProgressPercentage, "0%")
-            evaRetryCounter.text = getString(R.string.evaRetries, 0)
-            failedCounter.text = getString(R.string.failedCounter, "{}")
+    fun resumeUISettings() {
+        download_count.text = getString(R.string.downloadsInProgress, appGossiper?.downloadsInProgress)
+        inQueue.text = getString(R.string.downloadsInQueue, kotlin.math.max(0, appGossiper?.downloadsInProgress?.minus(1) ?: 0))
+        currentDownload.text = getString(R.string.currentTorrentDownload, appGossiper?.currentDownloadInProgress)
+        evaRetryCounter.text = getString(R.string.evaRetries, appGossiper?.evaRetries)
+        progressBar.progress = 0
+        progressBarPercentage.text = getString(R.string.downloadProgressPercentage, "0%")
+        failedCounter.text = getString(R.string.failedCounter, appGossiper?.failedTorrents.toString())
     }
 }
