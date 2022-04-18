@@ -16,6 +16,10 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
+import android.view.ViewGroup
+import android.text.InputType
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -30,7 +34,6 @@ import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
-import kotlinx.android.synthetic.main.fragment_upload.*
 import kotlinx.coroutines.*
 import java.io.*
 import java.net.URL
@@ -39,7 +42,7 @@ import java.util.*
 
 
 class MainActivityFOC : AppCompatActivity() {
-
+    private val scope = CoroutineScope(Dispatchers.IO)
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var uploadVisible = false
@@ -58,25 +61,7 @@ class MainActivityFOC : AppCompatActivity() {
             setSupportActionBar(toolbar)
 
             fab.setOnClickListener {
-                toggleUploadPopUp(uploadPopUp)
-            }
-            uploadFile.setOnClickListener {
-                printToast("INIT FILE UPLOAD")
-                selectNewFileToUpload()
-                finish()
-            }
-            uploadUrl.setOnClickListener {
-                val input = uploadUrl.getText().toString()
-                if (input != "") {
-                    printToast("INIT URL UPLOAD")
-                    val successfailtoast = selectNewUrlToUpload(input)
-                    toggleUploadPopUp(uploadPopUp)
-                    showAllFiles()
-                    printToast(successfailtoast)
-                } else {
-                    printToast("No URL specified for uploading")
-                    toggleUploadPopUp(uploadPopUp)
-                }
+                createDownloadDialog()
             }
 
             search_bar_input.setOnClickListener {
@@ -116,10 +101,6 @@ class MainActivityFOC : AppCompatActivity() {
             progressVisible = false
             popUp.visibility = View.GONE
         }
-        if (uploadVisible) {
-            uploadVisible = false
-            uploadPopUp.visibility = View.GONE
-        }
         debugVisible = !debugVisible
     }
 
@@ -146,10 +127,6 @@ class MainActivityFOC : AppCompatActivity() {
         if (debugVisible) {
             debugVisible = false
             debugPopUp.visibility = View.GONE
-        }
-        if (uploadVisible) {
-            uploadVisible = false
-            uploadPopUp.visibility = View.GONE
         }
         progressVisible = !progressVisible
     }
@@ -287,6 +264,24 @@ class MainActivityFOC : AppCompatActivity() {
         builder.setPositiveButton("Cancel", null)
         builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
         builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.show()
+    }
+
+    fun createDownloadDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Enter a URL on which the .apk file can be downloaded")
+        val input = EditText(this)
+        input.setInputType(InputType.TYPE_CLASS_TEXT)
+        input.setSingleLine();
+        val container = FrameLayout(this);
+        val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.leftMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        params.rightMargin = getResources().getDimensionPixelSize(R.dimen.dialog_margin);
+        input.setLayoutParams(params);
+        container.addView(input);
+        builder.setView(container);
+        builder.setNegativeButton("Cancel", null)
+        builder.setPositiveButton("Download") { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
         builder.show()
     }
 
@@ -449,30 +444,31 @@ class MainActivityFOC : AppCompatActivity() {
     }
 
     @Suppress("deprecation")
-    fun selectNewUrlToUpload(urlName: String): String {
-//        val urlName = "https://test.trackingcontracts.com/assets/voice.apk"     // Input placeholder
+    fun selectNewUrlToDownload(urlName: String) {
+        if (urlName.trim() == "") {
+            this.runOnUiThread {printToast("No URL provided.")}
+            return
+        }
+
         val urlTitle = urlName.substringAfterLast('/')
 
         val url = URL(urlName)
         val filePath: String = this.applicationContext.cacheDir.absolutePath + "/" + urlTitle
-        printToast("Testing:" + " " + url.toString() + " " + filePath)
-
-        // TEMPORARY FIX FOR NetworkOnMainThreadException
-        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
 
         try {
+            val file = File(filePath)
+
+            if (file.exists()) {
+                deleteApkFile(filePath)
+                this.runOnUiThread {printToast("Replacing existing APK with the same name.")}
+            }
+
             val con: URLConnection = url.openConnection()
             con.setReadTimeout(5000)
             con.setConnectTimeout(10000)
 
-            val `is`: InputStream = con.getInputStream()
-            val inStream = BufferedInputStream(`is`, 1024 * 5)
+            val inStream = BufferedInputStream(con.getInputStream(), 1024 * 5)
 
-            val file = File(filePath)
-            if (file.exists()) {
-                file.delete()       // TODO: remove
-                printToast("An APK with this name already exists.")
-            }
             file.createNewFile()
 
             val outStream = FileOutputStream(file)
@@ -486,11 +482,9 @@ class MainActivityFOC : AppCompatActivity() {
             outStream.flush()
             outStream.close()
             inStream.close()
-
-            return "Download complete"
-
+            this.runOnUiThread {showAllFiles()}
         } catch (e: Exception) {
-             return e.toString()
+            this.runOnUiThread {printToast(e.toString())}
         }
     }
 }
