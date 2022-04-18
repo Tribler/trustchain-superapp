@@ -1,58 +1,39 @@
 # Freedom-of-Computing App
 
 ## Overview
-
 Freedom-of-Computing (FOC) is an extension-app of the trustchain app. It enables the users to share files in the forms of torrents, through a torrent peer-to-peer (P2P) network, which is the same peer-to-peer network that we call "FOCCommunity" within the app. More specifically though, the purpose of the torrent network is to enable users to freely distribute code in the form of .apk files. The code can be uploaded (seeded) and downloaded by the users, who can then dynamically load that code and execute it. The code, apart from being an .apk file, also needs to follow some constraints to be executed; the requirements/constraints are listed below.
 
-## Describing the main use case of our app
-We present the main use case of our app, step by step, through which our contributions to the whole “superapp” project become visible.
+## User Guide
+We present the main use cases of our app, step by step, through which our contributions to the whole “superapp” project become visible.
 
 ### Creating a torrent out of an apk
 The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “demo.apk”. Suppose this file resides on a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, the user will be shown a set of options from which they can choose to either delete the file or create a torrent out of it. Once the torrent has been created, FOC will automatically share this with other FOC peers within the community.
 
+TODO gif
+
 ### Downloading the seeding torrent, as a recipient
 FOC continuously scans the network for newly seeded torrents, i.e. torrents it has not yet downloaded. If such a torrent is detected, it is directly downloaded to the app-specific directory of the superapp. Upon successfully downloading a detected torrent, FOC will create a torrent from the retrieved .apk on the receiving device to build a larger P2P network. The recipient will also be shown a new button displaying the name of the download .apk.
+
+TODO gif
 
 ### Executing the downloaded apk
 The user can press the displayed buttons containing the name of the specific .apk to execute it.
 
-## User Guide
-
-todo
-
-### Upload
-Enter the apk name in the upper input box and press "Upload torrent". The name needs to include the location of the file if the file is not stored in the phone's main storage folder.
-Press "Inform peers about seeding" to let the other connected peers know about the file you are uploading (seeding).
-
-### Download/Execute
-1. Retrieve the list of currently seeded torrents by clicking the "Retrieve list of torrents" button. Press on one of the available options.
-
-<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.37.52.png" width="180">
-
-2. Download
-
-The corresponding magnet link should auto-fill in the first input box. Proceed with the download by pressing "Download magnet link".
-
-<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.15.png" width="180">
-
-3. Execute apk
-
-This should result in the torrent information being displayed and in the apk name auto-filling up the lower text box. You can press "Execute module (apk)" once the download has finished, indicated by a full progress bar.
-Once the button has been pressed the downloaded application should launch.
-
-<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.38.40.png" width="180">
+TODO gif
 
 ## Developer guide
 
+### Main classes
+
 The MainActivityFOC is the main class which boots FOC. From here, all UI is loaded and the AppGossiper, which performs all network communication, is initialized. Furthermore, MainActivityFOC is also responsible for booting the dynamic code execution by initializing ExecutionActivity.
 
-The AppGossiper class is the main hub for all communication for both downloading and uploading .apk's. For both uploading and downloading, threads are created. The uploading thread will, in its current configuration, inform all known peers about 5 of its randomly chosen locally stored torrents every 10 seconds using the EVA protocol. Note: the AppGossiper knows about locally stored torrents by considering all .torrent files in the superapp's app-specific directory. This also includes additional functionality where newly downloaded/added torrents will automatically be shared. The downloading thread is currently ran every 20 seconds and will attempt to download all torrents it knows about, but does not stored locally. Initially, a torrenting mechanism will be used to share the .apk file with the receiver using a magnet link. However, in FOC's current state, this mechanism only works when both the sending and receiving device are connected to the same network and can thus communicate with each other directly. When attempting to share .apk's between devices on different networks, they will be unable to reach each other and will thus result in failure. The AppGossiper will attempt to retry the download until a threshold is reached, which is currently set to 1 failure. As soon as this threshold is reached, the receiving device will adopt a different approach and attempt a download using the EVA protocol. If the latter method fails as well for a specific amount of times (currently set to 10), it will give up on this .apk file.
+The AppGossiper class is the main hub for all communication for both downloading and uploading .apk's. For both uploading and downloading, threads are created. The uploading thread will, in its current configuration, inform all known peers about 5 of its randomly chosen locally stored torrents every 10 seconds using the EVA protocol. Note: the AppGossiper knows about locally stored torrents by considering all .torrent files in the superapp's app-specific directory. This also includes additional functionality where newly downloaded/added torrents will automatically be shared. The downloading thread is currently ran every 20 seconds and will attempt to download all torrents it knows about, but does not have stored locally. Initially, a torrenting mechanism will be used to share the .apk file with the receiver using a magnet link. However, in FOC's current state, this mechanism only works when both the sending and receiving device are connected to the same network and can thus communicate with each other directly. When attempting to share .apk's between devices on different networks, they will be unable to reach each other and will thus result in failure. The AppGossiper will attempt to retry the download until a threshold is reached, which is currently set to 1 failure. As soon as this threshold is reached, the receiving device will fallback to a different approach and attempt a download using the EVA protocol. If the latter method fails as well for a specific amount of times (currently set to 10), it will give up on this .apk file.
 
 The ExecutionActivity is responsible for executing dynamic code. It is passed the name of an .apk file, which should be stored in the superapp's app-specific directory. The DexClassLoader is used to load the .apk into memory, after which FOC will search for a class called 'MainFragment', as this is used as the starting point to boot the loaded code. Furthermore, the ExecutionActivity class supports basic functionality for saving states of dynamically loaded code. As such, as soon as the instance of ExecutionActivity is paused, it will store the current (UI) state into a file named the same as the apk followed by a .dat extension. Upon re-initializing the dynamic code, FOC checks for existing saved states, after which such state will be restored.
 
-## How to develop a module for execution in our app
+### How to develop a module for execution in our app
 
-### Code and layout constraints
+#### Code and layout constraints
 Our execution platform is currently only able to load fragments from an Android Package Kit(APK). Our platform loads one fixed fragment class from the APK to run inside of our platform's activity. The fragment that is loaded can still depend on other classes in different files inside of the APK.
 
 Here are the constraints a developer needs to strictly follow to develop an app for execution in the Freedom of Computing execution platform:
@@ -61,9 +42,7 @@ Here are the constraints a developer needs to strictly follow to develop an app 
 
 * As our platform internally uses DexClassLoader in order to load classes from an APK, it is really difficult to load precompiled layout resources from the APK. Therefore the developer needs to programatically build the layout instead of using XML files or pre compiled resources to build a UI.
 
-Other then these constraints, a developer can follow the normal android development procedures for further functionalities.
-
-**NOTE:** Our platform follows the normal android activity behavior, for example when the screen orientation changes the activity is destroyed and created again and thus the MainFragment is destroyed and recreated as well but not reloaded from the APK. Therefore, it is the developer's responsibility to implement state persistence as it suits the developer Further information on saving UI states temporarily/persistantly can be found on: https://developer.android.com/topic/libraries/architecture/saving-states and https://developer.android.com/training/data-storage/shared-preferences
+Other than these constraints, a developer can follow the normal android development procedures for further functionalities.
 
 ### A "Hello World!" example
 ```java
@@ -111,6 +90,6 @@ public class MainFragment extends Fragment {
 }
 ```
 
-<img src="../doc/freedomOfComputing/Screenshot%202020-04-29%20at%2023.26.46.png" width="180">
+todo screenshot of search.apk
 
-**NOTE:** A more advanced example/demo can be found at: https://github.com/rootmonkey/trustchain-foc-demoapp
+**NOTE:** A more advanced example/demo can be found at: https://github.com/rmadhwal/trustchain-voice-search
