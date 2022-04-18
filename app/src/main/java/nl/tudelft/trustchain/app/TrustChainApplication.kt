@@ -37,6 +37,7 @@ import nl.tudelft.ipv8.peerdiscovery.strategy.RandomWalk
 import nl.tudelft.ipv8.sqldelight.Database
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
@@ -83,7 +84,8 @@ class TrustChainApplication : Application() {
                 createVotingCommunity(),
                 createMusicCommunity(),
                 createRecommenderCommunity(),
-                createIdentityCommunity()
+                createIdentityCommunity(),
+                createFOCCommunity()
             ),
             walkerInterval = 5.0
         )
@@ -263,7 +265,7 @@ class TrustChainApplication : Application() {
     private fun createDemoCommunity(): OverlayConfiguration<DemoCommunity> {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            DemoCommunity.Factory(this),
+            Overlay.Factory(DemoCommunity::class.java),
             listOf(randomWalk)
         )
     }
@@ -320,6 +322,14 @@ class TrustChainApplication : Application() {
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
             RecommenderCommunity.Factory(recommendStore, settings, musicStore),
+            listOf(randomWalk)
+        )
+    }
+
+    private fun createFOCCommunity(): OverlayConfiguration<FOCCommunity> {
+        val randomWalk = RandomWalk.Factory()
+        return OverlayConfiguration(
+            FOCCommunity.Factory(this),
             listOf(randomWalk)
         )
     }

@@ -3,7 +3,6 @@ package nl.tudelft.trustchain.FOC
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -12,12 +11,11 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.text.InputType
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.Toast
+import android.view.ViewGroup
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,22 +27,31 @@ import com.frostwire.jlibtorrent.swig.*
 import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.io.*
+import java.net.URL
+import java.net.URLConnection
+
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import java.util.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
 
-class MainActivityFOC : AppCompatActivity() {
-
+open class MainActivityFOC : AppCompatActivity() {
+    private val scope = CoroutineScope(Dispatchers.IO)
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var debugVisible = false
     private var requestCode = 1
-    val MY_PERMISSIONS_REQUEST = 0
-    val s = SessionManager()
+    private val MY_PERMISSIONS_REQUEST = 0
+    private val s = SessionManager()
 
-    private lateinit var appGossiper: AppGossiper
+    private var appGossiper: AppGossiper? = null
 
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +59,14 @@ class MainActivityFOC : AppCompatActivity() {
         try {
             setContentView(R.layout.activity_main_foc)
             setSupportActionBar(toolbar)
-            fab.setOnClickListener { _ ->
-                selectNewFileToUpload()
+
+            fab.setOnClickListener {
+                createDownloadDialog()
+            }
+
+            search_bar_input.setOnClickListener {
+                val search = search_bar_input.text.toString()
+                searchAllFiles(search)
             }
 
             download_progress.setOnClickListener {
@@ -73,14 +86,15 @@ class MainActivityFOC : AppCompatActivity() {
 
             printToast("STARTED")
             showAllFiles()
-            appGossiper = AppGossiper.getInstance(s, this)
-            appGossiper.start()
+            appGossiper =
+                IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
+            appGossiper?.start()
         } catch (e: Exception) {
             printToast(e.toString())
         }
     }
 
-    fun toggleDebugPopUp(layout: LinearLayout) {
+    private fun toggleDebugPopUp(layout: LinearLayout) {
         if (debugVisible) layout.visibility = View.GONE
         else layout.visibility = View.VISIBLE
 
@@ -104,14 +118,13 @@ class MainActivityFOC : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        appGossiper.resume()
+        appGossiper?.resume()
     }
 
     override fun onPause() {
         super.onPause()
-        appGossiper.pause()
+        appGossiper?.pause()
     }
-
 
     @Suppress("deprecation")
     fun showAllFiles() {
@@ -143,6 +156,22 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
+    private fun searchAllFiles(searchVal: String) {
+        val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
+        torrentListView.removeAllViews()
+        torrentList.clear()
+        val files = applicationContext.cacheDir.listFiles()
+        if (files != null) {
+            for (file in files) {
+                val fileName = getFileName(file.toUri())
+                if (fileName.endsWith(".apk") && fileName.contains(searchVal)) {
+                    createSuccessfulTorrentButton(file.toUri())
+                }
+            }
+        }
+        requestStoragePermission()
+    }
+
     /**
      * Ensures that there will always be one apk runnable from within FoC.
      */
@@ -163,7 +192,7 @@ class MainActivityFOC : AppCompatActivity() {
     }
 
     // change if you want to write to the actual phone storage (needs "write" permission)
-    fun requestStoragePermission() {
+    private fun requestStoragePermission() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -185,7 +214,7 @@ class MainActivityFOC : AppCompatActivity() {
         Toast.makeText(applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun createSuccessfulTorrentButton(uri: Uri) {
+    private fun createSuccessfulTorrentButton(uri: Uri) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
         var button = Button(this)
         val fileName = getFileName(uri)
@@ -193,7 +222,7 @@ class MainActivityFOC : AppCompatActivity() {
         // Replace the failed torrent with the downloaded torrent
         val existingButton = torrentList.find { btn -> btn.text == fileName }
         if (existingButton != null) {
-            button = existingButton;
+            button = existingButton
         } else {
             torrentList.add(button)
             torrentListView.addView(button)
@@ -212,18 +241,35 @@ class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-
-    fun createAlertDialog(fileName: String) {
+    private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle("Create or Delete")
         builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
         builder.setPositiveButton("Cancel", null)
-        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName)}
-        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName)}
+        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName) }
+        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName) }
         builder.show()
     }
 
-    fun deleteApkFile(fileName: String) {
+    private fun createDownloadDialog() {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle("Enter a URL on which the .apk file can be downloaded")
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        input.setSingleLine()
+        val container = FrameLayout(this)
+        val params = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params.leftMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+        params.rightMargin = resources.getDimensionPixelSize(R.dimen.dialog_margin)
+        input.layoutParams = params
+        container.addView(input)
+        builder.setView(container)
+        builder.setNegativeButton("Cancel", null)
+        builder.setPositiveButton("Download") { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
+        builder.show()
+    }
+
+    private fun deleteApkFile(fileName: String) {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
             val file = files.find { file ->
@@ -303,7 +349,7 @@ class MainActivityFOC : AppCompatActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
             }
         } finally {
             cursor?.close()
@@ -318,7 +364,6 @@ class MainActivityFOC : AppCompatActivity() {
         }
         return result
     }
-
 
     /**
      * Creates a torrent from a file given as input
@@ -373,11 +418,47 @@ class MainActivityFOC : AppCompatActivity() {
         return ti
     }
 
-    @Suppress("deprecation")
-    fun selectNewFileToUpload() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
-        startActivityForResult(intent, requestCode)
+    private fun selectNewUrlToDownload(urlName: String) {
+        if (urlName.trim() == "") {
+            this.runOnUiThread { printToast("No URL provided.") }
+            return
+        }
+
+        val urlTitle = urlName.substringAfterLast('/')
+
+        val url = URL(urlName)
+        val filePath: String = this.applicationContext.cacheDir.absolutePath + "/" + urlTitle
+
+        try {
+            val file = File(filePath)
+
+            if (file.exists()) {
+                deleteApkFile(filePath)
+                this.runOnUiThread { printToast("Replacing existing APK with the same name.") }
+            }
+
+            val con: URLConnection = url.openConnection()
+            con.readTimeout = 5000
+            con.connectTimeout = 10000
+
+            val inStream = BufferedInputStream(con.getInputStream(), 1024 * 5)
+
+            file.createNewFile()
+
+            val outStream = FileOutputStream(file)
+            val buff = ByteArray(5 * 1024)
+
+            var len: Int
+            while (inStream.read(buff).also { len = it } != -1) {
+                outStream.write(buff, 0, len)
+            }
+
+            outStream.flush()
+            outStream.close()
+            inStream.close()
+            this.runOnUiThread { showAllFiles() }
+        } catch (e: Exception) {
+            this.runOnUiThread { printToast(e.toString()) }
+        }
     }
 }
