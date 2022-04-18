@@ -33,7 +33,7 @@ public class ExecutionActivity extends AppCompatActivity {
     private Fragment mainFragment;
     private FragmentManager manager;
     private String apkName;
-    private String fileName = "fileName";
+    private final static String FILE_NAME = "fileName";
 
     /**
      * Stores the current state of the dynamically loaded code.
@@ -101,8 +101,8 @@ public class ExecutionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Bundle extras = this.getIntent().getExtras();
-        if (extras.containsKey(this.fileName)) {
-            this.apkName = this.getIntent().getStringExtra(this.fileName);
+        if (extras.containsKey(FILE_NAME)) {
+            this.apkName = this.getIntent().getStringExtra(FILE_NAME);
             assert this.apkName != null;
         } else {
             this.printToast("No APK name supplied");

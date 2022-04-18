@@ -45,13 +45,14 @@ import java.net.URLConnection
 const val CONNECTION_TIMEOUT: Int = 10000
 const val READ_TIMEOUT: Int = 5000
 
+const val DEFAULT_APK = "search.apk"
+
 open class MainActivityFOC : AppCompatActivity() {
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var debugVisible = false
     private var bufferSize = 1024 * 5
-    private var defaultApk = "search.apk"
     private val s = SessionManager()
     private var torrentAmount = 0
 
@@ -84,7 +85,6 @@ open class MainActivityFOC : AppCompatActivity() {
 
             copyDefaultApp()
 
-            printToast("Started")
             showAllFiles()
             appGossiper =
                 IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
@@ -173,14 +173,14 @@ open class MainActivityFOC : AppCompatActivity() {
      */
     private fun copyDefaultApp() {
         try {
-            val file = File(this.applicationContext.cacheDir.absolutePath + "/" + this.defaultApk)
+            val file = File(this.applicationContext.cacheDir.absolutePath + "/" + DEFAULT_APK)
             if (!file.exists()) {
                 val outputStream = FileOutputStream(file)
-                val ins = resources.openRawResource(resources.getIdentifier("search", "raw", packageName))
+                val ins = resources.openRawResource(resources.getIdentifier(DEFAULT_APK.split('.').first(), "raw", packageName))
                 outputStream.write(ins.readBytes())
                 ins.close()
                 outputStream.close()
-                this.createTorrent(this.defaultApk)
+                this.createTorrent(DEFAULT_APK)
             }
         } catch (e: Exception) {
             this.printToast(e.toString())
@@ -284,7 +284,7 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    fun loadDynamicCode(fileName: String) {
+    private fun loadDynamicCode(fileName: String) {
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
             intent.putExtra(
@@ -322,7 +322,7 @@ open class MainActivityFOC : AppCompatActivity() {
      * Creates a torrent from a file given as input
      * The extension of the file must be included (for example, .png)
      */
-    private fun createTorrent(fileName: String): TorrentInfo? {
+    fun createTorrent(fileName: String): TorrentInfo? {
         val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
             runOnUiThread { printToast("Something went wrong, check logs") }
