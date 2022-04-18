@@ -44,7 +44,7 @@ import java.io.OutputStream
 
 open class MainActivityFOC : AppCompatActivity() {
     private val scope = CoroutineScope(Dispatchers.IO)
-    private var torrentList = ArrayList<Button>()
+    public var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var debugVisible = false
     private var requestCode = 1
@@ -243,7 +243,7 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    private fun createUnsuccessfulTorrentButton(torrentName: String) {
+    public fun createUnsuccessfulTorrentButton(torrentName: String) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
         val button = Button(this)
         button.text = torrentName
