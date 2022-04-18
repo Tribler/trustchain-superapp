@@ -7,19 +7,21 @@ Freedom-of-Computing (FOC) is an extension-app of the trustchain app. It enables
 We present the main use cases of our app, step by step, through which our contributions to the whole “superapp” project become visible.
 
 ### Creating a torrent out of an apk
-The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “demo.apk”. Suppose this file resides on a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, the user will be shown a set of options from which they can choose to either delete the file or create a torrent out of it. Once the torrent has been created, FOC will automatically share this with other FOC peers within the community.
+The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “voice.apk”. Suppose this file resides on a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, the user will be shown a set of options from which they can choose to either delete the file or create a torrent out of it. Once the torrent has been created, FOC will automatically share this with other FOC peers within the community.
 
-TODO gif
+<img height="600" src="../doc/freedomOfComputing/add_sc.jpeg" alt="Image displaying how to add apk's">
+<img height="600" src="../doc/freedomOfComputing/create_torrent.gif" alt="GIF displaying how to creat torrent's from apk's">
+
 
 ### Downloading the seeding torrent, as a recipient
 FOC continuously scans the network for newly seeded torrents, i.e. torrents it has not yet downloaded. If such a torrent is detected, it is directly downloaded to the app-specific directory of the superapp. Upon successfully downloading a detected torrent, FOC will create a torrent from the retrieved .apk on the receiving device to build a larger P2P network. The recipient will also be shown a new button displaying the name of the download .apk.
 
-TODO gif
+<img height="600" src="../doc/freedomOfComputing/download_seeded_apk.gif" alt="GIF displaying the download process of a seeded 'act.apk' file">
 
 ### Executing the downloaded apk
 The user can press the displayed buttons containing the name of the specific .apk to execute it.
 
-TODO gif
+<img height="600" src="../doc/freedomOfComputing/run_voice.gif" alt="GIF displaying voice.apk execution">
 
 ## Developer guide
 
@@ -90,6 +92,7 @@ public class MainFragment extends Fragment {
 }
 ```
 
-todo screenshot of search.apk
+<img height="600" src="../doc/freedomOfComputing/search_apk.jpeg" alt="Image of demo 'search.apk'">
+
 
 **NOTE:** A more advanced example/demo can be found at: https://github.com/rmadhwal/trustchain-voice-search
