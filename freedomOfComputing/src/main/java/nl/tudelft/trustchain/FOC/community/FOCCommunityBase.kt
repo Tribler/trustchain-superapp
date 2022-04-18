@@ -25,5 +25,5 @@ abstract class FOCCommunityBase : Community() {
 
     abstract fun informAboutTorrent(torrentName: String)
 
-    abstract fun sendAppRequest(torrentInfoHash: String, peer: Peer)
+    abstract fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String)
 }

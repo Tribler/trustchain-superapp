@@ -115,6 +115,7 @@ public class ExecutionActivity extends AppCompatActivity {
         //uncomment if you want to read from the actual phone storage (needs "write" permission)
         final String apkPath = this.apkName;
         String activeApp = this.apkName.substring(this.apkName.lastIndexOf("/") + 1, this.apkName.lastIndexOf("."));
+
         final ClassLoader classLoader = new DexClassLoader(apkPath, context.getCacheDir().getAbsolutePath(), null, this.getClass().getClassLoader());
 
         try {
