@@ -1,10 +1,7 @@
 package nl.tudelft.trustchain.FOC
 
 import android.content.Context
-import com.frostwire.jlibtorrent.SessionManager
-import com.frostwire.jlibtorrent.SessionStats
-import com.frostwire.jlibtorrent.Sha1Hash
-import com.frostwire.jlibtorrent.TorrentInfo
+import com.frostwire.jlibtorrent.*
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -19,6 +16,7 @@ import org.junit.Test
 import java.io.File
 import java.lang.RuntimeException
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 
 /**
  * App Gossiping Tests
@@ -99,6 +97,10 @@ class AppGossiperTest {
     @Test
     fun informsPeersAboutLocalFiles() {
         every { sessionManager.fetchMagnet(someMagnetLink, 30) } throws RuntimeException("No torrenting for you")
+        val mockTorrentHandle = mockk<TorrentHandle>(relaxed = true)
+        every { mockTorrentHandle.isValid } returns true
+        every { sessionManager.find(any()) } returns mockTorrentHandle
+
         appGossiper = AppGossiper(sessionManager, mainActivity, focCommunityMock, false)
         appGossiper.start()
         await().atMost(1, TimeUnit.MINUTES).until { focCommunityMock.torrentsInformedAbout.size == 1 }
