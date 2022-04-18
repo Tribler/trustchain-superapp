@@ -26,17 +26,21 @@ import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.Objects;
 
+import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dataDotExtension;
+import static nl.tudelft.trustchain.FOC.util.ExtensionUtils.dexExtension;
+
 public class ExecutionActivity extends AppCompatActivity {
     private Fragment mainFragment;
     private FragmentManager manager;
     private String apkName;
+    private final static String FILE_NAME = "fileName";
 
     /**
      * Stores the current state of the dynamically loaded code.
      */
     private void storeState() {
         // Store state next to apk
-        String fileName = this.apkName + ".dat";
+        String fileName = this.apkName + dataDotExtension;
         try {
             FileOutputStream stream = new FileOutputStream(fileName);
             Parcel p = Parcel.obtain();
@@ -58,7 +62,7 @@ public class ExecutionActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.O)
     private Fragment.SavedState getState() {
         // states are stored in the same directories as apks themselves (in the app specific files)
-        String fileName = this.apkName + ".dat";
+        String fileName = this.apkName + dataDotExtension;
         try {
             Path path = Paths.get(fileName);
             byte[] data = Files.readAllBytes(path);
@@ -97,8 +101,8 @@ public class ExecutionActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Bundle extras = this.getIntent().getExtras();
-        if (extras.containsKey("fileName")) {
-            this.apkName = this.getIntent().getStringExtra("fileName");
+        if (extras.containsKey(FILE_NAME)) {
+            this.apkName = this.getIntent().getStringExtra(FILE_NAME);
             assert this.apkName != null;
         } else {
             this.printToast("No APK name supplied");
@@ -150,7 +154,7 @@ public class ExecutionActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private String getMainFragmentClass(String path) {
         try {
-            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", "dex",
+            DexFile dx = DexFile.loadDex(path, File.createTempFile("opt", dexExtension,
                 getCacheDir()).getPath(), 0);
             for (Enumeration<String> classNames = dx.entries(); classNames.hasMoreElements(); ) {
                 String className = classNames.nextElement();
