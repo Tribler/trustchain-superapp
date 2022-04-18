@@ -105,8 +105,8 @@ class FOCCommunity(
         }
     }
 
-    override fun sendAppRequest(torrentInfoHash: String, peer: Peer) {
-        AppRequestPayload(torrentInfoHash).let { payload ->
+    override fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String) {
+        AppRequestPayload(torrentInfoHash, uuid).let { payload ->
             logger.debug { "-> $payload" }
             send(peer, serializePacket(MessageId.APP_REQUEST, payload))
         }
@@ -152,14 +152,14 @@ class FOCCommunity(
     private fun onAppRequestPacket(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(AppRequestPayload.Deserializer)
         logger.debug { "-> DemoCommunity: Received request $payload from ${peer.mid}" }
-        onAppRequest(peer, payload.appTorrentInfoHash)
+        onAppRequest(peer, payload)
     }
 
-    private fun onAppRequest(peer: Peer, appTorrentInfoHash: String) {
+    private fun onAppRequest(peer: Peer, appRequestPayload: AppRequestPayload) {
         try {
-            locateApp(appTorrentInfoHash)?.let { file ->
+            locateApp(appRequestPayload.appTorrentInfoHash)?.let { file ->
                 logger.debug { "-> sending app ${file.name} to ${peer.mid}" }
-                sendApp(peer, appTorrentInfoHash, file)
+                sendApp(peer, appRequestPayload.appTorrentInfoHash, file, appRequestPayload.uuid)
                 return
             }
             logger.debug { "Received Request for an app that doesn't exist" }
@@ -168,14 +168,14 @@ class FOCCommunity(
         }
     }
 
-    private fun sendApp(peer: Peer, appTorrentInfoHash: String, file: File) {
+    private fun sendApp(peer: Peer, appTorrentInfoHash: String, file: File, uuid: String) {
         val appPayload = AppPayload(appTorrentInfoHash, file.name, file.readBytes())
         val packet =
             serializePacket(MessageId.APP, appPayload, encrypt = true, recipient = peer)
         if (evaProtocolEnabled) evaSendBinary(
             peer,
             EVA_FOC_COMMUNITY_ATTACHMENT,
-            appTorrentInfoHash,
+            uuid,
             packet
         ) else send(peer, packet)
     }
