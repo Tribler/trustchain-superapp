@@ -90,11 +90,12 @@
                 app:srcCompat="@drawable/ic_baseline_search_24" />
 
             <EditText
-                android:id="@+id/editTextTextPersonName"
+                android:id="@+id/search_bar_input"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:backgroundTint="#8f8c83"
+                android:singleLine="true"
                 android:hint="@string/SearchHint"
                 android:inputType="textPersonName"
                 android:textColor="#8f8c83"
@@ -125,6 +126,7 @@
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
         app:backgroundTint="@color/blue"
+        android:onClick="showPopup"
         />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
