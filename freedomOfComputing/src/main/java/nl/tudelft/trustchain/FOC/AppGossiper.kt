@@ -279,13 +279,14 @@ class AppGossiper(
                         val magnetLink = constructMagnetLink(dup.infoHash(), dup.name())
                         informAboutTorrent(magnetLink)
                     }
-                } else
+                } else {
                     if (torrentHandle.isValid) {
                         torrentHandle.pause()
                     } else {
                         // Remove torrentHandle if necessary. It will be created again later on once the file is stable.
                         torrentHandles.remove(torrentHandle)
                     }
+                }
             }
             toSeed.forEach {
                 downloadAndSeed(it)

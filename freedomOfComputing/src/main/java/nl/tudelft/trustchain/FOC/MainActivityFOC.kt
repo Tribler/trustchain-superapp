@@ -1,10 +1,8 @@
 package nl.tudelft.trustchain.FOC
 
-import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.database.Cursor
 import android.net.Uri
@@ -17,7 +15,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.frostwire.jlibtorrent.SessionManager
@@ -30,17 +27,11 @@ import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import java.io.*
 import java.net.URL
 import java.net.URLConnection
-
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.FOC.community.FOCCommunity
-import java.util.*
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
 
 open class MainActivityFOC : AppCompatActivity() {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -79,9 +70,6 @@ open class MainActivityFOC : AppCompatActivity() {
             }
 
             torrentCount.text = getString(R.string.torrentCount, torrentAmount)
-
-            // upon launching our activity, we ask for the "Storage" permission
-            requestStoragePermission()
 
             copyDefaultApp()
 
@@ -141,9 +129,6 @@ open class MainActivityFOC : AppCompatActivity() {
                 }
             }
         }
-
-        // upon launching our activity, we ask for the "Storage" permission
-        requestStoragePermission()
     }
 
     fun showAddedFile(torrentName: String) {
@@ -171,7 +156,6 @@ open class MainActivityFOC : AppCompatActivity() {
                 }
             }
         }
-        requestStoragePermission()
     }
 
     /**
@@ -190,22 +174,6 @@ open class MainActivityFOC : AppCompatActivity() {
             }
         } catch (e: Exception) {
             this.printToast(e.toString())
-        }
-    }
-
-    // change if you want to write to the actual phone storage (needs "write" permission)
-    private fun requestStoragePermission() {
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) // READ_EXTERNAL_STORAGE
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
-                MY_PERMISSIONS_REQUEST
-            )
         }
     }
 
@@ -243,7 +211,7 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    public fun createUnsuccessfulTorrentButton(torrentName: String) {
+    fun createUnsuccessfulTorrentButton(torrentName: String) {
         val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
         val button = Button(this)
         button.text = torrentName
