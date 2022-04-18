@@ -33,14 +33,28 @@ import kotlinx.coroutines.launch
 import java.io.*
 import java.net.URL
 import java.net.URLConnection
-
-import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.FOC.community.FOCCommunity
 import java.util.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
+
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.cancelButton
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogMsg
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogTitle
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createButton
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createDownloadDialogTitle
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.deleteButton
+import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.downloadButton
+import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentDotExtension
+import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.apkDotExtension
+import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.displayNameAppender
+import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.preHashString
+
+const val CONNECTION_TIMEOUT: Int = 10000
+const val READ_TIMEOUT: Int = 5000
 
 open class MainActivityFOC : AppCompatActivity() {
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -48,6 +62,8 @@ open class MainActivityFOC : AppCompatActivity() {
     private var progressVisible = false
     private var debugVisible = false
     private var requestCode = 1
+    private var bufferSize = 1024 * 5
+    private var defaultApk = "search.apk"
     private val MY_PERMISSIONS_REQUEST = 0
     private val s = SessionManager()
 
@@ -84,7 +100,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
             copyDefaultApp()
 
-            printToast("STARTED")
+            printToast("Started")
             showAllFiles()
             appGossiper =
                 IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
@@ -134,7 +150,7 @@ open class MainActivityFOC : AppCompatActivity() {
             torrentListView.removeAllViews()
             torrentList.clear()
             for (file in files) {
-                if (getFileName(file.toUri()).endsWith(".apk")) {
+                if (getFileName(file.toUri()).endsWith(apkDotExtension)) {
                     createSuccessfulTorrentButton(file.toUri())
                 }
             }
@@ -164,7 +180,7 @@ open class MainActivityFOC : AppCompatActivity() {
         if (files != null) {
             for (file in files) {
                 val fileName = getFileName(file.toUri())
-                if (fileName.endsWith(".apk") && fileName.contains(searchVal)) {
+                if (fileName.endsWith(apkDotExtension) && fileName.contains(searchVal)) {
                     createSuccessfulTorrentButton(file.toUri())
                 }
             }
@@ -177,14 +193,14 @@ open class MainActivityFOC : AppCompatActivity() {
      */
     private fun copyDefaultApp() {
         try {
-            val file = File(this.applicationContext.cacheDir.absolutePath + "/search.apk")
+            val file = File(this.applicationContext.cacheDir.absolutePath + "/" + this.defaultApk)
             if (!file.exists()) {
                 val outputStream = FileOutputStream(file)
                 val ins = resources.openRawResource(resources.getIdentifier("search", "raw", packageName))
                 outputStream.write(ins.readBytes())
                 ins.close()
                 outputStream.close()
-                this.createTorrent("search.apk")
+                this.createTorrent(this.defaultApk)
             }
         } catch (e: Exception) {
             this.printToast(e.toString())
@@ -196,12 +212,12 @@ open class MainActivityFOC : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) // READ_EXTERNAL_STORAGE
+            )
             != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), // READ_EXTERNAL_STORAGE
+                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 MY_PERMISSIONS_REQUEST
             )
         }
@@ -243,17 +259,17 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Create or Delete")
-        builder.setMessage("Select whether you want to delete the apk or create a torrent out of it")
-        builder.setPositiveButton("Cancel", null)
-        builder.setNeutralButton("Delete") { _, _ -> deleteApkFile(fileName) }
-        builder.setNegativeButton("Create") { _, _ -> createTorrent(fileName) }
+        builder.setTitle(createAlertDialogTitle)
+        builder.setMessage(createAlertDialogMsg)
+        builder.setPositiveButton(cancelButton, null)
+        builder.setNeutralButton(deleteButton) { _, _ -> deleteApkFile(fileName) }
+        builder.setNegativeButton(createButton) { _, _ -> createTorrent(fileName) }
         builder.show()
     }
 
     private fun createDownloadDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle("Enter a URL on which the .apk file can be downloaded")
+        builder.setTitle(createDownloadDialogTitle)
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setSingleLine()
@@ -264,8 +280,8 @@ open class MainActivityFOC : AppCompatActivity() {
         input.layoutParams = params
         container.addView(input)
         builder.setView(container)
-        builder.setNegativeButton("Cancel", null)
-        builder.setPositiveButton("Download") { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
+        builder.setNegativeButton(cancelButton, null)
+        builder.setPositiveButton(downloadButton) { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
         builder.show()
     }
 
@@ -279,7 +295,7 @@ open class MainActivityFOC : AppCompatActivity() {
 
             // delete torrent file if it exists
             files.find { torrentFile ->
-                getFileName(torrentFile.toUri()) == fileName.replace(".apk", ".torrent")
+                getFileName(torrentFile.toUri()) == fileName.replace(apkDotExtension, torrentDotExtension)
             }?.delete()
 
             if (deleted != null && deleted) {
@@ -318,7 +334,6 @@ open class MainActivityFOC : AppCompatActivity() {
             try {
                 printToast(data.data!!.path!!.split(":").last())
                 File(
-//                    Environment.getExternalStorageDirectory().absolutePath + "/" + data.data!!.path!!.split(":").last()
                     Environment.getExternalStorageDirectory().absolutePath + "/" + fileName
                 ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
             } catch (e: Exception) {
@@ -395,7 +410,7 @@ open class MainActivityFOC : AppCompatActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
-        val torrentName = fileName.substringBeforeLast('.') + ".torrent"
+        val torrentName = fileName.substringBeforeLast('.') + torrentDotExtension
 
         var os: OutputStream? = null
         try {
@@ -412,7 +427,7 @@ open class MainActivityFOC : AppCompatActivity() {
         }
 
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
-        val magnetLink = "magnet:?xt=urn:btih:" + ti.infoHash() + "&dn=" + ti.name()
+        val magnetLink = preHashString + ti.infoHash() + displayNameAppender + ti.name()
         Log.i("personal", magnetLink)
         runOnUiThread { printToast(fileName) }
         return ti
@@ -425,7 +440,6 @@ open class MainActivityFOC : AppCompatActivity() {
         }
 
         val urlTitle = urlName.substringAfterLast('/')
-
         val url = URL(urlName)
         val filePath: String = this.applicationContext.cacheDir.absolutePath + "/" + urlTitle
 
@@ -438,15 +452,15 @@ open class MainActivityFOC : AppCompatActivity() {
             }
 
             val con: URLConnection = url.openConnection()
-            con.readTimeout = 5000
-            con.connectTimeout = 10000
+            con.connectTimeout = CONNECTION_TIMEOUT
+            con.readTimeout = READ_TIMEOUT
 
-            val inStream = BufferedInputStream(con.getInputStream(), 1024 * 5)
+            val inStream = BufferedInputStream(con.getInputStream(), this.bufferSize)
 
             file.createNewFile()
 
             val outStream = FileOutputStream(file)
-            val buff = ByteArray(5 * 1024)
+            val buff = ByteArray(this.bufferSize)
 
             var len: Int
             while (inStream.read(buff).also { len = it } != -1) {
@@ -457,6 +471,7 @@ open class MainActivityFOC : AppCompatActivity() {
             outStream.close()
             inStream.close()
             this.runOnUiThread { showAllFiles() }
+
         } catch (e: Exception) {
             this.runOnUiThread { printToast(e.toString()) }
         }

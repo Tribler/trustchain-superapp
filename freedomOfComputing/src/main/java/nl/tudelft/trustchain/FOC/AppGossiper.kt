@@ -234,7 +234,7 @@ class AppGossiper(
             val peer = packet.first
             val payload = packet.second
             logger.info { peer.mid + ": " + payload.message }
-            val torrentName = payload.message.substringAfter("&dn=")
+            val torrentName = payload.message.substringAfter(displayNameAppender)
                 .substringBefore('&')
             activity.runOnUiThread {
                 activity.createUnsuccessfulTorrentButton(torrentName)
