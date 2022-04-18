@@ -1,13 +1,11 @@
 package nl.tudelft.trustchain.FOC
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.OpenableColumns
 import android.text.InputType
 import android.util.Log
@@ -29,15 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.FOC.community.FOCCommunity
-import java.io.*
-import java.net.URL
-import java.net.URLConnection
-import java.util.*
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.OutputStream
-
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.cancelButton
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogMsg
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogTitle
@@ -45,10 +34,13 @@ import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createButton
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createDownloadDialogTitle
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.deleteButton
 import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.downloadButton
-import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.apkDotExtension
+import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.preHashString
+import java.io.*
+import java.net.URL
+import java.net.URLConnection
 
 const val CONNECTION_TIMEOUT: Int = 10000
 const val READ_TIMEOUT: Int = 5000
@@ -58,7 +50,6 @@ open class MainActivityFOC : AppCompatActivity() {
     var torrentList = ArrayList<Button>()
     private var progressVisible = false
     private var debugVisible = false
-    private var requestCode = 1
     private var bufferSize = 1024 * 5
     private var defaultApk = "search.apk"
     private val s = SessionManager()
@@ -66,7 +57,6 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private var appGossiper: AppGossiper? = null
 
-    @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -137,8 +127,7 @@ open class MainActivityFOC : AppCompatActivity() {
         appGossiper?.pause()
     }
 
-    @Suppress("deprecation")
-    fun showAllFiles() {
+    private fun showAllFiles() {
         val files = applicationContext.cacheDir.listFiles()
         if (files != null) {
             val torrentListView = findViewById<LinearLayout>(R.id.torrentList)
@@ -295,30 +284,6 @@ open class MainActivityFOC : AppCompatActivity() {
         }
     }
 
-    @Suppress("DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == this.requestCode && resultCode == Activity.RESULT_OK) {
-            if (data == null) {
-                return
-            }
-            val fileName = getFileName(data.data!!)
-            try {
-                printToast(data.data!!.path!!.split(":").last())
-                File(
-                    Environment.getExternalStorageDirectory().absolutePath + "/" + fileName
-                ).copyTo(File(applicationContext.cacheDir.absolutePath + "/" + fileName))
-            } catch (e: Exception) {
-                printToast(e.toString())
-                printToast("$fileName already exists!")
-                return
-            }
-            createSuccessfulTorrentButton(data.data!!)
-        }
-    }
-
-    @Suppress("deprecation")
     fun loadDynamicCode(fileName: String) {
         try {
             val intent = Intent(this, ExecutionActivity::class.java)
@@ -357,8 +322,7 @@ open class MainActivityFOC : AppCompatActivity() {
      * Creates a torrent from a file given as input
      * The extension of the file must be included (for example, .png)
      */
-    @Suppress("deprecation")
-    fun createTorrent(fileName: String): TorrentInfo? {
+    private fun createTorrent(fileName: String): TorrentInfo? {
         val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
             runOnUiThread { printToast("Something went wrong, check logs") }
@@ -444,13 +408,12 @@ open class MainActivityFOC : AppCompatActivity() {
             outStream.close()
             inStream.close()
             this.runOnUiThread { showAllFiles() }
-
         } catch (e: Exception) {
             this.runOnUiThread { printToast(e.toString()) }
         }
     }
 
-    fun resumeUISettings() {
+    private fun resumeUISettings() {
         download_count.text = getString(R.string.downloadsInProgress, appGossiper?.downloadsInProgress)
         inQueue.text = getString(R.string.downloadsInQueue, kotlin.math.max(0, appGossiper?.downloadsInProgress?.minus(1) ?: 0))
         currentDownload.text = getString(R.string.currentTorrentDownload, appGossiper?.currentDownloadInProgress)
