@@ -56,7 +56,7 @@ class FOCCommunityMock(
         torrentsInformedAbout.add(torrentName)
     }
 
-    override fun sendAppRequest(torrentInfoHash: String, peer: Peer) {
+    override fun sendAppRequest(torrentInfoHash: String, peer: Peer, uuid: String) {
         appRequests.add(Pair(torrentInfoHash, peer))
     }
 }
