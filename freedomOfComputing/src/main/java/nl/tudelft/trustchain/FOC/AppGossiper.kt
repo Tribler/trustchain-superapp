@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.FOC
 
-import android.util.Log
 import android.widget.Toast
 import com.frostwire.jlibtorrent.*
 import com.frostwire.jlibtorrent.alerts.AddTorrentAlert
@@ -11,13 +10,15 @@ import kotlinx.android.synthetic.main.activity_main_foc.*
 import kotlinx.android.synthetic.main.fragment_debugging.*
 import kotlinx.android.synthetic.main.fragment_download.*
 import kotlinx.coroutines.*
+import mu.KotlinLogging
 import nl.tudelft.ipv8.Peer
-import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.keyvault.PrivateKey
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.PeerBusyException
 import nl.tudelft.ipv8.messaging.eva.TimeoutException
 import nl.tudelft.ipv8.messaging.eva.TransferType
+import nl.tudelft.trustchain.FOC.community.FOCCommunityBase
+import nl.tudelft.trustchain.FOC.community.FOCMessage
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.addressTracker
@@ -26,13 +27,12 @@ import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.constructMagnetLink
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.magnetHeaderString
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.preHashString
-import nl.tudelft.trustchain.common.DemoCommunity
-import nl.tudelft.trustchain.common.MyMessage
 import nl.tudelft.trustchain.common.freedomOfComputing.AppPayload
 import java.io.File
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.Pair
 import kotlin.collections.HashMap
 
 /**
@@ -45,35 +45,38 @@ const val DOWNLOAD_DELAY: Long = 20000
 
 const val TORRENT_ATTEMPTS_THRESHOLD = 1
 const val EVA_RETRIES = 10
+private val logger = KotlinLogging.logger {}
 
 @Suppress("deprecation")
 class AppGossiper(
     private val sessionManager: SessionManager,
-    private val activity: MainActivityFOC
+    private val activity: MainActivityFOC,
+    private val focCommunity: FOCCommunityBase,
+    private val toastingEnabled: Boolean
 ) {
     private val scope = CoroutineScope(Dispatchers.IO)
+    private var evaDownload: EvaDownload = EvaDownload()
     private val maxTorrentThreads = 5
     private val torrentHandles = ArrayList<TorrentHandle>()
     private val torrentInfos = ArrayList<TorrentInfo>()
     private val failedTorrents = HashMap<String, Int>()
-    private var signal = CountDownLatch(0)
+    internal var signal = CountDownLatch(0)
     private val appDirectory = activity.applicationContext.cacheDir
-    private val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()
     private var gossipingPaused = false
     private var downloadingPaused = false
-    private var evaDownload: EvaDownload = EvaDownload()
     var sessionActive = false
     var downloadsInProgress = 0
     var downloadsFinished = 0
-    var batchDone = true
 
     companion object {
         fun getInstance(
             sessionManager: SessionManager,
-            activity: MainActivityFOC
+            activity: MainActivityFOC,
+            focCommunity: FOCCommunityBase,
+            toastingEnabled: Boolean = true
         ): AppGossiper {
             if (!::appGossiperInstance.isInitialized) {
-                appGossiperInstance = AppGossiper(sessionManager, activity)
+                appGossiperInstance = AppGossiper(sessionManager, activity, focCommunity, toastingEnabled)
             }
             return appGossiperInstance
         }
@@ -81,6 +84,8 @@ class AppGossiper(
 
     fun start() {
         printToast("Start gossiper")
+        // This call seems redundant, but it's necessary to populate known torrents
+        // before downloading starts so we don't retry known downloads
         populateKnownTorrents()
         initializeTorrentSession()
         initializeEvaCallbacks()
@@ -99,11 +104,11 @@ class AppGossiper(
     }
 
     private fun initializeEvaCallbacks() {
-        demoCommunity?.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
+        focCommunity.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
             data?.let {
                 val packet = Packet(peer.address, data)
                 val (_, payload) = packet.getDecryptedAuthPayload(
-                    AppPayload.Deserializer, demoCommunity.myPeer.key as PrivateKey
+                    AppPayload.Deserializer, focCommunity.myPeer.key as PrivateKey
                 )
                 evaDownload.activeDownload = false
                 activity.runOnUiThread {
@@ -113,11 +118,11 @@ class AppGossiper(
             }
         }
 
-        demoCommunity?.setEVAOnReceiveProgressCallback { _, _, progress ->
+        focCommunity.setEVAOnReceiveProgressCallback { _, _, progress ->
             updateProgress(progress = progress.progress.toInt())
         }
 
-        demoCommunity?.setEVAOnErrorCallback { _, exception ->
+        focCommunity.setEVAOnErrorCallback { _, exception ->
             if (evaDownload.activeDownload && exception.transfer?.type == TransferType.INCOMING) {
                 if (exception is TimeoutException || exception is PeerBusyException) {
                     activity.runOnUiThread { printToast("Failed to fetch through EVA protocol because $exception! Retrying") }
@@ -133,7 +138,7 @@ class AppGossiper(
 
     private fun retryActiveEvaDownload() {
         if (evaDownload.retryAttempts < EVA_RETRIES) {
-            evaDownload.peer?.let { demoCommunity?.sendAppRequest(evaDownload.magnetInfoHash, it) }
+            evaDownload.peer?.let { focCommunity.sendAppRequest(evaDownload.magnetInfoHash, it) }
             evaDownload.lastRequest = System.currentTimeMillis()
             evaDownload.retryAttempts++
             if (evaDownload.retryAttempts == EVA_RETRIES) {
@@ -143,10 +148,11 @@ class AppGossiper(
             } else {
                 downloadHasStarted(evaDownload.fileName)
             }
-            activity.runOnUiThread { activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaDownload.retryAttempts) }
+            activity.runOnUiThread {
+                activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaDownload.retryAttempts)
+            }
         }
     }
-
 
     fun pause() {
         gossipingPaused = true
@@ -166,31 +172,22 @@ class AppGossiper(
             }
 
             override fun alert(alert: Alert<*>) {
-                val type = alert.type()
-
-                when (type) {
+                when (alert.type()) {
                     AlertType.ADD_TORRENT -> {
-                        Log.i("appGossiper", "Torrent added")
+                        logger.info { "Torrent added" }
                         (alert as AddTorrentAlert).handle().resume()
                     }
                     AlertType.BLOCK_FINISHED -> {
                         val a = alert as BlockFinishedAlert
                         val p = (a.handle().status().progress() * 100).toInt()
-                        Log.i(
-                            "appGossiper",
-                            "Progress: " + p + " for torrent name: " + a.torrentName()
-                        )
+                        logger.info { "Progress: " + p + " for torrent name: " + a.torrentName() }
                         printToast("Download in progress!")
                         updateProgress(p)
-                        Log.i("appGossiper", java.lang.Long.toString(sessionManager.stats().totalDownload()))
+                        logger.info { java.lang.Long.toString(sessionManager.stats().totalDownload()) }
                     }
                     AlertType.TORRENT_FINISHED -> {
                         signal.countDown()
-                        Log.i("appGossiper", "Torrent finished")
-
-                        activity.runOnUiThread {
-                            printToast("Torrent downloaded!!")
-                        }
+                        logger.info { "Torrent finished" }
                     }
                     else -> {
                     }
@@ -198,7 +195,6 @@ class AppGossiper(
             }
         })
     }
-
 
     /**
      * This is a very simplistic way to crawl all chains from the peers you know
@@ -220,9 +216,7 @@ class AppGossiper(
         while (scope.isActive) {
             if (!downloadingPaused) {
                 try {
-                    if (batchDone) {
-                        downloadPendingFiles()
-                    }
+                    downloadPendingFiles()
                     if (evaDownload.activeDownload && evaDownload.lastRequest?.let { it -> System.currentTimeMillis() - it } ?: 0 > 30 * 1000) {
                         activity.runOnUiThread { printToast("EVA Protocol timed out, retrying") }
                         retryActiveEvaDownload()
@@ -235,10 +229,11 @@ class AppGossiper(
         }
     }
 
-    fun addButtonsInAdvance(packets: ArrayList<Packet>) {
+    fun addButtonsInAdvance(packets: ArrayList<Pair<Peer, FOCMessage>>) {
         for (packet in packets) {
-            val (peer, payload) = packet.getAuthPayload(MyMessage)
-            Log.i("appGossiper", peer.mid + ": " + payload.message)
+            val peer = packet.first
+            val payload = packet.second
+            logger.info { peer.mid + ": " + payload.message }
             val torrentName = payload.message.substringAfter("&dn=")
                 .substringBefore('&')
             activity.runOnUiThread {
@@ -247,36 +242,28 @@ class AppGossiper(
         }
     }
 
-    private suspend fun downloadPendingFiles() {
-        IPv8Android.getInstance().getOverlay<DemoCommunity>()?.let { demoCommunity ->
-
-            delay(1000)
-            addDownloadToQueue(demoCommunity.getTorrentMessages().size - downloadsFinished)
-            addButtonsInAdvance(demoCommunity.getTorrentMessages())
-            batchDone = false
-            for (packet in ArrayList(demoCommunity.getTorrentMessages())) {
-                val (peer, payload) = packet.getAuthPayload(MyMessage)
-                Log.i("appGossiper", peer.mid + ": " + payload.message)
-                val torrentName = payload.message.substringAfter("&dn=")
-                    .substringBefore('&')
-                val magnetLink = payload.message.substringAfter("FOC:")
-                val torrentHash = magnetLink.substringAfter("magnet:?xt=urn:btih:")
-                    .substringBefore("&dn=")
-                if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
-                    if (failedTorrents.containsKey(torrentName)) {
-                        // Wait at least 1000 seconds if torrent failed before
-                        if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
-                            continue
-                    }
-                    getMagnetLink(magnetLink, torrentName, peer)
+    private fun downloadPendingFiles() {
+        addDownloadToQueue(focCommunity.torrentMessagesList.size - downloadsFinished)
+        addButtonsInAdvance(focCommunity.torrentMessagesList)
+        for ((peer, payload) in ArrayList(focCommunity.torrentMessagesList)) {
+            val torrentName = payload.message.substringAfter(displayNameAppender)
+                .substringBefore('&')
+            val magnetLink = payload.message.substringAfter("FOC:")
+            val torrentHash = magnetLink.substringAfter(preHashString)
+                .substringBefore(displayNameAppender)
+            if (torrentInfos.none { it.infoHash().toString() == torrentHash }) {
+                if (failedTorrents.containsKey(torrentName)) {
+                    // Wait at least 1000 seconds if torrent failed before
+                    if (failedTorrents[torrentName]!! >= TORRENT_ATTEMPTS_THRESHOLD)
+                        continue
                 }
+                getMagnetLink(magnetLink, torrentName, peer)
             }
-            batchDone = true
         }
     }
 
     private fun randomlyShareFiles() {
-        demoCommunity?.run {
+        focCommunity.run {
             populateKnownTorrents()
             torrentInfos.shuffle()
             val toSeed: ArrayList<TorrentInfo> = ArrayList(torrentInfos.take(maxTorrentThreads))
@@ -323,7 +310,7 @@ class AppGossiper(
                 // an unsolved issue: seeding local torrents often result in an endless "CHECKING_FILES"
                 // state
                 val magnetLink = constructMagnetLink(torrentInfo.infoHash(), torrentInfo.name())
-                demoCommunity?.informAboutTorrent(magnetLink)
+                focCommunity.informAboutTorrent(magnetLink)
                 torrentHandles.add(torrentHandle)
             }
         }
@@ -355,10 +342,10 @@ class AppGossiper(
             if (magnetLink.contains(addressTrackerAppender)) magnetLink.indexOf(addressTracker) else magnetLink.length
 
         val magnetNameRaw = magnetLink.substring(startIndexName + 4, stopIndexName)
-        Log.i("appGossiper", magnetNameRaw)
+        logger.info { magnetNameRaw }
         val magnetName = magnetNameRaw.replace('+', ' ', false)
         val magnetInfoHash = magnetLink.substring(preHashString.length, startIndexName)
-        Log.i("appGossiper", magnetName)
+        logger.info { magnetName }
 
         val sp = SettingsPack()
         sp.seedingOutgoingConnections(true)
@@ -373,7 +360,7 @@ class AppGossiper(
                     val nodes = sessionManager.stats().dhtNodes()
                     // wait for at least 10 nodes in the DHT.
                     if (nodes >= 10) {
-                        Log.i("appGossiper", "DHT contains $nodes nodes")
+                        logger.info { "DHT contains $nodes nodes" }
                         // signal.countDown();
                         timer.cancel()
                     }
@@ -382,21 +369,18 @@ class AppGossiper(
             0, 1000
         )
 
-
-        Log.i("appGossiper", "Fetching the magnet uri, please wait...")
+        logger.info { "Fetching the magnet uri, please wait..." }
         val data: ByteArray
         try {
             data = sessionManager.fetchMagnet(magnetLink, 30)
         } catch (e: Exception) {
-            Log.i("appGossiper", "Failed to retrieve the magnet")
-            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:${e}") }
+            logger.info { "Failed to retrieve the magnet" }
+            activity.runOnUiThread { printToast("Failed to fetch magnet info for $torrentName! error:$e") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
             return
         }
 
         if (data != null) {
-            val torrentInfoAsString = Entry.bdecode(data).toString()
-            Log.i("appGossiper", torrentInfoAsString)
 
             val torrentInfo = TorrentInfo.bdecode(data)
             sessionActive = true
@@ -418,7 +402,7 @@ class AppGossiper(
             }
             sessionActive = false
         } else {
-            Log.i("appGossiper", "Failed to retrieve the magnet")
+            logger.info { "Failed to retrieve the magnet" }
             activity.runOnUiThread { printToast("Failed to retrieve magnet for $torrentName!") }
             onTorrentDownloadFailure(torrentName, magnetInfoHash, peer)
         }
@@ -440,36 +424,37 @@ class AppGossiper(
         peer: Peer
     ) {
         downloadHasFailed()
-        if (demoCommunity?.evaProtocolEnabled == true && !evaDownload.activeDownload) {
+        if (focCommunity.evaProtocolEnabled && !evaDownload.activeDownload) {
             if (failedTorrents.containsKey(torrentName))
                 failedTorrents[torrentName] = failedTorrents[torrentName]!!.plus(1)
             else
                 failedTorrents[torrentName] = 1
             if (failedTorrents[torrentName] == TORRENT_ATTEMPTS_THRESHOLD)
-                demoCommunity.let {
+                focCommunity.let {
                     activity.runOnUiThread {
                         downloadHasStarted(torrentName)
                         printToast("Torrent download failure threshold reached, attempting to fetch $torrentName through EVA Protocol!")
                     }
-                    demoCommunity.sendAppRequest(magnetInfoHash, peer)
+                    focCommunity.sendAppRequest(magnetInfoHash, peer)
                     evaDownload =
                         EvaDownload(true, System.currentTimeMillis(), magnetInfoHash, peer, 0, torrentName)
                 }
             else
                 activity.runOnUiThread { printToast("$torrentName download failed ${failedTorrents[torrentName]} times") }
-
         }
     }
 
     fun printToast(s: String) {
-        Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
+        if (toastingEnabled)
+            Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
     fun addDownloadToQueue(downloadsInProgressCount: Int) {
         downloadsInProgress = downloadsInProgressCount
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.inQueue.text =
+                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
         }
     }
 
@@ -482,8 +467,10 @@ class AppGossiper(
 
     fun downloadHasStarted(torrentName: String) {
         activity.runOnUiThread {
-            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
+            activity.inQueue.text =
+                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text =
+                activity.getString(R.string.currentTorrentDownload, "Downloading: $torrentName")
         }
     }
 
@@ -491,8 +478,10 @@ class AppGossiper(
         downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.inQueue.text =
+                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text =
+                activity.getString(R.string.currentTorrentDownload, "No download in progress")
             activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
         }
         updateProgress(0)
@@ -502,8 +491,10 @@ class AppGossiper(
         downloadsInProgress = kotlin.math.max(0, downloadsInProgress - 1)
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, downloadsInProgress)
-            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.inQueue.text =
+                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text =
+                activity.getString(R.string.currentTorrentDownload, "No download in progress")
             downloadsFinished++
         }
         updateProgress(0)
@@ -512,8 +503,10 @@ class AppGossiper(
     fun initialUISettings() {
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, 0)
-            activity.inQueue.text = activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text = activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.inQueue.text =
+                activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
+            activity.currentDownload.text =
+                activity.getString(R.string.currentTorrentDownload, "No download in progress")
             activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
             activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, 0)
             activity.failedCounter.text = activity.getString(R.string.failedCounter, "{}")

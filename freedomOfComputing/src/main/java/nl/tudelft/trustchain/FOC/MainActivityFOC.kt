@@ -34,8 +34,15 @@ import java.io.*
 import java.net.URL
 import java.net.URLConnection
 
+import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.FOC.community.FOCCommunity
+import java.util.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 
-class MainActivityFOC : AppCompatActivity() {
+open class MainActivityFOC : AppCompatActivity() {
     private val scope = CoroutineScope(Dispatchers.IO)
     private var torrentList = ArrayList<Button>()
     private var progressVisible = false
@@ -44,7 +51,7 @@ class MainActivityFOC : AppCompatActivity() {
     private val MY_PERMISSIONS_REQUEST = 0
     private val s = SessionManager()
 
-    private lateinit var appGossiper: AppGossiper
+    private var appGossiper: AppGossiper? = null
 
     @Suppress("deprecation")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,8 +86,9 @@ class MainActivityFOC : AppCompatActivity() {
 
             printToast("STARTED")
             showAllFiles()
-            appGossiper = AppGossiper.getInstance(s, this)
-            appGossiper.start()
+            appGossiper =
+                IPv8Android.getInstance().getOverlay<FOCCommunity>()?.let { AppGossiper.getInstance(s, this, it) }
+            appGossiper?.start()
         } catch (e: Exception) {
             printToast(e.toString())
         }
@@ -110,14 +118,13 @@ class MainActivityFOC : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        appGossiper.resume()
+        appGossiper?.resume()
     }
 
     override fun onPause() {
         super.onPause()
-        appGossiper.pause()
+        appGossiper?.pause()
     }
-
 
     @Suppress("deprecation")
     fun showAllFiles() {
@@ -342,7 +349,7 @@ class MainActivityFOC : AppCompatActivity() {
         val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                result = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME))
             }
         } finally {
             cursor?.close()
@@ -357,7 +364,6 @@ class MainActivityFOC : AppCompatActivity() {
         }
         return result
     }
-
 
     /**
      * Creates a torrent from a file given as input
