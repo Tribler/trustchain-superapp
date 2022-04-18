@@ -8,5 +8,6 @@ data class EvaDownload(
     var magnetInfoHash: String = "",
     var peer: Peer? = null,
     var retryAttempts: Int = 0,
-    var fileName: String = ""
+    var fileName: String = "",
+    var attemptUUID: String? = null
 )
