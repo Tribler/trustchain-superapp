@@ -148,6 +148,8 @@ public class ExecutionActivity extends AppCompatActivity {
      * Retrieves the main fragment class from the specified APK.
      * This class can be in any package. The only requirement is the main fragment should be called exactly 'MainFragment'
      *
+     * Deprecation suppression required to use DexFile, which we use to loop through all classes.
+     *
      * @param path to the APK.
      * @return the exact location of the main fragment class
      */
