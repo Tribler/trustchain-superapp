@@ -26,7 +26,7 @@ private val logger = KotlinLogging.logger {}
 class FOCCommunity(
     context: Context
 ) : FOCCommunityBase() {
-    override val serviceId = "n18shbtp3optuiqedxs9acs2h9l95azx1tyw7rrb"
+    override val serviceId = "12313685c1912a141279f8248fc8db5899c5df5b"
 
     val discoveredAddressesContacted: MutableMap<IPv4Address, Date> = mutableMapOf()
 
