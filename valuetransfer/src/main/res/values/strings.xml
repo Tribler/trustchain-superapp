@@ -198,7 +198,7 @@
     <string name="text_identity_name_info">The identity name consists of the initials and surname of the contact that are on the official identity document. If the contact is unverified, the contact can choose it\'s own name.</string>
     <string name="text_title_transactions">Transactions</string>
     <string name="text_no_transactions">There are no transactions yet</string>
-    <string name="text_including_unverified_transactions">Including Unverified Transactions</string>
+    <string name="text_including_unverified_transactions">Unverified balance</string>
     <string name="text_tooltip_unverified_balance">Verified balance differs from the correct balance, click the balance to see the difference</string>
     <string name="text_transaction_content">Transaction Content</string>
     <string name="text_transaction_receiver">Receiver</string>
@@ -399,6 +399,8 @@
     <string name="text_trust_score">Score</string>
     <string name="text_trust_score_details">A score indicating the trustworthiness of a user</string>
     <string name="text_trust_scores">Scores</string>
+    <string name="text_unverified_details">This transaction will be paid for with unverified money. Make sure you trust the other party!</string>
+    <string name="text_unverified_title">Unverified Transaction</string>
     <string name="text_title_trust_scores">Trust Scores</string>
     <string name="text_trust_score_format">%1$.2f%%</string>
     <string name="text_trust_peer_unknown">Unknown contact</string>

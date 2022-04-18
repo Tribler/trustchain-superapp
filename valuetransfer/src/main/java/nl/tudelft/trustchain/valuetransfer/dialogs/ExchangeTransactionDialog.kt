@@ -17,6 +17,7 @@ import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.common.eurotoken.TransactionRepository.Companion.KEY_UNVERIFIED
 import nl.tudelft.trustchain.common.util.TrustChainHelper
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
@@ -74,6 +75,7 @@ class ExchangeTransactionDialog(
             val additionalIconHiddenView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalHidden)
             val additionalIconShowedView = view.findViewById<ImageView>(R.id.ivTransactionAdditionalShowed)
             val trustScoreView = view.findViewById<TextView>(R.id.tvTrustScoreValue)
+            val unverifiedWarning = view.findViewById<ConstraintLayout>(R.id.clUnverifiedWarning)
 
             val viewChatView = view.findViewById<ConstraintLayout>(R.id.tvViewChat)
             val viewContactView = view.findViewById<ConstraintLayout>(R.id.tvViewContact)
@@ -236,6 +238,13 @@ class ExchangeTransactionDialog(
                 )
             }
 
+            // Determine if the unverified warning needs to be shown or not.
+            if (transactionItem.canSign) {
+                val unverified = transactionItem.transaction.block.transaction[KEY_UNVERIFIED]
+                if (unverified != null) {
+                    unverifiedWarning.isVisible = unverified as Boolean
+                }
+            }
             transactionSignButton.isVisible = transactionItem.canSign
             transactionSignButton.setOnClickListener {
                 transactionSignButtonView.text = resources.getString(R.string.text_exchange_signing_transaction)
@@ -258,6 +267,7 @@ class ExchangeTransactionDialog(
                 Handler().postDelayed(
                     Runnable {
                         transactionSignButton.isVisible = false
+                        unverifiedWarning.isVisible = false
                     },
                     2000
                 )

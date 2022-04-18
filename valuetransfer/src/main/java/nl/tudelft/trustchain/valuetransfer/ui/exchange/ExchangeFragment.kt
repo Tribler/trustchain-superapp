@@ -143,14 +143,6 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             binding.btnShowMoreTransactions.isVisible = false
         }
 
-        val onBalanceClickListener = View.OnClickListener {
-            binding.tvBalanceAmountTitle.isVisible = !binding.tvBalanceAmountTitle.isVisible
-            binding.tvBalanceAmount.isVisible = !binding.tvBalanceAmount.isVisible
-            binding.tvBalanceVerifiedAmount.isVisible = !binding.tvBalanceVerifiedAmount.isVisible
-        }
-
-        binding.ivBalanceErrorIcon.setOnClickListener(onBalanceClickListener)
-
         val onHideBalanceClickListener = View.OnClickListener {
             binding.llExchangeBalanceHidden.isVisible = !binding.llExchangeBalanceHidden.isVisible
             binding.llExchangeBalance.isVisible = !binding.llExchangeBalance.isVisible
@@ -166,25 +158,27 @@ class ExchangeFragment : VTFragment(R.layout.fragment_exchange_vt) {
             addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
+        var verified = 0f
         parentActivity.getBalance(false).observe(
-            viewLifecycleOwner,
-            {
-                if (it != binding.tvBalanceAmount.text.toString()) {
-                    binding.tvBalanceAmount.text = it
-                }
+            viewLifecycleOwner
+        ) {
+            val unverified = it.replace(",", ".").toFloatOrNull() ?: 0f
+            val onlyUnverified = unverified - verified
+            val text = onlyUnverified.toString().replace(".", ",")
+            if (text != binding.tvBalanceAmount.text.toString()) {
+                binding.tvBalanceAmount.text = text
             }
-        )
+        }
 
         parentActivity.getBalance(true).observe(
-            viewLifecycleOwner,
-            {
-                if (it != binding.tvBalanceVerifiedAmount.text.toString()) {
-                    binding.tvBalanceVerifiedAmount.text = it
-                    binding.ivBalanceErrorIcon.isVisible = parentActivity.getBalance(false).value != it
-                    binding.pbBalanceUpdating.isVisible = false
-                }
+            viewLifecycleOwner
+        ) {
+            verified = it.replace(",", ".").toFloatOrNull() ?: 0f
+            if (it != binding.tvBalanceVerifiedAmount.text.toString()) {
+                binding.tvBalanceVerifiedAmount.text = it
+                binding.pbBalanceUpdating.isVisible = false
             }
-        )
+        }
     }
 
     override fun initView() {

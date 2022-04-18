@@ -57,10 +57,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
-                android:padding="8dp"
-                android:visibility="invisible"
                 android:indeterminateTint="?attr/onWidgetSecondaryColor"
                 android:indeterminateTintMode="src_atop"
+                android:padding="8dp"
+                android:visibility="invisible"
                 app:layout_constraintDimensionRatio="H,1:1" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -80,8 +80,8 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_exchange"
                 android:padding="4dp"
+                android:src="@drawable/ic_exchange"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -91,7 +91,7 @@
         <FrameLayout
             android:id="@+id/flExchangeBalance"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="76dp"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -106,9 +106,9 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingEnd="8dp"
-                tools:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="gone">
 
                 <ImageView
                     android:layout_width="18dp"
@@ -167,9 +167,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:visibility="gone"
-                tools:visibility="visible"
-                android:orientation="horizontal">
+                tools:visibility="visible">
 
                 <ImageView
                     android:id="@+id/ivBalanceIcon"
@@ -194,67 +194,41 @@
                         android:id="@+id/tvBalanceAmountTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
                         android:text="@string/text_including_unverified_transactions"
                         android:textColor="?attr/onWidgetSecondaryColor"
                         android:textSize="10sp"
                         android:textStyle="italic"
-                        android:visibility="gone"
-                        app:layout_constraintStart_toStartOf="@+id/clBalanceAmount"
-                        app:layout_constraintBottom_toTopOf="@+id/clBalanceAmount"/>
+                        app:layout_constraintBottom_toBottomOf="@id/tvBalanceAmount"
+                        app:layout_constraintStart_toEndOf="@+id/tvBalanceAmount"
+                        app:layout_constraintTop_toTopOf="@+id/tvBalanceAmount" />
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/clBalanceAmount"
+                    <TextView
+                        android:id="@+id/tvBalanceAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:text="0.00"
+                        android:textColor="?attr/onWidgetColor"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent">
+                        app:layout_constraintTop_toBottomOf="@id/tvBalanceVerifiedAmount" />
 
-                        <TextView
-                            android:id="@+id/tvBalanceAmount"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0.00"
-                            android:gravity="center_vertical"
-                            android:textColor="?attr/onWidgetColor"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:visibility="gone"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"/>
+                    <TextView
+                        android:id="@+id/tvBalanceVerifiedAmount"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="0.00"
+                        android:textColor="?attr/onWidgetColor"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/tvBalanceAmount"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/tvBalanceVerifiedAmount"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:text="0.00"
-                            android:textColor="?attr/onWidgetColor"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
-
-                    </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    <ImageView
-                        android:id="@+id/ivBalanceErrorIcon"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
-                        android:layout_marginStart="8dp"
-                        android:padding="4dp"
-                        android:src="@drawable/ic_baseline_info_24"
-                        android:tooltipText="@string/text_tooltip_unverified_balance"
-                        android:visibility="gone"
-                        app:layout_constraintBottom_toBottomOf="@+id/clBalanceAmount"
-                        app:layout_constraintStart_toEndOf="@+id/clBalanceAmount"
-                        app:layout_constraintTop_toTopOf="@+id/clBalanceAmount"
-                        app:tint="?attr/colorError"
-                        tools:visibility="visible" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
-
-
             </LinearLayout>
         </FrameLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -262,10 +236,11 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:layout_marginHorizontal="12dp"
         android:layout_marginTop="12dp"
-        android:background="@drawable/square_rounded">
+        android:background="@drawable/square_rounded"
+        android:orientation="vertical">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -286,13 +261,13 @@
                 android:id="@+id/flReloadButtons"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
-                app:layout_constraintDimensionRatio="H1,1"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/pill_rounded"
-                android:backgroundTint="?attr/dialogColor">
+                android:backgroundTint="?attr/dialogColor"
+                app:layout_constraintDimensionRatio="H1,1">
 
                 <androidx.constraintlayout.utils.widget.ImageFilterView
                     android:id="@+id/ivReloadTransactions"
@@ -309,10 +284,10 @@
                     android:id="@+id/pbTransactionsUpdating"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:padding="8dp"
                     android:layout_gravity="center"
                     android:indeterminateTint="?attr/mutedColor"
                     android:indeterminateTintMode="src_atop"
+                    android:padding="8dp"
                     app:layout_constraintDimensionRatio="H,1:1" />
             </FrameLayout>
         </RelativeLayout>
@@ -339,8 +314,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:background="@drawable/square_rounded">
+                android:background="@drawable/square_rounded"
+                android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvTransactions"

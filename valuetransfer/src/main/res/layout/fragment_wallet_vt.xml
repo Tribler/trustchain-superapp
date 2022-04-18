@@ -163,7 +163,7 @@
                             <LinearLayout
                                 android:id="@+id/clExchangeBalanceHidden"
                                 android:layout_width="match_parent"
-                                android:layout_height="60dp"
+                                android:layout_height="76dp"
                                 android:gravity="center_vertical"
                                 android:orientation="horizontal"
                                 android:paddingStart="12dp"
@@ -224,7 +224,7 @@
                             <LinearLayout
                                 android:id="@+id/clExchangeBalance"
                                 android:layout_width="match_parent"
-                                android:layout_height="60dp"
+                                android:layout_height="76dp"
                                 android:gravity="center_vertical"
                                 android:orientation="horizontal"
                                 android:paddingStart="12dp"
@@ -238,15 +238,54 @@
                                     android:src="@drawable/ic_baseline_euro_symbol_24"
                                     app:tint="?attr/onWidgetColor" />
 
-                                <TextView
-                                    android:id="@+id/tvBalanceAmount"
+                                <androidx.constraintlayout.widget.ConstraintLayout
+                                    android:id="@+id/clBalanceAmount"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="8dp"
-                                    android:text="0.00"
-                                    android:textColor="?attr/onWidgetColor"
-                                    android:textSize="24sp"
-                                    android:textStyle="bold" />
+                                    app:layout_constraintBottom_toBottomOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toTopOf="parent">
+
+                                    <TextView
+                                        android:id="@+id/tvBalanceAmountTitle"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/text_including_unverified_transactions"
+                                        android:textColor="?attr/onWidgetSecondaryColor"
+                                        android:textSize="10sp"
+                                        android:layout_marginStart="8dp"
+                                        android:textStyle="italic"
+                                        app:layout_constraintStart_toEndOf="@+id/tvBalanceAmount"
+                                        app:layout_constraintTop_toTopOf="@+id/tvBalanceAmount"
+                                        app:layout_constraintBottom_toBottomOf="@id/tvBalanceAmount"/>
+
+                                    <TextView
+                                        android:id="@+id/tvBalanceAmount"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="0.00"
+                                        android:gravity="center_vertical"
+                                        android:textColor="?attr/onWidgetColor"
+                                        android:textSize="24sp"
+                                        android:textStyle="bold"
+                                        app:layout_constraintBottom_toBottomOf="parent"
+                                        app:layout_constraintStart_toStartOf="parent"
+                                        app:layout_constraintTop_toBottomOf="@id/tvBalanceVerifiedAmount"/>
+
+                                    <TextView
+                                        android:id="@+id/tvBalanceVerifiedAmount"
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:text="0.00"
+                                        android:textColor="?attr/onWidgetColor"
+                                        android:textSize="24sp"
+                                        android:textStyle="bold"
+                                        app:layout_constraintBottom_toTopOf="@id/tvBalanceAmount"
+                                        app:layout_constraintStart_toStartOf="parent"
+                                        app:layout_constraintTop_toTopOf="parent" />
+
+                                </androidx.constraintlayout.widget.ConstraintLayout>
 
                                 <ProgressBar
                                     android:id="@+id/pbBalanceUpdating"
