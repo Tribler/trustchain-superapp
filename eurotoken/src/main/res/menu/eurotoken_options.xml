@@ -2,14 +2,20 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/copyKey"
-        android:title="Copy PubKey" />
+        android:title="@string/copy_pubkey" />
     <item
         android:id="@+id/verifyBalance"
-        android:title="Verify Balance" />
+        android:title="@string/verify_balance" />
     <item
         android:id="@+id/renameSelf"
-        android:title="Change name" />
+        android:title="@string/change_name" />
     <item
         android:id="@+id/gateways"
-        android:title="Manage gateways" />
+        android:title="@string/manage_gateways" />
+    <item
+        android:id="@+id/toggleDemoMode"
+        android:title="@string/toggle_demo_mode" />
+    <item
+        android:id="@+id/trustScoresMenuItem"
+        android:title="@string/trust_scores_menu_item" />
 </menu>
