@@ -23,12 +23,13 @@ import java.math.BigInteger
 class EthereumSwap(
     web3j: Web3j,
     val credentials: Credentials,
-    contractAddress : String
+    contractAddress : String,
+    chainId : Long
 ) {
 
 
 
-    val txManager = RawTransactionManager(web3j,credentials,1337 )
+    val txManager = RawTransactionManager(web3j,credentials,chainId )
     val swapContract = AtomicSwapContract.load(contractAddress,web3j,txManager,DefaultGasProvider())
     /**
      * Map of callbacks that are called when a swap with a hash equal to the key is claimed.

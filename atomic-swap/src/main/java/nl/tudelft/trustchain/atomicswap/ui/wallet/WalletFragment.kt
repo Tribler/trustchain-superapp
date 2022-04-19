@@ -18,6 +18,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.atomicswap.BuildConfig
 import nl.tudelft.trustchain.atomicswap.R
 import nl.tudelft.trustchain.atomicswap.databinding.FragmentAtomicWalletBinding
 import nl.tudelft.trustchain.atomicswap.swap.WalletHolder
@@ -65,13 +66,7 @@ class WalletFragment : BaseFragment(R.layout.fragment_atomic_wallet), WalletChan
                 while (true) {
                     delay(4000)
                     try {
-//                        val contract = AtomicSwapContract.deploy(
-//                            ethereumWallet.web3j,
-//                            RawTransactionManager(ethereumWallet.web3j,ethereumWallet.credentials,1337 ),
-//                            DefaultGasProvider()
-//                        ).send()
-//                        Log.d("ETHLOG","contract address : ${contract.contractAddress}")
-                        WalletHolder.ethSwap = EthereumSwap(ethereumWallet.web3j, ethereumWallet.credentials,"0x58b2563d596da6ebbc6031d581c57baef6b9cbab") //todo add address to some env
+                        WalletHolder.ethSwap = EthereumSwap(ethereumWallet.web3j, ethereumWallet.credentials,BuildConfig.ETH_SWAP_CONTRACT,BuildConfig.ETH_CHAIN_ID)
                         break
                     }catch (e: Exception){
                         Log.d("ETHLOG", e.toString())

@@ -1,7 +1,7 @@
 package nl.tudelft.trustchain.atomicswap.swap
 
-import nl.tudelft.ipv8.util.sha256
-import org.bitcoinj.core.Address
+import nl.tudelft.trustchain.atomicswap.R
+import nl.tudelft.trustchain.atomicswap.ui.enums.TradeOfferStatus
 import org.bitcoinj.core.Sha256Hash
 import org.bitcoinj.wallet.KeyChain
 import kotlin.random.Random
@@ -17,9 +17,10 @@ import kotlin.random.Random
  */
 data class Trade(
     val id: Long,
-    val myCoin : Currency,
-    val myAmount : String,
-    val counterpartyCoin : Currency,
+    var status: TradeOfferStatus,
+    val myCoin: Currency,
+    val myAmount: String,
+    val counterpartyCoin: Currency,
     val counterpartyAmount: String,
 ) {
 
@@ -41,9 +42,12 @@ data class Trade(
         private set
 
     // Called by the recipient
-    fun setOnTrade(){
-        myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
-        myAddress= WalletHolder.ethereumWallet.address()
+    fun setOnTrade(
+        btcPubKey: ByteArray = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey,
+        ethAddress: String = WalletHolder.ethereumWallet.address()
+    ) {
+        myPubKey = btcPubKey
+        myAddress = ethAddress
     }
 
     fun setOnInitiate(counterpartyPubKey: ByteArray, secretHash: ByteArray, counterpartyBitcoinTransaction: ByteArray?, counterpartyAddress: String?) {
@@ -59,9 +63,14 @@ data class Trade(
 
 
     // Called by the initiator
-    fun setOnAccept(counterpartyPubKey: ByteArray, ethAddress: String) {
-        myPubKey = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey
-        myAddress= WalletHolder.ethereumWallet.address()
+    fun setOnAccept(
+        counterpartyPubKey: ByteArray,
+        ethAddress: String,
+        btcPubKey: ByteArray = WalletHolder.bitcoinWallet.freshKey(KeyChain.KeyPurpose.AUTHENTICATION).pubKey,
+        myEthAddress: String = WalletHolder.ethereumWallet.address()
+    ) {
+        myPubKey = btcPubKey
+        myAddress = myEthAddress
         val randomSecret = Random.nextBytes(32)
         secret = randomSecret
         secretHash = Sha256Hash.hash(randomSecret)
@@ -81,17 +90,17 @@ data class Trade(
 
 }
 
-enum class Currency{
-    BTC(),
-    ETH();
+enum class Currency(val currencyCodeStringResourceId: Int) {
+    BTC(R.string.currency_code_bitcoin),
+    ETH(R.string.currency_code_ethereum);
 
-   companion object {
-       fun fromString(coin: String): Currency {
-           return when(coin.toLowerCase()){
-               "btc" -> BTC
-               "eth" -> ETH
-               else -> error("Currency not supported")
-           }
-       }
-   }
+    companion object {
+        fun fromString(coin: String): Currency {
+            return when (coin.toLowerCase()) {
+                "btc" -> BTC
+                "eth" -> ETH
+                else -> error("Currency not supported")
+            }
+        }
+    }
 }
