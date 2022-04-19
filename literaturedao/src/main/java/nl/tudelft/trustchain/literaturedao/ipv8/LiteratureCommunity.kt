@@ -11,6 +11,7 @@ import nl.tudelft.ipv8.attestation.trustchain.TrustChainCommunity
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainCrawler
 import nl.tudelft.ipv8.attestation.trustchain.TrustChainSettings
 import nl.tudelft.ipv8.attestation.trustchain.store.TrustChainStore
+import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.supportedAppExtensions
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
@@ -101,11 +102,11 @@ class LiteratureCommunity(
     private fun onLiteratureRequest(peer: Peer, appTorrentInfoHash: String) {
         try {
             locateLiterature(appTorrentInfoHash)?.let { file ->
-                logger.debug { "-> sending app ${file.name} to ${peer.mid}" }
+                logger.debug { "-> sending literature ${file.name} to ${peer.mid}" }
                 sendLiterature(peer, appTorrentInfoHash, file)
                 return
             }
-            logger.debug { "Received Request for an app that doesn't exist" }
+            logger.debug { "Received Request for an literature that doesn't exist" }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -149,7 +150,7 @@ class LiteratureCommunity(
 
     private fun isTorrentOkay(torrentInfo: TorrentInfo, saveDirectory: File): Boolean {
         File(saveDirectory.path + "/" + torrentInfo.name()).run {
-            if (!arrayListOf("jar", "apk").contains(extension)) return false
+            if (!supportedAppExtensions.contains(extension)) return false
             if (length() >= torrentInfo.totalSize()) return true
         }
         return false
