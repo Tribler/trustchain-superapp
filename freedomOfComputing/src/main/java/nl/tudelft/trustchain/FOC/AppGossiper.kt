@@ -33,7 +33,6 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.Pair
-import kotlin.collections.HashMap
 
 /**
  * This gossips data about 5 random apps with peers on demoCommunity every 10 seconds and fetches new apps from peers every 20 seconds
@@ -287,9 +286,6 @@ class AppGossiper(
                 } else {
                     if (torrentHandle.isValid) {
                         torrentHandle.pause()
-                    } else {
-                        // Remove torrentHandle if necessary. It will be created again later on once the file is stable.
-                        torrentHandles.remove(torrentHandle)
                     }
                 }
             }
