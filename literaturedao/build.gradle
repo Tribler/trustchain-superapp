@@ -64,5 +64,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc'
     implementation 'androidx.gridlayout:gridlayout:1.0.0'
 
+    // Logging
+    implementation 'io.github.microutils:kotlin-logging:1.7.7'
+
     implementation 'com.tom-roush:pdfbox-android:2.0.16.0'
 }

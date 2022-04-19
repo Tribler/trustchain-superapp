@@ -312,7 +312,7 @@ class TrustChainApplication : Application() {
         val store = TrustChainSQLiteStore(Database(driver))
         val randomWalk = RandomWalk.Factory()
         return OverlayConfiguration(
-            LiteratureCommunity.Factory(settings, store),
+            LiteratureCommunity.Factory(this, settings, store),
             listOf(randomWalk)
         )
     }
