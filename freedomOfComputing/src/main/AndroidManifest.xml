@@ -17,6 +17,7 @@
             android:name="nl.tudelft.trustchain.FOC.MainActivityFOC"
             android:label="@string/title_activity_main_FOC"
             android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden" />
     </application>
 
