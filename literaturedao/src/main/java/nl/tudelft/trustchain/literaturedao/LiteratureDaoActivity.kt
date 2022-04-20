@@ -2,11 +2,12 @@ package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
 import android.content.Context
 import android.os.Bundle
-import nl.tudelft.trustchain.common.BaseActivity
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.SearchView
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import kotlinx.coroutines.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -26,12 +27,14 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.android.IPv8Android
+import nl.tudelft.trustchain.common.BaseActivity
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
-import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
+import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
+import java.io.*
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
@@ -39,13 +42,15 @@ import java.io.*
 import java.lang.Exception
 import java.util.*
 import kotlin.math.roundToInt
+import java.util.concurrent.locks.ReentrantLock
 
 const val DEFAULT_LITERATURE = "1.pdf"
-var tempStorage: MutableList<Pair<String, MutableList<Pair<String, Double>>>> = mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>()
 
 open class LiteratureDaoActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_literaturedao
     override val bottomNavigationMenu = R.menu.literature_navigation_menu
+    val metaDataLock = ReentrantLock()
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
@@ -119,18 +124,76 @@ open class LiteratureDaoActivity : BaseActivity() {
             val avgPingStr = if (!avgPing.isNaN()) "" + (avgPing * 1000).roundToInt() + " ms" else "? ms"
             Log.i("litdao", "${peer.mid} ${peer.address} (S: ${lastRequestStr}, R: ${lastResponseStr}, ${avgPingStr})")
         }
+
+        fun listAssetFiles(path: String): List<String> {
+            val assetManager = assets
+            val files = assetManager.list(path)
+            if (files != null) {
+                return files.toList()
+            }
+            return listOf<String>()
+        }
     }
 
-    @Serializable
-    data class Data(val content: MutableList<Pair<String, Double>>)
-    fun read(path: String): Data{
-        this.openFileInput(path).use { input ->
-            return Json.decodeFromString<Data>(input.toString())
+    fun loadMetaData(): KeyWordModelView.Data{
+        var fileInputStream: FileInputStream? = null
+        try{
+            fileInputStream = this.openFileInput("metaData")
+        } catch (e: FileNotFoundException){
+            this.openFileOutput("metaData", Context.MODE_PRIVATE).use { output ->
+                output.write(Json.encodeToString(KeyWordModelView.Data(mutableListOf<Pair<String, MutableList<Pair<String, Double>>>>())).toByteArray())
+            }
+            fileInputStream = this.openFileInput("metaData")
         }
+        var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+        val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+        val stringBuilder: StringBuilder = StringBuilder()
+        var text: String? = null
+        while ({ text = bufferedReader.readLine(); text }() != null) {
+            stringBuilder.append(text)
+            }
+        return Json.decodeFromString<KeyWordModelView.Data>(stringBuilder.toString())
+    }
+
+    fun localSearch(inp: String): MutableList<Pair<String, Double>>{
+        var handler = QueryHandler()
+        return handler.scoreList(inp, loadMetaData().content)
+    }
+
+    fun writeMetaData(newData: KeyWordModelView.Data){
+        metaDataLock.lock()
+        this.openFileOutput("metaData", Context.MODE_PRIVATE).use { output ->
+            output.write(Json.encodeToString(newData).toByteArray())
+        }
+        metaDataLock.unlock()
     }
 
     override fun onStart() {
         super.onStart()
+        Log.e("litdao", "starting ...")
+
+        try{
+            //testImportPDF()
+            //Log.e("litdao", loadMetaData().toString())
+        } catch (e: Exception){
+            Log.e("litdao", "litDao exception: " + e.toString())
+        }
+
+        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
+
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+
+                return false
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (!newText.isNullOrEmpty())
+                    Log.d("litdao", localSearch(newText).toString())
+                return false
+            }
+        })
+        //Log.d("litdao", localSearch("dpca").toString())
 //        Log.e("litdao", "starting ...")
 //
 //        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
@@ -148,23 +211,18 @@ open class LiteratureDaoActivity : BaseActivity() {
 //            }
 //        })
 //        Log.d("litdao", localSearch("dpca").toString())
+
     }
 
-    fun importPDF(){
+    fun testImportPDF(){
         PDFBoxResourceLoader.init(getApplicationContext());
         var i = 1
         while (i < 4){
-            val path = i.toString() + ".pdf"
-            val pdf: InputStream = getAssets().open(path)
-            PDFBoxResourceLoader.init(this)
-            val strippedString = PdfController().stripText(pdf)
-            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-            val kws = KeywordExtractor().extract(strippedString,csv)
-            store(path, kws)
-            Log.e("litdao", "litdao: " + kws.toString())
+            importPDF(i.toString() + ".pdf")
             i += 1
         }
     }
+    
         //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
 /*
         try{
@@ -260,10 +318,25 @@ fun localSearch(inp: String): MutableList<Pair<String, Double>>{
     return handler.scoreList(inp, loadAll())
 }
 
-fun store(path: String, KWList: MutableList<Pair<String, Double>>){
-    tempStorage.add(Pair(path, KWList))
-}
+    @Serializable
+    data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>)
 
-fun loadAll(): MutableList<Pair<String, MutableList<Pair<String, Double>>>>{
-    return tempStorage
+    fun operations(path: String, baseContext: Context){
+        PDFBoxResourceLoader.init(baseContext)
+        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+        val pdf: InputStream = getAssets().open(path)
+        val strippedString = PdfController().stripText(pdf)
+        val kws = KeywordExtractor().extract(strippedString, csv)
+        Log.e("litdao", "newWrite: " + kws.toString())
+        metaDataLock.lock()
+        var metadata = loadMetaData()
+        metadata.content.add(Pair(path, kws))
+        writeMetaData(metadata)
+        metaDataLock.unlock()
+    }
+
+    fun importPDF(path: String){
+        val context = this.baseContext
+        operations(path, context)
+    }
 }
