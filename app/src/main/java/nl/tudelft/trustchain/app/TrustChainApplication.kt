@@ -41,7 +41,6 @@ import nl.tudelft.trustchain.app.service.TrustChainService
 import nl.tudelft.trustchain.atomicswap.AtomicSwapCommunity
 import nl.tudelft.trustchain.atomicswap.AtomicSwapTrustchainConstants
 import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
-import nl.tudelft.trustchain.atomicswap.ui.swap.SwapFragment
 import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.common.MarketCommunity
 import nl.tudelft.trustchain.common.bitcoin.WalletService
@@ -187,12 +186,14 @@ class TrustChainApplication : Application() {
                     block: TrustChainBlock,
                     database: TrustChainStore
                 ): ValidationResult {
-                    if ((block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
+                    if ((
+                        block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_COIN] != null &&
                             block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_COIN] != null &&
                             block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_FROM_AMOUNT] != null &&
                             block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_TO_AMOUNT] != null &&
-                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null)
-                        || block.isAgreement
+                            block.transaction[AtomicSwapTrustchainConstants.TRANSACTION_OFFER_ID] != null
+                        ) ||
+                        block.isAgreement
                     ) {
                         return ValidationResult.Valid
                     } else {
@@ -223,8 +224,6 @@ class TrustChainApplication : Application() {
                 }
             }
         )
-
-
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {
