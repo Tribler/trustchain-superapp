@@ -12,8 +12,19 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
 
 
 ## Table of Contents
-- [luxury-communism](#luxury-communism)
-    - [Table of Contents](#Table-of-contents)
+- [Unverified Transfers in ConfIDapp with Trust Network](#Unverified-Transfers-in-ConfIDapp-with-Trust-Network)
+    - [Table of Contents](#Table-of-Contents)
+    - [Offline Gateway](#Offline-Gateway)
+    - [Network of Trust](#Network of Trust)
+        - [Technical specification](#Technical-specification)
+    - [Unverified Transfers](#Unverified-Transfers)
+        - [Changes in implementation](#Changes-in-implementation)
+    - [User Interface](#User-Interface)
+        - [Screenshots](#Screenshots)
+        - [Demo of an unverified transfer](#Demo-of-an-unverified-transfer)
+    - [Considerations & Limitations](#Considerations-Limitations)
+    - [Relevance of Offline Cash](#Relevance-of-Offline-Cash)
+    - [References](#References)
 
 ## Offline Gateway
 Before, one gateway existed that was hard coded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan QR code that contains information about a gateway. With this option, a gateway can be added without doing a transaction with it. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
@@ -23,7 +34,7 @@ Currently, distributed ledgers create trust in transactions through computer sys
 
 To implement the notion of trust into the code, a web of trust is used. Each participant is assigned a trust score which is stored locally. On receiving a transaction, the receiver sees a trust score of the other party, this score indicates the level of trust of the other party. On a complete transaction, the receiver either adds a new trust score of 1 to the database for the other party, or if a score exists, increases the existing score by 1% (maximum of 100%). Upon completing a transaction, the sender sends up to a specified number (currently 10) trusts scores together with the public keys to the receiving party. Upon receiving these n transactions, the receiver adds the score to the list of scores for this public key together with the score of the sending party. All received scores are then weighted by the score of their sender together with the current score and a trust score of 100\%, as we trust our self fully, and added to the database.
 
-#### Technical specification
+### Technical specification
 
 The trust protocol consists of two important classes: `db.TrustStore` and `community.TrustCommunity`. Both are instantiated in the main `TrustChainApplication` class. And are available on each `VTFragment` and `VtDialogFragment` via getters.
 
@@ -160,7 +171,7 @@ Both the verified and the unverified balances are now separately visible on the 
 The notion of trust is implemented in order to refine security against double spending attacks in an offline setting. Although the implementation provides its users with extra tools in order to evaluate the trustworthiness of the user on the other end, it is still based on a lot of human assessment. An improved GUI and the added notion of trust through scores help with this assessment. This could help people living in rural communities with high trust to make transactions in an offline environment. But vulnerable people such as the elderly still remain vulnerable, further work is required to protect them and to decide who pays the cost of double spending attacks. Furthermore, trust can be boosted through if users have do lots of transactions within their community. Someone not from the community and thus without a known trust score might be extra vulnerable in the case of a disaster, when left stranded in an unknown area.
 
 
-## Relevance of offline cash
+## Relevance of Offline Cash
 An increasing percentage of all payments are digital each year. This movement is also called the transition into a "cashless society". In Northern Europe, only an estimated 20\% of payments are still made with cash (https://www.cnbc.com/2018/12/19/millions-would-be-put-at-risk-in-a-cashless-society-research-warns.html). In Sweden, between the years 2010 and 2020, the percentage of people that used cash for their last payment dropped from 39\% to 9\% (https://www.riksbank.se/en-gb/payments--cash/payments-in-sweden/payments-in-sweden-2020/1.-the-payment-market-is-being-digitalised/cash-is-losing-ground/). This transition is especially difficult for people living in rural areas, the elderly and when there are technical difficulties. According to Access to Cash Review [3], 17\% of adults in the United Kingdom would have a hard time transitioning to a cashless society. "We identified risks to the viability of rural communities, the loss of personal independence and increased risks of financial abuse and debt.". The block chain based digital euro could be a solution to the loss of personal independence and if it has offline functionality, also to the viability in rural communities.
 
 Some management problems of risks and trade offs for "E-Cash" are described in [4]. In an online environment, transactions can be verified on the fly at the cost of efficiency and speed. In an offline environment however, the efficiency of spending money is high but double spending can only be detected after the fact, potentially at high cost.
