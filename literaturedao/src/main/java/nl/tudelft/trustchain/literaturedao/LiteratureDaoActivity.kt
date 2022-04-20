@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.SearchView
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
@@ -325,7 +328,7 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
 
-    override fun onActivityResult(requestCode:Int, resultCode:Int, data:Intent?)
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?)
     {
         if (requestCode == 100) {
             var fileUri = data?.data
