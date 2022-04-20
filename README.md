@@ -165,12 +165,12 @@ ConfIDapp also provides integration with legal documents such as an ID or passpo
 **Unverified transfers**
 In addition to transfer with verified balance, there is the option to pay with unverified balance.
 Unverified balance can be useful in an offline scenario where for longer periods of time no money can be verified by the validators.
-![Unverified transaction](imgs/unverified_transaction.png)
+<img src="imgs/unverified_transaction.png" width="280">
 
 **Web of trust**
 To improve the security of verified and unverified transfers there is a basic implementation of a web of trust.
 This aims to provide users with a better indicating of the trustworthiness of the other party, these scores are shown before signing a transaction.
-![Trust score](imgs/trust_score_transaction_before_sign.jpg)
+<img src="imgs/trust_score_transaction_before_sign.jpg" width="280">
 
 [More information about ConfIDapp](valuetransfer/README.md)
 
