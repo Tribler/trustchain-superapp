@@ -29,7 +29,7 @@ When Bitcoin is being swapped and we lock funds in a hash timelock, we send the 
 
 ### Ethereum specifics
 
-We use web3j to interact with the Ethereum network.
+We use [web3j](https://github.com/web3j/web3j) to interact with the Ethereum network.
 On the Ethereum side, the hash timelock is achieved using a solidity smart contract.
 The contract can be found at `src\main\java\nl\tudelft\trustchain\atomicswap\swap\eth\swap_contract.sol`
 
@@ -73,21 +73,28 @@ After deploying the contract the build config variables need to be changed in th
 Some debugging information can be found by searching for “Atomic Swap” in logcat.
 ### Process of making a swap
 
-AtomicSwap app allows two users to exchange different cryptocurrencies without the involvement of a third party and without having to trust each other. This is achieved by implementing the Atomic Swap protocol.
-
 A user creates a swap offer in the swap tab and broadcasts it to all users using ipv8.
 
 *insert image of the swap tab.
+![Screenshot 2022-04-20 191710](https://user-images.githubusercontent.com/21971137/164291922-959cd2b8-a848-4f10-a4bb-4cadf8fbe617.png)
+
 
 A user sees all available swap offers in the trade offers tab and can start a swap by clicking on the accept button of the desired swap offer.
 
-*insert image of the trade offers tab
+*insert image of the trade offers tab!
+[Screenshot 2022-04-20 195132](https://user-images.githubusercontent.com/21971137/164292243-63417f62-8cd3-4758-ac29-1cad77ee05f3.png)
+
 
 While the atomic swap is in progress, the status of the swap in the swap offers tab will be in progress and when the swap finishes, the status will change to completed.
 
 *insert images of trade offers tab with this statuses
+![in_progress](https://user-images.githubusercontent.com/21971137/164292369-2191bfd2-5036-4e01-8b68-da0d444f802a.png)
+
+![completed](https://user-images.githubusercontent.com/21971137/164292663-d2b20d5c-c594-4f7e-9375-702bf8350e35.png)
 
 The balance in the users wallets will change accordingly.
 
 *insert image of the wallet balance before/after
+![Screenshot 2022-04-20 195049](https://user-images.githubusercontent.com/21971137/164292774-640abb61-cd25-4b26-8a7f-8a9f6c800332.png)
+![balance_after](https://user-images.githubusercontent.com/21971137/164292789-1d064394-87a7-4c62-a22c-602c55128be3.png)
 
