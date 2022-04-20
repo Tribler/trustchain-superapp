@@ -21,7 +21,7 @@ The protocol we use consists of 4 messages; broadcast, accept, initiate and comp
 
 5. Alice receives the complete message and claims the funds Bob locked. Bob realizes this and then claims the funds Alice locked.
 
-<img src="https://user-images.githubusercontent.com/21971137/164295370-bd3a8cdb-21e2-4773-89ee-dbbb038221cc.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164295370-bd3a8cdb-21e2-4773-89ee-dbbb038221cc.png" width="280">
 
 ### Bitcoin specifics
 
@@ -78,24 +78,21 @@ After deploying the contract the build config variables need to be changed in th
 
 A user creates a swap offer in the swap tab and broadcasts it to all users using ipv8.
 
-<img src="https://user-images.githubusercontent.com/21971137/164291922-959cd2b8-a848-4f10-a4bb-4cadf8fbe617.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164291922-959cd2b8-a848-4f10-a4bb-4cadf8fbe617.png" width="280">
 
 
 A user sees all available swap offers in the trade offers tab and can start a swap by clicking on the accept button of the desired swap offer.
 
-<img src="https://user-images.githubusercontent.com/21971137/164292243-63417f62-8cd3-4758-ac29-1cad77ee05f3.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164292243-63417f62-8cd3-4758-ac29-1cad77ee05f3.png" width="280">
 
 
 While the atomic swap is in progress, the status of the swap in the swap offers tab will be in progress and when the swap finishes, the status will change to completed.
 
-<img src="https://user-images.githubusercontent.com/21971137/164292369-2191bfd2-5036-4e01-8b68-da0d444f802a.png" width="180">
-
-<img src="https://user-images.githubusercontent.com/21971137/164292663-d2b20d5c-c594-4f7e-9375-702bf8350e35.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164292369-2191bfd2-5036-4e01-8b68-da0d444f802a.png" width="280"><img src="https://user-images.githubusercontent.com/21971137/164292663-d2b20d5c-c594-4f7e-9375-702bf8350e35.png" width="280">
 
 The balance in the users wallets will change accordingly.
 
-<img src="https://user-images.githubusercontent.com/21971137/164292774-640abb61-cd25-4b26-8a7f-8a9f6c800332.png" width="180">
-<img src="https://user-images.githubusercontent.com/21971137/164292789-1d064394-87a7-4c62-a22c-602c55128be3.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164292774-640abb61-cd25-4b26-8a7f-8a9f6c800332.png" width="280"><img src="https://user-images.githubusercontent.com/21971137/164292789-1d064394-87a7-4c62-a22c-602c55128be3.png" width="280">
 
 ## Problems
 
