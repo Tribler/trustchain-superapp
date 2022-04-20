@@ -30,10 +30,11 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
 
-        buildConfigField "String", "DEFAULT_GATEWAY_IP", "\"gateway.euro-token.nl\""
+        buildConfigField "String", "DEFAULT_GATEWAY_IP", "\"0.0.0.0\""
         buildConfigField "Integer", "DEFAULT_GATEWAY_PORT", "8090"
-        buildConfigField "String", "DEFAULT_GATEWAY_PK", "\"4c69624e61434c504b3a035fd325276e03b9d0d106a91353cdd00f7a21aa861be79226224809cfedf80cbcc0e210c2ddc2f91a1fbc3e1e3cd0622e32027a27a8be7f5d28a73b42c0369f\""
-        buildConfigField "String", "DEFAULT_GATEWAY_NAME", "\"Demo Gateway\""
+        buildConfigField "String", "DEFAULT_GATEWAY_PK", "\"4c69624e61434c504b3ac16efa9bc1784b76d418dc051fca4e4ac645fd68699a26dfec1d1e880846f45c184297a0b52109f67de0d49dbc52fea3328d1d73a58ff3b99bfda453cbdcd350\""
+        buildConfigField "String", "DEFAULT_GATEWAY_NAME", "\"Localhost Gateway\""
+        buildConfigField "String", "DEFAULT_GATEWAY_HOST", "\"http://192.168.0.106:8000\""
 
 //        buildConfigField "String", "BITCOIN_FAUCET", "\"http://134.122.59.107:3000\""
         buildConfigField "String", "BITCOIN_FAUCET", "\"https://taproot.tribler.org\""

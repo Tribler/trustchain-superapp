@@ -35,9 +35,7 @@ import com.androidadvance.topsnackbar.TSnackbar
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
-import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.main_activity_vt.*
-import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Community
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
@@ -76,14 +74,15 @@ import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
-import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
 import java.util.*
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.net.Uri
 import android.widget.Toast
+import nl.tudelft.trustchain.valuetransfer.ui.exchangelink.ExchangeTransferMoneyLinkFragment
 
 class ValueTransferMainActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_graph_valuetransfer
@@ -92,11 +91,12 @@ class ValueTransferMainActivity : BaseActivity() {
      * All fragments within this application, contact chat fragment excluded because it depends on arguments
      */
     private val fragmentManager = supportFragmentManager
-    private val walletOverviewFragment = WalletOverviewFragment()
+    private val walletOverviewFragment = ExchangeFragment()
     private val identityFragment = IdentityFragment()
     private val exchangeFragment = ExchangeFragment()
     private val contactsFragment = ContactsFragment()
     private val settingsFragment = SettingsFragment()
+    private val exchangeTransferMoneyLinkFragment = ExchangeTransferMoneyLinkFragment()
     private val qrScanController = QRScanController()
 
     private lateinit var customActionBar: View
@@ -156,12 +156,15 @@ class ValueTransferMainActivity : BaseActivity() {
                 Color.BLACK
             }
         }
-
         setContentView(R.layout.main_activity_vt)
+        val action: String? = intent?.action
+        val data: Uri? = intent?.data
+        var requestMoney = false
+        if (action != null && data != null) {
+            requestMoney = exchangeTransferMoneyLinkFragment.handleLinkRequest(data)
+        }
 
-        /**
-         * Create identity database tables if not exist
-         */
+        // Create identity database tables if not exist
         val identityCommunity = getCommunity<IdentityCommunity>()!!
         identityCommunity.createIdentitiesTable()
         identityCommunity.createAttributesTable()
@@ -192,14 +195,26 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * On initialisation of activity pre-load all fragments to allow instant switching to increase performance
          */
-        fragmentManager.beginTransaction()
-            .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
-            .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
-            .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
-            .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
-            .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
-            .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
-            .commit()
+        if (!requestMoney)
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag).hide(exchangeTransferMoneyLinkFragment)
+                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag)
+                .commit()
+        else
+            fragmentManager.beginTransaction()
+                .add(R.id.container, identityFragment, identityFragmentTag).hide(identityFragment)
+                .add(R.id.container, exchangeFragment, exchangeFragmentTag).hide(exchangeFragment)
+                .add(R.id.container, contactsFragment, contactsFragmentTag).hide(contactsFragment)
+                .add(R.id.container, qrScanController, qrScanControllerTag).hide(qrScanController)
+                .add(R.id.container, settingsFragment, settingsFragmentTag).hide(settingsFragment)
+                .add(R.id.container, exchangeTransferMoneyLinkFragment, exchangeTransferMoneyLinkFragmentTag)
+                .add(R.id.container, walletOverviewFragment, walletOverviewFragmentTag).hide(walletOverviewFragment)
+                .commit()
 
         fragmentManager.executePendingTransactions()
 
@@ -250,6 +265,7 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
+
         if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
@@ -388,11 +404,17 @@ class ValueTransferMainActivity : BaseActivity() {
 
                     fragmentManager.executePendingTransactions()
 
-                    if (fragmentTag == settingsFragmentTag) {
-                        detailFragment(settingsFragmentTag, Bundle())
-                    } else {
-                        selectBottomNavigationItem(fragmentTag)
-                        (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
+                    when (fragmentTag) {
+                        settingsFragmentTag -> {
+                            detailFragment(settingsFragmentTag, Bundle())
+                        }
+                        exchangeTransferMoneyLinkFragmentTag -> {
+                            detailFragment(exchangeTransferMoneyLinkFragmentTag, Bundle())
+                        }
+                        else -> {
+                            selectBottomNavigationItem(fragmentTag)
+                            (getFragmentByTag(fragmentTag)!! as VTFragment).initView()
+                        }
                     }
                 }
             }
@@ -557,6 +579,16 @@ class ValueTransferMainActivity : BaseActivity() {
 
                 (settingsFragment as VTFragment).initView()
             }
+            exchangeTransferMoneyLinkFragmentTag -> {
+                fragmentManager.beginTransaction().apply {
+                    setCustomAnimations(0, R.anim.exit_to_left)
+                    if (activeFragment != null) hide(activeFragment)
+                    setCustomAnimations(R.anim.enter_from_right, 0)
+                    show(exchangeTransferMoneyLinkFragment)
+                }.commit()
+
+                (exchangeTransferMoneyLinkFragment as VTFragment).initView()
+            }
         }
     }
 
@@ -570,6 +602,7 @@ class ValueTransferMainActivity : BaseActivity() {
             exchangeFragmentTag -> exchangeFragment
             contactsFragmentTag -> contactsFragment
             settingsFragmentTag -> settingsFragment
+            exchangeTransferMoneyLinkFragmentTag -> exchangeTransferMoneyLinkFragment
             contactChatFragmentTag -> fragmentManager.findFragmentByTag(tag)
             else -> null
         }
@@ -1157,20 +1190,17 @@ class ValueTransferMainActivity : BaseActivity() {
         const val qrScanControllerTag = "qrscancontroller"
         const val contactChatFragmentTag = "contact_chat_fragment"
         const val settingsFragmentTag = "settings_fragment"
-
+        const val exchangeTransferMoneyLinkFragmentTag = "exchange_transfer_money_link_fragment"
         const val SNACKBAR_TYPE_SUCCESS = "success"
         const val SNACKBAR_TYPE_WARNING = "warning"
         const val SNACKBAR_TYPE_ERROR = "error"
         const val SNACKBAR_TYPE_INFO = "info"
-
         const val ARG_PUBLIC_KEY = "public_key"
         const val ARG_NAME = "name"
         const val ARG_PARENT = "parent_tag"
         const val ARG_FRAGMENT = "fragment"
-
         const val NOTIFICATION_INTENT_CHAT = 1
         const val NOTIFICATION_INTENT_TRANSACTION = 2
-
         const val PERMISSION_CAMERA = 2
     }
 }

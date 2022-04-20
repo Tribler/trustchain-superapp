@@ -39,6 +39,9 @@ android {
         consumerProguardFiles "consumer-rules.pro"
     }
 
+    packagingOptions {
+        exclude 'META-INF/kotlinx-coroutines-core.kotlin_module'
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -56,6 +59,7 @@ android {
     buildFeatures {
         viewBinding = true
     }
+    ndkVersion '21.1.6352462'
 }
 
 dependencies {
@@ -127,6 +131,8 @@ dependencies {
 
     // Side to confirm
     implementation "com.ncorti:slidetoact:0.9.0"
+
+    implementation "com.android.volley:volley:1.2.1"
 }
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
