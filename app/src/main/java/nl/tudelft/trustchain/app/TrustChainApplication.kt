@@ -48,13 +48,13 @@ import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.currencyii.CoinCommunity
 import nl.tudelft.trustchain.eurotoken.community.EuroTokenCommunity
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.gossipML.RecommenderCommunity
 import nl.tudelft.trustchain.gossipML.db.RecommenderStore
 import nl.tudelft.trustchain.peerchat.community.PeerChatCommunity
 import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.community.IdentityCommunity
 import nl.tudelft.trustchain.valuetransfer.db.IdentityStore
-
 import nl.tudelft.trustchain.voting.VotingCommunity
 import nl.tudelft.gossipML.sqldelight.Database as MLDatabase
 
@@ -64,10 +64,15 @@ class TrustChainApplication : Application() {
         super.onCreate()
 
         defaultCryptoProvider = AndroidCryptoProvider
-        initIPv8()
+
+        // Only start IPv8 here if we are on Android 11 or below.
+        val BUILD_VERSION_CODE_S = 31
+        if (Build.VERSION.SDK_INT < BUILD_VERSION_CODE_S) {
+            initIPv8()
+        }
     }
 
-    private fun initIPv8() {
+    fun initIPv8() {
         val config = IPv8Configuration(
             overlays = listOf(
                 createDiscoveryCommunity(),
@@ -283,8 +288,9 @@ class TrustChainApplication : Application() {
     private fun createEuroTokenCommunity(): OverlayConfiguration<EuroTokenCommunity> {
         val randomWalk = RandomWalk.Factory()
         val store = GatewayStore.getInstance(this)
+        val trustStore = TrustStore.getInstance(this)
         return OverlayConfiguration(
-            EuroTokenCommunity.Factory(store),
+            EuroTokenCommunity.Factory(store, trustStore, this),
             listOf(randomWalk)
         )
     }

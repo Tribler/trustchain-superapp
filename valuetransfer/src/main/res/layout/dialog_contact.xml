@@ -28,8 +28,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingBottom="8dp">
+            android:orientation="vertical">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cvContactImage"
@@ -215,27 +214,40 @@
         </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvSharedTitle"
+        style="@style/FragmentTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:text="@string/text_title_shared_with_contact"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/llContentTop"/>
+
     <LinearLayout
         android:id="@+id/llIsContact"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginHorizontal="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/llContentTop">
+        app:layout_constraintTop_toBottomOf="@+id/tvSharedTitle">
 
         <LinearLayout
             android:id="@+id/llTabChooser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="12dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/square_rounded"
             android:orientation="horizontal"
-            android:padding="4dp"
-            android:weightSum="2">
+            android:weightSum="2"
+            android:background="@drawable/square_rounded"
+            android:padding="4dp">
 
             <TextView
                 android:id="@+id/tvShowIdentityAttributes"
@@ -271,12 +283,15 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/clIdentityAttributes"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/square_rounded">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:id="@+id/tvNoAttributes"
@@ -284,21 +299,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="12dp"
                     android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="12dp"
                     android:text="@string/text_no_attributes"
                     android:textColor="?attr/onBackgroundColor"
                     android:textStyle="italic"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvAttributesInfo"
                     tools:visibility="visible" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvContactIdentityAttributes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
                     tools:itemCount="3"
                     tools:listitem="@layout/item_contact_identity_attribute" />
             </LinearLayout>
@@ -308,13 +319,16 @@
             android:id="@+id/clTransactions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:visibility="gone"
-            tools:visibility="visible">
+            tools:visibility="visible"
+            android:background="@drawable/square_rounded">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingVertical="4dp">
 
                 <TextView
                     android:id="@+id/tvNoTransactions"
@@ -322,14 +336,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="12dp"
                     android:paddingHorizontal="12dp"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="12dp"
                     android:text="@string/text_no_transactions"
                     android:textColor="?attr/onBackgroundColor"
                     android:textStyle="italic"
                     android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tvAttestationInfo"
                     tools:visibility="visible" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -344,6 +355,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="28dp"
                     android:layout_marginHorizontal="12dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@drawable/square_rounded"
                     android:paddingVertical="8dp"
                     android:src="@drawable/ic_arrow_down"

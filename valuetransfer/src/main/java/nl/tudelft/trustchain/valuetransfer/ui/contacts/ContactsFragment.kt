@@ -2,10 +2,12 @@ package nl.tudelft.trustchain.valuetransfer.ui.contacts
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.mattskala.itemadapter.Item
 import com.mattskala.itemadapter.ItemAdapter
 import kotlinx.android.synthetic.main.fragment_contacts_vt.*
@@ -192,6 +194,9 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
             ivSearchBarCancelIcon.isVisible = searchText != null && searchText.isNotEmpty()
             searchFilter = searchText.toString()
             observeContacts(viewLifecycleOwner, contactsAdapter)
+            observeChats(viewLifecycleOwner, chatsAdapter, chatItems, ADAPTER_RECENT)
+            observeChats(viewLifecycleOwner, archivedChatsAdapter, archivedChatItems, ADAPTER_ARCHIVE)
+            observeChats(viewLifecycleOwner, blockedChatsAdapter, blockedChatItems, ADAPTER_BLOCKED)
         }
 
         onFocusChange(binding.etSearchContact, requireContext())
@@ -201,19 +206,32 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
+        val drawable = ResourcesCompat.getDrawable(resources, R.drawable.divider_chat, requireContext().theme)
+
         binding.rvRecentChats.apply {
             adapter = chatsAdapter
             layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         binding.rvArchivedChats.apply {
             adapter = archivedChatsAdapter
             layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
         }
 
         binding.rvBlockedChats.apply {
             adapter = blockedChatsAdapter
             layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecorator(drawable!!) as RecyclerView.ItemDecoration)
+        }
+
+        binding.clAddNewContact.setOnClickListener {
+            ContactAddDialog(
+                getTrustChainCommunity().myPeer.publicKey,
+                null,
+                null
+            ).show(parentFragmentManager, tag)
         }
 
         observeContacts(viewLifecycleOwner, contactsAdapter)
@@ -232,6 +250,7 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         binding.clRecentChatsOptions.setOnClickListener {
             OptionsDialog(
                 R.menu.chats_types,
+                resources.getString(R.string.dialog_contacts_chats_view),
                 optionSelected = { _, item ->
                     when (item.itemId) {
                         R.id.actionArchiveChats -> toggleChats(ADAPTER_RECENT, ADAPTER_ARCHIVE)
@@ -286,11 +305,6 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                     binding.etSearchContact.showKeyboard(requireContext())
                 }
             }
-            R.id.actionAddContact -> ContactAddDialog(
-                getTrustChainCommunity().myPeer.publicKey,
-                null,
-                null
-            ).show(parentFragmentManager, tag)
         }
         return super.onOptionsItemSelected(item)
     }
@@ -303,15 +317,20 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
     ) {
         items.observe(
             owner,
-            Observer { list ->
+            Observer {
+                it.filter { item ->
+                    (item as ChatItem).contact.name.contains(searchFilter, ignoreCase = true) ||
+                        item.contact.mid.contains(searchFilter, ignoreCase = true) ||
+                        item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
+                }.let { list ->
+                    adapter.updateItems(list)
 
-                when (type) {
-                    ADAPTER_RECENT -> binding.tvNoRecentChats.isVisible = list.isEmpty()
-                    ADAPTER_ARCHIVE -> binding.tvNoArchivedChats.isVisible = list.isEmpty()
-                    ADAPTER_BLOCKED -> binding.tvNoBlockedChats.isVisible = list.isEmpty()
+                    when (type) {
+                        ADAPTER_RECENT -> binding.tvNoRecentChats.isVisible = list.isEmpty()
+                        ADAPTER_ARCHIVE -> binding.tvNoArchivedChats.isVisible = list.isEmpty()
+                        ADAPTER_BLOCKED -> binding.tvNoBlockedChats.isVisible = list.isEmpty()
+                    }
                 }
-
-                adapter.updateItems(list)
             }
         )
     }
@@ -320,14 +339,15 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
         contactItems.observe(
             owner,
             Observer {
-                val list = it.filter { item ->
+                it.filter { item ->
                     (item as ChatItem).contact.name.contains(searchFilter, ignoreCase = true) ||
                         item.contact.mid.contains(searchFilter, ignoreCase = true) ||
                         item.contact.publicKey.keyToBin().toHex().contains(searchFilter, ignoreCase = true)
-                }
-                adapter.updateItems(list)
+                }.let { list ->
+                    adapter.updateItems(list)
 
-                binding.tvNoContacts.isVisible = list.isEmpty()
+                    binding.tvNoContacts.isVisible = list.isEmpty()
+                }
             }
         )
     }
@@ -372,10 +392,13 @@ class ContactsFragment : VTFragment(R.layout.fragment_contacts_vt) {
                 val contact = getContactStore().getContactFromPublicKey(publicKey)
                 val status = state.firstOrNull { it.publicKey == publicKey }
                 val image = images.firstOrNull { it.publicKey == publicKey }
+                val identityName = status?.identityInfo?.let {
+                    "${it.initials} ${it.surname}"
+                }
 
                 ChatItem(
                     Contact(
-                        contact?.name ?: resources.getString(R.string.text_unknown_contact),
+                        contact?.name ?: (identityName ?: resources.getString(R.string.text_unknown_contact)),
                         publicKey
                     ),
                     message,

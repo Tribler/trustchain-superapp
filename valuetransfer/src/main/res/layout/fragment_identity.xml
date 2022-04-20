@@ -7,173 +7,186 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <TextView
-        style="@style/FragmentTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="Identity Details" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvIdentities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         tools:itemCount="1"
         tools:listitem="@layout/item_identity_detail" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp">
-
-        <TextView
-            style="@style/FragmentTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="Identity Extensions" />
-
-        <ImageView
-            android:id="@+id/ivAddAttributeAttestation"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:padding="4dp"
-            android:src="@drawable/ic_add_black_24dp"
-            app:tint="?attr/mutedColor" />
-
-    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="4dp"
-        android:background="@drawable/square_stroked"
-        android:orientation="vertical">
+        android:layout_marginTop="12dp"
+        android:paddingStart="4dp"
+        android:orientation="vertical"
+        android:background="@drawable/square_rounded">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                style="@style/FragmentTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:text="Identity Extensions" />
+
+            <RelativeLayout
+                android:id="@+id/rlScanIdentityQR"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintDimensionRatio="H1,1"
+                android:background="@drawable/pill_rounded"
+                android:backgroundTint="?attr/dialogColor"
+                android:padding="8dp"
+                android:layout_alignParentEnd="true">
+
+                <ImageView
+                    android:id="@+id/ivAddAttributeAttestation"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_add_black_24dp"
+                    app:tint="?attr/mutedColor" />
+
+            </RelativeLayout>
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/llTabChooser"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@drawable/square_rounded"
-            android:backgroundTint="?attr/widgetColor"
-            android:padding="4dp"
-            android:weightSum="2"
-            app:layout_constraintTop_toBottomOf="@+id/rvIdentities">
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/square_stroked"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tvShowIdentityAttributes"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:id="@+id/llTabChooser"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/pill_rounded_selected"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingHorizontal="8dp"
+                android:orientation="horizontal"
+                android:background="@drawable/square_rounded"
+                android:backgroundTint="?attr/widgetColor"
                 android:paddingVertical="4dp"
-                android:text="Identity Attributes"
-                android:textColor="?attr/onWidgetColor"
-                android:textStyle="bold" />
+                android:weightSum="2"
+                app:layout_constraintTop_toBottomOf="@+id/rvIdentities">
 
-            <TextView
-                android:id="@+id/tvShowAttestations"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/pill_rounded"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:text="@string/text_title_attestations"
-                android:textColor="?attr/onWidgetColor" />
+                <TextView
+                    android:id="@+id/tvShowIdentityAttributes"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/pill_rounded_selected"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="Identity Attributes"
+                    android:textColor="?attr/onWidgetColor"
+                    android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/tvShowAttestations"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/pill_rounded"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:text="@string/text_title_attestations"
+                    android:textColor="?attr/onWidgetColor" />
+
+            </LinearLayout>
         </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/clIdentityAttributes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvNoAttributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/text_no_attributes"
+                    android:textColor="?attr/onBackgroundColor"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAttributesInfo"
+                    tools:visibility="visible" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAttributes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    app:layout_constraintTop_toBottomOf="@+id/tvNoAttributes"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/item_identity_attribute" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/clAttestations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvNoAttestations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="12dp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/text_no_attestations"
+                    android:textColor="?attr/onBackgroundColor"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvAttestationInfo"
+                    tools:visibility="visible" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAttestations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
+                    app:layout_constraintTop_toBottomOf="@+id/tvNoAttestations"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/item_identity_attestation" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/clIdentityAttributes"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvNoAttributes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"
-                android:text="@string/text_no_attributes"
-                android:textColor="?attr/onBackgroundColor"
-                android:textStyle="italic"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvAttributesInfo"
-                tools:visibility="visible" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAttributes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoAttributes"
-                tools:itemCount="1"
-                tools:listitem="@layout/item_identity_attribute" />
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/clAttestations"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvNoAttestations"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="12dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"
-                android:text="@string/text_no_attestations"
-                android:textColor="?attr/onBackgroundColor"
-                android:textStyle="italic"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tvAttestationInfo"
-                tools:visibility="visible" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAttestations"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="12dp"
-                app:layout_constraintTop_toBottomOf="@+id/tvNoAttestations"
-                tools:itemCount="1"
-                tools:listitem="@layout/item_identity_attestation" />
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-
 </LinearLayout>

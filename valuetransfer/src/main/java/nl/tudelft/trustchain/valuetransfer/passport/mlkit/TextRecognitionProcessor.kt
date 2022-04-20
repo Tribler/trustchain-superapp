@@ -410,6 +410,7 @@ class TextRecognitionProcessor(
             if (isMrzValid(mrzInfo)) {
                 // Delay returning result 1 sec. in order to make mrz text become visible on graphicOverlay by user
                 // You want to call 'resultListener.onSuccess(mrzInfo)' without no delay
+                @Suppress("DEPRECATION")
                 Handler().postDelayed({ resultListener.onSuccess(mrzInfo) }, 1000)
             }
         } catch (e: java.lang.Exception) {

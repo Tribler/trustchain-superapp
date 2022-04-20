@@ -5,9 +5,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.view.isVisible
 import com.mattskala.itemadapter.ItemLayoutRenderer
+import nl.tudelft.ipv8.keyvault.PublicKey
 import nl.tudelft.trustchain.common.contacts.ContactStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
+import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
+import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.util.formatBalance
 import java.math.BigInteger
 import java.text.SimpleDateFormat
@@ -15,6 +18,7 @@ import java.util.*
 
 class ExchangeTransactionItemRenderer(
     private val withName: Boolean,
+    private val parentActivity: ValueTransferMainActivity,
     private val onTransactionClick: (ExchangeTransactionItem) -> Unit
 ) : ItemLayoutRenderer<ExchangeTransactionItem, View>(
     ExchangeTransactionItem::class.java
@@ -48,13 +52,14 @@ class ExchangeTransactionItemRenderer(
             }
             TransactionRepository.BLOCK_TYPE_TRANSFER -> {
                 val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(item.transaction.sender)
+                val contactName = contact?.name
+                val unknownName = resources.getString(R.string.text_unknown_contact)
 
                 transactionType.text = if (outgoing) {
                     if (withName) {
                         this.context.resources.getString(
                             R.string.text_exchange_transaction_outgoing_to,
-                            contact?.name
-                                ?: this.context.resources.getString(R.string.text_unknown_contact)
+                            getName(item.transaction.sender) ?: (contactName ?: unknownName)
                         )
                     } else {
                         this.context.resources.getString(R.string.text_exchange_transaction_outgoing)
@@ -63,7 +68,7 @@ class ExchangeTransactionItemRenderer(
                     if (withName) {
                         this.context.resources.getString(
                             R.string.text_exchange_transaction_incoming_to,
-                            contact?.name ?: this.context.resources.getString(R.string.text_unknown_contact)
+                            getName(item.transaction.sender) ?: (contactName ?: unknownName)
                         )
                     } else {
                         this.context.resources.getString(R.string.text_exchange_transaction_incoming)
@@ -105,6 +110,18 @@ class ExchangeTransactionItemRenderer(
         view.setOnClickListener {
             onTransactionClick(item)
         }
+    }
+
+    fun getName(publicKey: PublicKey): String? {
+        val contactState = parentActivity.getStore<PeerChatStore>()!!
+            .getContactState(publicKey)?.identityInfo
+        val identityInitials = contactState?.initials
+        val identitySurname = contactState?.surname
+
+        return if (identityInitials != null && identitySurname != null) {
+            StringBuilder().append(identityInitials).append(" ").append(identitySurname)
+                .toString()
+        } else null
     }
 
     override fun getLayoutResourceId(): Int {
