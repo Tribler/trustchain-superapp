@@ -1,6 +1,8 @@
+# Atomic Swap app
 
+This app allows for the trading of Ethereum and Bitcoin through atomic swaps.
 
-### Our approach
+## Our approach
 The Atomic Swap Protocol
 Our app currently supports the following atomic swaps:
 - Bitcoin <-> Bitcoin
@@ -19,6 +21,7 @@ The protocol we use consists of 4 messages; broadcast, accept, initiate and comp
 
 5. Alice receives the complete message and claims the funds Bob locked. Bob realizes this and then claims the funds Alice locked.
 
+<img src="https://user-images.githubusercontent.com/21971137/164295370-bd3a8cdb-21e2-4773-89ee-dbbb038221cc.png" width="180">
 
 ### Bitcoin specifics
 
@@ -43,17 +46,18 @@ We use IPv8 for communication and sending/receiving messages. We have created th
 ### TrustChain
 
 Currently, we use TrustChain to store completed transactions between two users. The blocks will have the ATOMIC_SWAP_COMPLETED_BLOCK type, and each block contains the following information about the transaction: offer id, the source and destination coin, the sent and received amount of currency.
-### Challenges
+## Challenges
 - Jvm cryptocurrency libraries are not as well maintained as Javascript libraries. We had some problems getting everything to work with Bitcoinj and Web3j.
 - The superapp has many logs, so trying to debug our part was hard in the beginning. Additionally, sometimes the logs would not show up.
 - Testing and debugging the code involves running the application on two devices and this setup therefore consumes much time.
-### Future work
+## Future work
 - Display more detailed status of your trade - maybe be able to expand the trade offer item, and view what is the current progress; we are already doing this in the logs, but not UI.
 - TrustScore - crawl the chain of the user and calculate a score based on how many successful transactions that user has; this will be the trust/reliability score for that user.
 - Persist swaps to memory to continue after the app is closed.
 - Handle different kinds of exceptions e.g. when a user does not have enough money for the swap.
 - Implement the reclaiming of the money if something does not go as expected. Currently the money will stay locked and the user has no way of retrieving it.
-Usage instructions
+-
+## Usage instructions
 
 ### Preparing the coin nodes
 In order for the app to work, it has to be able to connect with Bitcoin and Ethereum (geth) nodes. These can be deployed with the included Docker Compose file in the `docker` directory in the project’s root by [following the instructions](../docker/README.md).
@@ -69,32 +73,30 @@ In order for the atomic swaps involving Ethereum to work, the Ethereum contract 
 After deploying the contract the build config variables need to be changed in the `build.gradle` of the atomic swap module:
 `ETH_SWAP_CONTRACT` should be changed to the contract address.
 `ETH_CHAIN_ID` should be changed to the chain id of the network the contract was deployed at.
-### Debugging
-Some debugging information can be found by searching for “Atomic Swap” in logcat.
+
 ### Process of making a swap
 
 A user creates a swap offer in the swap tab and broadcasts it to all users using ipv8.
 
-*insert image of the swap tab.
-![Screenshot 2022-04-20 191710](https://user-images.githubusercontent.com/21971137/164291922-959cd2b8-a848-4f10-a4bb-4cadf8fbe617.png)
+<img src="https://user-images.githubusercontent.com/21971137/164291922-959cd2b8-a848-4f10-a4bb-4cadf8fbe617.png" width="180">
 
 
 A user sees all available swap offers in the trade offers tab and can start a swap by clicking on the accept button of the desired swap offer.
 
-*insert image of the trade offers tab!
-[Screenshot 2022-04-20 195132](https://user-images.githubusercontent.com/21971137/164292243-63417f62-8cd3-4758-ac29-1cad77ee05f3.png)
+<img src="https://user-images.githubusercontent.com/21971137/164292243-63417f62-8cd3-4758-ac29-1cad77ee05f3.png" width="180">
 
 
 While the atomic swap is in progress, the status of the swap in the swap offers tab will be in progress and when the swap finishes, the status will change to completed.
 
-*insert images of trade offers tab with this statuses
-![in_progress](https://user-images.githubusercontent.com/21971137/164292369-2191bfd2-5036-4e01-8b68-da0d444f802a.png)
+<img src="https://user-images.githubusercontent.com/21971137/164292369-2191bfd2-5036-4e01-8b68-da0d444f802a.png" width="180">
 
-![completed](https://user-images.githubusercontent.com/21971137/164292663-d2b20d5c-c594-4f7e-9375-702bf8350e35.png)
+<img src="https://user-images.githubusercontent.com/21971137/164292663-d2b20d5c-c594-4f7e-9375-702bf8350e35.png" width="180">
 
 The balance in the users wallets will change accordingly.
 
-*insert image of the wallet balance before/after
-![Screenshot 2022-04-20 195049](https://user-images.githubusercontent.com/21971137/164292774-640abb61-cd25-4b26-8a7f-8a9f6c800332.png)
-![balance_after](https://user-images.githubusercontent.com/21971137/164292789-1d064394-87a7-4c62-a22c-602c55128be3.png)
+<img src="https://user-images.githubusercontent.com/21971137/164292774-640abb61-cd25-4b26-8a7f-8a9f6c800332.png" width="180">
+<img src="https://user-images.githubusercontent.com/21971137/164292789-1d064394-87a7-4c62-a22c-602c55128be3.png" width="180">
 
+## Problems
+
+Currently, there is a random bug where IPV8 fails to decode messages correctly. Because of this the swap may not work everytime.
