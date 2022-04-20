@@ -165,6 +165,7 @@ Below is a video demo that shows the steps to do an atomic swap.
 
 <a href="https://user-images.githubusercontent.com/21971137/164297537-e8b4ff5f-a999-4e6d-b1e8-17135399848e.mp4" title="Swap Demo"><img src="https://user-images.githubusercontent.com/21971137/164298818-a152b7ca-6ebe-4038-a449-e6a246c7f1ab.png" alt="Alternate Text" /></a>
 
+[More about The Atomic Swap app](atomic-swap/README.md)
 
 ### Do you want to add your own app?
 
