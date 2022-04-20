@@ -58,7 +58,6 @@ Previously, transfers could only be done with verified money. Before creating th
 Now, the receiver has the possibility to specify whether unverified money is accepted. If unverified money is not allowed, no transfer proposal block will be created when the sender has a verified balance that is too low. In the case that unverified money is allowed by the receiver, there are two possibilities. Either the sender has enough verified money, in which case he/she will automatically pay with verified money, or the sender does not have enough verified money, which is the case where unverified money can be transferred. The unverified balance of the sender is calculating by subtracting the verified balance from the total balance, which is calculated by the function `getBalanceForBlock()`. If both balances are too low, the proposal block is not created.
 
 > The flowchart below shows the **new transfer protocol**.
-[color=#3b75c6]
 
 <img src="https://imgur.com/UnsIv49.png" alt="chart" style="width:1000px;margin-top:10px;margin-bottom:20px;">
 
