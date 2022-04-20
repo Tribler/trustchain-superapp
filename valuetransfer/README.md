@@ -156,13 +156,14 @@ fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified
 Both the verified and the unverified balances are now separately visible on the main screen and on the Wallet page. When making a transfer request, the user is able to specify whether unverified money is accepted with a toggle button. Before signing a transfer proposal, the receiver will get a warning when the transfer is unverified. The receiver is also able to see the trust score of the sender. Each device stores the trust scores of all users locally. This section provides visualizations of this new functionality.
 
 ### Screenshots
-<img src="https://imgur.com/PqtdiSE.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-<img src="https://imgur.com/Bj2HhjT.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-<img src="https://imgur.com/fy630qt.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-
-<img src="https://imgur.com/0qDrtwN.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-<img src="https://imgur.com/IE80CRJ.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-<img src="https://imgur.com/25AvPl8.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+<div style="display:inline;">
+    <img src="https://imgur.com/PqtdiSE.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/Bj2HhjT.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/fy630qt.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/0qDrtwN.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/IE80CRJ.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/25AvPl8.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+</div>
 
 ### Demo of an unverified transfer
 ![permalink setting demo](https://imgur.com/x7R3SNe.gif)
