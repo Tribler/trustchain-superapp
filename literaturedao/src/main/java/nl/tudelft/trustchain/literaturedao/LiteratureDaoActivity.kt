@@ -9,18 +9,12 @@ import android.widget.SearchView
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -38,7 +32,6 @@ import java.io.*
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
-import java.io.*
 import java.lang.Exception
 import java.util.*
 import kotlin.math.roundToInt
@@ -50,8 +43,6 @@ open class LiteratureDaoActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_literaturedao
     override val bottomNavigationMenu = R.menu.literature_navigation_menu
     val metaDataLock = ReentrantLock()
-    val scope = CoroutineScope(Job() + Dispatchers.Main)
-
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
     private var progressVisible = false
@@ -170,29 +161,29 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     override fun onStart() {
         super.onStart()
-        Log.e("litdao", "starting ...")
-
-        try{
-            //testImportPDF()
-            //Log.e("litdao", loadMetaData().toString())
-        } catch (e: Exception){
-            Log.e("litdao", "litDao exception: " + e.toString())
-        }
-
-        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
-
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-
-                return false
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                if (!newText.isNullOrEmpty())
-                    Log.d("litdao", localSearch(newText).toString())
-                return false
-            }
-        })
+//        Log.e("litdao", "starting ...")
+//
+//        try{
+//            //testImportPDF()
+//            //Log.e("litdao", loadMetaData().toString())
+//        } catch (e: Exception){
+//            Log.e("litdao", "litDao exception: " + e.toString())
+//        }
+//
+//        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
+//
+//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//
+//                return false
+//            }
+//
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                if (!newText.isNullOrEmpty())
+//                    Log.d("litdao", localSearch(newText).toString())
+//                return false
+//            }
+//        })
         //Log.d("litdao", localSearch("dpca").toString())
 //        Log.e("litdao", "starting ...")
 //
@@ -222,7 +213,7 @@ open class LiteratureDaoActivity : BaseActivity() {
             i += 1
         }
     }
-    
+
         //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
 /*
         try{
@@ -310,13 +301,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         return ti
     }
 
-}
-
-
-fun localSearch(inp: String): MutableList<Pair<String, Double>>{
-    var handler = QueryHandler()
-    return handler.scoreList(inp, loadAll())
-}
 
     @Serializable
     data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>)
