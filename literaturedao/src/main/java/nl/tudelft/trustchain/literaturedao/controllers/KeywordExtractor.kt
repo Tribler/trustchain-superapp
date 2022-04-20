@@ -1,28 +1,26 @@
 
 package nl.tudelft.trustchain.literaturedao.controllers
 
-import android.R
 import android.util.Log
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.InputStream
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 
 class KeywordExtractor : LiteratureDaoActivity() {
 
-    // Function that loads the acerage stemmed word occurance
+    val hardCodedMagickNumber = 1
+    val maxKWs = 99999
 
-    fun instantiateAvgFreqMap(csv: BufferedReader): Map<String, Long>{
+    // Function that loads the average stemmed word occurance
+    fun instantiateAvgFreqMap(csv: InputStream): Map<String, Long>{
 
         var res = mutableMapOf<String, Long>()
-
-        val reader = csv
-        var line : String
-        while (reader.readLine().also { line = it } != null){
-            val key = line.split(",".toRegex())[0]
-            val num = line.split(",".toRegex())[1].toLong()
+        csv.bufferedReader().useLines { lines -> lines.forEach {
+            val key = it.split(",".toRegex())[0]
+            val num = it.split(",".toRegex())[1].toLong()
             res[key] = num
+            }
         }
         return res
     }
@@ -45,43 +43,7 @@ class KeywordExtractor : LiteratureDaoActivity() {
         }
     }
 
-    // Quik fix alternative if the actual implementation does not work
-    fun quikFix(arg: String): kotlin.collections.MutableList<Result> {
-
-        //List of frequently used words
-        val banList = listOf("a", "about", "above", "actually", "after", "again", "against", "all", "almost", "also", "although", "always", "am", "an", "and", "any", "are", "as", "at", "be", "became", "become", "because", "been", "before", "being", "below", "between", "both", "but", "by", "can", "could", "did", "do", "does", "doing", "down", "during", "each", "either", "else", "few", "for", "from", "further", "had", "has", "have", "having", "he", "hence", "her", "here", "hers", "herself", "him", "himself", "his", "how", "I", "if", "in", "into", "is", "it", "its", "itself", "just", "may", "maybe", "me", "might", "mine", "more", "most", "must", "my", "myself", "neither", "nor", "not", "of", "oh", "on", "once", "only", "ok", "or", "other", "ought", "our", "ours", "ourselves", "out", "over", "own", "same", "she", "should", "so", "some", "such", "than", "that", "the", "their", "theirs", "them", "themselves", "then", "there", "these", "they", "this", "those", "through", "to", "too", "under", "until", "up", "very", "was", "we", "were", "what", "when", "whenever", "where", "whereas", "wherever", "whether", "which", "while", "who", "whoever", "whose", "whom", "why", "will", "with", "within", "would", "yes", "yet", "you", "your", "yours", "yourself", "yourselves")
-
-        var input = stem(arg)
-            .split("\\s".toRegex())
-
-        var freqMap = mutableMapOf<String, Int>()
-
-        var total = 0
-
-        // Count words
-        for (word in input){
-            if (word in banList) continue
-            total += 1
-            if (word !in freqMap.keys){
-                freqMap[word] = 1
-            } else {
-                freqMap[word] = freqMap.getValue(word) + 1
-            }
-        }
-
-        var pressenceList = mutableListOf<Result>()
-
-        //Calculate word pressence
-        for ((word, freq) in freqMap.entries){
-            pressenceList.add(Result(word, freq.toDouble() / total.toDouble()))
-        }
-
-        pressenceList.sortBy { it.second }
-        pressenceList.reverse()
-        return pressenceList
-    }
-
-    fun actualImplementation(text: String, csv: BufferedReader): kotlin.collections.MutableList<Result> {
+    fun extract(text: String, csv: InputStream): MutableList<Pair<String, Double>> {
 
         // Establish general averages
         val avgTotal = 588089694315
@@ -113,15 +75,28 @@ class KeywordExtractor : LiteratureDaoActivity() {
 
         //Calculate relative frequencies per word
         for ((word, freq) in freqMap.entries){
-            val avgFreq = avgFreqMap[word]
-            if (avgFreq == null) continue
-            relativeFreqList.add(Result(word, (freq.toDouble() / total.toDouble())  / (avgFreq.toDouble() / avgTotal.toDouble())))
+            var avgFreq = avgFreqMap[word]
+            if (avgFreq == null) {
+                avgFreq = 1
+            }
+            val relativeFreq = (freq.toDouble() / total.toDouble())  / (avgFreq.toDouble() / avgTotal.toDouble())
+            // filter for relevance of the word
+            if (relativeFreq > hardCodedMagickNumber) {
+                relativeFreqList.add(Result(word, relativeFreq))
+            }
         }
-
-        //sort results (not working yet)
+        // sort results (not working yet)
         relativeFreqList.sortBy { it.second }
         relativeFreqList.reverse()
+        // cutoff for top 100 results
+        if (relativeFreqList.size > maxKWs) {
+            relativeFreqList = relativeFreqList.slice(0..(maxKWs - 1)).toMutableList()
+        }
         Log.d("litdao", relativeFreqList.toString())
-        return relativeFreqList
-    }
+        var result: MutableList<Pair<String, Double>> = mutableListOf<Pair<String, Double>>()
+        for(res in relativeFreqList){
+            result.add(Pair(res.first, res.second))
+        }
+        return result
+        }
 }
