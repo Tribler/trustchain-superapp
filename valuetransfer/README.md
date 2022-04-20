@@ -12,7 +12,8 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
 
 
 ## Table of Contents
-[ToC]
+- [luxury-communism](#luxury-communism)
+    - [Table of Contents](#Table-of-contents)
 
 ## Offline Gateway
 Before, one gateway existed that was hard coded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan QR code that contains information about a gateway. With this option, a gateway can be added without doing a transaction with it. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
