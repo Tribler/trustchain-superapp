@@ -1,14 +1,17 @@
 package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.SearchView
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
 import android.widget.Toast
+import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
@@ -142,7 +145,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         var text: String? = null
         while ({ text = bufferedReader.readLine(); text }() != null) {
             stringBuilder.append(text)
-            }
+        }
         return Json.decodeFromString<KeyWordModelView.Data>(stringBuilder.toString())
     }
 
@@ -214,7 +217,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
-        //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
+    //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
 /*
         try{
             Log.e("litdao", "litDao read: " + read("1.pdf").content.toString())
@@ -323,4 +326,36 @@ open class LiteratureDaoActivity : BaseActivity() {
         val context = this.baseContext
         operations(path, context)
     }
+
+
+    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?)
+    {
+        if (requestCode == 100) {
+            var fileUri = data?.data
+            if (fileUri != null) {
+                val d = DocumentFile.fromSingleUri(this, fileUri)
+                if (d != null) {
+                    Log.d("litdao", "file name: " + d.name)
+                    Log.d("litdao", "file path: " + d.uri.path)
+                    var intent = Intent(Intent.ACTION_VIEW);
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setDataAndType(d.uri, "application/pdf");
+                    intent = Intent.createChooser(intent, "Open File");
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    fun filePicker(view: View) {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "*/*"
+        startActivityForResult(intent, 100)
+
+    }
+
+
+
 }
