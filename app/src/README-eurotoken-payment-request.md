@@ -62,13 +62,13 @@ In order to enhance security of link sharing through insecure channels (is is so
 ## Installation
 ### Requirements:
 ### Steps:
-1. git clone --recurse-submodules https://github.com/Nieuwlaar/trustchain-superapp.git
+1. `git clone --recurse-submodules` https://github.com/Nieuwlaar/trustchain-superapp.git
 2. Setup exchange server (follow its readme) from https://github.com/mkhattat/stablecoin-exchange
-3. After exchange setup, go to run_coin.py and change GATEWAY_HOSTNAME to the IP address of your computer running the python server
-4. Now make some changes to TrustChain App. Basically change my IP (192.168.0.106) to your computer IP:
-5. go to app/src/main/res/xml/network_security_config.xml and change 192.168.0.106 to your local IP
-6. go to common/build.gradle and change ONLY IP of DEFAULT_GATEWAY_HOST to your IP
-7. Run backend exchange with python3 run_coin.py
+3. After exchange setup, go to `run_coin.py` and change `GATEWAY_HOSTNAME` to the IP address of your computer running the python server
+4. Now make some changes to TrustChain App. Basically change my IP (`192.168.0.106`) to your computer IP:
+5. go to `app/src/main/res/xml/network_security_config.xml` and change `192.168.0.106` to your local IP
+6. go to `common/build.gradle` and change ONLY IP of `DEFAULT_GATEWAY_HOST` to your IP
+7. Run backend exchange with `python3 run_coin.py`
 
 ## Challenges:
 Working with this project came along with some challenges, namely: 
