@@ -60,20 +60,45 @@ In order to enhance security of link sharing through insecure channels (is is so
 
 
 ## Installation
-### Requirements:
+## Before running:
+To make the process of link sharing and receiving the transactions easier, we have made some changes to the exchange, namely, we added a method called `check_payments_done` in the `backend/stablecoin/stablecoin.py`. This method checks every 5 seconds for pending transactions to see if they are paid. If so, it will process the payment to finalize the transactions. This is especially relevant when the user uses the second scenario, namely Euro to EuroToken in which a Tikkie link will be used to pay in Euro.
+
+However, this change is not necessary when the server is deployed. When the server is deployed a webhook should be implemented. The webhook will be called by the bank (e.g., in case of Tikkie link, the bank is ABN AMRO) when the user has finished the payment and paid, and then the exchange server can process the transaction. You can find a PR of this change to the exchange server [here.](https://github.com/KoningR/stablecoin-exchange/pull/1)
+
+- Setup the exchange server (https://github.com/KoningR/stablecoin-exchange) (follow its readme)
+- After exchange setup, go to `run_coin.py` and change `GATEWAY_HOSTNAME` to the IP address of your computer running the python server
+- Now make some changes to TrustChain App. Basically change my IP (`192.168.0.106`) to your computer IP
+- go to `app/src/main/res/xml/network_security_config.xml` and change `192.168.0.106` to your local IP
+- go to `common/build.gradle` and change ONLY IP of `DEFAULT_GATEWAY_HOST` to your IP
+- Run backend exchange with `python3 run_coin.py`
+
+Furthermore:
+- Android by default doesn't allow for clear traffic (HTTP). So to test the app with a 
+exchange server running on localhost you should add your IP address to ```app/src/main/res/xml/network_security_config.xml```:
+
+```
+        <domain includeSubdomains="true">127.0.0.1</domain>
+```
+
+- In ```common/build.gradle``` change ```DEFAULT_GATEWAY_HOST``` to the IP and Port of the exchange.
+Note that the port is the same as REST API port and not the port running IPV8 server.
+
+***TIP***: if you want to bypass the wallet creation step in the app, you can do it in the ```valuetransfer/src/main/java/nl/tudelft/trustchain/valuetransfer/ValueTransferMainActivity.kt``` by changing the following line 
+```
+    private val walletOverviewFragment = WalletOverviewFragment()
+```
+to this line
+```
+    private val walletOverviewFragment = ExchangeFragment()
+```
 ### Steps:
-1. `git clone --recurse-submodules` https://github.com/Nieuwlaar/trustchain-superapp.git
-2. Setup exchange server (follow its readme) from https://github.com/mkhattat/stablecoin-exchange
-3. After exchange setup, go to `run_coin.py` and change `GATEWAY_HOSTNAME` to the IP address of your computer running the python server
-4. Now make some changes to TrustChain App. Basically change my IP (`192.168.0.106`) to your computer IP:
-5. go to `app/src/main/res/xml/network_security_config.xml` and change `192.168.0.106` to your local IP
-6. go to `common/build.gradle` and change ONLY IP of `DEFAULT_GATEWAY_HOST` to your IP
-7. Run backend exchange with `python3 run_coin.py`
+- `git clone --recurse-submodules` https://github.com/Nieuwlaar/trustchain-superapp.git
+- Run TrustChain app
 
 ## Challenges:
 Working with this project came along with some challenges, namely: 
 
-- We could not fully test scenario 3 due to not being able to acquire the live API keys 
+- We could not fully test scenario 3 due to not being able to acquire the live API keys (Thanks to Robbert for trying though!)
 - The superapp code is not tested, hence there could be hidden bugs that might have contributed to difficulties of the project
 - There was no documentation with the code we worked with. During the progress, we did not know how to use specific code and has to go throug all the code with sometimes having to debug that code to understand it.
 - By default, ConfiApp used QR code as E2E communication, which enable the application to know the receiver of the payment - the receiver is known. However, with our payment request implementation, we can create and share link but there is actually no way to know who is the receiver for sure (IP address, Port, Identity, etc).  
@@ -110,37 +135,10 @@ We had difficulties with setting E2E intergration tests since you will need to s
 
 
 
-## Before running:
-
-- Setup the exchange server (https://github.com/KoningR/stablecoin-exchange) and modify two files ```common/build.grade``` and ```eurotoken/…/EuroTokenCommunity.kt``` as mentioned in the readme
-
-- Android by default doesn't allow for clear traffic (HTTP). So to test the app with a 
-exchange server running on localhost you should add your IP address to ```app/src/main/res/xml/network_security_config.xml```:
-
-```
-        <domain includeSubdomains="true">127.0.0.1</domain>
-```
-
-- In ```common/build.gradle``` change ```DEFAULT_GATEWAY_HOST``` to the IP and Port of the exchange.
-Note that the port is the same as REST API port and not the port running IPV8 server.
-
-***TIP***: if you want to bypass the wallet creation step in the app, you can do it in the ```valuetransfer/src/main/java/nl/tudelft/trustchain/valuetransfer/ValueTransferMainActivity.kt``` by changing the following line 
-```
-    private val walletOverviewFragment = WalletOverviewFragment()
-```
-to this line
-```
-    private val walletOverviewFragment = ExchangeFragment()
-```
-
 ## Notes
 
 To make the process of link sharing and receiving the transactions easier, we have made some changes to the exchange, namely, we added a method called ```check_payments_done``` in the ```backend/stablecoin/stablecoin.py```. This method checks every 5 seconds for pending transactions to see if they are paid. If so, it will process the payment to finalize the transactions. This is especially relevant when the user uses the second scenario, namely Euro to EuroToken in which a Tikkie link will be used to pay in Euro.
 
 However, this change is not necessary when the server is deployed. When the server is deployed a webhook should be implemented. The webhook will be called by the bank (e.g., in case of Tikkie link, the bank is ABN AMRO) when the user has finished the payment and paid, and then the exchange server can process the transaction.
 
-
-## Support:
-If you come across issues with this feature or simply have implementation questions, you can send them to:
-t.l.nguyen@student.tudeflt.nl
 
