@@ -22,7 +22,7 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
     - [User Interface](#User-Interface)
         - [Screenshots](#Screenshots)
         - [Demo of an unverified transfer](#Demo-of-an-unverified-transfer)
-    - [Considerations & Limitations](#Considerations-&-Limitations)
+    - [Considerations and Limitations](#Considerations-and-Limitations)
     - [Relevance of Offline Cash](#Relevance-of-Offline-Cash)
     - [References](#References)
 
@@ -167,7 +167,7 @@ Both the verified and the unverified balances are now separately visible on the 
 ### Demo of an unverified transfer
 ![permalink setting demo](https://imgur.com/x7R3SNe.gif)
 
-## Considerations & Limitations
+## Considerations and Limitations
 The notion of trust is implemented in order to refine security against double spending attacks in an offline setting. Although the implementation provides its users with extra tools in order to evaluate the trustworthiness of the user on the other end, it is still based on a lot of human assessment. An improved GUI and the added notion of trust through scores help with this assessment. This could help people living in rural communities with high trust to make transactions in an offline environment. But vulnerable people such as the elderly still remain vulnerable, further work is required to protect them and to decide who pays the cost of double spending attacks. Furthermore, trust can be boosted through if users have do lots of transactions within their community. Someone not from the community and thus without a known trust score might be extra vulnerable in the case of a disaster, when left stranded in an unknown area.
 
 
