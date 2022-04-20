@@ -5,8 +5,6 @@
         <domain includeSubdomains="true">134.122.59.107</domain>
         <!--        This is for RegTest faucet, to claim some starter money -->
         <domain includeSubdomains="true">131.180.27.224</domain>
-        <!--        This is for The Atomic swap ethereum and btc nodes  -->
-        <domain includeSubdomains="true">217.182.77.81</domain>
         <!--        IP address of the host machine when ran from the Android emulator -->
         <domain includeSubdomains="true">10.0.2.2</domain>
     </domain-config>

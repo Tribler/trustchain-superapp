@@ -3,6 +3,7 @@
 This app allows for the trading of Ethereum and Bitcoin through atomic swaps.
 
 ## Our approach
+
 The Atomic Swap Protocol
 Our app currently supports the following atomic swaps:
 - Bitcoin <-> Bitcoin
@@ -36,9 +37,6 @@ We use [web3j](https://github.com/web3j/web3j) to interact with the Ethereum net
 On the Ethereum side, the hash timelock is achieved using a solidity smart contract.
 The contract can be found at `src\main\java\nl\tudelft\trustchain\atomicswap\swap\eth\swap_contract.sol`
 
-
-
-
 ### IPv8
 
 We use IPv8 for communication and sending/receiving messages. We have created the AtomicSwap Community for this purpose, which implements callbacks for all the message types.
@@ -46,11 +44,15 @@ We use IPv8 for communication and sending/receiving messages. We have created th
 ### TrustChain
 
 Currently, we use TrustChain to store completed transactions between two users. The blocks will have the ATOMIC_SWAP_COMPLETED_BLOCK type, and each block contains the following information about the transaction: offer id, the source and destination coin, the sent and received amount of currency.
+
 ## Challenges
+
 - Jvm cryptocurrency libraries are not as well maintained as Javascript libraries. We had some problems getting everything to work with Bitcoinj and Web3j.
 - The superapp has many logs, so trying to debug our part was hard in the beginning. Additionally, sometimes the logs would not show up.
 - Testing and debugging the code involves running the application on two devices and this setup therefore consumes much time.
+
 ## Future work
+
 - Display more detailed status of your trade - maybe be able to expand the trade offer item, and view what is the current progress; we are already doing this in the logs, but not UI.
 - TrustScore - crawl the chain of the user and calculate a score based on how many successful transactions that user has; this will be the trust/reliability score for that user.
 - Persist swaps to memory to continue after the app is closed.
@@ -60,11 +62,21 @@ Currently, we use TrustChain to store completed transactions between two users. 
 ## Usage instructions
 
 ### Preparing the coin nodes
-In order for the app to work, it has to be able to connect with Bitcoin and Ethereum (geth) nodes. These can be deployed with the included Docker Compose file in the `docker` directory in the project’s root by [following the instructions](../docker/README.md).
 
-Once the nodes are deployed, the addresses have to be configured in the following build config variables:
-`BITCOIN_DEFAULT_PEER` in the common module’s `build.gradle` file - IP address of the machine with the Bitcoin node
-`ETH_HTTP_URL` in the common-ethereum module’s `build.gradle file - URL of the node, complete with the protocol (HTTP or HTTPS) and the port. In case the HTTPS protocol is used, the certificate has to be signed by the trusted certificate authority (eg. Let’s Encrypt).
+In order for the app to work, it has to be able to connect with Bitcoin and Ethereum (geth) nodes.
+These can be deployed with the included Docker Compose file in the `docker` directory in the
+project’s root by [following the instructions](../docker/README.md). The default configuration of
+the app is set for the local development on Android emulator (the IP address of 10.0.2.2). This
+means that the aforementioned Docker Compose services can be ran on the local machine of the
+developer.
+
+Once the nodes are deployed, the addresses have to be configured in the following build config
+variables:
+`BITCOIN_DEFAULT_PEER` in the common module’s `build.gradle` file - IP address of the machine with
+the Bitcoin node
+`ETH_HTTP_URL` in the common-ethereum module’s `build.gradle file - URL of the node, complete with
+the protocol (HTTP or HTTPS) and the port. In case the HTTPS protocol is used, the certificate has
+to be signed by the trusted certificate authority (eg. Let’s Encrypt).
 
 Additionally, the IP address(es) have to be added to the `network_security_config.xml` of the main application module, in order to allow the Trustchain’s application to communicate with the server.
 ### Deploying Ethereum Contract
@@ -96,5 +108,7 @@ The balance in the users wallets will change accordingly.
 
 ## Problems
 
-- Currently, there is a random bug where IPV8 fails to decode messages correctly. Because of this the swap may not work everytime.
-- We created some tests, but we removed them since adding them somehow made the IPV8 decode problem worse. 
+- Currently, there is a random bug where IPV8 fails to decode messages correctly. Because of this
+  the swap may not work everytime.
+- We created some tests, but we removed them since adding them somehow made the IPV8 decode problem
+  worse.
