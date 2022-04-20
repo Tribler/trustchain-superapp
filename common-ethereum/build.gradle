@@ -1,0 +1,63 @@
+plugins {
+    id 'com.android.library'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 29
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        // 10.0.2.2 - IP address of the host system on Android emulator
+        // Refer to included Docker Compose to launch the nodes locally
+        buildConfigField "String", "ETH_HTTP_URL", "\"http://10.0.2.2:8545\""
+
+        // The address of the MultiSig wallet deployed on the goerli test network.
+        buildConfigField "String", "ETH_TEST_MULTISIG_ADDR", "\"0x2DfEecF7d2f5363149cC73cAb96C00575c732170\""
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+        allWarningsAsErrors = true
+    }
+}
+
+repositories {
+    flatDir {
+        dirs '../common/libs'
+    }
+}
+
+dependencies {
+
+    api project(':common')
+
+    api(group: 'org.web3j', name: 'core', version: '4.6.0-android') {
+        exclude group: 'org.bouncycastle'
+    }
+    api group: 'org.ethereum', name: 'geth-android-all-1.10.1-c2d2f4ed', ext: 'aar'
+
+    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+}

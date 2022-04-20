@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_wallet"
+        android:icon="@drawable/ic_balance_wallet"
+        android:title="@string/title_wallet" />
+
+    <item
+        android:id="@+id/navigation_swap"
+        android:icon="@drawable/ic_currency_exchange"
+        android:title="@string/title_swap" />
+
+    <item
+        android:id="@+id/navigation_trade_offers"
+        android:icon="@drawable/ic_swap_horizontal_circle"
+        android:title="@string/title_trade_offers" />
+
+</menu>
