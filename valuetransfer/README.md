@@ -15,7 +15,7 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
 - [Unverified Transfers in ConfIDapp with Trust Network](#Unverified-Transfers-in-ConfIDapp-with-Trust-Network)
     - [Table of Contents](#Table-of-Contents)
     - [Offline Gateway](#Offline-Gateway)
-    - [Network of Trust](#Network of Trust)
+    - [Network of Trust](#Network-of-Trust)
         - [Technical specification](#Technical-specification)
     - [Unverified Transfers](#Unverified-Transfers)
         - [Changes in implementation](#Changes-in-implementation)
