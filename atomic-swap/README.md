@@ -56,7 +56,7 @@ Currently, we use TrustChain to store completed transactions between two users. 
 - Persist swaps to memory to continue after the app is closed.
 - Handle different kinds of exceptions e.g. when a user does not have enough money for the swap.
 - Implement the reclaiming of the money if something does not go as expected. Currently the money will stay locked and the user has no way of retrieving it.
--
+
 ## Usage instructions
 
 ### Preparing the coin nodes
@@ -96,4 +96,5 @@ The balance in the users wallets will change accordingly.
 
 ## Problems
 
-Currently, there is a random bug where IPV8 fails to decode messages correctly. Because of this the swap may not work everytime.
+- Currently, there is a random bug where IPV8 fails to decode messages correctly. Because of this the swap may not work everytime.
+- We created some tests, but we removed them since adding them somehow made the IPV8 decode problem worse. 
