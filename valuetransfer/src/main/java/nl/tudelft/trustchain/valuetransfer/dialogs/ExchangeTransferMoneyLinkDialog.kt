@@ -247,17 +247,17 @@ class ExchangeTransferMoneyLinkDialog(
         simpleParams.append("&paymentId=").append(paymentId)
         parameters.append("amount=").append(SecurityUtil.urlencode(transactionAmountText))
         parameters.append("&message=").append(SecurityUtil.urlencode(transactionMessage))
-        parameters.append("&host=").append(host)
-        parameters.append("&paymentId=").append(paymentId)
+        parameters.append("&host=").append(SecurityUtil.urlencode(host))
+        parameters.append("&paymentId=").append(SecurityUtil.urlencode(paymentId))
         if (name != null) {
             simpleParams.append("&name=").append(name)
             parameters.append("&name=").append(SecurityUtil.urlencode(name))
         }
         if (isEuroTransfer) {
             simpleParams.append("&t2e=").append(true)
-            parameters.append("&t2e=").append(true)
+            parameters.append("&t2e=").append(SecurityUtil.urlencode("true"))
             simpleParams.append("&port=").append(BuildConfig.DEFAULT_GATEWAY_PORT)
-            parameters.append("&port=").append(BuildConfig.DEFAULT_GATEWAY_PORT)
+            parameters.append("&port=").append(SecurityUtil.urlencode(BuildConfig.DEFAULT_GATEWAY_PORT.toString()))
         }
         simpleParams.append("&public=").append(ownKey.keyToBin().toHex())
         parameters.append("&public=").append(SecurityUtil.urlencode(ownKey.keyToBin().toHex()))

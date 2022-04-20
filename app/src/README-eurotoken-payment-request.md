@@ -28,7 +28,9 @@ However, if a link is shared through insecure channels where MITM can intercept 
 
 In order to enhance security of link sharing through insecure channels (is is sometimes still used nowadays), we implemented link signature. The receiver sign the link with his or her private key before sharing it to the payer through insecure channels, whose will validate the signature upon receiving the link. This will ONLY work if the payer already somehow has the public key of the receiver in list of contact contained in his device. A practical approach for this would be the one-time sharing of public key in person/ through secure channels and make use of link signature for payment requests subsequently. Another application for this in the future would be sending payment to organizations or goverment entities by beforehand verify signatures with their public key on their trusted sources such as websites. 
 
-### Three-way currency transaction flow
+
+### Two-way currency transaction flow
+
 
 Our implementation supports the following payment flow of currency with the payment requests:
 (1) Paying in EuroToken and receiving EuroToken
@@ -45,6 +47,7 @@ Implementing this enable the payer to pay without having the required funding in
 In order to enable currency exchange during the payment, we modified both the tokenization and detokenization flow (originally described in the EuroToken graduation thesis)  in order to "swap" the currencies for the multi-currency payment to work.
 
 After the payment request link is received by the intended recipient (payer), there are 3 scenarios - depending on the type of payment both the payer and receiver decided to use:
+
 file:///home/nosleep/Downloads/scenarios2(1).png![image](https://user-images.githubusercontent.com/16018391/163803312-12c46953-4271-4004-8470-c476f19db82c.png) (Credit: Erwin Nieuwlaar - @Nieuwlaar)
 
 Scenario 2 and 3 involves making use of the REST API of the EuroToken exchange, this is due to the reason that the payer and receiver makes use of different currencies and there is a need to exchange it at point of transaction. In order to make sure that resources are not being wasted on unecessary exchange of currency, the exchange process is only initiated after the payer has decided to pay (i.e. clicking on pay button the app). 
@@ -54,7 +57,6 @@ In order to make sure that payment information is available at point of payment,
 There is one problem with this approach. If a link is shared through insecure channels where MITM can intercept and tamper with the information in the link, then the payer will pay to the wrong receiver. Hence, we recommended using only end-to-end encrypted communication channels to share the link. 
 
 In order to enhance security of link sharing through insecure channels (is is sometimes still used nowadays), we implemented link signature. The receiver sign the link with his or her private key before sharing it to the payer through insecure channels, whose will validate the signature upon receiving the link. This will ONLY work if the payer already somehow has the public key of the receiver in list of contact contained in his device. A practical approach for this would be the one-time sharing of public key in person/ through secure channels and make use of link signature for payment requests subsequently. Another application for this in the future would be sending payment to organizations or goverment entities by beforehand verify signatures with their public key on their trusted sources such as websites. 
-
 
 
 ## Installation
@@ -71,7 +73,7 @@ In order to enhance security of link sharing through insecure channels (is is so
 ## Challenges:
 Working with this project came along with some challenges, namely: 
 
-- We could not fully test scenario 3 due to not being able to acquire the live API keys from Robert
+- We could not fully test scenario 3 due to not being able to acquire the live API keys 
 - The superapp code is not tested, hence there could be hidden bugs that might have contributed to difficulties of the project
 - There was no documentation with the code we worked with. During the progress, we did not know how to use specific code and has to go throug all the code with sometimes having to debug that code to understand it.
 - By default, ConfiApp used QR code as E2E communication, which enable the application to know the receiver of the payment - the receiver is known. However, with our payment request implementation, we can create and share link but there is actually no way to know who is the receiver for sure (IP address, Port, Identity, etc).  
@@ -82,6 +84,13 @@ Working with this project came along with some challenges, namely:
 - The link needs to be set up with a website which display payment information and methods so that the payer who does not have the EuroToken app can still make use of the EuroToken payment request system.
 
 - Even though our implementation of link sharing is very straight forward, during this progress there is no guarantee that the person behind the public key is the intended benficiary. The suggestion for the future is that, a validation mechanism should be implemented either in the server (with a trusted authority) or user to make sure the link is shared by a receiver linked to the strong identity (for example passport-enrolled identity in the app)
+
+
+- Implement a multi-payer system to enable multiple payer pay to same user and overview of payers to the payment system
+
+- Tying the payment request to the identity of the requester
+
+- Advertise and update IP and ports of clients to the exchange server so that they can be found there easily
 
 
 ## Testings:
@@ -99,6 +108,36 @@ Integration Tests:
 
 We had difficulties with setting E2E intergration tests since you will need to setup an instance of IPv8. We have also tried to do mock testing, however we came across a variety of problems. 
 
+
+
+## Before running:
+
+- Setup the exchange server (https://github.com/KoningR/stablecoin-exchange) and modify two files ```common/build.grade``` and ```eurotoken/…/EuroTokenCommunity.kt``` as mentioned in the readme
+
+- Android by default doesn't allow for clear traffic (HTTP). So to test the app with a 
+exchange server running on localhost you should add your IP address to ```app/src/main/res/xml/network_security_config.xml```:
+
+```
+        <domain includeSubdomains="true">127.0.0.1</domain>
+```
+
+- In ```common/build.gradle``` change ```DEFAULT_GATEWAY_HOST``` to the IP and Port of the exchange.
+Note that the port is the same as REST API port and not the port running IPV8 server.
+
+***TIP***: if you want to bypass the wallet creation step in the app, you can do it in the ```valuetransfer/src/main/java/nl/tudelft/trustchain/valuetransfer/ValueTransferMainActivity.kt``` by changing the following line 
+```
+    private val walletOverviewFragment = WalletOverviewFragment()
+```
+to this line
+```
+    private val walletOverviewFragment = ExchangeFragment()
+```
+
+## Notes
+
+To make the process of link sharing and receiving the transactions easier, we have made some changes to the exchange, namely, we added a method called ```check_payments_done``` in the ```backend/stablecoin/stablecoin.py```. This method checks every 5 seconds for pending transactions to see if they are paid. If so, it will process the payment to finalize the transactions. This is especially relevant when the user uses the second scenario, namely Euro to EuroToken in which a Tikkie link will be used to pay in Euro.
+
+However, this change is not necessary when the server is deployed. When the server is deployed a webhook should be implemented. The webhook will be called by the bank (e.g., in case of Tikkie link, the bank is ABN AMRO) when the user has finished the payment and paid, and then the exchange server can process the transaction.
 
 
 ## Support:
