@@ -103,6 +103,10 @@ class LiteratureGossiper(
         }
     }
 
+    fun addTorrentInfo(torrentInfo: TorrentInfo) {
+        this.torrentInfos.add(torrentInfo);
+    }
+
     private fun initializeEvaCallbacks() {
         literatureCommunity.setEVAOnReceiveCompleteCallback { peer, _, _, data ->
             data?.let {
@@ -410,9 +414,9 @@ class LiteratureGossiper(
 
     private fun onDownloadSuccess(torrentName: String) {
         activity.runOnUiThread {
-//            activity.createTorrent(torrentName)?.let {
-//                torrentInfos.add(it)
-//            }
+            activity.createTorrent(torrentName)?.let {
+                torrentInfos.add(it)
+            }
 //            activity.showAddedFile(torrentName)
         }
         downloadHasPassed()
