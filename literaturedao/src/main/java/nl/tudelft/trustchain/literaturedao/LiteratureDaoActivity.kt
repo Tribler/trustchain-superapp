@@ -351,8 +351,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         operations(path, context)
     }
 
-<<<<<<< Updated upstream
-=======
     fun importFromInternalStorage(d: DocumentFile){
         val pdf = contentResolver.openInputStream(d.uri)
         PDFBoxResourceLoader.init(baseContext)
@@ -371,7 +369,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         writeMetaData(metadata)
         metaDataLock.unlock()
     }
->>>>>>> Stashed changes
 
     override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?)
     {
@@ -380,6 +377,7 @@ open class LiteratureDaoActivity : BaseActivity() {
             if (fileUri != null) {
                 val d = DocumentFile.fromSingleUri(this, fileUri)
                 if (d != null) {
+                    importFromInternalStorage(d)
                     Log.d("litdao", "file name: " + d.name)
                     Log.d("litdao", "file path: " + d.uri.path)
                     var intent = Intent(Intent.ACTION_VIEW);
