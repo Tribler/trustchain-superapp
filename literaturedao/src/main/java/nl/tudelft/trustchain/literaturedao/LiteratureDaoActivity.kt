@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.roundToInt
 
 
-const val DEFAULT_LITERATURE = "1.pdf"
+const val DEFAULT_LITERATURE = "2.pdf"
 
 open class LiteratureDaoActivity : BaseActivity() {
     override val navigationGraph = R.navigation.nav_literaturedao
@@ -348,6 +348,9 @@ open class LiteratureDaoActivity : BaseActivity() {
                     importFromInternalStorage(d)
                     Log.d("litdao", "file name: " + d.name)
                     Log.d("litdao", "file path: " + d.uri.path)
+                    Log.d("litdao", "file exists? " + d.exists().toString())
+                    copyFile(File(d.uri.path.toString().substringAfter(":")), File(applicationContext.cacheDir.absolutePath + "/" + d.name))
+                    createTorrent(d.name.toString())
                     var intent = Intent(Intent.ACTION_VIEW);
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.setDataAndType(d.uri, "application/pdf");
@@ -364,7 +367,30 @@ open class LiteratureDaoActivity : BaseActivity() {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)
+    }
 
+    /**
+     * copy file from source to destination
+     *
+     * @param src source
+     * @param dst destination
+     * @throws java.io.IOException in case of any problems
+     */
+    @Throws(IOException::class)
+    fun copyFile(src: File?, dst: File?) {
+        try {
+            val inChannel = FileInputStream(src).channel
+            val outChannel = FileOutputStream(dst).channel
+
+            try {
+                inChannel.transferTo(0, inChannel.size(), outChannel)
+            } finally {
+                inChannel.close()
+                outChannel.close()
+            }
+        } catch (e: FileNotFoundException) {
+            Log.e("litdao", e.toString())
+        }
     }
 
 
