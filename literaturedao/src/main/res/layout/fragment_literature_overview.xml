@@ -122,6 +122,13 @@
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="141dp"
+                    android:layout_height="wrap_content"
+                    android:onClick="filePicker"
+                    android:text="Select File" />
+
                 <androidx.gridlayout.widget.GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
