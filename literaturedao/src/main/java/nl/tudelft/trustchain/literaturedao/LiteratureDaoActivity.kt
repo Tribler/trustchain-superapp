@@ -27,6 +27,7 @@ import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList
 import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
@@ -149,6 +150,18 @@ open class LiteratureDaoActivity : BaseActivity() {
     fun localSearch(inp: String): MutableList<Pair<String, Double>>{
         var handler = QueryHandler()
         return handler.scoreList(inp, loadMetaData().content)
+    }
+
+    fun remoteSeach() {
+        // get query from UI
+        val query = "TODO"
+
+        // send to peers
+        IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
+    }
+
+    fun updateSearchResults(results: SearchResultList){
+        // access UI and append results to some view
     }
 
     fun writeMetaData(newData: KeyWordModelView.Data){

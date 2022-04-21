@@ -15,6 +15,7 @@ import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.suppor
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
+import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -34,6 +35,7 @@ class LiteratureCommunity(
     object MessageID {
         const val DEBUG_MESSAGE = 1
         const val SEARCH_QUERY = 2
+        const val SEARCH_RESPONSE = 6
         const val TORRENT_MESSAGE = 3
         const val LITERATURE_REQUEST = 4
         const val LITERATURE = 5
@@ -49,6 +51,8 @@ class LiteratureCommunity(
             return LiteratureCommunity(context, settings, database, crawler)
         }
     }
+
+    val litDaoActivity = context as LiteratureDaoActivity
 
     companion object {
         // Use this until we can commit an id to kotlin ipv8
@@ -68,14 +72,45 @@ class LiteratureCommunity(
         }
     }
 
+    @OptIn(ExperimentalUnsignedTypes::class)
+    fun broadcastSearchQuery(query: String){
+        for (peer in getPeers()) {
+            val packet = serializePacket(MessageID.SEARCH_QUERY, LitDaoMessage(query))
+            send(peer.address, packet)
+        }
+    }
 
     private fun onDebugMessage(packet: Packet) {
         val (peer, payload) = packet.getAuthPayload(DebugMessage.Deserializer)
         Log.i("litdao", peer.mid + ": " + payload.message)
     }
 
-    private fun onQueryMessage(packet: Packet) {
-        // handle query message here
+    /**
+     * Received a remote query from other device.
+     * Perform local search on the query and respond with a list of relevant docs.
+     */
+    private fun onSearchQueryMessage(packet: Packet) {
+        // Decode packet
+        val (peer, payload) = packet.getAuthPayload(LitDaoMessage)
+
+        // Perform local search on the query
+        val results = litDaoActivity.localSearch(payload.message)
+
+        // Parse data and collect magnet links
+        results.sortByDescending { it.second }
+        val parsed = results.map { SearchResult(it.first, it.second, litDaoActivity.createTorrent(it.first)!!.makeMagnetUri()) }
+
+        // Encode and send to peer
+        val packet = serializePacket(MessageID.SEARCH_QUERY, SearchResultsMessage(SearchResultList(parsed)))
+        send(peer.address, packet)
+    }
+
+    /**
+     * Received relevant docs for my query
+     */
+    private fun onSearchResponseMessage(packet: Packet) {
+        val (peer, payload) = packet.getAuthPayload(SearchResultsMessage)
+        litDaoActivity.updateSearchResults(payload.results)
     }
 
     private fun onTorrentMessage(packet: Packet) {
@@ -190,7 +225,8 @@ class LiteratureCommunity(
 
     init {
         messageHandlers[MessageID.DEBUG_MESSAGE] = ::onDebugMessage
-        messageHandlers[MessageID.SEARCH_QUERY] = ::onQueryMessage
+        messageHandlers[MessageID.SEARCH_QUERY] = ::onSearchQueryMessage
+        messageHandlers[MessageID.SEARCH_RESPONSE] = ::onSearchResponseMessage
         messageHandlers[MessageID.TORRENT_MESSAGE] = ::onTorrentMessage
         messageHandlers[MessageID.LITERATURE_REQUEST] = ::onLiteratureRequestPacket
         messageHandlers[MessageID.LITERATURE] = ::onLiteraturePacket
