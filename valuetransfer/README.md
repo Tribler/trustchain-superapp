@@ -32,6 +32,8 @@ In the previous version, a default gateway existed that was hardcoded in the app
 In `ui.QRScanController` a new QR type was added with value `VALUE_GATEWAY`. Upon scanning this type of QR code the function `addGateway(data: JSONObject)` is invoked. The data object contains `KEY_PUBLIC_KEY`, `KEY_IP`, `KEY_PORT`, `KEY_NAME`, representing the connection details of this specific gateway.
 This data is shown to the user in a `GatewayAddDialog`, where the user can confirm the details and save the information to the `GatewayStore`.
 
+The modified exchange code and instructions can be found [here](https://github.com/leondeklerk/stablecoin-exchange)
+
 
 ## Network of Trust
 Currently, distributed ledgers create trust in transactions through computer systems without the need for third parties to confirm them. The most widely used distributed ledger for verification of transactions is blockchain, however this requires an online setting. In order to accommodate for expenditure of offline money, while decreasing the risk of double spending, a new solution is required. A chain of trust could validate participants, providing flexibility, but how does one know whether a user can be 100% trusted or not? Trust is often implemented through reputation scores. Malik et al [2] for example, utilize smart contracts to calculate reputation scores of participating parties.
