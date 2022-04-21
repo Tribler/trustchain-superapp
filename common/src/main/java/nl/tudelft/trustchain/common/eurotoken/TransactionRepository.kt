@@ -476,7 +476,7 @@ class TransactionRepository(
             .filter { block ->
                 val linkedBlock = blocks.find { it.linkedBlockId == block.blockId }
                 val hasLinkedBlock = linkedBlock != null
-                val outgoing = getBalanceChangeForBlock(block) < 0 || block.isProposal
+                val outgoing = getBalanceChangeForBlock(block) < 0
 
                 val outgoingTransaction = outgoing && hasLinkedBlock && block.type == BLOCK_TYPE_TRANSFER
                 val incomingTransaction = !outgoing && block.type == BLOCK_TYPE_TRANSFER && (blocks.find { it.blockId == block.linkedBlockId } != null)
@@ -496,7 +496,7 @@ class TransactionRepository(
                         (block.transaction[KEY_AMOUNT] as BigInteger).toLong()
                     } else 0L,
                     block.type,
-                    getBalanceChangeForBlock(block) < 0 || block.isProposal,
+                    getBalanceChangeForBlock(block) < 0,
                     block.timestamp
                 )
             }

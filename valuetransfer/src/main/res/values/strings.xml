@@ -471,7 +471,8 @@
     <string name="text_identity_required">A personal identity is required for this application. It is important to provide the correct details.</string>
     <string name="text_exchange_eurotoken">EuroToken</string>
     <string name="text_exchange_euro">Euro</string>
-
+    <string name="text_request_euro_1">Would you please pay me €</string>
+    <string name="text_request_euro_2"> via\n</string>
     <string-array name="exchange_types">
         <item>EuroToken</item>
         <item>Euro</item>

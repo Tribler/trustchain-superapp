@@ -223,7 +223,10 @@ class ExchangeTransferMoneyLinkDialog(
             action = Intent.ACTION_SEND
             putExtra(
                 Intent.EXTRA_TEXT,
-                "Would you please pay me €$transactionAmountText  via\n$link"
+                resources.getString(R.string.text_request_euro_1) +
+                    transactionAmountText +
+                    resources.getString(R.string.text_request_euro_2) +
+                    link
             )
             type = "text/plain"
         }
