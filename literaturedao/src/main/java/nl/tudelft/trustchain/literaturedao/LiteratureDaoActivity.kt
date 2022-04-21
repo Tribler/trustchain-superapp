@@ -7,17 +7,14 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.SearchView
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import kotlinx.coroutines.*
 import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -31,14 +28,14 @@ import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
-import java.io.*
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.displayNameAppender
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashString
-import java.lang.Exception
+import java.io.*
 import java.util.*
-import kotlin.math.roundToInt
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.math.roundToInt
+
 
 const val DEFAULT_LITERATURE = "1.pdf"
 
@@ -56,9 +53,6 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     private var literatureGossiper: LiteratureGossiper? = null
 
-    var freqMap = emptyMap<String, Long>()
-    var freqMapInitialized = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
@@ -66,10 +60,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         val myName = literatureCommunity.myPeer.mid
         Log.i("litdao","I am $myName and Im broadcasting: hello")
         literatureCommunity.broadcastDebugMessage("hello")
-        val parent = this
-        scope.launch {
-            instantiateAvgFreqMap(parent)
-        }
+
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
         val demoCommunityName = demoCommunity.myPeer.mid
         Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
@@ -105,24 +96,6 @@ open class LiteratureDaoActivity : BaseActivity() {
 //        val magnet = torrentInfo.makeMagnetUri()
 //        val torrentInfoName = torrentInfo.name()
 
-    }
-    fun initFreqMap(inp: Map<String, Long>){
-        this.freqMap = inp
-        this.freqMapInitialized = true
-        Log.d("litdao", "Init of freq map complete")
-    }
-    // Function that loads the average stemmed word occurance
-    suspend fun instantiateAvgFreqMap(parent: LiteratureDaoActivity){
-        Log.d("litdao", "Starting init of freq map")
-        val csv: InputStream = parent.getAssets().open("stemmed_freqs.csv")
-        var res = mutableMapOf<String, Long>()
-        csv.bufferedReader().useLines { lines -> lines.forEach {
-            val key = it.split(",".toRegex())[0]
-            val num = it.split(",".toRegex())[1].toLong()
-            res[key] = num
-            }
-        }
-        parent.initFreqMap(res)
     }
 
     private fun printPeersInfo(overlay: Overlay) {
@@ -354,14 +327,9 @@ open class LiteratureDaoActivity : BaseActivity() {
     fun importFromInternalStorage(d: DocumentFile){
         val pdf = contentResolver.openInputStream(d.uri)
         PDFBoxResourceLoader.init(baseContext)
+        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
         val strippedString = PdfController().stripText(pdf!!)
-        val kws: MutableList<Pair<String, Double>>
-        if (this.freqMapInitialized){
-            kws = KeywordExtractor().preInitializedExtract(strippedString, this.freqMap)
-        } else{
-            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
-            kws = KeywordExtractor().extract(strippedString, csv)
-        }
+        val kws = KeywordExtractor().extract(strippedString, csv)
         Log.e("litdao", "Specifically from storage: " + kws.toString())
         metaDataLock.lock()
         var metadata = loadMetaData()
@@ -380,12 +348,13 @@ open class LiteratureDaoActivity : BaseActivity() {
                     importFromInternalStorage(d)
                     Log.d("litdao", "file name: " + d.name)
                     Log.d("litdao", "file path: " + d.uri.path)
+                    /*
                     var intent = Intent(Intent.ACTION_VIEW);
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.setDataAndType(d.uri, "application/pdf");
                     intent = Intent.createChooser(intent, "Open File");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    startActivity(intent);*/
                 }
             }
         }
