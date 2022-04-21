@@ -348,13 +348,12 @@ open class LiteratureDaoActivity : BaseActivity() {
                     importFromInternalStorage(d)
                     Log.d("litdao", "file name: " + d.name)
                     Log.d("litdao", "file path: " + d.uri.path)
-                    /*
                     var intent = Intent(Intent.ACTION_VIEW);
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.setDataAndType(d.uri, "application/pdf");
                     intent = Intent.createChooser(intent, "Open File");
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);*/
+                    startActivity(intent);
                 }
             }
         }
