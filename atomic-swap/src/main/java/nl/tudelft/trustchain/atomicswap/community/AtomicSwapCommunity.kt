@@ -7,6 +7,7 @@ import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.payload.IntroductionResponsePayload
 import nl.tudelft.trustchain.atomicswap.messages.*
+import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
 import java.util.*
 
 typealias onAccept = (AcceptMessage, Peer) -> Unit
@@ -107,7 +108,7 @@ class AtomicSwapCommunity : Community() {
             onCompleteCallback(payload, peer)
             Log.d("AtomicSwapCommunity", peer.mid + ": TRADE COMPLETED " + payload.offerId)
         } catch (e:Exception){
-            print(e)
+            Log.e(LOG, "Error occurred when completing trade", e)
         }
     }
 

@@ -1,13 +1,15 @@
 package nl.tudelft.trustchain.atomicswap.messages
 
+import android.util.Log
 import nl.tudelft.ipv8.messaging.Deserializable
 import nl.tudelft.ipv8.messaging.Serializable
 import nl.tudelft.ipv8.util.toHex
+import nl.tudelft.trustchain.atomicswap.ui.swap.LOG
 
 data class AcceptMessage(val offerId: String, val btcPubKey: String, val ethAddress: String) : Serializable {
     override fun serialize(): ByteArray {
         val msgString = "$offerId;$btcPubKey;$ethAddress;"
-        println(msgString.toByteArray().toHex())
+        Log.v(LOG, msgString.toByteArray().toHex())
         return msgString.toByteArray()
     }
 

@@ -65,24 +65,34 @@ Currently, we use TrustChain to store completed transactions between two users. 
 
 In order for the app to work, it has to be able to connect with Bitcoin and Ethereum (geth) nodes.
 These can be deployed with the included Docker Compose file in the `docker` directory in the
-project’s root by [following the instructions](../docker/README.md). The default configuration of
-the app is set for the local development on Android emulator (the IP address of 10.0.2.2). This
-means that the aforementioned Docker Compose services can be ran on the local machine of the
-developer.
+project’s root by [following the instructions](../docker/README.md).
 
 Once the nodes are deployed, the addresses have to be configured in the following build config
 variables:
-`BITCOIN_DEFAULT_PEER` in the common module’s `build.gradle` file - IP address of the machine with
-the Bitcoin node
-`ETH_HTTP_URL` in the common-ethereum module’s `build.gradle file - URL of the node, complete with
-the protocol (HTTP or HTTPS) and the port. In case the HTTPS protocol is used, the certificate has
-to be signed by the trusted certificate authority (eg. Let’s Encrypt).
 
-Additionally, the IP address(es) have to be added to the `network_security_config.xml` of the main application module, in order to allow the Trustchain’s application to communicate with the server.
+* `BITCOIN_DEFAULT_PEER` in the common module’s `build.gradle` file - IP address of the machine with
+  the Bitcoin node
+* `ETH_HTTP_URL` in the common-ethereum module’s `build.gradle` file - URL of the node, complete
+  with the protocol (HTTP or HTTPS) and the port. In case the HTTPS protocol is used, the
+  certificate has to be signed by the trusted certificate authority (eg. Let’s Encrypt).
+
+In case the Trustchain app is running on Android emulator, developer can launch Docker Compose
+services locally and configure the aforementioned variables to point at the 10.0.2.2 address, on
+which the host system is accessible.
+
+Additionally, the IP address(es) have to be added to the `network_security_config.xml`
+of the main application module, in order to allow the Trustchain’s application to communicate with
+the server.
+
 ### Deploying Ethereum Contract
-In order for the atomic swaps involving Ethereum to work, the Ethereum contract responsible for this needs to be deployed. One way this can be done is to use [Remix](https://remix.ethereum.org/) and copy, add the smart contract file to remix and deploy it by following this [guide](https://remix-ide.readthedocs.io/en/latest/run.html).
 
-After deploying the contract the build config variables need to be changed in the `build.gradle` of the atomic swap module:
+In order for the atomic swaps involving Ethereum to work, the Ethereum contract responsible for this
+needs to be deployed. One way this can be done is to use [Remix](https://remix.ethereum.org/) and
+copy, add the smart contract file to remix and deploy it by following
+this [guide](https://remix-ide.readthedocs.io/en/latest/run.html).
+
+After deploying the contract the build config variables need to be changed in the `build.gradle` of
+the atomic swap module:
 `ETH_SWAP_CONTRACT` should be changed to the contract address.
 `ETH_CHAIN_ID` should be changed to the chain id of the network the contract was deployed at.
 
