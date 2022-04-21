@@ -27,12 +27,16 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
     - [References](#References)
 
 ## Offline Gateway
-Before, one gateway existed that was hard coded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan QR code that contains information about a gateway. With this option, a gateway can be added without doing a transaction with it. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
+In the previous version, a default gateway existed that was hardcoded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan a QR code that contains information about a gateway. With this option, a gateway can be added without making a transaction to that gateway. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
+
+In `ui.QRScanController` a new QR type was added with value `VALUE_GATEWAY`. Upon scanning this type of QR code the function `addGateway(data: JSONObject)` is invoked. The data object contains `KEY_PUBLIC_KEY`, `KEY_IP`, `KEY_PORT`, `KEY_NAME`, representing the connection details of this specific gateway.
+This data is shown to the user in a `GatewayAddDialog`, where the user can confirm the details and save the information to the `GatewayStore`.
+
 
 ## Network of Trust
 Currently, distributed ledgers create trust in transactions through computer systems without the need for third parties to confirm them. The most widely used distributed ledger for verification of transactions is blockchain, however this requires an online setting. In order to accommodate for expenditure of offline money, while decreasing the risk of double spending, a new solution is required. A chain of trust could validate participants, providing flexibility, but how does one know whether a user can be 100% trusted or not? Trust is often implemented through reputation scores. Malik et al [2] for example, utilize smart contracts to calculate reputation scores of participating parties.
 
-To implement the notion of trust into the code, a web of trust is used. Each participant is assigned a trust score which is stored locally. On receiving a transaction, the receiver sees a trust score of the other party, this score indicates the level of trust of the other party. On a complete transaction, the receiver either adds a new trust score of 1 to the database for the other party, or if a score exists, increases the existing score by 1% (maximum of 100%). Upon completing a transaction, the sender sends up to a specified number (currently 10) trusts scores together with the public keys to the receiving party. Upon receiving these n transactions, the receiver adds the score to the list of scores for this public key together with the score of the sending party. All received scores are then weighted by the score of their sender together with the current score and a trust score of 100\%, as we trust our self fully, and added to the database.
+To implement the notion of trust into the code, a web of trust is used. Each participant is assigned a trust score which is stored locally. On receiving a transaction, the receiver sees a trust score of the other party, this score indicates the level of trust of the other party. On a complete transaction, the receiver either adds a new trust score of 1% to the database, or, if a score exists, increases the existing score by 1% (maximum of 100%). Upon completing a transaction, the sender sends up to a specified number (currently 10) trusts scores together with the public keys to the receiving party. Upon receiving these n transactions, the receiver adds the score to the list of scores for this public key together with the score of the sending party. All received scores are then weighted by the score of their sender together with the current score and a trust score of 100\%, as we trust our self fully, and added to the database.
 
 ### Technical specification
 
@@ -55,7 +59,51 @@ The `TrustCommunity` is used to send and handle messages over the EVA protocol r
 After the scores are serialized, they are stored in a `messaging.TrustPayload`, which converts the serialized data to an array of bytes. All this is combined and serialized into a signed packet, containing: the message type id (TRUST_MESSAGE_ID), the payload and the peer recipient. If enabled, this is then sent over the ipv8 EVA protocol.
 
 On initialization of the community, a handler is registered for the `TRUST_MESSAGE_ID` message type: `onTrustMessage(packet: Packet)`.
-This handler is responsible for authenticating and deserializing the `TrustPayload`. From the payload the actual scores are deserialized as a list of `TrustScore`s. For each of these scores, the new received score is added to the list of received values and a new weighted average is calculated. These updates are then also reflected in the database. The community also contains a testing function `generateScores(number: Int)` which creates a list of random TrustScore entries with new public keys and a random score.
+This handler is responsible for authenticating and deserializing the `TrustPayload`. From the payload the actual scores are deserialized as a list of `TrustScore`s. For each of these scores, the new received score is added to the list of received values and a new weighted average is calculated. These updates are then also reflected in the database. 
+```kotlin
+private fun onTrustMessage(packet: Packet) {
+    // Retrieve the signed payload
+    val (peer, payload) = packet.getAuthPayload(TrustPayload.Deserializer)
+    // Deserialize all the scores
+    val scores = Json.decodeFromString<ArrayList<TrustScore>>(String(payload.scores))
+
+    scope.launch {
+        val store = store.trustDao()
+        // Only parse data received from senders with a known trust score.
+        val otherScore = store.getByKey(peer.publicKey)?.trustScore ?: return@launch
+        // Now update the database values for each received score.
+        scores.forEach {
+            // Don't add any score about ourself
+            if (it.publicKey != myPeer.publicKey) {
+                // Check if there is already a score for this specific key.
+                val currentScore = store.getByKey(it.publicKey)
+                // If there is no score, we create a new average based on no trust from ourself (0, 100%) and the received value.
+                if (currentScore == null) {
+                    val storeValues = arrayListOf(Pair(it.trustScore, otherScore))
+                    // No need to save our own input in the list of values
+                    val calcValues = arrayListOf(Pair(0f, 100f))
+                    calcValues.addAll(storeValues)
+                    val score = getWeightedAverage(calcValues)
+                    store.insert(TrustScore(it.publicKey, score, storeValues))
+                } else {
+                    // If we already have a score, treat that score as 100% trusted (as its the score we gave it),
+                    // and calculate the new average
+                    val storeValues = arrayListOf(Pair(it.trustScore, otherScore))
+                    if (currentScore.values != null) {
+                        storeValues.addAll(currentScore.values)
+                    }
+                    // Don't store our own input in the database
+                    val calcValues = arrayListOf(Pair(currentScore.trustScore, 100f))
+                    calcValues.addAll(storeValues)
+                    val score = getWeightedAverage(calcValues)
+                    store.insert(TrustScore(it.publicKey, score, storeValues))
+                }
+            }
+        }
+    }
+}
+```
+The community also contains a debug function: `generateScores(number: Int)`, which creates a list of random TrustScore entries with new public keys and a random score.
 
 In addition there is the trust list screen (`ui.trust.TrustFragment`) which contains a list of `ui.trust.TrustItems`. These items are a combination of the public key, score and (if known) contact name.
 Each list item is rendered using a `ui.trust.TrustItemRenderer`, where the items are applied to layouts. Additionally the screen contains two menu items: `actionInsertScores`, `actionClearScores`. The first invokes `TrustCommunity.generateScores(10)`, while the latter invokes `TrustStore.clearAllTables()`
@@ -110,7 +158,7 @@ fun getVerifiedBalanceForBlock(block: TrustChainBlock, database: TrustChainStore
 }
 ```
 
-Here, the `KEY_AMOUNT` field of the transaction represents the amount of money that is being transferred, the `KEY_BALANCE` field specifies the post-transfer combined balance (verified + unverified), and the `KEY_UNVERIFIED` field states whether the transfer is done with unverified money. These fields are defined in `TransactionRepository.kt`, where the following function is used to create transfer proposals:
+Here, the `KEY_AMOUNT` field of the transaction represents the amount of money that is being transferred, the `KEY_BALANCE` field specifies the post-transfer combined balance (verified + unverified), and the `KEY_UNVERIFIED` field states whether the transfer is done with unverified money. Together they make op the actual contents of the transaction and therefore also the transaction size. These fields are defined in `TransactionRepository.kt`, where the following function is used to create transfer proposals:
 
 ```kotlin
 fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified: Boolean = false): TrustChainBlock? {
