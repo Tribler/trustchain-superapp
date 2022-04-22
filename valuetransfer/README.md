@@ -35,6 +35,15 @@ Both the verified and the unverified balances are now separately visible on the 
 ### Demo of an unverified transfer
 ![permalink setting demo](https://imgur.com/x7R3SNe.gif)
 
+## Considerations and Limitations
+The notion of trust is implemented in order to refine security against double spending attacks in an offline setting. Although the implementation provides its users with extra tools in order to evaluate the trustworthiness of the user on the other end, it is still based on a lot of human assessment. An improved GUI and the added notion of trust through scores help with this assessment. This could help people living in rural communities with high trust to make transactions in an offline environment. But vulnerable people such as the elderly still remain vulnerable, further work is required to protect them and to decide who pays the cost of double spending attacks. Furthermore, trust can be boosted through if users have do lots of transactions within their community. Someone not from the community and thus without a known trust score might be extra vulnerable in the case of a disaster, when left stranded in an unknown area.
+
+
+## Relevance of Offline Cash
+An increasing percentage of all payments are digital each year. This movement is also called the transition into a "cashless society". In Northern Europe, only an estimated 20\% of payments are still made with cash (https://www.cnbc.com/2018/12/19/millions-would-be-put-at-risk-in-a-cashless-society-research-warns.html). In Sweden, between the years 2010 and 2020, the percentage of people that used cash for their last payment dropped from 39\% to 9\% (https://www.riksbank.se/en-gb/payments--cash/payments-in-sweden/payments-in-sweden-2020/1.-the-payment-market-is-being-digitalised/cash-is-losing-ground/). This transition is especially difficult for people living in rural areas, the elderly and when there are technical difficulties. According to Access to Cash Review [3], 17\% of adults in the United Kingdom would have a hard time transitioning to a cashless society. "We identified risks to the viability of rural communities, the loss of personal independence and increased risks of financial abuse and debt.". The block chain based digital euro could be a solution to the loss of personal independence and if it has offline functionality, also to the viability in rural communities.
+
+Some management problems of risks and trade offs for "E-Cash" are described in [4]. In an online environment, transactions can be verified on the fly at the cost of efficiency and speed. In an offline environment however, the efficiency of spending money is high but double spending can only be detected after the fact, potentially at high cost.
+
 ## Offline Gateway
 In the previous version, a default gateway existed that was hardcoded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan a QR code that contains information about a gateway. With this option, a gateway can be added without making a transaction to that gateway. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
 
@@ -210,15 +219,6 @@ fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified
     return null
 }
 ```
-
-## Considerations and Limitations
-The notion of trust is implemented in order to refine security against double spending attacks in an offline setting. Although the implementation provides its users with extra tools in order to evaluate the trustworthiness of the user on the other end, it is still based on a lot of human assessment. An improved GUI and the added notion of trust through scores help with this assessment. This could help people living in rural communities with high trust to make transactions in an offline environment. But vulnerable people such as the elderly still remain vulnerable, further work is required to protect them and to decide who pays the cost of double spending attacks. Furthermore, trust can be boosted through if users have do lots of transactions within their community. Someone not from the community and thus without a known trust score might be extra vulnerable in the case of a disaster, when left stranded in an unknown area.
-
-
-## Relevance of Offline Cash
-An increasing percentage of all payments are digital each year. This movement is also called the transition into a "cashless society". In Northern Europe, only an estimated 20\% of payments are still made with cash (https://www.cnbc.com/2018/12/19/millions-would-be-put-at-risk-in-a-cashless-society-research-warns.html). In Sweden, between the years 2010 and 2020, the percentage of people that used cash for their last payment dropped from 39\% to 9\% (https://www.riksbank.se/en-gb/payments--cash/payments-in-sweden/payments-in-sweden-2020/1.-the-payment-market-is-being-digitalised/cash-is-losing-ground/). This transition is especially difficult for people living in rural areas, the elderly and when there are technical difficulties. According to Access to Cash Review [3], 17\% of adults in the United Kingdom would have a hard time transitioning to a cashless society. "We identified risks to the viability of rural communities, the loss of personal independence and increased risks of financial abuse and debt.". The block chain based digital euro could be a solution to the loss of personal independence and if it has offline functionality, also to the viability in rural communities.
-
-Some management problems of risks and trade offs for "E-Cash" are described in [4]. In an online environment, transactions can be verified on the fly at the cost of efficiency and speed. In an offline environment however, the efficiency of spending money is high but double spending can only be detected after the fact, potentially at high cost.
 
 ## References
 1. R.W. Blokzijl. “EuroToken, An offline capable Central Bank Digital Currency”. In: Available at: http://resolver.tudelft.nl/uuid:132faae8-6883-454f-a8ce-94735340dce9. 2021.
