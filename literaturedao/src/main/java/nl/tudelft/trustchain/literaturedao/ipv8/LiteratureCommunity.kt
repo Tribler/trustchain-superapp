@@ -52,7 +52,7 @@ class LiteratureCommunity(
         }
     }
 
-    val litDaoActivity = context as LiteratureDaoActivity
+    val context = context
 
     companion object {
         // Use this until we can commit an id to kotlin ipv8
@@ -90,6 +90,8 @@ class LiteratureCommunity(
      * Perform local search on the query and respond with a list of relevant docs.
      */
     private fun onSearchQueryMessage(packet: Packet) {
+        val litDaoActivity = context as LiteratureDaoActivity
+
         // Decode packet
         val (peer, payload) = packet.getAuthPayload(LitDaoMessage)
 
@@ -109,6 +111,8 @@ class LiteratureCommunity(
      * Received relevant docs for my query
      */
     private fun onSearchResponseMessage(packet: Packet) {
+        val litDaoActivity = context as LiteratureDaoActivity
+
         val (peer, payload) = packet.getAuthPayload(SearchResultsMessage)
         litDaoActivity.updateSearchResults(payload.results)
     }

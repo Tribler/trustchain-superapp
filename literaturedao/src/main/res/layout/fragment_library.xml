@@ -98,7 +98,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/cheltenhamstd_bold"
-                    android:text="Library"
+                    android:text="Remote Search"
                     android:textColor="#000000"
                     android:textSize="34sp" />
 
