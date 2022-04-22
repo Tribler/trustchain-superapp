@@ -10,13 +10,13 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
     - [User Interface](#User-Interface)
         - [Screenshots](#Screenshots)
         - [Demo of an unverified transfer](#Demo-of-an-unverified-transfer)
+    - [Considerations and Limitations](#Considerations-and-Limitations)
+    - [Relevance of Offline Cash](#Relevance-of-Offline-Cash)
     - [Offline Gateway](#Offline-Gateway)
     - [Network of Trust](#Network-of-Trust)
         - [Technical specification](#Technical-specification)
     - [Unverified Transfers](#Unverified-Transfers)
         - [Changes in implementation](#Changes-in-implementation)
-    - [Considerations and Limitations](#Considerations-and-Limitations)
-    - [Relevance of Offline Cash](#Relevance-of-Offline-Cash)
     - [References](#References)
 
 ## User Interface
