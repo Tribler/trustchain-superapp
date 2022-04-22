@@ -7,17 +7,33 @@ This readme describes how the implementation of ConfIDapp is extended to offer f
 ## Table of Contents
 - [Unverified Transfers in ConfIDapp with Trust Network](#Unverified-Transfers-in-ConfIDapp-with-Trust-Network)
     - [Table of Contents](#Table-of-Contents)
+    - [User Interface](#User-Interface)
+        - [Screenshots](#Screenshots)
+        - [Demo of an unverified transfer](#Demo-of-an-unverified-transfer)
     - [Offline Gateway](#Offline-Gateway)
     - [Network of Trust](#Network-of-Trust)
         - [Technical specification](#Technical-specification)
     - [Unverified Transfers](#Unverified-Transfers)
         - [Changes in implementation](#Changes-in-implementation)
-    - [User Interface](#User-Interface)
-        - [Screenshots](#Screenshots)
-        - [Demo of an unverified transfer](#Demo-of-an-unverified-transfer)
     - [Considerations and Limitations](#Considerations-and-Limitations)
     - [Relevance of Offline Cash](#Relevance-of-Offline-Cash)
     - [References](#References)
+
+## User Interface
+Both the verified and the unverified balances are now separately visible on the main screen and on the Wallet page. When making a transfer request, the user is able to specify whether unverified money is accepted with a toggle button. Before signing a transfer proposal, the receiver will get a warning when the transfer is unverified. The receiver is also able to see the trust score of the sender. Each device stores the trust scores of all users locally. This section provides visualizations of this new functionality.
+
+### Screenshots
+<div style="display:inline;">
+    <img src="https://imgur.com/PqtdiSE.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/Bj2HhjT.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/fy630qt.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/0qDrtwN.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/IE80CRJ.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+    <img src="https://imgur.com/25AvPl8.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
+</div>
+
+### Demo of an unverified transfer
+![permalink setting demo](https://imgur.com/x7R3SNe.gif)
 
 ## Offline Gateway
 In the previous version, a default gateway existed that was hardcoded in the application, with the intended use to have one centralized gateway where all transactions are verified. Now, there is an option to scan a QR code that contains information about a gateway. With this option, a gateway can be added without making a transaction to that gateway. This makes it easier to have a scenario where local gateways are used to provide users with a local verified trust chain. When in offline mode, these local gateways can for example be set up in city centers and enforced by police. This allows increased verification over a fully offline scenario, but not as much security as a fully connected scenario.
@@ -194,22 +210,6 @@ fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified
     return null
 }
 ```
-
-## User Interface
-Both the verified and the unverified balances are now separately visible on the main screen and on the Wallet page. When making a transfer request, the user is able to specify whether unverified money is accepted with a toggle button. Before signing a transfer proposal, the receiver will get a warning when the transfer is unverified. The receiver is also able to see the trust score of the sender. Each device stores the trust scores of all users locally. This section provides visualizations of this new functionality.
-
-### Screenshots
-<div style="display:inline;">
-    <img src="https://imgur.com/PqtdiSE.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-    <img src="https://imgur.com/Bj2HhjT.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-    <img src="https://imgur.com/fy630qt.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-    <img src="https://imgur.com/0qDrtwN.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-    <img src="https://imgur.com/IE80CRJ.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-    <img src="https://imgur.com/25AvPl8.png" alt="request" style="width:250px;margin-right:20px;margin-bottom:20px;"/>
-</div>
-
-### Demo of an unverified transfer
-![permalink setting demo](https://imgur.com/x7R3SNe.gif)
 
 ## Considerations and Limitations
 The notion of trust is implemented in order to refine security against double spending attacks in an offline setting. Although the implementation provides its users with extra tools in order to evaluate the trustworthiness of the user on the other end, it is still based on a lot of human assessment. An improved GUI and the added notion of trust through scores help with this assessment. This could help people living in rural communities with high trust to make transactions in an offline environment. But vulnerable people such as the elderly still remain vulnerable, further work is required to protect them and to decide who pays the cost of double spending attacks. Furthermore, trust can be boosted through if users have do lots of transactions within their community. Someone not from the community and thus without a known trust score might be extra vulnerable in the case of a disaster, when left stranded in an unknown area.
