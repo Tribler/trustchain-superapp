@@ -2,6 +2,7 @@ package nl.tudelft.trustchain.atomicswap.swap.eth
 
 import android.annotation.SuppressLint
 import android.util.Log
+import io.reactivex.disposables.Disposable
 import io.reactivex.plugins.RxJavaPlugins
 import nl.tudelft.ipv8.util.sha256
 import nl.tudelft.ipv8.util.toHex
@@ -19,7 +20,6 @@ import org.web3j.utils.Convert
 import java.math.BigInteger
 
 
-@SuppressLint("CheckResult")
 class EthereumSwap(
     web3j: Web3j,
     val credentials: Credentials,
@@ -37,13 +37,22 @@ class EthereumSwap(
      */
     val claimCallbacks = mutableMapOf<String,ClaimCallback>()
     init {
+        var listener : Disposable? = null
         try {
-            swapContract.swapClaimedEventFlowable(DefaultBlockParameterName.LATEST,DefaultBlockParameterName.LATEST)
-                .subscribe { event->
-                    claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret) ?: run{Log.d("ETHLOG","cb is null")}
-                    Log.d("ETHLOG","Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}")
+            listener = swapContract.swapClaimedEventFlowable(
+                DefaultBlockParameterName.LATEST,
+                DefaultBlockParameterName.LATEST
+            )
+                .subscribe { event ->
+                    claimCallbacks.remove(event.hashValue.toHex())?.invoke(event.secret)
+                        ?: run { Log.d("ETHLOG", "cb is null") }
+                    Log.d(
+                        "ETHLOG",
+                        "Eth claimed, hash: ${event.hashValue.toHex()}, amount : ${event.amount}"
+                    )
                 }
         } catch (e: Exception) {
+            listener?.dispose()
             Log.d(LOG,e.stackTraceToString())
         }
     }
