@@ -12,6 +12,6 @@
     <fragment
         android:id="@+id/LibraryFragment"
         android:name="nl.tudelft.trustchain.literaturedao.ui.LibraryFragment"
-        android:label="Library"
+        android:label="Remote Search"
         tools:layout="@layout/fragment_library" />
 </navigation>

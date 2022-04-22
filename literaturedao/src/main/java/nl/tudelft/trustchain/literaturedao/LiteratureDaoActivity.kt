@@ -1,13 +1,16 @@
 package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
-import android.widget.Toast
+import android.widget.*
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -27,6 +30,7 @@ import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
+import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
 import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList
 import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension
@@ -35,6 +39,7 @@ import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashSt
 import java.io.*
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
+import java.util.stream.Collectors
 import kotlin.math.roundToInt
 
 
@@ -54,6 +59,12 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     private var literatureGossiper: LiteratureGossiper? = null
 
+    var freqMap = emptyMap<String, Long>()
+    var freqMapInitialized = false
+
+    var remoteSearchList: MutableList<String> = mutableListOf()
+    lateinit var remoteSearchListAdapter : ArrayAdapter<*>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
@@ -61,7 +72,10 @@ open class LiteratureDaoActivity : BaseActivity() {
         val myName = literatureCommunity.myPeer.mid
         Log.i("litdao","I am $myName and Im broadcasting: hello")
         literatureCommunity.broadcastDebugMessage("hello")
-
+        val parent = this
+        scope.launch {
+            instantiateAvgFreqMap(parent)
+        }
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
         val demoCommunityName = demoCommunity.myPeer.mid
         Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
@@ -97,6 +111,49 @@ open class LiteratureDaoActivity : BaseActivity() {
 //        val magnet = torrentInfo.makeMagnetUri()
 //        val torrentInfoName = torrentInfo.name()
 
+        /*
+        // TODO: UI CONNECTION FOR REMOTE SEARCH
+        setContentView(R.layout.fragment_library_search)
+        val remoteSearch = findViewById<SearchView>(R.id.remote_search_bar)
+        remoteSearch.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.i("litdao", "perform remote search with: "+query)
+                if(!query.isNullOrBlank()){
+                    remoteSeach(query)
+                    return true
+                }
+                return false
+            }
+
+            override fun onQueryTextChange(query: String?): Boolean {
+                Log.i("litdao", "remote search text changed to: "+query)
+                return true
+            }
+        })
+
+        remoteSearchListAdapter = ArrayAdapter(this, R.layout.fragment_library_search_row, remoteSearchList)
+        findViewById<ListView>(R.id.remote_search_results).adapter = remoteSearchListAdapter
+        */
+    }
+
+    fun initFreqMap(inp: Map<String, Long>){
+        this.freqMap = inp
+        this.freqMapInitialized = true
+        Log.d("litdao", "Init of freq map complete")
+    }
+
+    // Function that loads the average stemmed word occurance
+    suspend fun instantiateAvgFreqMap(parent: LiteratureDaoActivity){
+        Log.d("litdao", "Starting init of freq map")
+        val csv: InputStream = parent.getAssets().open("stemmed_freqs.csv")
+        var res = mutableMapOf<String, Long>()
+        csv.bufferedReader().useLines { lines -> lines.forEach {
+            val key = it.split(",".toRegex())[0]
+            val num = it.split(",".toRegex())[1].toLong()
+            res[key] = num
+            }
+        }
+        parent.initFreqMap(res)
     }
 
     private fun printPeersInfo(overlay: Overlay) {
@@ -152,16 +209,24 @@ open class LiteratureDaoActivity : BaseActivity() {
         return handler.scoreList(inp, loadMetaData().content)
     }
 
-    fun remoteSeach() {
-        // get query from UI
-        val query = "TODO"
-
+    fun remoteSeach(query: String) {
         // send to peers
         IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
+
+//        // DEBUG
+//        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
     }
 
     fun updateSearchResults(results: SearchResultList){
         // access UI and append results to some view
+        setContentView(R.layout.fragment_library_search)
+        val list = findViewById<ListView>(R.id.remote_search_results)
+        for (r : SearchResult in results.results){
+            if(!remoteSearchList.contains(r.fileName)){
+                remoteSearchList.add(r.fileName)
+            }
+        }
+        remoteSearchListAdapter.notifyDataSetChanged()
     }
 
     fun writeMetaData(newData: KeyWordModelView.Data){
@@ -183,6 +248,8 @@ open class LiteratureDaoActivity : BaseActivity() {
 //            Log.e("litdao", "litDao exception: " + e.toString())
 //        }
 //
+
+//        // SHOULD BE DONE IN ONCREATE()
 //        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
 //
 //        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -344,9 +411,14 @@ open class LiteratureDaoActivity : BaseActivity() {
     fun importFromInternalStorage(d: DocumentFile){
         val pdf = contentResolver.openInputStream(d.uri)
         PDFBoxResourceLoader.init(baseContext)
-        val csv: InputStream = getAssets().open("stemmed_freqs.csv")
         val strippedString = PdfController().stripText(pdf!!)
-        val kws = KeywordExtractor().extract(strippedString, csv)
+        val kws: MutableList<Pair<String, Double>>
+        if (this.freqMapInitialized){
+            kws = KeywordExtractor().preInitializedExtract(strippedString, this.freqMap)
+        } else{
+            val csv: InputStream = getAssets().open("stemmed_freqs.csv")
+            kws = KeywordExtractor().extract(strippedString, csv)
+        }
         Log.e("litdao", "Specifically from storage: " + kws.toString())
         metaDataLock.lock()
         var metadata = loadMetaData()
