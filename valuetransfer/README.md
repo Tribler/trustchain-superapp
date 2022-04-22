@@ -1,6 +1,6 @@
 # Unverified EuroToken Transfers in ConfIDapp with Trust Network
 
-ConfIDapp is an application where multiple functionalities are combined. It uses the EuroToken [1] repository to create token and transfer money to other users. It also uses PeerChat for the communication between users in terms of token transfers. Besides, ConfIDapp provides integration with legal documents such as an ID or passport.
+ConfIDapp is an application where multiple functionalities are combined. It uses EuroTokens from the EuroToken repository [1] for the peer to peer money transfers. It also uses PeerChat for the communication between users in terms of token transfers. Besides, ConfIDapp provides integration with legal documents such as an ID or passport.
 
 This readme describes how the implementation of ConfIDapp is extended to offer functionality for offline gateways, a network of trust among the users, and transfers with unverified money.
 
