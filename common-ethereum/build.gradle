@@ -4,19 +4,20 @@ plugins {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     buildToolsVersion "29.0.3"
 
     defaultConfig {
         minSdkVersion 22
-        targetSdkVersion 29
+        targetSdkVersion 31
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
 
         // 10.0.2.2 - IP address of the host system on Android emulator
         // Refer to included Docker Compose to launch the nodes locally
-        buildConfigField "String", "ETH_HTTP_URL", "\"http://10.0.2.2:8545\""
+//        buildConfigField "String", "ETH_HTTP_URL", "\"http://10.0.2.2:8545\""
+        buildConfigField "String", "ETH_HTTP_URL", "\"https://rpc.goerli.mudit.blog/\""
 
         // The address of the MultiSig wallet deployed on the goerli test network.
         buildConfigField "String", "ETH_TEST_MULTISIG_ADDR", "\"0x2DfEecF7d2f5363149cC73cAb96C00575c732170\""

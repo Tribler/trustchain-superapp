@@ -143,7 +143,7 @@ class AtomicSwapActivity : BaseActivity() {
                     )
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(LOG, "Error has occurred when creating a transaction", e)
             }
         }
 

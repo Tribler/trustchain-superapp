@@ -28,12 +28,6 @@ contract AtomicSwap {
 
 	mapping(bytes32 => Swap) swaps;
 
-	//	address owner;
-
-	//	constructor() {
-	//		owner = msg.sender;
-	//	}
-
 	// Takes a hash and returns the swap details of that hash.
 	function getSwap(bytes32 hashValue) public view returns (Swap memory swap){
 		swap = swaps[hashValue];
