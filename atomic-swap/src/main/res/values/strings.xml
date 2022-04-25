@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Atomic Swap</string>
+    <string name="title_wallet">Wallet</string>
+    <string name="title_swap">Swap</string>
+    <string name="title_trade_offers">Trade offers</string>
+
+    <string name="bitcoin">Bitcoin</string>
+    <string name="ethereum">Ethereum</string>
+
+    <string name="button_make_swap">Create swap offer</string>
+    <string name="button_trade_offers_refresh">Refresh trade offers</string>
+    <string name="button_accept">Accept</string>
+
+    <string name="status_open">Open</string>
+    <string name="status_in_progress">In progress</string>
+    <string name="status_completed">Completed</string>
+
+    <string name="balance">Balance:</string>
+    <string name="notification_copied_key">Copied wallet public key to clipboard</string>
+
+    <string name="toast_refreshing_trade_offers">Refreshing trade offers…</string>
+
+    <string name="currency_code_bitcoin">BTC</string>
+    <string name="currency_code_ethereum">ETH</string>
+
+    <string-array name="currency_codes">
+        <item>BTC</item>
+        <item>ETH</item>
+    </string-array>
+
+</resources>
