@@ -110,6 +110,10 @@
             android:parentActivityName=".ui.dashboard.DashboardActivity" />
 
         <activity
+            android:name="nl.tudelft.trustchain.atomicswap.AtomicSwapActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity" />
+
+        <activity
             android:name="nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity"
             android:parentActivityName=".ui.dashboard.DashboardActivity"
             android:theme="@style/Theme.ValueTransfer"

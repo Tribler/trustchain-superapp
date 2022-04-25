@@ -1,4 +1,13 @@
 <resources>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="send_money_trustscore_warning_high">INFO: The public key you are sending to has a good trust score (%d%%)!</string>
+    <string name="send_money_trustscore_warning_low">WARNING: The public key you are sending to has a low trust score (%d%%).</string>
+    <string name="send_money_trustscore_warning_average">WARNING: The public key you are sending to has an average trust score (%d%%).</string>
+    <string name="send_money_trustscore_warning_no_score">WARNING: No trust score available for the public key you are sending to.</string>
+    <string name="copy_pubkey">Copy PubKey</string>
+    <string name="verify_balance">Verify Balance</string>
+    <string name="change_name">Change name</string>
+    <string name="manage_gateways">Manage gateways</string>
+    <string name="toggle_demo_mode">Turn %s Demo Mode</string>
+    <string name="trust_scores_menu_item">Trustscores DB</string>
+    <string name="trust_scores_db_item_score">%d%%</string>
 </resources>

@@ -410,9 +410,9 @@ class TransactionRepository(
         return block
     }
 
-    fun getTransactions(): List<Transaction> {
+    fun getTransactions(limit: Int = 1000): List<Transaction> {
         val myKey = trustChainCommunity.myPeer.publicKey.keyToBin()
-        return trustChainCommunity.database.getLatestBlocks(myKey, 1000)
+        return trustChainCommunity.database.getLatestBlocks(myKey, limit)
             .filter { block: TrustChainBlock -> EUROTOKEN_TYPES.contains(block.type) }
             .map { block: TrustChainBlock ->
                 val sender = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
