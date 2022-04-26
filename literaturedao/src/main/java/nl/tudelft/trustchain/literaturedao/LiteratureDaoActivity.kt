@@ -1,16 +1,12 @@
 package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
-import androidx.annotation.RequiresApi
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -18,7 +14,6 @@ import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -39,8 +34,9 @@ import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashSt
 import java.io.*
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import java.util.stream.Collectors
 import kotlin.math.roundToInt
+import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.android.synthetic.main.fragment_literature_overview.*
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
@@ -134,7 +130,17 @@ open class LiteratureDaoActivity : BaseActivity() {
         remoteSearchListAdapter = ArrayAdapter(this, R.layout.fragment_library_search_row, remoteSearchList)
         findViewById<ListView>(R.id.remote_search_results).adapter = remoteSearchListAdapter
         */
+
+        // Set the LayoutManager that this RecyclerView will use.
+        recycler_view_items.layoutManager = LinearLayoutManager(this)
+
+        // Adapter class is initialized and list is passed in the param.
+        val itemAdapter = ItemAdapter(this, getItemsList())
+
+        // adapter instance is set to the recyclerview to inflate the items.
+        recycler_view_items.adapter = itemAdapter
     }
+
 
     fun initFreqMap(inp: Map<String, Long>){
         this.freqMap = inp
@@ -486,6 +492,14 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
+    private fun getItemsList(): ArrayList<String> {
+        val list = ArrayList<String>()
 
+        for(i in 1..15){
+            list.add("Item $i")
+        }
+
+        return list
+    }
 
 }

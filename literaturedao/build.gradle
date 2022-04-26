@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'kotlin-android-extensions'
 }
 
 apply plugin: 'kotlinx-serialization'
@@ -32,6 +33,7 @@ android {
 }
 
 dependencies {
+    // Other classpath declarations
     implementation project(':common')
     api project(':common')
 
