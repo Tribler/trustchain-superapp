@@ -12,22 +12,22 @@
         android:id="@+id/appbar"
 
         android:layout_width="match_parent"
-        android:layout_height="90dp">
+        android:layout_height="90dp" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/design_default_color_background"
             android:gravity="center"
             android:orientation="horizontal"
-            android:padding="25dp">
+            android:padding="25dp"
+            android:background="@color/design_default_color_background">
 
-            <!--            <ImageView-->
-            <!--                android:id="@+id/imageView2"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="match_parent"-->
-            <!--                android:layout_weight="1"-->
-            <!--                android:src="@drawable/ic_menu" />-->
+<!--            <ImageView-->
+<!--                android:id="@+id/imageView2"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_weight="1"-->
+<!--                android:src="@drawable/ic_menu" />-->
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -67,8 +67,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        tools:context=".LiteratureDaoActivity">
+
+        android:layout_marginTop="90dp"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -104,11 +105,14 @@
                             android:textSize="34sp" />
 
                         <SearchView
-                            android:id="@+id/searchViewLit"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="10dp"
-                            android:background="#F5F9FC" />
+                            android:id="@+id/searchViewLit"
+                            android:background="#F5F9FC"
+                            android:queryHint="Title, Author, Keywords ..."
+                            android:iconifiedByDefault="false"
+                            />
 
                     </LinearLayout>
 
@@ -128,17 +132,41 @@
                     android:onClick="filePicker"
                     android:text="Select File" />
 
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_view_items"
+                <androidx.gridlayout.widget.GridLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:listitem="@layout/fragment_literature" />
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    app:columnCount="2"
+                    app:useDefaultMargins="true">
 
+                    <androidx.fragment.app.FragmentContainerView
+                        android:id="@+id/fragmentContainerView"
+                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_column="1"
+                        app:layout_columnSpan="1"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill"
+                        app:layout_row="1"
+                        app:layout_rowSpan="1"
+                        app:layout_rowWeight="1"
+                        tools:layout="@layout/fragment_literature" />
+
+                    <androidx.fragment.app.FragmentContainerView
+                        android:id="@+id/fragmentContainerView4"
+                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:layout_column="1"
+                        app:layout_columnSpan="1"
+                        app:layout_columnWeight="1"
+                        app:layout_gravity="fill"
+                        app:layout_rowSpan="1"
+                        app:layout_rowWeight="1"
+                        tools:layout="@layout/fragment_literature" />
+
+                </androidx.gridlayout.widget.GridLayout>
 
             </LinearLayout>
 
@@ -146,80 +174,66 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_marginRight="20dp"
-        android:layout_marginBottom="20dp"
-        android:clickable="true"
-        android:contentDescription="Add Literature"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        app:fabSize="normal"
-        app:srcCompat="@drawable/ic_add_black_24dp" />
+<!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="bottom"-->
+<!--        android:background="#FFFFFF"-->
+<!--        android:padding="10dp">-->
 
-    <!--    <com.google.android.material.bottomnavigation.BottomNavigationView-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="bottom"-->
-    <!--        android:background="#FFFFFF"-->
-    <!--        android:padding="10dp">-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:gravity="center"-->
+<!--            android:orientation="horizontal">-->
 
-    <!--        <LinearLayout-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="match_parent"-->
-    <!--            android:gravity="center"-->
-    <!--            android:orientation="horizontal">-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginRight="20dp"-->
+<!--                android:orientation="vertical">-->
 
-    <!--            <LinearLayout-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_marginRight="20dp"-->
-    <!--                android:orientation="vertical">-->
+<!--                <ImageView-->
+<!--                    android:id="@+id/imageView"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:paddingBottom="5dp"-->
+<!--                    app:srcCompat="@drawable/ic_myliterature" />-->
 
-    <!--                <ImageView-->
-    <!--                    android:id="@+id/imageView"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:paddingBottom="5dp"-->
-    <!--                    app:srcCompat="@drawable/ic_myliterature" />-->
+<!--                <TextView-->
+<!--                    android:id="@+id/textView3"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
+<!--                    android:text="My Literature"-->
+<!--                    android:textColor="#000000" />-->
+<!--            </LinearLayout>-->
 
-    <!--                <TextView-->
-    <!--                    android:id="@+id/textView3"-->
-    <!--                    android:layout_width="wrap_content"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
-    <!--                    android:text="My Literature"-->
-    <!--                    android:textColor="#000000" />-->
-    <!--            </LinearLayout>-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_marginLeft="20dp"-->
+<!--                android:orientation="vertical">-->
 
-    <!--            <LinearLayout-->
-    <!--                android:layout_width="wrap_content"-->
-    <!--                android:layout_height="wrap_content"-->
-    <!--                android:layout_marginLeft="20dp"-->
-    <!--                android:orientation="vertical">-->
+<!--                <ImageView-->
+<!--                    android:id="@+id/imageView4"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:paddingBottom="5dp"-->
+<!--                    app:srcCompat="@drawable/ic_library" />-->
 
-    <!--                <ImageView-->
-    <!--                    android:id="@+id/imageView4"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:paddingBottom="5dp"-->
-    <!--                    app:srcCompat="@drawable/ic_library" />-->
+<!--                <TextView-->
+<!--                    android:id="@+id/nav_library"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
+<!--                    android:text="Library"-->
+<!--                    android:textColor="#000000" />-->
+<!--            </LinearLayout>-->
 
-    <!--                <TextView-->
-    <!--                    android:id="@+id/nav_library"-->
-    <!--                    android:layout_width="match_parent"-->
-    <!--                    android:layout_height="wrap_content"-->
-    <!--                    android:fontFamily="@font/cheltenhamstd_bold"-->
-    <!--                    android:text="Library"-->
-    <!--                    android:textColor="#000000" />-->
-    <!--            </LinearLayout>-->
+<!--        </LinearLayout>-->
 
-    <!--        </LinearLayout>-->
-
-    <!--    </com.google.android.material.bottomnavigation.BottomNavigationView>-->
+<!--    </com.google.android.material.bottomnavigation.BottomNavigationView>-->
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
