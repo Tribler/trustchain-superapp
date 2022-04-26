@@ -131,37 +131,19 @@
 
                 <androidx.gridlayout.widget.GridLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="470dp"
                     android:padding="10dp"
                     app:columnCount="2"
                     app:useDefaultMargins="true">
 
-                    <androidx.fragment.app.FragmentContainerView
-                        android:id="@+id/fragmentContainerView"
-                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_view_items"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        app:layout_column="1"
-                        app:layout_columnSpan="1"
-                        app:layout_columnWeight="1"
-                        app:layout_gravity="fill"
-                        app:layout_row="1"
-                        app:layout_rowSpan="1"
-                        app:layout_rowWeight="1"
-                        tools:layout="@layout/fragment_literature" />
-
-                    <androidx.fragment.app.FragmentContainerView
-                        android:id="@+id/fragmentContainerView4"
-                        android:name="nl.tudelft.trustchain.literaturedao.LiteratureFragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        app:layout_column="1"
-                        app:layout_columnSpan="1"
-                        app:layout_columnWeight="1"
-                        app:layout_gravity="fill"
-                        app:layout_rowSpan="1"
-                        app:layout_rowWeight="1"
-                        tools:layout="@layout/fragment_literature" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.gridlayout.widget.GridLayout>
 
