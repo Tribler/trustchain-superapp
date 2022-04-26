@@ -7,11 +7,11 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.android.synthetic.main.fragment_pool_bitcoin_ethereum.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import nl.tudelft.trustchain.common.bitcoin.BitcoinMultiSigWallet
+import nl.tudelft.trustchain.common.bitcoin.BitcoinWallet
+import nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.liquidity.R
-import nl.tudelft.trustchain.liquidity.data.BitcoinMultiSigWallet
-import nl.tudelft.trustchain.liquidity.data.BitcoinWallet
-import nl.tudelft.trustchain.liquidity.data.EthereumWeb3jWallet
 import nl.tudelft.trustchain.liquidity.util.TrustChainInteractor
 import org.bitcoinj.core.Coin
 import org.bitcoinj.params.RegTestParams
@@ -96,7 +96,8 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         debugLog("Created personal bitcoin wallet with address: ${bitcoinWallet.address()}.")
 
         debugLog("Creating multi-signature bitcoin wallet.")
-        bitcoinMultiSigWallet = BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
+        bitcoinMultiSigWallet =
+            BitcoinMultiSigWallet(params, 1, listOf(bitcoinWallet.key()))
         debugLog("Created multi-signature bitcoin wallet with address: ${bitcoinMultiSigWallet.address()}.")
     }
 
@@ -108,12 +109,22 @@ class PoolBitcoinEthereumFragment : BaseFragment(R.layout.fragment_pool_bitcoin_
         val password = "123456"
         val keyPair = ECKeyPair.create(BigInteger.valueOf(85678567585858758))
         val walletDirectory = context?.cacheDir ?: throw Error("CacheDir not found")
-        ethereumWallet = EthereumWeb3jWallet(web3j, walletDirectory, keyPair, password)
+        ethereumWallet = nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet(
+            web3j,
+            walletDirectory,
+            keyPair,
+            password
+        )
         debugLog("Created personal ethereum wallet with address: ${ethereumWallet.address()}")
 
         val multiSigPassword = "123456"
         val multiSigKeyPair = ECKeyPair.create(BigInteger.valueOf(74587348957389457))
-        ethereumMultiSigWallet = EthereumWeb3jWallet(web3j, walletDirectory, multiSigKeyPair, multiSigPassword)
+        ethereumMultiSigWallet = nl.tudelft.trustchain.common.ethereum.EthereumWeb3jWallet(
+            web3j,
+            walletDirectory,
+            multiSigKeyPair,
+            multiSigPassword
+        )
         debugLog("Created multi-signature ethereum wallet with address: ${ethereumMultiSigWallet.address()}")
     }
 

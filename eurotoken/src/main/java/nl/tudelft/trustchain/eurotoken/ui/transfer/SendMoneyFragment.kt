@@ -3,16 +3,18 @@ package nl.tudelft.trustchain.eurotoken.ui.transfer
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
+import kotlinx.android.synthetic.main.fragment_send_money.*
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.util.hexToBytes
 import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.common.contacts.ContactStore
-import nl.tudelft.trustchain.common.eurotoken.GatewayStore
 import nl.tudelft.trustchain.common.eurotoken.TransactionRepository
 import nl.tudelft.trustchain.common.util.viewBinding
 import nl.tudelft.trustchain.eurotoken.R
 import nl.tudelft.trustchain.eurotoken.databinding.FragmentSendMoneyBinding
+import nl.tudelft.trustchain.eurotoken.db.TrustStore
 import nl.tudelft.trustchain.eurotoken.ui.EurotokenBaseFragment
 
 class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
@@ -20,10 +22,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
     private var addContact = false
 
     private val binding by viewBinding(FragmentSendMoneyBinding::bind)
-
-    private val gatewayStore by lazy {
-        GatewayStore.getInstance(requireContext())
-    }
 
     private val ownPublicKey by lazy {
         defaultCryptoProvider.keyFromPublicBin(
@@ -41,7 +39,6 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
 
         val key = defaultCryptoProvider.keyFromPublicBin(publicKey.hexToBytes())
         val contact = ContactStore.getInstance(view.context).getContactFromPublicKey(key)
-
         binding.txtContactName.text = contact?.name ?: name
 
         binding.newContactName.visibility = View.GONE
@@ -75,6 +72,26 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         binding.txtAmount.text = TransactionRepository.prettyAmount(amount)
         binding.txtContactPublicKey.text = publicKey
 
+        val trustScore = trustStore.getScore(publicKey.toByteArray())
+        logger.info { "Trustscore: $trustScore" }
+
+        if (trustScore != null) {
+            if (trustScore >= TRUSTSCORE_AVERAGE_BOUNDARY) {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_high, trustScore)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.android_green))
+            } else if (trustScore > TRUSTSCORE_LOW_BOUNDARY) {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_average, trustScore)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+            } else {
+                trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_low, trustScore)
+                trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+            }
+        } else {
+            trustScoreWarning.text = getString(R.string.send_money_trustscore_warning_no_score)
+            trustScoreWarning.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.metallic_gold))
+            trustScoreWarning.visibility = View.VISIBLE
+        }
+
         binding.btnSend.setOnClickListener {
             val newName = binding.newContactName.text.toString()
             if (addContact && newName.isNotEmpty()) {
@@ -99,5 +116,7 @@ class SendMoneyFragment : EurotokenBaseFragment(R.layout.fragment_send_money) {
         const val ARG_AMOUNT = "amount"
         const val ARG_PUBLIC_KEY = "pubkey"
         const val ARG_NAME = "name"
+        const val TRUSTSCORE_AVERAGE_BOUNDARY = 70
+        const val TRUSTSCORE_LOW_BOUNDARY = 30
     }
 }

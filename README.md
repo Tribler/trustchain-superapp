@@ -27,7 +27,19 @@ An online indicator and the last message is shown for each contact. Users can ex
 
 ### Digital Euro
 
-The Superapp is connected to the European IBAN Euro system. You can send and receive digital Euros using QR-codes or build-in chat. **Experimental**. Sending Euros is as easy as sending a smiley. We did a test with native implementation of Trustchain and [a digital Euro last week](https://twitter.com/TriblerTeam/status/1367526077422256128). Field test date: 4 March 2021 at 10:30am. The native Android implementation in Kotlin is slowly getting mature. Location: the bar Doerak (with a liquor license! This is a special place, therefore selected as the site for our trail. Shops which sell coffee or closed canisters of alcohol are "essential shops" and therefore open in Corona times.) Loading real money on your phone requires an operational an open source [gateway](https://github.com/rwblokzijl/stablecoin-exchange) of Euros to digital Euros. Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
+The Superapp is connected to the European IBAN Euro system.
+You can send and receive digital Euros using QR-codes or build-in chat. **Experimental**.
+Sending Euros is as easy as sending a smiley.
+We did a test with native implementation of Trustchain and [a digital Euro last week](https://twitter.com/TriblerTeam/status/1367526077422256128).
+Field test date: 4 March 2021 at 10:30am.
+The native Android implementation in Kotlin is slowly getting mature.
+Location: the bar Doerak (with a liquor license! This is a special place, therefore selected as the site for our trail.
+Shops which sell coffee or closed canisters of alcohol are "essential shops" and therefore open in Corona times.) Loading real money on your phone requires an operational an open source [gateway](https://github.com/rwblokzijl/stablecoin-exchange) of Euros to digital Euros.
+Discussed in this master thesis issue: https://github.com/Tribler/tribler/issues/4629
+
+#### Double Spending mitigation
+Double spending in EuroToken occurs when a malicious user sends a transaction to a wallet, and then sends the same transaction to another wallet whilst the second receiver is not aware of the first transaction.
+This has been mitigated by introducing a web-of-trust, read more about this in the [EuroToken README.MD](eurotoken/README.MD)
 
 Creative Commons CC0 license - share freely:
 
@@ -37,6 +49,8 @@ Zooming into the actual mechanism of QR-Codes (Creative Commons CC0 license - sh
 
 <IMG src="https://user-images.githubusercontent.com/325224/110597621-15b6d500-8181-11eb-828a-0f3409b6608c.jpg" width=150>
 <img src="https://user-images.githubusercontent.com/446634/107397810-47e00300-6aff-11eb-8abe-5d345a096ade.jpeg" width=200>
+
+![Demo](eurotoken/images/demo.gif)
 
 ### Debug
 
@@ -154,6 +168,18 @@ Every time a user opens MusicDAO, they are asked to reload the page in order to 
 
 The feature-based models are gossiped along random walks through the network. At each peer they are merged and re-trained on peer's local data. The matrix factorization model seeks to learn a factorization of the user-song matrix. This means that one of the two factors contains only information on how users generally rate each song. This matrix can then be gossiped around the network while a user's personal vector as well as their listening history are kept private.
  - [More about federated machine learning using gossiping for music recommendations](gossipML/README.md)
+
+### Atomic Swap
+
+AtomicSwap app allows two users to exchange different cryptocurrencies without the involvement of a third party and without having to trust each other. This is achieved by implementing the Atomic Swap protocol.
+
+User can create trade offers by sending Ipv8 messages indicating that they wish to trade to the Swap community. Others can then accept the offer by sending another Ipv8 message. The swap procedure starts when the initiator receives an accept message for their trade offer.
+
+Below is a video demo that shows the steps to do an atomic swap.
+
+<a href="https://user-images.githubusercontent.com/21971137/164297537-e8b4ff5f-a999-4e6d-b1e8-17135399848e.mp4" title="Swap Demo"><img src="https://user-images.githubusercontent.com/21971137/164298818-a152b7ca-6ebe-4038-a449-e6a246c7f1ab.png" alt="Alternate Text" /></a>
+
+[More about The Atomic Swap app](atomic-swap/README.md)
 
 ### Do you want to add your own app?
 
