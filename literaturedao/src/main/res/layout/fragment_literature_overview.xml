@@ -126,11 +126,11 @@
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/litdao_pick_file_button"
                     android:layout_width="141dp"
                     android:layout_height="wrap_content"
                     android:onClick="filePicker"
-                    android:text="Select File" />
+                    android:text="@string/litdao_file_picker_button_text" />
 
                 <androidx.gridlayout.widget.GridLayout
                     android:layout_width="match_parent"

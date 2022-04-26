@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.literaturedao
+
 import LiteratureGossiper
 import android.content.Context
 import android.Manifest
@@ -92,11 +93,9 @@ open class LiteratureDaoActivity : BaseActivity() {
             Log.e("litdao", "starting ...")
 
             copyDefaultLiterature()
-
             literatureGossiper =
                 IPv8Android.getInstance().getOverlay<LiteratureCommunity>()?.let { LiteratureGossiper.getInstance(s, this, it) }
             literatureGossiper?.start()
-            checkStoragePermissions()
 
         } catch (e: Exception) {
             printToast(e.toString())
@@ -459,7 +458,9 @@ open class LiteratureDaoActivity : BaseActivity() {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     fun filePicker(view: View) {
+        checkStoragePermissions()
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)
@@ -490,7 +491,7 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
     /**
-     * Check camera permissions
+     * Check storage permissions
      */
     @RequiresApi(Build.VERSION_CODES.M)
     private fun checkStoragePermissions() {
