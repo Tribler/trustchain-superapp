@@ -119,7 +119,10 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="20dp"
                     android:layout_weight="1"
-                    android:background="#F5F9FC" />
+                    android:background="#F5F9FC"
+                    android:queryHint="Title, Author, Keywords ..."
+                    android:iconifiedByDefault="false"
+                    />
 
             </LinearLayout>
 
