@@ -1,32 +1,20 @@
 package nl.tudelft.trustchain.common.ebsi
 
-import android.content.Context
-import com.android.volley.Request
-import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 import java.net.URLEncoder
 
 object EBSIAPI {
 
     private val TAG = EBSIAPI::class.simpleName!!
-    private lateinit var requestQueue: RequestQueue
-
-    // Move to EBSI request
-    fun setup(context: Context){
-        requestQueue = Volley.newRequestQueue(context)
-    }
-
-    fun addToQueue(request: EBSIJsonObjectRequest) {
-        requestQueue.add(request)
-    }
 
     // =====ONBOARDING=====
-    fun getAuthenticationRequest(api: String, scope: String, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener?) {
+    fun getAuthenticationRequest(api: String,
+                                 scope: String,
+                                 listener: Response.Listener<JSONObject>,
+                                 errorListener: Response.ErrorListener?) {
         val body = JSONObject().put("scope", scope)
-        val request = EBSIRequest.post(api, body, listener, errorListener)
-        requestQueue.add(request)
+        EBSIRequest.post(api, body, listener, errorListener)
     }
 
     fun getVerifiableAuthorisation(sessionToken: String, clientId: String, idToken: String,
@@ -34,51 +22,54 @@ object EBSIAPI {
                                    errorListener: Response.ErrorListener?) {
         EBSIRequest.setAuthorization(sessionToken)
         val body = JSONObject().put("id_token", idToken)
-        val request = EBSIRequest.post(null, body, listener, errorListener).redirect(clientId)
-        requestQueue.add(request)
+        EBSIRequest.post(null, body, listener, errorListener, redirect = clientId)
     }
 
     fun getAuthorisationAccessToken(clientId: String, idToken: String,
                                     listener: Response.Listener<JSONObject>,
                                     errorListener: Response.ErrorListener?) {
         val body = JSONObject().put("id_token", idToken)
-        val request = EBSIRequest.post(null, body, listener, errorListener).redirect(clientId)
-        requestQueue.add(request)
+        EBSIRequest.post(null, body, listener, errorListener, redirect = clientId)
     }
 
     // ===============
 
     // =====REQUEST VA=====
 
-    fun requestVerifiableCredential(api: String, params: Map<String, String>,
-                                    listener: Response.Listener<JSONObject>,
-                                    errorListener: Response.ErrorListener?) {
+    fun requestVerifiableCredentialAuthorisation(api: String, params: Map<String, String>,
+                                                 listener: Response.Listener<JSONObject>,
+                                                 errorListener: Response.ErrorListener?, redirect: String? = null) {
         val urlParams = EBSIRequest.urlEncodeParams(params)
         val getApi = "$api?$urlParams"
-        val request = EBSIRequest.get(getApi, null, listener, errorListener)
-        requestQueue.add(request)
+        EBSIRequest.get(getApi, null, listener, errorListener, redirect)
     }
 
     fun getToken(api: String, code: String,
                  listener: Response.Listener<JSONObject>,
-                 errorListener: Response.ErrorListener?) {
+                 errorListener: Response.ErrorListener?, redirect: String? = null) {
         val body = JSONObject().apply {
             put("code", code)
             put("grant_type", "authorization_code")
             put("redirect_uri", "")
         }
-        val request = EBSIRequest.post(api, body, listener, errorListener)
-        requestQueue.add(request)
+        EBSIRequest.post(api, body, listener, errorListener, redirect)
     }
     // ===============
 
-    // =====DID Document=====
+    // =====DID Registry=====
     fun getDidDocument(did: String,
                        listener: Response.Listener<JSONObject>,
                        errorListener: Response.ErrorListener?) {
         val api = "did-registry/v2/identifiers/${URLEncoder.encode(did, "UTF-8")}"
-        val request = EBSIRequest.get(api, null, listener, errorListener)
-        requestQueue.add(request)
+        EBSIRequest.get(api, null, listener, errorListener)
     }
+
+    fun jsonRpc(rpcBody: JSONObject,
+                listener: Response.Listener<JSONObject>,
+                errorListener: Response.ErrorListener?) {
+        val api = "did-registry/v2/jsonrpc"
+        EBSIRequest.post(api, rpcBody, listener, errorListener)
+    }
+
     // ===============
 }

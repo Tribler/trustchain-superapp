@@ -65,6 +65,28 @@ android {
     }
 }
 
+configurations.all {
+    /*c -> c.resolutionStrategy.dependencySubstitution {
+        all { DependencySubstitution dependency ->
+            if (dependency.requested.group == 'org.bouncycastle') {
+                dependency.useTarget 'org.bouncycastle:bcprov-jdk15on:1.68'
+            }
+        }
+    }*/
+
+    /* resolutionStrategy.capabilitiesResolution.withCapability('org.ow2.asm:asm') {
+         selectHighestVersion()
+     }*/
+}
+
+
+
+/*configurations {
+    resolutionStrategy {
+        force 'org.bouncycastle:bcprov-jdk15on:1.68'
+    }
+}*/
+
 repositories {
     mavenCentral()
     maven { url "https://dl.bintray.com/terl/lazysodium-maven" }
@@ -133,8 +155,13 @@ dependencies {
     // Multibase encoding
     implementation 'com.github.multiformats:java-multibase:1.1.0'
 
+    // web3j
+    implementation('org.web3j:core:4.8.8-android') {
+        exclude group: 'org.bouncycastle'
+    }
+
     // Networking
-    implementation 'com.android.volley:volley:1.2.0'
+    implementation'com.android.volley:volley:1.2.0'
 
     // Logging
     implementation 'io.github.microutils:kotlin-logging:1.7.7'
@@ -162,6 +189,8 @@ dependencies {
     testImplementation "com.goterl:lazysodium-java:5.0.1"
     annotationProcessor 'androidx.room:room-compiler:2.2.5'
 }
+
+
 
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {

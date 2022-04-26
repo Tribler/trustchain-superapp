@@ -73,6 +73,8 @@ class KeyStoreHelper(
                 val b = BigInteger(curveB)
                 val curve = EllipticCurve(ecField, a, b)
 
+
+
                 val bN = BigInteger(n)
                 val bH = Integer.parseInt(h.toString(Charset.defaultCharset()))
                 val spec = ECParameterSpec(curve, g, bN, bH)
@@ -90,6 +92,19 @@ class KeyStoreHelper(
                 val privateKey = kf.generatePrivate(ecPrivateKeySpec) as ECPrivateKey
                 val publicKey = kf.generatePublic(ecPublicKeySpec) as ECPublicKey
 
+//                val bcCurve = org.bouncycastle.math.ec.ECCurve.Fp(parsedP, a, b, bN, BigInteger.valueOf(Integer(bH).toLong()))
+//                org.bouncycastle.math.ec.ECFieldElement.Fp.
+//                val bcECPoint = org.bouncycastle.math.ec.ECPoint.Fp(bcCurve, bcCurve.fromBigInteger(bWX), bcCurve.fromBigInteger(bWY))
+
+//                val bcECPoint = bcCurve.createPoint(bWX, bWY)
+//                val bcEcParSpec = org.bouncycastle.jce.spec.ECParameterSpec(bcCurve,bcECPoint, bN)
+//                val bcPKSpec = org.bouncycastle.jce.spec.ECPrivateKeySpec(b, bcEcParSpec)
+
+//                val bcConf = org.bouncycastle.jce.provider.BouncyCastleProvider.CONFIGURATION
+//                val bcPrivateKey = org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey("EC",ecPrivateKeySpec, bcConf)
+//                val bcPublicKey = org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey("EC", ecPublicKeySpec, bcConf)
+
+//                return KeyPair(bcPublicKey, bcPrivateKey)
                 return KeyPair(publicKey, privateKey)
             } catch (e: Exception) {
                 Log.e(TAG, "Error reading key files", e)

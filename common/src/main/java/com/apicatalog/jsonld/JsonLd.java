@@ -347,7 +347,7 @@ public final class JsonLd {
 
         assertNotNull(document, param);
 
-        // document.checkVirtualMethods();
+//        document.checkVirtualMethod();
         if (document.getJsonContent() == null) {
             throw new IllegalArgumentException("'" + param + "' is not not JSON document but [" + document.getContentType() + "].");
         }

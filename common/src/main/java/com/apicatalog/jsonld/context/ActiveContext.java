@@ -167,8 +167,8 @@ public final class ActiveContext {
     }
 
     public UriExpansion uriExpansion() {
-        // options.checkVirtualMethods();
-        // UriExpansion.with(this).checkVirtualMethods();
+//        options.checkVirtualMethod();
+//        UriExpansion.with(this).checkVirtualMethod();
         return UriExpansion.with(this).uriValidation(options.isUriValidation());
     }
 

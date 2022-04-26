@@ -8,11 +8,12 @@ import nl.tudelft.ipv8.util.sha512
 import nl.tudelft.ipv8.util.toHex
 import org.json.JSONArray
 import org.json.JSONObject
+import org.web3j.crypto.Credentials
+import org.web3j.crypto.ECKeyPair
+import org.web3j.crypto.WalletUtils
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.Signature
+import java.security.*
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import java.security.spec.ECGenParameterSpec
@@ -32,14 +33,23 @@ class EBSIWallet(
     val ebsiWalletDir by lazy { File(context.filesDir, EBSI_WALLET_DIR).also { it.mkdir() } }
     private val didFile by lazy { File(ebsiWalletDir, EBSI_DID_FILE) }
     private val vaFile by lazy { File(ebsiWalletDir, EBSI_VA_FILE) }
+    private val ethWalletDir by lazy { File(context.filesDir, ETH_WALLET_DIR).also { it.mkdir()
+        // Clear eth wallet
+        it.listFiles()?.forEach { f ->
+            f.delete()
+        }
+    } }
 
     private lateinit var didCache: String
     private lateinit var keyPairCache: KeyPair
-    val privateKey: ECPrivateKey = keyPair.private as ECPrivateKey
-    val publicKey: ECPublicKey = keyPair.public as ECPublicKey
+//    val privateKey: ECPrivateKey = keyPair.private as ECPrivateKey
+//    val publicKey: ECPublicKey = keyPair.public as ECPublicKey
+    val privateKey: PrivateKey = keyPair.private
+    val publicKey: PublicKey = keyPair.public
     val keyAlias = "$did#keys-1"
     var accessToken: Map<String, Any>? = null
     private var vaCache: JSONObject? = null
+    private var ethCredentialsCache: Credentials? = null
 
     val did: String get() {
         if (!this::didCache.isInitialized) {
@@ -61,7 +71,7 @@ class EBSIWallet(
     }
 
     private fun newKeyPair(store: Boolean = false): KeyPair {
-        Log.e(TAG, "Creating new key pair")
+//        Log.e(TAG, "Creating new key pair")
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
             KeyProperties.KEY_ALGORITHM_EC,
             KEYSTORE_PROVIDER
@@ -115,27 +125,52 @@ class EBSIWallet(
         return vaCache
     }
 
+    val ethCredentials: Credentials get() {
+        if (ethCredentialsCache == null) {
+            val password = privateKey.encoded.toString(Charsets.UTF_8)
+            ethCredentialsCache = WalletUtils.loadCredentials(password, getEthWalletFile())
+            Log.e("EthWallet", "Address: ${ethCredentialsCache!!.address}")
+        }
+        return ethCredentialsCache!!
+    }
+
+    private fun getEthWalletFile(): File {
+        return if (ethWalletDir.listFiles()?.firstOrNull() == null) {
+            val password = privateKey.encoded.toString(Charsets.UTF_8)
+//            ECKeyPair.create(keyPair)
+            val filename = WalletUtils.generateWalletFile(password, ECKeyPair.create((privateKey as ECPrivateKey).s), ethWalletDir, false)
+            Log.e(TAG, "New Eth Wallet: $filename")
+            File(ethWalletDir, filename)
+        } else {
+            val ethWalletFile = ethWalletDir.listFiles()!!.first()
+            Log.e(TAG, "Existing Eth Wallet: ${ethWalletFile.absolutePath}")
+            ethWalletFile
+        }
+    }
+
     fun storeVerifiableAuthorisation(verifiableAuthorisation: JSONObject) {
         vaFile.createNewFile()
         vaFile.writeText(verifiableAuthorisation.toString())
+        Log.e(TAG, "Verifiable Authorisation stored")
     }
 
-    fun getAccessToken(accessTokenRequest: JSONObject, accessTokenCallback: (payload: MutableMap<String, Any>?) -> Unit) {
-        val encPayload = accessTokenRequest.getString("ake1_enc_payload")
+    fun getAccessTokenFromResponse(accessTokenPayload: JSONObject, accessTokenCallback: (payload: MutableMap<String, Any>?) -> Unit) {
+        val encPayload = accessTokenPayload.getString("ake1_enc_payload")
         val eciesPayload = ECIESPayload.parseCiphertext(encPayload)
 
         val decryptedPayload = decrypt(eciesPayload).toString(Charsets.UTF_8)
         val payload = JSONObject(decryptedPayload)
         val accessTokenJWT = payload.getString("access_token")
-        Log.e("Ake1", "Decrypted payload: ${payload.toString()}")
+//        Log.e("Ake1", "Decrypted payload: $payload")
 
         // TODO something with ake1_sig_payload and ake1_jws_detached
 
-        JWTHelper.verifyJWT(accessTokenJWT) { JWTPayload ->
+        JWTHelper.verifyJWT(accessTokenJWT, VerificationListener { JWTPayload ->
             // TODO store accessToken for 15 min
             accessToken = JWTPayload
+            EBSIRequest.setAuthorization(accessTokenJWT)
             accessTokenCallback(JWTPayload)
-        }
+        })
     }
 
     fun sign(data: ByteArray): ByteArray {
@@ -189,6 +224,7 @@ class EBSIWallet(
         const val EBSI_WALLET_DIR = "EBSI_WALLET"
         const val EBSI_DID_FILE = "EBSI_DID"
         const val EBSI_VA_FILE = "EBSI_VA"
+        const val ETH_WALLET_DIR = "ETH_WALLET_DIR"
 
         private fun appendBytesToVersion(arr: ByteArray, version: Int = 1): ByteArray {
             val baos = ByteArrayOutputStream()

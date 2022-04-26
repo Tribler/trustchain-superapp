@@ -59,28 +59,41 @@ object JWTHelper {
         // Compute the EC signature
         signedJWT.sign(signer)
 
+        verifyJWT(signedJWT.serialize(), VerificationListener {
+            Log.e("SignJWT", "Signature verified: ${it != null}")
+        }, wallet.publicKey as ECPublicKey)
+
         // Serialize the JWS to compact form
         return signedJWT.serialize(detached)
     }
 
-    fun verifyJWT(jwt: String, onVerified: (payload: MutableMap<String, Any>?) -> Unit) {
+    fun verifyJWT(jwt: String, onVerified: VerificationListener, verificationKey: ECPublicKey? = null) {
         try {
             val parsedJWT = SignedJWT.parse(jwt)
+            val payload = parsedJWT.payload.toJSONObject()
             val header = parsedJWT.header
             val kid = header.keyID
-            val payload = parsedJWT.payload.toJSONObject()
 
-            header.toJSONObject().forEach {
+            /*header.toJSONObject().forEach {
                 Log.e("JWT Verify", "[header] ${it.key}: ${it.value}")
             }
             payload?.forEach {
               Log.e("JWT Verify", "[payload] ${it.key}: ${it.value}")
+            }*/
+
+            if (verificationKey != null) {
+                val verifier: JWSVerifier = ECDSAVerifier(verificationKey)
+                // assertTrue(signedJWT.verify(verifier))
+                if (parsedJWT.verify(verifier)) {
+                    onVerified(payload)
+                    Log.e("JWT Verify", "Verified")
+                }
+                return
             }
 
-            val getPublicKeysRequest = EBSIRequest.get(null,null,
+            EBSIRequest.get(null,null,
                 {
                     val publicKeys = it.getJSONArray("publicKeys")
-                    var verified = false
                     for (i in 0 until publicKeys.length()) {
                         val publicKeyStr = publicKeys.getString(i)
                         val publicKey = KeyStoreHelper.decodePemPublicKey(publicKeyStr)
@@ -88,20 +101,17 @@ object JWTHelper {
                         // assertTrue(signedJWT.verify(verifier))
                         if (parsedJWT.verify(verifier)) {
                             onVerified(payload)
-                            verified = true
                             Log.e("JWT Verify", "Verified")
-                            break
+                            return@get
                         }
                     }
 
-                    if (!verified) onVerified(null)
+                    onVerified(null)
                 }, {
                     Log.e("JWT Verify", "Failed to get kid", it)
-                    // TODO don't callback with payload if error. Callback with null.
                     onVerified(null)
-                }).redirect(kid)
+                }, redirect = kid)
 
-            EBSIAPI.addToQueue(getPublicKeysRequest)
         } catch (e: ParseException) {
             // Invalid signed JOSE object encoding
             Log.e("JWT Verify","Invalid JWT", e)
@@ -119,6 +129,13 @@ object JWTHelper {
         val decrypter: JWEDecrypter = ECDHDecrypter(privateKey)
         encJWT.decrypt(decrypter)
         return encJWT
+    }
+}
+
+class VerificationListener(private val listener: (MutableMap<String, Any>?) -> Unit): (MutableMap<String, Any>?) -> Unit {
+
+    override fun invoke(payload: MutableMap<String, Any>?) {
+        listener(payload)
     }
 }
 

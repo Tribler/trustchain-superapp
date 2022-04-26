@@ -28,4 +28,6 @@ public class HttpLoader extends DefaultHttpLoader {
     public static final DocumentLoader defaultInstance() {
         return INSTANCE;
     }
+
+    public static void checkVirtualMethod() { }
 }

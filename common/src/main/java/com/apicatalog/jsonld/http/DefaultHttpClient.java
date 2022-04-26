@@ -17,8 +17,7 @@ import okhttp3.Response;
 
 public final class DefaultHttpClient implements HttpClient {
 
-     private static final OkHttpClient CLIENT = new OkHttpClient();
-    // private static final java.net.http.HttpClient CLIENT = java.net.http.HttpClient.newBuilder().followRedirects(Redirect.NEVER).build();
+     private static final OkHttpClient CLIENT = new OkHttpClient.Builder().followRedirects(false).build();
 
     private static final DefaultHttpClient INSTANCE = new DefaultHttpClient(CLIENT);
 

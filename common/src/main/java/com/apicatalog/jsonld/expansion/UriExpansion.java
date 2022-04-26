@@ -138,7 +138,7 @@ public final class UriExpansion {
 
             result = initPropertyContext(split[0], split[1], result);
 
-            // UriUtils.checkVirtualMethods();
+//            UriUtils.checkVirtualMethod();
 
             // 6.5
             if (BlankNode.hasPrefix(result) || UriUtils.isAbsoluteUri(result, uriValidation)) {
@@ -209,8 +209,7 @@ public final class UriExpansion {
         return result;
     }
 
-    public void checkVirtualMethods() {
-    }
+    public static void checkVirtualMethod() { }
 
     public UriExpansion uriValidation(boolean uriValidation) {
         this.uriValidation = uriValidation;

@@ -190,7 +190,7 @@ class TrustChainApplication : Application() {
 
     private fun initEBSI() {
         KeyStoreHelper.initProvider()
-        EBSIAPI.setup(this)
+        EBSIRequest.setup(this)
     }
 
     private fun createWalletCommunity(): OverlayConfiguration<AttestationCommunity> {

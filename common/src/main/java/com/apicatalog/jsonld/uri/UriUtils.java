@@ -135,7 +135,7 @@ public final class UriUtils {
         }
     }
 
-    public static void checkVirtualMethods() {
+    public static void checkVirtualMethod() {
     }
 
     private static final boolean startsWithScheme(final String uri) {

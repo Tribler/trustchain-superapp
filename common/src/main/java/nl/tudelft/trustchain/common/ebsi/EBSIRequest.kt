@@ -1,8 +1,18 @@
 package nl.tudelft.trustchain.common.ebsi
 
+import android.content.Context
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.apicatalog.jsonld.JsonLdOptions
+import com.apicatalog.jsonld.document.Document
+import com.apicatalog.jsonld.expansion.UriExpansion
+import com.apicatalog.jsonld.http.media.MediaTypeParameters
+import com.apicatalog.jsonld.loader.HttpLoader
+import com.apicatalog.jsonld.uri.UriUtils
 import org.json.JSONObject
 import java.net.URI
 import java.net.URLDecoder
@@ -15,53 +25,71 @@ object EBSIRequest {
 
     private var isTest = false
     private val EBSIHeaders = mutableMapOf<String, String>()
+    private lateinit var requestQueue: RequestQueue
+
+    fun setup(context: Context){
+        requestQueue = Volley.newRequestQueue(context)
+
+        // temporary binding correct java files
+        HttpLoader.checkVirtualMethod()
+        JsonLdOptions.checkVirtualMethod()
+        Document.checkVirtualMethod()
+        UriExpansion.checkVirtualMethod()
+        MediaTypeParameters.checkVirtualMethod()
+        UriUtils.checkVirtualMethod()
+    }
 
     fun get(
         api: String?,
         jsonRequest: JSONObject?,
         listener: Response.Listener<JSONObject>,
-        errorListener: Response.ErrorListener?
-    ): EBSIJsonObjectRequest {
-        return EBSIJsonObjectRequest(
+        errorListener: Response.ErrorListener?,
+        redirect: String? = null
+    ) {
+        val req = EBSIJsonObjectRequest(
             Request.Method.GET,
-            apiURL(api),
+            apiURL(api, redirect),
             EBSIHeaders,
             jsonRequest,
             listener,
             errorListener
         )
+
+        requestQueue.add(req)
     }
 
     fun post(
         api: String?,
         jsonRequest: JSONObject?,
         listener: Response.Listener<JSONObject>,
-        errorListener: Response.ErrorListener?
-    ): EBSIJsonObjectRequest {
-        return EBSIJsonObjectRequest(
+        errorListener: Response.ErrorListener?,
+        redirect: String? = null
+    ) {
+        val req = EBSIJsonObjectRequest(
             Request.Method.POST,
-            apiURL(api),
+            apiURL(api, redirect),
             EBSIHeaders,
             jsonRequest,
             listener,
             errorListener
         )
+
+        requestQueue.add(req)
     }
 
     fun setAuthorization(sessionToken: String) {
         EBSIHeaders["Authorization"] = "Bearer $sessionToken"
     }
 
-    fun test(uuid: UUID) {
+    fun testSetup(uuid: UUID) {
         isTest = true
 
-        // TODO conformance server seems to have some problems
-        // server = "https://api.conformance.intebsi.xyz"
+        server = "https://api.conformance.intebsi.xyz"
         EBSIHeaders["Conformance"] = uuid.toString()
     }
 
-    private fun apiURL(api: String?): String {
-        return "$server/${api ?: ""}"
+    private fun apiURL(api: String?, redirect: String?): String {
+        return (redirect ?: server) + if (api != null ) "/$api" else ""
     }
 
     fun urlEncodeParams(params: Map<String, String>): String {
@@ -79,14 +107,12 @@ object EBSIRequest {
 
 class EBSIJsonObjectRequest(
     method: Int,
-    url: String,
+    val myUrl: String,
     private val extraHeaders: Map<String, String>?,
     jsonRequest: JSONObject?,
     listener: Response.Listener<JSONObject>,
     errorListener: Response.ErrorListener?
-): JsonObjectRequest(method, url, jsonRequest, listener, errorListener) {
-
-    private var redirectUrl: String? = null
+): JsonObjectRequest(method, myUrl, jsonRequest, listener, errorListener) {
 
     override fun getHeaders(): MutableMap<String, String> {
         val allHeaders = mutableMapOf<String, String>()
@@ -95,14 +121,25 @@ class EBSIJsonObjectRequest(
         return allHeaders
     }
 
-    fun redirect(url: String): EBSIJsonObjectRequest {
-        redirectUrl = url
-        return this
+    override fun deliverError(error: VolleyError?) {
+//        error?.printStackTrace()
+        super.deliverError(MyVolleyError(error, myUrl))
+    }
+}
+
+class MyVolleyError: VolleyError {
+
+    var volleyError: VolleyError? = null
+    var url: String = "No URL"
+
+    constructor(volleyError: VolleyError?, url: String) : super(volleyError) {
+        this.volleyError = volleyError
+        this.url = url
     }
 
-    override fun getUrl(): String {
-        return redirectUrl ?: super.getUrl()
-    }
+    constructor(message: String): super(message)
+
+    constructor(message: String, t: Throwable): super(message, t)
 }
 
 fun URI.splitQuery(): List<Pair<String, String?>> {

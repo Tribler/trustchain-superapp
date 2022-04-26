@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
 
@@ -109,6 +110,7 @@ public abstract class LdSigner<SIGNATURESUITE extends SignatureSuite> {
     }
 
     public LdProof sign(JsonLDObject jsonLdObject) throws IOException, GeneralSecurityException, JsonLDException {
+        // Logger.getLogger("TEST").severe("LD Proof sign");
         return this.sign(jsonLdObject, true, false);
     }
 

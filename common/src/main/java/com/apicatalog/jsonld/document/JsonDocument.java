@@ -80,7 +80,7 @@ public final class JsonDocument implements Document {
             throw new IllegalArgumentException("The provided JSON structure is null.");
         }
 
-        // contentType.parameters().checkVirtualMethods();
+//        contentType.parameters().checkVirtualMethod();
         String firstValue = contentType.parameters().firstValue("profile");
 
         return new JsonDocument(MediaType.of(contentType.type(), contentType.subtype()), firstValue, structure);

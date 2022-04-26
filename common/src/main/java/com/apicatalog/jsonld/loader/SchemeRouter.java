@@ -22,7 +22,7 @@ import java.util.Map;
 import com.apicatalog.jsonld.JsonLdError;
 import com.apicatalog.jsonld.JsonLdErrorCode;
 import com.apicatalog.jsonld.document.Document;
-// import com.apicatalog.jsonld.loader
+//import com.apicatalog.jsonld.loader.HttpLoader;
 
 public final class SchemeRouter implements DocumentLoader {
 

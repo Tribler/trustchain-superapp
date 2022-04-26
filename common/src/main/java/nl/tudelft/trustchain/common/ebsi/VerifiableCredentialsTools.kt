@@ -14,68 +14,67 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.StringReader
 import java.net.URI
+import java.security.interfaces.ECPrivateKey
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-class VerifiableCredentialsTools {
+object VerifiableCredentialsTools {
 
-    companion object {
-        private fun getTimeStamp(): String {
-            val date = Date()
-            val ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
-            val sdf = SimpleDateFormat(ISO_FORMAT, Locale.US)
-            val utc = TimeZone.getTimeZone("UTC")
-            sdf.timeZone = utc
-            return sdf.format(date)
-        }
+    private fun getTimeStamp(): String {
+        val date = Date()
+        val ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        val sdf = SimpleDateFormat(ISO_FORMAT, Locale.US)
+        val utc = TimeZone.getTimeZone("UTC")
+        sdf.timeZone = utc
+        return sdf.format(date)
+    }
 
-        fun createVerifiablePresentation(wallet: EBSIWallet, verifiableCredential: JSONObject, callback: (presentation: JSONObject) -> Unit) {
-            // https://www.w3.org/TR/vc-data-model/#proofs-signatures
+    fun createVerifiablePresentation(wallet: EBSIWallet, verifiableCredential: JSONObject, callback: (presentation: JSONObject) -> Unit) {
+        // https://www.w3.org/TR/vc-data-model/#proofs-signatures
 
-            CoroutineScope(Dispatchers.IO).launch {
-                val subject = verifiableCredential.getJSONObject("credentialSubject").getString("id")
+        CoroutineScope(Dispatchers.IO).launch {
+            val subject = verifiableCredential.getJSONObject("credentialSubject").getString("id")
 
-                val jsonLdObject = JsonLDObject.fromJson(StringReader(verifiableCredential.toString()))
-                val privateECKey = ECKey.fromPrivate(wallet.privateKey.s)
-                val signer = EcdsaSecp256k1Signature2019LdSigner(privateECKey)
-                signer.created = Date()
-                signer.proofPurpose = LDSecurityKeywords.JSONLD_TERM_AUTHENTICATION
-                signer.verificationMethod = URI.create(wallet.keyAlias)
-                // signer.domain = "example.com"
-                // signer.nonce = "343s\$FSFDa-"
-                val ldProof = signer.sign(jsonLdObject)
-                // Log.e("VerPres", "proof: ${ldProof}")
+            val jsonLdObject = JsonLDObject.fromJson(StringReader(verifiableCredential.toString()))
+            val privateECKey = ECKey.fromPrivate((wallet.privateKey as ECPrivateKey).s)
+            val signer = EcdsaSecp256k1Signature2019LdSigner(privateECKey)
+            signer.created = Date()
+            signer.proofPurpose = LDSecurityKeywords.JSONLD_TERM_AUTHENTICATION
+            signer.verificationMethod = URI.create(wallet.keyAlias)
+            val ldProof = signer.sign(jsonLdObject)
 
-                val verifiablePresentation = JSONObject().apply {
-                    put("@context", JSONArray().apply { put("https://www.w3.org/2018/credentials/v1") })
-                    // put("id", "optional unique id")
-                    put("type", JSONArray().apply { put("VerifiablePresentation") })
-                    put("holder", subject)
-                    put("verifiableCredential", JSONArray().apply { put(verifiableCredential) })
-                    put("proof", JSONObject(ldProof.toString()))
-                }
+            // Log.e("VerPres", "proof: ${ldProof}")
 
-                // https://www.npmjs.com/package/canonicalize
-                // base64 url
-
-                withContext(Dispatchers.Main) {
-                    callback(verifiablePresentation)
-                }
+            val verifiablePresentation = JSONObject().apply {
+                put("@context", JSONArray().apply { put("https://www.w3.org/2018/credentials/v1") })
+                // put("id", "optional unique id")
+                put("type", JSONArray().apply { put("VerifiablePresentation") })
+                put("holder", subject)
+                put("verifiableCredential", JSONArray().apply { put(verifiableCredential) })
+                put("proof", JSONObject(ldProof.toString()))
             }
-        }
 
-        fun canonicalize(jsonObject: JSONObject, makeBase64: Boolean = false): String {
-            val jsonLdObject = JsonLDObject.fromJson(StringReader(jsonObject.toString()))
-            val canonicalized = JsonCanonicalizer.canonicalize(jsonLdObject.toJsonObject())
+            // https://www.npmjs.com/package/canonicalize
+            // base64 url
 
-            return if (makeBase64) {
-                Base64.getUrlEncoder().encodeToString(canonicalized.toByteArray())
-            } else {
-                canonicalized
+            withContext(Dispatchers.Main) {
+                callback(verifiablePresentation)
             }
         }
     }
+
+    fun canonicalize(jsonObject: JSONObject, makeBase64: Boolean = false): String {
+        val jsonLdObject = JsonLDObject.fromJson(StringReader(jsonObject.toString()))
+        val canonicalized = JsonCanonicalizer.canonicalize(jsonLdObject.toJsonObject())
+
+        return if (makeBase64) {
+            Base64.getUrlEncoder().encodeToString(canonicalized.toByteArray())
+        } else {
+            canonicalized
+        }
+    }
+
 }
 
 /*
