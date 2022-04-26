@@ -65,7 +65,7 @@ class AppGossiper(
     var sessionActive = false
     var downloadsInProgress = 0
     var evaRetries = 0
-    var currentDownloadInProgress = "No download in progress"
+    var currentDownloadInProgress = activity.getString(R.string.noDownloadInProgress)
 
     companion object {
         fun getInstance(
@@ -471,7 +471,7 @@ class AppGossiper(
             Toast.makeText(activity.applicationContext, s, Toast.LENGTH_LONG).show()
     }
 
-    fun addDownloadToQueue() {
+    private fun addDownloadToQueue() {
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, ++downloadsInProgress)
             activity.inQueue.text =
@@ -486,45 +486,41 @@ class AppGossiper(
         }
     }
 
-    fun downloadHasStarted(torrentName: String) {
-        currentDownloadInProgress = "Downloading: $torrentName"
+    private fun downloadHasStarted(torrentName: String) {
+        currentDownloadInProgress = activity.getString(R.string.currentTorrentDownload, torrentName)
         activity.runOnUiThread {
             activity.inQueue.text =
                 activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text =
-                activity.getString(R.string.currentTorrentDownload, currentDownloadInProgress)
+            activity.currentDownload.text = currentDownloadInProgress
         }
     }
 
-    fun downloadHasFailed() {
-        currentDownloadInProgress = "No download in progress"
+    private fun downloadHasFailed() {
+        currentDownloadInProgress = activity.getString(R.string.noDownloadInProgress)
         activity.runOnUiThread {
-            activity.currentDownload.text =
-                activity.getString(R.string.currentTorrentDownload, currentDownloadInProgress)
+            activity.currentDownload.text = currentDownloadInProgress
             activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())
         }
         updateProgress(0)
     }
 
-    fun downloadHasPassed() {
-        currentDownloadInProgress = "No download in progress"
+    private fun downloadHasPassed() {
+        currentDownloadInProgress = activity.getString(R.string.noDownloadInProgress)
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, --downloadsInProgress)
             activity.inQueue.text =
                 activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text =
-                activity.getString(R.string.currentTorrentDownload, currentDownloadInProgress)
+            activity.currentDownload.text = currentDownloadInProgress
         }
         updateProgress(0)
     }
 
-    fun initialUISettings() {
+    private fun initialUISettings() {
         activity.runOnUiThread {
             activity.download_count.text = activity.getString(R.string.downloadsInProgress, 0)
             activity.inQueue.text =
                 activity.getString(R.string.downloadsInQueue, kotlin.math.max(0, downloadsInProgress - 1))
-            activity.currentDownload.text =
-                activity.getString(R.string.currentTorrentDownload, "No download in progress")
+            activity.currentDownload.text = currentDownloadInProgress
             activity.progressBarPercentage.text = activity.getString(R.string.downloadProgressPercentage, "0%")
             activity.evaRetryCounter.text = activity.getString(R.string.evaRetries, evaRetries)
             activity.failedCounter.text = activity.getString(R.string.failedCounter, failedTorrents.toString())

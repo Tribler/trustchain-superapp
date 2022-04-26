@@ -27,13 +27,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.trustchain.FOC.community.FOCCommunity
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.cancelButton
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogMsg
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createAlertDialogTitle
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createButton
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.createDownloadDialogTitle
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.deleteButton
-import nl.tudelft.trustchain.FOC.util.BuilderUtils.Companion.downloadButton
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.apkDotExtension
 import nl.tudelft.trustchain.FOC.util.ExtensionUtils.Companion.torrentDotExtension
 import nl.tudelft.trustchain.FOC.util.MagnetUtils.Companion.displayNameAppender
@@ -232,17 +225,17 @@ open class MainActivityFOC : AppCompatActivity() {
 
     private fun createAlertDialog(fileName: String) {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle(createAlertDialogTitle)
-        builder.setMessage(createAlertDialogMsg)
-        builder.setPositiveButton(cancelButton, null)
-        builder.setNeutralButton(deleteButton) { _, _ -> deleteApkFile(fileName) }
-        builder.setNegativeButton(createButton) { _, _ -> createTorrent(fileName) }
+        builder.setTitle(getString(R.string.createAlertDialogTitle))
+        builder.setMessage(getString(R.string.createAlertDialogMsg))
+        builder.setPositiveButton(getString(R.string.cancelButton), null)
+        builder.setNeutralButton(getString(R.string.deleteButton)) { _, _ -> deleteApkFile(fileName) }
+        builder.setNegativeButton(getString(R.string.createButton)) { _, _ -> createTorrent(fileName) }
         builder.show()
     }
 
     private fun createDownloadDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle(createDownloadDialogTitle)
+        builder.setTitle(getString(R.string.createDownloadDialogTitle))
         val input = EditText(this)
         input.inputType = InputType.TYPE_CLASS_TEXT
         input.setSingleLine()
@@ -253,8 +246,8 @@ open class MainActivityFOC : AppCompatActivity() {
         input.layoutParams = params
         container.addView(input)
         builder.setView(container)
-        builder.setNegativeButton(cancelButton, null)
-        builder.setPositiveButton(downloadButton) { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
+        builder.setNegativeButton(getString(R.string.cancelButton), null)
+        builder.setPositiveButton(getString(R.string.downloadButton)) { _, _ -> scope.launch { selectNewUrlToDownload(input.text.toString()) } }
         builder.show()
     }
 
@@ -416,7 +409,7 @@ open class MainActivityFOC : AppCompatActivity() {
     private fun resumeUISettings() {
         download_count.text = getString(R.string.downloadsInProgress, appGossiper?.downloadsInProgress)
         inQueue.text = getString(R.string.downloadsInQueue, kotlin.math.max(0, appGossiper?.downloadsInProgress?.minus(1) ?: 0))
-        currentDownload.text = getString(R.string.currentTorrentDownload, appGossiper?.currentDownloadInProgress)
+        currentDownload.text = appGossiper?.currentDownloadInProgress
         evaRetryCounter.text = getString(R.string.evaRetries, appGossiper?.evaRetries)
         progressBar.progress = 0
         progressBarPercentage.text = getString(R.string.downloadProgressPercentage, "0%")
