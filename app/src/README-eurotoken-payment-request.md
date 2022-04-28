@@ -150,11 +150,3 @@ To make the process of link sharing and receiving the transactions easier, we ha
 
 However, this change is not necessary when the server is deployed. When the server is deployed a webhook should be implemented. The webhook will be called by the bank (e.g., in case of Tikkie link, the bank is ABN AMRO) when the user has finished the payment and paid, and then the exchange server can process the transaction.
 
-
-## Notes
-
-To make the process of link sharing and receiving the transactions easier, we have made some changes to the exchange, namely, we added a method called ```check_payments_done``` in the ```backend/stablecoin/stablecoin.py```. This method checks every 5 seconds for pending transactions to see if they are paid. If so, it will process the payment to finalize the transactions. This is especially relevant when the user uses the second scenario, namely Euro to EuroToken in which a Tikkie link will be used to pay in Euro.
-
-However, this change is not necessary when the server is deployed. When the server is deployed a webhook should be implemented. The webhook will be called by the bank (e.g., in case of Tikkie link, the bank is ABN AMRO) when the user has finished the payment and paid, and then the exchange server can process the transaction.
-
-
