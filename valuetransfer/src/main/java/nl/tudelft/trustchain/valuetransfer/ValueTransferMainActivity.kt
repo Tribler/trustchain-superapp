@@ -35,8 +35,10 @@ import com.androidadvance.topsnackbar.TSnackbar
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.jaredrummler.blockingdialog.BlockingDialogManager
+import kotlinx.android.synthetic.main.dialog_image.*
 import kotlinx.android.synthetic.main.main_activity_vt.*
 import nl.tudelft.ipv8.Community
+import kotlinx.coroutines.*
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.android.IPv8Android
 import nl.tudelft.ipv8.attestation.WalletAttestation
@@ -74,6 +76,7 @@ import nl.tudelft.trustchain.valuetransfer.ui.identity.IdentityFragment
 import nl.tudelft.trustchain.valuetransfer.ui.settings.AppPreferences
 import nl.tudelft.trustchain.valuetransfer.ui.settings.NotificationHandler
 import nl.tudelft.trustchain.valuetransfer.ui.settings.SettingsFragment
+import nl.tudelft.trustchain.valuetransfer.ui.walletoverview.WalletOverviewFragment
 import nl.tudelft.trustchain.valuetransfer.util.dpToPixels
 import nl.tudelft.trustchain.valuetransfer.util.getColorIDFromThemeAttribute
 import org.json.JSONObject
@@ -269,7 +272,6 @@ class ValueTransferMainActivity : BaseActivity() {
         /**
          * Enable click on notification when app is currently not on foreground
          */
-
         if (intent != null && identityCommunity.hasIdentity() && !lifecycle.currentState.isAtLeast(
                 Lifecycle.State.RESUMED
             )
