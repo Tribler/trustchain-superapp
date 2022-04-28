@@ -95,4 +95,4 @@ public class MainFragment extends Fragment {
 <img height="600" src="../doc/freedomOfComputing/search_apk.jpeg" alt="Image of demo 'search.apk'">
 
 
-**NOTE:** A more advanced example/demo can be found at: https://github.com/rmadhwal/trustchain-voice-search
+**NOTE:** A more advanced example/demo can be found at: https://github.com/Tribler/trustchain-voice-search
