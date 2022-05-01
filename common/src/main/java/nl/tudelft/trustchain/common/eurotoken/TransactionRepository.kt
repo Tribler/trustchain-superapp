@@ -260,7 +260,11 @@ class TransactionRepository(
         return true
     }
 
-    fun sendTransferProposalSync(recipient: ByteArray, amount: Long, allowUnverified: Boolean = false): TrustChainBlock? {
+    fun sendTransferProposalSync(
+        recipient: ByteArray,
+        amount: Long,
+        allowUnverified: Boolean = false
+    ): TrustChainBlock? {
         Log.d("TransactionRepository", "Allow unverified: $allowUnverified")
 
         // paying with unverified money is not allowed and the verified balance is too low

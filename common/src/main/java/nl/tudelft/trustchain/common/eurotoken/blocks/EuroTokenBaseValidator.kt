@@ -91,9 +91,9 @@ open class EuroTokenBaseValidator(val transactionRepository: TransactionReposito
         if (balance < 0) {
             throw InsufficientValidatedBalance(
                 "Insufficient unverified balance ($balance) for amount (${
-                    getBalanceChangeForBlock(
-                        block
-                    )
+                getBalanceChangeForBlock(
+                    block
+                )
                 })"
             )
         }
