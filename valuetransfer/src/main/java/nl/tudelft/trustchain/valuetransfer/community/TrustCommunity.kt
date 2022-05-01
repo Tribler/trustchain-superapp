@@ -1,7 +1,6 @@
 package nl.tudelft.trustchain.valuetransfer.community
 
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -11,7 +10,6 @@ import nl.tudelft.ipv8.Overlay
 import nl.tudelft.ipv8.Peer
 import nl.tudelft.ipv8.keyvault.defaultCryptoProvider
 import nl.tudelft.ipv8.messaging.Packet
-import nl.tudelft.ipv8.util.toHex
 import nl.tudelft.trustchain.valuetransfer.db.TrustStore
 import nl.tudelft.trustchain.valuetransfer.entity.TrustScore
 import nl.tudelft.trustchain.valuetransfer.messaging.TrustPayload

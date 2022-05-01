@@ -323,7 +323,6 @@ class ExchangeTransactionDialog(
                 } ?: run {
                     trustScoreView.text = getString(R.string.text_trust_score_unknown)
                 }
-
             }
 
             bottomSheetDialog.setContentView(view)

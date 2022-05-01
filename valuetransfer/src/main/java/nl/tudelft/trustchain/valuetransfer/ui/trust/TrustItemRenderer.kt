@@ -9,7 +9,7 @@ import nl.tudelft.trustchain.peerchat.db.PeerChatStore
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 
-class TrustItemRenderer (
+class TrustItemRenderer(
     private val parentActivity: ValueTransferMainActivity,
 ) : ItemLayoutRenderer<TrustItem, View>(
     TrustItem::class.java

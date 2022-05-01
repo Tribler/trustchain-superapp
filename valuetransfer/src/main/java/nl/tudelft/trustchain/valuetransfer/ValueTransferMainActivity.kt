@@ -249,32 +249,34 @@ class ValueTransferMainActivity : BaseActivity() {
         stores[TrustStore::class.java] = TrustStore.getInstance(this)
         communities[TrustCommunity::class.java] = IPv8Android.getInstance().getOverlay<TrustCommunity>()!!
         val trustChainCommunity = getCommunity<TrustChainCommunity>()
-        trustChainCommunity?.addListener(TransactionRepository.BLOCK_TYPE_TRANSFER,
+        trustChainCommunity?.addListener(
+            TransactionRepository.BLOCK_TYPE_TRANSFER,
             object : BlockListener {
-            override fun onBlockReceived(block: TrustChainBlock) {
-                // If we received an agreement block from the other party, the transaction is now complete.
-                if (block.isAgreement && !block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
-                    // First find the peer based on the sender public key (peer that created the agreement block)
-                    val itr = trustChainCommunity.getPeers().listIterator()
-                    var peer: Peer? = null
-                    while (itr.hasNext()) {
-                        val cur : Peer = itr.next()
-                        val key = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
-                        if (cur.key.pub() == key) {
-                            peer = cur
-                            break
+                override fun onBlockReceived(block: TrustChainBlock) {
+                    // If we received an agreement block from the other party, the transaction is now complete.
+                    if (block.isAgreement && !block.publicKey.contentEquals(trustChainCommunity.myPeer.publicKey.keyToBin())) {
+                        // First find the peer based on the sender public key (peer that created the agreement block)
+                        val itr = trustChainCommunity.getPeers().listIterator()
+                        var peer: Peer? = null
+                        while (itr.hasNext()) {
+                            val cur: Peer = itr.next()
+                            val key = defaultCryptoProvider.keyFromPublicBin(block.publicKey)
+                            if (cur.key.pub() == key) {
+                                peer = cur
+                                break
+                            }
                         }
-                    }
 
-                    // If a peer was found, send it the trust scores
-                    if (peer != null) {
-                        lifecycleScope.launch {
-                            getCommunity<TrustCommunity>()?.sendTrustScores(peer)
+                        // If a peer was found, send it the trust scores
+                        if (peer != null) {
+                            lifecycleScope.launch {
+                                getCommunity<TrustCommunity>()?.sendTrustScores(peer)
+                            }
                         }
                     }
                 }
             }
-        })
+        )
 
         /**
          * Create a (centered) custom action bar with a title and subtitle

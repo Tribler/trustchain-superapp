@@ -34,7 +34,6 @@ abstract class VTFragment(@LayoutRes contentLayoutId: Int = 0) : BaseFragment(co
             ?: throw java.lang.IllegalStateException("TrustCommunity is not configured")
     }
 
-
     fun getPeerChatCommunity(): PeerChatCommunity {
         return parentActivity.getCommunity()
             ?: throw java.lang.IllegalStateException("PeerChatCommunity is not configured")

@@ -45,7 +45,6 @@ data class TrustScore(
             override fun serialize(encoder: Encoder, value: PublicKey) {
                 return encoder.encodeString(value.keyToBin().toHex())
             }
-
         }
     }
 }

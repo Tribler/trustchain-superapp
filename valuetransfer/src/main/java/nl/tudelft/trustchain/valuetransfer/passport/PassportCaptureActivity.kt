@@ -54,18 +54,20 @@ open class PassportCaptureActivity : Activity(), TextRecognitionProcessor.Result
         findViewById<TextView>(R.id.tvScanTitle).setOnClickListener {
             overrideScan += 1
             if (overrideScan % 5 == 0) {
-                onSuccess(MRZInfo(
-                    "P",
-                    "NLD",
-                    "Test",
-                    "Dummy",
-                    "AA12345678",
-                    "NLD",
-                    "990101",
-                    Gender.MALE,
-                    "221212",
-                    "123456789"
-                ))
+                onSuccess(
+                    MRZInfo(
+                        "P",
+                        "NLD",
+                        "Test",
+                        "Dummy",
+                        "AA12345678",
+                        "NLD",
+                        "990101",
+                        Gender.MALE,
+                        "221212",
+                        "123456789"
+                    )
+                )
             }
         }
 
