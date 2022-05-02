@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.literaturedao
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 
-class ItemAdapter(val context: Context, val items: ArrayList<String>) :
+class ItemAdapter(var context: Context, val items: ArrayList<String>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -18,6 +19,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>) :
      * {@link ViewHolder} and initializes some private fields to be used by RecyclerView.
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        context = parent.context
         return ViewHolder(
             LayoutInflater.from(context).inflate(
                 R.layout.item_custom_row,
@@ -40,6 +42,7 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         val item = items.get(position)
+        Log.e("litdao", item.toString())
 
         holder.tvItem.text = item
 
@@ -75,5 +78,9 @@ class ItemAdapter(val context: Context, val items: ArrayList<String>) :
         // Holds the TextView that will add each item to
         val tvItem = view.tv_item_name
         val cardViewItem = view.card_view_item
+    }
+
+    fun refresh(){
+        notifyDataSetChanged()
     }
 }

@@ -1,4 +1,5 @@
 package nl.tudelft.trustchain.literaturedao
+
 import LiteratureGossiper
 import android.content.Context
 import android.content.Intent
@@ -8,11 +9,14 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+//import kotlinx.android.synthetic.main.fragment_literature_overview.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -35,8 +39,6 @@ import java.io.*
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.roundToInt
-import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.fragment_literature_overview.*
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
@@ -131,14 +133,26 @@ open class LiteratureDaoActivity : BaseActivity() {
         findViewById<ListView>(R.id.remote_search_results).adapter = remoteSearchListAdapter
         */
 
-        // Set the LayoutManager that this RecyclerView will use.
-        recycler_view_items.layoutManager = LinearLayoutManager(this)
+        try{
 
-        // Adapter class is initialized and list is passed in the param.
-        val itemAdapter = ItemAdapter(this, getItemsList())
+            val items = getItemsList()
+            Log.e("litdao", items.toString())
 
-        // adapter instance is set to the recyclerview to inflate the items.
-        recycler_view_items.adapter = itemAdapter
+            val inflatedView: View = layoutInflater.inflate(R.layout.fragment_literature_overview, null)
+            val recViewItems = inflatedView.findViewById<View>(R.id.recycler_view_items) as RecyclerView
+
+            // Adapter class is initialized and list is passed in the param.
+            val itemAdapter = ItemAdapter(this, items)
+
+            // Set the LayoutManager that this RecyclerView will use.
+            recViewItems.setLayoutManager(LinearLayoutManager(itemAdapter.context))
+
+            // adapter instance is set to the recyclerview to inflate the items.
+            recViewItems.setAdapter(itemAdapter)
+            itemAdapter.refresh()
+        } catch(e: Exception){
+            Log.e("litdao", e.toString())
+        }
     }
 
 
@@ -392,8 +406,8 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
 
-    @Serializable
-    data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>)
+    //@Serializable
+    data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>): Serializable
 
     fun operations(path: String, baseContext: Context){
         PDFBoxResourceLoader.init(baseContext)
