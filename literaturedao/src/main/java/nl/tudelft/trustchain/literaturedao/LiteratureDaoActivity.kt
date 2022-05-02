@@ -4,16 +4,16 @@ import LiteratureGossiper
 import android.content.Context
 import android.Manifest
 import android.content.Intent
-import android.os.Build
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
-import androidx.annotation.RequiresApi
 import android.widget.Button
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.documentfile.provider.DocumentFile
 import com.frostwire.jlibtorrent.SessionManager
@@ -137,6 +137,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         remoteSearchListAdapter = ArrayAdapter(this, R.layout.fragment_library_search_row, remoteSearchList)
         findViewById<ListView>(R.id.remote_search_results).adapter = remoteSearchListAdapter
         */
+        checkStoragePermissions()
     }
 
     fun initFreqMap(inp: Map<String, Long>){
@@ -460,7 +461,6 @@ open class LiteratureDaoActivity : BaseActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun filePicker(view: View) {
-        checkStoragePermissions()
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         startActivityForResult(intent, 100)
