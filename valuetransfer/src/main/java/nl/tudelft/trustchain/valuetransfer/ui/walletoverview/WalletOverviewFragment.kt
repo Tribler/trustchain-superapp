@@ -27,10 +27,7 @@ import nl.tudelft.trustchain.peerchat.entity.ContactState
 import nl.tudelft.trustchain.valuetransfer.R
 import nl.tudelft.trustchain.valuetransfer.ValueTransferMainActivity
 import nl.tudelft.trustchain.valuetransfer.databinding.FragmentWalletVtBinding
-import nl.tudelft.trustchain.valuetransfer.dialogs.ExchangeTransferMoneyDialog
-import nl.tudelft.trustchain.valuetransfer.dialogs.IdentityOnboardingDialog
-import nl.tudelft.trustchain.valuetransfer.dialogs.OptionsDialog
-import nl.tudelft.trustchain.valuetransfer.dialogs.QRCodeDialog
+import nl.tudelft.trustchain.valuetransfer.dialogs.*
 import nl.tudelft.trustchain.valuetransfer.entity.Identity
 import nl.tudelft.trustchain.valuetransfer.ui.QRScanController
 import nl.tudelft.trustchain.valuetransfer.ui.VTFragment
@@ -256,6 +253,10 @@ class WalletOverviewFragment : VTFragment(R.layout.fragment_wallet_vt) {
                         null,
                         false
                     ).show(parentFragmentManager, tag)
+                    R.id.actionRequestTransferLink -> ExchangeTransferMoneyLinkDialog(
+                        null,
+                        false
+                    ).show(parentFragmentManager, ExchangeTransferMoneyLinkDialog.TAG)
                 }
             }.show(parentFragmentManager, tag)
         }

@@ -19,9 +19,10 @@
     <string name="menu_navigation_exchange_balance">Wallet Balance</string>
     <string name="menu_exchange_deposit">Deposit Money from online Bank</string>
     <string name="menu_exchange_withdraw">Withdraw Money to online Bank</string>
-    <string name="menu_exchange_transfer_qrcode">Money Transfer using QR-code</string>
-    <string name="menu_exchange_transfer_contact">Money Transfer to Contact</string>
-    <string name="menu_exchange_transfer_request">Request Money Transfer</string>
+    <string name="menu_exchange_transfer_qrcode">Scan QR</string>
+    <string name="menu_exchange_transfer_contact">Transfer Money</string>
+    <string name="menu_exchange_transfer_request">QR Payment Request</string>
+    <string name="menu_exchange_transfer_request_link">Request Money Transfer (Link)</string>
     <string name="menu_contact_chat_attachment_camera">Camera</string>
     <string name="menu_contact_chat_attachment_photo">Photo from Library</string>
     <string name="menu_contact_chat_attachment_file">File</string>
@@ -65,6 +66,7 @@
     // Dialog titles
     <string name="dialog_title_exchange_transfer">Transfer Money</string>
     <string name="dialog_title_exchange_request">Request Money</string>
+    <string name="dialog_title_exchange_request_link">Request Money (Link)</string>
     <string name="dialog_title_exchange_transaction">Transaction</string>
     <string name="dialog_title_contact_share">Share Contact</string>
     <string name="dialog_title_contact_name">Contact Name</string>
@@ -209,6 +211,15 @@
     <string name="text_exchange_waiting_for_signature">Waiting for signature</string>
     <string name="text_exchange_unknown">Status unknown</string>
     <string name="text_exchange_signing_transaction">Signing transaction…</string>
+    <string name="text_exchange_copy_link">Copy link</string>
+    <string name="text_exchange_share_link">Share link</string>
+    <string name="text_exchange_type">Type</string>
+    <string name="text_exchange_iban">IBAN</string>
+    <string name="text_exchange_payment_info">Information</string>
+    <string name="text_exchange_pay_with">Pay with</string>
+    <string name="text_exchange_receiver">Receiver</string>
+    <string name="text_exchange_amount">Amount</string>
+    <string name="text_exchange_message">Message</string>
     <string name="text_unknown_contact">Unknown contact</string>
     <string name="text_unknown_contact_extra">Unknown contact (%s)</string>
     <string name="text_to_contact">to %s</string>
@@ -375,7 +386,7 @@
     <string name="text_open_in_google_maps">Open in Google Maps</string>
     <string name="text_confirm_are_you_sure">Are you sure?</string>
     <string name="text_confirm_ok">OK</string>
-    <string name="text_confirm_cancel">CANCEL</string>
+    <string name="text_confirm_cancel">Cancel</string>
     <string name="text_new">New</string>
     <string name="text_eur">EUR</string>
     <string name="text_additional_details">Additional Details</string>
@@ -424,6 +435,9 @@
     <string name="snackbar_peer_unlocated">Peer could not be located in the network, please try again</string>
     <string name="snackbar_missing_variable">Missing variable %s</string>
     <string name="snackbar_provide_valid_public_key">Please provide a valid public key</string>
+    <string name="transer_money_link_valid_iban">Please provide a valid IBAN</string>
+    <string name="transer_money_link_valid_transaction_value">Transaction amount is too high or invalid</string>
+    <string name="transer_money_link_valid_amount">Please provide a valid amount</string>
     <string name="snackbar_contact_shared_to">Contact %s shared to %s</string>
     <string name="snackbar_unexpected_error_occurred">Unexpected error occurred, please try again</string>
     <string name="snackbar_gateway_trying_connect">Trying to connect to gateway, continue on exchange portal</string>
@@ -455,5 +469,12 @@
     <string name="text_identity_ssi">* You will always remain the owner of your own identity. As an owner of a self-sovereign identity (SSI) you decide who is able to view the identity and what information is visible.</string>
     <string name="btn_identity_create">Create identity</string>
     <string name="text_identity_required">A personal identity is required for this application. It is important to provide the correct details.</string>
-
+    <string name="text_exchange_eurotoken">EuroToken</string>
+    <string name="text_exchange_euro">Euro</string>
+    <string name="text_request_euro_1">Would you please pay me €</string>
+    <string name="text_request_euro_2"> via\n</string>
+    <string-array name="exchange_types">
+        <item>EuroToken</item>
+        <item>Euro</item>
+    </string-array>
 </resources>
