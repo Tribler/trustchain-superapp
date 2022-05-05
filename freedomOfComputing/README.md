@@ -10,7 +10,7 @@ We present the main use cases of our app, step by step, through which our contri
 The user has a .apk file they want to distribute to the rest of the peers in the superapp’s network, say “voice.apk”. Suppose this file resides on a publicly accessible location on the internet. The user presses the "+"-button on the main FOC screen and enters the URL on which the .apk is published. After confirming this URL, the .apk file will be downloaded into the superapp's app-specific directory and a new button will be displayed on the main FOC screen. By long-pressing/holding the newly appeared button, the user will be shown a set of options from which they can choose to either delete the file or create a torrent out of it. Once the torrent has been created, FOC will automatically share this with other FOC peers within the community.
 
 <img height="600" src="../doc/freedomOfComputing/add_sc.jpeg" alt="Image displaying how to add apks">
-<img height="600" src="../doc/freedomOfComputing/create_torrent.gif" alt="GIF displaying how to creat torrent's from apk's">
+<img height="600" src="../doc/freedomOfComputing/create_torrent.gif" alt="GIF displaying how to create torrents from apks">
 
 
 ### Downloading the seeding torrent, as a recipient
