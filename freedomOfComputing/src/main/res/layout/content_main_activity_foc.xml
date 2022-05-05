@@ -1,147 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.widget.RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+                               xmlns:app="http://schemas.android.com/apk/res-auto"
+                               android:layout_width="match_parent"
+                               android:layout_height="match_parent" xmlns:tools="http://schemas.android.com/tools"
+                               app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
-    <!--style="?android:attr/progressBarStyleHorizontal"-->
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="354dp"
-        android:layout_height="48dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="230dp"
-        android:elevation="500dp"
-        android:max="100"
-        android:progress="0"
-        android:visibility="visible" />
 
     <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="220dp">
-
-        <TextView
-            android:id="@+id/torrentView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="50dp"
-            android:gravity="center"
-            android:hint="Torrent info will appear here" />
-
-    </ScrollView>
-
-    <ScrollView
+        android:id="@id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignTop="@id/progressBar"
-        android:layout_marginTop="60dp">
+        android:paddingTop="5dp"
+        android:scrollbars="none">
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/torrentList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <ListView
-                android:id="@+id/myListView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="430dp" />
+        </LinearLayout>
 
-            <EditText
-                android:id="@+id/enterJar"
-                android:layout_width="343dp"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/enterTorrent"
-                android:layout_marginTop="50dp"
-                android:ems="10"
-                android:hint="Enter name of jar/apk to execute. Empty = default"
-                android:inputType="textPersonName"
-                android:textSize="14sp" />
-
-            <EditText
-                android:id="@+id/enterTorrent"
-                android:layout_width="343dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginTop="10dp"
-                android:ems="10"
-                android:hint="Enter magnet link/torrent name. Empty = default"
-                android:inputType="textPersonName"
-                android:textSize="14sp" />
-
-            <Button
-                android:id="@+id/downloadMagnetButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignLeft="@id/enterTorrent"
-                android:layout_centerVertical="false"
-                android:layout_marginTop="100dp"
-                android:background="#036BFC"
-                android:text="DOWNLOAD (MAGNET LINK)"
-                android:textColor="#FFFFFF" />
-
-
-            <Button
-                android:id="@+id/informPeersButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignLeft="@id/enterTorrent"
-                android:layout_centerVertical="false"
-                android:layout_marginTop="210dp"
-                android:background="#036BFC"
-                android:text="INFORM PEERS ABOUT SEEDING"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/uploadTorrentButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignLeft="@id/enterTorrent"
-                android:layout_centerVertical="false"
-                android:layout_marginTop="320dp"
-                android:background="#036BFC"
-                android:text="UPLOAD TORRENT"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/executeCodeButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="210dp"
-                android:background="#036BFC"
-                android:text="EXECUTE MODULE (APK)"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/downloadTorrentButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="100dp"
-                android:background="#036BFC"
-                android:text="DOWNLOAD (TORRENT)"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/retrieveListButton"
-                android:layout_width="168dp"
-                android:layout_height="105dp"
-                android:layout_alignRight="@id/enterTorrent"
-                android:layout_marginTop="320dp"
-                android:background="#036BFC"
-                android:text="RETRIEVE LIST OF TORRENTS"
-                android:textColor="#FFFFFF" />
-
-
-        </RelativeLayout>
     </ScrollView>
-
 
 </android.widget.RelativeLayout>
