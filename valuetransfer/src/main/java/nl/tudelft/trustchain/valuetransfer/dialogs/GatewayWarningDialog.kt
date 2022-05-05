@@ -1,9 +1,7 @@
 package nl.tudelft.trustchain.valuetransfer.dialogs
 
-import android.os.Build
 import android.os.Bundle
 import android.widget.*
-import androidx.annotation.RequiresApi
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import nl.tudelft.trustchain.valuetransfer.R
@@ -12,7 +10,6 @@ import nl.tudelft.trustchain.valuetransfer.util.*
 
 class GatewayWarningDialog : VTDialogFragment() {
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateDialog(savedInstanceState: Bundle?): BottomSheetDialog {
         return activity?.let {
             val bottomSheetDialog = BottomSheetDialog(requireContext(), R.style.BaseBottomSheetDialog)

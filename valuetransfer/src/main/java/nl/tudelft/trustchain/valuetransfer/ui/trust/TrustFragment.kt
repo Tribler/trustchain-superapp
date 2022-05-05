@@ -1,6 +1,5 @@
 package nl.tudelft.trustchain.valuetransfer.ui.trust
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.*
 import androidx.core.content.res.ResourcesCompat
@@ -48,7 +47,6 @@ class TrustFragment : VTFragment(R.layout.fragment_trust_vt) {
         }
     }
 
-    @SuppressLint("RestrictedApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

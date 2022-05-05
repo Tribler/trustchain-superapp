@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.valuetransfer.dialogs
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -60,8 +61,7 @@ class GatewayAddDialog(
             connectGatewaySlider.onSlideCompleteListener = object : SlideToActView.OnSlideCompleteListener {
                 override fun onSlideComplete(view: SlideToActView) {
 
-                    @Suppress("DEPRECATION")
-                    Handler().postDelayed(
+                    Handler(Looper.getMainLooper()).postDelayed(
                         {
                             // Add the gateway to the store
                             getGatewayStore().addGateway(
