@@ -1,12 +1,11 @@
 package nl.tudelft.trustchain.literaturedao.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import nl.tudelft.trustchain.common.ui.BaseFragment
 import nl.tudelft.trustchain.literaturedao.R
 
-class MyLiteratureFragment : BaseFragment(R.layout.fragment_literature_overview) {
+class AddLiteratureFragment : BaseFragment(R.layout.fragment_literature_add) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,11 +17,5 @@ class MyLiteratureFragment : BaseFragment(R.layout.fragment_literature_overview)
 
     override fun onDestroy() {
         super.onDestroy()
-    }
-
-    fun filePicker(view: View) {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "*/*"
-        startActivityForResult(intent, 100)
     }
 }

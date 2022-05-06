@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
 
 
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="#FEFCF7">
 
     <LinearLayout
@@ -16,7 +16,7 @@
         android:padding="20dp">
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/literature_fragment_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/cheltenhamstd_book"

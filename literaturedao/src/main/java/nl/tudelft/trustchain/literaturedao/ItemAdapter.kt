@@ -5,11 +5,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 
-class ItemAdapter(var context: Context, val items: ArrayList<String>) :
+class ItemAdapter(val items: ArrayList<String>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -19,10 +20,9 @@ class ItemAdapter(var context: Context, val items: ArrayList<String>) :
      * {@link ViewHolder} and initializes some private fields to be used by RecyclerView.
      */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        context = parent.context
         return ViewHolder(
-            LayoutInflater.from(context).inflate(
-                R.layout.item_custom_row,
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.fragment_literature,
                 parent,
                 false
             )
@@ -44,24 +44,7 @@ class ItemAdapter(var context: Context, val items: ArrayList<String>) :
         val item = items.get(position)
         Log.e("litdao", item.toString())
 
-        holder.tvItem.text = item
-
-        // Updating the background color according to the odd/even positions in list.
-        if (position % 2 == 0) {
-            holder.cardViewItem.setBackgroundColor(
-                ContextCompat.getColor(
-                    context,
-                    R.color.colorLightGray
-                )
-            )
-        } else {
-            holder.cardViewItem.setBackgroundColor(
-                ContextCompat.getColor(
-                    context,
-                    R.color.colorWhite
-                )
-            )
-        }
+        holder.LiteratureFragment.text = item;
     }
 
     /**
@@ -76,8 +59,7 @@ class ItemAdapter(var context: Context, val items: ArrayList<String>) :
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // Holds the TextView that will add each item to
-        val tvItem = view.tv_item_name
-        val cardViewItem = view.card_view_item
+        val LiteratureFragment: TextView = view.findViewById<TextView>(R.id.literature_fragment_title)
     }
 
     fun refresh(){

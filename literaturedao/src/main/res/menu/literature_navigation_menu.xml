@@ -7,7 +7,9 @@
         android:icon="@drawable/ic_myliterature"
         android:title="My Literature" />
     <item
-        android:id="@+id/LibraryFragment"
-        android:icon="@drawable/ic_library"
-        android:title="Remote Search" />
+        android:id="@+id/AddLiteratureFragment"
+        android:icon="@drawable/ic_myliterature"
+        android:title="Add Literature" />
+
+
 </menu>
