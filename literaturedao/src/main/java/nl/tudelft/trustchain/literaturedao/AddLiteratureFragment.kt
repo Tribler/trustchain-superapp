@@ -1,5 +1,6 @@
 package nl.tudelft.trustchain.literaturedao
 
+import LiteratureGossiper
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -53,6 +54,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
     private var bufferSize = 1024 * 5
     private val s = SessionManager()
     private var torrentAmount = 0
+    private var literatureGossiper: LiteratureGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +124,9 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
 
                     val magnet = createTorrent(requireContext(), selectedFile.uri);
+                    if (magnet != null) {
+                        literatureGossiper?.addTorrentInfo(magnet)
+                    }
 
                     // TODO: Create Literature object
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text;
