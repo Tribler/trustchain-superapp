@@ -9,20 +9,25 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import kotlinx.serialization.Serializable
 import android.view.WindowManager
 import android.widget.*
-import android.widget.Button
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.databinding.DataBindingUtil
 import androidx.documentfile.provider.DocumentFile
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+//import kotlinx.android.synthetic.main.fragment_literature_overview.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -43,15 +48,19 @@ import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils.Companion.preHashSt
 import java.io.*
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import java.util.stream.Collectors
+import kotlin.collections.ArrayList
 import kotlin.math.roundToInt
 
 
 const val DEFAULT_LITERATURE = "2.pdf"
 
 open class LiteratureDaoActivity : BaseActivity() {
+
+    // Setting Menu And Default routing
     override val navigationGraph = R.navigation.nav_literaturedao
     override val bottomNavigationMenu = R.menu.literature_navigation_menu
+    private val myLiteratureFragment = MyLiteratureFragment();
+
     val metaDataLock = ReentrantLock()
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
@@ -72,18 +81,35 @@ open class LiteratureDaoActivity : BaseActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        /*
+        setContentView(R.layout.activity_main);
+
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.fragment_container,myLiteratureFragment)
+        transaction.commit();
+*/
+
+
         val literatureCommunity = IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!
         printPeersInfo(literatureCommunity)
         val myName = literatureCommunity.myPeer.mid
         Log.i("litdao","I am $myName and Im broadcasting: hello")
         literatureCommunity.broadcastDebugMessage("hello")
         val parent = this
-        scope.launch {
+
+        /*scope.launch {
             instantiateAvgFreqMap(parent)
         }
+        */
+
         val demoCommunity = IPv8Android.getInstance().getOverlay<DemoCommunity>()!!
         val demoCommunityName = demoCommunity.myPeer.mid
         Log.i("personal","I am $demoCommunityName and Im broadcasting a message")
+
+
         demoCommunity.broadcastGreeting()
 
         this.window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN)
@@ -92,7 +118,10 @@ open class LiteratureDaoActivity : BaseActivity() {
         try {
             Log.e("litdao", "starting ...")
 
-            copyDefaultLiterature()
+            copyDefaultLiterature();
+
+            // TODO fetch all local literatures.
+
             literatureGossiper =
                 IPv8Android.getInstance().getOverlay<LiteratureCommunity>()?.let { LiteratureGossiper.getInstance(s, this, it) }
             literatureGossiper?.start()
@@ -137,8 +166,40 @@ open class LiteratureDaoActivity : BaseActivity() {
         remoteSearchListAdapter = ArrayAdapter(this, R.layout.fragment_library_search_row, remoteSearchList)
         findViewById<ListView>(R.id.remote_search_results).adapter = remoteSearchListAdapter
         */
-        checkStoragePermissions()
+
+        try{
+
+            val items : ArrayList<String> = arrayListOf("item 1" , "Item 2");
+            Log.e("litdao", items.toString())
+
+            //val inflatedView: View = layoutInflater.inflate(R.layout.fragment_literature_overview, null)
+
+            /*
+            val recViewItems = findViewById<RecyclerView>(R.id.recycler_view_items);
+
+
+
+            recViewItems.layoutManager = LinearLayoutManager(this )
+            recViewItems.adapter = ItemAdapter(items);
+            */
+
+            // Adapter class is initialized and list is passed in the param.
+            /*val itemAdapter = ItemAdapter(this, items)
+
+            // Set the LayoutManager that this RecyclerView will use.
+            recViewItems.setLayoutManager(LinearLayoutManager(itemAdapter.context))
+
+            // adapter instance is set to the recyclerview to inflate the items.
+            recViewItems.setAdapter(itemAdapter)
+            itemAdapter.refresh()
+            */
+
+            checkStoragePermissions()
+        } catch(e: Exception){
+            Log.e("litdao", e.toString())
+        }
     }
+
 
     fun initFreqMap(inp: Map<String, Long>){
         this.freqMap = inp
@@ -241,54 +302,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         metaDataLock.unlock()
     }
 
-    override fun onStart() {
-        super.onStart()
-//        Log.e("litdao", "starting ...")
-//
-//        try{
-//            //testImportPDF()
-//            //Log.e("litdao", loadMetaData().toString())
-//        } catch (e: Exception){
-//            Log.e("litdao", "litDao exception: " + e.toString())
-//        }
-//
-
-//        // SHOULD BE DONE IN ONCREATE()
-//        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
-//
-//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//
-//                return false
-//            }
-//
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                if (!newText.isNullOrEmpty())
-//                    Log.d("litdao", localSearch(newText).toString())
-//                return false
-//            }
-//        })
-        //Log.d("litdao", localSearch("dpca").toString())
-//        Log.e("litdao", "starting ...")
-//
-//        val searchView: SearchView = findViewById<SearchView>(R.id.searchViewLit)
-//
-//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//
-//                return false
-//            }
-//
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                if (!newText.isNullOrEmpty())
-//                    Log.d("litdao", localSearch(newText).toString())
-//                return false
-//            }
-//        })
-//        Log.d("litdao", localSearch("dpca").toString())
-
-    }
-
     fun testImportPDF(){
         PDFBoxResourceLoader.init(getApplicationContext());
         var i = 1
@@ -341,11 +354,12 @@ open class LiteratureDaoActivity : BaseActivity() {
      */
     fun createTorrent(filePath: String): TorrentInfo? {
         val file = File(filePath)
+        val temp = file.exists();
 //        val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
             runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("litdao", "File doesn't exist!")
-            return null
+            return null;
         }
 
         val fs = file_storage()
@@ -389,8 +403,8 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
 
-    @Serializable
-    data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>)
+    //@Serializable
+    //data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>): Serializable
 
     fun operations(path: String, baseContext: Context){
         PDFBoxResourceLoader.init(baseContext)
@@ -430,23 +444,59 @@ open class LiteratureDaoActivity : BaseActivity() {
         metaDataLock.unlock()
     }
 
+
+
+    @Serializable
+    data class Literature(
+        var title: String,
+        val magnet: String,
+        val keywords: MutableList<Pair<String, Double>>,
+        val local: Boolean
+    );
+
+
+
     override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?)
     {
+        //super.onActivityResult(requestCode,resultCode,data);
+
         if (requestCode == 100) {
             var fileUri = data?.data
             if (fileUri != null) {
                 val d = DocumentFile.fromSingleUri(this, fileUri)
+
+                //TODO  Copy to cache
                 if (d != null) {
+
+                    // keyword extraction
                     importFromInternalStorage(d)
+
+
                     Log.d("litdao", "file name: " + d.name)
                     Log.d("litdao", "file path: " + d.uri.path)
                     Log.d("litdao", "file exists? " + d.exists().toString())
 //                    copyFile(File(d.uri.path.toString().substringAfter(":")), File(applicationContext.cacheDir.absolutePath + "/" + d.name))
 //                    createTorrent(d.name.toString())
+
+
                     val newTorrent = createTorrent(d.uri.path.toString())
+
+
+                    // TODO load data from file
+                    // custom title
+                    // keyword
+
+                    // TODO add to gossip
+                    val title: String = "sadasasd";
+
+                    // TODO: Serialize Object
+
+                    //val SerializedObject =
+
                     if (newTorrent != null) {
                         literatureGossiper?.addTorrentInfo(newTorrent)
                     }
+
                     var intent = Intent(Intent.ACTION_VIEW);
                     intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     intent.setDataAndType(d.uri, "application/pdf");
