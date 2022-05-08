@@ -1,7 +1,11 @@
 package nl.tudelft.trustchain.literaturedao
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +27,7 @@ import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
+import org.apache.commons.io.FileUtils
 import java.io.*
 
 // TODO: Rename parameter arguments, choose names that match
@@ -86,7 +91,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
 
 
-                    val pdf = activity?.contentResolver?.openInputStream(selectedFile.uri);
+                    val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri);
                     PDFBoxResourceLoader.init(activity?.baseContext);
 
                     val strippedString = PdfController().stripText(pdf!!)
@@ -116,19 +121,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         ?.let { it1 -> selectedFile.name?.substring(0, it1) };
 
 
-
-
-                    val cachedLiterature = File(activity?.applicationContext?.cacheDir?.absolutePath +"/" + selectedFile.name);
-
-                    pdf.use { input ->
-                        cachedLiterature.outputStream().use { output ->
-                            input.copyTo(output)
-                        }
-                    }
-
-
-
-                    val magnet = createTorrent(cachedLiterature.path);
+                    val magnet = createTorrent(requireContext(), selectedFile.uri);
 
                     // TODO: Create Literature object
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text;
@@ -185,7 +178,23 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
      * Creates a torrent from a file given as input
      * The extension of the file must be included (for example, .png)
      */
-    fun createTorrent(filePath: String): TorrentInfo? {
+    fun createTorrent(context: Context, uri: Uri): TorrentInfo? {
+        val contentResolver = context.contentResolver
+        val projection = arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
+        var fileName = ""
+        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                fileName = cursor.getString(0)
+            }
+        }
+
+        if (fileName == "") throw Error("Source file name for creating torrent not found")
+        val input =
+            contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
+        val filePath = "${context.cacheDir}/$fileName"
+
+        FileUtils.copyInputStreamToFile(input, File(filePath))
+
         val file = File(filePath)
         if (!file.exists()) {
             //runOnUiThread { printToast("Something went wrong, check logs") }
