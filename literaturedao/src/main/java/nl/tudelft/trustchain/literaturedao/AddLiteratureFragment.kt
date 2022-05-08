@@ -1,6 +1,7 @@
 package nl.tudelft.trustchain.literaturedao
 
 import LiteratureGossiper
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -18,7 +19,6 @@ import android.widget.TextView
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.frostwire.jlibtorrent.SessionManager
 import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
@@ -35,7 +35,6 @@ import java.io.*
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
     private lateinit var selectedFile: DocumentFile
-    private val s = SessionManager()
     private var literatureGossiper: LiteratureGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +44,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         val view : View =  inflater.inflate(R.layout.fragment_literature_add, container, false)
         val selectFileUpload: Button = view.findViewById(R.id.select_new_lirterature) as Button
@@ -55,42 +54,42 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             // do something
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "*/*"
-            startActivityForResult(intent, 101);
+            startActivityForResult(intent, 101)
         }
 
         submitFileUpload.setOnClickListener  {
             try {
                 //TODO: Start Loading animation and start thread
                 activity?.runOnUiThread {
-                    view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE;
-                    view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE;
+                    view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE
+                    view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE
                 }
 
                 lifecycleScope.launch {
-                    val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri);
-                    PDFBoxResourceLoader.init(activity?.baseContext);
+                    val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
+                    PDFBoxResourceLoader.init(activity?.baseContext)
 
                     val strippedString = PdfController().stripText(pdf!!)
                     val kws: MutableList<Pair<String, Double>>
 
                     // initilaizing freq's
                     val csv: InputStream = context?.getAssets()?.open("stemmed_freqs.csv")
-                        ?: throw Exception("Stemmed_freqs.csv not found");
+                        ?: throw Exception("Stemmed_freqs.csv not found")
 
                     // Extract keywords
-                    kws = KeywordExtractor().extract(strippedString, csv);
+                    kws = KeywordExtractor().extract(strippedString, csv)
 
                     // Create Torrent
-                    val magnet = createTorrentFromFileUri(requireContext(), selectedFile.uri);
+                    val magnet = createTorrentFromFileUri(requireContext(), selectedFile.uri)
                     if (magnet != null) {
                         literatureGossiper?.addTorrentInfo(magnet)
                     }
 
                     // TODO: Create Literature object
-                    val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text;
-                    val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true);
+                    val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
+                    val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
-                    print(newLiterature);
+                    print(newLiterature)
 
                     // TODO: Store Result locally
 
@@ -98,17 +97,17 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                     // TODO: Move to Home Screen
                     withContext(Dispatchers.Main) {
-                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.GONE;
-                        view.findViewById<LinearLayout>(R.id.add_literature_done).visibility = View.VISIBLE;
+                        view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.GONE
+                        view.findViewById<LinearLayout>(R.id.add_literature_done).visibility = View.VISIBLE
                     }
                 }
             } catch (ex: Exception ) {
                 // TODO: Show error
-                ex.printStackTrace();
+                ex.printStackTrace()
             }
         }
         // Inflate the layout for this fragment
-        return view;
+        return view
     }
 
     /**
@@ -142,7 +141,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         if (!file.exists()) {
             //runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("litdao", "File doesn't exist!")
-            return null;
+            return null
         }
 
         val fs = file_storage()
@@ -178,26 +177,22 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             }
         }
         try {
-
             val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
             val magnetLink = MagnetUtils.preHashString + ti.infoHash() + MagnetUtils.displayNameAppender + ti.name()
-
             Log.i("litdao", magnetLink)
-
             return ti
         } catch(e : Exception ) {
-            print(e);
-
-
+            print(e)
         }
-        return null;
+        return null
     }
 
 
 
+    @SuppressLint("SetTextI18n")
     override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
         if (requestCode == 101) {
-            var fileUri = data?.data;
+            val fileUri = data?.data
 
             if (fileUri != null) {
 
@@ -206,15 +201,15 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                 //TODO  Copy to cache
                 if (d != null) {
-                    selectedFile = d;
+                    selectedFile = d
 
-                    view?.findViewById<TextView>(R.id.selected_literature)?.text = "Selected FIle: " + d.name ;
+                    view?.findViewById<TextView>(R.id.selected_literature)?.text = "Selected FIle: " + d.name
                     //selected_literature
 
                 }
             }
         } else if (requestCode == 100) {
-            var fileUri = data?.data;
+            val fileUri = data?.data
 
             if (fileUri != null) {
 
@@ -224,9 +219,9 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                 //TODO  Copy to cache
                 if (d != null) {
-                    selectedFile = d;
+                    selectedFile = d
 
-                    // Create Magnet URL;
+                    // Create Magnet URL
                     //val newTorrent = createTorrent(d.uri.path.toString())
 
 
@@ -237,7 +232,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     //importFromInternalStorage(d)
 
                     // TODO add to gossip
-                    val title: String = "sadasasd";
+                    val title: String = "sadasasd"
 
                     //selected_literature
 
@@ -252,17 +247,17 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     /*
                     Start Intent to Open the file..
 
-                    var intent = Intent(Intent.ACTION_VIEW);
-                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setDataAndType(d.uri, "application/pdf");
-                    intent = Intent.createChooser(intent, "Open File");
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    var intent = Intent(Intent.ACTION_VIEW)
+                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    intent.setDataAndType(d.uri, "application/pdf")
+                    intent = Intent.createChooser(intent, "Open File")
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    startActivity(intent)
                      */
                 }
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
 }

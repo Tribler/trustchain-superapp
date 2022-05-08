@@ -311,14 +311,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         }
     }
 
-    //KeyWordModelView(this.baseContext).calcKWs("1.pdf")
-/*
-        try{
-            Log.e("litdao", "litDao read: " + read("1.pdf").content.toString())
-        } catch (e: Exception){
-            Log.e("litdao", "litDao exception: " + e.toString())
-       }*/
-
     /**
      * Display a short message on the screen
      */
@@ -349,13 +341,11 @@ open class LiteratureDaoActivity : BaseActivity() {
     }
 
     /**
-     * Creates a torrent from a file given as input
+     * Creates a torrent from a file in the cache directory
      * The extension of the file must be included (for example, .png)
      */
-    fun createTorrent(filePath: String): TorrentInfo? {
-        val file = File(filePath)
-        val temp = file.exists();
-//        val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
+    fun createTorrent(fileName: String): TorrentInfo? {
+        val file = File(applicationContext.cacheDir.absolutePath + "/" + fileName.split("/").last())
         if (!file.exists()) {
             runOnUiThread { printToast("Something went wrong, check logs") }
             Log.i("litdao", "File doesn't exist!")
@@ -379,7 +369,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         val torrent = ct.generate()
         val buffer = torrent.bencode()
 
-        val torrentName = filePath.substringBeforeLast('.') + torrentDotExtension
+        val torrentName = fileName.substringBeforeLast('.') + torrentDotExtension
 
         var os: OutputStream? = null
         try {
@@ -398,7 +388,7 @@ open class LiteratureDaoActivity : BaseActivity() {
         val ti = TorrentInfo.bdecode(Vectors.byte_vector2bytes(buffer))
         val magnetLink = preHashString + ti.infoHash() + displayNameAppender + ti.name()
         Log.i("litdao", magnetLink)
-        runOnUiThread { printToast(filePath) }
+        runOnUiThread { printToast(fileName + " is ready for gossiping.") }
         return ti
     }
 
@@ -454,60 +444,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         val local: Boolean
     );
 
-
-
-    override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?)
-    {
-        //super.onActivityResult(requestCode,resultCode,data);
-
-        if (requestCode == 100) {
-            var fileUri = data?.data
-            if (fileUri != null) {
-                val d = DocumentFile.fromSingleUri(this, fileUri)
-
-                //TODO  Copy to cache
-                if (d != null) {
-
-                    // keyword extraction
-                    importFromInternalStorage(d)
-
-
-                    Log.d("litdao", "file name: " + d.name)
-                    Log.d("litdao", "file path: " + d.uri.path)
-                    Log.d("litdao", "file exists? " + d.exists().toString())
-//                    copyFile(File(d.uri.path.toString().substringAfter(":")), File(applicationContext.cacheDir.absolutePath + "/" + d.name))
-//                    createTorrent(d.name.toString())
-
-
-                    val newTorrent = createTorrent(d.uri.path.toString())
-
-
-                    // TODO load data from file
-                    // custom title
-                    // keyword
-
-                    // TODO add to gossip
-                    val title: String = "sadasasd";
-
-                    // TODO: Serialize Object
-
-                    //val SerializedObject =
-
-                    if (newTorrent != null) {
-                        literatureGossiper?.addTorrentInfo(newTorrent)
-                    }
-
-                    var intent = Intent(Intent.ACTION_VIEW);
-                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.setDataAndType(d.uri, "application/pdf");
-                    intent = Intent.createChooser(intent, "Open File");
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                }
-            }
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     fun filePicker(view: View) {
