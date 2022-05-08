@@ -31,29 +31,11 @@ import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
 import org.apache.commons.io.FileUtils
 import java.io.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-
-
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MyLiteratureFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
     private lateinit var selectedFile: DocumentFile
-
-    var torrentList = ArrayList<Button>()
-    private var progressVisible = false
-    private var debugVisible = false
-    private var bufferSize = 1024 * 5
     private val s = SessionManager()
-    private var torrentAmount = 0
     private var literatureGossiper: LiteratureGossiper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,22 +59,14 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         }
 
         submitFileUpload.setOnClickListener  {
-
-
-
             try {
                 //TODO: Start Loading animation and start thread
-
                 activity?.runOnUiThread {
                     view.findViewById<LinearLayout>(R.id.add_literature_content).visibility = View.GONE;
                     view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE;
                 }
 
-
                 lifecycleScope.launch {
-
-
-
                     val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri);
                     PDFBoxResourceLoader.init(activity?.baseContext);
 
@@ -104,26 +78,10 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         ?: throw Exception("Stemmed_freqs.csv not found");
 
                     // Extract keywords
-
                     kws = KeywordExtractor().extract(strippedString, csv);
-                    // TODO: create Torrent
 
-
-                    //File(selectedFile.uri.path.toString())., File(activity?.applicationContext?.cacheDir?.absolutePath + "/" + selectedFile.name))
-
-                    //File(selectedFile.uri.path+ "/" + selectedFile.name).copyTo(File(activity?.applicationContext?.cacheDir?.absolutePath + "/" + selectedFile.name),true)
-                    var fileURI = selectedFile.uri.path;
-                    if (fileURI != null) {
-                        if (fileURI.contains("msf:")) {
-                            fileURI = fileURI.split("msf:")[0];
-
-                        }
-                    }
-                    val filewithoutExt = selectedFile.name?.lastIndexOf('.')
-                        ?.let { it1 -> selectedFile.name?.substring(0, it1) };
-
-
-                    val magnet = createTorrent(requireContext(), selectedFile.uri);
+                    // Create Torrent
+                    val magnet = createTorrentFromFileUri(requireContext(), selectedFile.uri);
                     if (magnet != null) {
                         literatureGossiper?.addTorrentInfo(magnet)
                     }
@@ -134,56 +92,29 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                     print(newLiterature);
 
-
-
-
                     // TODO: Store Result locally
 
                     // TODO: Gossip Result
 
-
                     // TODO: Move to Home Screen
-
-
-
-
-
-
                     withContext(Dispatchers.Main) {
-
                         view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.GONE;
                         view.findViewById<LinearLayout>(R.id.add_literature_done).visibility = View.VISIBLE;
                     }
                 }
-
-                /*
-
-
-                Log.e("litdao", "Specifically from storage: " + kws.toString())
-
-
-
-
-                 */
-
             } catch (ex: Exception ) {
                 // TODO: Show error
                 ex.printStackTrace();
             }
-
-
         }
-
-
         // Inflate the layout for this fragment
         return view;
     }
 
     /**
-     * Creates a torrent from a file given as input
-     * The extension of the file must be included (for example, .png)
+     * Creates a torrent from a file uri in the given context
      */
-    fun createTorrent(context: Context, uri: Uri): TorrentInfo? {
+    fun createTorrentFromFileUri(context: Context, uri: Uri): TorrentInfo? {
         val contentResolver = context.contentResolver
         val projection = arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
         var fileName = ""
@@ -196,10 +127,17 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         if (fileName == "") throw Error("Source file name for creating torrent not found")
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-        val filePath = "${context.cacheDir}/$fileName"
+        val outputFilePath = "${context.cacheDir}/$fileName"
 
-        FileUtils.copyInputStreamToFile(input, File(filePath))
+        FileUtils.copyInputStreamToFile(input, File(outputFilePath))
+        return createTorrent(outputFilePath)
+    }
 
+    /**
+     * Creates a torrent from a file path string given as input
+     * The extension of the file must be included (for example, .png)
+     */
+    fun createTorrent(filePath: String): TorrentInfo? {
         val file = File(filePath)
         if (!file.exists()) {
             //runOnUiThread { printToast("Something went wrong, check logs") }
@@ -253,11 +191,6 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
         }
         return null;
-
-
-
-        //runOnUiThread { printToast(filePath) }
-
     }
 
 
@@ -270,7 +203,6 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
                 val d =
                     activity?.let { DocumentFile.fromSingleUri(it.applicationContext, fileUri) }
-
 
                 //TODO  Copy to cache
                 if (d != null) {
