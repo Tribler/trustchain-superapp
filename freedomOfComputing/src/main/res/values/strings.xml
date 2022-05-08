@@ -1,9 +1,24 @@
 <resources>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="title_activity_main_FOC">FOC</string>
-    <!-- Strings used for fragments for navigation -->
+    <string name="title_activity_main_FOC">Freedom Of Computing</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
+    <string name="SearchHint">Search…</string>
+    <string name="torrentFileName">Another TorrentAPK</string>
+    <string name="addButtonDescription">Add</string>
+    <string name="progress">75</string>
+    <string name="torrentCount">%1$d torrent(s)</string>
+    <string name="downloadsInProgress">%1$d</string>
+    <string name="downloadsInQueue">In queue: %1$d</string>
+    <string name="currentTorrentDownload">Downloading %1$s</string>
+    <string name="downloadProgressPercentage">%1$s</string>
+    <string name="failedCounter">Failed torrent counter map: %1$s</string>
+    <string name="evaRetries">Eva retries: %1$d</string>
+    <string name="cancelButton">Cancel</string>
+    <string name="downloadButton">Download</string>
+    <string name="deleteButton">Delete</string>
+    <string name="createButton">Create</string>
+    <string name="createAlertDialogTitle">Create or Delete</string>
+    <string name="createAlertDialogMsg">Select whether you want to delete the apk or create a torrent out of it</string>
+    <string name="createDownloadDialogTitle">Enter a URL on which the .apk file can be downloaded</string>
+    <string name="noDownloadInProgress">No download in progress</string>
 </resources>

@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  ethereum:
+    container_name: trustchain-superapp-ethereum-node
+    image: ethereum/client-go:release-1.10
+    ports:
+      - "8545:8545"
+      - "30303:30303"
+    volumes:
+      - ethereum_data:/root/.ethereum
+    command:
+      - "--dev"
+      - "--http"
+      - "--http.addr=0.0.0.0"
+  bitcoin:
+    container_name: trustchain-superapp-bitcoin-node
+    image: ruimarinho/bitcoin-core:22-alpine
+    ports:
+      - "18444:18444"
+    volumes:
+      - bitcoin_data:/home/bitcoin/.bitcoin
+    command:
+      - "--regtest"
+      - "--printtoconsole"
+      - "--peerbloomfilters"
+      - "--txindex"
+      - "--acceptnonstdtxn"
+      - "--disablewallet"
+
+volumes:
+  ethereum_data:
+  bitcoin_data:

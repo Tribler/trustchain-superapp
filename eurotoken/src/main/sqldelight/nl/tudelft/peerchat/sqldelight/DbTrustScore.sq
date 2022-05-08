@@ -1,0 +1,22 @@
+createContactStateTable:
+CREATE TABLE IF NOT EXISTS trust_scores (
+    public_key BLOB NOT NULL,
+    score INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (public_key)
+);
+
+getAll:
+SELECT public_key, score FROM trust_scores;
+
+addScore:
+INSERT INTO trust_scores (public_key, score)
+VALUES(?, ?);
+
+getScore:
+SELECT score FROM trust_scores WHERE public_key=?;
+
+incrementScore:
+UPDATE trust_scores SET score = score + 1 WHERE public_key=?;
+
+-- deleteTable:
+-- DROP TABLE IF EXISTS trust_scores;
