@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.item_custom_row.view.*
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
 import android.net.Uri;
 import androidx.core.net.toUri
+import java.lang.Integer.min
 
 class ItemAdapter(val items: MutableList<Literature>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
@@ -52,9 +53,11 @@ class ItemAdapter(val items: MutableList<Literature>) :
         var keywords: String  = "";
         var i = 0;
 
-        item.keywords.slice(1..4).forEach {
-            keywords = keywords.plus(it.first.plus(", "));
-            i++;
+        if(!item.keywords.isEmpty()) {
+            item.keywords.slice(0..min(3, item.keywords.size - 1)).forEach {
+                keywords = keywords.plus(it.first.plus(", "));
+                i++;
+            }
         }
 
         holder.LiteratureFragmentTitle.text = item.title;

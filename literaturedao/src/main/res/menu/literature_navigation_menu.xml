@@ -12,10 +12,14 @@
     android:title="Add Literature" />
 
     <item
+        android:id="@+id/RemoteSearchFragment"
+        android:icon="@drawable/ic_library"
+        android:title="Remote Search" />
+
+    <item
         android:id="@+id/ConnectionFragment"
         android:icon="@drawable/ic_myliterature"
         android:title="Connections" />
-
 
 
 

@@ -18,6 +18,12 @@
         tools:layout="@layout/fragment_literature_add" />
 
     <fragment
+        android:id="@+id/RemoteSearchFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment"
+        android:label="Remote Search"
+        tools:layout="@layout/fragment_remote_search" />
+
+    <fragment
         android:id="@+id/ConnectionFragment"
         android:name="nl.tudelft.trustchain.literaturedao.ConnectionFragment"
         android:label="Connections"
