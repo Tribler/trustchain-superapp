@@ -1,15 +1,19 @@
 package nl.tudelft.trustchain.literaturedao
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_custom_row.view.*
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
+import android.net.Uri;
+import androidx.core.net.toUri
 
 class ItemAdapter(val items: MutableList<Literature>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
@@ -56,7 +60,17 @@ class ItemAdapter(val items: MutableList<Literature>) :
         holder.LiteratureFragmentTitle.text = item.title;
         holder.LiteratureFragmentDate.text = item.date;
         holder.LiteratureFragmentKeywords.text = keywords;
+
+        holder.LiteratureFragmentHolder.setOnClickListener {
+            var intent = Intent(Intent.ACTION_VIEW)
+            intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            intent.setDataAndType(item.localFileUri.toUri(), "application/pdf")
+            intent = Intent.createChooser(intent, "Open File")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            holder.LiteratureFragmentKeywords.context.startActivity(intent)
+        }
     }
+
 
     /**
      * Gets the number of items in the list
@@ -73,6 +87,7 @@ class ItemAdapter(val items: MutableList<Literature>) :
         val LiteratureFragmentTitle: TextView = view.findViewById<TextView>(R.id.literature_fragment_title)
         val LiteratureFragmentKeywords: TextView = view.findViewById<TextView>(R.id.keywords)
         val LiteratureFragmentDate: TextView = view.findViewById<TextView>(R.id.date)
+        val LiteratureFragmentHolder: LinearLayout = view.findViewById<LinearLayout>(R.id.lit_item)
     }
 
     fun refresh(){
