@@ -2,6 +2,8 @@ package nl.tudelft.trustchain.literaturedao
 
 import LiteratureGossiper
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -12,10 +14,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.URLUtil
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -49,6 +53,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val view : View =  inflater.inflate(R.layout.fragment_literature_add, container, false)
         val selectFileUpload: Button = view.findViewById(R.id.select_new_lirterature) as Button
         val submitFileUpload: Button = view.findViewById(R.id.submit_new_lirterature) as Button
+        val urlTextField: EditText = view.findViewById(R.id.url_text_field) as EditText
 
         selectFileUpload.setOnClickListener {
             // do something
@@ -56,6 +61,12 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             intent.type = "*/*"
             startActivityForResult(intent, 101)
         }
+
+        val clipBoardManager = context?.getSystemService(AppCompatActivity.CLIPBOARD_SERVICE) as ClipboardManager
+        val urlCopiedTest = clipBoardManager.primaryClip?.getItemAt(0)?.text?.toString()
+
+        if (urlCopiedTest != null && URLUtil.isValidUrl(urlCopiedTest))
+            urlTextField.setText(urlCopiedTest)
 
         submitFileUpload.setOnClickListener  {
             try {
