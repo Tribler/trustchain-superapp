@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.literaturedao
 
 import LiteratureGossiper
 import android.annotation.SuppressLint
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -28,18 +27,30 @@ import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
-import org.apache.commons.io.FileUtils
 import java.io.*
+import nl.tudelft.trustchain.literaturedao.data_types.Literature
+import java.util.*
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
 
+    val parentActivity = getActivity()
+
+    val localDataLock = if (parentActivity is LiteratureDaoActivity){
+        parentActivity.localDataLock
+    } else{
+        null
+    }
+
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,16 +121,41 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
                     val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
+                    val literatureObject = Literature(
+                        literatureTitle.toString(),
+                        magnet.toString(),
+                        kws,
+                        true,
+                        Calendar.getInstance().getTime().toString(),
+                        selectedFile.getUri().toString())
                     print(newLiterature)
+
 
                     // TODO: Store Result locally
                     // The newLiteratire model should be stored locally in some kind of json.
                     // SO it becomes searchable
-                    
+                    // Comment:
+                    // This is done partially now, I still have to modify the local search to search
+                    // this different data type
+
+
+                    if ((parentActivity != null) && (localDataLock != null)) {
+                        localDataLock.lock()
+                        parentActivity.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                            output.write(Json.encodeToString(literatureObject).toByteArray())
+                        }
+                        localDataLock.unlock()
+                    } else{
+                        throw Exception("Parent activity was not found for open file output or parent activity was not LiteratureDaoActivity")
+                    }
+
+
 
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
+                    // Comment: This should be a constantly running process that uses the locally stored pdf's
+                    // so there should be no need to do anything after we stored it in local storage
 
 
                     // TODO: Move to Home Screen
@@ -154,8 +190,8 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
         val outputFilePath = "${context.cacheDir}/$fileName"
-
-        FileUtils.copyInputStreamToFile(input, File(outputFilePath))
+        //TODO, this was commented out becouse of malfunction
+        //FileUtils.copyInputStreamToFile(input, File(outputFilePath))
         return createTorrent(outputFilePath)
     }
 

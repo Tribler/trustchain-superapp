@@ -61,6 +61,8 @@ open class LiteratureDaoActivity : BaseActivity() {
     override val bottomNavigationMenu = R.menu.literature_navigation_menu
     private val myLiteratureFragment = MyLiteratureFragment();
 
+    public val localDataLock = ReentrantLock()
+
     val metaDataLock = ReentrantLock()
     private val scope = CoroutineScope(Dispatchers.IO)
     var torrentList = ArrayList<Button>()
@@ -391,10 +393,6 @@ open class LiteratureDaoActivity : BaseActivity() {
         runOnUiThread { printToast(fileName + " is ready for gossiping.") }
         return ti
     }
-
-
-    //@Serializable
-    //data class Data(val content: MutableList<Pair<String, MutableList<Pair<String, Double>>>>): Serializable
 
     fun operations(path: String, baseContext: Context){
         PDFBoxResourceLoader.init(baseContext)
