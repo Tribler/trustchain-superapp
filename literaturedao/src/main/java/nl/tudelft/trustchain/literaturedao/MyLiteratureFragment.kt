@@ -73,7 +73,6 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
     ): View? {
 
         val view : View =  inflater.inflate(R.layout.fragment_my_literature, container, false)
-        val button: Button = view.findViewById(R.id.upload_new_literatuteBtn) as Button
 
 
         val json = loadLocalData();
@@ -84,14 +83,6 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
         recViewItems.layoutManager = LinearLayoutManager(context )
         recViewItems.adapter = ItemAdapter(json.content);
-
-
-        button.setOnClickListener {
-            // do something
-            val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "*/*"
-            startActivityForResult(intent, 100);
-        }
 
 
         // Inflate the layout for this fragment

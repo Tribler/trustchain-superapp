@@ -45,7 +45,17 @@ class ItemAdapter(val items: MutableList<Literature>) :
         val item = items.get(position)
         Log.e("litdao", item.toString())
 
-        holder.LiteratureFragment.text = item.title;
+        var keywords: String  = "";
+        var i = 0;
+
+        item.keywords.slice(1..4).forEach {
+            keywords = keywords.plus(it.first.plus(", "));
+            i++;
+        }
+
+        holder.LiteratureFragmentTitle.text = item.title;
+        holder.LiteratureFragmentDate.text = item.date;
+        holder.LiteratureFragmentKeywords.text = keywords;
     }
 
     /**
@@ -60,7 +70,9 @@ class ItemAdapter(val items: MutableList<Literature>) :
      */
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // Holds the TextView that will add each item to
-        val LiteratureFragment: TextView = view.findViewById<TextView>(R.id.literature_fragment_title)
+        val LiteratureFragmentTitle: TextView = view.findViewById<TextView>(R.id.literature_fragment_title)
+        val LiteratureFragmentKeywords: TextView = view.findViewById<TextView>(R.id.keywords)
+        val LiteratureFragmentDate: TextView = view.findViewById<TextView>(R.id.date)
     }
 
     fun refresh(){
