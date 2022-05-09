@@ -3,6 +3,7 @@ package nl.tudelft.trustchain.literaturedao
 import LiteratureGossiper
 import android.annotation.SuppressLint
 import android.content.ClipboardManager
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
@@ -20,6 +21,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toFile
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -58,7 +60,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
     } else{
         null
     }*/
-
+    private var downloaded = false
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null
 
@@ -119,6 +121,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         if( docFile != null){
                             selectedFile = docFile
                         }
+                        downloaded = true
                     } else{
                         pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
                     }
@@ -284,17 +287,21 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
     fun createTorrentFromFileUri(context: Context, uri: Uri): TorrentInfo? {
         val contentResolver = context.contentResolver
         val projection = arrayOf<String>(MediaStore.MediaColumns.DISPLAY_NAME)
+        var outputFilePath = ""
         var fileName = ""
-        contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                fileName = cursor.getString(0)
+        if( !downloaded){
+            contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    fileName = cursor.getString(0)
+                }
             }
+            if (fileName == "") throw Error("Source file name for creating torrent not found")
+        } else{
+            fileName = uri.toFile().name
         }
-
-        if (fileName == "") throw Error("Source file name for creating torrent not found")
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
-        val outputFilePath = "${context.cacheDir}/$fileName"
+        outputFilePath = "${context.cacheDir}/$fileName"
         FileUtils.copyInputStreamToFile(input, File(outputFilePath))
         return createTorrent(outputFilePath)
     }
