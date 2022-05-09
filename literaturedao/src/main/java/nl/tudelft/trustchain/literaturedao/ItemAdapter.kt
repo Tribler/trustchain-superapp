@@ -9,8 +9,9 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_custom_row.view.*
+import nl.tudelft.trustchain.literaturedao.data_types.Literature
 
-class ItemAdapter(val items: ArrayList<String>) :
+class ItemAdapter(val items: MutableList<Literature>) :
     RecyclerView.Adapter<ItemAdapter.ViewHolder>() {
 
     /**
@@ -44,7 +45,7 @@ class ItemAdapter(val items: ArrayList<String>) :
         val item = items.get(position)
         Log.e("litdao", item.toString())
 
-        holder.LiteratureFragment.text = item;
+        holder.LiteratureFragment.text = item.title;
     }
 
     /**

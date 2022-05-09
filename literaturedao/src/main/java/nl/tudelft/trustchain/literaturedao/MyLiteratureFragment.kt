@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -33,23 +35,31 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
     fun loadLocalData(): LocalData{
         // Load local data
         var fileInputStream: FileInputStream? = null
-        try{
-            fileInputStream = context?.openFileInput("localData")
-        } catch (e: FileNotFoundException){
-            context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
-                output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
+
+
+        try {
+            try {
+                fileInputStream = context?.openFileInput("localData.json")
+            } catch (e: FileNotFoundException) {
+                context?.openFileOutput("localData.json", Context.MODE_PRIVATE).use { output ->
+                    output?.write(
+                        Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray()
+                    )
+                }
+                fileInputStream = context?.openFileInput("localData.json")
             }
-            fileInputStream = context?.openFileInput("localData")
+            var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+            val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+            val stringBuilder: StringBuilder = StringBuilder()
+            var text: String? = null
+            while ({ text = bufferedReader.readLine(); text }() != null) {
+                stringBuilder.append(text)
+            }
+            val localData: LocalData = Json.decodeFromString<LocalData>(stringBuilder.toString())
+            return localData
+        } catch (e: Exception) {
+            return LocalData(mutableListOf<Literature>());
         }
-        var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
-        val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
-        val stringBuilder: StringBuilder = StringBuilder()
-        var text: String? = null
-        while ({ text = bufferedReader.readLine(); text }() != null) {
-            stringBuilder.append(text)
-        }
-        val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
-        return localData
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +74,17 @@ class MyLiteratureFragment : Fragment(R.layout.fragment_my_literature) {
 
         val view : View =  inflater.inflate(R.layout.fragment_my_literature, container, false)
         val button: Button = view.findViewById(R.id.upload_new_literatuteBtn) as Button
+
+
+        val json = loadLocalData();
+
+        val recViewItems = view.findViewById<RecyclerView>(R.id.recycler_view_items);
+
+
+
+        recViewItems.layoutManager = LinearLayoutManager(context )
+        recViewItems.adapter = ItemAdapter(json.content);
+
 
         button.setOnClickListener {
             // do something
