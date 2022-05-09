@@ -27,6 +27,7 @@ import com.frostwire.jlibtorrent.Vectors
 import com.frostwire.jlibtorrent.swig.*
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import kotlinx.coroutines.*
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
@@ -34,19 +35,21 @@ import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
 import java.io.*
-import nl.tudelft.trustchain.literaturedao.data_types.Literature
+import nl.tudelft.trustchain.literaturedao.data_types.*
+import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import java.util.*
+import org.apache.commons.io.FileUtils
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
-
+    /*
     val parentActivity = getActivity()
 
     val localDataLock = if (parentActivity is LiteratureDaoActivity){
         parentActivity.localDataLock
     } else{
         null
-    }
+    }*/
 
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null
@@ -131,26 +134,33 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     print(newLiterature)
 
 
-                    // TODO: Store Result locally
-                    // The newLiteratire model should be stored locally in some kind of json.
-                    // SO it becomes searchable
-                    // Comment:
-                    // This is done partially now, I still have to modify the local search to search
-                    // this different data type
-
-
-                    if ((parentActivity != null) && (localDataLock != null)) {
-                        localDataLock.lock()
-                        parentActivity.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
-                            output.write(Json.encodeToString(literatureObject).toByteArray())
+                    // Load local data
+                    var fileInputStream: FileInputStream? = null
+                    try{
+                        fileInputStream = context?.openFileInput("localData")
+                    } catch (e: FileNotFoundException){
+                        context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                            output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
                         }
-                        localDataLock.unlock()
-                    } else{
-                        throw Exception("Parent activity was not found for open file output or parent activity was not LiteratureDaoActivity")
+                        fileInputStream = context?.openFileInput("localData")
                     }
+                    var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+                    val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+                    val stringBuilder: StringBuilder = StringBuilder()
+                    var text: String? = null
+                    while ({ text = bufferedReader.readLine(); text }() != null) {
+                        stringBuilder.append(text)
+                    }
+                    val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
 
+                    // add new entry to local data and write
 
+                    localData.content.add(literatureObject)
 
+                    // write modified local data
+                    context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                        output?.write(Json.encodeToString(localData).toByteArray())
+                    }
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
@@ -190,8 +200,7 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
         val outputFilePath = "${context.cacheDir}/$fileName"
-        //TODO, this was commented out becouse of malfunction
-        //FileUtils.copyInputStreamToFile(input, File(outputFilePath))
+        FileUtils.copyInputStreamToFile(input, File(outputFilePath))
         return createTorrent(outputFilePath)
     }
 
