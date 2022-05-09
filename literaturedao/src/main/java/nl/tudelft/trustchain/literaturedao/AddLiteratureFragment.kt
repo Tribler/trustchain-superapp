@@ -113,8 +113,14 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     print(newLiterature)
 
                     // TODO: Store Result locally
+                    // The newLiteratire model should be stored locally in some kind of json.
+                    // SO it becomes searchable
+                    
+
 
                     // TODO: Gossip Result
+                    // JSON Serialize to string the newLiterature and gossip it to the connected peers.
+
 
                     // TODO: Move to Home Screen
                     withContext(Dispatchers.Main) {
