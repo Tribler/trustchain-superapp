@@ -1,20 +1,21 @@
 package nl.tudelft.trustchain.literaturedao.ui
 
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import nl.tudelft.ipv8.android.IPv8Android
-import nl.tudelft.trustchain.literaturedao.ItemAdapter
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.literaturedao.R
-import nl.tudelft.trustchain.literaturedao.data_types.Literature
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResult
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
@@ -25,6 +26,7 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
 
     val results: MutableList<SearchResult> = mutableListOf()
     val adapter: RemoteSearchResultAdapter = RemoteSearchResultAdapter(results)
+    lateinit var progressBar: LinearLayout
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +41,6 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         val uiScope = CoroutineScope(Dispatchers.Main + job)
 
         (context as LiteratureDaoActivity).setRemoteSearchFragment(this)
-
 
         val searchBar: SearchView = view.findViewById(R.id.remote_search_bar) as SearchView
 
@@ -60,6 +61,7 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         })
 
         val recViewItems = view.findViewById<RecyclerView>(R.id.remote_search_results);
+        progressBar = view.findViewById(R.id.remote_search_loading)
 
         recViewItems.layoutManager = LinearLayoutManager(context)
         recViewItems.adapter = adapter
@@ -72,11 +74,12 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         // send to peers
         IPv8Android.getInstance().getOverlay<LiteratureCommunity>()!!.broadcastSearchQuery(query)
 
-
         results.clear()
         adapter.refresh()
 
-        // DEBUG
+        progressBar.visibility = View.VISIBLE
+
+//        // DEBUG
 //        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
     }
 
@@ -84,11 +87,15 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         // access UI and append results to some view
         Log.d("litdao", "update remote search results with:" +newResults.toString())
 
+        progressBar.visibility = View.GONE
+
         for (r : SearchResult in newResults.results){
             if(!results.contains(r)){
                 results.add(r)
             }
         }
+
+        results.sortBy { it.score }
         adapter.refresh()
     }
 
