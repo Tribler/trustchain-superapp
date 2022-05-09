@@ -21,6 +21,7 @@ import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
 import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultsMessage
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Integer.min
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -77,9 +78,10 @@ class LiteratureCommunity(
 
     @OptIn(ExperimentalUnsignedTypes::class)
     fun broadcastSearchQuery(query: String){
+        Log.d("litdao", "broadcasting remote query:\""+query+"\"")
         for (peer in getPeers()) {
             val packet = serializePacket(MessageID.SEARCH_QUERY, LitDaoMessage(query))
-            send(peer.address, packet)
+            send(peer, packet)
         }
     }
 
@@ -92,31 +94,39 @@ class LiteratureCommunity(
      * Received a remote query from other device.
      * Perform local search on the query and respond with a list of relevant docs.
      */
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun onSearchQueryMessage(packet: Packet) {
         val litDaoActivity = context as LiteratureDaoActivity
 
         // Decode packet
         val (peer, payload) = packet.getAuthPayload(LitDaoMessage)
+        Log.d("litdao", "received remote query:\""+payload.message+"\"")
 
         // Perform local search on the query
         val results = litDaoActivity.localSearch(payload.message)
 
         // Parse data and collect magnet links
         results.sortByDescending { it.second }
+        results.take(min(results.size, 10))
         val parsed = results.map { SearchResult(it.first, it.second, litDaoActivity.createTorrent(it.first)!!.makeMagnetUri()) }
 
+        Log.d("litdao", "replying remote query with list: "+results.toString())
         // Encode and send to peer
-        val packet = serializePacket(MessageID.SEARCH_RESPONSE, SearchResultsMessage(SearchResultList(parsed)))
-        send(peer.address, packet)
+        val response = serializePacket(MessageID.SEARCH_RESPONSE, SearchResultsMessage(SearchResultList(parsed)))
+        send(peer, response)
     }
 
     /**
      * Received relevant docs for my query
      */
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun onSearchResponseMessage(packet: Packet) {
         val litDaoActivity = context as LiteratureDaoActivity
 
         val (peer, payload) = packet.getAuthPayload(SearchResultsMessage)
+
+        Log.d("litdao", "Received remote query results list: "+payload.results.toString())
+
         litDaoActivity.updateSearchResults(payload.results)
     }
 
