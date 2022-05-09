@@ -15,7 +15,6 @@ import android.widget.*
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.databinding.DataBindingUtil
 import androidx.documentfile.provider.DocumentFile
 import androidx.navigation.Navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -38,6 +37,7 @@ import nl.tudelft.trustchain.common.DemoCommunity
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
+import nl.tudelft.trustchain.literaturedao.controllers.pdfFromUrl
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
 import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
 import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList
@@ -197,9 +197,16 @@ open class LiteratureDaoActivity : BaseActivity() {
             */
 
             checkStoragePermissions()
+            /*
+            val remotePdf = pdfFromUrl(this)
+            remotePdf.startThread()
+            remotePdf.download("https://www.ed.ac.uk/files/atoms/files/sc_online_summer_sessions_bob.pdf")
+            Log.e("litdao", "tested")*/
         } catch(e: Exception){
             Log.e("litdao", e.toString())
         }
+
+
     }
 
 

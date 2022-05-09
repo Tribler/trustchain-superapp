@@ -50,6 +50,7 @@ class pdfFromUrl(context: LiteratureDaoActivity) {
                         val url = msg?.obj.toString()
                         if (urlCheck(url)){
                             downloadFile(url)
+                            printToast("done")
                         }
                     }
                 }
