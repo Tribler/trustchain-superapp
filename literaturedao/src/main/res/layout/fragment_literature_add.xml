@@ -100,28 +100,135 @@
                     android:textColor="#000000"
                     android:textSize="34sp" />
 
-                <SearchView
+                <LinearLayout
+                    android:id="@+id/add_literature_content"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginLeft="20dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="20dp"
                     android:layout_weight="1"
-                    android:background="#F5F9FC"
-                    android:queryHint="Title, Author, Keywords ..."
-                    android:iconifiedByDefault="false"
-                    >
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:visibility="visible">
 
-                </SearchView>
+                    <TextView
+                        android:id="@+id/textView3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"
+                        android:text="Title"
+                        android:textSize="16sp" />
 
-                <Button
-                    android:id="@+id/button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    <EditText
+                        android:id="@+id/literature_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:inputType="textPersonName|textEmailAddress"
+                        android:text="Title of literature " />
+
+                    <View
+                        android:id="@+id/divider"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="?android:attr/listDivider" />
+
+                    <TextView
+                        android:id="@+id/selected_literature"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_weight="1"
+                        android:text="No file selected...." />
+
+                    <Button
+                        android:id="@+id/select_new_lirterature"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Select Literature" />
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        android:padding="10dp"
+                        android:text="OR" />
+
+                    <TextView
+                        android:id="@+id/textView6"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:layout_weight="1"
+                        android:paddingLeft="20dp"
+                        android:text="URL"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/url_text_field"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ems="10"
+                        android:inputType="textPersonName"
+                        android:text="URL of literature" />
+
+                    <Button
+                        android:id="@+id/submit_new_lirterature"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:backgroundTint="#FBCB5E"
+                        android:fontFamily="@font/cheltenhamstd_bold"
+                        android:text="Upload" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_literature_loading"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:backgroundTint="#FBCB5E"
-                    android:fontFamily="@font/cheltenhamstd_bold"
-                    android:text="Upload" />
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/progressBar"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="20dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/add_literature_done"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:padding="20dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:paddingBottom="10dp"
+                        android:text="Successfully added Literature!"
+                        android:textAlignment="center"
+                        android:textColor="#4CAF50"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
