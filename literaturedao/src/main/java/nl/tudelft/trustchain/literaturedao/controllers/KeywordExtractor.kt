@@ -7,7 +7,7 @@ import java.io.InputStream
 import nl.tudelft.trustchain.literaturedao.snowball.Main.main as stem
 
 
-class KeywordExtractor() : LiteratureDaoActivity() {
+class KeywordExtractor(){
 
     val hardCodedMagickNumber = 1
     val maxKWs = 99999
