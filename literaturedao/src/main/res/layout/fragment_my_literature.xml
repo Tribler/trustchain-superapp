@@ -121,12 +121,6 @@
 
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/upload_new_literatuteBtn"
-                    android:layout_width="141dp"
-                    android:layout_height="wrap_content"
-                    android:text="Select File" />
-
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_items"
