@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.res.Resources
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -32,13 +33,20 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
+import nl.tudelft.trustchain.literaturedao.data_types.*
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
-import java.io.*
-import nl.tudelft.trustchain.literaturedao.data_types.*
-import nl.tudelft.trustchain.literaturedao.utils.CacheUtil
-import java.util.*
 import org.apache.commons.io.FileUtils
+import java.io.*
+import java.util.*
+import com.squareup.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.URI
+import java.net.URL
+import java.util.concurrent.TimeUnit
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
@@ -92,7 +100,6 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
             try {
                 //TODO: Start Loading animation and start thread
 
-
                 uiScope.launch(Dispatchers.IO) {
 
                     withContext(Dispatchers.Main) {
@@ -100,13 +107,29 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         view.findViewById<LinearLayout>(R.id.add_literature_loading).visibility = View.VISIBLE
                     }
 
+                    val URLInput = view.findViewById<EditText>(R.id.url_text_field).text.toString()
+                    val nameOfLit = view.findViewById<EditText>(R.id.literature_title).text.toString()
+
+                    var pdf: InputStream?
+
+                    if( urlCheck( URLInput)){
+                        val file = downloadFile(nameOfLit, URLInput)
+                        pdf = requireContext().contentResolver.openInputStream(Uri.fromFile(file))
+                        val docFile = DocumentFile.fromSingleUri(requireContext(), Uri.fromFile(file))
+                        if( docFile != null){
+                            selectedFile = docFile
+                        }
+                    } else{
+                        pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
+                    }
+
                     // TODO: Select where you want to select the file from;
                     // case 1: A file location/URI is selected in selectedFile.uri
-                    val pdf = requireContext().contentResolver.openInputStream(selectedFile.uri)
                     // case2: A internet URL is selected;
                     // Step 1: Download the file to download directory.
                     //https://medium.com/mobile-app-development-publication/download-file-in-android-with-kotlin-874d50bccaa2
                     //val pdf = requireContext().contentResolver.openInputStream(==== Downlaoded file URI (downloads/pdf...)====)
+
 
 
                     PDFBoxResourceLoader.init(activity?.baseContext)
@@ -127,7 +150,9 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         literatureGossiper?.addTorrentInfo(magnet)
                     }
 
+                    // TODO: Create Literature object
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
+                    val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
                     val literatureObject = Literature(
                         literatureTitle.toString(),
@@ -136,12 +161,39 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         true,
                         Calendar.getInstance().getTime().toString(),
                         selectedFile.getUri().toString())
+                    print(newLiterature)
 
 
 
-                    val localData = CacheUtil(context).loadLocalData()
+                    Log.e("litdao", "start load")
+                    // Load local data
+                    var fileInputStream: FileInputStream? = null
+
+                    try{
+                        fileInputStream = context?.openFileInput("localData")
+                    } catch (e: FileNotFoundException){
+                        context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                            output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
+                        }
+                        fileInputStream = context?.openFileInput("localData")
+                    }
+                    var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+                    val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+                    val stringBuilder: StringBuilder = StringBuilder()
+                    var text: String? = null
+                    while ({ text = bufferedReader.readLine(); text }() != null) {
+                        stringBuilder.append(text)
+                    }
+                    val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
+                    Log.e("litdao", "start add")
+                    // add new entry to local data and write
+
                     localData.content.add(literatureObject)
-                    CacheUtil(context).writeLocalData(localData)
+                    Log.e("litdao", "start write")
+                    // write modified local data
+                    context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                        output?.write(Json.encodeToString(localData).toByteArray())
+                    }
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
@@ -164,6 +216,40 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         }
         // Inflate the layout for this fragment
         return view
+    }
+
+    fun urlCheck(url: String): Boolean{
+        return URLUtil.isValidUrl(url)
+    }
+
+    internal fun downloadFile(name: String, url: String): File{
+
+        val client = OkHttpClient()
+        val MEGABYTE = 1024 * 1024
+        val okHttpBuilder = client.newBuilder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+        okHttpBuilder.build()
+
+        val request = Request.Builder().url(url).build()
+        val response = client.newCall(request).execute()
+
+        val body = response.body
+        val responseCode = response.code
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        var file = File(downloadsDir.toString() + File.separator.toString() + name + ".pdf")
+
+        if (body != null) {
+            body.byteStream().apply {
+                file.outputStream().use { fileOut ->
+                    copyTo(fileOut, MEGABYTE)
+                }
+            }
+        } else {
+            throw Exception("No body returned in url request.")
+        }
+        return file
     }
 
     fun stripText(file: InputStream): String {
