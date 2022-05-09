@@ -114,11 +114,16 @@
 
                 </SearchView>
 
-                <ListView
+                <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/remote_search_results"
                     android:layout_width="match_parent"
-                    android:layout_height="353dp"
-                    android:layout_marginBottom="120dp" />
+                    android:layout_height="match_parent"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:listitem="@layout/fragment_literature" />
 
             </LinearLayout>
 
