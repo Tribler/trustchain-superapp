@@ -7,9 +7,16 @@
         android:icon="@drawable/ic_myliterature"
         android:title="My Literature" />
     <item
-        android:id="@+id/AddLiteratureFragment"
+    android:id="@+id/AddLiteratureFragment"
+    android:icon="@drawable/ic_myliterature"
+    android:title="Add Literature" />
+
+    <item
+        android:id="@+id/ConnectionFragment"
         android:icon="@drawable/ic_myliterature"
-        android:title="Add Literature" />
+        android:title="Connections" />
+
+
 
 
 </menu>

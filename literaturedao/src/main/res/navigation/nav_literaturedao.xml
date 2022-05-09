@@ -17,6 +17,12 @@
         android:label="Add literature"
         tools:layout="@layout/fragment_literature_add" />
 
+    <fragment
+        android:id="@+id/ConnectionFragment"
+        android:name="nl.tudelft.trustchain.literaturedao.ConnectionFragment"
+        android:label="Connections"
+        tools:layout="@layout/fragment_connection" />
+
 
 
 </navigation>
