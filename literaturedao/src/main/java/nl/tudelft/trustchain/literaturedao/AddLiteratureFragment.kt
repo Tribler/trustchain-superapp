@@ -2,7 +2,6 @@ package nl.tudelft.trustchain.literaturedao
 
 import LiteratureGossiper
 import android.annotation.SuppressLint
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -30,18 +29,33 @@ import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import kotlinx.coroutines.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils
 import nl.tudelft.trustchain.literaturedao.utils.MagnetUtils
-import org.apache.commons.io.FileUtils
 import java.io.*
+import nl.tudelft.trustchain.literaturedao.data_types.*
+import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
+import java.util.*
+import org.apache.commons.io.FileUtils
 
 
 class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
+    /*
+    val parentActivity = getActivity()
+
+    val localDataLock = if (parentActivity is LiteratureDaoActivity){
+        parentActivity.localDataLock
+    } else{
+        null
+    }*/
 
     private lateinit var selectedFile: DocumentFile
     private var literatureGossiper: LiteratureGossiper? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,16 +133,51 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                     val literatureTitle = view.findViewById<EditText>(R.id.literature_title).text
                     val newLiterature = LiteratureDaoActivity.Literature(literatureTitle.toString(),magnet?.makeMagnetUri().toString(),kws,true)
 
+                    val literatureObject = Literature(
+                        literatureTitle.toString(),
+                        magnet.toString(),
+                        kws,
+                        true,
+                        Calendar.getInstance().getTime().toString(),
+                        selectedFile.getUri().toString())
                     print(newLiterature)
 
-                    // TODO: Store Result locally
-                    // The newLiteratire model should be stored locally in some kind of json.
-                    // SO it becomes searchable
 
 
+                    Log.e("litdao", "start load")
+                    // Load local data
+                    var fileInputStream: FileInputStream? = null
+
+                    try{
+                        fileInputStream = context?.openFileInput("localData")
+                    } catch (e: FileNotFoundException){
+                        context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                            output?.write(Json.encodeToString(LocalData(mutableListOf<Literature>())).toByteArray())
+                        }
+                        fileInputStream = context?.openFileInput("localData")
+                    }
+                    var inputStreamReader: InputStreamReader = InputStreamReader(fileInputStream)
+                    val bufferedReader: BufferedReader = BufferedReader(inputStreamReader)
+                    val stringBuilder: StringBuilder = StringBuilder()
+                    var text: String? = null
+                    while ({ text = bufferedReader.readLine(); text }() != null) {
+                        stringBuilder.append(text)
+                    }
+                    val localData: LocalData =  Json.decodeFromString<LocalData>(stringBuilder.toString())
+                    Log.e("litdao", "start add")
+                    // add new entry to local data and write
+
+                    localData.content.add(literatureObject)
+                    Log.e("litdao", "start write")
+                    // write modified local data
+                    context?.openFileOutput("localData", Context.MODE_PRIVATE).use { output ->
+                        output?.write(Json.encodeToString(localData).toByteArray())
+                    }
 
                     // TODO: Gossip Result
                     // JSON Serialize to string the newLiterature and gossip it to the connected peers.
+                    // Comment: This should be a constantly running process that uses the locally stored pdf's
+                    // so there should be no need to do anything after we stored it in local storage
 
 
                     // TODO: Move to Home Screen
@@ -137,9 +186,11 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
                         view.findViewById<LinearLayout>(R.id.add_literature_done).visibility = View.VISIBLE
                     }
                 }
+
             } catch (ex: Exception ) {
                 // TODO: Show error
                 ex.printStackTrace()
+                Log.e("litdao", ex.toString())
             }
         }
         // Inflate the layout for this fragment
@@ -189,7 +240,6 @@ class AddLiteratureFragment : Fragment(R.layout.fragment_literature_add) {
         val input =
             contentResolver.openInputStream(uri) ?: throw Resources.NotFoundException()
         val outputFilePath = "${context.cacheDir}/$fileName"
-
         FileUtils.copyInputStreamToFile(input, File(outputFilePath))
         return createTorrent(outputFilePath)
     }
