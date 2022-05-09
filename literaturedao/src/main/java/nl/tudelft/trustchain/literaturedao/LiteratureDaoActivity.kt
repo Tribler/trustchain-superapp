@@ -33,7 +33,7 @@ import nl.tudelft.trustchain.literaturedao.controllers.KeywordExtractor
 import nl.tudelft.trustchain.literaturedao.controllers.PdfController
 import nl.tudelft.trustchain.literaturedao.controllers.QueryHandler
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
 import nl.tudelft.trustchain.literaturedao.ui.KeyWordModelView
 import nl.tudelft.trustchain.literaturedao.ui.RemoteSearchFragment
 import nl.tudelft.trustchain.literaturedao.utils.ExtensionUtils.Companion.torrentDotExtension

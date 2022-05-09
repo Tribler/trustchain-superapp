@@ -16,15 +16,15 @@ import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
 import nl.tudelft.trustchain.literaturedao.R
 import nl.tudelft.trustchain.literaturedao.data_types.Literature
 import nl.tudelft.trustchain.literaturedao.ipv8.LiteratureCommunity
-import nl.tudelft.trustchain.literaturedao.ipv8.SearchResult
-import nl.tudelft.trustchain.literaturedao.ipv8.SearchResultList
-import java.time.LocalDateTime
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResult
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
+import nl.tudelft.trustchain.literaturedao.ui.adapters.RemoteSearchResultAdapter
 
 
 class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
 
-    val results: MutableList<Literature> = mutableListOf()
-    val adapter: ItemAdapter = ItemAdapter(results)
+    val results: MutableList<SearchResult> = mutableListOf()
+    val adapter: RemoteSearchResultAdapter = RemoteSearchResultAdapter(results)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -77,23 +77,16 @@ class RemoteSearchFragment : Fragment(R.layout.fragment_remote_search) {
         adapter.refresh()
 
         // DEBUG
-        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
+//        updateSearchResults(SearchResultList(listOf(SearchResult("f1", 1.0, "m1"), SearchResult("f2", 2.0, "m2"))))
     }
 
     fun updateSearchResults(newResults: SearchResultList){
         // access UI and append results to some view
         Log.d("litdao", "update remote search results with:" +newResults.toString())
-        val names = results.map { it.title }
+
         for (r : SearchResult in newResults.results){
-            if(!names.contains(r)){
-                results.add(Literature(
-                    r.fileName,
-                    r.magnetLink,
-                    mutableListOf(Pair("score: "+r.score, 1.0)),
-                    false,
-                    "score: "+r.score,
-                    ""
-                ))
+            if(!results.contains(r)){
+                results.add(r)
             }
         }
         adapter.refresh()
