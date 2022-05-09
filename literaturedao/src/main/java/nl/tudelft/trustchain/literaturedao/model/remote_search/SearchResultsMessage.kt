@@ -1,4 +1,4 @@
-package nl.tudelft.trustchain.literaturedao.ipv8
+package nl.tudelft.trustchain.literaturedao.model.remote_search
 
 import com.google.gson.Gson
 import nl.tudelft.ipv8.messaging.Deserializable

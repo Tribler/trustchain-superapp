@@ -16,6 +16,9 @@ import nl.tudelft.ipv8.messaging.Packet
 import nl.tudelft.ipv8.messaging.eva.TransferException
 import nl.tudelft.ipv8.messaging.eva.TransferProgress
 import nl.tudelft.trustchain.literaturedao.LiteratureDaoActivity
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResult
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultList
+import nl.tudelft.trustchain.literaturedao.model.remote_search.SearchResultsMessage
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -103,7 +106,7 @@ class LiteratureCommunity(
         val parsed = results.map { SearchResult(it.first, it.second, litDaoActivity.createTorrent(it.first)!!.makeMagnetUri()) }
 
         // Encode and send to peer
-        val packet = serializePacket(MessageID.SEARCH_QUERY, SearchResultsMessage(SearchResultList(parsed)))
+        val packet = serializePacket(MessageID.SEARCH_RESPONSE, SearchResultsMessage(SearchResultList(parsed)))
         send(peer.address, packet)
     }
 
